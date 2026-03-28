@@ -1,0 +1,218 @@
+/** LlmLogModal Styles */
+
+.overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.7);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+	padding: var(--space-lg);
+}
+
+.modal {
+	background: var(--bg-secondary);
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-lg);
+	width: 100%;
+	max-width: 900px;
+	max-height: 80vh;
+	display: flex;
+	flex-direction: column;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: var(--space-md) var(--space-lg);
+	border-bottom: 1px solid var(--border-color);
+}
+
+.title {
+	margin: 0;
+	font-size: var(--font-lg);
+	font-weight: 600;
+	color: var(--text-primary);
+}
+
+.headerActions {
+	display: flex;
+	gap: var(--space-xs);
+	align-items: center;
+}
+
+.headerBtn,
+.closeBtn {
+	background: none;
+	border: none;
+	color: var(--text-secondary);
+	cursor: pointer;
+	padding: var(--space-xs);
+	border-radius: var(--radius-sm);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: var(--transition);
+}
+
+.headerBtn:hover,
+.closeBtn:hover {
+	background: var(--bg-tertiary);
+	color: var(--text-primary);
+}
+
+.headerBtn.active {
+	background: var(--accent-bg);
+	color: var(--accent-fg);
+}
+
+.config {
+	padding: var(--space-md) var(--space-lg);
+	background: var(--bg-tertiary);
+	border-bottom: 1px solid var(--border-color);
+	display: flex;
+	gap: var(--space-lg);
+	flex-wrap: wrap;
+}
+
+.configRow {
+	display: flex;
+	align-items: center;
+	gap: var(--space-sm);
+}
+
+.configLabel {
+	font-size: var(--font-sm);
+	color: var(--text-secondary);
+}
+
+.configSelect {
+	padding: var(--space-xs) var(--space-sm);
+	background: var(--bg-secondary);
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-md);
+	color: var(--text-primary);
+	font-size: var(--font-sm);
+	cursor: pointer;
+}
+
+.configSelect:focus {
+	outline: none;
+	border-color: var(--accent-color);
+}
+
+.content {
+	flex: 1;
+	overflow: auto;
+	padding: var(--space-md);
+	background: var(--bg-primary);
+}
+
+.empty {
+	text-align: center;
+	padding: var(--space-xl);
+	color: var(--text-muted);
+	font-style: italic;
+}
+
+.logList {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	font-family: var(--font-mono);
+	font-size: var(--font-xs);
+}
+
+.logEntry {
+	display: flex;
+	gap: var(--space-sm);
+	padding: var(--space-xs) var(--space-sm);
+	border-radius: var(--radius-sm);
+	align-items: flex-start;
+}
+
+.logEntry:hover {
+	background: var(--bg-tertiary);
+}
+
+.logTime {
+	color: var(--text-muted);
+	flex-shrink: 0;
+	min-width: 70px;
+}
+
+.logLevel {
+	flex-shrink: 0;
+	min-width: 50px;
+	font-weight: 600;
+	text-align: center;
+	padding: 1px var(--space-xs);
+	border-radius: var(--radius-sm);
+	font-size: 9px;
+}
+
+.logMessage {
+	color: var(--text-primary);
+	word-break: break-word;
+	flex: 1;
+}
+
+/* Log level colors */
+.info .logLevel {
+	background: rgba(88, 166, 255, 0.2);
+	color: #58a6ff;
+}
+
+.warn .logLevel {
+	background: rgba(210, 153, 34, 0.2);
+	color: #d29922;
+}
+
+.error .logLevel {
+	background: rgba(248, 81, 73, 0.2);
+	color: #f85149;
+}
+
+.debug .logLevel {
+	background: rgba(139, 148, 158, 0.2);
+	color: #8b949e;
+}
+
+.footer {
+	padding: var(--space-sm) var(--space-lg);
+	border-top: 1px solid var(--border-color);
+	background: var(--bg-tertiary);
+	display: flex;
+	justify-content: flex-end;
+}
+
+.status {
+	font-size: var(--font-xs);
+	color: var(--text-muted);
+}
+
+/* Scrollbar styling */
+.content::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+	background: var(--bg-secondary);
+	border-radius: var(--radius-sm);
+}
+
+.content::-webkit-scrollbar-thumb {
+	background: var(--border-color);
+	border-radius: var(--radius-sm);
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+	background: var(--text-muted);
+}

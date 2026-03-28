@@ -1,0 +1,247 @@
+/**
+ * LlmLogPanel Styles - Fixed Bottom Panel (Terminal-like)
+ */
+
+.panel {
+  position: fixed;
+  bottom: 44px;
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  z-index: 50;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Resize Handle */
+.resizeHandle {
+  position: absolute;
+  top: -4px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  cursor: row-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  z-index: 1;
+}
+
+.resizeLine {
+  width: 40px;
+  height: 3px;
+  background: var(--border-color);
+  border-radius: 2px;
+  transition: background 0.15s ease;
+}
+
+.resizeHandle:hover .resizeLine {
+  background: var(--accent-primary);
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.title svg {
+  width: 14px;
+  height: 14px;
+  color: var(--accent-primary);
+}
+
+.count {
+  color: var(--text-muted);
+  font-weight: normal;
+  font-size: var(--font-xs);
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.toggleBtn {
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toggleBtn:hover {
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+.toggleBtn.enabled {
+  background: var(--accent-bg);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.select {
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--font-xs);
+  cursor: pointer;
+}
+
+.clearBtn,
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.clearBtn:hover {
+  color: var(--accent-warning);
+  background: rgba(210, 153, 34, 0.1);
+}
+
+.closeBtn:hover {
+  color: var(--accent-danger);
+  background: rgba(248, 81, 73, 0.1);
+}
+
+.clearBtn svg,
+.closeBtn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  overflow: auto;
+  padding: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+}
+
+/* Messages */
+.disabledMessage,
+.emptyMessage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+}
+
+/* Log List */
+.logList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.logEntry {
+  display: flex;
+  gap: var(--space-sm);
+  padding: 2px var(--space-xs);
+  border-radius: var(--radius-sm);
+  transition: background 0.1s ease;
+}
+
+.logEntry:hover {
+  background: var(--bg-hover);
+}
+
+.timestamp {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.level {
+  flex-shrink: 0;
+  min-width: 50px;
+  font-weight: 600;
+}
+
+.levelInfo {
+  color: var(--accent-primary);
+}
+
+.levelWarn {
+  color: var(--accent-warning);
+}
+
+.levelError {
+  color: var(--accent-danger);
+}
+
+.levelDebug {
+  color: var(--text-muted);
+}
+
+.message {
+  flex: 1;
+  color: var(--text-primary);
+}
+
+.metadata {
+  margin: var(--space-xs) 0 0 0;
+  padding: var(--space-xs);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 10px;
+  white-space: pre-wrap;
+}
+
+/* Scrollbar */
+.content::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

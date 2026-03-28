@@ -1,0 +1,236 @@
+/**
+ * File Store - 文件浏览器状态管理
+ */
+
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
+
+export type ViewMode = "grid" | "list";
+export type SortMode = "time-desc" | "time-asc" | "name-asc" | "name-desc" | "type" | "size-desc" | "size-asc";
+export type FilterType = "all" | "code" | "media" | "doc" | "custom";
+
+export interface FileItem {
+	name: string;
+	path: string;
+	isDirectory: boolean;
+	size?: number;
+	modified?: string;
+	extension?: string;
+}
+
+export interface FileState {
+	// 当前路径
+	currentPath: string;
+	parentPath: string;
+
+	// 文件列表
+	items: FileItem[];
+	selectedItems: string[];
+
+	// 视图设置
+	viewMode: ViewMode;
+	sortMode: SortMode;
+	filterType: FilterType;
+	filterText: string;
+
+	// UI状态
+	isLoading: boolean;
+	error: string | null;
+	sidebarVisible: boolean;
+
+	// 选中文件（用于操作）
+	selectedActionFile: string | null;
+	selectedActionFileName: string | null;
+}
+
+interface FileActions {
+	// 导航
+	setCurrentPath: (path: string) => void;
+	navigateUp: () => void;
+	navigateHome: () => void;
+
+	// 文件列表
+	setItems: (items: FileItem[]) => void;
+	toggleSelection: (path: string) => void;
+	clearSelection: () => void;
+	selectForAction: (path: string, name: string) => void;
+
+	// 视图设置
+	setViewMode: (mode: ViewMode) => void;
+	toggleViewMode: () => void;
+	setSortMode: (mode: SortMode) => void;
+	setFilterType: (type: FilterType) => void;
+	setFilterText: (text: string) => void;
+
+	// UI
+	setLoading: (loading: boolean) => void;
+	setError: (error: string | null) => void;
+	toggleSidebar: () => void;
+
+	// 过滤和排序后的列表
+	getFilteredAndSortedItems: () => FileItem[];
+
+	// 执行文件
+	executeFile: (path: string, onOutput?: (output: string) => void) => Promise<string | undefined>;
+}
+
+export const useFileStore = create<FileState & FileActions>()(
+	devtools(
+		(set, get) => ({
+			// 初始状态
+			currentPath: "/root",
+			parentPath: "/",
+			items: [],
+			selectedItems: [],
+			viewMode: "grid",
+			sortMode: "time-desc",
+			filterType: "all",
+			filterText: "",
+			isLoading: false,
+			error: null,
+			sidebarVisible: false,
+			selectedActionFile: null,
+			selectedActionFileName: null,
+
+			// 导航
+			setCurrentPath: (path) => set({ currentPath: path }),
+
+			navigateUp: () => {
+				const current = get().currentPath;
+				if (current === "/" || current === "") return;
+				const parent = current.split("/").slice(0, -1).join("/") || "/";
+				if (parent !== current) {
+					set({ currentPath: parent });
+				}
+			},
+
+			navigateHome: () => {
+				set({ currentPath: "/root" });
+			},
+
+			// 文件列表
+			setItems: (items) => set({ items }),
+
+			toggleSelection: (path) =>
+				set((state) => {
+					const exists = state.selectedItems.includes(path);
+					return {
+						selectedItems: exists
+							? state.selectedItems.filter((p) => p !== path)
+							: [...state.selectedItems, path],
+					};
+				}),
+
+			clearSelection: () => set({ selectedItems: [] }),
+
+			selectForAction: (path, name) =>
+				set({
+					selectedActionFile: path,
+					selectedActionFileName: name,
+				}),
+
+			// 视图设置
+			setViewMode: (mode) => set({ viewMode: mode }),
+
+			toggleViewMode: () =>
+				set((state) => ({
+					viewMode: state.viewMode === "grid" ? "list" : "grid",
+				})),
+
+			setSortMode: (mode) => set({ sortMode: mode }),
+			setFilterType: (type) => set({ filterType: type }),
+			setFilterText: (text) => set({ filterText: text }),
+
+			// UI
+			setLoading: (loading) => set({ isLoading: loading }),
+			setError: (error) => set({ error }),
+			toggleSidebar: () => set((state) => ({ sidebarVisible: !state.sidebarVisible })),
+
+			// 获取过滤和排序后的列表
+			getFilteredAndSortedItems: () => {
+				const state = get();
+				let items = [...state.items];
+
+				// 过滤
+				if (state.filterText) {
+					const text = state.filterText.toLowerCase();
+					items = items.filter((item) => item.name.toLowerCase().includes(text));
+				}
+
+				if (state.filterType !== "all") {
+					items = items.filter((item) => {
+						if (item.isDirectory) return true;
+						const ext = item.extension?.toLowerCase() || "";
+						switch (state.filterType) {
+							case "code":
+								return ["js", "ts", "jsx", "tsx", "py", "java", "cpp", "c", "h", "go", "rs"].includes(ext);
+							case "media":
+								return ["png", "jpg", "jpeg", "gif", "svg", "mp4", "mp3", "webp"].includes(ext);
+							case "doc":
+								return ["md", "txt", "doc", "docx", "pdf"].includes(ext);
+							default:
+								return true;
+						}
+					});
+				}
+
+				// 排序
+				items.sort((a, b) => {
+					// 目录始终在文件前面
+					if (a.isDirectory && !b.isDirectory) return -1;
+					if (!a.isDirectory && b.isDirectory) return 1;
+
+					switch (state.sortMode) {
+						case "name-asc":
+							return a.name.localeCompare(b.name);
+						case "name-desc":
+							return b.name.localeCompare(a.name);
+						case "time-desc":
+							return (b.modified || "").localeCompare(a.modified || "");
+						case "time-asc":
+							return (a.modified || "").localeCompare(b.modified || "");
+						case "size-desc":
+							return (b.size || 0) - (a.size || 0);
+						case "size-asc":
+							return (a.size || 0) - (b.size || 0);
+						case "type":
+							return (a.extension || "").localeCompare(b.extension || "");
+						default:
+							return 0;
+					}
+				});
+
+				return items;
+			},
+
+			// 执行文件（shell脚本等）
+			executeFile: async (path: string, onOutput?: (output: string) => void) => {
+				// 通过 API 发送执行命令，结果会显示在终端面板
+				try {
+					const response = await fetch("/api/execute", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ path }),
+					});
+					if (!response.ok) {
+						throw new Error("Failed to execute file");
+					}
+					const output = await response.text();
+					if (onOutput) {
+						onOutput(output);
+					}
+					return output;
+				} catch (error) {
+					console.error("Execute file error:", error);
+					const errorMessage = error instanceof Error ? error.message : "Failed to execute file";
+					set({ error: errorMessage });
+					if (onOutput) {
+						onOutput(`Error: ${errorMessage}`);
+					}
+					throw error;
+				}
+			},
+		}),
+		{ name: "FileStore" },
+	),
+);

@@ -1,0 +1,12 @@
+/**
+ * ChatPanel Styles
+ */
+
+.panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-primary);
+}

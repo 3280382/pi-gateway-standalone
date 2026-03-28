@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Debug</title>
+</head>
+<body>
+  <div id="log" style="font-family: monospace; white-space: pre; padding: 10px;"></div>
+  <script>
+    const log = [];
+    const addLog = (msg) => {
+      log.push(msg);
+      document.getElementById('log').textContent = log.join('\n');
+    };
+    
+    window.onerror = (msg, url, line, col, err) => {
+      addLog('ERROR: ' + msg + ' at ' + line + ':' + col);
+      return true;
+    };
+    
+    window.addEventListener('unhandledrejection', (e) => {
+      addLog('REJECTION: ' + e.reason);
+    });
+    
+    // 加载主应用
+    import('/src/main.tsx').then(() => {
+      addLog('✅ main.tsx loaded');
+    }).catch(e => {
+      addLog('❌ Failed to load main.tsx: ' + e.message);
+    });
+  </script>
+</body>
+</html>

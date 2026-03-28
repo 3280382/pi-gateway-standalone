@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Pi Gateway - AI Coding Agent</title>
+  <script type="module">
+    import RefreshRuntime from "/@react-refresh"
+    RefreshRuntime.injectIntoGlobalHook(window)
+    window.$RefreshReg$ = () => {}
+    window.$RefreshSig$ = () => (type) => type
+    window.__vite_plugin_react_preamble_installed__ = true
+  </script>
+  <!-- Local Fonts -->
+  <link rel="stylesheet" href="fonts/inter.css">
+  <link rel="stylesheet" href="fonts/jetbrains-mono.css">
+  <!-- Prism.js for syntax highlighting (local) -->
+  <link rel="stylesheet" href="vendor/prism/prism-tomorrow.min.css" />
+  <script src="vendor/prism/prism.js"></script>
+  <script src="vendor/prism/components/prism-javascript.min.js"></script>
+  <script src="vendor/prism/components/prism-typescript.min.js"></script>
+  <script src="vendor/prism/components/prism-json.min.js"></script>
+  <script src="vendor/prism/components/prism-python.min.js"></script>
+  <script src="vendor/prism/components/prism-bash.min.js"></script>
+  <script src="vendor/prism/components/prism-yaml.min.js"></script>
+  <script src="vendor/prism/components/prism-css.min.js"></script>
+  <script src="vendor/prism/components/prism-markup.min.js"></script>
+</head>
+<body>
+  <!-- React Application Mount Point -->
+  <div id="root"></div>
+  
+  <!-- Error handling -->
+  <script>
+    window.onerror = function(msg, url, line, col, error) {
+      document.body.innerHTML += '<div style="color:red;padding:20px;">Error: ' + msg + ' at ' + line + ':' + col + '</div>';
+      return false;
+    };
+    window.addEventListener('error', function(e) {
+      console.error('Error:', e);
+    });
+  </script>
+  
+  <!-- Vite handles this script tag -->
+  <script type="module" src="/src/client/main.tsx"></script>
+</body>
+</html>

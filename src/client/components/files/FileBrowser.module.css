@@ -1,0 +1,410 @@
+/**
+ * File Browser Styles - Compact, minimal borders
+ */
+
+.fileBrowserSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.loading,
+.error,
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.error {
+  color: var(--accent-red);
+}
+
+/* Toolbar - Compact, tighter spacing */
+.toolbarWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.toolbarRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Toolbar buttons - slightly larger, thicker icons */
+.toolbarBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: var(--bg-tertiary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toolbarBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.toolbarBtn svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.5px;
+}
+
+/* Up button with .. text */
+.upBtn {
+  font-family: var(--font-mono);
+  font-size: var(--font-md);
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--accent-blue);
+}
+
+/* Execute button - green color */
+.exeBtn {
+  color: var(--accent-green);
+  background: var(--accent-bg-green);
+}
+
+.exeBtn:hover {
+  background: var(--accent-green);
+  color: white;
+}
+
+/* Path bar */
+.pathBar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.pathBar svg {
+  stroke-width: 2px;
+  color: var(--accent-blue);
+}
+
+/* Inputs - compact */
+.select,
+.filterInput {
+  padding: 6px 10px;
+  background: var(--bg-tertiary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--font-xs);
+  height: 30px;
+}
+
+.filterInput {
+  width: 140px;
+}
+
+.filterInput:focus {
+  outline: 2px solid var(--accent-bg-blue);
+}
+
+.select {
+  cursor: pointer;
+}
+
+.stats {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  margin-left: auto;
+  margin-right: 6px;
+}
+
+/* View Mode Button - more prominent */
+.viewModeBtn {
+  width: auto;
+  padding: 0 12px;
+  gap: 6px;
+  font-size: var(--font-xs);
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.viewModeBtn svg {
+  stroke-width: 2px;
+}
+
+/* List View */
+.list {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: 0 12px;
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  margin-bottom: 2px;
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.headerName { flex: 1; }
+.headerSize { width: 70px; text-align: right; }
+.headerModified { width: 120px; text-align: right; }
+
+.listItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-base);
+  transition: all 0.1s ease;
+  margin-bottom: 1px;
+}
+
+.listItem:hover {
+  background: var(--bg-hover);
+}
+
+.listItem.selected {
+  background: var(--accent-bg-blue);
+}
+
+.listIcon {
+  width: 18px;
+  text-align: center;
+  font-size: var(--font-md);
+}
+
+.listName {
+  flex: 1;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.listItem.directory .listName {
+  color: var(--accent-blue);
+  font-weight: 500;
+}
+
+.listSize {
+  width: 70px;
+  text-align: right;
+  color: var(--text-secondary);
+  font-size: var(--font-xs);
+}
+
+.listModified {
+  width: 120px;
+  text-align: right;
+  color: var(--text-secondary);
+  font-size: var(--font-xs);
+}
+
+/* Grid View */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 6px;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+.gridItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gridItem:hover {
+  background: var(--bg-hover);
+}
+
+.gridItem.selected {
+  background: var(--accent-bg-blue);
+}
+
+.gridIcon {
+  font-size: var(--font-lg);
+  line-height: 1;
+}
+
+.gridName {
+  font-size: var(--font-xs);
+  color: var(--text-primary);
+  text-align: center;
+  word-break: break-word;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Sidebar */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 44px;
+  width: 200px;
+  background: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 100;
+  transform: translateX(0);
+  transition: transform 0.25s ease;
+  box-shadow: var(--shadow-lg);
+}
+
+.sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  font-weight: 600;
+  font-size: var(--font-md);
+}
+
+.tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.treeItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all 0.1s ease;
+}
+
+.treeItem:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.treeIcon {
+  font-size: var(--font-sm);
+  width: 14px;
+  text-align: center;
+}
+
+/* Action Bar */
+.actionBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.selectedName {
+  font-size: var(--font-sm);
+  color: var(--text-primary);
+  margin-right: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  background: var(--bg-secondary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--font-xs);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.actionBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.actionBtn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.actionBtn.view {
+  color: var(--accent-blue);
+}
+
+.actionBtn.edit {
+  color: var(--accent-green);
+}
+
+.actionBtn.execute {
+  color: var(--accent-orange);
+}
