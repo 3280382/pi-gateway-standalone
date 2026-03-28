@@ -1,0 +1,42 @@
+{
+  "sessionId": "default-session",
+  "messages": [
+    {
+      "id": "msg-1",
+      "role": "user",
+      "content": [{ "type": "text", "text": "Hello, can you help me with this project?" }],
+      "timestamp": "2024-03-26T09:00:00Z"
+    },
+    {
+      "id": "msg-2",
+      "role": "assistant",
+      "content": [
+        { "type": "thinking", "thinking": "The user wants help with their project. I should ask what they need." },
+        { "type": "text", "text": "Of course! I'd be happy to help. What would you like to work on?" }
+      ],
+      "timestamp": "2024-03-26T09:00:05Z"
+    },
+    {
+      "id": "msg-3",
+      "role": "user",
+      "content": [{ "type": "text", "text": "I want to refactor the file browser component." }],
+      "timestamp": "2024-03-26T09:01:00Z"
+    },
+    {
+      "id": "msg-4",
+      "role": "assistant",
+      "content": [
+        { "type": "thinking", "thinking": "File browser refactoring. I should check the current structure and suggest improvements." },
+        { "type": "text", "text": "I can help with that! Let me first check the current file browser implementation..." },
+        {
+          "type": "tool",
+          "toolName": "read",
+          "args": { "path": "/root/pi-mono/packages/gateway/src/components/files/FileBrowser.tsx" },
+          "output": "File content here...",
+          "status": "success"
+        }
+      ],
+      "timestamp": "2024-03-26T09:01:10Z"
+    }
+  ]
+}

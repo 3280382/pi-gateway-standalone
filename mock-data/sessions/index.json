@@ -1,0 +1,22 @@
+{
+  "sessions": [
+    {
+      "path": "/root/pi-mono/packages/gateway/.pi/sessions/demo-session.jsonl",
+      "firstMessage": "查看一下你当前是在什么开发模式下？",
+      "messageCount": 45,
+      "modified": "2026-03-26T12:55:00.000Z"
+    },
+    {
+      "path": "/root/pi-mono/packages/gateway/.pi/sessions/feature-ui.jsonl",
+      "firstMessage": "帮我实现一个文件浏览器组件",
+      "messageCount": 32,
+      "modified": "2026-03-25T18:30:00.000Z"
+    },
+    {
+      "path": "/root/pi-mono/packages/gateway/.pi/sessions/bug-fix.jsonl",
+      "firstMessage": "修复 TypeScript 类型错误",
+      "messageCount": 18,
+      "modified": "2026-03-24T14:20:00.000Z"
+    }
+  ]
+}

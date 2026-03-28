@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "lastUpdated": "2025-03-28T19:15:00Z",
+  "services": {
+    "backend": {
+      "enabled": true,
+      "pid": null,
+      "startCommand": "npx tsx watch src/server/server.ts",
+      "port": 3000,
+      "healthEndpoint": "/api/version",
+      "lastRestart": null
+    },
+    "frontend": {
+      "enabled": true,
+      "pid": null,
+      "startCommand": "npx vite --host 127.0.0.1 --port 5173",
+      "port": 5173,
+      "healthEndpoint": "/",
+      "lastRestart": null
+    }
+  },
+  "actions": {
+    "clearViteCache": {
+      "command": "rm -rf node_modules/.vite",
+      "description": "清除 Vite 缓存"
+    },
+    "restartFrontend": {
+      "command": "pkill -f 'vite --host' && sleep 2 && npm run dev:react",
+      "description": "重启前端服务"
+    },
+    "restartBackend": {
+      "command": "pkill -f 'tsx watch src/server' && sleep 2 && npm run dev",
+      "description": "重启后端服务"
+    },
+    "restartAll": {
+      "command": "bash dev-start.sh",
+      "description": "重启所有服务"
+    }
+  },
+  "aiInstructions": {
+    "whenPathChanged": "如果修改了 vite.config.ts 或 index.html，需要重启前端服务",
+    "whenServerCodeChanged": "修改 src/server/ 下的代码，tsx watch 会自动重启",
+    "whenClientCodeChanged": "修改 src/client/ 下的代码，Vite HMR 会自动更新",
+    "whenImportError": "如果出现 'Failed to load url' 错误，先检查路径，然后清除 Vite 缓存",
+    "whenTypeError": "如果出现 TypeScript 类型错误，运行 npm run typecheck"
+  }
+}
