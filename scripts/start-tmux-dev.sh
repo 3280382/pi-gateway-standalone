@@ -4,7 +4,7 @@
 
 set -e
 
-GATEWAY_DIR="/root/pi-mono/packages/gateway"
+GATEWAY_DIR="/root/pi-gateway-standalone"
 SESSION_NAME="gateway-dev"
 
 # 颜色

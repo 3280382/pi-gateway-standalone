@@ -6,7 +6,7 @@
 
 set -e
 
-GATEWAY_DIR="/root/pi-mono/packages/gateway"
+GATEWAY_DIR="/root/pi-gateway-standalone"
 MODE="${1:-tmux}"
 
 cd $GATEWAY_DIR

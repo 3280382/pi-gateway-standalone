@@ -4,7 +4,7 @@
 #              底部(AI交互/日志)
 
 SESSION_NAME="gateway-dev"
-GATEWAY_DIR="/root/pi-mono/packages/gateway"
+GATEWAY_DIR="/root/pi-gateway-standalone"
 
 # 颜色定义
 RED='\033[0;31m'

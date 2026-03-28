@@ -2,7 +2,7 @@
 # 开发状态检查脚本
 # AI 使用此脚本检查服务状态并生成用户操作指令
 
-cd /root/pi-mono/packages/gateway
+cd /root/pi-gateway-standalone
 
 echo "=== Pi Gateway 开发状态检查 ==="
 echo ""

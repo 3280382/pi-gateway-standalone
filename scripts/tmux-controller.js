@@ -12,7 +12,7 @@ const { execSync, spawn } = require('child_process');
 const path = require('path');
 
 const SESSION_NAME = 'gateway-dev';
-const GATEWAY_DIR = '/root/pi-mono/packages/gateway';
+const GATEWAY_DIR = '/root/pi-gateway-standalone';
 
 // ANSI 颜色
 const colors = {
