@@ -1,5 +1,15 @@
 # Pi Gateway Standalone - Development Rules
 
+## First Message
+
+If the user did not give you a concrete task in their first message,
+**ALWAYS read these documents in parallel**:
+- `README.md` - Project overview and quick start
+- `DEVELOPMENT.md` - Development workflow and architecture
+- `FEATURES.md` - Feature specification and UI layout
+
+Only after reading these, ask which specific feature or module to work on.
+
 ## Project Overview
 
 This is a **standalone** Pi Gateway project, independent from the pi-mono monorepo.
@@ -110,9 +120,13 @@ cd /path/to/pi-mono/packages/coding-agent && npm link
 cd ~/pi-gateway-standalone && npm link @mariozechner/pi-coding-agent
 ```
 
-## Documentation
+## Documentation (Read Before Starting)
 
-- `README.md` - Quick start
-- `DEVELOPMENT.md` - Development guide
-- `FEATURES.md` - Feature specification
-- `STANDALONE.md` - Standalone-specific notes
+**MUST READ** (in this order):
+1. `README.md` - Project overview, architecture, quick start commands
+2. `DEVELOPMENT.md` - Detailed development workflow, tmux setup, testing strategy
+3. `FEATURES.md` - Complete feature list, UI layout, operation flows
+
+**Reference**:
+- `STANDALONE.md` - Notes specific to standalone version
+- `SYSTEM.md` - System prompt and common tasks
