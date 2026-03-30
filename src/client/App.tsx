@@ -14,14 +14,18 @@ import { useNewChatStore } from "@/stores/new-chat.store";
 import { useSessionStore } from "@/stores/sessionStore";
 import { MessageList } from "./components/chat/MessageList/MessageList";
 import { FileBrowser } from "./components/files/FileBrowser";
-import { AppLayout, LayoutProvider } from "./components/layout/AppLayout";
+import {
+	AppLayout,
+	LayoutProvider,
+	useLayout,
+} from "./components/layout/AppLayout";
 import { fileController, sessionController } from "./controllers";
 import "./styles/global.css";
 
 function AppContent() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [currentView, setCurrentView] = useState<"chat" | "files">("chat");
+	const { currentView, setCurrentView } = useLayout();
 
 	const messages = useChatStore((s) => s.messages);
 	const currentStreamingMessage = useChatStore(

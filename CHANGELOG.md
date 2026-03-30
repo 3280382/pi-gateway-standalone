@@ -8,6 +8,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Unified AppLayout System**: Centralized layout component with consistent structure
+  - Header (64px): TopBar with model selector, thinking level, working directory, search
+  - Sidebar (280px): Recent workspaces, sessions, settings with collapsible design
+  - Content area: MessageList (chat) or FileBrowser (files)
+  - Footer (44px): BottomMenu with view switcher and sidebar toggle
+  - BottomPanel: Overlay panel for terminal/preview with resizable height
+- **State Persistence**: 
+  - Frontend: localStorage stores currentDir, currentSessionId, currentModel, thinkingLevel
+  - Backend: Session files automatically saved on WebSocket disconnect
+- **Working Directory & Session Management**:
+  - Directory picker for selecting working directory
+  - Session lifecycle: init → change_dir → dispose → reinit with new dir
+  - PID tracking for pi process management
+- **Dual View Mode**: Chat view (with input) and Files view (without input)
+- **Layout Context**: React Context for managing sidebar, bottom panel, and view state
+
+### Changed
+- Refactored App.tsx to use unified AppLayout
+- Updated TopBar with two-row layout (Row 1: controls, Row 2: working dir + search)
+- Moved InputArea to Content area (only visible in Chat view)
+- Fixed icon sizes (added explicit width/height to all SVG icons)
+- Updated state management to use LayoutContext for view switching
+
+### Fixed
+- Fixed TopBar picker overlay styles (added missing CSS)
+- Fixed MessageList and InputArea visibility issues
+- Fixed sidebar visibility in FileBrowser view
+- Fixed view switching between Chat and Files
+
+## [0.57.1] - 2025-03-28
+
+### Added
 - Initial gateway implementation with web UI
 - WebSocket-based real-time communication
 - Directory browser with visual file navigation

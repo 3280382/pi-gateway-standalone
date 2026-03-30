@@ -2,7 +2,8 @@
 
 ## 🎯 当前项目
 **项目名称**: pi-gateway-standalone  
-**项目位置**: /root/pi-gateway-standalone
+**项目位置**: /root/pi-gateway-standalone  
+**GitHub**: https://github.com/3280382/pi-gateway-standalone
 
 ## 快速开始 (推荐: Tmux 三窗格模式)
 
@@ -13,7 +14,7 @@ bash scripts/start-tmux-dev.sh
 这会在一个 tmux 会话中创建三个窗格：
 - **上左**: 前端服务 (http://127.0.0.1:5173)
 - **上右**: 后端服务 (http://127.0.0.1:3000)
-- **底部**: AI 交互窗格（AI 在此执行命令）
+- **底部**: AI 交互窗格
 
 快捷键:
 - `Ctrl+b + ↑/↓/←/→` - 切换窗格
@@ -27,393 +28,196 @@ bash dev-start.sh  # 非 tmux，直接在后台运行
 
 ## 项目架构
 
-本项目采用**模块化单体架构 (Modular Monolith)**，前后端代码在同一仓库，但严格分离。
+采用**模块化单体架构 (Modular Monolith)**：
 
 ```
 src/
-├── client/              # 🎨 前端代码（浏览器运行）
-│   ├── components/      # React 组件
+├── client/              # 🎨 前端代码
+│   ├── components/
+│   │   ├── layout/      # 布局组件
+│   │   │   ├── AppLayout/      # 统一布局控制器
+│   │   │   ├── TopBar/         # 顶部菜单
+│   │   │   ├── BottomMenu/     # 底部菜单
+│   │   │   ├── SidebarPanel/   # 侧边栏
+│   │   │   └── AppLayout/      # 布局上下文
+│   │   ├── chat/        # 聊天组件
+│   │   └── files/       # 文件浏览器
 │   ├── stores/          # Zustand 状态管理
-│   ├── services/        # 前端 API 服务
-│   │   └── api/         # API 客户端
-│   ├── controllers/     # 前端业务控制器
-│   ├── hooks/           # React hooks
-│   ├── models/          # 数据模型
-│   ├── lib/             # 前端工具
-│   ├── types/           # 前端私有类型
-│   ├── styles/          # 全局样式
-│   ├── mocks/           # Mock 数据
-│   ├── main.tsx         # 入口
+│   ├── services/        # API 和 WebSocket 服务
 │   └── App.tsx          # 根组件
-│
-├── server/              # 🖥️ 后端代码（Node.js）
+├── server/              # 🖥️ 后端代码
+│   ├── session/         # GatewaySession 会话管理
 │   ├── routes/          # Express 路由
-│   ├── controllers/     # 后端控制器
-│   ├── middleware/      # 中间件
-│   ├── services/        # 后端业务逻辑
-│   ├── session/         # 会话管理
-│   ├── llm/             # LLM 拦截器、日志
-│   ├── lib/             # 后端工具、错误处理
-│   ├── config/          # 配置
-│   ├── types/           # 后端私有类型
 │   └── server.ts        # 服务器入口
-│
-└── shared/              # 🔗 共享代码（仅类型/常量）
-    ├── types/           # API 契约类型
-    └── constants/       # 常量
+└── shared/              # 🔗 共享类型
 ```
 
-## 架构边界规则
+## 核心架构组件
 
-### ❌ 禁止跨边界导入
+### 1. AppLayout 统一布局系统
 
-| 错误示例 | 说明 |
-|---------|------|
-| `client/` 导入 `@server/*` | 前端不能直接使用后端代码 |
-| `server/` 导入 `@client/*` | 后端不能直接使用前端代码 |
-| `client/` 使用 Node.js 模块 (`fs`, `path`) | 浏览器环境不支持 |
-| `shared/` 包含运行时逻辑 | 只能有类型和常量 |
+所有视图共享统一的布局框架：
 
-### ✅ 正确的交互方式
+```
+┌─────────────────────────────────────────┐
+│ Header (64px) - TopBar                  │
+│ ├─ Row1: 模型 | Thinking | 状态指示器   │
+│ └─ Row2: 工作目录 | 搜索框              │
+├──────────┬──────────────────────────────┤
+│ Sidebar  │  Content                     │
+│ (可隐藏) │  ├─ contentBody (消息/文件)  │
+│ 280px    │  └─ inputArea (聊天输入框)   │
+├──────────┴──────────────────────────────┤
+│ Footer (44px) - BottomMenu              │
+├─────────────────────────────────────────┤
+│ BottomPanel - 可弹出终端/预览           │
+└─────────────────────────────────────────┘
+```
+
+**设计原则**:
+- 布局样式集中在 `AppLayout.module.css`
+- 子组件只负责内容渲染，不控制布局位置
+- 通过 `LayoutContext` 统一管理侧边栏、底部面板状态
+
+### 2. 状态管理架构
+
+#### 前端状态 (Zustand + Persist)
 
 ```typescript
-// 前端调用后端 API（正确）
-// client/services/api/chatApi.ts
-import { fetchApi } from './client';
-export const chatApi = {
-  sendMessage: (msg: string) => fetchApi('/api/chat', { body: { message: msg } })
-};
+// sessionStore.ts - 持久化到 localStorage
+{
+  currentSessionId,  // 当前会话 ID
+  currentDir,        // 当前工作目录
+  currentModel,      // 当前模型
+  thinkingLevel,     // Thinking 级别
+  theme,             // 主题
+  recentWorkspaces,  // 最近工作区
+}
 
-// 后端提供 API（正确）
-// server/routes/index.ts
-app.post('/api/chat', chatController.sendMessage);
+// chatStore.ts - 内存状态
+{
+  messages,          // 消息列表
+  isStreaming,       // 是否正在流式输出
+  inputText,         // 输入框文本
+}
 ```
+
+#### 后端状态 (GatewaySession)
+
+```typescript
+class GatewaySession {
+  session: AgentSession | null;  // pi-coding-agent 会话
+  workingDir: string;             // 当前工作目录
+  ws: WebSocket;                  // WebSocket 连接
+  
+  initialize(workingDir, sessionId?)  // 初始化会话
+  dispose()                           // 清理资源，自动保存
+}
+```
+
+### 3. 工作目录与 Session 生命周期
+
+```
+┌─────────────┐     WebSocket连接      ┌──────────────┐
+│   前端      │ ─────────────────────> │   后端       │
+│ 选择目录    │                        │ GatewaySession│
+└─────────────┘                        └──────┬───────┘
+                                              │
+                                              ▼
+                                    ┌──────────────────┐
+                                    │ 1. 终止旧 pi 进程 │
+                                    │ 2. 在新目录启动 pi│
+                                    │ 3. 加载/创建会话  │
+                                    │ 4. 返回新 PID     │
+                                    └──────────────────┘
+```
+
+**关系说明**:
+- **工作目录**: pi 进程的工作目录，文件操作基于此目录
+- **Session 文件**: 持久化的会话历史（`.pi/sessions/`）
+- **PID**: 动态进程号，每次启动 pi 都不同
 
 ## 路径别名
 
 ```typescript
-// 前端代码
-import { Button } from '@/components/ui/Button';
-import { useChatStore } from '@/stores/chatStore';
-import type { Message } from '@/models/message.model';
+// 前端
+import { AppLayout } from '@/components/layout/AppLayout';
+import { useSessionStore } from '@/stores/sessionStore';
+import type { Message } from '@shared/types/message.types';
 
-// 后端代码
+// 后端
 import { GatewaySession } from '@server/session/gateway-session';
-import { llmInterceptor } from '@server/llm/interceptor';
-
-// 共享代码
 import type { ApiResponse } from '@shared/types/api.types';
-import { APP_NAME } from '@shared/constants/app';
 ```
-
-## 常用脚本
-
-```bash
-npm run dev              # 后端热重载
-npm run dev:react        # 前端 Vite
-npm run build            # 生产构建
-npm run typecheck        # 类型检查
-npm run check            # 代码检查（Biome + ESLint）
-```
-
-## 测试
-
-```bash
-npm test                 # 运行单元测试 + 集成测试
-npm run test:unit        # 仅单元测试
-npm run test:integration # 仅集成测试
-npm run test:e2e         # E2E 测试
-npm run test:debug       # 调试测试
-```
-
-### 测试目录结构
-
-```
-test/
-├── unit/                # 单元测试
-│   ├── client/          # 前端单元测试
-│   ├── server/          # 后端单元测试
-│   └── models/          # 模型单元测试
-├── integration/         # 集成测试
-│   ├── client/          # 前端集成测试
-│   └── server/          # 后端集成测试
-└── e2e/                 # 端到端测试
-```
-
-## ✅ 完整代码修改流程
-
-**每次代码修改后，必须按顺序执行以下完整流程：**
-
-### 第一阶段：代码质量检查
-
-1. **编译构建** - 确保代码可以编译
-   ```bash
-   npm run build
-   ```
-   **要求**: 构建必须成功，无编译错误
-
-2. **代码规范检查** - 确保代码符合规范
-   ```bash
-   npm run check  # Biome + TypeScript 检查
-   npm run typecheck  # TypeScript 类型检查
-   ```
-   **要求**: 
-   - 无 linting 警告或错误
-   - TypeScript 错误必须修复，警告应最小化
-   - 代码符合项目风格指南
-
-### 第二阶段：测试验证
-
-3. **运行测试** - 确保所有测试通过
-   ```bash
-   npm test  # 单元测试 + 集成测试
-   ```
-   **要求**:
-   - 所有测试必须通过
-   - 无不稳定或跳过的测试（除非明确文档说明）
-   - 测试覆盖率不应显著下降
-
-### 第三阶段：服务验证
-
-4. **检查服务状态** - 确保服务正常运行
-   ```bash
-   node scripts/tmux-controller.js status
-   ```
-
-5. **重启服务** - 代码修改后重启服务
-   ```bash
-   # 根据需要重启
-   node scripts/tmux-controller.js restart-frontend
-   node scripts/tmux-controller.js restart-backend
-   ```
-
-6. **检查服务日志** - 确认无启动错误
-   ```bash
-   tail -20 /root/pi-gateway-standalone/logs/frontend_current.log
-   tail -20 /root/pi-gateway-standalone/logs/backend_current.log
-   ```
-
-7. **验证服务端点** - 确认前后台位置正确
-   ```bash
-   # 验证前端 (5173) 和后端 (3000) 可访问
-   curl -s http://127.0.0.1:5173 > /dev/null && echo "前端正常"
-   curl -s http://127.0.0.1:3000/health > /dev/null && echo "后端正常"
-   ```
-   **要求**:
-   - 前端服务运行在 http://127.0.0.1:5173
-   - 后端服务运行在 http://127.0.0.1:3000
-   - API 端点正确响应
-   - WebSocket 服务器接受连接
-
-### 第四阶段：最终验证（黄金标准 - 强制要求）
-
-8. **综合检查** - 重新运行完整检查
-   ```bash
-   npm run check
-   npm test
-   node scripts/tmux-controller.js status
-   ```
-
-9. **功能验证（黄金标准 - 强制）** - 必须创建并运行模拟浏览器测试
-
-   **⚠️ 重要警告：在完成以下验证前，不得说"完成"、"修复"或"通过"：**
-
-   必须按照以下模板执行，每一步完成后明确报告结果，全部勾选后才能说"任务完成"：
-
-   ```
-   □ STEP 1 - 代码修改完成
-     修改文件: [列出修改的文件]
-     
-   □ STEP 2 - 编译构建通过
-     运行: npm run build
-     结果: [成功/失败，如有错误列出]
-     
-   □ STEP 3 - 类型检查通过
-     运行: npm run typecheck
-     结果: [通过/失败，如有错误列出前3个]
-     
-   □ STEP 4 - 单元测试通过
-     运行: npm test
-     结果: [通过X个/失败Y个]
-     
-   □ STEP 5 - 服务验证正常
-     运行: node scripts/tmux-controller.js status
-     结果: [前端正常/异常] [后端正常/异常]
-     
-   □ STEP 6 - [黄金标准] 模拟浏览器测试
-     **要求**: 必须创建实际的自动化测试验证功能
-     **禁止**: 仅用代码审查或API测试冒充功能验证
-     
-     创建测试脚本（Playwright或详细模拟测试），验证：
-     □ 用户界面元素存在（按钮、面板等）
-     □ 用户交互触发状态更新（点击按钮）
-     □ DOM元素正确渲染（面板显示/隐藏）
-     □ 网络请求正确触发（API调用）
-     □ 数据正确显示（文件列表、内容等）
-     
-     测试代码: [提供测试代码]
-     运行结果: [提供运行输出]
-     
-   □ STEP 7 - 实际行为验证
-     通过日志或测试输出证明：
-     □ 状态更新确实发生
-     □ 组件确实重新渲染
-     □ API请求确实发送
-     □ 数据确实加载
-   ```
-
-   **违反此流程的后果**:
-   - 只说"代码修改完成"≠"功能修复完成"
-   - API测试正常≠功能正常
-   - 构建成功≠运行时正确
-   - TypeScript编译通过≠JavaScript执行正确
-
-**只有以上所有步骤（特别是STEP 6-7）完全通过后，才能进入下一阶段。**
 
 ## 开发规范
 
-### 文件命名
-- 组件: `PascalCase.tsx` (如 `ChatPanel.tsx`)
-- 样式: `Component.module.css`
-- 工具: `camelCase.ts`
-- 类型: `types.ts` 或 `*.types.ts`
+### 组件开发
 
-### 代码规范
-- TypeScript 严格模式
-- CSS Modules 管理样式
-- Zustand 状态管理
-- 统一使用路径别名（@/, @shared/, @server/）
+```typescript
+// 布局组件只负责布局，内容通过 children 传入
+function AppLayout({ children, showInput }: AppLayoutProps) {
+  return (
+    <div className={styles.layout}>
+      <header>...</header>
+      <main>{children}</main>
+      {showInput && <InputArea />}
+    </div>
+  );
+}
 
-### 提交规范
-
-```
-type(scope): subject
-
-类型: feat, fix, docs, style, refactor, test, chore
-```
-
-示例:
-```
-feat(chat): add message search
-
-Add search functionality to chat panel
+// 内容组件只负责渲染，不参与布局
+function MessageList({ messages }: MessageListProps) {
+  return <div className={styles.list}>...</div>;
+}
 ```
 
-## ESLint 规则
+### 状态更新
 
-项目配置了跨边界导入检查：
-- Client 代码不能导入 `@server/*`
-- Server 代码不能导入 `@client/*`
-- 违反规则会在编辑器中显示错误
+```typescript
+// ✅ 正确: 直接调用 store action
+const setCurrentDir = useSessionStore((s) => s.setCurrentDir);
+setCurrentDir('/new/path');
 
-## 开发流程管理 (Tmux 方案)
-
-### 三窗格架构（上1/3、下2/3）
-
-```
-┌───────────────────────┬───────────────────────┐
-│  🎨 前端窗格 (0)       │  🖥️  后端窗格 (1)       │  <- 上部 33%
-│  npx vite             │  npx tsx watch        │     左右各50%
-│  http://127.0.0.1:5173│  http://127.0.0.1:3000│
-├───────────────────────┴───────────────────────┤
-│  🤖 AI 交互窗格 (2) - pi                        │  <- 底部 66%
-│  AI 在此执行命令、查看日志、自动修复            │     宽度占满
-└───────────────────────────────────────────────┘
+// ❌ 错误: 解构获取整个 store
+const store = useSessionStore();  // 会导致不必要的重渲染
 ```
 
-### AI 自动化控制
-
-AI 现在可以**直接控制**服务，无需用户手动操作：
+## 常用命令
 
 ```bash
-# AI 使用的控制命令
-node scripts/tmux-controller.js status           # 检查状态
+# 开发
+npm run dev                       # 启动开发服务器
+bash scripts/start-tmux-dev.sh    # Tmux 模式
+
+# 构建与检查
+npm run build                     # 生产构建
+npm run check                     # 代码检查
+npm run typecheck                 # TypeScript 检查
+
+# 测试
+npm test                          # 全部测试
+npm run test:unit                 # 单元测试
+npm run test:e2e                  # E2E 测试
+
+# 服务管理
+node scripts/tmux-controller.js status           # 服务状态
 node scripts/tmux-controller.js restart-frontend # 重启前端
-node scripts/tmux-controller.js restart-backend  # 重启后端
-node scripts/tmux-controller.js clear-cache      # 清缓存
-node scripts/tmux-controller.js autofix          # 自动修复所有问题
+
+# 调试
+tail -f logs/frontend_current.log  # 前端日志
+tail -f logs/backend_current.log   # 后端日志
 ```
 
-### 用户观察视角
+## 测试策略
 
-1. **启动**: `bash scripts/start-tmux-dev.sh`
-2. **观察**: 你会看到三个窗格同时运行
-3. **AI 操作**: AI 在底部窗格自动执行命令
-4. **人类介入**: 只在需要时（如确认重启、查看特殊输出）
+- **单元测试**: 组件、store、工具函数
+- **集成测试**: API 路由、WebSocket 消息
+- **E2E 测试**: 完整用户流程（Playwright）
 
-### 快捷键
+## 调试技巧
 
-```bash
-Ctrl+b + ↑        # 到前端窗格
-Ctrl+b + ↓        # 到 AI 窗格
-Ctrl+b + ←        # 到后端窗格
-Ctrl+b + d        # 分离（后台继续运行）
-tmux attach       # 重新连接
-```
-
-### 退出方式
-
-**方法1: 分离（推荐）** - 服务继续运行，可恢复
-```bash
-# 按 Ctrl+b，然后按 d
-# 效果: 回到普通终端，三个服务在后台继续运行
-
-# 之后可以恢复
-tmux attach -t gateway-dev
-```
-
-**方法2: 停止服务后退出**
-```bash
-# 在每个窗格按 Ctrl+c 停止服务，然后 exit
-Ctrl+b + ↑    # 去前端窗格
-Ctrl+c        # 停止前端服务
-exit          # 退出前端窗格
-
-Ctrl+b + ←    # 去后端窗格  
-Ctrl+c        # 停止后端服务
-exit          # 退出后端窗格
-
-Ctrl+b + ↓    # 去 pi 窗格
-exit          # 或按 Ctrl+d 退出 pi
-```
-
-**方法3: 强制关闭全部**
-```bash
-# 直接关闭终端窗口
-# 或在另一个终端执行:
-tmux kill-session -t gateway-dev
-```
-
-### 手动控制（备用）
-
-```bash
-# 会话管理
-bash scripts/tmux-dev.sh create      # 创建会话
-bash scripts/tmux-dev.sh attach      # 进入观察
-bash scripts/tmux-dev.sh kill        # 终止会话
-
-# 服务控制
-bash scripts/tmux-dev.sh start       # 启动所有
-bash scripts/tmux-dev.sh stop        # 停止所有
-bash scripts/tmux-dev.sh restart     # 重启所有
-bash scripts/tmux-dev.sh clear-cache # 清除缓存
-```
-
-## 调试
-
-```bash
-# Chrome DevTools
-http://127.0.0.1:5173
-
-# 移动端调试
-http://<ip>:5173?debug=true
-
-# 检查服务状态
-bash scripts/dev-status.sh
-```
-
-## 参考文档
-
-- [FEATURES.md](./FEATURES.md) - 功能规格说明书
-- [CHANGELOG.md](./CHANGELOG.md) - 变更历史
-- [mock-data/README.md](./mock-data/README.md) - Mock 数据说明
+1. **前端热重载**: Vite 自动重载，无需手动刷新
+2. **后端热重载**: tsx 监视模式，自动重启
+3. **WebSocket 调试**: 查看浏览器 DevTools Network WS 标签
+4. **状态检查**: Redux DevTools 可查看 Zustand 状态
