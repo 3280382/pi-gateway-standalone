@@ -1,410 +1,768 @@
 /**
- * File Browser Styles - Compact, minimal borders
+ * File Browser Styles - Ultra Compact
  */
 
 .fileBrowserSection {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  background: var(--bg-primary);
-  overflow: hidden;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	min-height: 0; /* 关键：允许flex子项收缩 */
+	background: var(--bg-primary);
+	overflow: hidden; /* 改为hidden，让子元素控制滚动 */
 }
 
 .container {
-  display: flex;
-  width: 100%;
-  height: 100%;
+	display: flex;
+	width: 100%;
+	height: 100%;
+}
+
+.sidebar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	width: 280px;
+	background: var(--bg-secondary);
+	border-right: 1px solid var(--border-subtle);
+	overflow-y: auto;
+	z-index: 900;
+	box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+	transform: translateX(-100%);
+	transition: transform 0.3s ease;
+}
+
+.sidebar.visible {
+	transform: translateX(0);
 }
 
 .main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0; /* 关键：允许flex子项收缩 */
+	overflow: hidden; /* 让contentArea控制滚动 */
+}
+
+.contentArea {
+	flex: 1;
+	overflow-y: auto !important;
+	overflow-x: hidden;
+	padding: 8px;
+	min-height: 0;
+	max-height: calc(100vh - 140px);
 }
 
 .loading,
 .error,
 .empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--text-muted);
-  font-size: 13px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	color: var(--text-muted);
+	font-size: 11px;
+	padding: 20px;
 }
 
 .error {
-  color: var(--accent-red);
+	color: var(--accent-red);
 }
 
-/* Toolbar - Compact, tighter spacing */
+/* ====== 工具栏 ====== */
 .toolbarWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 10px 12px;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-subtle);
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	padding: 6px 8px;
+	background: var(--bg-secondary);
+	border-bottom: 1px solid var(--border-subtle);
 }
 
 .toolbarRow {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
 }
 
-/* Toolbar buttons - slightly larger, thicker icons */
 .toolbarBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  background: var(--bg-tertiary);
-  border: none;
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-size: var(--font-sm);
-  cursor: pointer;
-  transition: all 0.15s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	padding: 4px;
+	background: var(--bg-tertiary);
+	border: none;
+	border-radius: 3px;
+	color: var(--text-secondary);
+	font-size: 10px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	box-sizing: border-box;
 }
 
 .toolbarBtn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+	background: var(--bg-hover);
+	color: var(--text-primary);
 }
 
-.toolbarBtn svg {
-  width: 16px;
-  height: 16px;
-  stroke-width: 2.5px;
+.toolbarBtn.active {
+	background: var(--accent-blue-transparent);
+	color: var(--accent-blue);
 }
 
-/* Up button with .. text */
-.upBtn {
-  font-family: var(--font-mono);
-  font-size: var(--font-md);
-  font-weight: 600;
-  letter-spacing: 1px;
-  color: var(--accent-blue);
+/* 仅图标按钮 */
+.iconBtn {
+	width: 24px;
+	height: 24px;
+	padding: 4px;
+}
+
+.iconBtn svg {
+	width: 16px;
+	height: 16px;
 }
 
 /* Execute button - green color */
 .exeBtn {
-  color: var(--accent-green);
-  background: var(--accent-bg-green);
+	color: var(--accent-green);
+	background: var(--accent-bg-green);
 }
 
 .exeBtn:hover {
-  background: var(--accent-green);
-  color: white;
+	background: var(--accent-green);
+	color: white;
 }
 
 /* Path bar */
 .pathBar {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  background: var(--bg-tertiary);
-  border-radius: var(--radius-md);
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
+	flex: 1;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 8px;
+	background: var(--bg-tertiary);
+	border-radius: 3px;
+	font-size: 10px;
+	color: var(--text-muted);
+	overflow: hidden;
+	height: 24px;
 }
 
 .pathBar svg {
-  stroke-width: 2px;
-  color: var(--accent-blue);
+	flex-shrink: 0;
+	width: 12px;
+	height: 12px;
 }
 
-/* Inputs - compact */
-.select,
-.filterInput {
-  padding: 6px 10px;
-  background: var(--bg-tertiary);
-  border: none;
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: var(--font-xs);
-  height: 30px;
+.pathBar span {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
-.filterInput {
-  width: 140px;
+/* View mode toggle */
+.viewToggle {
+	display: flex;
+	gap: 1px;
+	background: var(--bg-tertiary);
+	border-radius: 3px;
+	padding: 1px;
 }
 
-.filterInput:focus {
-  outline: 2px solid var(--accent-bg-blue);
+.viewToggleBtn {
+	padding: 3px 6px;
+	background: transparent;
+	border: none;
+	border-radius: 2px;
+	color: var(--text-muted);
+	font-size: 10px;
+	cursor: pointer;
+	transition: all 0.15s;
 }
 
-.select {
-  cursor: pointer;
+.viewToggleBtn.active {
+	background: var(--accent-blue-transparent);
+	color: var(--accent-blue);
 }
 
-.stats {
-  font-size: var(--font-xs);
-  color: var(--text-muted);
-  margin-left: auto;
-  margin-right: 6px;
+/* Filter and sort */
+.filterSortRow {
+	display: flex;
+	align-items: center;
+	gap: 4px;
 }
 
-/* View Mode Button - more prominent */
-.viewModeBtn {
-  width: auto;
-  padding: 0 12px;
-  gap: 6px;
-  font-size: var(--font-xs);
-  font-weight: 500;
-  color: var(--text-primary);
-  background: var(--bg-tertiary);
+/* 合并过滤组件：输入+下拉 */
+.filterCombo {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	background: var(--bg-tertiary);
+	border: 1px solid var(--border-subtle);
+	border-radius: 3px;
+	overflow: visible;
+	height: 24px;
+	position: relative;
 }
 
-.viewModeBtn svg {
-  stroke-width: 2px;
+.filterComboInput {
+	flex: 1;
+	padding: 3px 6px;
+	background: transparent;
+	border: none;
+	color: var(--text-primary);
+	font-size: 10px;
+	min-width: 0;
+	outline: none;
 }
 
-/* List View */
+.filterComboInput::placeholder {
+	color: var(--text-muted);
+}
+
+.filterComboBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	margin: 1px;
+	background: var(--bg-secondary);
+	border: none;
+	border-left: 1px solid var(--border-subtle);
+	border-radius: 0 2px 2px 0;
+	color: var(--text-secondary);
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.filterComboBtn:hover {
+	background: var(--bg-hover);
+	color: var(--text-primary);
+}
+
+.filterComboBtn svg {
+	width: 12px;
+	height: 12px;
+}
+
+/* 自定义下拉菜单 */
+.filterDropdown {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	margin-top: 2px;
+	background: var(--bg-secondary);
+	border: 1px solid var(--border-subtle);
+	border-radius: 3px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	max-height: 200px;
+	overflow-y: auto;
+	z-index: 100;
+}
+
+.filterDropdownItem {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	cursor: pointer;
+	font-size: 11px;
+	color: var(--text-primary);
+	transition: background 0.15s ease;
+	border-bottom: 1px solid var(--border-subtle);
+}
+
+.filterDropdownItem:last-child {
+	border-bottom: none;
+}
+
+.filterDropdownItem:hover,
+.filterDropdownItem.active {
+	background: var(--accent-bg);
+	color: var(--accent-fg);
+}
+
+.filterIcon {
+	font-size: 13px;
+	width: 18px;
+	text-align: center;
+}
+
+.filterLabel {
+	flex: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* 排序下拉框 - 自定义样式 */
+.sortCombo {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+
+.sortComboBtn {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 6px;
+	background: var(--bg-tertiary);
+	border: 1px solid var(--border-subtle);
+	border-radius: 3px;
+	color: var(--text-primary);
+	font-size: 10px;
+	cursor: pointer;
+	height: 24px;
+	min-width: 80px;
+	transition: all 0.15s ease;
+}
+
+.sortComboBtn:hover {
+	background: var(--bg-hover);
+	border-color: var(--border-color);
+}
+
+.sortComboBtn svg {
+	width: 10px;
+	height: 10px;
+	margin-left: auto;
+}
+
+/* 排序下拉菜单 */
+.sortDropdown {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	margin-top: 2px;
+	background: var(--bg-secondary);
+	border: 1px solid var(--border-subtle);
+	border-radius: 3px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	max-height: 200px;
+	overflow-y: auto;
+	z-index: 100;
+	min-width: 120px;
+}
+
+.sortDropdownItem {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	cursor: pointer;
+	font-size: 11px;
+	color: var(--text-primary);
+	transition: background 0.15s ease;
+	border-bottom: 1px solid var(--border-subtle);
+}
+
+.sortDropdownItem:last-child {
+	border-bottom: none;
+}
+
+.sortDropdownItem:hover,
+.sortDropdownItem.active {
+	background: var(--accent-bg);
+	color: var(--accent-fg);
+}
+
+.sortIcon {
+	font-size: 13px;
+	width: 18px;
+	text-align: center;
+}
+
+.sortLabel {
+	flex: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* ====== 文件列表视图 ====== */
 .list {
-  display: flex;
-  flex-direction: column;
-  overflow: auto;
-  padding: 0 12px;
+	display: flex;
+	flex-direction: column;
+	overflow-y: auto !important;
+	overflow-x: hidden;
+	padding: 0 8px;
+	height: auto;
+	max-height: calc(100vh - 200px);
 }
 
 .listHeader {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 12px;
-  margin-bottom: 2px;
-  font-size: var(--font-xs);
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
+	display: grid;
+	grid-template-columns: 18px 1fr 60px 90px;
+	gap: 6px;
+	padding: 3px 8px;
+	margin-bottom: 1px;
+	font-size: 9px;
+	color: var(--text-muted);
+	border-bottom: 1px solid var(--border-subtle);
 }
 
-.headerName { flex: 1; }
-.headerSize { width: 70px; text-align: right; }
-.headerModified { width: 120px; text-align: right; }
-
 .listItem {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 12px;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: var(--font-base);
-  transition: all 0.1s ease;
-  margin-bottom: 1px;
+	display: grid;
+	grid-template-columns: 18px 1fr 60px 90px;
+	gap: 6px;
+	padding: 3px 8px;
+	border-radius: 2px;
+	font-size: 11px;
+	cursor: pointer;
+	transition: background 0.15s;
+	margin-bottom: 1px;
 }
 
 .listItem:hover {
-  background: var(--bg-hover);
+	background: var(--bg-hover);
 }
 
 .listItem.selected {
-  background: var(--accent-bg-blue);
+	background: var(--accent-blue-transparent);
+	color: var(--accent-blue);
 }
 
 .listIcon {
-  width: 18px;
-  text-align: center;
-  font-size: var(--font-md);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
 }
 
 .listName {
-  flex: 1;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .listItem.directory .listName {
-  color: var(--accent-blue);
-  font-weight: 500;
+	font-weight: 500;
 }
 
 .listSize {
-  width: 70px;
-  text-align: right;
-  color: var(--text-secondary);
-  font-size: var(--font-xs);
+	color: var(--text-muted);
+	text-align: right;
 }
 
 .listModified {
-  width: 120px;
-  text-align: right;
-  color: var(--text-secondary);
-  font-size: var(--font-xs);
+	color: var(--text-muted);
 }
 
-/* Grid View */
+/* ====== 网格视图 ====== */
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  gap: 6px;
-  padding: 12px;
-  overflow-y: auto;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+	gap: 4px;
+	padding: 8px;
+	overflow-y: auto !important;
+	height: auto;
+	max-height: calc(100vh - 200px);
 }
 
 .gridItem {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 12px 8px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all 0.15s ease;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 6px;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.15s;
+	text-align: center;
 }
 
 .gridItem:hover {
-  background: var(--bg-hover);
+	background: var(--bg-hover);
 }
 
 .gridItem.selected {
-  background: var(--accent-bg-blue);
+	background: var(--accent-blue-transparent);
+	color: var(--accent-blue);
+}
+
+.gridItem.directory {
+	font-weight: 500;
 }
 
 .gridIcon {
-  font-size: var(--font-lg);
-  line-height: 1;
+	font-size: 20px;
+	margin-bottom: 4px;
 }
 
 .gridName {
-  font-size: var(--font-xs);
-  color: var(--text-primary);
-  text-align: center;
-  word-break: break-word;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+	font-size: 10px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	width: 100%;
 }
 
-/* Sidebar */
-.sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 44px;
-  width: 200px;
-  background: var(--bg-secondary);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  z-index: 100;
-  transform: translateX(0);
-  transition: transform 0.25s ease;
-  box-shadow: var(--shadow-lg);
-}
-
-.sidebar.collapsed {
-  transform: translateX(-100%);
-}
-
-.sidebarHeader {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  font-weight: 600;
-  font-size: var(--font-md);
-}
-
+/* ====== 侧边栏树视图 ====== */
 .tree {
-  flex: 1;
-  overflow-y: auto;
-  padding: 6px;
+	padding: 6px 0;
 }
 
 .treeItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 10px;
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
-  cursor: pointer;
-  border-radius: var(--radius-md);
-  transition: all 0.1s ease;
+	display: flex;
+	align-items: center;
+	padding: 3px 8px;
+	cursor: pointer;
+	transition: background 0.15s;
+	font-size: 11px;
+	user-select: none;
 }
 
 .treeItem:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+	background: var(--bg-hover);
+	color: var(--text-primary);
+}
+
+.treeItem.active {
+	background: var(--accent-blue-transparent);
+	color: var(--accent-blue);
 }
 
 .treeIcon {
-  font-size: var(--font-sm);
-  width: 14px;
-  text-align: center;
+	font-size: 12px;
+	width: 16px;
+	text-align: center;
+	margin-right: 4px;
 }
 
-/* Action Bar */
+.treeName {
+	flex: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.treeLoadingIcon {
+	font-size: 10px;
+	color: var(--text-muted);
+	margin-left: 4px;
+}
+
+.treeExpandIcon {
+	font-size: 10px;
+	color: var(--text-muted);
+	margin-left: 4px;
+}
+
+.treeChildren {
+	margin-left: 12px;
+}
+
+.treeEmpty {
+	padding: 12px;
+	text-align: center;
+	color: var(--text-muted);
+	font-size: 10px;
+}
+
+.clearCacheBtn {
+	background: none;
+	border: none;
+	color: var(--text-muted);
+	cursor: pointer;
+	font-size: 10px;
+	padding: 2px;
+	border-radius: 2px;
+	margin-left: auto;
+}
+
+.clearCacheBtn:hover {
+	background: var(--bg-hover);
+	color: var(--text-primary);
+}
+
+/* ====== 选中文件操作栏 ====== */
 .actionBar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--bg-tertiary);
-  border-bottom: 1px solid var(--border-subtle);
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 8px;
+	background: var(--bg-secondary);
+	border-bottom: 1px solid var(--border-subtle);
+	font-size: 11px;
 }
 
 .selectedName {
-  font-size: var(--font-sm);
-  color: var(--text-primary);
-  margin-right: auto;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px;
+	flex: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: var(--text-primary);
+	font-weight: 500;
+	padding-right: 8px;
 }
 
 .actionBtn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
-  background: var(--bg-secondary);
-  border: none;
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-size: var(--font-xs);
-  cursor: pointer;
-  transition: all 0.15s ease;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 8px;
+	background: var(--bg-tertiary);
+	border: 1px solid var(--border-subtle);
+	border-radius: 3px;
+	color: var(--text-secondary);
+	font-size: 10px;
+	cursor: pointer;
+	transition: all 0.15s;
 }
 
 .actionBtn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-
-.actionBtn svg {
-  width: 14px;
-  height: 14px;
+	background: var(--bg-hover);
+	color: var(--text-primary);
 }
 
 .actionBtn.view {
-  color: var(--accent-blue);
+	color: var(--accent-blue);
 }
 
 .actionBtn.edit {
-  color: var(--accent-green);
+	color: var(--accent-green);
 }
 
 .actionBtn.execute {
-  color: var(--accent-orange);
+	color: var(--accent-green);
+}
+
+/* ====== 文件查看器 ====== */
+.viewerOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.7);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+	padding: 20px;
+}
+
+.viewerContent {
+	background: var(--bg-primary);
+	border-radius: 8px;
+	width: 90%;
+	max-width: 1000px;
+	max-height: 90vh;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.viewerHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 16px;
+	background: var(--bg-secondary);
+	border-bottom: 1px solid var(--border-subtle);
+}
+
+.viewerTitle {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--text-primary);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.viewerClose {
+	background: none;
+	border: none;
+	color: var(--text-muted);
+	cursor: pointer;
+	padding: 4px;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.viewerClose:hover {
+	background: var(--bg-hover);
+	color: var(--text-primary);
+}
+
+.viewerBody {
+	flex: 1;
+	overflow: auto;
+	padding: 16px;
+}
+
+.viewerLoading,
+.viewerError {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 200px;
+	color: var(--text-muted);
+	font-size: 13px;
+}
+
+.viewerError {
+	color: var(--accent-red);
+}
+
+.viewerCode {
+	background: var(--bg-secondary);
+	border-radius: 6px;
+	padding: 16px;
+	overflow: auto;
+	font-family: "JetBrains Mono", monospace;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.viewerFooter {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px;
+	padding: 12px 16px;
+	background: var(--bg-secondary);
+	border-top: 1px solid var(--border-subtle);
+}
+
+.viewerBtn {
+	padding: 6px 12px;
+	border-radius: 4px;
+	font-size: 12px;
+	cursor: pointer;
+	transition: all 0.15s;
+	border: 1px solid var(--border-subtle);
+}
+
+.viewerBtn.primary {
+	background: var(--accent-blue);
+	color: white;
+	border-color: var(--accent-blue);
+}
+
+.viewerBtn.secondary {
+	background: var(--bg-tertiary);
+	color: var(--text-primary);
+}
+
+.viewerBtn.danger {
+	background: var(--accent-red);
+	color: white;
+	border-color: var(--accent-red);
+}
+
+.viewerBtn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
 }

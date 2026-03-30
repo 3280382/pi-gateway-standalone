@@ -1,190 +1,271 @@
 /**
  * App - Gateway Main Application
+ *
+ * 使用统一的 AppLayout 布局系统：
+ * - 布局行为全部由 AppLayout 控制
+ * - 子组件只负责内容渲染
+ * - Chat 视图和 Files 视图共享相同的布局框架
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { Button } from './components/ui/Button/Button';
-import { chatController } from './controllers';
-import { fileController } from './controllers';
-import { sessionController } from './controllers';
-import { useNewChatStore } from './store/new-chat.store';
-import { ChatPanel } from './components/chat/ChatPanel/ChatPanel';
-import { FileBrowser } from './components/files/FileBrowser';
-import { SidebarPanel } from './components/layout/SidebarPanel/SidebarPanel';
-import { BottomMenu } from './components/layout/BottomMenu';
-import './styles/global.css';
-import './styles/ui-optimized.css';
-import './styles/animations.css';
-import styles from './App.module.css';
+import { useEffect, useState } from "react";
+import { websocketService } from "@/services/websocket.service";
+import { useChatStore } from "@/stores/chatStore";
+import { useNewChatStore } from "@/stores/new-chat.store";
+import { useSessionStore } from "@/stores/sessionStore";
+import { MessageList } from "./components/chat/MessageList/MessageList";
+import { FileBrowser } from "./components/files/FileBrowser";
+import { AppLayout, LayoutProvider } from "./components/layout/AppLayout";
+import { fileController, sessionController } from "./controllers";
+import "./styles/global.css";
+
+function AppContent() {
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const [currentView, setCurrentView] = useState<"chat" | "files">("chat");
+
+	const messages = useChatStore((s) => s.messages);
+	const currentStreamingMessage = useChatStore(
+		(s) => s.currentStreamingMessage,
+	);
+	const showThinking = useChatStore((s) => s.showThinking);
+	// 直接从 store 获取 actions，避免创建新对象
+	const toggleMessageCollapse = useChatStore((s) => s.toggleMessageCollapse);
+	const toggleThinkingCollapse = useChatStore((s) => s.toggleThinkingCollapse);
+	const deleteMessage = useChatStore((s) => s.deleteMessage);
+	const regenerateMessage = useChatStore((s) => s.regenerateMessage);
+
+	// 初始化应用
+	useEffect(() => {
+		async function initApp() {
+			try {
+				// 从持久化存储获取之前的状态
+				const persistedDir = useSessionStore.getState().currentDir;
+				const persistedSessionId = useSessionStore.getState().currentSessionId;
+
+				// 快速初始化显示（使用持久化的目录）
+				if (persistedDir && persistedDir !== "/root") {
+					useSessionStore.getState().setCurrentDir(persistedDir);
+					fileController.setCurrentPath(persistedDir);
+				}
+				setIsLoading(false);
+
+				// 后台完整初始化
+				try {
+					await sessionController.getUserSettings();
+					const workspace = await sessionController.getCurrentWorkspace();
+
+					// 只有在没有持久化目录时才使用服务器返回的目录
+					if (!persistedDir || persistedDir === "/root") {
+						useSessionStore.getState().setCurrentDir(workspace.path);
+						fileController.setCurrentPath(workspace.path);
+					}
+
+					// WebSocket 连接
+					try {
+						await websocketService.connect();
+					} catch (wsErr) {
+						console.warn("[App] WebSocket connection failed:", wsErr);
+					}
+
+					if (websocketService.isConnected) {
+						// 优先使用持久化的 sessionId，如果没有则从服务器获取
+						let sessionId = persistedSessionId;
+
+						if (!sessionId) {
+							try {
+								const sessionsRes = await fetch(
+									`/api/sessions?cwd=${encodeURIComponent(workspace.path)}`,
+								);
+								if (sessionsRes.ok) {
+									const sessionsData = await sessionsRes.json();
+									if (sessionsData.sessions?.length > 0) {
+										sessionId = sessionsData.sessions[0].id;
+									}
+								}
+							} catch (e) {
+								console.warn("[App] Failed to get sessions:", e);
+							}
+						}
+
+						// 初始化会话（使用持久化的目录和 sessionId）
+						const currentDir = useSessionStore.getState().currentDir;
+						const initData = await websocketService.initWorkingDirectory(
+							currentDir,
+							sessionId,
+						);
+
+						if (initData) {
+							// 保存到 new-chat store
+							useNewChatStore.getState().setSessionId(initData.sessionId);
+							useNewChatStore.getState().setCurrentModel(initData.model);
+
+							// 保存到 session store（会被持久化到 localStorage）
+							useSessionStore.getState().setCurrentSession(initData.sessionId);
+							useSessionStore.getState().setServerPid(initData.pid);
+							useSessionStore.getState().setIsConnected(true);
+
+							if (initData.model) {
+								useNewChatStore.getState().setCurrentModel(initData.model);
+								useSessionStore.getState().setCurrentModel(initData.model);
+							}
+							if (initData.thinkingLevel) {
+								useSessionStore
+									.getState()
+									.setThinkingLevel(initData.thinkingLevel);
+							}
+
+							// 加载历史消息
+							if (initData.sessionFile) {
+								await loadSessionMessages(initData.sessionFile);
+							}
+						}
+					}
+				} catch (bgErr) {
+					console.error("[App] Background init error:", bgErr);
+				}
+			} catch (err) {
+				const errorMsg = err instanceof Error ? err.message : String(err);
+				setError(errorMsg);
+				setIsLoading(false);
+			}
+		}
+
+		initApp();
+	}, []);
+
+	// 加载会话消息
+	async function loadSessionMessages(sessionFile: string) {
+		try {
+			const response = await fetch("/api/session/load", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ sessionPath: sessionFile }),
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				if (data.entries?.length > 0) {
+					const loadedMessages = data.entries
+						.filter((entry: any) => entry.type === "message" && entry.message)
+						.map((entry: any) => ({
+							id: entry.id || `msg-${Date.now()}-${Math.random()}`,
+							role: entry.message.role || "assistant",
+							content: Array.isArray(entry.message.content)
+								? entry.message.content
+								: [{ type: "text", text: String(entry.message.content) }],
+							timestamp: new Date(
+								entry.message.timestamp || entry.timestamp || Date.now(),
+							),
+							isStreaming: false,
+							isThinkingCollapsed: true,
+							isMessageCollapsed: false,
+						}));
+					useChatStore.getState().setMessages(loadedMessages);
+				}
+			}
+		} catch (err) {
+			console.error("[App] Failed to load messages:", err);
+		}
+	}
+
+	// 错误状态
+	if (error) {
+		return (
+			<div
+				style={{
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "center",
+					justifyContent: "center",
+					height: "100vh",
+					padding: 20,
+					background: "#0f0f1a",
+					color: "#ff6b6b",
+				}}
+			>
+				<h2>❌ Error</h2>
+				<pre style={{ maxWidth: "80%", overflow: "auto" }}>{error}</pre>
+				<button
+					onClick={() => window.location.reload()}
+					style={{
+						marginTop: 20,
+						padding: "10px 20px",
+						background: "#1f6feb",
+						color: "white",
+						border: "none",
+						borderRadius: 6,
+						cursor: "pointer",
+					}}
+				>
+					Retry
+				</button>
+			</div>
+		);
+	}
+
+	// 加载状态
+	if (isLoading) {
+		return (
+			<div
+				style={{
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "center",
+					height: "100vh",
+					background: "#0d1117",
+					color: "white",
+				}}
+			>
+				<div>Loading...</div>
+			</div>
+		);
+	}
+
+	// 聊天视图 - 显示输入框
+	if (currentView === "chat") {
+		return (
+			<AppLayout
+				showInput={true}
+				bottomPanelContent={
+					<div style={{ color: "#8b949e", padding: 20 }}>
+						Terminal Panel (Placeholder)
+					</div>
+				}
+			>
+				<MessageList
+					messages={messages}
+					currentStreamingMessage={currentStreamingMessage}
+					showThinking={showThinking}
+					onToggleMessageCollapse={toggleMessageCollapse}
+					onToggleThinkingCollapse={toggleThinkingCollapse}
+					onDeleteMessage={deleteMessage}
+					onRegenerateMessage={regenerateMessage}
+				/>
+			</AppLayout>
+		);
+	}
+
+	// 文件浏览器视图 - 不显示输入框，使用终端面板显示执行结果
+	return (
+		<AppLayout
+			showInput={false}
+			bottomPanelContent={
+				<div style={{ color: "#8b949e", padding: 20 }}>
+					File Execution Terminal (Placeholder)
+				</div>
+			}
+		>
+			<FileBrowser externalSidebarVisible={false} onToggleSidebar={() => {}} />
+		</AppLayout>
+	);
+}
 
 function App() {
-  const [currentView, setCurrentView] = useState<'chat' | 'files'>('chat');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [crashInfo, setCrashInfo] = useState<string | null>(null);
-  const [initStep, setInitStep] = useState<string>('starting');
-  
-  const [isSidebarVisible, setIsSidebarVisible] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth >= 768;
-    }
-    return true;
-  });
-
-  // Global error capture
-  useEffect(() => {
-    const handleError = (e: ErrorEvent) => {
-      const info = `ERROR: ${e.message}\n at ${e.filename}:${e.lineno}`;
-      console.error(info);
-      setCrashInfo(info);
-    };
-    const handleRejection = (e: PromiseRejectionEvent) => {
-      const info = `REJECTION: ${String(e.reason)}`;
-      console.error(info);
-      setCrashInfo(info);
-    };
-    window.addEventListener('error', handleError);
-    window.addEventListener('unhandledrejection', handleRejection);
-    return () => {
-      window.removeEventListener('error', handleError);
-      window.removeEventListener('unhandledrejection', handleRejection);
-    };
-  }, []);
-  
-  // Initialization
-  useEffect(() => {
-    async function initApp() {
-      try {
-        setIsLoading(true);
-        setInitStep('settings');
-        
-        const settings = await sessionController.getUserSettings();
-        console.log('Settings loaded:', settings);
-        
-        setInitStep('workspace');
-        const workspace = await sessionController.getCurrentWorkspace();
-        console.log('Workspace loaded:', workspace);
-        
-        setInitStep('fileController');
-        fileController.setCurrentPath(workspace.path);
-        
-        setInitStep('websocket');
-        chatController.initWebSocketConnection().catch(err => {
-          console.warn('WebSocket failed:', err);
-        });
-        
-        setInitStep('done');
-        setIsLoading(false);
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        console.error('Init failed:', errorMsg);
-        setError(`Step [${initStep}]: ${errorMsg}`);
-        setIsLoading(false);
-      }
-    }
-    
-    initApp();
-    
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setIsSidebarVisible(true);
-      }
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Crash display
-  if (crashInfo) {
-    return (
-      <div style={{padding: '20px', background: '#0f0f1a', color: '#ff6b6b', minHeight: '100vh', fontFamily: 'monospace'}}>
-        <h2>💥 CRASH</h2>
-        <pre style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '14px'}}>{crashInfo}</pre>
-        <button onClick={() => window.location.reload()} style={{marginTop: '20px', padding: '10px 20px'}}>
-          Reload
-        </button>
-      </div>
-    );
-  }
-
-  // Error display
-  if (error) {
-    return (
-      <div style={{padding: '20px', background: '#0f0f1a', color: '#ff6b6b', minHeight: '100vh'}}>
-        <h2>❌ Error</h2>
-        <p>Step: {initStep}</p>
-        <pre style={{whiteSpace: 'pre-wrap'}}>{error}</pre>
-        <button onClick={() => window.location.reload()} style={{marginTop: '20px', padding: '10px 20px'}}>
-          Retry
-        </button>
-      </div>
-    );
-  }
-
-  // Loading display
-  if (isLoading) {
-    return (
-      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0f0f1a', color: 'white'}}>
-        <div style={{textAlign: 'center'}}>
-          <div style={{display: 'inline-block', width: '40px', height: '40px', border: '4px solid #30363d', borderTopColor: '#58a6ff', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '16px'}}></div>
-          <p>Loading... [{initStep}]</p>
-        </div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
-
-  // Main app
-  return (
-    <div className={styles.app}>
-      <header className={styles.appHeader}>
-        <div className={styles.headerLeft}>
-          <h1 className={styles.appTitle}>Pi Gateway</h1>
-          <div className={styles.viewSwitcher}>
-            <button onClick={() => setCurrentView('chat')} style={{padding: '6px 12px', background: currentView === 'chat' ? '#58a6ff' : 'transparent', border: 'none', color: 'white', borderRadius: '4px'}}>Chat</button>
-            <button onClick={() => setCurrentView('files')} style={{padding: '6px 12px', background: currentView === 'files' ? '#58a6ff' : 'transparent', border: 'none', color: 'white', borderRadius: '4px'}}>Files</button>
-          </div>
-        </div>
-        <div className={styles.headerCenter}>
-          <span style={{color: '#3fb950'}}>● Connected</span>
-        </div>
-        <div className={styles.headerRight}>
-          <button style={{background: 'transparent', border: 'none', color: 'white'}}>Settings</button>
-        </div>
-      </header>
-
-      <main className={styles.appMain}>
-        {currentView === 'chat' ? (
-          <div style={{display: 'flex', height: '100%'}}>
-            <div className={styles.chatSidebar} style={{display: isSidebarVisible ? 'block' : 'none'}}>
-              <SidebarPanel 
-                isVisible={isSidebarVisible}
-                onSwitchView={setCurrentView}
-                currentView={currentView}
-              />
-            </div>
-            <div style={{flex: 1, overflowY: 'auto'}}>
-              <ChatPanel />
-            </div>
-          </div>
-        ) : (
-          <div style={{height: '100%', overflowY: 'auto'}}>
-            <FileBrowser />
-          </div>
-        )}
-      </main>
-
-      <footer style={{borderTop: '1px solid #30363d', background: '#161b22'}}>
-        <BottomMenu
-          isSidebarVisible={isSidebarVisible}
-          currentView={currentView}
-          onToggleSidebar={() => setIsSidebarVisible(!isSidebarVisible)}
-          onSwitchView={setCurrentView}
-        />
-      </footer>
-    </div>
-  );
+	return (
+		<LayoutProvider>
+			<AppContent />
+		</LayoutProvider>
+	);
 }
 
 export default App;

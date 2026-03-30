@@ -19,7 +19,15 @@ describe("Gateway Comprehensive Tests", () => {
 	beforeAll(async () => {
 		console.log(`🚀 启动服务器在端口 ${SERVER_PORT}...`);
 		// Start server using tsx (TypeScript execution)
-		const serverPath = join(__dirname, "..", "src", "server.ts");
+		const serverPath = join(
+			__dirname,
+			"..",
+			"..",
+			"..",
+			"src",
+			"server",
+			"server.ts",
+		);
 		serverProcess = spawn("npx", ["tsx", serverPath], {
 			env: { ...process.env, PORT: String(SERVER_PORT) },
 			stdio: "pipe",
@@ -27,13 +35,19 @@ describe("Gateway Comprehensive Tests", () => {
 
 		// Wait for server to start
 		await new Promise<void>((resolve, reject) => {
-			const timeout = setTimeout(() => reject(new Error(`Server startup timeout after 30000ms`)), 30000);
+			const timeout = setTimeout(
+				() => reject(new Error(`Server startup timeout after 30000ms`)),
+				30000,
+			);
 			let output = "";
 			const handleData = (data: Buffer) => {
 				const text = data.toString();
 				output += text;
 				console.log(`[Server Output] ${text.trim()}`);
-				if (text.includes("Server started on") || text.includes("Pi Gateway Server")) {
+				if (
+					text.includes("Server started on") ||
+					text.includes("Pi Gateway Server")
+				) {
 					console.log(`✅ 服务器启动成功，检测到启动消息`);
 					clearTimeout(timeout);
 					serverProcess.stdout?.off("data", handleData);
@@ -154,29 +168,31 @@ describe("Gateway Comprehensive Tests", () => {
 			const wsUrl = SERVER_URL!.replace("http://", "ws://");
 			const testWs = new WebSocket(wsUrl);
 
-			const result = await new Promise<{ sessionId: string; pid: number }>((resolve, reject) => {
-				const timeout = setTimeout(() => {
-					reject(new Error("Timeout waiting for initialized message"));
-				}, WS_TIMEOUT);
+			const result = await new Promise<{ sessionId: string; pid: number }>(
+				(resolve, reject) => {
+					const timeout = setTimeout(() => {
+						reject(new Error("Timeout waiting for initialized message"));
+					}, WS_TIMEOUT);
 
-				testWs.on("message", (data) => {
-					const msg = JSON.parse(data.toString());
-					if (msg.type === "initialized") {
-						clearTimeout(timeout);
-						testWs.close();
-						resolve({ sessionId: msg.sessionId, pid: msg.pid });
-					}
-				});
+					testWs.on("message", (data) => {
+						const msg = JSON.parse(data.toString());
+						if (msg.type === "initialized") {
+							clearTimeout(timeout);
+							testWs.close();
+							resolve({ sessionId: msg.sessionId, pid: msg.pid });
+						}
+					});
 
-				testWs.on("open", () => {
-					testWs.send(
-						JSON.stringify({
-							type: "init",
-							workingDir: "/root",
-						}),
-					);
-				});
-			});
+					testWs.on("open", () => {
+						testWs.send(
+							JSON.stringify({
+								type: "init",
+								workingDir: "/root",
+							}),
+						);
+					});
+				},
+			);
 
 			expect(result.sessionId).toBeDefined();
 			expect(result.pid).toBeDefined();
@@ -266,7 +282,8 @@ describe("Gateway Comprehensive Tests", () => {
 	describe("3. LLM Integration Tests", () => {
 		it("should process a simple prompt and receive response", async () => {
 			// Check if API key is configured
-			const hasApiKey = process.env.ANTHROPIC_AUTH_TOKEN || process.env.OPENAI_API_KEY;
+			const hasApiKey =
+				process.env.ANTHROPIC_AUTH_TOKEN || process.env.OPENAI_API_KEY;
 			if (!hasApiKey) {
 				console.log("[Test] Skipping LLM test - no API key configured");
 				return;
@@ -322,12 +339,26 @@ describe("Gateway Comprehensive Tests", () => {
 						gotDone = true;
 						clearTimeout(timeout);
 						testWs.close();
-						resolve({ gotResponse, gotDone, gotError, gotAgentStart, textReceived, timedOut: false });
+						resolve({
+							gotResponse,
+							gotDone,
+							gotError,
+							gotAgentStart,
+							textReceived,
+							timedOut: false,
+						});
 					} else if (msg.type === "error") {
 						gotError = true;
 						clearTimeout(timeout);
 						testWs.close();
-						resolve({ gotResponse, gotDone, gotError, gotAgentStart, textReceived, timedOut: false });
+						resolve({
+							gotResponse,
+							gotDone,
+							gotError,
+							gotAgentStart,
+							textReceived,
+							timedOut: false,
+						});
 					}
 				});
 
@@ -344,13 +375,20 @@ describe("Gateway Comprehensive Tests", () => {
 			// If timed out without any response, the server might not have API access
 			// This is acceptable for testing the protocol, just log it
 			if (result.timedOut && !result.gotAgentStart && !result.gotResponse) {
-				console.log("[Test] Prompt processing timeout - API may not be accessible in test environment");
+				console.log(
+					"[Test] Prompt processing timeout - API may not be accessible in test environment",
+				);
 				// Still pass the test as we're testing protocol, not API connectivity
 				return;
 			}
 
 			// agent_start means the prompt was accepted and processing started
-			expect(result.gotAgentStart || result.gotResponse || result.gotDone || result.gotError).toBe(true);
+			expect(
+				result.gotAgentStart ||
+					result.gotResponse ||
+					result.gotDone ||
+					result.gotError,
+			).toBe(true);
 		}, 20000);
 
 		it("should log LLM API calls", async () => {
@@ -406,11 +444,17 @@ describe("Gateway Comprehensive Tests", () => {
 			expect(Array.isArray(logData.logContent)).toBe(true);
 
 			if (logData.logContent.length > 0) {
-				const hasRequest = logData.logContent.some((e: any) => e.type === "request");
-				const _hasResponse = logData.logContent.some((e: any) => e.type === "response");
+				const hasRequest = logData.logContent.some(
+					(e: any) => e.type === "request",
+				);
+				const _hasResponse = logData.logContent.some(
+					(e: any) => e.type === "response",
+				);
 
 				if (hasRequest) {
-					const requestEntry = logData.logContent.find((e: any) => e.type === "request");
+					const requestEntry = logData.logContent.find(
+						(e: any) => e.type === "request",
+					);
 					const requestContent = JSON.parse(requestEntry.content);
 					expect(requestContent.method).toBe("POST");
 					expect(requestContent.url).toContain("moonshot.cn");
@@ -465,7 +509,10 @@ describe("Gateway Comprehensive Tests", () => {
 			const wsUrl = SERVER_URL!.replace("http://", "ws://");
 			const testWs = new WebSocket(wsUrl);
 
-			const result = await new Promise<{ gotError: boolean; errorMessage: string }>((resolve, _reject) => {
+			const result = await new Promise<{
+				gotError: boolean;
+				errorMessage: string;
+			}>((resolve, _reject) => {
 				const timeout = setTimeout(() => {
 					resolve({ gotError: false, errorMessage: "" });
 				}, 5000);
@@ -476,7 +523,10 @@ describe("Gateway Comprehensive Tests", () => {
 					if (msg.type === "error") {
 						clearTimeout(timeout);
 						testWs.close();
-						resolve({ gotError: true, errorMessage: msg.error || msg.message || "" });
+						resolve({
+							gotError: true,
+							errorMessage: msg.error || msg.message || "",
+						});
 					}
 				});
 
@@ -497,31 +547,33 @@ describe("Gateway Comprehensive Tests", () => {
 			const wsUrl = SERVER_URL!.replace("http://", "ws://");
 			const testWs = new WebSocket(wsUrl);
 
-			const result = await new Promise<{ gotError: boolean }>((resolve, _reject) => {
-				const timeout = setTimeout(() => {
-					resolve({ gotError: false });
-				}, 5000);
+			const result = await new Promise<{ gotError: boolean }>(
+				(resolve, _reject) => {
+					const timeout = setTimeout(() => {
+						resolve({ gotError: false });
+					}, 5000);
 
-				testWs.on("message", (data) => {
-					const msg = JSON.parse(data.toString());
+					testWs.on("message", (data) => {
+						const msg = JSON.parse(data.toString());
 
-					if (msg.type === "error") {
-						clearTimeout(timeout);
-						testWs.close();
-						resolve({ gotError: true });
-					}
-				});
+						if (msg.type === "error") {
+							clearTimeout(timeout);
+							testWs.close();
+							resolve({ gotError: true });
+						}
+					});
 
-				testWs.on("open", () => {
-					// Try to send prompt without initialization
-					testWs.send(
-						JSON.stringify({
-							type: "prompt",
-							text: "Hello",
-						}),
-					);
-				});
-			});
+					testWs.on("open", () => {
+						// Try to send prompt without initialization
+						testWs.send(
+							JSON.stringify({
+								type: "prompt",
+								text: "Hello",
+							}),
+						);
+					});
+				},
+			);
 
 			expect(result.gotError).toBe(true);
 		});

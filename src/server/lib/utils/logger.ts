@@ -56,7 +56,12 @@ export class Logger {
 		return targetLevel <= currentLevel;
 	}
 
-	private createLogEntry(level: LogLevel, message: string, context?: Record<string, any>, error?: Error): LogEntry {
+	private createLogEntry(
+		level: LogLevel,
+		message: string,
+		context?: Record<string, any>,
+		error?: Error,
+	): LogEntry {
 		return {
 			timestamp: new Date().toISOString(),
 			level,
@@ -94,11 +99,17 @@ export class Logger {
 		if (this.options.format === "json") {
 			console.log(JSON.stringify(entry));
 		} else {
-			const timestamp = this.options.includeTimestamp ? `[${entry.timestamp}] ` : "";
+			const timestamp = this.options.includeTimestamp
+				? `[${entry.timestamp}] `
+				: "";
 			const levelStr = entry.level.toUpperCase().padEnd(5);
 			const sourceStr = entry.source ? ` [${entry.source}]` : "";
-			const contextStr = entry.context ? ` ${JSON.stringify(entry.context)}` : "";
-			const errorStr = entry.error ? `\nError: ${entry.error.message}\n${entry.error.stack}` : "";
+			const contextStr = entry.context
+				? ` ${JSON.stringify(entry.context)}`
+				: "";
+			const errorStr = entry.error
+				? `\nError: ${entry.error.message}\n${entry.error.stack}`
+				: "";
 
 			const message = `${timestamp}${levelStr}${sourceStr}: ${entry.message}${contextStr}${errorStr}`;
 
@@ -142,7 +153,11 @@ export class Logger {
 	}
 
 	// 快捷方法
-	static error(message: string, context?: Record<string, any>, error?: Error): void {
+	static error(
+		message: string,
+		context?: Record<string, any>,
+		error?: Error,
+	): void {
 		Logger.getInstance().error(message, context, error);
 	}
 

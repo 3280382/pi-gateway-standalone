@@ -130,7 +130,9 @@ export interface BaseEvent {
 }
 
 export type EventHandler<T extends BaseEvent = BaseEvent> = (event: T) => void;
-export type EventFilter<T extends BaseEvent = BaseEvent> = (event: T) => boolean;
+export type EventFilter<T extends BaseEvent = BaseEvent> = (
+	event: T,
+) => boolean;
 
 // ============================================================================
 // 实用类型

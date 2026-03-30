@@ -27,7 +27,9 @@ export function createVersionController(startTime: number) {
 				memoryUsage: process.memoryUsage(),
 			};
 
-			logger.debug(`获取版本信息，PID: ${process.pid}, 运行时间: ${versionInfo.uptime}ms`);
+			logger.debug(
+				`获取版本信息，PID: ${process.pid}, 运行时间: ${versionInfo.uptime}ms`,
+			);
 			res.json(versionInfo);
 		},
 

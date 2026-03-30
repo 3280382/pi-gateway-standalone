@@ -115,8 +115,20 @@ describe("SessionStore", () => {
 		});
 
 		it("should remove session from list", () => {
-			const s1: Session = { id: "s1", name: "S1", path: "/p1", messageCount: 1, lastModified: "" };
-			const s2: Session = { id: "s2", name: "S2", path: "/p2", messageCount: 2, lastModified: "" };
+			const s1: Session = {
+				id: "s1",
+				name: "S1",
+				path: "/p1",
+				messageCount: 1,
+				lastModified: "",
+			};
+			const s2: Session = {
+				id: "s2",
+				name: "S2",
+				path: "/p2",
+				messageCount: 2,
+				lastModified: "",
+			};
 			store.addSession(s1);
 			store.addSession(s2);
 

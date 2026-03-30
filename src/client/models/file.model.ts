@@ -17,7 +17,9 @@ export class FileModel extends BaseModel<FileItem> {
 			isDirectory: data.isDirectory,
 			size: data.size || 0,
 			modified: data.modified || new Date().toISOString(),
-			extension: data.extension || FileModel.extractExtension(data.name, data.isDirectory),
+			extension:
+				data.extension ||
+				FileModel.extractExtension(data.name, data.isDirectory),
 			permissions: data.permissions,
 		});
 	}
@@ -25,7 +27,10 @@ export class FileModel extends BaseModel<FileItem> {
 	/**
 	 * 提取文件扩展名
 	 */
-	private static extractExtension(name: string, isDirectory: boolean): string | undefined {
+	private static extractExtension(
+		name: string,
+		isDirectory: boolean,
+	): string | undefined {
 		if (isDirectory) return undefined;
 
 		const parts = name.split(".");
@@ -209,7 +214,10 @@ export class FileModel extends BaseModel<FileItem> {
 
 		if (diffDays === 0) {
 			// 今天
-			return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+			return date.toLocaleTimeString([], {
+				hour: "2-digit",
+				minute: "2-digit",
+			});
 		} else if (diffDays === 1) {
 			// 昨天
 			return "Yesterday";
@@ -221,7 +229,11 @@ export class FileModel extends BaseModel<FileItem> {
 			return date.toLocaleDateString([], { month: "short", day: "numeric" });
 		} else {
 			// 更早
-			return date.toLocaleDateString([], { year: "numeric", month: "short", day: "numeric" });
+			return date.toLocaleDateString([], {
+				year: "numeric",
+				month: "short",
+				day: "numeric",
+			});
 		}
 	}
 
@@ -275,7 +287,9 @@ export class FileModel extends BaseModel<FileItem> {
 			"toml",
 		];
 
-		return !this.data.extension || editableExtensions.includes(this.data.extension);
+		return (
+			!this.data.extension || editableExtensions.includes(this.data.extension)
+		);
 	}
 
 	/**
@@ -284,17 +298,41 @@ export class FileModel extends BaseModel<FileItem> {
 	isExecutable(): boolean {
 		if (this.data.isDirectory) return false;
 
-		const executableExtensions = ["sh", "bash", "py", "rb", "php", "js", "ts", "exe", "bat", "cmd"];
+		const executableExtensions = [
+			"sh",
+			"bash",
+			"py",
+			"rb",
+			"php",
+			"js",
+			"ts",
+			"exe",
+			"bat",
+			"cmd",
+		];
 
-		return this.data.extension ? executableExtensions.includes(this.data.extension) : false;
+		return this.data.extension
+			? executableExtensions.includes(this.data.extension)
+			: false;
 	}
 
 	/**
 	 * 是否是图片文件
 	 */
 	isImage(): boolean {
-		const imageExtensions = ["jpg", "jpeg", "png", "gif", "svg", "webp", "bmp", "ico"];
-		return this.data.extension ? imageExtensions.includes(this.data.extension) : false;
+		const imageExtensions = [
+			"jpg",
+			"jpeg",
+			"png",
+			"gif",
+			"svg",
+			"webp",
+			"bmp",
+			"ico",
+		];
+		return this.data.extension
+			? imageExtensions.includes(this.data.extension)
+			: false;
 	}
 
 	/**
@@ -330,15 +368,27 @@ export class FileModel extends BaseModel<FileItem> {
 			"bash",
 		];
 
-		return this.data.extension ? codeExtensions.includes(this.data.extension) : false;
+		return this.data.extension
+			? codeExtensions.includes(this.data.extension)
+			: false;
 	}
 
 	/**
 	 * 是否是配置文件
 	 */
 	isConfigFile(): boolean {
-		const configExtensions = ["env", "config", "ini", "toml", "json", "yml", "yaml"];
-		return this.data.extension ? configExtensions.includes(this.data.extension) : false;
+		const configExtensions = [
+			"env",
+			"config",
+			"ini",
+			"toml",
+			"json",
+			"yml",
+			"yaml",
+		];
+		return this.data.extension
+			? configExtensions.includes(this.data.extension)
+			: false;
 	}
 
 	/**
@@ -356,7 +406,9 @@ export class FileModel extends BaseModel<FileItem> {
 	getBaseName(): string {
 		if (!this.data.extension) return this.data.name;
 		const extIndex = this.data.name.lastIndexOf(".");
-		return extIndex > 0 ? this.data.name.substring(0, extIndex) : this.data.name;
+		return extIndex > 0
+			? this.data.name.substring(0, extIndex)
+			: this.data.name;
 	}
 
 	/**

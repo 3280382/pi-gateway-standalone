@@ -11,7 +11,15 @@ describe("Gateway API", () => {
 	beforeAll(async () => {
 		console.log(`🚀 启动服务器在端口 ${SERVER_PORT}...`);
 		// Start server using tsx (TypeScript execution)
-		const serverPath = join(__dirname, "..", "src", "server.ts");
+		const serverPath = join(
+			__dirname,
+			"..",
+			"..",
+			"..",
+			"src",
+			"server",
+			"server.ts",
+		);
 		serverProcess = spawn("npx", ["tsx", serverPath], {
 			env: { ...process.env, PORT: String(SERVER_PORT) },
 			stdio: "pipe",
@@ -19,13 +27,19 @@ describe("Gateway API", () => {
 
 		// Wait for server to start
 		await new Promise<void>((resolve, reject) => {
-			const timeout = setTimeout(() => reject(new Error(`Server startup timeout after 30000ms`)), 30000);
+			const timeout = setTimeout(
+				() => reject(new Error(`Server startup timeout after 30000ms`)),
+				30000,
+			);
 			let output = "";
 			const handleData = (data: Buffer) => {
 				const text = data.toString();
 				output += text;
 				console.log(`[Server Output] ${text.trim()}`);
-				if (text.includes("Server started on") || text.includes("Pi Gateway Server")) {
+				if (
+					text.includes("Server started on") ||
+					text.includes("Pi Gateway Server")
+				) {
 					console.log(`✅ 服务器启动成功，检测到启动消息`);
 					clearTimeout(timeout);
 					serverProcess.stdout?.off("data", handleData);
@@ -108,7 +122,9 @@ describe("Gateway API", () => {
 		});
 
 		it("should return session with required fields", async () => {
-			const response = await fetch(`${SERVER_URL}/api/sessions?cwd=/root/.pi/agent`);
+			const response = await fetch(
+				`${SERVER_URL}/api/sessions?cwd=/root/.pi/agent`,
+			);
 			const data = await response.json();
 
 			if (data.sessions.length > 0) {
@@ -185,7 +201,9 @@ describe("Gateway API", () => {
 	describe("POST /api/session/load", () => {
 		it("should load session file content", async () => {
 			// First get available sessions
-			const sessionsResponse = await fetch(`${SERVER_URL}/api/sessions?cwd=/root/.pi/agent`);
+			const sessionsResponse = await fetch(
+				`${SERVER_URL}/api/sessions?cwd=/root/.pi/agent`,
+			);
 			const sessionsData = await sessionsResponse.json();
 
 			if (!sessionsData.sessions || sessionsData.sessions.length === 0) {

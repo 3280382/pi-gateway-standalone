@@ -66,7 +66,10 @@ function finalizeStreamingMessage(
 
 function extractTextFromMessage(message: Message): string {
 	return message.content
-		.filter((c): c is MessageContent & { type: "text"; text: string } => c.type === "text" && !!c.text)
+		.filter(
+			(c): c is MessageContent & { type: "text"; text: string } =>
+				c.type === "text" && !!c.text,
+		)
 		.map((c) => c.text)
 		.join("\n");
 }

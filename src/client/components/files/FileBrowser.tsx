@@ -1,106 +1,222 @@
 /**
  * FileBrowser - 文件浏览器主组件
  */
-
-import { useEffect, useCallback } from 'react';
-import { useFileStore } from '../../store/fileStore';
-import { browseDirectory } from '../../api/fileApi';
-import { FileToolbar } from './FileToolbar';
-import { FileGrid } from './FileGrid';
-import { FileList } from './FileList';
-import { FileSidebar } from './FileSidebar';
-import { FileActionBar } from './FileActionBar';
-import styles from './FileBrowser.module.css';
+import React, { useCallback, useEffect } from "react";
+import { fileBrowserDebug, withLogging } from "@/lib/debug";
+import { browseDirectory } from "@/services/api/fileApi";
+import { useFileStore } from "@/stores/fileStore";
+import { useFileViewerStore } from "@/stores/fileViewerStore";
+import { FileActionBar } from "./FileActionBar";
+import styles from "./FileBrowser.module.css";
+import { FileBrowserErrorBoundary } from "./FileBrowserErrorBoundary";
+import { FileGrid } from "./FileGrid";
+import { FileList } from "./FileList";
+import { FileSidebar } from "./FileSidebar";
+import { FileToolbar } from "./FileToolbar";
+import { FileViewer } from "./FileViewer";
 
 interface FileBrowserProps {
-  externalSidebarVisible?: boolean;
-  onToggleSidebar?: () => void;
-  onExecuteOutput?: (output: string) => void;
+	externalSidebarVisible?: boolean;
+	onToggleSidebar?: () => void;
+	onExecuteOutput?: (output: string) => void;
+	onOpenBottomPanel?: (output: string) => void;
 }
+export function FileBrowser({
+	externalSidebarVisible,
+	onToggleSidebar,
+	onExecuteOutput,
+	onOpenBottomPanel,
+}: FileBrowserProps) {
+	const {
+		currentPath,
+		viewMode,
+		isLoading,
+		error,
+		sidebarVisible: storeSidebarVisible,
+		setItems,
+		setLoading,
+		setError,
+		setCurrentPath,
+		getFilteredAndSortedItems,
+	} = useFileStore();
+	// 使用外部状态或内部状态
+	const sidebarVisible =
+		externalSidebarVisible !== undefined
+			? externalSidebarVisible
+			: storeSidebarVisible;
+	const filteredItems = getFilteredAndSortedItems();
+	// 获取文件查看器状态用于key
+	const fileViewerStore = useFileViewerStore();
+	// 加载目录内容
+	const loadDirectory = useCallback(
+		async (path: string) => {
+			fileBrowserDebug.info("开始加载目录", { path });
+			setLoading(true);
+			setError(null);
+			try {
+				fileBrowserDebug.debug("调用browseDirectory API", { path });
+				const data = await browseDirectory(path);
+				fileBrowserDebug.info("目录加载成功", {
+					currentPath: data.currentPath,
+					itemCount: data.items.length,
+					hasParent: data.parentPath !== data.currentPath,
+				});
 
-export function FileBrowser({ externalSidebarVisible, onToggleSidebar, onExecuteOutput }: FileBrowserProps) {
-  const {
-    currentPath,
-    viewMode,
-    isLoading,
-    error,
-    sidebarVisible: storeSidebarVisible,
-    setItems,
-    setLoading,
-    setError,
-    setCurrentPath,
-    getFilteredAndSortedItems
-  } = useFileStore();
+				const itemsToSet = [
+					// 上级目录
+					...(data.parentPath !== data.currentPath
+						? [
+								{
+									name: "..",
+									path: data.parentPath,
+									isDirectory: true,
+									modified: "",
+								},
+							]
+						: []),
+					...data.items,
+				];
 
-  // 使用外部状态或内部状态
-  const sidebarVisible = externalSidebarVisible !== undefined ? externalSidebarVisible : storeSidebarVisible;
+				fileBrowserDebug.debug("设置文件项", { itemCount: itemsToSet.length });
+				setItems(itemsToSet);
+				setCurrentPath(data.currentPath);
 
-  const filteredItems = getFilteredAndSortedItems();
+				fileBrowserDebug.info("目录加载完成", {
+					currentPath: data.currentPath,
+					totalItems: itemsToSet.length,
+				});
+			} catch (err) {
+				const errorMessage =
+					err instanceof Error ? err.message : "Failed to load directory";
+				fileBrowserDebug.error("目录加载失败", {
+					path,
+					error: errorMessage,
+					errorObject: err,
+				});
 
-  // 加载目录内容
-  const loadDirectory = useCallback(async (path: string) => {
-    setLoading(true);
-    setError(null);
+				setError(errorMessage);
 
-    try {
-      const data = await browseDirectory(path);
-      setItems([
-        // 上级目录
-        ...(data.parentPath !== data.currentPath ? [{
-          name: '..',
-          path: data.parentPath,
-          isDirectory: true,
-          modified: ''
-        }] : []),
-        ...data.items
-      ]);
-      setCurrentPath(data.currentPath);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load directory');
-    } finally {
-      setLoading(false);
-    }
-  }, [setItems, setLoading, setError, setCurrentPath]);
+				// 提供更友好的错误消息
+				if (
+					errorMessage.includes("permission") ||
+					errorMessage.includes("Permission")
+				) {
+					const friendlyError = `Permission denied: Cannot access "${path}". You may need to check file permissions.`;
+					fileBrowserDebug.warn("权限错误", {
+						path,
+						originalError: errorMessage,
+						friendlyError,
+					});
+					setError(friendlyError);
+				}
+				// 如果是路径不存在错误
+				else if (
+					errorMessage.includes("ENOENT") ||
+					errorMessage.includes("not exist")
+				) {
+					const friendlyError = `Directory not found: "${path}" does not exist or cannot be accessed.`;
+					fileBrowserDebug.warn("路径不存在错误", {
+						path,
+						originalError: errorMessage,
+						friendlyError,
+					});
+					setError(friendlyError);
+				}
+				// 如果是网络错误
+				else if (
+					errorMessage.includes("network") ||
+					errorMessage.includes("Network")
+				) {
+					const friendlyError = `Network error: Cannot connect to server. Please check your connection.`;
+					fileBrowserDebug.warn("网络错误", {
+						path,
+						originalError: errorMessage,
+						friendlyError,
+					});
+					setError(friendlyError);
+				} else {
+					fileBrowserDebug.warn("其他错误", { path, error: errorMessage });
+				}
+			} finally {
+				fileBrowserDebug.debug("设置加载状态为false");
+				setLoading(false);
+			}
+		},
+		[setItems, setLoading, setError, setCurrentPath],
+	);
+	// 初始加载
+	useEffect(() => {
+		fileBrowserDebug.info("FileBrowser组件挂载/更新", {
+			currentPath,
+			isLoading,
+			error,
+			filteredItemsCount: filteredItems.length,
+		});
 
-  // 初始加载
-  useEffect(() => {
-    loadDirectory(currentPath);
-  }, [currentPath, loadDirectory]);
+		loadDirectory(currentPath);
+	}, [currentPath, loadDirectory]);
+	// 监听状态变化
+	useEffect(() => {
+		if (error) {
+			fileBrowserDebug.warn("文件浏览器错误状态", { error });
+		}
+	}, [error]);
+	useEffect(() => {
+		if (isLoading) {
+			fileBrowserDebug.debug("文件浏览器加载中", { currentPath });
+		}
+	}, [isLoading]);
+	return (
+		<section className={styles.fileBrowserSection}>
+			<div className={styles.container}>
+				{/* 侧边栏文件树 */}
+				<FileBrowserErrorBoundary componentName="File Sidebar">
+					<FileSidebar visible={sidebarVisible} />
+				</FileBrowserErrorBoundary>
+				{/* 主内容区 */}
+				<div className={styles.main}>
+					{/* 工具栏 */}
+					<FileBrowserErrorBoundary componentName="File Toolbar">
+						<FileToolbar
+							currentPath={currentPath}
+							onRefresh={() => loadDirectory(currentPath)}
+							onToggleSidebar={onToggleSidebar}
+							onExecuteOutput={onExecuteOutput}
+							onOpenBottomPanel={onOpenBottomPanel}
+						/>
+					</FileBrowserErrorBoundary>
+					{/* 选中文件操作栏 */}
+					<FileBrowserErrorBoundary componentName="File Action Bar">
+						<FileActionBar
+							onExecute={onExecuteOutput}
+							onOpenBottomPanel={onOpenBottomPanel}
+						/>
+					</FileBrowserErrorBoundary>
+					{/* 文件列表区域 */}
+					<div className={styles.contentArea}>
+						{isLoading ? (
+							<div className={styles.loading}>Loading...</div>
+						) : error ? (
+							<div className={styles.error}>{error}</div>
+						) : filteredItems.length === 0 ? (
+							<div className={styles.empty}>No files found</div>
+						) : viewMode === "grid" ? (
+							<FileBrowserErrorBoundary componentName="File Grid">
+								<FileGrid items={filteredItems} />
+							</FileBrowserErrorBoundary>
+						) : (
+							<FileBrowserErrorBoundary componentName="File List">
+								<FileList items={filteredItems} />
+							</FileBrowserErrorBoundary>
+						)}
+					</div>
+				</div>
+			</div>
 
-  return (
-    <section className={styles.fileBrowserSection}>
-      <div className={styles.container}>
-        {/* 侧边栏文件树 */}
-        <FileSidebar visible={sidebarVisible} />
-
-        {/* 主内容区 */}
-        <div className={styles.main}>
-          {/* 工具栏 */}
-          <FileToolbar
-            currentPath={currentPath}
-            itemCount={filteredItems.length}
-            onRefresh={() => loadDirectory(currentPath)}
-            onToggleSidebar={onToggleSidebar}
-            onExecuteOutput={onExecuteOutput}
-          />
-
-          {/* 选中文件操作栏 */}
-          <FileActionBar onExecute={onExecuteOutput} />
-
-          {/* 文件列表 */}
-          {isLoading ? (
-            <div className={styles.loading}>Loading...</div>
-          ) : error ? (
-            <div className={styles.error}>{error}</div>
-          ) : filteredItems.length === 0 ? (
-            <div className={styles.empty}>No files found</div>
-          ) : viewMode === 'grid' ? (
-            <FileGrid items={filteredItems} />
-          ) : (
-            <FileList items={filteredItems} />
-          )}
-        </div>
-      </div>
-    </section>
-  );
+			{/* 文件查看器模态框 */}
+			<FileBrowserErrorBoundary componentName="File Viewer">
+				<FileViewer />
+			</FileBrowserErrorBoundary>
+		</section>
+	);
 }

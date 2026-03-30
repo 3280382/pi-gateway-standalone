@@ -10,7 +10,13 @@ import { devtools, persist } from "zustand/middleware";
 // Types
 // ============================================================================
 
-export type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
+export type ThinkingLevel =
+	| "off"
+	| "minimal"
+	| "low"
+	| "medium"
+	| "high"
+	| "xhigh";
 
 export interface Model {
 	id: string;
@@ -87,7 +93,9 @@ interface SidebarExtrasActions {
 	setThinkingLevel: (level: ThinkingLevel) => void;
 
 	// Status Bar Actions
-	setConnectionStatus: (status: "connected" | "disconnected" | "connecting") => void;
+	setConnectionStatus: (
+		status: "connected" | "disconnected" | "connecting",
+	) => void;
 	setPid: (pid: number | null) => void;
 
 	// Reset
@@ -98,7 +106,10 @@ interface SidebarExtrasActions {
 // Initial State Factory
 // ============================================================================
 
-const createInitialState = (): Omit<SidebarExtrasState, keyof SidebarExtrasActions> => ({
+const createInitialState = (): Omit<
+	SidebarExtrasState,
+	keyof SidebarExtrasActions
+> => ({
 	// System Prompt Modal
 	isSystemPromptOpen: false,
 	activeSystemPromptTab: "agents",
@@ -134,7 +145,9 @@ const createInitialState = (): Omit<SidebarExtrasState, keyof SidebarExtrasActio
 // Store Creation
 // ============================================================================
 
-export const useSidebarExtrasStore = create<SidebarExtrasState & SidebarExtrasActions>()(
+export const useSidebarExtrasStore = create<
+	SidebarExtrasState & SidebarExtrasActions
+>()(
 	devtools(
 		persist(
 			(set, _get) => ({
@@ -148,7 +161,11 @@ export const useSidebarExtrasStore = create<SidebarExtrasState & SidebarExtrasAc
 					set({ isSystemPromptOpen: false }, false, "closeSystemPrompt");
 				},
 				setActiveSystemPromptTab: (tabId: string) => {
-					set({ activeSystemPromptTab: tabId }, false, "setActiveSystemPromptTab");
+					set(
+						{ activeSystemPromptTab: tabId },
+						false,
+						"setActiveSystemPromptTab",
+					);
 				},
 				setSystemPrompts: (prompts: SystemPromptTab[]) => {
 					set({ systemPrompts: prompts }, false, "setSystemPrompts");
@@ -156,7 +173,9 @@ export const useSidebarExtrasStore = create<SidebarExtrasState & SidebarExtrasAc
 				updateSystemPromptContent: (tabId: string, content: string) => {
 					set(
 						(state) => ({
-							systemPrompts: state.systemPrompts.map((p) => (p.id === tabId ? { ...p, content } : p)),
+							systemPrompts: state.systemPrompts.map((p) =>
+								p.id === tabId ? { ...p, content } : p,
+							),
 						}),
 						false,
 						"updateSystemPromptContent",
@@ -173,7 +192,10 @@ export const useSidebarExtrasStore = create<SidebarExtrasState & SidebarExtrasAc
 				addLlmLog: (entry: LlmLogEntry) => {
 					set(
 						(state) => {
-							const newLogs = [entry, ...state.llmLogs].slice(0, state.llmLogConfig.truncateLength);
+							const newLogs = [entry, ...state.llmLogs].slice(
+								0,
+								state.llmLogConfig.truncateLength,
+							);
 							return { llmLogs: newLogs };
 						},
 						false,
@@ -213,7 +235,9 @@ export const useSidebarExtrasStore = create<SidebarExtrasState & SidebarExtrasAc
 				},
 
 				// Status Bar Actions
-				setConnectionStatus: (status: "connected" | "disconnected" | "connecting") => {
+				setConnectionStatus: (
+					status: "connected" | "disconnected" | "connecting",
+				) => {
 					set({ connectionStatus: status }, false, "setConnectionStatus");
 				},
 				setPid: (pid: number | null) => {
@@ -242,15 +266,25 @@ export const useSidebarExtrasStore = create<SidebarExtrasState & SidebarExtrasAc
 // Selectors
 // ============================================================================
 
-export const selectIsSystemPromptOpen = (state: SidebarExtrasState) => state.isSystemPromptOpen;
-export const selectActiveSystemPromptTab = (state: SidebarExtrasState) => state.activeSystemPromptTab;
-export const selectSystemPrompts = (state: SidebarExtrasState) => state.systemPrompts;
-export const selectIsLlmLogOpen = (state: SidebarExtrasState) => state.isLlmLogOpen;
+export const selectIsSystemPromptOpen = (state: SidebarExtrasState) =>
+	state.isSystemPromptOpen;
+export const selectActiveSystemPromptTab = (state: SidebarExtrasState) =>
+	state.activeSystemPromptTab;
+export const selectSystemPrompts = (state: SidebarExtrasState) =>
+	state.systemPrompts;
+export const selectIsLlmLogOpen = (state: SidebarExtrasState) =>
+	state.isLlmLogOpen;
 export const selectLlmLogs = (state: SidebarExtrasState) => state.llmLogs;
-export const selectLlmLogConfig = (state: SidebarExtrasState) => state.llmLogConfig;
-export const selectIsModelSelectorOpen = (state: SidebarExtrasState) => state.isModelSelectorOpen;
-export const selectAvailableModels = (state: SidebarExtrasState) => state.availableModels;
-export const selectSelectedModel = (state: SidebarExtrasState) => state.selectedModel;
-export const selectThinkingLevel = (state: SidebarExtrasState) => state.thinkingLevel;
-export const selectConnectionStatus = (state: SidebarExtrasState) => state.connectionStatus;
+export const selectLlmLogConfig = (state: SidebarExtrasState) =>
+	state.llmLogConfig;
+export const selectIsModelSelectorOpen = (state: SidebarExtrasState) =>
+	state.isModelSelectorOpen;
+export const selectAvailableModels = (state: SidebarExtrasState) =>
+	state.availableModels;
+export const selectSelectedModel = (state: SidebarExtrasState) =>
+	state.selectedModel;
+export const selectThinkingLevel = (state: SidebarExtrasState) =>
+	state.thinkingLevel;
+export const selectConnectionStatus = (state: SidebarExtrasState) =>
+	state.connectionStatus;
 export const selectPid = (state: SidebarExtrasState) => state.pid;

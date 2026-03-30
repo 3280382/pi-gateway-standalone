@@ -1,60 +1,61 @@
 .modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.85);
-  z-index: 2000;
-  padding: 20px;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.9);
+	z-index: 2000;
+	padding: 4px;
 }
 
 .content {
-  display: flex;
-  flex-direction: column;
-  width: 90vw;
-  height: 85vh;
-  max-width: 1200px;
-  max-height: 800px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
+	display: flex;
+	flex-direction: column;
+	width: 99vw;
+	height: 98vh;
+	max-width: 100%;
+	max-height: 100%;
+	background: var(--bg-secondary);
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	overflow: hidden;
+	box-shadow: var(--shadow-lg);
 }
 
 .header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--bg-tertiary);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 6px 10px;
+	border-bottom: 1px solid var(--border-color);
+	background: var(--bg-tertiary);
+	min-height: 32px;
 }
 
 .title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  font-weight: 500;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 12px;
+	font-weight: 500;
 }
 
 .type {
-  padding: 2px 8px;
-  background: var(--accent-bg);
-  color: var(--accent-fg);
-  font-size: 11px;
-  border-radius: 4px;
-  text-transform: uppercase;
+	padding: 1px 6px;
+	background: var(--accent-bg);
+	color: var(--accent-fg);
+	font-size: 9px;
+	border-radius: 3px;
+	text-transform: uppercase;
 }
 
 .actions {
-  display: flex;
-  gap: 8px;
+	display: flex;
+	gap: 4px;
 }
 
 .btnPrimary,
@@ -63,131 +64,170 @@
 .btnEdit,
 .btnExecute,
 .btnClose {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: opacity 0.15s;
+	padding: 3px 8px;
+	border: none;
+	border-radius: 3px;
+	font-size: 11px;
+	cursor: pointer;
+	transition: opacity 0.15s;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	height: 22px;
 }
 
 .btnPrimary {
-  background: var(--accent-primary);
-  color: white;
+	background: var(--accent-primary);
+	color: white;
 }
 
 .btnSecondary {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+	background: var(--bg-tertiary);
+	color: var(--text-primary);
+	border: 1px solid var(--border-subtle);
 }
 
 .btnDanger {
-  background: var(--accent-danger);
-  color: white;
+	background: var(--accent-danger);
+	color: white;
 }
 
 .btnEdit {
-  background: var(--accent-secondary);
-  color: white;
+	background: var(--accent-secondary);
+	color: white;
 }
 
 .btnExecute {
-  background: var(--accent-warning);
-  color: white;
+	background: var(--accent-warning);
+	color: white;
 }
 
 .btnClose {
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 18px;
+	background: transparent;
+	color: var(--text-muted);
+	font-size: 14px;
+	padding: 0 4px;
+	width: 22px;
+	justify-content: center;
 }
 
 .body {
-  flex: 1;
-  overflow: auto;
-  padding: 16px;
+	flex: 1;
+	overflow: hidden;
+	padding: 0;
+	position: relative;
 }
 
 .loading,
 .error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--text-muted);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	color: var(--text-muted);
 }
 
 .error {
-  color: var(--accent-danger);
+	color: var(--accent-danger);
 }
 
 .editor {
-  width: 100%;
-  height: 100%;
-  padding: 12px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  color: var(--text-primary);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  line-height: 1.6;
-  resize: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	height: 100%;
+	padding: 6px;
+	background: var(--bg-primary);
+	border: none;
+	color: var(--text-primary);
+	font-family: var(--font-mono, "JetBrains Mono", monospace);
+	font-size: 12px;
+	line-height: 1.5;
+	resize: none;
+	overflow: auto;
 }
 
 .terminal {
-  height: 100%;
-  padding: 12px;
-  background: #0d1117;
-  border-radius: 4px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #e6edf3;
-  overflow: auto;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 6px;
+	background: #0d1117;
+	font-family: var(--font-mono, "JetBrains Mono", monospace);
+	font-size: 12px;
+	line-height: 1.5;
+	color: #e6edf3;
+	overflow: auto;
 }
 
 .terminal pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
+	margin: 0;
+	white-space: pre-wrap;
+	word-break: break-word;
+	font-size: 12px;
+	line-height: 1.5;
 }
 
 .cursor {
-  animation: blink 1s step-end infinite;
+	animation: blink 1s step-end infinite;
 }
 
 @keyframes blink {
-  50% { opacity: 0; }
+	50% {
+		opacity: 0;
+	}
 }
 
 .image {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	background: var(--bg-primary);
 }
 
 .iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	border: none;
+	background: white;
 }
 
 .code {
-  margin: 0;
-  padding: 16px;
-  background: var(--bg-primary);
-  border-radius: 4px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  line-height: 1.6;
-  overflow: auto;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: 0;
+	padding: 6px;
+	background: var(--bg-primary);
+	font-family: var(--font-mono, "JetBrains Mono", monospace);
+	font-size: 12px;
+	line-height: 1.5;
+	overflow: auto;
+}
+
+.code code {
+	font-size: 12px;
+	line-height: 1.5;
 }
 
 .footer {
-  display: flex;
-  gap: 8px;
-  padding: 12px 16px;
-  border-top: 1px solid var(--border-color);
-  background: var(--bg-tertiary);
+	display: flex;
+	gap: 6px;
+	padding: 6px 10px;
+	border-top: 1px solid var(--border-color);
+	background: var(--bg-tertiary);
+	min-height: 32px;
 }

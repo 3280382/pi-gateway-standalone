@@ -2,7 +2,11 @@
  * WebSocket Service - 处理实时通信
  */
 
-import type { ChatWebSocketMessage, Message, ToolExecution } from "@/types/chat";
+import type {
+	ChatWebSocketMessage,
+	Message,
+	ToolExecution,
+} from "@/types/chat";
 import { BaseService, ServiceError } from "./base.service";
 
 export type WebSocketEvent =
@@ -19,7 +23,14 @@ export type WebSocketEvent =
 	| "agent_start"
 	| "agent_end"
 	| "session_updated"
-	| "system_notification";
+	| "system_notification"
+	| "initialized"
+	| "dir_changed"
+	| "session_created"
+	| "session_loaded"
+	| "sessions_list"
+	| "model_set"
+	| "thinking_set";
 
 export interface WebSocketMessage<T = any> {
 	type: string;
@@ -42,7 +53,6 @@ export class WebSocketService extends BaseService {
 	private reconnectAttempts = 0;
 	private maxReconnectAttempts = 10;
 	private reconnectDelay = 1000;
-	private heartbeatInterval: NodeJS.Timeout | null = null;
 	private connectionStatus: ConnectionStatus = {
 		isConnected: false,
 		reconnectAttempts: 0,
@@ -79,21 +89,24 @@ export class WebSocketService extends BaseService {
 						url: wsUrl,
 					};
 					this.reconnectAttempts = 0;
-					this.startHeartbeat();
+
 					this.emit("connected", this.connectionStatus);
 					resolve();
 				};
 
 				this.ws.onclose = (event) => {
-					console.log(`[WebSocket] Disconnected: ${event.code} ${event.reason}`);
+					console.log(
+						`[WebSocket] Disconnected: ${event.code} ${event.reason}`,
+					);
 					this.connectionStatus.isConnected = false;
-					this.stopHeartbeat();
+
 					this.emit("disconnected", { code: event.code, reason: event.reason });
 
 					// 自动重连
 					if (this.reconnectAttempts < this.maxReconnectAttempts) {
 						this.reconnectAttempts++;
-						const delay = this.reconnectDelay * Math.min(this.reconnectAttempts, 5);
+						const delay =
+							this.reconnectDelay * Math.min(this.reconnectAttempts, 5);
 						console.log(
 							`[WebSocket] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`,
 						);
@@ -107,7 +120,13 @@ export class WebSocketService extends BaseService {
 				this.ws.onerror = (error) => {
 					console.error("[WebSocket] Error:", error);
 					this.emit("error", error);
-					reject(new ServiceError("WEBSOCKET_CONNECT_FAILED", "Failed to connect to WebSocket", error));
+					reject(
+						new ServiceError(
+							"WEBSOCKET_CONNECT_FAILED",
+							"Failed to connect to WebSocket",
+							error,
+						),
+					);
 				};
 
 				this.ws.onmessage = (event) => {
@@ -115,11 +134,21 @@ export class WebSocketService extends BaseService {
 						const message = JSON.parse(event.data);
 						this.handleIncomingMessage(message);
 					} catch (error) {
-						console.error("[WebSocket] Failed to parse message:", error, event.data);
+						console.error(
+							"[WebSocket] Failed to parse message:",
+							error,
+							event.data,
+						);
 					}
 				};
 			} catch (error) {
-				reject(new ServiceError("WEBSOCKET_INIT_FAILED", "Failed to initialize WebSocket", error));
+				reject(
+					new ServiceError(
+						"WEBSOCKET_INIT_FAILED",
+						"Failed to initialize WebSocket",
+						error,
+					),
+				);
 			}
 		});
 	}
@@ -130,7 +159,7 @@ export class WebSocketService extends BaseService {
 	disconnect(code?: number, reason?: string): void {
 		if (this.ws) {
 			console.log("[WebSocket] Disconnecting...");
-			this.stopHeartbeat();
+
 			this.ws.close(code || 1000, reason || "Normal closure");
 			this.ws = null;
 			this.connectionStatus.isConnected = false;
@@ -139,6 +168,7 @@ export class WebSocketService extends BaseService {
 
 	/**
 	 * 发送消息
+	 * 注意：后端期望直接的消息对象，而不是嵌套在data字段中
 	 */
 	send<T = any>(type: string, data?: T): boolean {
 		if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
@@ -147,14 +177,14 @@ export class WebSocketService extends BaseService {
 		}
 
 		try {
-			const message: WebSocketMessage<T> = {
+			// 后端期望的消息格式：直接包含字段的对象
+			const message = {
 				type,
-				data: data as T,
-				timestamp: new Date().toISOString(),
+				...(data || {}),
 			};
 
 			this.ws.send(JSON.stringify(message));
-			console.log(`[WebSocket] Sent: ${type}`);
+			console.log(`[WebSocket] Sent: ${type}`, message);
 			return true;
 		} catch (error) {
 			console.error("[WebSocket] Failed to send message:", error);
@@ -163,55 +193,85 @@ export class WebSocketService extends BaseService {
 	}
 
 	/**
-	 * 发送聊天消息
+	 * 发送聊天消息（对应后端的prompt类型）
 	 */
 	sendMessage(text: string, sessionId?: string, model?: string): boolean {
-		return this.send("message", {
+		return this.send("prompt", {
 			text,
 			sessionId,
 			model,
-			timestamp: new Date().toISOString(),
 		});
 	}
 
 	/**
-	 * 中止生成
+	 * 中止生成（对应后端的abort类型）
 	 */
 	abortGeneration(): boolean {
-		return this.send("abort_generation");
+		return this.send("abort");
 	}
 
 	/**
-	 * 切换会话
+	 * 切换会话（对应后端的load_session类型）
 	 */
 	switchSession(sessionId: string, workspace?: string): boolean {
-		return this.send("switch_session", {
-			sessionId,
-			workspace,
-			timestamp: new Date().toISOString(),
+		return this.send("load_session", {
+			sessionPath: sessionId, // 注意：后端期望sessionPath字段
 		});
 	}
 
 	/**
-	 * 切换工作目录
+	 * 初始化工作目录（对应后端的init类型）
+	 * 返回Promise等待initialized响应
+	 */
+	initWorkingDirectory(path: string, sessionId?: string): Promise<any> {
+		return new Promise((resolve, reject) => {
+			// 设置一次性监听器等待initialized响应
+			const unsubscribe = this.on("initialized", (data) => {
+				unsubscribe();
+				resolve(data);
+			});
+
+			// 5秒超时
+			setTimeout(() => {
+				unsubscribe();
+				reject(new Error("Timeout waiting for initialization"));
+			}, 5000);
+
+			// 发送init消息
+			const sent = this.send("init", {
+				workingDir: path,
+				sessionId,
+			});
+
+			if (!sent) {
+				unsubscribe();
+				reject(new Error("Failed to send init message"));
+			}
+		});
+	}
+
+	/**
+	 * 切换工作目录 - 已弃用，使用initWorkingDirectory
 	 */
 	switchWorkingDirectory(path: string): boolean {
-		return this.send("switch_working_directory", {
-			path,
-			timestamp: new Date().toISOString(),
-		});
+		console.warn("switchWorkingDirectory已弃用，请使用initWorkingDirectory");
+		return this.initWorkingDirectory(path);
 	}
 
 	/**
-	 * 更新工具状态
+	 * 更新工具状态（对应后端的tool_request类型）
 	 */
-	updateToolStatus(toolId: string, status: "executing" | "success" | "error", output?: any, error?: string): boolean {
-		return this.send("tool_status", {
-			toolId,
-			status,
-			output,
-			error,
-			timestamp: new Date().toISOString(),
+	updateToolStatus(
+		toolId: string,
+		status: "executing" | "success" | "error",
+		output?: any,
+		error?: string,
+	): boolean {
+		// 注意：后端可能需要不同的消息格式
+		return this.send("tool_request", {
+			toolCallId: toolId,
+			toolName: "unknown", // 需要实际工具名
+			args: { status, output, error },
 		});
 	}
 
@@ -249,36 +309,6 @@ export class WebSocketService extends BaseService {
 	 */
 	getConnectionStatus(): ConnectionStatus {
 		return { ...this.connectionStatus };
-	}
-
-	/**
-	 * 测试连接延迟
-	 */
-	async testLatency(): Promise<number> {
-		if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-			throw new ServiceError("WEBSOCKET_NOT_CONNECTED", "WebSocket is not connected");
-		}
-
-		return new Promise((resolve) => {
-			const startTime = Date.now();
-			const pingId = `ping-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-			const handler = () => {
-				const latency = Date.now() - startTime;
-				resolve(latency);
-				this.off("pong", handler);
-			};
-
-			this.on("pong", handler);
-
-			this.send("ping", { id: pingId, timestamp: startTime });
-
-			// 超时处理
-			setTimeout(() => {
-				this.off("pong", handler);
-				resolve(-1);
-			}, 5000);
-		});
 	}
 
 	/**
@@ -333,9 +363,28 @@ export class WebSocketService extends BaseService {
 			case "system_notification":
 				this.emit("system_notification", data);
 				break;
-			case "pong":
-				this.emit("pong", data);
+			case "initialized":
+				this.emit("initialized", message);
 				break;
+			case "dir_changed":
+				this.emit("dir_changed", message);
+				break;
+			case "session_loaded":
+				this.emit("session_loaded", message);
+				break;
+			case "sessions_list":
+				this.emit("sessions_list", message);
+				break;
+			case "model_set":
+				this.emit("model_set", message);
+				break;
+			case "thinking_set":
+				this.emit("thinking_set", message);
+				break;
+			// "pong"事件已移除，因为后端不支持
+			// case "pong":
+			// 	this.emit("pong", data);
+			// 	break;
 			default:
 				console.warn(`[WebSocket] Unknown message type: ${type}`);
 		}
@@ -384,31 +433,6 @@ export class WebSocketService extends BaseService {
 				this.eventHandlers.set(event, new Set());
 			}
 		});
-	}
-
-	/**
-	 * 开始心跳检测
-	 */
-	private startHeartbeat(): void {
-		if (this.heartbeatInterval) {
-			clearInterval(this.heartbeatInterval);
-		}
-
-		this.heartbeatInterval = setInterval(() => {
-			if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-				this.send("heartbeat", { timestamp: Date.now() });
-			}
-		}, 30000); // 每30秒发送一次心跳
-	}
-
-	/**
-	 * 停止心跳检测
-	 */
-	private stopHeartbeat(): void {
-		if (this.heartbeatInterval) {
-			clearInterval(this.heartbeatInterval);
-			this.heartbeatInterval = null;
-		}
 	}
 
 	/**

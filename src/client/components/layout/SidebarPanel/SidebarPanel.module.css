@@ -1,105 +1,84 @@
-/**
- * SidebarPanel Styles - Ultra compact, minimal
- */
+/* ============================================
+   SidebarPanel - Overlay sidebar
+   ============================================ */
 
 .sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 44px;
-  width: 220px;
-  background: var(--bg-secondary);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  z-index: 100;
-  transform: translateX(0);
-  transition: transform 0.25s ease;
+	width: 100%;
+	height: 100%;
+	background: #161b22;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 }
 
-.sidebarHidden {
-  transform: translateX(-100%);
-}
-
-/* Header - minimal */
+/* Header */
 .header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 16px;
+	border-bottom: 1px solid #30363d;
+	flex-shrink: 0;
 }
 
 .logo {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-  color: white;
-  font-size: var(--font-md);
-  font-weight: 700;
-  border-radius: var(--radius-md);
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(135deg, #58a6ff, #a371f7);
+	color: white;
+	font-size: 14px;
+	font-weight: 700;
+	border-radius: 6px;
 }
 
 .title {
-  font-size: var(--font-base);
-  font-weight: 600;
-  color: var(--text-primary);
+	font-size: 14px;
+	font-weight: 600;
+	color: #e6edf3;
 }
 
 /* Content area */
 .content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 4px 0;
+	flex: 1;
+	overflow-y: auto;
+	padding: 8px 0;
 }
 
 .content::-webkit-scrollbar {
-  width: 3px;
-}
-
-.content::-webkit-scrollbar-track {
-  background: transparent;
+	width: 4px;
 }
 
 .content::-webkit-scrollbar-thumb {
-  background: var(--border-subtle);
-  border-radius: 2px;
+	background: #30363d;
+	border-radius: 2px;
 }
 
-/* Error - minimal */
+/* Error */
 .error {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  margin: 4px 12px 12px;
-  padding: 8px 12px;
-  background: var(--accent-bg-red);
-  border-radius: var(--radius-md);
-  color: var(--accent-red);
-  font-size: var(--font-xs);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin: 8px 12px;
+	padding: 8px 12px;
+	background: rgba(248, 81, 73, 0.1);
+	border-radius: 6px;
+	color: #f85149;
+	font-size: 12px;
 }
 
 .error button {
-  background: none;
-  border: none;
-  color: inherit;
-  font-size: var(--font-md);
-  cursor: pointer;
-  padding: 0;
-  width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  opacity: 0.7;
-  transition: opacity 0.15s;
+	background: none;
+	border: none;
+	color: inherit;
+	cursor: pointer;
+	padding: 4px;
+	border-radius: 4px;
 }
 
 .error button:hover {
-  opacity: 1;
+	background: rgba(248, 81, 73, 0.2);
 }

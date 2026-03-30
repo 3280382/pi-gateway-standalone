@@ -6,7 +6,13 @@
 import type { Request, Response } from "express";
 import { homedir } from "os";
 import * as path from "path";
-import { expandPath, getMimeType, isBinaryFile, isHighlightable, isPathAllowed } from "../lib/utils/file-utils";
+import {
+	expandPath,
+	getMimeType,
+	isBinaryFile,
+	isHighlightable,
+	isPathAllowed,
+} from "../lib/utils/file-utils";
 import { Logger, LogLevel } from "../lib/utils/logger";
 
 const logger = new Logger({ level: LogLevel.INFO });
@@ -18,10 +24,18 @@ export async function browseDirectory(req: Request, res: Response) {
 	const { path: browsePath } = req.body;
 	const targetPath = browsePath || homedir();
 
+	// 记录请求来源信息
+	const clientInfo = req.headers["user-agent"]?.substring(0, 50) || "unknown";
+	logger.info(
+		`[browseDirectory] 收到请求: path="${targetPath}", client="${clientInfo}"`,
+	);
+
 	try {
 		const startTime = Date.now();
 		const { readdir, stat } = await import("fs/promises");
 		const entries = await readdir(targetPath, { withFileTypes: true });
+
+		logger.info(`[browseDirectory] 读取目录成功: ${entries.length} 个条目`);
 
 		// 并行获取文件状态（限制并发数）
 		const concurrencyLimit = 10;
@@ -69,10 +83,15 @@ export async function browseDirectory(req: Request, res: Response) {
 			},
 		};
 
-		logger.info(`浏览目录: ${targetPath}, 项目数: ${items.length}`);
+		logger.info(
+			`[browseDirectory] 响应成功: ${targetPath}, ${items.length} 个项目 (${items.filter((i) => i.isDirectory).length} 目录, ${items.filter((i) => !i.isDirectory).length} 文件), 耗时: ${Date.now() - startTime}ms`,
+		);
 		res.json(response);
 	} catch (error) {
-		logger.error(`文件浏览错误: ${error instanceof Error ? error.message : String(error)}`, { targetPath });
+		logger.error(
+			`文件浏览错误: ${error instanceof Error ? error.message : String(error)}`,
+			{ targetPath },
+		);
 		res.status(500).json({
 			error: String(error),
 			code: "BROWSE_ERROR",
@@ -109,7 +128,11 @@ export async function getDirectoryTree(req: Request, res: Response) {
 			return;
 		}
 
-		const buildTree = async (dirPath: string, depth: number, maxDepth: number = 3): Promise<any> => {
+		const buildTree = async (
+			dirPath: string,
+			depth: number,
+			maxDepth: number = 3,
+		): Promise<any> => {
 			if (depth >= maxDepth) {
 				return {
 					name: path.basename(dirPath),
@@ -138,7 +161,9 @@ export async function getDirectoryTree(req: Request, res: Response) {
 						isDirectory: false,
 						size: childStats.size,
 						modified: childStats.mtime.toISOString(),
-						extension: entry.name.includes(".") ? entry.name.split(".").pop()?.toLowerCase() : undefined,
+						extension: entry.name.includes(".")
+							? entry.name.split(".").pop()?.toLowerCase()
+							: undefined,
 					});
 				}
 			}
@@ -155,7 +180,10 @@ export async function getDirectoryTree(req: Request, res: Response) {
 		logger.info(`获取目录树: ${targetPath}`);
 		res.json(tree);
 	} catch (error) {
-		logger.error(`获取目录树错误: ${error instanceof Error ? error.message : String(error)}`, { targetPath });
+		logger.error(
+			`获取目录树错误: ${error instanceof Error ? error.message : String(error)}`,
+			{ targetPath },
+		);
 		res.status(500).json({ error: String(error) });
 	}
 }
@@ -206,7 +234,10 @@ export async function getFileContent(req: Request, res: Response) {
 			binary: isBinaryFile(targetPath),
 		});
 	} catch (error) {
-		logger.error(`获取文件内容错误: ${error instanceof Error ? error.message : String(error)}`, { targetPath });
+		logger.error(
+			`获取文件内容错误: ${error instanceof Error ? error.message : String(error)}`,
+			{ targetPath },
+		);
 		res.status(500).json({ error: String(error) });
 	}
 }
@@ -245,10 +276,15 @@ export async function getRawFile(req: Request, res: Response) {
 
 		const content = await readFile(targetPath);
 
-		logger.info(`获取原始文件: ${targetPath}, MIME类型: ${mimeType}, 大小: ${stats.size}字节`);
+		logger.info(
+			`获取原始文件: ${targetPath}, MIME类型: ${mimeType}, 大小: ${stats.size}字节`,
+		);
 		res.send(content);
 	} catch (error) {
-		logger.error(`获取原始文件错误: ${error instanceof Error ? error.message : String(error)}`, { targetPath });
+		logger.error(
+			`获取原始文件错误: ${error instanceof Error ? error.message : String(error)}`,
+			{ targetPath },
+		);
 		res.status(500).json({ error: String(error) });
 	}
 }
@@ -285,7 +321,10 @@ export async function writeFileContent(req: Request, res: Response) {
 		logger.info(`写入文件: ${targetPath}, 大小: ${content.length}字符`);
 		res.json({ success: true, path: targetPath });
 	} catch (error) {
-		logger.error(`写入文件错误: ${error instanceof Error ? error.message : String(error)}`, { targetPath });
+		logger.error(
+			`写入文件错误: ${error instanceof Error ? error.message : String(error)}`,
+			{ targetPath },
+		);
 		res.status(500).json({ error: String(error) });
 	}
 }
@@ -312,7 +351,9 @@ export async function executeCommand(req: Request, res: Response) {
 		const { spawn } = await import("child_process");
 
 		// 解析命令
-		const [cmd, ...args] = command.split(" ").map((s: string) => s.replace(/^"|"$/g, "").replace(/^'|'$/g, ""));
+		const [cmd, ...args] = command
+			.split(" ")
+			.map((s: string) => s.replace(/^"|"$/g, "").replace(/^'|'$/g, ""));
 
 		if (streaming) {
 			// 流式执行
@@ -366,9 +407,13 @@ export async function executeCommand(req: Request, res: Response) {
 
 			child.on("close", (code: number | null) => {
 				const isError = code !== 0;
-				const result = errorOutput ? `${output}\n${errorOutput}`.trim() : output.trim();
+				const result = errorOutput
+					? `${output}\n${errorOutput}`.trim()
+					: output.trim();
 
-				logger.info(`执行命令: ${command}, 工作目录: ${workingDir}, 退出代码: ${code}`);
+				logger.info(
+					`执行命令: ${command}, 工作目录: ${workingDir}, 退出代码: ${code}`,
+				);
 				res.json({
 					success: !isError,
 					output: result || "(无输出)",
@@ -388,7 +433,10 @@ export async function executeCommand(req: Request, res: Response) {
 			});
 		}
 	} catch (error) {
-		logger.error(`执行命令异常: ${error instanceof Error ? error.message : String(error)}`, { command, workingDir });
+		logger.error(
+			`执行命令异常: ${error instanceof Error ? error.message : String(error)}`,
+			{ command, workingDir },
+		);
 		res.status(500).json({ error: String(error) });
 	}
 }

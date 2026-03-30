@@ -10,7 +10,7 @@ describe("File Browser Integration", () => {
 
 	beforeAll(async () => {
 		// Start server
-		const serverPath = join(__dirname, "..", "dist", "server.js");
+		const serverPath = join(__dirname, "..", "..", "..", "dist", "server.js");
 		serverProcess = spawn("node", [serverPath], {
 			env: { ...process.env, PORT: String(SERVER_PORT) },
 			stdio: "pipe",
@@ -18,7 +18,10 @@ describe("File Browser Integration", () => {
 
 		// Wait for server to start
 		await new Promise<void>((resolve, reject) => {
-			const timeout = setTimeout(() => reject(new Error("Server startup timeout")), 15000);
+			const timeout = setTimeout(
+				() => reject(new Error("Server startup timeout")),
+				15000,
+			);
 			serverProcess.stdout?.on("data", (data) => {
 				if (data.toString().includes("Pi Gateway Server")) {
 					clearTimeout(timeout);
@@ -50,7 +53,9 @@ describe("File Browser Integration", () => {
 		});
 
 		it("should get directory tree via API", async () => {
-			const response = await fetch(`${SERVER_URL}/api/files/tree?path=/root/pi-mono/packages/gateway`);
+			const response = await fetch(
+				`${SERVER_URL}/api/files/tree?path=/root/pi-mono/packages/gateway`,
+			);
 			expect(response.status).toBe(200);
 
 			const data = await response.json();
@@ -90,13 +95,17 @@ describe("File Browser Integration", () => {
 
 		it("should serve raw files (images)", async () => {
 			// Test with a file that should exist
-			const response = await fetch(`${SERVER_URL}/api/files/raw?path=/root/pi-mono/packages/gateway/public/app.js`);
+			const response = await fetch(
+				`${SERVER_URL}/api/files/raw?path=/root/pi-gateway-standalone/public/app.js`,
+			);
 			expect(response.status).toBe(200);
 			expect(response.headers.get("content-type")).toContain("javascript");
 		});
 
 		it("should handle directory traversal protection", async () => {
-			const response = await fetch(`${SERVER_URL}/api/files/tree?path=../../../etc`);
+			const response = await fetch(
+				`${SERVER_URL}/api/files/tree?path=../../../etc`,
+			);
 			// Should be 403 or 500 (both indicate access denied)
 			expect([403, 500]).toContain(response.status);
 

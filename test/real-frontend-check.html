@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real Frontend Check</title>
+    <script>
+        async function checkFrontend() {
+            const result = document.getElementById('result');
+            
+            // 1. 检查页面是否加载
+            result.innerHTML += '<h3>1. 检查页面加载...</h3>';
+            try {
+                const response = await fetch('http://127.0.0.1:5173/');
+                if (response.ok) {
+                    const html = await response.text();
+                    const hasReact = html.includes('React') || html.includes('react');
+                    const hasApp = html.includes('app') || html.includes('App');
+                    result.innerHTML += `✅ 页面加载成功 (${html.length} 字节)<br>`;
+                    result.innerHTML += `React相关: ${hasReact ? '✅' : '❌'}<br>`;
+                    result.innerHTML += `App相关: ${hasApp ? '✅' : '❌'}<br>`;
+                } else {
+                    result.innerHTML += `❌ 页面加载失败: HTTP ${response.status}<br>`;
+                }
+            } catch (error) {
+                result.innerHTML += `❌ 页面检查错误: ${error.message}<br>`;
+            }
+            
+            // 2. 检查关键文件
+            result.innerHTML += '<h3>2. 检查关键文件...</h3>';
+            const files = [
+                'src/client/App.tsx',
+                'src/client/components/files/FileBrowser.tsx',
+                'src/client/components/files/FileSidebar.tsx'
+            ];
+            
+            for (const file of files) {
+                try {
+                    const response = await fetch(`http://127.0.0.1:5173/${file}`);
+                    result.innerHTML += `${file}: ${response.ok ? '✅' : '❌'}<br>`;
+                } catch (error) {
+                    result.innerHTML += `${file}: ❌ ${error.message}<br>`;
+                }
+            }
+            
+            // 3. 检查API
+            result.innerHTML += '<h3>3. 检查后端API...</h3>';
+            const apis = [
+                { name: '版本API', url: 'http://127.0.0.1:3000/api/version' },
+                { name: '文件浏览API', url: 'http://127.0.0.1:3000/api/browse', method: 'POST', body: { path: '/root' } }
+            ];
+            
+            for (const api of apis) {
+                try {
+                    const options = {
+                        method: api.method || 'GET',
+                        headers: api.body ? { 'Content-Type': 'application/json' } : {}
+                    };
+                    if (api.body) {
+                        options.body = JSON.stringify(api.body);
+                    }
+                    
+                    const response = await fetch(api.url, options);
+                    result.innerHTML += `${api.name}: ${response.ok ? '✅' : '❌'} (HTTP ${response.status})<br>`;
+                } catch (error) {
+                    result.innerHTML += `${api.name}: ❌ ${error.message}<br>`;
+                }
+            }
+            
+            // 4. 检查控制台错误
+            result.innerHTML += '<h3>4. 手动检查步骤:</h3>';
+            result.innerHTML += '请打开浏览器开发者工具 (F12) 并检查:<br>';
+            result.innerHTML += '1. Console标签页 - 是否有JavaScript错误<br>';
+            result.innerHTML += '2. Network标签页 - 请求是否成功<br>';
+            result.innerHTML += '3. Elements标签页 - React组件是否渲染<br>';
+            result.innerHTML += '<br>然后访问: <a href="http://127.0.0.1:5173/" target="_blank">http://127.0.0.1:5173/</a>';
+        }
+        
+        window.onload = checkFrontend;
+    </script>
+</head>
+<body>
+    <h1>真实前端检查</h1>
+    <div id="result">检查中...</div>
+</body>
+</html>

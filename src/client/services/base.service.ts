@@ -52,7 +52,10 @@ export abstract class BaseService {
 	/**
 	 * 发送HTTP GET请求
 	 */
-	protected async get<T>(path: string, params?: Record<string, any>): Promise<T> {
+	protected async get<T>(
+		path: string,
+		params?: Record<string, any>,
+	): Promise<T> {
 		const url = this.buildUrl(path, params);
 		try {
 			console.log(`[${this.serviceName}] GET ${url}`);
@@ -65,7 +68,11 @@ export abstract class BaseService {
 	/**
 	 * 发送HTTP POST请求
 	 */
-	protected async post<T>(path: string, data?: any, params?: Record<string, any>): Promise<T> {
+	protected async post<T>(
+		path: string,
+		data?: any,
+		params?: Record<string, any>,
+	): Promise<T> {
 		const url = this.buildUrl(path, params);
 		try {
 			console.log(`[${this.serviceName}] POST ${url}`);
@@ -81,7 +88,11 @@ export abstract class BaseService {
 	/**
 	 * 发送HTTP PUT请求
 	 */
-	protected async put<T>(path: string, data?: any, params?: Record<string, any>): Promise<T> {
+	protected async put<T>(
+		path: string,
+		data?: any,
+		params?: Record<string, any>,
+	): Promise<T> {
 		const url = this.buildUrl(path, params);
 		try {
 			console.log(`[${this.serviceName}] PUT ${url}`);
@@ -97,7 +108,10 @@ export abstract class BaseService {
 	/**
 	 * 发送HTTP DELETE请求
 	 */
-	protected async delete<T>(path: string, params?: Record<string, any>): Promise<T> {
+	protected async delete<T>(
+		path: string,
+		params?: Record<string, any>,
+	): Promise<T> {
 		const url = this.buildUrl(path, params);
 		try {
 			console.log(`[${this.serviceName}] DELETE ${url}`);
@@ -136,25 +150,41 @@ export abstract class BaseService {
 		console.error(`[${this.serviceName}] ${method} ${path} failed:`, error);
 
 		if (error instanceof ApiError) {
-			return new ServiceError(`API_${error.status}`, `API request failed: ${error.status} ${error.statusText}`, {
-				status: error.status,
-				response: error.response,
-				originalError: error.message,
-			});
+			return new ServiceError(
+				`API_${error.status}`,
+				`API request failed: ${error.status} ${error.statusText}`,
+				{
+					status: error.status,
+					response: error.response,
+					originalError: error.message,
+				},
+			);
 		}
 
 		if (error instanceof Error) {
-			return new ServiceError("NETWORK_ERROR", `Network error: ${error.message}`, { originalError: error });
+			return new ServiceError(
+				"NETWORK_ERROR",
+				`Network error: ${error.message}`,
+				{ originalError: error },
+			);
 		}
 
-		return new ServiceError("UNKNOWN_ERROR", "An unknown error occurred", { originalError: error });
+		return new ServiceError("UNKNOWN_ERROR", "An unknown error occurred", {
+			originalError: error,
+		});
 	}
 
 	/**
 	 * 创建带延迟的Promise（用于模拟加载状态）
 	 */
-	protected async withDelay<T>(promise: Promise<T>, delayMs: number = 300): Promise<T> {
-		const [result] = await Promise.all([promise, new Promise((resolve) => setTimeout(resolve, delayMs))]);
+	protected async withDelay<T>(
+		promise: Promise<T>,
+		delayMs: number = 300,
+	): Promise<T> {
+		const [result] = await Promise.all([
+			promise,
+			new Promise((resolve) => setTimeout(resolve, delayMs)),
+		]);
 		return result;
 	}
 
@@ -173,10 +203,15 @@ export abstract class BaseService {
 				return await operation();
 			} catch (error) {
 				lastError = error as Error;
-				console.log(`[${this.serviceName}] Attempt ${attempt}/${maxRetries} failed:`, error);
+				console.log(
+					`[${this.serviceName}] Attempt ${attempt}/${maxRetries} failed:`,
+					error,
+				);
 
 				if (attempt < maxRetries) {
-					await new Promise((resolve) => setTimeout(resolve, retryDelay * attempt));
+					await new Promise((resolve) =>
+						setTimeout(resolve, retryDelay * attempt),
+					);
 				}
 			}
 		}

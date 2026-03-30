@@ -53,7 +53,11 @@ export class ChatService {
 			if (error instanceof ServiceError) {
 				throw error;
 			}
-			throw new ServiceError("SEND_MESSAGE_FAILED", "Failed to send message", error);
+			throw new ServiceError(
+				"SEND_MESSAGE_FAILED",
+				"Failed to send message",
+				error,
+			);
 		}
 	}
 
@@ -62,9 +66,15 @@ export class ChatService {
 	 */
 	async loadSession(sessionId: string): Promise<LoadSessionResponse> {
 		try {
-			return await this.post<LoadSessionResponse>("/session/load", { sessionId });
+			return await this.post<LoadSessionResponse>("/session/load", {
+				sessionId,
+			});
 		} catch (error) {
-			throw new ServiceError("LOAD_SESSION_FAILED", "Failed to load session", error);
+			throw new ServiceError(
+				"LOAD_SESSION_FAILED",
+				"Failed to load session",
+				error,
+			);
 		}
 	}
 
@@ -75,7 +85,11 @@ export class ChatService {
 		try {
 			await this.post("/session/save", { sessionId, messages });
 		} catch (error) {
-			throw new ServiceError("SAVE_SESSION_FAILED", "Failed to save session", error);
+			throw new ServiceError(
+				"SAVE_SESSION_FAILED",
+				"Failed to save session",
+				error,
+			);
 		}
 	}
 
@@ -85,10 +99,17 @@ export class ChatService {
 	async listSessions(workspace?: string): Promise<ChatSession[]> {
 		try {
 			const params = workspace ? { workspace } : {};
-			const response = await this.get<{ sessions: ChatSession[] }>("/sessions", params);
+			const response = await this.get<{ sessions: ChatSession[] }>(
+				"/sessions",
+				params,
+			);
 			return response.sessions;
 		} catch (error) {
-			throw new ServiceError("LIST_SESSIONS_FAILED", "Failed to list sessions", error);
+			throw new ServiceError(
+				"LIST_SESSIONS_FAILED",
+				"Failed to list sessions",
+				error,
+			);
 		}
 	}
 
@@ -97,9 +118,16 @@ export class ChatService {
 	 */
 	async createSession(name: string, workspace?: string): Promise<ChatSession> {
 		try {
-			return await this.post<ChatSession>("/session/create", { name, workspace });
+			return await this.post<ChatSession>("/session/create", {
+				name,
+				workspace,
+			});
 		} catch (error) {
-			throw new ServiceError("CREATE_SESSION_FAILED", "Failed to create session", error);
+			throw new ServiceError(
+				"CREATE_SESSION_FAILED",
+				"Failed to create session",
+				error,
+			);
 		}
 	}
 
@@ -110,19 +138,29 @@ export class ChatService {
 		try {
 			await this.post("/session/delete", { sessionId });
 		} catch (error) {
-			throw new ServiceError("DELETE_SESSION_FAILED", "Failed to delete session", error);
+			throw new ServiceError(
+				"DELETE_SESSION_FAILED",
+				"Failed to delete session",
+				error,
+			);
 		}
 	}
 
 	/**
 	 * 获取可用模型列表
 	 */
-	async getAvailableModels(): Promise<Array<{ id: string; name: string; provider: string; description: string }>> {
+	async getAvailableModels(): Promise<
+		Array<{ id: string; name: string; provider: string; description: string }>
+	> {
 		try {
 			const response = await this.get<{ models: any[] }>("/models");
 			return response.models;
 		} catch (error) {
-			throw new ServiceError("GET_MODELS_FAILED", "Failed to get models", error);
+			throw new ServiceError(
+				"GET_MODELS_FAILED",
+				"Failed to get models",
+				error,
+			);
 		}
 	}
 
@@ -145,7 +183,11 @@ export class ChatService {
 			const response = await this.get<{ prompt: string }>("/system-prompt");
 			return response.prompt;
 		} catch (error) {
-			throw new ServiceError("GET_SYSTEM_PROMPT_FAILED", "Failed to get system prompt", error);
+			throw new ServiceError(
+				"GET_SYSTEM_PROMPT_FAILED",
+				"Failed to get system prompt",
+				error,
+			);
 		}
 	}
 
@@ -156,7 +198,11 @@ export class ChatService {
 		try {
 			await this.post("/system-prompt/update", { prompt });
 		} catch (error) {
-			throw new ServiceError("UPDATE_SYSTEM_PROMPT_FAILED", "Failed to update system prompt", error);
+			throw new ServiceError(
+				"UPDATE_SYSTEM_PROMPT_FAILED",
+				"Failed to update system prompt",
+				error,
+			);
 		}
 	}
 
@@ -167,7 +213,11 @@ export class ChatService {
 		try {
 			await this.post("/chat/clear", { sessionId });
 		} catch (error) {
-			throw new ServiceError("CLEAR_CHAT_FAILED", "Failed to clear chat history", error);
+			throw new ServiceError(
+				"CLEAR_CHAT_FAILED",
+				"Failed to clear chat history",
+				error,
+			);
 		}
 	}
 
@@ -178,18 +228,30 @@ export class ChatService {
 		try {
 			await this.post("/message/regenerate", { messageId });
 		} catch (error) {
-			throw new ServiceError("REGENERATE_MESSAGE_FAILED", "Failed to regenerate message", error);
+			throw new ServiceError(
+				"REGENERATE_MESSAGE_FAILED",
+				"Failed to regenerate message",
+				error,
+			);
 		}
 	}
 
 	/**
 	 * 工具执行完成回调
 	 */
-	async onToolComplete(toolId: string, output: any, error?: string): Promise<void> {
+	async onToolComplete(
+		toolId: string,
+		output: any,
+		error?: string,
+	): Promise<void> {
 		try {
 			await this.post("/tool/complete", { toolId, output, error });
 		} catch (error) {
-			throw new ServiceError("TOOL_COMPLETE_FAILED", "Failed to complete tool execution", error);
+			throw new ServiceError(
+				"TOOL_COMPLETE_FAILED",
+				"Failed to complete tool execution",
+				error,
+			);
 		}
 	}
 
@@ -200,7 +262,11 @@ export class ChatService {
 		try {
 			await this.post("/generation/abort", {});
 		} catch (error) {
-			throw new ServiceError("ABORT_GENERATION_FAILED", "Failed to abort generation", error);
+			throw new ServiceError(
+				"ABORT_GENERATION_FAILED",
+				"Failed to abort generation",
+				error,
+			);
 		}
 	}
 
@@ -217,13 +283,20 @@ export class ChatService {
 		},
 	): Promise<Message[]> {
 		try {
-			const response = await this.post<{ messages: Message[] }>("/chat/search", {
-				query,
-				filters,
-			});
+			const response = await this.post<{ messages: Message[] }>(
+				"/chat/search",
+				{
+					query,
+					filters,
+				},
+			);
 			return response.messages;
 		} catch (error) {
-			throw new ServiceError("SEARCH_MESSAGES_FAILED", "Failed to search messages", error);
+			throw new ServiceError(
+				"SEARCH_MESSAGES_FAILED",
+				"Failed to search messages",
+				error,
+			);
 		}
 	}
 }

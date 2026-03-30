@@ -1,0 +1,215 @@
+/**
+ * AppLayout - 统一布局样式
+ *
+ * 设计原则：
+ * 1. 所有布局样式集中在这里
+ * 2. 子组件只负责内容样式，不负责布局
+ * 3. 使用 CSS Grid 和 Flexbox 实现响应式布局
+ */
+
+/* 根布局容器 - 全屏 */
+.layout {
+	display: flex;
+	flex-direction: column;
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+	background: #0d1117;
+	color: #e6edf3;
+}
+
+/* ============================================
+   1. Header - 顶部菜单 (固定64px)
+   ============================================ */
+.header {
+	flex-shrink: 0;
+	height: 64px;
+	background: #161b22;
+	border-bottom: 1px solid #30363d;
+	overflow: hidden;
+	z-index: 100;
+}
+
+/* ============================================
+   2. Body - 主体区域 (侧边栏 + 内容)
+   ============================================ */
+.body {
+	flex: 1;
+	display: flex;
+	flex-direction: row;
+	overflow: hidden;
+	position: relative;
+}
+
+/* 侧边栏 - 固定宽度280px，可隐藏 */
+.sidebar {
+	flex-shrink: 0;
+	width: 0;
+	height: 100%;
+	background: #161b22;
+	border-right: 1px solid #30363d;
+	overflow: hidden;
+	transition: width 0.2s ease;
+	z-index: 50;
+}
+
+.sidebarVisible {
+	width: 280px;
+}
+
+/* 主内容区 - 占据剩余空间，相对定位用于overlay */
+.content {
+	flex: 1;
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+}
+
+/* 内容体 - 消息列表区域 */
+.contentBody {
+	flex: 1;
+	overflow: auto;
+	position: relative;
+}
+
+/* ============================================
+   3. 输入框 - 在Content底部
+   ============================================ */
+.inputArea {
+	flex-shrink: 0;
+	padding: 12px 16px;
+	background: #0d1117;
+	border-top: 2px solid #30363d;
+}
+
+/* ============================================
+   4. Footer - 底部菜单 (固定44px)
+   ============================================ */
+.footer {
+	flex-shrink: 0;
+	height: 44px;
+	background: #161b22;
+	overflow: hidden;
+	z-index: 150;
+}
+
+/* 3.3 底部弹出面板 - overlay模式，定位在Content上方，从BottomMenu上方弹出 */
+.bottomPanel {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 44px; /* 在BottomMenu上方 */
+	background: #0d1117;
+	border-top: 1px solid #30363d;
+	display: flex;
+	flex-direction: column;
+	z-index: 200;
+	box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.resizer {
+	height: 24px;
+	background: #161b22;
+	border-bottom: 1px solid #30363d;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	cursor: default;
+}
+
+.dragHandle {
+	width: 40px;
+	height: 4px;
+	background: #484f58;
+	border-radius: 2px;
+	cursor: row-resize;
+}
+
+.dragHandle:hover {
+	background: #6e7681;
+}
+
+.closeBtn {
+	position: absolute;
+	right: 8px;
+	width: 20px;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border: none;
+	color: #8b949e;
+	font-size: 16px;
+	cursor: pointer;
+	border-radius: 4px;
+}
+
+.closeBtn:hover {
+	background: #30363d;
+	color: #e6edf3;
+}
+
+.panelContent {
+	flex: 1;
+	overflow: auto;
+	padding: 12px;
+}
+
+.emptyPanel {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	color: #8b949e;
+	font-size: 14px;
+}
+
+/* ============================================
+   响应式适配 - 移动端
+   ============================================ */
+@media (max-width: 767px) {
+	.header {
+		height: 56px;
+	}
+
+	.sidebar {
+		position: absolute;
+		left: 0;
+		top: 56px;
+		bottom: 0;
+		z-index: 200;
+		box-shadow: 2px 0 8px rgba(0, 0, 0, 0.5);
+	}
+
+	.sidebarVisible {
+		width: 260px;
+	}
+
+	.content {
+		width: 100%;
+	}
+}
+
+/* ============================================
+   文件浏览器专用样式
+   ============================================ */
+.fileBrowserLayout .content {
+	padding: 0;
+}
+
+/* ============================================
+   暗色主题变量（与全局样式保持一致）
+   ============================================ */
+:root {
+	--layout-bg-primary: #0d1117;
+	--layout-bg-secondary: #161b22;
+	--layout-bg-tertiary: #21262d;
+	--layout-border: #30363d;
+	--layout-text-primary: #e6edf3;
+	--layout-text-secondary: #8b949e;
+	--layout-accent: #1f6feb;
+}

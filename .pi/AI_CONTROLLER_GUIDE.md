@@ -16,7 +16,7 @@
 ## 快速开始
 
 ```javascript
-const controller = require('/root/pi-mono/packages/gateway/scripts/tmux-controller.js');
+import controller from '/root/pi-gateway-standalone/scripts/tmux-controller.js';
 
 // 初始化检查
 if (!controller.init()) {
@@ -133,15 +133,26 @@ await controller.restartFrontend();
 ```
 AI: "检测到前端路径错误，正在自动重启前端服务..."
 [执行 controller.restartFrontend()]
-AI: "✅ 前端已重启，请观察上左窗格确认服务正常启动"
+AI: "✅ 前端已重启，请观察上左窗格确认服务正常启动，日志文件: logs/frontend_*.log"
 ```
+
+## 日志文件
+
+服务输出会同时显示在tmux窗格并保存到独立的日志文件：
+
+- **前端日志**: `logs/frontend_YYYYMMDD_HHMMSS.log`
+- **后端日志**: `logs/backend_YYYYMMDD_HHMMSS.log`
+- **日志位置**: `/root/pi-gateway-standalone/logs/`
+
+每次重启服务都会创建新的日志文件，文件名包含时间戳确保唯一性。
 
 ## 注意事项
 
 1. **用户观察**: 操作会在底部窗格显示，用户可看到命令执行
-2. **日志保留**: 所有输出都保留在对应窗格，便于追溯
+2. **日志保留**: 所有输出同时保存到日志文件，便于追溯
 3. **并发安全**: 不要在短时间内重复执行相同命令
 4. **错误处理**: 方法会返回 boolean 表示成功/失败
+5. **日志唯一性**: 每次启动创建新的日志文件，避免与其他项目冲突
 
 ## CLI 用法
 

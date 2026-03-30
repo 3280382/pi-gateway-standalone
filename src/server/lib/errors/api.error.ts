@@ -3,7 +3,10 @@
  * 定义应用程序中的API错误类型
  */
 
-import type { ApiError as ApiErrorType, ErrorCode } from "../../../shared/types/api.types";
+import type {
+	ApiError as ApiErrorType,
+	ErrorCode,
+} from "../../../shared/types/api.types";
 
 export class ApiError extends Error implements ApiErrorType {
 	public code: ErrorCode | string;
@@ -168,7 +171,10 @@ export class ConnectionError extends ApiError {
 
 // 错误工厂
 export class ErrorFactory {
-	static validation(message: string, details?: Record<string, any>): ValidationError {
+	static validation(
+		message: string,
+		details?: Record<string, any>,
+	): ValidationError {
 		return new ValidationError(message, details);
 	}
 
@@ -184,19 +190,31 @@ export class ErrorFactory {
 		return new ForbiddenError(message);
 	}
 
-	static conflict(message: string, details?: Record<string, any>): ConflictError {
+	static conflict(
+		message: string,
+		details?: Record<string, any>,
+	): ConflictError {
 		return new ConflictError(message, details);
 	}
 
-	static internal(message?: string, details?: Record<string, any>): InternalError {
+	static internal(
+		message?: string,
+		details?: Record<string, any>,
+	): InternalError {
 		return new InternalError(message, details);
 	}
 
-	static badRequest(message: string, details?: Record<string, any>): BadRequestError {
+	static badRequest(
+		message: string,
+		details?: Record<string, any>,
+	): BadRequestError {
 		return new BadRequestError(message, details);
 	}
 
-	static timeout(message?: string, details?: Record<string, any>): TimeoutError {
+	static timeout(
+		message?: string,
+		details?: Record<string, any>,
+	): TimeoutError {
 		return new TimeoutError(message, details);
 	}
 

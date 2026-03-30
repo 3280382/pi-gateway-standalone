@@ -4,7 +4,11 @@
  */
 
 import { ServiceError } from "@/services/base.service";
-import type { BrowseResponse, ExecuteResponse, FileContentResponse } from "@/services/file.service";
+import type {
+	BrowseResponse,
+	ExecuteResponse,
+	FileContentResponse,
+} from "@/services/file.service";
 import { fileService } from "@/services/file.service";
 
 export class FileController {
@@ -22,13 +26,17 @@ export class FileController {
 			const cached = this.fileCache.get(cacheKey);
 
 			if (cached && this.isCacheValid(cacheKey)) {
-				console.log(`[FileController] Using cached browse data for: ${cacheKey}`);
+				console.log(
+					`[FileController] Using cached browse data for: ${cacheKey}`,
+				);
 				this.currentPath = cached.currentPath;
 				return cached;
 			}
 
 			// 从服务获取
-			console.log(`[FileController] Fetching browse data for: ${path || "root"}`);
+			console.log(
+				`[FileController] Fetching browse data for: ${path || "root"}`,
+			);
 			const response = await fileService.browse(path);
 			this.currentPath = response.currentPath;
 
@@ -46,7 +54,10 @@ export class FileController {
 	/**
 	 * 读取文件内容
 	 */
-	async readFile(path: string, encoding: string = "utf-8"): Promise<FileContentResponse> {
+	async readFile(
+		path: string,
+		encoding: string = "utf-8",
+	): Promise<FileContentResponse> {
 		try {
 			// 检查缓存
 			const cacheKey = `${path}:${encoding}`;
@@ -110,7 +121,9 @@ export class FileController {
 	 */
 	async delete(path: string, recursive: boolean = false): Promise<void> {
 		try {
-			console.log(`[FileController] Deleting: ${path} ${recursive ? "(recursive)" : ""}`);
+			console.log(
+				`[FileController] Deleting: ${path} ${recursive ? "(recursive)" : ""}`,
+			);
 			await fileService.delete(path, recursive);
 
 			// 清除相关缓存
@@ -177,9 +190,15 @@ export class FileController {
 	/**
 	 * 执行命令
 	 */
-	async execute(command: string, workingDir?: string, streaming: boolean = false): Promise<ExecuteResponse> {
+	async execute(
+		command: string,
+		workingDir?: string,
+		streaming: boolean = false,
+	): Promise<ExecuteResponse> {
 		try {
-			console.log(`[FileController] Executing command: ${command} in ${workingDir || "current directory"}`);
+			console.log(
+				`[FileController] Executing command: ${command} in ${workingDir || "current directory"}`,
+			);
 
 			const response = await fileService.execute({
 				command,
@@ -240,7 +259,11 @@ export class FileController {
 	/**
 	 * 上传文件
 	 */
-	async uploadFile(path: string, file: File, onProgress?: (progress: number) => void): Promise<void> {
+	async uploadFile(
+		path: string,
+		file: File,
+		onProgress?: (progress: number) => void,
+	): Promise<void> {
 		try {
 			console.log(`[FileController] Uploading file to: ${path}`);
 			await fileService.uploadFile(path, file, onProgress);
@@ -281,7 +304,9 @@ export class FileController {
 	 */
 	async getDirectoryTree(path: string, maxDepth: number = 3): Promise<any> {
 		try {
-			console.log(`[FileController] Getting directory tree: ${path} (depth: ${maxDepth})`);
+			console.log(
+				`[FileController] Getting directory tree: ${path} (depth: ${maxDepth})`,
+			);
 			return await fileService.getDirectoryTree(path, maxDepth);
 		} catch (error) {
 			this.handleError("getDirectoryTree", error);
@@ -300,14 +325,20 @@ export class FileController {
 		}>,
 	): Promise<void> {
 		try {
-			console.log(`[FileController] Performing batch operations: ${operations.length} operations`);
+			console.log(
+				`[FileController] Performing batch operations: ${operations.length} operations`,
+			);
 
 			const results = await fileService.batchOperation(operations);
 
 			// 检查结果
 			const failed = results.filter((r) => !r.success);
 			if (failed.length > 0) {
-				throw new ServiceError("BATCH_OPERATION_PARTIAL_FAILURE", `${failed.length} operations failed`, failed);
+				throw new ServiceError(
+					"BATCH_OPERATION_PARTIAL_FAILURE",
+					`${failed.length} operations failed`,
+					failed,
+				);
 			}
 
 			// 清除相关缓存
@@ -316,7 +347,11 @@ export class FileController {
 				if (op.destination) {
 					this.invalidateCacheForPath(op.destination);
 				}
-				if (op.type === "delete" || op.type === "move" || op.type === "rename") {
+				if (
+					op.type === "delete" ||
+					op.type === "move" ||
+					op.type === "rename"
+				) {
 					this.fileContentCache.delete(op.source);
 				}
 			});
@@ -331,7 +366,9 @@ export class FileController {
 	 */
 	async getDiskUsage(path?: string): Promise<any> {
 		try {
-			console.log(`[FileController] Getting disk usage for: ${path || "current path"}`);
+			console.log(
+				`[FileController] Getting disk usage for: ${path || "current path"}`,
+			);
 			return await fileService.getDiskUsage(path || this.currentPath);
 		} catch (error) {
 			this.handleError("getDiskUsage", error);

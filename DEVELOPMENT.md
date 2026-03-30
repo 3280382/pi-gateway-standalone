@@ -1,5 +1,9 @@
 # 开发指南
 
+## 🎯 当前项目
+**项目名称**: pi-gateway-standalone  
+**项目位置**: /root/pi-gateway-standalone
+
 ## 快速开始 (推荐: Tmux 三窗格模式)
 
 ```bash
@@ -135,6 +139,136 @@ test/
 │   └── server/          # 后端集成测试
 └── e2e/                 # 端到端测试
 ```
+
+## ✅ 完整代码修改流程
+
+**每次代码修改后，必须按顺序执行以下完整流程：**
+
+### 第一阶段：代码质量检查
+
+1. **编译构建** - 确保代码可以编译
+   ```bash
+   npm run build
+   ```
+   **要求**: 构建必须成功，无编译错误
+
+2. **代码规范检查** - 确保代码符合规范
+   ```bash
+   npm run check  # Biome + TypeScript 检查
+   npm run typecheck  # TypeScript 类型检查
+   ```
+   **要求**: 
+   - 无 linting 警告或错误
+   - TypeScript 错误必须修复，警告应最小化
+   - 代码符合项目风格指南
+
+### 第二阶段：测试验证
+
+3. **运行测试** - 确保所有测试通过
+   ```bash
+   npm test  # 单元测试 + 集成测试
+   ```
+   **要求**:
+   - 所有测试必须通过
+   - 无不稳定或跳过的测试（除非明确文档说明）
+   - 测试覆盖率不应显著下降
+
+### 第三阶段：服务验证
+
+4. **检查服务状态** - 确保服务正常运行
+   ```bash
+   node scripts/tmux-controller.js status
+   ```
+
+5. **重启服务** - 代码修改后重启服务
+   ```bash
+   # 根据需要重启
+   node scripts/tmux-controller.js restart-frontend
+   node scripts/tmux-controller.js restart-backend
+   ```
+
+6. **检查服务日志** - 确认无启动错误
+   ```bash
+   tail -20 /root/pi-gateway-standalone/logs/frontend_current.log
+   tail -20 /root/pi-gateway-standalone/logs/backend_current.log
+   ```
+
+7. **验证服务端点** - 确认前后台位置正确
+   ```bash
+   # 验证前端 (5173) 和后端 (3000) 可访问
+   curl -s http://127.0.0.1:5173 > /dev/null && echo "前端正常"
+   curl -s http://127.0.0.1:3000/health > /dev/null && echo "后端正常"
+   ```
+   **要求**:
+   - 前端服务运行在 http://127.0.0.1:5173
+   - 后端服务运行在 http://127.0.0.1:3000
+   - API 端点正确响应
+   - WebSocket 服务器接受连接
+
+### 第四阶段：最终验证（黄金标准 - 强制要求）
+
+8. **综合检查** - 重新运行完整检查
+   ```bash
+   npm run check
+   npm test
+   node scripts/tmux-controller.js status
+   ```
+
+9. **功能验证（黄金标准 - 强制）** - 必须创建并运行模拟浏览器测试
+
+   **⚠️ 重要警告：在完成以下验证前，不得说"完成"、"修复"或"通过"：**
+
+   必须按照以下模板执行，每一步完成后明确报告结果，全部勾选后才能说"任务完成"：
+
+   ```
+   □ STEP 1 - 代码修改完成
+     修改文件: [列出修改的文件]
+     
+   □ STEP 2 - 编译构建通过
+     运行: npm run build
+     结果: [成功/失败，如有错误列出]
+     
+   □ STEP 3 - 类型检查通过
+     运行: npm run typecheck
+     结果: [通过/失败，如有错误列出前3个]
+     
+   □ STEP 4 - 单元测试通过
+     运行: npm test
+     结果: [通过X个/失败Y个]
+     
+   □ STEP 5 - 服务验证正常
+     运行: node scripts/tmux-controller.js status
+     结果: [前端正常/异常] [后端正常/异常]
+     
+   □ STEP 6 - [黄金标准] 模拟浏览器测试
+     **要求**: 必须创建实际的自动化测试验证功能
+     **禁止**: 仅用代码审查或API测试冒充功能验证
+     
+     创建测试脚本（Playwright或详细模拟测试），验证：
+     □ 用户界面元素存在（按钮、面板等）
+     □ 用户交互触发状态更新（点击按钮）
+     □ DOM元素正确渲染（面板显示/隐藏）
+     □ 网络请求正确触发（API调用）
+     □ 数据正确显示（文件列表、内容等）
+     
+     测试代码: [提供测试代码]
+     运行结果: [提供运行输出]
+     
+   □ STEP 7 - 实际行为验证
+     通过日志或测试输出证明：
+     □ 状态更新确实发生
+     □ 组件确实重新渲染
+     □ API请求确实发送
+     □ 数据确实加载
+   ```
+
+   **违反此流程的后果**:
+   - 只说"代码修改完成"≠"功能修复完成"
+   - API测试正常≠功能正常
+   - 构建成功≠运行时正确
+   - TypeScript编译通过≠JavaScript执行正确
+
+**只有以上所有步骤（特别是STEP 6-7）完全通过后，才能进入下一阶段。**
 
 ## 开发规范
 

@@ -1,82 +1,112 @@
 /**
  * RecentWorkspaces Section
+ * 使用 Zustand persist 存储（自动保存到 localStorage）
  */
 
-import { SectionHeader, IconButton } from '../../../ui';
-import { useSidebarStore } from '../../../../store/sidebarStore';
-import { useSidebarController } from '../../../../api/sidebarApi';
-import styles from './RecentWorkspaces.module.css';
+import { useSidebarController } from "@/services/api/sidebarApi";
+import { useSidebarStore } from "@/stores/sidebarStore";
+import { IconButton, SectionHeader } from "../../../ui";
+import styles from "./RecentWorkspaces.module.css";
 
 export function RecentWorkspaces() {
-  const recentWorkspaces = useSidebarStore((state) => state.recentWorkspaces);
-  const controller = useSidebarController();
+	const recentWorkspaces = useSidebarStore((state) => state.recentWorkspaces);
+	const isLoading = useSidebarStore((state) => state.isLoading);
+	const controller = useSidebarController();
+	const setRecentWorkspaces = useSidebarStore(
+		(state) => state.setRecentWorkspaces,
+	);
 
-  const handleClear = () => {
-    localStorage.removeItem('recentWorkspaces');
-    controller.loadRecentWorkspaces();
-  };
+	const handleClear = () => {
+		setRecentWorkspaces([]);
+	};
 
-  const handleSelect = (path: string) => {
-    controller.changeWorkingDir(path);
-  };
+	const handleSelect = (path: string) => {
+		controller.changeWorkingDir(path);
+	};
 
-  if (recentWorkspaces.length === 0) {
-    return (
-      <section className={styles.section}>
-        <SectionHeader title="Recent Workspaces" />
-        <div className={styles.empty}>No recent workspaces</div>
-      </section>
-    );
-  }
+	if (isLoading && recentWorkspaces.length === 0) {
+		return (
+			<section className={styles.section}>
+				<SectionHeader title="Recent Workspaces" />
+				<div className={styles.loading}>Loading...</div>
+			</section>
+		);
+	}
 
-  return (
-    <section className={styles.section}>
-      <SectionHeader
-        title="Recent Workspaces"
-        action={
-          <IconButton onClick={handleClear} title="Clear Recent">
-            <TrashIcon />
-          </IconButton>
-        }
-      />
-      <div className={styles.list}>
-        {recentWorkspaces.map((workspace) => {
-          // Handle both string and object formats
-          const path = typeof workspace === 'string' ? workspace : workspace?.path || '';
-          const name = typeof workspace === 'string' 
-            ? (path.split('/').pop() || path)
-            : (workspace?.name || path.split('/').pop() || path);
-          
-          return (
-            <button
-              key={path}
-              className={styles.item}
-              onClick={() => handleSelect(path)}
-              title={path}
-            >
-              <FolderIcon />
-              <span className={styles.name}>{name}</span>
-            </button>
-          );
-        })}
-      </div>
-    </section>
-  );
+	if (recentWorkspaces.length === 0) {
+		return (
+			<section className={styles.section}>
+				<SectionHeader title="Recent Workspaces" />
+				<div className={styles.empty}>No recent workspaces</div>
+			</section>
+		);
+	}
+
+	return (
+		<section className={styles.section}>
+			<SectionHeader
+				title="Recent Workspaces"
+				action={
+					<IconButton onClick={handleClear} title="Clear Recent">
+						<TrashIcon />
+					</IconButton>
+				}
+			/>
+			<div className={styles.list}>
+				{recentWorkspaces.map((workspace) => {
+					// Normalize path (handle both string and object formats)
+					const rawPath =
+						typeof workspace === "string" ? workspace : workspace?.path || "";
+					const path = rawPath.replace(/\/$/, ""); // Remove trailing slash
+					const name = path.split("/").pop() || path;
+
+					return (
+						<button
+							key={path}
+							className={styles.item}
+							onClick={() => handleSelect(path)}
+							title={path}
+						>
+							<FolderIcon />
+							<div className={styles.info}>
+								<span className={styles.name}>{name}</span>
+								<span className={styles.path}>{path}</span>
+							</div>
+						</button>
+					);
+				})}
+			</div>
+		</section>
+	);
 }
 
 function TrashIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-      <polyline points="3 6 5 6 21 6" />
-      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-    </svg>
-  );
+	return (
+		<svg
+			width="16"
+			height="16"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+		>
+			<polyline points="3 6 5 6 21 6" />
+			<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+		</svg>
+	);
 }
 
 function FolderIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-      <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
-    </svg>
-  );
+	return (
+		<svg
+			width="16"
+			height="16"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+		>
+			<path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+		</svg>
+	);
 }

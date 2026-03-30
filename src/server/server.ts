@@ -11,12 +11,12 @@
 // ============================================================================
 
 import { z } from "zod";
-import { registerRoutes } from "./routes";
 import { Config } from "./config";
-import { setupLlmInterceptors } from "./llm";
-import { LlmLogManager } from "./llm/log-manager";
 import { AppFactory } from "./lib/app-factory";
 import { Logger, LogLevel } from "./lib/utils/logger";
+import { setupLlmInterceptors } from "./llm";
+import { LlmLogManager } from "./llm/log-manager";
+import { registerRoutes } from "./routes";
 import { GatewaySession } from "./session/gateway-session";
 
 // ============================================================================
@@ -109,7 +109,9 @@ const MessageSchema = z.discriminatedUnion("type", [
 		type: z.literal("set_model"),
 		provider: z.string(),
 		modelId: z.string(),
-		thinkingLevel: z.enum(["off", "minimal", "low", "medium", "high", "xhigh"]).optional(),
+		thinkingLevel: z
+			.enum(["off", "minimal", "low", "medium", "high", "xhigh"])
+			.optional(),
 	}),
 	z.object({
 		type: z.literal("list_models"),
@@ -136,6 +138,10 @@ const MessageSchema = z.discriminatedUnion("type", [
 	z.object({
 		type: z.literal("set_llm_log"),
 		enabled: z.boolean(),
+	}),
+	z.object({
+		type: z.literal("change_dir"),
+		path: z.string(),
 	}),
 ]);
 
@@ -168,25 +174,28 @@ wss.on("connection", (ws) => {
 	const gatewaySession = new GatewaySession(ws, llmLogManager);
 
 	ws.on("message", async (data) => {
+		let rawMessage: unknown;
 		try {
-			let rawMessage: unknown;
-			try {
-				rawMessage = JSON.parse(data.toString());
-			} catch {
-				ws.send(
-					JSON.stringify({
-						type: "error",
-						error: "无效的JSON消息",
-					}),
-				);
-				return;
-			}
+			rawMessage = JSON.parse(data.toString());
+		} catch {
+			ws.send(
+				JSON.stringify({
+					type: "error",
+					error: "无效的JSON消息",
+				}),
+			);
+			return;
+		}
 
+		try {
 			const message = MessageSchema.parse(rawMessage);
 
 			switch (message.type) {
 				case "init": {
-					const info = await gatewaySession.initialize(message.workingDir, message.sessionId);
+					const info = await gatewaySession.initialize(
+						message.workingDir,
+						message.sessionId,
+					);
 					ws.send(
 						JSON.stringify({
 							type: "initialized",
@@ -221,7 +230,11 @@ wss.on("connection", (ws) => {
 					break;
 				}
 				case "set_model": {
-					await gatewaySession.setModel(message.provider, message.modelId, message.thinkingLevel);
+					await gatewaySession.setModel(
+						message.provider,
+						message.modelId,
+						message.thinkingLevel,
+					);
 					break;
 				}
 				case "list_models": {
@@ -233,7 +246,11 @@ wss.on("connection", (ws) => {
 					break;
 				}
 				case "tool_request": {
-					await gatewaySession.executeTool(message.toolName, message.args, message.toolCallId);
+					await gatewaySession.executeTool(
+						message.toolName,
+						message.args,
+						message.toolCallId,
+					);
 					break;
 				}
 				case "model_change": {
@@ -255,18 +272,59 @@ wss.on("connection", (ws) => {
 					);
 					break;
 				}
+				case "change_dir": {
+					try {
+						// Re-initialize session with new working directory
+						const info = await gatewaySession.initialize(message.path);
+						ws.send(
+							JSON.stringify({
+								type: "dir_changed",
+								cwd: info.workingDir,
+								sessionId: info.sessionId,
+								sessionFile: info.sessionFile,
+								pid: process.pid,
+							}),
+						);
+						logger.info(`工作目录已更改: ${message.path}`);
+					} catch (error) {
+						logger.error(
+							`更改工作目录失败: ${error instanceof Error ? error.message : String(error)}`,
+						);
+						ws.send(
+							JSON.stringify({
+								type: "error",
+								error:
+									error instanceof Error
+										? error.message
+										: "Failed to change directory",
+							}),
+						);
+					}
+					break;
+				}
 			}
 		} catch (error) {
-			logger.error("WebSocket消息处理错误:", {}, error instanceof Error ? error : undefined);
+			// 记录收到的原始消息以便调试
+			logger.error(
+				"WebSocket消息处理错误，收到的消息:",
+				{ rawMessage },
+				error instanceof Error ? error : undefined,
+			);
 			try {
 				ws.send(
 					JSON.stringify({
 						type: "error",
 						error: error instanceof Error ? error.message : "无效消息",
+						// 添加更多调试信息
+						receivedType: (rawMessage as any)?.type,
 					}),
 				);
 			} catch (sendError) {
-				logger.error("发送错误消息失败:", {}, sendError instanceof Error ? sendError : undefined);
+				logger.error(
+					"发送错误消息失败:",
+					{},
+					sendError instanceof Error ? sendError : undefined,
+				);
 			}
 		}
 	});
@@ -366,4 +424,4 @@ if (isMainModule) {
 // 导出（用于测试）
 // ============================================================================
 
-export { app, server, wss, llmLogManager, GatewaySession };
+export { app, GatewaySession, llmLogManager, server, wss };

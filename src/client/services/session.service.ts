@@ -69,18 +69,28 @@ export class SessionService extends BaseService {
 		try {
 			return await this.get<UserSettings>("/settings");
 		} catch (error) {
-			throw new ServiceError("GET_SETTINGS_FAILED", "Failed to get user settings", error);
+			throw new ServiceError(
+				"GET_SETTINGS_FAILED",
+				"Failed to get user settings",
+				error,
+			);
 		}
 	}
 
 	/**
 	 * 更新用户设置
 	 */
-	async updateUserSettings(settings: Partial<UserSettings>): Promise<UserSettings> {
+	async updateUserSettings(
+		settings: Partial<UserSettings>,
+	): Promise<UserSettings> {
 		try {
 			return await this.post<UserSettings>("/settings/update", settings);
 		} catch (error) {
-			throw new ServiceError("UPDATE_SETTINGS_FAILED", "Failed to update user settings", error);
+			throw new ServiceError(
+				"UPDATE_SETTINGS_FAILED",
+				"Failed to update user settings",
+				error,
+			);
 		}
 	}
 
@@ -91,7 +101,11 @@ export class SessionService extends BaseService {
 		try {
 			return await this.post<UserSettings>("/settings/reset", {});
 		} catch (error) {
-			throw new ServiceError("RESET_SETTINGS_FAILED", "Failed to reset user settings", error);
+			throw new ServiceError(
+				"RESET_SETTINGS_FAILED",
+				"Failed to reset user settings",
+				error,
+			);
 		}
 	}
 
@@ -102,7 +116,11 @@ export class SessionService extends BaseService {
 		try {
 			return await this.get<WorkspaceInfo>("/workspace/current");
 		} catch (error) {
-			throw new ServiceError("GET_WORKSPACE_FAILED", "Failed to get current workspace", error);
+			throw new ServiceError(
+				"GET_WORKSPACE_FAILED",
+				"Failed to get current workspace",
+				error,
+			);
 		}
 	}
 
@@ -113,7 +131,11 @@ export class SessionService extends BaseService {
 		try {
 			return await this.post<WorkspaceInfo>("/workspace/switch", { path });
 		} catch (error) {
-			throw new ServiceError("SWITCH_WORKSPACE_FAILED", "Failed to switch workspace", error);
+			throw new ServiceError(
+				"SWITCH_WORKSPACE_FAILED",
+				"Failed to switch workspace",
+				error,
+			);
 		}
 	}
 
@@ -122,10 +144,17 @@ export class SessionService extends BaseService {
 	 */
 	async getRecentWorkspaces(limit: number = 10): Promise<WorkspaceInfo[]> {
 		try {
-			const response = await this.get<{ workspaces: WorkspaceInfo[] }>("/workspace/recent", { limit });
+			const response = await this.get<{ workspaces: WorkspaceInfo[] }>(
+				"/workspace/recent",
+				{ limit },
+			);
 			return response.workspaces;
 		} catch (error) {
-			throw new ServiceError("GET_RECENT_WORKSPACES_FAILED", "Failed to get recent workspaces", error);
+			throw new ServiceError(
+				"GET_RECENT_WORKSPACES_FAILED",
+				"Failed to get recent workspaces",
+				error,
+			);
 		}
 	}
 
@@ -136,7 +165,11 @@ export class SessionService extends BaseService {
 		try {
 			await this.post("/workspace/add-recent", { path });
 		} catch (error) {
-			throw new ServiceError("ADD_RECENT_WORKSPACE_FAILED", "Failed to add workspace to recent", error);
+			throw new ServiceError(
+				"ADD_RECENT_WORKSPACE_FAILED",
+				"Failed to add workspace to recent",
+				error,
+			);
 		}
 	}
 
@@ -147,7 +180,11 @@ export class SessionService extends BaseService {
 		try {
 			await this.post("/workspace/remove-recent", { path });
 		} catch (error) {
-			throw new ServiceError("REMOVE_RECENT_WORKSPACE_FAILED", "Failed to remove workspace from recent", error);
+			throw new ServiceError(
+				"REMOVE_RECENT_WORKSPACE_FAILED",
+				"Failed to remove workspace from recent",
+				error,
+			);
 		}
 	}
 
@@ -158,14 +195,21 @@ export class SessionService extends BaseService {
 		try {
 			return await this.get<SessionStats>("/session/stats");
 		} catch (error) {
-			throw new ServiceError("GET_SESSION_STATS_FAILED", "Failed to get session stats", error);
+			throw new ServiceError(
+				"GET_SESSION_STATS_FAILED",
+				"Failed to get session stats",
+				error,
+			);
 		}
 	}
 
 	/**
 	 * 导出会话数据
 	 */
-	async exportSessions(sessionIds: string[], format: "json" | "markdown" | "html" = "json"): Promise<Blob> {
+	async exportSessions(
+		sessionIds: string[],
+		format: "json" | "markdown" | "html" = "json",
+	): Promise<Blob> {
 		try {
 			const response = await fetch(`/api/session/export?format=${format}`, {
 				method: "POST",
@@ -179,22 +223,35 @@ export class SessionService extends BaseService {
 
 			return await response.blob();
 		} catch (error) {
-			throw new ServiceError("EXPORT_SESSIONS_FAILED", "Failed to export sessions", error);
+			throw new ServiceError(
+				"EXPORT_SESSIONS_FAILED",
+				"Failed to export sessions",
+				error,
+			);
 		}
 	}
 
 	/**
 	 * 导入会话数据
 	 */
-	async importSessions(file: File): Promise<{ imported: number; failed: number }> {
+	async importSessions(
+		file: File,
+	): Promise<{ imported: number; failed: number }> {
 		try {
 			const formData = new FormData();
 			formData.append("file", file);
 
-			const response = await this.post<{ imported: number; failed: number }>("/session/import", formData);
+			const response = await this.post<{ imported: number; failed: number }>(
+				"/session/import",
+				formData,
+			);
 			return response;
 		} catch (error) {
-			throw new ServiceError("IMPORT_SESSIONS_FAILED", "Failed to import sessions", error);
+			throw new ServiceError(
+				"IMPORT_SESSIONS_FAILED",
+				"Failed to import sessions",
+				error,
+			);
 		}
 	}
 
@@ -205,7 +262,11 @@ export class SessionService extends BaseService {
 		try {
 			return await this.post<BackupInfo>("/backup/create", { description });
 		} catch (error) {
-			throw new ServiceError("CREATE_BACKUP_FAILED", "Failed to create backup", error);
+			throw new ServiceError(
+				"CREATE_BACKUP_FAILED",
+				"Failed to create backup",
+				error,
+			);
 		}
 	}
 
@@ -214,10 +275,16 @@ export class SessionService extends BaseService {
 	 */
 	async getBackups(): Promise<BackupInfo[]> {
 		try {
-			const response = await this.get<{ backups: BackupInfo[] }>("/backup/list");
+			const response = await this.get<{ backups: BackupInfo[] }>(
+				"/backup/list",
+			);
 			return response.backups;
 		} catch (error) {
-			throw new ServiceError("GET_BACKUPS_FAILED", "Failed to get backups", error);
+			throw new ServiceError(
+				"GET_BACKUPS_FAILED",
+				"Failed to get backups",
+				error,
+			);
 		}
 	}
 
@@ -228,7 +295,11 @@ export class SessionService extends BaseService {
 		try {
 			await this.post("/backup/restore", { backupId });
 		} catch (error) {
-			throw new ServiceError("RESTORE_BACKUP_FAILED", "Failed to restore backup", error);
+			throw new ServiceError(
+				"RESTORE_BACKUP_FAILED",
+				"Failed to restore backup",
+				error,
+			);
 		}
 	}
 
@@ -239,7 +310,11 @@ export class SessionService extends BaseService {
 		try {
 			await this.post("/backup/delete", { backupId });
 		} catch (error) {
-			throw new ServiceError("DELETE_BACKUP_FAILED", "Failed to delete backup", error);
+			throw new ServiceError(
+				"DELETE_BACKUP_FAILED",
+				"Failed to delete backup",
+				error,
+			);
 		}
 	}
 
@@ -271,7 +346,11 @@ export class SessionService extends BaseService {
 		try {
 			return await this.get("/system/info");
 		} catch (error) {
-			throw new ServiceError("GET_SYSTEM_INFO_FAILED", "Failed to get system info", error);
+			throw new ServiceError(
+				"GET_SYSTEM_INFO_FAILED",
+				"Failed to get system info",
+				error,
+			);
 		}
 	}
 
@@ -300,7 +379,11 @@ export class SessionService extends BaseService {
 		try {
 			return await this.get("/system/metrics");
 		} catch (error) {
-			throw new ServiceError("GET_METRICS_FAILED", "Failed to get performance metrics", error);
+			throw new ServiceError(
+				"GET_METRICS_FAILED",
+				"Failed to get performance metrics",
+				error,
+			);
 		}
 	}
 
@@ -315,7 +398,11 @@ export class SessionService extends BaseService {
 		try {
 			return await this.post("/system/cleanup", {});
 		} catch (error) {
-			throw new ServiceError("CLEANUP_FAILED", "Failed to cleanup temp files", error);
+			throw new ServiceError(
+				"CLEANUP_FAILED",
+				"Failed to cleanup temp files",
+				error,
+			);
 		}
 	}
 
@@ -326,7 +413,11 @@ export class SessionService extends BaseService {
 		try {
 			await this.post("/system/reset", {});
 		} catch (error) {
-			throw new ServiceError("RESET_APP_FAILED", "Failed to reset app state", error);
+			throw new ServiceError(
+				"RESET_APP_FAILED",
+				"Failed to reset app state",
+				error,
+			);
 		}
 	}
 }

@@ -5,7 +5,13 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
-export type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
+export type ThinkingLevel =
+	| "off"
+	| "minimal"
+	| "low"
+	| "medium"
+	| "high"
+	| "xhigh";
 export type Theme = "dark" | "light";
 export type FontSize = "tiny" | "small" | "medium" | "large";
 
@@ -70,7 +76,7 @@ export const useSessionStore = create<SessionState & SessionActions>()(
 				currentSessionId: null,
 				sessions: [],
 				currentModel: null,
-				thinkingLevel: "medium",
+				thinkingLevel: "off",
 				theme: "dark",
 				fontSize: "tiny",
 				currentDir: "/root",
@@ -95,7 +101,10 @@ export const useSessionStore = create<SessionState & SessionActions>()(
 				setThinkingLevel: (level) => set({ thinkingLevel: level }),
 				setTheme: (theme) => set({ theme }),
 				setFontSize: (size) => set({ fontSize: size }),
-				toggleTheme: () => set((state) => ({ theme: state.theme === "dark" ? "light" : "dark" })),
+				toggleTheme: () =>
+					set((state) => ({
+						theme: state.theme === "dark" ? "light" : "dark",
+					})),
 
 				// 工作区
 				setCurrentDir: (dir) => set({ currentDir: dir }),
@@ -117,6 +126,9 @@ export const useSessionStore = create<SessionState & SessionActions>()(
 			{
 				name: "session-store",
 				partialize: (state) => ({
+					currentSessionId: state.currentSessionId,
+					currentDir: state.currentDir,
+					currentModel: state.currentModel,
 					thinkingLevel: state.thinkingLevel,
 					theme: state.theme,
 					fontSize: state.fontSize,

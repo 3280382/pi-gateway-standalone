@@ -1,23 +1,23 @@
 {
-  "version": "1.0.0",
-  "description": "Mock data configuration for parallel development",
-  "modes": {
-    "ui": {
-      "enabled": true,
-      "apiBaseUrl": "/mock-api",
-      "useMockData": true
-    },
-    "backend": {
-      "enabled": false,
-      "apiBaseUrl": "http://localhost:3000",
-      "useMockData": false
-    }
-  },
-  "endpoints": {
-    "sessions": "/mock-api/sessions",
-    "messages": "/mock-api/messages",
-    "files": "/mock-api/files",
-    "models": "/mock-api/models",
-    "systemPrompt": "/mock-api/system-prompt"
-  }
+	"version": "1.0.0",
+	"description": "Mock data configuration for parallel development",
+	"modes": {
+		"ui": {
+			"enabled": true,
+			"apiBaseUrl": "/mock-api",
+			"useMockData": true
+		},
+		"backend": {
+			"enabled": false,
+			"apiBaseUrl": "http://localhost:3000",
+			"useMockData": false
+		}
+	},
+	"endpoints": {
+		"sessions": "/mock-api/sessions",
+		"messages": "/mock-api/messages",
+		"files": "/mock-api/files",
+		"models": "/mock-api/models",
+		"systemPrompt": "/mock-api/system-prompt"
+	}
 }

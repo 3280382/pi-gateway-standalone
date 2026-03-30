@@ -51,7 +51,9 @@ describe("MessageModel", () => {
 			const message = MessageModel.createSystemMessage("System message");
 
 			expect(message.role).toBe("system");
-			expect(message.content).toEqual([{ type: "text", text: "System message" }]);
+			expect(message.content).toEqual([
+				{ type: "text", text: "System message" },
+			]);
 		});
 
 		it("应该从JSON创建消息", () => {
@@ -86,7 +88,10 @@ describe("MessageModel", () => {
 
 			expect(message.content).toHaveLength(2);
 			expect(message.content[0]).toEqual({ type: "text", text: "Hello" });
-			expect(message.content[1]).toEqual({ type: "thinking", thinking: "Thinking..." });
+			expect(message.content[1]).toEqual({
+				type: "thinking",
+				thinking: "Thinking...",
+			});
 		});
 
 		it("应该获取文本内容", () => {

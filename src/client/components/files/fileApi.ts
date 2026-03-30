@@ -3,7 +3,13 @@
  */
 
 import { fetchApi } from "@/services/api/client";
-import type { BrowseResponse, FileExecuteResponse, FileItem, FileReadResponse, FileWriteResponse } from "./types";
+import type {
+	BrowseResponse,
+	FileExecuteResponse,
+	FileItem,
+	FileReadResponse,
+	FileWriteResponse,
+} from "./types";
 
 // ============================================================================
 // API Functions
@@ -14,7 +20,9 @@ import type { BrowseResponse, FileExecuteResponse, FileItem, FileReadResponse, F
  */
 export async function browseDirectory(path: string): Promise<FileItem[]> {
 	const encodedPath = encodeURIComponent(path);
-	const response = await fetchApi<BrowseResponse>(`/browse?path=${encodedPath}`);
+	const response = await fetchApi<BrowseResponse>(
+		`/browse?path=${encodedPath}`,
+	);
 
 	return response.files.map((file) => ({
 		name: file.name,
@@ -29,9 +37,13 @@ export async function browseDirectory(path: string): Promise<FileItem[]> {
 /**
  * Read file content
  */
-export async function readFile(path: string): Promise<{ content: string; language?: string }> {
+export async function readFile(
+	path: string,
+): Promise<{ content: string; language?: string }> {
 	const encodedPath = encodeURIComponent(path);
-	const response = await fetchApi<FileReadResponse>(`/file/read?path=${encodedPath}`);
+	const response = await fetchApi<FileReadResponse>(
+		`/file/read?path=${encodedPath}`,
+	);
 
 	return {
 		content: response.content,
@@ -60,7 +72,9 @@ export async function executeFile(path: string): Promise<{
 }> {
 	const startTime = Date.now();
 	const encodedPath = encodeURIComponent(path);
-	const response = await fetchApi<FileExecuteResponse>(`/file/execute?path=${encodedPath}`);
+	const response = await fetchApi<FileExecuteResponse>(
+		`/file/execute?path=${encodedPath}`,
+	);
 	const duration = Date.now() - startTime;
 
 	return {

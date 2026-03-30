@@ -4,7 +4,13 @@
 
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { ChatSearchFilters, ChatState, Message, MessageContent, ToolExecution } from "@/types/chat";
+import type {
+	ChatSearchFilters,
+	ChatState,
+	Message,
+	MessageContent,
+	ToolExecution,
+} from "@/types/chat";
 
 // ============================================================================
 // Initial State Factory
@@ -18,6 +24,7 @@ const createInitialState = (): Omit<
 	| "updateMessage"
 	| "deleteMessage"
 	| "clearMessages"
+	| "setMessages"
 	| "toggleMessageCollapse"
 	| "toggleThinkingCollapse"
 	| "setShowThinking"
@@ -99,7 +106,9 @@ export const useChatStore = create<ChatState>()(
 			updateMessage: (messageId: string, updates: Partial<Message>) => {
 				set(
 					(state) => ({
-						messages: state.messages.map((m) => (m.id === messageId ? { ...m, ...updates } : m)),
+						messages: state.messages.map((m) =>
+							m.id === messageId ? { ...m, ...updates } : m,
+						),
 					}),
 					false,
 					"updateMessage",
@@ -117,14 +126,24 @@ export const useChatStore = create<ChatState>()(
 			},
 
 			clearMessages: () => {
-				set({ messages: [], currentStreamingMessage: null }, false, "clearMessages");
+				set(
+					{ messages: [], currentStreamingMessage: null },
+					false,
+					"clearMessages",
+				);
+			},
+
+			setMessages: (messages: Message[]) => {
+				set({ messages, currentStreamingMessage: null }, false, "setMessages");
 			},
 
 			toggleMessageCollapse: (messageId: string) => {
 				set(
 					(state) => ({
 						messages: state.messages.map((m) =>
-							m.id === messageId ? { ...m, isMessageCollapsed: !m.isMessageCollapsed } : m,
+							m.id === messageId
+								? { ...m, isMessageCollapsed: !m.isMessageCollapsed }
+								: m,
 						),
 					}),
 					false,
@@ -136,7 +155,9 @@ export const useChatStore = create<ChatState>()(
 				set(
 					(state) => ({
 						messages: state.messages.map((m) =>
-							m.id === messageId ? { ...m, isThinkingCollapsed: !m.isThinkingCollapsed } : m,
+							m.id === messageId
+								? { ...m, isThinkingCollapsed: !m.isThinkingCollapsed }
+								: m,
 						),
 					}),
 					false,
@@ -172,7 +193,9 @@ export const useChatStore = create<ChatState>()(
 						currentStreamingMessage: state.currentStreamingMessage
 							? {
 									...state.currentStreamingMessage,
-									content: [{ type: "text", text: state.streamingContent + text }],
+									content: [
+										{ type: "text", text: state.streamingContent + text },
+									],
 								}
 							: null,
 					}),
@@ -212,7 +235,10 @@ export const useChatStore = create<ChatState>()(
 					(state) => ({
 						isStreaming: false,
 						messages: state.currentStreamingMessage
-							? [...state.messages, { ...state.currentStreamingMessage, isStreaming: false }]
+							? [
+									...state.messages,
+									{ ...state.currentStreamingMessage, isStreaming: false },
+								]
 							: state.messages,
 						currentStreamingMessage: null,
 						streamingContent: "",
@@ -292,7 +318,9 @@ export const useChatStore = create<ChatState>()(
 			// Load session from server
 			loadSession: async (sessionPath: string) => {
 				try {
-					const response = await fetch(`/api/session?path=${encodeURIComponent(sessionPath)}`);
+					const response = await fetch(
+						`/api/session?path=${encodeURIComponent(sessionPath)}`,
+					);
 					if (!response.ok) throw new Error("Failed to load session");
 
 					const data = await response.json();
@@ -366,16 +394,24 @@ export const useChatStore = create<ChatState>()(
 
 					// Second pass: handle toolResult messages
 					for (const entry of sessionMessages) {
-						if (entry.type === "message" && entry.message?.role === "toolResult" && entry.parentId) {
+						if (
+							entry.type === "message" &&
+							entry.message?.role === "toolResult" &&
+							entry.parentId
+						) {
 							const parentMsg = messageMap.get(entry.parentId);
 							if (parentMsg && entry.message.toolCallId) {
 								// Find the tool content in parent message and update it
 								const toolContent = parentMsg.content.find(
-									(tc) => tc.type === "tool" && tc.toolCallId === entry.message.toolCallId,
+									(tc) =>
+										tc.type === "tool" &&
+										tc.toolCallId === entry.message.toolCallId,
 								);
 								if (toolContent) {
 									toolContent.output = entry.message.content?.[0]?.text || "";
-									toolContent.error = entry.message.isError ? "Error occurred" : undefined;
+									toolContent.error = entry.message.isError
+										? "Error occurred"
+										: undefined;
 								}
 							}
 						}
@@ -402,7 +438,9 @@ export const useChatStore = create<ChatState>()(
 			// Regenerate message
 			regenerateMessage: (messageId: string) => {
 				const state = get();
-				const messageIndex = state.messages.findIndex((m) => m.id === messageId);
+				const messageIndex = state.messages.findIndex(
+					(m) => m.id === messageId,
+				);
 				if (messageIndex === -1) return;
 
 				// Find the user message that triggered this assistant message
@@ -441,7 +479,9 @@ export const useChatStore = create<ChatState>()(
 				if (text) {
 					// Send via WebSocket - this would be handled by the API layer
 					if (typeof window !== "undefined") {
-						window.dispatchEvent(new CustomEvent("chat:resend", { detail: { text } }));
+						window.dispatchEvent(
+							new CustomEvent("chat:resend", { detail: { text } }),
+						);
 					}
 				}
 			},
@@ -460,7 +500,8 @@ export const useChatStore = create<ChatState>()(
 // ============================================================================
 
 export const selectMessages = (state: ChatState) => state.messages;
-export const selectCurrentStreamingMessage = (state: ChatState) => state.currentStreamingMessage;
+export const selectCurrentStreamingMessage = (state: ChatState) =>
+	state.currentStreamingMessage;
 export const selectInputText = (state: ChatState) => state.inputText;
 export const selectIsStreaming = (state: ChatState) => state.isStreaming;
 export const selectShowThinking = (state: ChatState) => state.showThinking;

@@ -3,9 +3,9 @@
  * Real-time log display with configuration options
  */
 
-import { useEffect, useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { LlmLogConfig, LlmLogEntry } from "@/stores/sidebarExtrasStore";
 import { useSidebarExtrasStore } from "@/stores/sidebarExtrasStore";
-import type { LlmLogEntry, LlmLogConfig } from "@/stores/sidebarExtrasStore";
 import styles from "./LlmLogModal.module.css";
 
 export function LlmLogModal() {
@@ -59,7 +59,10 @@ export function LlmLogModal() {
 
 		// Set up interval
 		if (config.refreshInterval > 0) {
-			intervalRef.current = setInterval(fetchLogs, config.refreshInterval * 1000);
+			intervalRef.current = setInterval(
+				fetchLogs,
+				config.refreshInterval * 1000,
+			);
 		}
 
 		return () => {
@@ -86,13 +89,19 @@ export function LlmLogModal() {
 		setConfig({ enabled: !config.enabled });
 	}, [config.enabled, setConfig]);
 
-	const handleRefreshIntervalChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-		setConfig({ refreshInterval: parseInt(e.target.value, 10) });
-	}, [setConfig]);
+	const handleRefreshIntervalChange = useCallback(
+		(e: React.ChangeEvent<HTMLSelectElement>) => {
+			setConfig({ refreshInterval: parseInt(e.target.value, 10) });
+		},
+		[setConfig],
+	);
 
-	const handleTruncateChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-		setConfig({ truncateLength: parseInt(e.target.value, 10) });
-	}, [setConfig]);
+	const handleTruncateChange = useCallback(
+		(e: React.ChangeEvent<HTMLSelectElement>) => {
+			setConfig({ truncateLength: parseInt(e.target.value, 10) });
+		},
+		[setConfig],
+	);
 
 	// Close on Escape key
 	useEffect(() => {
@@ -139,10 +148,18 @@ export function LlmLogModal() {
 						>
 							<SettingsIcon />
 						</button>
-						<button className={styles.headerBtn} onClick={handleClear} title="Clear logs">
+						<button
+							className={styles.headerBtn}
+							onClick={handleClear}
+							title="Clear logs"
+						>
 							<ClearIcon />
 						</button>
-						<button className={styles.closeBtn} onClick={handleClose} aria-label="Close">
+						<button
+							className={styles.closeBtn}
+							onClick={handleClose}
+							aria-label="Close"
+						>
 							<CloseIcon />
 						</button>
 					</div>
@@ -188,9 +205,16 @@ export function LlmLogModal() {
 					) : (
 						<div className={styles.logList}>
 							{logs.map((log, index) => (
-								<div key={index} className={`${styles.logEntry} ${styles[log.level]}`}>
-									<span className={styles.logTime}>{formatTimestamp(log.timestamp)}</span>
-									<span className={styles.logLevel}>{log.level.toUpperCase()}</span>
+								<div
+									key={index}
+									className={`${styles.logEntry} ${styles[log.level]}`}
+								>
+									<span className={styles.logTime}>
+										{formatTimestamp(log.timestamp)}
+									</span>
+									<span className={styles.logLevel}>
+										{log.level.toUpperCase()}
+									</span>
 									<span className={styles.logMessage}>{log.message}</span>
 								</div>
 							))}
@@ -220,7 +244,14 @@ function formatTimestamp(timestamp: string): string {
 
 function CloseIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="16" height="16">
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+			width="16"
+			height="16"
+		>
 			<line x1="18" y1="6" x2="6" y2="18" />
 			<line x1="6" y1="6" x2="18" y2="18" />
 		</svg>
@@ -229,7 +260,14 @@ function CloseIcon() {
 
 function PlayIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="16" height="16">
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+			width="16"
+			height="16"
+		>
 			<polygon points="5 3 19 12 5 21 5 3" />
 		</svg>
 	);
@@ -237,7 +275,14 @@ function PlayIcon() {
 
 function PauseIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="16" height="16">
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+			width="16"
+			height="16"
+		>
 			<rect x="6" y="4" width="4" height="16" />
 			<rect x="14" y="4" width="4" height="16" />
 		</svg>
@@ -246,7 +291,14 @@ function PauseIcon() {
 
 function SettingsIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="16" height="16">
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+			width="16"
+			height="16"
+		>
 			<circle cx="12" cy="12" r="3" />
 			<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
 		</svg>
@@ -255,7 +307,14 @@ function SettingsIcon() {
 
 function ClearIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="16" height="16">
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+			width="16"
+			height="16"
+		>
 			<polyline points="3 6 5 6 21 6" />
 			<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
 		</svg>

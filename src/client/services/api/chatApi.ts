@@ -104,7 +104,9 @@ export function useChatController(): ChatController {
 // Streaming Handlers Setup
 // ============================================================================
 
-function setupStreamingHandlers(store: ReturnType<typeof useChatStore.getState>) {
+function setupStreamingHandlers(
+	store: ReturnType<typeof useChatStore.getState>,
+) {
 	// Track handlers so we can clean them up
 	const handlers: (() => void)[] = [];
 

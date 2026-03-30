@@ -3,19 +3,31 @@
  */
 
 import { vi } from "vitest";
-import type { FontSize, SearchFilters, Session, SidebarState, Theme, WorkingDirectory } from "@/types/sidebar";
+import type {
+	FontSize,
+	SearchFilters,
+	Session,
+	SidebarState,
+	Theme,
+	WorkingDirectory,
+} from "@/types/sidebar";
 
 // ============================================================================
 // Mock Data Factories
 // ============================================================================
 
-export const createMockWorkingDirectory = (overrides?: Partial<WorkingDirectory>): WorkingDirectory => ({
+export const createMockWorkingDirectory = (
+	overrides?: Partial<WorkingDirectory>,
+): WorkingDirectory => ({
 	path: "/home/user/project",
 	displayName: "project",
 	...overrides,
 });
 
-export const createMockSession = (id: string, overrides?: Partial<Session>): Session => ({
+export const createMockSession = (
+	id: string,
+	overrides?: Partial<Session>,
+): Session => ({
 	id,
 	name: `Session ${id}`,
 	messageCount: Math.floor(Math.random() * 20) + 1,
@@ -24,7 +36,9 @@ export const createMockSession = (id: string, overrides?: Partial<Session>): Ses
 	...overrides,
 });
 
-export const createMockSearchFilters = (overrides?: Partial<SearchFilters>): SearchFilters => ({
+export const createMockSearchFilters = (
+	overrides?: Partial<SearchFilters>,
+): SearchFilters => ({
 	user: true,
 	assistant: true,
 	thinking: true,
@@ -32,9 +46,15 @@ export const createMockSearchFilters = (overrides?: Partial<SearchFilters>): Sea
 	...overrides,
 });
 
-export const createMockSidebarState = (overrides?: Partial<SidebarState>): SidebarState => ({
+export const createMockSidebarState = (
+	overrides?: Partial<SidebarState>,
+): SidebarState => ({
 	workingDir: createMockWorkingDirectory(),
-	recentWorkspaces: ["/home/user/project", "/home/user/docs", "/home/user/experiments"],
+	recentWorkspaces: [
+		"/home/user/project",
+		"/home/user/docs",
+		"/home/user/experiments",
+	],
 	sessions: [
 		createMockSession("1", { name: "API Integration", messageCount: 15 }),
 		createMockSession("2", { name: "Bug Fix Session", messageCount: 8 }),
@@ -61,7 +81,9 @@ export interface MockSidebarStore {
 	getInitialState: () => SidebarState;
 }
 
-export const createMockSidebarStore = (initialState?: Partial<SidebarState>): MockSidebarStore => {
+export const createMockSidebarStore = (
+	initialState?: Partial<SidebarState>,
+): MockSidebarStore => {
 	let state = createMockSidebarState(initialState);
 	const listeners = new Set<(state: SidebarState) => void>();
 

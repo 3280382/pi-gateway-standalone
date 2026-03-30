@@ -13,7 +13,7 @@ describe("Session Loading", () => {
 
 	beforeAll(async () => {
 		// Start server
-		const serverPath = join(__dirname, "..", "dist", "server.js");
+		const serverPath = join(__dirname, "..", "..", "..", "dist", "server.js");
 		serverProcess = spawn("node", [serverPath], {
 			env: { ...process.env, PORT: String(SERVER_PORT) },
 			stdio: "pipe",
@@ -21,7 +21,10 @@ describe("Session Loading", () => {
 
 		// Wait for server to start
 		await new Promise<void>((resolve, reject) => {
-			const timeout = setTimeout(() => reject(new Error("Server startup timeout")), 15000);
+			const timeout = setTimeout(
+				() => reject(new Error("Server startup timeout")),
+				15000,
+			);
 			serverProcess.stdout?.on("data", (data) => {
 				if (data.toString().includes("Pi Gateway Server")) {
 					clearTimeout(timeout);
@@ -45,7 +48,9 @@ describe("Session Loading", () => {
 	describe("Session API", () => {
 		it("should load session file via API", async () => {
 			// First get available sessions
-			const sessionsResponse = await fetch(`${SERVER_URL}/api/sessions?cwd=/root/.pi/agent`);
+			const sessionsResponse = await fetch(
+				`${SERVER_URL}/api/sessions?cwd=/root/.pi/agent`,
+			);
 			expect(sessionsResponse.ok).toBe(true);
 
 			const sessionsData = await sessionsResponse.json();
@@ -72,11 +77,15 @@ describe("Session Loading", () => {
 			expect(sessionData.entries.length).toBeGreaterThan(0);
 
 			// Check entry types
-			const entryTypes = sessionData.entries.map((e: { type: string }) => e.type);
+			const entryTypes = sessionData.entries.map(
+				(e: { type: string }) => e.type,
+			);
 			console.log("Entry types found:", [...new Set(entryTypes)]);
 
 			// Verify session entry exists
-			const sessionEntry = sessionData.entries.find((e: { type: string }) => e.type === "session");
+			const sessionEntry = sessionData.entries.find(
+				(e: { type: string }) => e.type === "session",
+			);
 			expect(sessionEntry).toBeDefined();
 		});
 
@@ -136,11 +145,15 @@ describe("Session Loading", () => {
 			// Check if loadAndRenderRecentSession function exists (unified function)
 			const hasLoadFunction = await page.evaluate(() => {
 				return (
-					typeof (window as { loadAndRenderRecentSession?: () => void }).loadAndRenderRecentSession !== "undefined"
+					typeof (window as { loadAndRenderRecentSession?: () => void })
+						.loadAndRenderRecentSession !== "undefined"
 				);
 			});
 
-			console.log("loadAndRenderRecentSession function exists:", hasLoadFunction);
+			console.log(
+				"loadAndRenderRecentSession function exists:",
+				hasLoadFunction,
+			);
 			// Function should be defined (even if no sessions to load)
 			expect(hasLoadFunction).toBe(true);
 		});
@@ -157,15 +170,18 @@ describe("Session Loading", () => {
 				const firstMessage = page.locator(".message").first();
 
 				// Should have message header
-				const hasHeader = (await firstMessage.locator(".message-header").count()) > 0;
+				const hasHeader =
+					(await firstMessage.locator(".message-header").count()) > 0;
 				expect(hasHeader).toBe(true);
 
 				// Should have message content
-				const hasContent = (await firstMessage.locator(".message-content").count()) > 0;
+				const hasContent =
+					(await firstMessage.locator(".message-content").count()) > 0;
 				expect(hasContent).toBe(true);
 
 				// Should have toggle button
-				const hasToggle = (await firstMessage.locator(".message-toggle").count()) > 0;
+				const hasToggle =
+					(await firstMessage.locator(".message-toggle").count()) > 0;
 				expect(hasToggle).toBe(true);
 			}
 		});
@@ -194,10 +210,14 @@ describe("Session Loading", () => {
 				// This relies on the function storing data or we can check the DOM
 				const messages = document.querySelectorAll(".message");
 				const tools = document.querySelectorAll(".tool-execution");
-				const assistantMessages = document.querySelectorAll(".message .message-avatar.assistant");
+				const assistantMessages = document.querySelectorAll(
+					".message .message-avatar.assistant",
+				);
 
 				// Check for assistant message content
-				const assistantContents = Array.from(document.querySelectorAll(".message-content")).map((el) => {
+				const assistantContents = Array.from(
+					document.querySelectorAll(".message-content"),
+				).map((el) => {
 					return {
 						childCount: el.children.length,
 						hasThinking: el.querySelector(".thinking-block") !== null,
@@ -236,13 +256,21 @@ describe("Session Loading", () => {
 				for (let i = 0; i < toolCount; i++) {
 					const tool = page.locator(".tool-execution").nth(i);
 					const statusText = await tool.locator(".tool-status").textContent();
-					const statusClass = await tool.locator(".tool-status").getAttribute("class");
-					console.log(`Tool ${i} status: "${statusText}", class: "${statusClass}"`);
+					const statusClass = await tool
+						.locator(".tool-status")
+						.getAttribute("class");
+					console.log(
+						`Tool ${i} status: "${statusText}", class: "${statusClass}"`,
+					);
 
 					// Status should be "done" (not "running") for completed tools
 					// If tool has content, it should be completed
 					const contentText = await tool.locator(".tool-content").textContent();
-					if (contentText && contentText.length > 0 && contentText !== "Executing...") {
+					if (
+						contentText &&
+						contentText.length > 0 &&
+						contentText !== "Executing..."
+					) {
 						expect(statusText).toBe("done");
 						expect(statusClass).toContain("completed");
 					}

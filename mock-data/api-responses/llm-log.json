@@ -1,80 +1,80 @@
 {
-  "enabled": true,
-  "logFilePath": "/root/.pi/logs/llm-gateway-ui.log",
-  "config": {
-    "logRequests": true,
-    "logResponses": true,
-    "logErrors": true,
-    "maxEntries": 1000
-  },
-  "logs": [
-    {
-      "timestamp": "2026-03-26T12:55:30.123Z",
-      "type": "request",
-      "provider": "kimi",
-      "model": "kimi-k2.5",
-      "messages": 3,
-      "tokens": 15420
-    },
-    {
-      "timestamp": "2026-03-26T12:55:32.456Z",
-      "type": "response",
-      "provider": "kimi",
-      "model": "kimi-k2.5",
-      "tokens": 892,
-      "duration": 2333
-    },
-    {
-      "timestamp": "2026-03-26T12:50:15.789Z",
-      "type": "request",
-      "provider": "kimi",
-      "model": "kimi-k2.5",
-      "messages": 5,
-      "tokens": 23100
-    },
-    {
-      "timestamp": "2026-03-26T12:50:18.012Z",
-      "type": "response",
-      "provider": "kimi",
-      "model": "kimi-k2.5",
-      "tokens": 1245,
-      "duration": 3223
-    },
-    {
-      "timestamp": "2026-03-26T12:48:41.229Z",
-      "type": "request",
-      "provider": "kimi",
-      "model": "kimi-k2.5",
-      "messages": 1,
-      "tokens": 42
-    },
-    {
-      "timestamp": "2026-03-26T12:48:54.769Z",
-      "type": "thinking",
-      "provider": "kimi",
-      "thinking": "用户问我在什么开发模式下。我需要检查一下当前的环境...",
-      "thinkingSignature": "reasoning_content"
-    },
-    {
-      "timestamp": "2026-03-26T12:49:02.116Z",
-      "type": "response",
-      "provider": "kimi",
-      "model": "kimi-k2.5",
-      "tokens": 306,
-      "duration": 12345
-    },
-    {
-      "timestamp": "2026-03-26T12:45:10.345Z",
-      "type": "error",
-      "provider": "kimi",
-      "error": "Rate limit exceeded",
-      "retryable": true
-    }
-  ],
-  "stats": {
-    "totalRequests": 156,
-    "totalTokens": 284920,
-    "averageLatency": 2340,
-    "errorRate": 0.02
-  }
+	"enabled": true,
+	"logFilePath": "/root/.pi/logs/llm-gateway-ui.log",
+	"config": {
+		"logRequests": true,
+		"logResponses": true,
+		"logErrors": true,
+		"maxEntries": 1000
+	},
+	"logs": [
+		{
+			"timestamp": "2026-03-26T12:55:30.123Z",
+			"type": "request",
+			"provider": "kimi",
+			"model": "kimi-k2.5",
+			"messages": 3,
+			"tokens": 15420
+		},
+		{
+			"timestamp": "2026-03-26T12:55:32.456Z",
+			"type": "response",
+			"provider": "kimi",
+			"model": "kimi-k2.5",
+			"tokens": 892,
+			"duration": 2333
+		},
+		{
+			"timestamp": "2026-03-26T12:50:15.789Z",
+			"type": "request",
+			"provider": "kimi",
+			"model": "kimi-k2.5",
+			"messages": 5,
+			"tokens": 23100
+		},
+		{
+			"timestamp": "2026-03-26T12:50:18.012Z",
+			"type": "response",
+			"provider": "kimi",
+			"model": "kimi-k2.5",
+			"tokens": 1245,
+			"duration": 3223
+		},
+		{
+			"timestamp": "2026-03-26T12:48:41.229Z",
+			"type": "request",
+			"provider": "kimi",
+			"model": "kimi-k2.5",
+			"messages": 1,
+			"tokens": 42
+		},
+		{
+			"timestamp": "2026-03-26T12:48:54.769Z",
+			"type": "thinking",
+			"provider": "kimi",
+			"thinking": "用户问我在什么开发模式下。我需要检查一下当前的环境...",
+			"thinkingSignature": "reasoning_content"
+		},
+		{
+			"timestamp": "2026-03-26T12:49:02.116Z",
+			"type": "response",
+			"provider": "kimi",
+			"model": "kimi-k2.5",
+			"tokens": 306,
+			"duration": 12345
+		},
+		{
+			"timestamp": "2026-03-26T12:45:10.345Z",
+			"type": "error",
+			"provider": "kimi",
+			"error": "Rate limit exceeded",
+			"retryable": true
+		}
+	],
+	"stats": {
+		"totalRequests": 156,
+		"totalTokens": 284920,
+		"averageLatency": 2340,
+		"errorRate": 0.02
+	}
 }

@@ -1,64 +1,64 @@
 {
-  "currentPath": "/root/pi-mono/packages/gateway",
-  "parentPath": "/root/pi-mono/packages",
-  "items": [
-    {
-      "name": "dist",
-      "path": "/root/pi-mono/packages/gateway/dist",
-      "isDirectory": true,
-      "size": 0,
-      "modified": "2026-03-26T16:40:45.162Z",
-      "description": "构建输出目录"
-    },
-    {
-      "name": "mock-data",
-      "path": "/root/pi-mono/packages/gateway/mock-data",
-      "isDirectory": true,
-      "size": 0,
-      "modified": "2026-03-26T16:40:45.162Z",
-      "description": "Mock数据目录"
-    },
-    {
-      "name": "node_modules",
-      "path": "/root/pi-mono/packages/gateway/node_modules",
-      "isDirectory": true,
-      "size": 0,
-      "modified": "2026-03-25T16:40:45.162Z",
-      "description": "依赖包目录"
-    },
-    {
-      "name": "src",
-      "path": "/root/pi-mono/packages/gateway/src",
-      "isDirectory": true,
-      "size": 0,
-      "modified": "2026-03-26T16:40:45.153Z",
-      "description": "源代码目录"
-    },
-    {
-      "name": "test",
-      "path": "/root/pi-mono/packages/gateway/test",
-      "isDirectory": true,
-      "size": 0,
-      "modified": "2026-03-26T16:40:45.162Z",
-      "description": "测试目录"
-    },
-    {
-      "name": "package.json",
-      "path": "/root/pi-mono/packages/gateway/package.json",
-      "isDirectory": false,
-      "size": 2500,
-      "modified": "2026-03-26T16:40:45.162Z",
-      "extension": "json",
-      "description": "项目配置文件"
-    },
-    {
-      "name": "README.md",
-      "path": "/root/pi-mono/packages/gateway/README.md",
-      "isDirectory": false,
-      "size": 4000,
-      "modified": "2026-03-26T16:40:45.162Z",
-      "extension": "md",
-      "description": "项目说明文档"
-    }
-  ]
+	"currentPath": "/root/pi-gateway-standalone",
+	"parentPath": "/root",
+	"items": [
+		{
+			"name": "dist",
+			"path": "/root/pi-gateway-standalone/dist",
+			"isDirectory": true,
+			"size": 0,
+			"modified": "2026-03-26T16:40:45.162Z",
+			"description": "构建输出目录"
+		},
+		{
+			"name": "mock-data",
+			"path": "/root/pi-gateway-standalone/mock-data",
+			"isDirectory": true,
+			"size": 0,
+			"modified": "2026-03-26T16:40:45.162Z",
+			"description": "Mock数据目录"
+		},
+		{
+			"name": "node_modules",
+			"path": "/root/pi-gateway-standalone/node_modules",
+			"isDirectory": true,
+			"size": 0,
+			"modified": "2026-03-25T16:40:45.162Z",
+			"description": "依赖包目录"
+		},
+		{
+			"name": "src",
+			"path": "/root/pi-gateway-standalone/src",
+			"isDirectory": true,
+			"size": 0,
+			"modified": "2026-03-26T16:40:45.153Z",
+			"description": "源代码目录"
+		},
+		{
+			"name": "test",
+			"path": "/root/pi-gateway-standalone/test",
+			"isDirectory": true,
+			"size": 0,
+			"modified": "2026-03-26T16:40:45.162Z",
+			"description": "测试目录"
+		},
+		{
+			"name": "package.json",
+			"path": "/root/pi-gateway-standalone/package.json",
+			"isDirectory": false,
+			"size": 2500,
+			"modified": "2026-03-26T16:40:45.162Z",
+			"extension": "json",
+			"description": "项目配置文件"
+		},
+		{
+			"name": "README.md",
+			"path": "/root/pi-gateway-standalone/README.md",
+			"isDirectory": false,
+			"size": 4000,
+			"modified": "2026-03-26T16:40:45.162Z",
+			"extension": "md",
+			"description": "项目说明文档"
+		}
+	]
 }

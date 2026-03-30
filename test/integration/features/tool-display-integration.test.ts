@@ -15,14 +15,17 @@ describe("Tool Display Integration", () => {
 	let serverProcess: ReturnType<typeof spawn>;
 
 	beforeAll(async () => {
-		const serverPath = join(__dirname, "..", "dist", "server.js");
+		const serverPath = join(__dirname, "..", "..", "..", "dist", "server.js");
 		serverProcess = spawn("node", [serverPath], {
 			env: { ...process.env, PORT: String(SERVER_PORT) },
 			stdio: "pipe",
 		});
 
 		await new Promise<void>((resolve, reject) => {
-			const timeout = setTimeout(() => reject(new Error("Server startup timeout")), 15000);
+			const timeout = setTimeout(
+				() => reject(new Error("Server startup timeout")),
+				15000,
+			);
 			serverProcess.stdout?.on("data", (data) => {
 				if (data.toString().includes("Pi Gateway Server")) {
 					clearTimeout(timeout);
@@ -42,7 +45,12 @@ describe("Tool Display Integration", () => {
 		async () => {
 			const ws = new WebSocket(WS_URL);
 
-			const events: Array<{ type: string; toolCallId?: string; toolName?: string; hasArgs?: boolean }> = [];
+			const events: Array<{
+				type: string;
+				toolCallId?: string;
+				toolName?: string;
+				hasArgs?: boolean;
+			}> = [];
 
 			await new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(() => {
@@ -53,7 +61,11 @@ describe("Tool Display Integration", () => {
 				ws.on("message", (data) => {
 					const msg = JSON.parse(data.toString());
 
-					if (msg.type === "toolcall_delta" || msg.type === "tool_start" || msg.type === "tool_end") {
+					if (
+						msg.type === "toolcall_delta" ||
+						msg.type === "tool_start" ||
+						msg.type === "tool_end"
+					) {
 						events.push({
 							type: msg.type,
 							toolCallId: msg.toolCallId,
@@ -138,7 +150,11 @@ describe("Tool Display Integration", () => {
 		async () => {
 			const ws = new WebSocket(WS_URL);
 
-			const toolEvents: Array<{ type: string; toolName: string; toolCallId: string }> = [];
+			const toolEvents: Array<{
+				type: string;
+				toolName: string;
+				toolCallId: string;
+			}> = [];
 
 			await new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(() => {
@@ -187,9 +203,14 @@ describe("Tool Display Integration", () => {
 			});
 
 			console.log("\n=== Multiple Tools Test ===");
-			console.log("Tool events:", toolEvents.map((e) => `${e.type}:${e.toolName}`).join(", "));
+			console.log(
+				"Tool events:",
+				toolEvents.map((e) => `${e.type}:${e.toolName}`).join(", "),
+			);
 
-			const writeTools = toolEvents.filter((e) => e.toolName === "write" && e.type === "tool_start");
+			const writeTools = toolEvents.filter(
+				(e) => e.toolName === "write" && e.type === "tool_start",
+			);
 			console.log(`Write tool calls: ${writeTools.length}`);
 
 			expect(writeTools.length).toBeGreaterThan(0);

@@ -92,12 +92,19 @@ interface UIActions {
 	setFilePanelWidth: (width: number) => void;
 
 	// Modal Actions
-	openModal: (modal: Exclude<ModalType, null>, data?: Record<string, unknown>) => void;
+	openModal: (
+		modal: Exclude<ModalType, null>,
+		data?: Record<string, unknown>,
+	) => void;
 	closeModal: () => void;
 	toggleModal: (modal: Exclude<ModalType, null>) => void;
 
 	// Toast Actions
-	showToast: (message: string, type?: Toast["type"], duration?: number) => string;
+	showToast: (
+		message: string,
+		type?: Toast["type"],
+		duration?: number,
+	) => string;
 	removeToast: (id: string) => void;
 	clearToasts: () => void;
 
@@ -172,8 +179,13 @@ function getPrevFontSize(current: FontSize): FontSize {
 
 function applyTheme(theme: Theme) {
 	if (theme === "system") {
-		const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-		document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
+		const prefersDark = window.matchMedia(
+			"(prefers-color-scheme: dark)",
+		).matches;
+		document.documentElement.setAttribute(
+			"data-theme",
+			prefersDark ? "dark" : "light",
+		);
 	} else {
 		document.documentElement.setAttribute("data-theme", theme);
 	}
@@ -249,12 +261,19 @@ export const useUIStore = create<UIState & UIActions>()(
 						normal: "1.6",
 						relaxed: "1.8",
 					};
-					document.documentElement.style.setProperty("--line-height", heightMap[height]);
+					document.documentElement.style.setProperty(
+						"--line-height",
+						heightMap[height],
+					);
 				},
 
 				// Layout Actions
 				toggleSidebar: () => {
-					set((state) => ({ sidebarVisible: !state.sidebarVisible }), false, "toggleSidebar");
+					set(
+						(state) => ({ sidebarVisible: !state.sidebarVisible }),
+						false,
+						"toggleSidebar",
+					);
 				},
 
 				setSidebarVisible: (visible: boolean) => {
@@ -262,20 +281,39 @@ export const useUIStore = create<UIState & UIActions>()(
 				},
 
 				setSidebarWidth: (width: number) => {
-					set({ sidebarWidth: Math.max(200, Math.min(500, width)) }, false, "setSidebarWidth");
+					set(
+						{ sidebarWidth: Math.max(200, Math.min(500, width)) },
+						false,
+						"setSidebarWidth",
+					);
 				},
 
 				setChatPanelWidth: (width: number) => {
-					set({ chatPanelWidth: Math.max(20, Math.min(80, width)) }, false, "setChatPanelWidth");
+					set(
+						{ chatPanelWidth: Math.max(20, Math.min(80, width)) },
+						false,
+						"setChatPanelWidth",
+					);
 				},
 
 				setFilePanelWidth: (width: number) => {
-					set({ filePanelWidth: Math.max(20, Math.min(80, width)) }, false, "setFilePanelWidth");
+					set(
+						{ filePanelWidth: Math.max(20, Math.min(80, width)) },
+						false,
+						"setFilePanelWidth",
+					);
 				},
 
 				// Modal Actions
-				openModal: (modal: Exclude<ModalType, null>, data?: Record<string, unknown>) => {
-					set({ activeModal: modal, modalData: data || null }, false, "openModal");
+				openModal: (
+					modal: Exclude<ModalType, null>,
+					data?: Record<string, unknown>,
+				) => {
+					set(
+						{ activeModal: modal, modalData: data || null },
+						false,
+						"openModal",
+					);
 				},
 
 				closeModal: () => {
@@ -292,10 +330,18 @@ export const useUIStore = create<UIState & UIActions>()(
 				},
 
 				// Toast Actions
-				showToast: (message: string, type: Toast["type"] = "info", duration = 3000): string => {
+				showToast: (
+					message: string,
+					type: Toast["type"] = "info",
+					duration = 3000,
+				): string => {
 					const id = generateToastId();
 					const toast: Toast = { id, message, type, duration };
-					set((state) => ({ toasts: [...state.toasts, toast] }), false, "showToast");
+					set(
+						(state) => ({ toasts: [...state.toasts, toast] }),
+						false,
+						"showToast",
+					);
 
 					// Auto-remove toast
 					if (duration > 0) {
@@ -308,7 +354,11 @@ export const useUIStore = create<UIState & UIActions>()(
 				},
 
 				removeToast: (id: string) => {
-					set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }), false, "removeToast");
+					set(
+						(state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }),
+						false,
+						"removeToast",
+					);
 				},
 
 				clearToasts: () => {
@@ -317,11 +367,19 @@ export const useUIStore = create<UIState & UIActions>()(
 
 				// Tooltip Actions
 				showTooltip: (content: string, x: number, y: number) => {
-					set({ tooltip: { visible: true, content, x, y } }, false, "showTooltip");
+					set(
+						{ tooltip: { visible: true, content, x, y } },
+						false,
+						"showTooltip",
+					);
 				},
 
 				hideTooltip: () => {
-					set((state) => ({ tooltip: { ...state.tooltip, visible: false } }), false, "hideTooltip");
+					set(
+						(state) => ({ tooltip: { ...state.tooltip, visible: false } }),
+						false,
+						"hideTooltip",
+					);
 				},
 
 				// Drag & Drop Actions
@@ -348,7 +406,11 @@ export const useUIStore = create<UIState & UIActions>()(
 				},
 
 				toggleCommandPalette: () => {
-					set((state) => ({ isCommandPaletteOpen: !state.isCommandPaletteOpen }), false, "toggleCommandPalette");
+					set(
+						(state) => ({ isCommandPaletteOpen: !state.isCommandPaletteOpen }),
+						false,
+						"toggleCommandPalette",
+					);
 				},
 
 				// Reset
@@ -395,5 +457,8 @@ export const selectToasts = (state: UIState) => state.toasts;
 export const selectTooltip = (state: UIState) => state.tooltip;
 export const selectIsDragging = (state: UIState) => state.isDragging;
 export const selectFocusedPanel = (state: UIState) => state.focusedPanel;
-export const selectIsCommandPaletteOpen = (state: UIState) => state.isCommandPaletteOpen;
-export const selectIsModalOpen = (modal: Exclude<ModalType, null>) => (state: UIState) => state.activeModal === modal;
+export const selectIsCommandPaletteOpen = (state: UIState) =>
+	state.isCommandPaletteOpen;
+export const selectIsModalOpen =
+	(modal: Exclude<ModalType, null>) => (state: UIState) =>
+		state.activeModal === modal;

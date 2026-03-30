@@ -9,7 +9,11 @@ import { URL } from "url";
 
 import { Logger, LogLevel } from "../lib/utils/logger";
 import type { LlmLogManager } from "./log-manager";
-import type { LlmInterceptorOptions, LlmRequestLog, LlmResponseLog } from "./types";
+import type {
+	LlmInterceptorOptions,
+	LlmRequestLog,
+	LlmResponseLog,
+} from "./types";
 
 /**
  * 截断请求体内容
@@ -36,12 +40,16 @@ function sanitizeHeaders(headers: any): Record<string, string> {
 		if (headers instanceof Headers) {
 			headers.forEach((value, key) => {
 				sanitized[key] =
-					key.toLowerCase() === "authorization" || key.toLowerCase() === "x-api-key" ? "[REDACTED]" : value;
+					key.toLowerCase() === "authorization" ||
+					key.toLowerCase() === "x-api-key"
+						? "[REDACTED]"
+						: value;
 			});
 		} else if (typeof headers === "object") {
 			for (const [key, value] of Object.entries(headers)) {
 				sanitized[key] =
-					key.toLowerCase() === "authorization" || key.toLowerCase() === "x-api-key"
+					key.toLowerCase() === "authorization" ||
+					key.toLowerCase() === "x-api-key"
 						? "[REDACTED]"
 						: String(value);
 			}
@@ -56,7 +64,10 @@ function sanitizeHeaders(headers: any): Record<string, string> {
 /**
  * 设置全局fetch拦截器
  */
-export function setupGlobalFetchInterceptor(logManager: LlmLogManager, options: LlmInterceptorOptions = {}): void {
+export function setupGlobalFetchInterceptor(
+	logManager: LlmLogManager,
+	options: LlmInterceptorOptions = {},
+): void {
 	if (typeof globalThis.fetch !== "function") {
 		console.log("[LLM Log] globalThis.fetch not available");
 		return;
@@ -116,7 +127,9 @@ export function setupGlobalFetchInterceptor(logManager: LlmLogManager, options: 
 			pathname: parsedUrl.pathname,
 			search: parsedUrl.search,
 			headers: requestHeaders,
-			body: init?.body ? truncateBody(String(init.body), truncateLimit) : undefined,
+			body: init?.body
+				? truncateBody(String(init.body), truncateLimit)
+				: undefined,
 			timestamp: new Date().toISOString(),
 		};
 
@@ -179,7 +192,9 @@ export function setupGlobalFetchInterceptor(logManager: LlmLogManager, options: 
 			};
 
 			logManager.log(responseLogEntry);
-			logger.info(`LLM响应: ${response.status} ${response.statusText} 用时 ${duration}ms`);
+			logger.info(
+				`LLM响应: ${response.status} ${response.statusText} 用时 ${duration}ms`,
+			);
 
 			return response;
 		} catch (error) {
@@ -214,7 +229,10 @@ export function setupGlobalFetchInterceptor(logManager: LlmLogManager, options: 
 /**
  * 设置HTTP/HTTPS拦截器（旧版SDK的回退）
  */
-export function setupHttpInterceptor(logManager: LlmLogManager, options: LlmInterceptorOptions = {}): void {
+export function setupHttpInterceptor(
+	logManager: LlmLogManager,
+	options: LlmInterceptorOptions = {},
+): void {
 	const originalHttpRequest = http.request;
 	const originalHttpsRequest = https.request;
 	const logger = new Logger({ level: LogLevel.INFO });
@@ -227,8 +245,14 @@ export function setupHttpInterceptor(logManager: LlmLogManager, options: LlmInte
 		callback?: any,
 	): any {
 		const startTime = Date.now();
-		const host = typeof options === "string" ? new URL(options).host : options.hostname || options.host;
-		const path = typeof options === "string" ? new URL(options).pathname : options.path || "/";
+		const host =
+			typeof options === "string"
+				? new URL(options).host
+				: options.hostname || options.host;
+		const path =
+			typeof options === "string"
+				? new URL(options).pathname
+				: options.path || "/";
 
 		// 仅拦截LLM API调用
 		const isLlmApi =
@@ -262,7 +286,9 @@ export function setupHttpInterceptor(logManager: LlmLogManager, options: LlmInte
 		};
 
 		logManager.log(requestLogEntry);
-		logger.info(`LLM HTTP请求: ${options.method || "GET"} ${protocol}//${host}${path}`);
+		logger.info(
+			`LLM HTTP请求: ${options.method || "GET"} ${protocol}//${host}${path}`,
+		);
 
 		const request = originalRequest(options, (response: any) => {
 			const responseData: Buffer[] = [];
@@ -297,7 +323,9 @@ export function setupHttpInterceptor(logManager: LlmLogManager, options: LlmInte
 						};
 
 						logManager.log(responseLogEntry);
-						logger.info(`LLM HTTP响应: ${response.statusCode} 用时 ${duration}ms`);
+						logger.info(
+							`LLM HTTP响应: ${response.statusCode} 用时 ${duration}ms`,
+						);
 
 						listener();
 					});
@@ -361,7 +389,10 @@ export function setupHttpInterceptor(logManager: LlmLogManager, options: LlmInte
 /**
  * 设置所有LLM拦截器
  */
-export function setupLlmInterceptors(logManager: LlmLogManager, options: LlmInterceptorOptions = {}): void {
+export function setupLlmInterceptors(
+	logManager: LlmLogManager,
+	options: LlmInterceptorOptions = {},
+): void {
 	// 首先设置fetch拦截器（必须在导入SDK之前）
 	setupGlobalFetchInterceptor(logManager, options);
 

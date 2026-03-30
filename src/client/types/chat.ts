@@ -73,6 +73,7 @@ export interface ChatState {
 	// Messages
 	messages: Message[];
 	currentStreamingMessage: Message | null;
+	setMessages: (messages: Message[]) => void;
 
 	// Input
 	inputText: string;
@@ -202,6 +203,8 @@ export interface MessageListProps {
 	showThinking: boolean;
 	onToggleMessageCollapse: (id: string) => void;
 	onToggleThinkingCollapse: (id: string) => void;
+	onDeleteMessage?: (id: string) => void;
+	onRegenerateMessage?: (id: string) => void;
 }
 
 export interface MessageItemProps {
@@ -209,6 +212,8 @@ export interface MessageItemProps {
 	showThinking: boolean;
 	onToggleCollapse: () => void;
 	onToggleThinking: () => void;
+	onDelete?: () => void;
+	onRegenerate?: () => void;
 }
 
 export interface InputAreaProps {

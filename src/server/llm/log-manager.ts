@@ -89,7 +89,11 @@ export class LlmLogManager {
 
 		this.flushInterval = setInterval(() => {
 			this.flush().catch((error) => {
-				this.logger.error("LLM日志刷新失败", {}, error instanceof Error ? error : undefined);
+				this.logger.error(
+					"LLM日志刷新失败",
+					{},
+					error instanceof Error ? error : undefined,
+				);
 			});
 		}, this.flushIntervalMs);
 	}
@@ -98,7 +102,9 @@ export class LlmLogManager {
 	 * 刷新缓冲区到文件
 	 */
 	async flush(): Promise<void> {
-		this.logger.debug(`LLM日志刷新: bufferLength=${this.logBuffer.length}, logFilePath=${this.logFilePath}`);
+		this.logger.debug(
+			`LLM日志刷新: bufferLength=${this.logBuffer.length}, logFilePath=${this.logFilePath}`,
+		);
 
 		if (this.logBuffer.length === 0 || !this.logFilePath) {
 			this.logger.debug(
@@ -120,9 +126,15 @@ export class LlmLogManager {
 			// 追加到日志文件
 			const lines = `${entries.map((e) => JSON.stringify(e)).join("\n")}\n`;
 			await appendFile(this.logFilePath, lines, "utf-8");
-			this.logger.info(`LLM日志刷新成功: 写入${entries.length}个条目到${this.logFilePath}`);
+			this.logger.info(
+				`LLM日志刷新成功: 写入${entries.length}个条目到${this.logFilePath}`,
+			);
 		} catch (error) {
-			this.logger.error("LLM日志写入失败", {}, error instanceof Error ? error : undefined);
+			this.logger.error(
+				"LLM日志写入失败",
+				{},
+				error instanceof Error ? error : undefined,
+			);
 			// 将条目放回缓冲区
 			this.logBuffer.unshift(...entries);
 		}
@@ -147,7 +159,11 @@ export class LlmLogManager {
 				.filter((l) => l.trim());
 			return lines.map((line) => JSON.parse(line));
 		} catch (error) {
-			this.logger.error("LLM日志读取失败", {}, error instanceof Error ? error : undefined);
+			this.logger.error(
+				"LLM日志读取失败",
+				{},
+				error instanceof Error ? error : undefined,
+			);
 			return [];
 		}
 	}
@@ -211,7 +227,11 @@ export class LlmLogManager {
 
 		// 最终刷新
 		this.flush().catch((error) => {
-			this.logger.error("LLM日志最终刷新失败", {}, error instanceof Error ? error : undefined);
+			this.logger.error(
+				"LLM日志最终刷新失败",
+				{},
+				error instanceof Error ? error : undefined,
+			);
 		});
 	}
 }

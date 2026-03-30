@@ -3,8 +3,8 @@
  * 处理LLM日志相关的API请求
  */
 
+import type { LlmLogManager } from "@server/llm/log-manager";
 import type { Request, Response } from "express";
-import type { LlmLogManager } from "../lib/llm/log-manager";
 import { Logger, LogLevel } from "../lib/utils/logger";
 
 const logger = new Logger({ level: LogLevel.INFO });
@@ -28,7 +28,9 @@ export function createLlmLogController(llmLogManager: LlmLogManager) {
 					logFilePath: llmLogManager.getLogFilePath(),
 				});
 			} catch (error) {
-				logger.error(`获取LLM日志错误: ${error instanceof Error ? error.message : String(error)}`);
+				logger.error(
+					`获取LLM日志错误: ${error instanceof Error ? error.message : String(error)}`,
+				);
 				res.status(500).json({ error: String(error) });
 			}
 		},
@@ -49,9 +51,12 @@ export function createLlmLogController(llmLogManager: LlmLogManager) {
 				logger.info(`${enabled ? "启用" : "禁用"}LLM日志`);
 				res.json({ success: true, enabled });
 			} catch (error) {
-				logger.error(`设置LLM日志启用状态错误: ${error instanceof Error ? error.message : String(error)}`, {
-					enabled: req.body.enabled,
-				});
+				logger.error(
+					`设置LLM日志启用状态错误: ${error instanceof Error ? error.message : String(error)}`,
+					{
+						enabled: req.body.enabled,
+					},
+				);
 				res.status(500).json({ error: String(error) });
 			}
 		},

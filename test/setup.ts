@@ -1,7 +1,10 @@
+import React from "react";
 import { cleanup } from "@testing-library/react";
 import { afterEach } from "vitest";
+import "@testing-library/jest-dom/vitest";
 
-// import '@testing-library/jest-dom/vitest'; // 导致vitest错误，暂时禁用
+// 全局定义 React
+global.React = React;
 
 // 全局清理
 afterEach(() => {

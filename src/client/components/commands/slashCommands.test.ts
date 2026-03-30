@@ -32,7 +32,9 @@ describe("SlashCommands", () => {
 
 	describe("Command Categories", () => {
 		it("should have session commands", () => {
-			const sessionCmds = SLASH_COMMANDS.filter((cmd) => cmd.category === "session");
+			const sessionCmds = SLASH_COMMANDS.filter(
+				(cmd) => cmd.category === "session",
+			);
 			expect(sessionCmds.length).toBeGreaterThan(0);
 
 			const names = sessionCmds.map((cmd) => cmd.name);
@@ -43,7 +45,9 @@ describe("SlashCommands", () => {
 		});
 
 		it("should have context commands", () => {
-			const contextCmds = SLASH_COMMANDS.filter((cmd) => cmd.category === "context");
+			const contextCmds = SLASH_COMMANDS.filter(
+				(cmd) => cmd.category === "context",
+			);
 			expect(contextCmds.length).toBeGreaterThan(0);
 
 			const names = contextCmds.map((cmd) => cmd.name);
@@ -53,7 +57,9 @@ describe("SlashCommands", () => {
 		});
 
 		it("should have tools commands", () => {
-			const toolsCmds = SLASH_COMMANDS.filter((cmd) => cmd.category === "tools");
+			const toolsCmds = SLASH_COMMANDS.filter(
+				(cmd) => cmd.category === "tools",
+			);
 			expect(toolsCmds.length).toBeGreaterThan(0);
 
 			const names = toolsCmds.map((cmd) => cmd.name);

@@ -26,7 +26,9 @@ export class MessageModel extends BaseModel<Message> {
 	/**
 	 * 标准化消息数据
 	 */
-	private static normalizeMessageData(data: Partial<Message>): Partial<Message> {
+	private static normalizeMessageData(
+		data: Partial<Message>,
+	): Partial<Message> {
 		const normalized = { ...data };
 
 		// 确保timestamp是Date实例
@@ -105,7 +107,9 @@ export class MessageModel extends BaseModel<Message> {
 	 * 获取思考内容
 	 */
 	getThinkingContent(): string {
-		const thinkingContent = this.data.content.find((c) => c.type === "thinking");
+		const thinkingContent = this.data.content.find(
+			(c) => c.type === "thinking",
+		);
 		return thinkingContent?.thinking || "";
 	}
 
@@ -127,7 +131,9 @@ export class MessageModel extends BaseModel<Message> {
 	 * 是否包含特定工具
 	 */
 	hasTool(toolName: string): boolean {
-		return this.data.content.some((c) => c.type === "tool" && c.toolName === toolName);
+		return this.data.content.some(
+			(c) => c.type === "tool" && c.toolName === toolName,
+		);
 	}
 
 	/**

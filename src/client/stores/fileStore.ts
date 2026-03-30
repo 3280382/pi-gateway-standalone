@@ -6,8 +6,30 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 export type ViewMode = "grid" | "list";
-export type SortMode = "time-desc" | "time-asc" | "name-asc" | "name-desc" | "type" | "size-desc" | "size-asc";
-export type FilterType = "all" | "code" | "media" | "doc" | "custom";
+export type SortMode =
+	| "time-desc"
+	| "time-asc"
+	| "name-asc"
+	| "name-desc"
+	| "type"
+	| "size-desc"
+	| "size-asc";
+export type FilterType =
+	| "all"
+	| "dir"
+	| "text"
+	| "html"
+	| "js"
+	| "py"
+	| "sh"
+	| "java"
+	| "json"
+	| "md"
+	| "image"
+	| "code"
+	| "media"
+	| "doc"
+	| "custom";
 
 export interface FileItem {
 	name: string;
@@ -71,7 +93,10 @@ interface FileActions {
 	getFilteredAndSortedItems: () => FileItem[];
 
 	// 执行文件
-	executeFile: (path: string, onOutput?: (output: string) => void) => Promise<string | undefined>;
+	executeFile: (
+		path: string,
+		onOutput?: (output: string) => void,
+	) => Promise<string | undefined>;
 }
 
 export const useFileStore = create<FileState & FileActions>()(
@@ -144,7 +169,8 @@ export const useFileStore = create<FileState & FileActions>()(
 			// UI
 			setLoading: (loading) => set({ isLoading: loading }),
 			setError: (error) => set({ error }),
-			toggleSidebar: () => set((state) => ({ sidebarVisible: !state.sidebarVisible })),
+			toggleSidebar: () =>
+				set((state) => ({ sidebarVisible: !state.sidebarVisible })),
 
 			// 获取过滤和排序后的列表
 			getFilteredAndSortedItems: () => {
@@ -154,20 +180,79 @@ export const useFileStore = create<FileState & FileActions>()(
 				// 过滤
 				if (state.filterText) {
 					const text = state.filterText.toLowerCase();
-					items = items.filter((item) => item.name.toLowerCase().includes(text));
+					items = items.filter((item) =>
+						item.name.toLowerCase().includes(text),
+					);
 				}
 
 				if (state.filterType !== "all") {
 					items = items.filter((item) => {
-						if (item.isDirectory) return true;
 						const ext = item.extension?.toLowerCase() || "";
 						switch (state.filterType) {
+							case "dir":
+								return item.isDirectory;
+							case "text":
+								return ["txt", "log", "csv"].includes(ext);
+							case "html":
+								return ["html", "htm", "css", "scss", "sass", "less"].includes(
+									ext,
+								);
+							case "js":
+								return ["js", "ts", "jsx", "tsx", "mjs", "cjs"].includes(ext);
+							case "py":
+								return ["py", "pyw", "ipynb"].includes(ext);
+							case "sh":
+								return ["sh", "bash", "zsh", "fish"].includes(ext);
+							case "java":
+								return ["java", "class", "jar"].includes(ext);
+							case "json":
+								return ["json", "yaml", "yml", "xml"].includes(ext);
+							case "md":
+								return ["md", "mdx", "markdown"].includes(ext);
+							case "image":
+								return [
+									"png",
+									"jpg",
+									"jpeg",
+									"gif",
+									"svg",
+									"webp",
+									"ico",
+									"bmp",
+								].includes(ext);
 							case "code":
-								return ["js", "ts", "jsx", "tsx", "py", "java", "cpp", "c", "h", "go", "rs"].includes(ext);
+								return [
+									"js",
+									"ts",
+									"jsx",
+									"tsx",
+									"py",
+									"java",
+									"cpp",
+									"c",
+									"h",
+									"go",
+									"rs",
+									"php",
+									"rb",
+									"swift",
+									"kt",
+								].includes(ext);
 							case "media":
-								return ["png", "jpg", "jpeg", "gif", "svg", "mp4", "mp3", "webp"].includes(ext);
+								return [
+									"png",
+									"jpg",
+									"jpeg",
+									"gif",
+									"svg",
+									"mp4",
+									"mp3",
+									"webp",
+									"mov",
+									"avi",
+								].includes(ext);
 							case "doc":
-								return ["md", "txt", "doc", "docx", "pdf"].includes(ext);
+								return ["md", "txt", "doc", "docx", "pdf", "rtf"].includes(ext);
 							default:
 								return true;
 						}
@@ -176,7 +261,11 @@ export const useFileStore = create<FileState & FileActions>()(
 
 				// 排序
 				items.sort((a, b) => {
-					// 目录始终在文件前面
+					// ".." 始终排在第一位
+					if (a.name === "..") return -1;
+					if (b.name === "..") return 1;
+
+					// 目录始终在文件前面（除了..已经处理过了）
 					if (a.isDirectory && !b.isDirectory) return -1;
 					if (!a.isDirectory && b.isDirectory) return 1;
 
@@ -204,7 +293,10 @@ export const useFileStore = create<FileState & FileActions>()(
 			},
 
 			// 执行文件（shell脚本等）
-			executeFile: async (path: string, onOutput?: (output: string) => void) => {
+			executeFile: async (
+				path: string,
+				onOutput?: (output: string) => void,
+			) => {
 				// 通过 API 发送执行命令，结果会显示在终端面板
 				try {
 					const response = await fetch("/api/execute", {
@@ -222,7 +314,8 @@ export const useFileStore = create<FileState & FileActions>()(
 					return output;
 				} catch (error) {
 					console.error("Execute file error:", error);
-					const errorMessage = error instanceof Error ? error.message : "Failed to execute file";
+					const errorMessage =
+						error instanceof Error ? error.message : "Failed to execute file";
 					set({ error: errorMessage });
 					if (onOutput) {
 						onOutput(`Error: ${errorMessage}`);

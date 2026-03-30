@@ -3,174 +3,174 @@
  */
 
 .container {
-  display: flex;
-  flex-direction: column;
-  padding: 8px 12px;
-  background: var(--bg-secondary);
-  position: relative;
+	display: flex;
+	flex-direction: column;
+	padding: 8px 12px;
+	background: var(--bg-secondary);
+	position: relative;
 }
 
 /* Mode Indicator - smaller */
 .modeIndicator {
-  position: absolute;
-  top: 0;
-  left: 20px;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  background: var(--accent-bg-blue);
-  border-radius: 50%;
-  color: var(--accent-blue);
-  z-index: 10;
+	position: absolute;
+	top: 0;
+	left: 20px;
+	transform: translateY(-50%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	background: var(--accent-bg-blue);
+	border-radius: 50%;
+	color: var(--accent-blue);
+	z-index: 10;
 }
 
 .modeIndicator svg {
-  width: 12px;
-  height: 12px;
+	width: 12px;
+	height: 12px;
 }
 
 /* Command Menu - Compact */
 .commandMenu {
-  position: absolute;
-  bottom: 100%;
-  left: 12px;
-  right: 60px;
-  max-height: 200px;
-  overflow-y: auto;
-  background: var(--bg-elevated);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  margin-bottom: 6px;
-  z-index: 100;
-  padding: 4px;
+	position: absolute;
+	bottom: 100%;
+	left: 12px;
+	right: 60px;
+	max-height: 200px;
+	overflow-y: auto;
+	background: var(--bg-elevated);
+	border-radius: var(--radius-md);
+	box-shadow: var(--shadow-lg);
+	margin-bottom: 6px;
+	z-index: 100;
+	padding: 4px;
 }
 
 .commandItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 6px 10px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-primary);
-  font-size: var(--font-sm);
-  cursor: pointer;
-  transition: background 0.15s ease;
-  text-align: left;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	padding: 6px 10px;
+	border: none;
+	border-radius: var(--radius-sm);
+	background: transparent;
+	color: var(--text-primary);
+	font-size: var(--font-sm);
+	cursor: pointer;
+	transition: background 0.15s ease;
+	text-align: left;
 }
 
 .commandItem:hover,
 .commandItem.selected {
-  background: var(--bg-hover);
+	background: var(--bg-hover);
 }
 
 .commandIcon {
-  font-size: var(--font-md);
-  width: 20px;
-  text-align: center;
+	font-size: var(--font-md);
+	width: 20px;
+	text-align: center;
 }
 
 .commandName {
-  font-weight: 500;
+	font-weight: 500;
 }
 
 /* Input Wrapper */
 .inputWrapper {
-  display: flex;
-  gap: 8px;
-  align-items: flex-end;
+	display: flex;
+	gap: 8px;
+	align-items: flex-end;
 }
 
 /* Textarea - Compact */
 .textarea {
-  flex: 1;
-  min-height: 36px;
-  max-height: 120px;
-  padding: 8px 12px;
-  background: var(--bg-tertiary);
-  border: none;
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: var(--font-sm);
-  font-family: var(--font-sans);
-  line-height: 1.5;
-  resize: none;
-  outline: none;
-  transition: all 0.2s ease;
+	flex: 1;
+	min-height: 36px;
+	max-height: 120px;
+	padding: 8px 12px;
+	background: var(--bg-tertiary);
+	border: none;
+	border-radius: var(--radius-md);
+	color: var(--text-primary);
+	font-size: var(--font-sm);
+	font-family: var(--font-sans);
+	line-height: 1.5;
+	resize: none;
+	outline: none;
+	transition: all 0.2s ease;
 }
 
 .textarea:focus {
-  background: var(--bg-elevated);
-  box-shadow: 0 0 0 2px var(--accent-bg-blue);
+	background: var(--bg-elevated);
+	box-shadow: 0 0 0 2px var(--accent-bg-blue);
 }
 
 .textarea:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+	opacity: 0.5;
+	cursor: not-allowed;
 }
 
 .textarea.bashMode {
-  background: var(--accent-bg-blue);
+	background: var(--accent-bg-blue);
 }
 
 .textarea.bashMode:focus {
-  box-shadow: 0 0 0 2px var(--accent-blue);
+	box-shadow: 0 0 0 2px var(--accent-blue);
 }
 
 /* Send Button - Smaller */
 .sendButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 50%;
-  background: var(--accent-primary);
-  color: white;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border: none;
+	border-radius: 50%;
+	background: var(--accent-primary);
+	color: white;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	flex-shrink: 0;
 }
 
 .sendButton:hover:not(:disabled) {
-  background: var(--accent-blue);
-  transform: scale(1.05);
+	background: var(--accent-blue);
+	transform: scale(1.05);
 }
 
 .sendButton:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+	opacity: 0.4;
+	cursor: not-allowed;
 }
 
 .sendButton.stopButton {
-  background: var(--accent-danger);
+	background: var(--accent-danger);
 }
 
 .sendButton.stopButton:hover {
-  background: #ff6b6b;
+	background: #ff6b6b;
 }
 
 .sendButton svg {
-  width: 18px;
-  height: 18px;
+	width: 18px;
+	height: 18px;
 }
 
 /* Scrollbar for command menu */
 .commandMenu::-webkit-scrollbar {
-  width: 4px;
+	width: 4px;
 }
 
 .commandMenu::-webkit-scrollbar-track {
-  background: transparent;
+	background: transparent;
 }
 
 .commandMenu::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 2px;
+	background: var(--border-color);
+	border-radius: 2px;
 }

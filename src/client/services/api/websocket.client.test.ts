@@ -173,7 +173,9 @@ describe("WebSocketClient", () => {
 		});
 
 		it("should throw when sending while disconnected", () => {
-			expect(() => client.send("prompt", { text: "Hello" })).toThrow("WebSocket not connected");
+			expect(() => client.send("prompt", { text: "Hello" })).toThrow(
+				"WebSocket not connected",
+			);
 		});
 	});
 
@@ -192,7 +194,9 @@ describe("WebSocketClient", () => {
 				}),
 			);
 
-			expect(handler).toHaveBeenCalledWith(expect.objectContaining({ text: "Test" }));
+			expect(handler).toHaveBeenCalledWith(
+				expect.objectContaining({ text: "Test" }),
+			);
 		});
 
 		it("should handle multiple event types", async () => {
@@ -258,7 +262,9 @@ describe("WebSocketClient", () => {
 				}),
 			);
 
-			expect(handler).toHaveBeenCalledWith(expect.objectContaining({ id: "123" }));
+			expect(handler).toHaveBeenCalledWith(
+				expect.objectContaining({ id: "123" }),
+			);
 		});
 
 		it("should handle streaming content", async () => {
@@ -274,7 +280,9 @@ describe("WebSocketClient", () => {
 				}),
 			);
 
-			expect(handler).toHaveBeenCalledWith(expect.objectContaining({ delta: "Hello" }));
+			expect(handler).toHaveBeenCalledWith(
+				expect.objectContaining({ delta: "Hello" }),
+			);
 		});
 
 		it("should handle tool execution events", async () => {

@@ -3,7 +3,12 @@
  * 处理会话和用户设置相关的业务逻辑
  */
 
-import type { BackupInfo, SessionStats, UserSettings, WorkspaceInfo } from "@/services/session.service";
+import type {
+	BackupInfo,
+	SessionStats,
+	UserSettings,
+	WorkspaceInfo,
+} from "@/services/session.service";
 import { sessionService } from "@/services/session.service";
 import { fileController } from "./file.controller";
 
@@ -33,7 +38,9 @@ export class SessionController {
 	/**
 	 * 更新用户设置
 	 */
-	async updateUserSettings(updates: Partial<UserSettings>): Promise<UserSettings> {
+	async updateUserSettings(
+		updates: Partial<UserSettings>,
+	): Promise<UserSettings> {
 		try {
 			console.log("[SessionController] Updating user settings:", updates);
 
@@ -122,7 +129,9 @@ export class SessionController {
 				return this.recentWorkspaces.slice(0, limit);
 			}
 
-			console.log(`[SessionController] Loading recent workspaces (limit: ${limit})`);
+			console.log(
+				`[SessionController] Loading recent workspaces (limit: ${limit})`,
+			);
 			this.recentWorkspaces = await sessionService.getRecentWorkspaces(limit);
 			return this.recentWorkspaces;
 		} catch (error) {
@@ -167,11 +176,15 @@ export class SessionController {
 	 */
 	async removeFromRecentWorkspaces(path: string): Promise<void> {
 		try {
-			console.log(`[SessionController] Removing from recent workspaces: ${path}`);
+			console.log(
+				`[SessionController] Removing from recent workspaces: ${path}`,
+			);
 			await sessionService.removeFromRecentWorkspaces(path);
 
 			// 更新本地缓存
-			this.recentWorkspaces = this.recentWorkspaces.filter((w) => w.path !== path);
+			this.recentWorkspaces = this.recentWorkspaces.filter(
+				(w) => w.path !== path,
+			);
 		} catch (error) {
 			this.handleError("removeFromRecentWorkspaces", error);
 			throw error;
@@ -194,9 +207,14 @@ export class SessionController {
 	/**
 	 * 导出会话数据
 	 */
-	async exportSessions(sessionIds: string[], format: "json" | "markdown" | "html" = "json"): Promise<void> {
+	async exportSessions(
+		sessionIds: string[],
+		format: "json" | "markdown" | "html" = "json",
+	): Promise<void> {
 		try {
-			console.log(`[SessionController] Exporting ${sessionIds.length} sessions as ${format}`);
+			console.log(
+				`[SessionController] Exporting ${sessionIds.length} sessions as ${format}`,
+			);
 			const blob = await sessionService.exportSessions(sessionIds, format);
 
 			// 创建下载链接
@@ -217,12 +235,19 @@ export class SessionController {
 	/**
 	 * 导入会话数据
 	 */
-	async importSessions(file: File): Promise<{ imported: number; failed: number }> {
+	async importSessions(
+		file: File,
+	): Promise<{ imported: number; failed: number }> {
 		try {
-			console.log("[SessionController] Importing sessions from file:", file.name);
+			console.log(
+				"[SessionController] Importing sessions from file:",
+				file.name,
+			);
 			const result = await sessionService.importSessions(file);
 
-			console.log(`[SessionController] Import result: ${result.imported} imported, ${result.failed} failed`);
+			console.log(
+				`[SessionController] Import result: ${result.imported} imported, ${result.failed} failed`,
+			);
 			return result;
 		} catch (error) {
 			this.handleError("importSessions", error);
@@ -235,10 +260,15 @@ export class SessionController {
 	 */
 	async createBackup(description?: string): Promise<BackupInfo> {
 		try {
-			console.log("[SessionController] Creating backup", description ? `(${description})` : "");
+			console.log(
+				"[SessionController] Creating backup",
+				description ? `(${description})` : "",
+			);
 			const backup = await sessionService.createBackup(description);
 
-			console.log(`[SessionController] Backup created: ${backup.id} (${backup.size} bytes)`);
+			console.log(
+				`[SessionController] Backup created: ${backup.id} (${backup.size} bytes)`,
+			);
 			return backup;
 		} catch (error) {
 			this.handleError("createBackup", error);
@@ -321,7 +351,11 @@ export class SessionController {
 	/**
 	 * 清理临时文件
 	 */
-	async cleanupTempFiles(): Promise<{ deleted: number; freed: number; errors: number }> {
+	async cleanupTempFiles(): Promise<{
+		deleted: number;
+		freed: number;
+		errors: number;
+	}> {
 		try {
 			console.log("[SessionController] Cleaning up temp files");
 			const result = await sessionService.cleanupTempFiles();
@@ -391,7 +425,9 @@ export class SessionController {
 
 		if (theme === "auto") {
 			// 使用系统偏好
-			const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+			const prefersDark = window.matchMedia(
+				"(prefers-color-scheme: dark)",
+			).matches;
 			document.body.classList.add(prefersDark ? "dark-mode" : "light-mode");
 		} else {
 			document.body.classList.add(`${theme}-mode`);
@@ -405,7 +441,12 @@ export class SessionController {
 		console.log(`[SessionController] Applying font size: ${fontSize}`);
 
 		// 移除现有字体大小类
-		document.body.classList.remove("font-tiny", "font-small", "font-medium", "font-large");
+		document.body.classList.remove(
+			"font-tiny",
+			"font-small",
+			"font-medium",
+			"font-large",
+		);
 
 		// 添加新的字体大小类
 		document.body.classList.add(`font-${fontSize}`);

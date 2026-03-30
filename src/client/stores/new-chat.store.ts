@@ -106,7 +106,9 @@ export const useNewChatStore = create<ChatStore>()(
 				})),
 			updateMessage: (messageId, updates) =>
 				set((state) => ({
-					messages: state.messages.map((m) => (m.id === messageId ? { ...m, ...updates } : m)),
+					messages: state.messages.map((m) =>
+						m.id === messageId ? { ...m, ...updates } : m,
+					),
 				})),
 			deleteMessage: (messageId) =>
 				set((state) => ({
@@ -125,7 +127,8 @@ export const useNewChatStore = create<ChatStore>()(
 
 			// Streaming actions
 			setStreaming: (streaming) => set({ isStreaming: streaming }),
-			setCurrentStreamingMessage: (message) => set({ currentStreamingMessage: message }),
+			setCurrentStreamingMessage: (message) =>
+				set({ currentStreamingMessage: message }),
 			setStreamingContent: (content) => set({ streamingContent: content }),
 			setStreamingThinking: (thinking) => set({ streamingThinking: thinking }),
 			appendStreamingContent: (content) =>
@@ -174,13 +177,17 @@ export const useNewChatStore = create<ChatStore>()(
 			toggleMessageCollapse: (messageId) =>
 				set((state) => ({
 					messages: state.messages.map((m) =>
-						m.id === messageId ? { ...m, isMessageCollapsed: !m.isMessageCollapsed } : m,
+						m.id === messageId
+							? { ...m, isMessageCollapsed: !m.isMessageCollapsed }
+							: m,
 					),
 				})),
 			toggleThinkingCollapse: (messageId) =>
 				set((state) => ({
 					messages: state.messages.map((m) =>
-						m.id === messageId ? { ...m, isThinkingCollapsed: !m.isThinkingCollapsed } : m,
+						m.id === messageId
+							? { ...m, isThinkingCollapsed: !m.isThinkingCollapsed }
+							: m,
 					),
 				})),
 
@@ -210,13 +217,19 @@ export const useNewChatStore = create<ChatStore>()(
 
 export const chatStoreSelectors = {
 	// Message selectors
-	getMessageById: (id: string) => (state: ChatStore) => state.messages.find((m) => m.id === id),
+	getMessageById: (id: string) => (state: ChatStore) =>
+		state.messages.find((m) => m.id === id),
 
-	getLastMessage: (state: ChatStore) => (state.messages.length > 0 ? state.messages[state.messages.length - 1] : null),
+	getLastMessage: (state: ChatStore) =>
+		state.messages.length > 0
+			? state.messages[state.messages.length - 1]
+			: null,
 
-	getUserMessages: (state: ChatStore) => state.messages.filter((m) => m.role === "user"),
+	getUserMessages: (state: ChatStore) =>
+		state.messages.filter((m) => m.role === "user"),
 
-	getAssistantMessages: (state: ChatStore) => state.messages.filter((m) => m.role === "assistant"),
+	getAssistantMessages: (state: ChatStore) =>
+		state.messages.filter((m) => m.role === "assistant"),
 
 	// Tool selectors
 	getToolById: (id: string) => (state: ChatStore) => state.activeTools.get(id),
@@ -235,7 +248,8 @@ export const chatStoreSelectors = {
 		return messages.filter((message) => {
 			// Filter by role
 			if (message.role === "user" && !searchFilters.user) return false;
-			if (message.role === "assistant" && !searchFilters.assistant) return false;
+			if (message.role === "assistant" && !searchFilters.assistant)
+				return false;
 
 			// Search in content
 			const hasMatchingContent = message.content.some((content) => {
@@ -248,7 +262,8 @@ export const chatStoreSelectors = {
 	},
 
 	// UI selectors
-	shouldScrollToBottom: (state: ChatStore) => state.scrollToBottom && !state.isSearching,
+	shouldScrollToBottom: (state: ChatStore) =>
+		state.scrollToBottom && !state.isSearching,
 
 	// Computed values
 	getMessageCount: (state: ChatStore) => state.messages.length,

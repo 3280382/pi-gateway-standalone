@@ -90,7 +90,10 @@ export class Config {
 			port,
 			host,
 			cors: {
-				origin: env === "development" ? ["http://127.0.0.1:5173", "http://localhost:5173", "*"] : host,
+				origin:
+					env === "development"
+						? ["http://127.0.0.1:5173", "http://localhost:5173", "*"]
+						: host,
 				credentials: true,
 			},
 			static: {
@@ -105,7 +108,9 @@ export class Config {
 				maxConnections: 1000,
 			},
 			logging: {
-				level: (process.env.LOG_LEVEL as any) || (env === "development" ? "debug" : "info"),
+				level:
+					(process.env.LOG_LEVEL as any) ||
+					(env === "development" ? "debug" : "info"),
 				format: env === "production" ? "json" : "text",
 			},
 			llm: {

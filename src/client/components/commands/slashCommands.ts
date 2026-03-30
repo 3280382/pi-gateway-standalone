@@ -12,39 +12,169 @@ export interface SlashCommand {
 
 export const SLASH_COMMANDS: Omit<SlashCommand, "action">[] = [
 	// Session commands
-	{ name: "/new", description: "Start a new session", category: "session", icon: "📄" },
-	{ name: "/clear", description: "Clear current session messages", category: "session", icon: "🧹" },
-	{ name: "/save", description: "Save current session", category: "session", icon: "💾" },
-	{ name: "/load", description: "Load a saved session", category: "session", icon: "📂" },
-	{ name: "/export", description: "Export session to JSON", category: "session", icon: "📤" },
+	{
+		name: "/new",
+		description: "Start a new session",
+		category: "session",
+		icon: "📄",
+	},
+	{
+		name: "/clear",
+		description: "Clear current session messages",
+		category: "session",
+		icon: "🧹",
+	},
+	{
+		name: "/save",
+		description: "Save current session",
+		category: "session",
+		icon: "💾",
+	},
+	{
+		name: "/load",
+		description: "Load a saved session",
+		category: "session",
+		icon: "📂",
+	},
+	{
+		name: "/export",
+		description: "Export session to JSON",
+		category: "session",
+		icon: "📤",
+	},
 
 	// Context commands
-	{ name: "/context", description: "Show current context info", category: "context", icon: "📋" },
-	{ name: "/agents", description: "View AGENTS.md", category: "context", icon: "📄" },
-	{ name: "/system", description: "View SYSTEM.md", category: "context", icon: "⚙️" },
-	{ name: "/skills", description: "View available skills", category: "context", icon: "🎯" },
-	{ name: "/prompt", description: "Show full system prompt", category: "context", icon: "💬" },
-	{ name: "/compact", description: "Compact context (summarize)", category: "context", icon: "🗜️" },
-	{ name: "/model", description: "Change AI model", category: "context", icon: "🤖" },
-	{ name: "/think", description: "Set thinking level", category: "context", icon: "🧠" },
-	{ name: "/dir", description: "Change working directory", category: "context", icon: "📁" },
-	{ name: "/log", description: "View LLM request log", category: "context", icon: "📊" },
+	{
+		name: "/context",
+		description: "Show current context info",
+		category: "context",
+		icon: "📋",
+	},
+	{
+		name: "/agents",
+		description: "View AGENTS.md",
+		category: "context",
+		icon: "📄",
+	},
+	{
+		name: "/system",
+		description: "View SYSTEM.md",
+		category: "context",
+		icon: "⚙️",
+	},
+	{
+		name: "/skills",
+		description: "View available skills",
+		category: "context",
+		icon: "🎯",
+	},
+	{
+		name: "/prompt",
+		description: "Show full system prompt",
+		category: "context",
+		icon: "💬",
+	},
+	{
+		name: "/compact",
+		description: "Compact context (summarize)",
+		category: "context",
+		icon: "🗜️",
+	},
+	{
+		name: "/model",
+		description: "Change AI model",
+		category: "context",
+		icon: "🤖",
+	},
+	{
+		name: "/think",
+		description: "Set thinking level",
+		category: "context",
+		icon: "🧠",
+	},
+	{
+		name: "/dir",
+		description: "Change working directory",
+		category: "context",
+		icon: "📁",
+	},
+	{
+		name: "/log",
+		description: "View LLM request log",
+		category: "context",
+		icon: "📊",
+	},
 
 	// Tool commands
-	{ name: "/bash", description: "Execute bash command", category: "tools", icon: "💻" },
-	{ name: "/read", description: "Read file content", category: "tools", icon: "📖" },
-	{ name: "/write", description: "Write to file", category: "tools", icon: "✏️" },
+	{
+		name: "/bash",
+		description: "Execute bash command",
+		category: "tools",
+		icon: "💻",
+	},
+	{
+		name: "/read",
+		description: "Read file content",
+		category: "tools",
+		icon: "📖",
+	},
+	{
+		name: "/write",
+		description: "Write to file",
+		category: "tools",
+		icon: "✏️",
+	},
 	{ name: "/edit", description: "Edit file", category: "tools", icon: "🔧" },
-	{ name: "/ls", description: "List directory contents", category: "tools", icon: "📂" },
-	{ name: "/grep", description: "Search in files", category: "tools", icon: "🔍" },
-	{ name: "/tree", description: "Show directory tree", category: "tools", icon: "🌲" },
-	{ name: "/git", description: "Git operations", category: "tools", icon: "🌿" },
+	{
+		name: "/ls",
+		description: "List directory contents",
+		category: "tools",
+		icon: "📂",
+	},
+	{
+		name: "/grep",
+		description: "Search in files",
+		category: "tools",
+		icon: "🔍",
+	},
+	{
+		name: "/tree",
+		description: "Show directory tree",
+		category: "tools",
+		icon: "🌲",
+	},
+	{
+		name: "/git",
+		description: "Git operations",
+		category: "tools",
+		icon: "🌿",
+	},
 
 	// Help commands
-	{ name: "/help", description: "Show all commands", category: "help", icon: "❓" },
-	{ name: "/shortcuts", description: "Show keyboard shortcuts", category: "help", icon: "⌨️" },
-	{ name: "/theme", description: "Toggle dark/light theme", category: "help", icon: "🎨" },
-	{ name: "/font", description: "Change font size", category: "help", icon: "🔤" },
+	{
+		name: "/help",
+		description: "Show all commands",
+		category: "help",
+		icon: "❓",
+	},
+	{
+		name: "/shortcuts",
+		description: "Show keyboard shortcuts",
+		category: "help",
+		icon: "⌨️",
+	},
+	{
+		name: "/theme",
+		description: "Toggle dark/light theme",
+		category: "help",
+		icon: "🎨",
+	},
+	{
+		name: "/font",
+		description: "Change font size",
+		category: "help",
+		icon: "🔤",
+	},
 ];
 
 export function createSlashCommands(handlers: {
@@ -91,8 +221,20 @@ export function createSlashCommands(handlers: {
 			icon: "🧹",
 			action: handlers.onClear,
 		},
-		{ name: "/save", description: "Save current session", category: "session", icon: "💾", action: handlers.onSave },
-		{ name: "/load", description: "Load a saved session", category: "session", icon: "📂", action: handlers.onLoad },
+		{
+			name: "/save",
+			description: "Save current session",
+			category: "session",
+			icon: "💾",
+			action: handlers.onSave,
+		},
+		{
+			name: "/load",
+			description: "Load a saved session",
+			category: "session",
+			icon: "📂",
+			action: handlers.onLoad,
+		},
 		{
 			name: "/export",
 			description: "Export session to JSON",
@@ -114,7 +256,13 @@ export function createSlashCommands(handlers: {
 			icon: "📄",
 			action: handlers.onShowAgents,
 		},
-		{ name: "/system", description: "View SYSTEM.md", category: "context", icon: "⚙️", action: handlers.onShowSystem },
+		{
+			name: "/system",
+			description: "View SYSTEM.md",
+			category: "context",
+			icon: "⚙️",
+			action: handlers.onShowSystem,
+		},
 		{
 			name: "/skills",
 			description: "View available skills",
@@ -185,7 +333,13 @@ export function createSlashCommands(handlers: {
 			icon: "✏️",
 			action: () => handlers.onWrite("", ""),
 		},
-		{ name: "/edit", description: "Edit file", category: "tools", icon: "🔧", action: () => handlers.onEdit("") },
+		{
+			name: "/edit",
+			description: "Edit file",
+			category: "tools",
+			icon: "🔧",
+			action: () => handlers.onEdit(""),
+		},
 		{
 			name: "/ls",
 			description: "List directory contents",
@@ -207,8 +361,20 @@ export function createSlashCommands(handlers: {
 			icon: "🌲",
 			action: () => handlers.onTree(),
 		},
-		{ name: "/git", description: "Git operations", category: "tools", icon: "🌿", action: () => handlers.onGit("") },
-		{ name: "/help", description: "Show all commands", category: "help", icon: "❓", action: handlers.onHelp },
+		{
+			name: "/git",
+			description: "Git operations",
+			category: "tools",
+			icon: "🌿",
+			action: () => handlers.onGit(""),
+		},
+		{
+			name: "/help",
+			description: "Show all commands",
+			category: "help",
+			icon: "❓",
+			action: handlers.onHelp,
+		},
 		{
 			name: "/shortcuts",
 			description: "Show keyboard shortcuts",
@@ -223,6 +389,12 @@ export function createSlashCommands(handlers: {
 			icon: "🎨",
 			action: handlers.onToggleTheme,
 		},
-		{ name: "/font", description: "Change font size", category: "help", icon: "🔤", action: handlers.onSetFont },
+		{
+			name: "/font",
+			description: "Change font size",
+			category: "help",
+			icon: "🔤",
+			action: handlers.onSetFont,
+		},
 	];
 }

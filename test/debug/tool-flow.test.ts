@@ -21,7 +21,10 @@ describe("Tool Display Flow", () => {
 		});
 
 		await new Promise<void>((resolve, reject) => {
-			const timeout = setTimeout(() => reject(new Error("Server startup timeout")), 15000);
+			const timeout = setTimeout(
+				() => reject(new Error("Server startup timeout")),
+				15000,
+			);
 			serverProcess.stdout?.on("data", (data) => {
 				if (data.toString().includes("Pi Gateway Server")) {
 					clearTimeout(timeout);
@@ -106,16 +109,20 @@ describe("Tool Display Flow", () => {
 
 				if (deltaIndex >= 0 && startIndex >= 0) {
 					expect(deltaIndex).toBeLessThan(startIndex);
-					console.log(`✓ Tool ${toolCallId}: toolcall_delta comes before tool_start`);
+					console.log(
+						`✓ Tool ${toolCallId}: toolcall_delta comes before tool_start`,
+					);
 				}
 
 				const startCount = types.filter((t) => t === "tool_start").length;
 				expect(startCount).toBeLessThanOrEqual(1);
-				console.log(`✓ Tool ${toolCallId}: has ${startCount} tool_start event(s)`);
+				console.log(
+					`✓ Tool ${toolCallId}: has ${startCount} tool_start event(s)`,
+				);
 			}
 
-			const writeToolEvents = Array.from(toolEvents.entries()).find(([_id, types]) =>
-				types.some((t) => t.includes("write")),
+			const writeToolEvents = Array.from(toolEvents.entries()).find(
+				([_id, types]) => types.some((t) => t.includes("write")),
 			);
 
 			if (writeToolEvents) {

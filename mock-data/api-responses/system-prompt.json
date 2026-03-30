@@ -1,19 +1,25 @@
 {
-  "systemPrompt": "You are Pi, an AI coding assistant. You help users with software development tasks including reading files, executing commands, editing code, and writing new files.\n\nAlways be concise and technical in your responses. Follow the project's coding conventions and AGENTS.md guidelines.",
-  "appendSystemPrompt": [
-    "Use the read tool to examine files instead of cat/sed.",
-    "Use edit for precise changes (old text must match exactly).",
-    "Use write only for new files or complete rewrites.",
-    "Check node_modules for external API type definitions.",
-    "Never hardcode keybindings - all must be configurable."
-  ],
-  "skills": [
-    { "name": "typescript", "description": "TypeScript development with strict typing" },
-    { "name": "react", "description": "React component development" },
-    { "name": "nodejs", "description": "Node.js backend development" },
-    { "name": "testing", "description": "Unit and integration testing with Vitest" },
-    { "name": "css-modules", "description": "CSS Modules styling" },
-    { "name": "zustand", "description": "Zustand state management" }
-  ],
-  "agentsMd": "# Development Rules\n\n## First Message\nIf the user did not give you a concrete task in their first message,\nread README.md, then ask which module(s) to work on. Based on the answer, read the relevant README.md files in parallel.\n- packages/ai/README.md\n- packages/tui/README.md\n- packages/agent/README.md\n- packages/coding-agent/README.md\n- packages/gateway/README.md\n- packages/mom/README.md\n- packages/pods/README.md\n- packages/web-ui/README.md\n\n## Package Context Loading\nWhen working on a specific package, ALWAYS read its README.md and test/README.md (if exists) to understand:\n- Development workflow (e.g., `npm run dev` vs `npm run build`)\n- Testing strategy and available test commands\n- Architecture and important implementation details\n\nFor packages/gateway specifically:\n- MUST read packages/gateway/README.md\n- MUST read packages/gateway/test/README.md\n- Use `npm run dev` for development (hot reload, no build needed)\n- Tests auto-detect running dev server on port 3000\n\n### Gateway Development Mode (Critical - Dual Pi)\n\n**User runs TWO pi instances simultaneously:**\n- **Pi-UI**: Session file `gateway-ui.jsonl` → Frontend only\n- **Pi-Backend**: Session file `gateway-backend.jsonl` → Backend only\n\n**Role Detection by Session File:**\n```bash\n# Terminal 1\n./start-gateway-ui.sh\n# → pi --session /root/.pi/sessions/gateway-ui.jsonl\n# → Role: UI Developer\n\n# Terminal 2  \n./start-gateway-backend.sh\n# → pi --session /root/.pi/sessions/gateway-backend.jsonl\n# → Role: Backend Developer\n```\n\n## Code Quality\n- No `any` types unless absolutely necessary\n- Check node_modules for external API type definitions instead of guessing\n- **NEVER use inline imports** - no `await import(\"./foo.js\")`, no `import(\"pkg\").Type` in type positions, no dynamic imports for types. Always use standard top-level imports.\n- NEVER remove or downgrade code to fix type errors from outdated dependencies; upgrade the dependency instead\n- Always ask before removing functionality or code that appears to be intentional\n- Never hardcode key checks with, eg. `matchesKey(keyData, \"ctrl+x\")`. All keybindings must be configurable.\n\n## Commands\n- After code changes (not documentation changes): `npm run check` (get full output, no tail). Fix all errors, warnings, and infos before committing.\n- Note: `npm run check` does not run tests.\n- NEVER run: `npm run dev`, `npm run build`, `npm test`\n- Only run specific tests if user instructs: `npx tsx ../../node_modules/vitest/dist/cli.js --run test/specific.test.ts`\n- Run tests from the package root, not the repo root.\n- When writing tests, run them, identify issues in either the test or implementation, and iterate until fixed.\n- NEVER commit unless user asks\n\n## Style\n- Keep answers short and concise\n- No emojis in commits, issues, PR comments, or code\n- No fluff or cheerful filler text\n- Technical prose only, be kind but direct"
+	"systemPrompt": "You are Pi, an AI coding assistant. You help users with software development tasks including reading files, executing commands, editing code, and writing new files.\n\nAlways be concise and technical in your responses. Follow the project's coding conventions and AGENTS.md guidelines.",
+	"appendSystemPrompt": [
+		"Use the read tool to examine files instead of cat/sed.",
+		"Use edit for precise changes (old text must match exactly).",
+		"Use write only for new files or complete rewrites.",
+		"Check node_modules for external API type definitions.",
+		"Never hardcode keybindings - all must be configurable."
+	],
+	"skills": [
+		{
+			"name": "typescript",
+			"description": "TypeScript development with strict typing"
+		},
+		{ "name": "react", "description": "React component development" },
+		{ "name": "nodejs", "description": "Node.js backend development" },
+		{
+			"name": "testing",
+			"description": "Unit and integration testing with Vitest"
+		},
+		{ "name": "css-modules", "description": "CSS Modules styling" },
+		{ "name": "zustand", "description": "Zustand state management" }
+	],
+	"agentsMd": "# Development Rules\n\n## First Message\nIf the user did not give you a concrete task in their first message,\nread README.md, then ask which module(s) to work on. Based on the answer, read the relevant README.md files in parallel.\n- packages/ai/README.md\n- packages/tui/README.md\n- packages/agent/README.md\n- packages/coding-agent/README.md\n- packages/gateway/README.md\n- packages/mom/README.md\n- packages/pods/README.md\n- packages/web-ui/README.md\n\n## Package Context Loading\nWhen working on a specific package, ALWAYS read its README.md and test/README.md (if exists) to understand:\n- Development workflow (e.g., `npm run dev` vs `npm run build`)\n- Testing strategy and available test commands\n- Architecture and important implementation details\n\nFor packages/gateway specifically:\n- MUST read packages/gateway/README.md\n- MUST read packages/gateway/test/README.md\n- Use `npm run dev` for development (hot reload, no build needed)\n- Tests auto-detect running dev server on port 3000\n\n### Gateway Development Mode (Critical - Dual Pi)\n\n**User runs TWO pi instances simultaneously:**\n- **Pi-UI**: Session file `gateway-ui.jsonl` → Frontend only\n- **Pi-Backend**: Session file `gateway-backend.jsonl` → Backend only\n\n**Role Detection by Session File:**\n```bash\n# Terminal 1\n./start-gateway-ui.sh\n# → pi --session /root/.pi/sessions/gateway-ui.jsonl\n# → Role: UI Developer\n\n# Terminal 2  \n./start-gateway-backend.sh\n# → pi --session /root/.pi/sessions/gateway-backend.jsonl\n# → Role: Backend Developer\n```\n\n## Code Quality\n- No `any` types unless absolutely necessary\n- Check node_modules for external API type definitions instead of guessing\n- **NEVER use inline imports** - no `await import(\"./foo.js\")`, no `import(\"pkg\").Type` in type positions, no dynamic imports for types. Always use standard top-level imports.\n- NEVER remove or downgrade code to fix type errors from outdated dependencies; upgrade the dependency instead\n- Always ask before removing functionality or code that appears to be intentional\n- Never hardcode key checks with, eg. `matchesKey(keyData, \"ctrl+x\")`. All keybindings must be configurable.\n\n## Commands\n- After code changes (not documentation changes): `npm run check` (get full output, no tail). Fix all errors, warnings, and infos before committing.\n- Note: `npm run check` does not run tests.\n- NEVER run: `npm run dev`, `npm run build`, `npm test`\n- Only run specific tests if user instructs: `npx tsx ../../node_modules/vitest/dist/cli.js --run test/specific.test.ts`\n- Run tests from the package root, not the repo root.\n- When writing tests, run them, identify issues in either the test or implementation, and iterate until fixed.\n- NEVER commit unless user asks\n\n## Style\n- Keep answers short and concise\n- No emojis in commits, issues, PR comments, or code\n- No fluff or cheerful filler text\n- Technical prose only, be kind but direct"
 }

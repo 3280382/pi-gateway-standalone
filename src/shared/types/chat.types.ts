@@ -38,7 +38,12 @@ export interface Message {
 // 工具执行类型
 // ============================================================================
 
-export type ToolStatus = "pending" | "executing" | "success" | "error" | "cancelled";
+export type ToolStatus =
+	| "pending"
+	| "executing"
+	| "success"
+	| "error"
+	| "cancelled";
 
 export interface ToolExecution {
 	id: string;

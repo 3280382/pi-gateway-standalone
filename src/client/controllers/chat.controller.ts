@@ -44,10 +44,17 @@ export class ChatController {
 			this.store.getState().setStreaming(true);
 
 			// 通过WebSocket发送消息
-			const success = websocketService.sendMessage(text, state.sessionId, state.currentModel);
+			const success = websocketService.sendMessage(
+				text,
+				state.sessionId,
+				state.currentModel,
+			);
 
 			if (!success) {
-				throw new ServiceError("WEBSOCKET_SEND_FAILED", "Failed to send message via WebSocket");
+				throw new ServiceError(
+					"WEBSOCKET_SEND_FAILED",
+					"Failed to send message via WebSocket",
+				);
 			}
 
 			// 监听WebSocket事件
@@ -150,7 +157,9 @@ export class ChatController {
 	/**
 	 * 获取可用模型列表
 	 */
-	async getAvailableModels(): Promise<Array<{ id: string; name: string; provider: string; description: string }>> {
+	async getAvailableModels(): Promise<
+		Array<{ id: string; name: string; provider: string; description: string }>
+	> {
 		try {
 			return await chatService.getAvailableModels();
 		} catch (error) {
@@ -232,7 +241,8 @@ export class ChatController {
 				// 重新发送用户消息
 				const message = state.messages[messageIndex];
 				if (message && message.role === "user") {
-					const text = message.content.find((c) => c.type === "text")?.text || "";
+					const text =
+						message.content.find((c) => c.type === "text")?.text || "";
 					if (text) {
 						await this.sendMessage(text);
 					}
@@ -293,9 +303,9 @@ export class ChatController {
 	}
 
 	/**
-	 * 设置WebSocket监听器
+	 * 设置WebSocket监听器（公开方法，供外部调用）
 	 */
-	private setupWebSocketListeners(): void {
+	setupWebSocketListeners(): void {
 		// 移除现有的监听器（避免重复添加）
 		// 实际实现中需要更完善的监听器管理
 

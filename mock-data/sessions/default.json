@@ -1,8 +1,8 @@
 {
-  "id": "default-session",
-  "name": "Default Session",
-  "path": "/root/pi-mono/packages/gateway",
-  "messageCount": 5,
-  "lastModified": "2024-03-26T10:00:00Z",
-  "workingDir": "/root/pi-mono/packages/gateway"
+	"id": "default-session",
+	"name": "Default Session",
+	"path": "/root/pi-gateway-standalone",
+	"messageCount": 5,
+	"lastModified": "2024-03-26T10:00:00Z",
+	"workingDir": "/root/pi-gateway-standalone"
 }

@@ -91,14 +91,21 @@ export class FileService extends BaseService {
 		try {
 			return await this.post<BrowseResponse>("/browse", { path });
 		} catch (error) {
-			throw new ServiceError("BROWSE_FAILED", "Failed to browse directory", error);
+			throw new ServiceError(
+				"BROWSE_FAILED",
+				"Failed to browse directory",
+				error,
+			);
 		}
 	}
 
 	/**
 	 * 读取文件内容
 	 */
-	async readFile(path: string, encoding: string = "utf-8"): Promise<FileContentResponse> {
+	async readFile(
+		path: string,
+		encoding: string = "utf-8",
+	): Promise<FileContentResponse> {
 		try {
 			const params = { path, encoding };
 			return await this.post<FileContentResponse>("/files/content", params);
@@ -114,7 +121,11 @@ export class FileService extends BaseService {
 		try {
 			return await this.post<FileOperationResponse>("/files/write", request);
 		} catch (error) {
-			throw new ServiceError("WRITE_FILE_FAILED", "Failed to write file", error);
+			throw new ServiceError(
+				"WRITE_FILE_FAILED",
+				"Failed to write file",
+				error,
+			);
 		}
 	}
 
@@ -123,18 +134,30 @@ export class FileService extends BaseService {
 	 */
 	async createDirectory(path: string): Promise<FileOperationResponse> {
 		try {
-			return await this.post<FileOperationResponse>("/files/create-directory", { path });
+			return await this.post<FileOperationResponse>("/files/create-directory", {
+				path,
+			});
 		} catch (error) {
-			throw new ServiceError("CREATE_DIRECTORY_FAILED", "Failed to create directory", error);
+			throw new ServiceError(
+				"CREATE_DIRECTORY_FAILED",
+				"Failed to create directory",
+				error,
+			);
 		}
 	}
 
 	/**
 	 * 删除文件或目录
 	 */
-	async delete(path: string, recursive: boolean = false): Promise<FileOperationResponse> {
+	async delete(
+		path: string,
+		recursive: boolean = false,
+	): Promise<FileOperationResponse> {
 		try {
-			return await this.post<FileOperationResponse>("/files/delete", { path, recursive });
+			return await this.post<FileOperationResponse>("/files/delete", {
+				path,
+				recursive,
+			});
 		} catch (error) {
 			throw new ServiceError("DELETE_FAILED", "Failed to delete", error);
 		}
@@ -143,9 +166,15 @@ export class FileService extends BaseService {
 	/**
 	 * 重命名文件或目录
 	 */
-	async rename(oldPath: string, newPath: string): Promise<FileOperationResponse> {
+	async rename(
+		oldPath: string,
+		newPath: string,
+	): Promise<FileOperationResponse> {
 		try {
-			return await this.post<FileOperationResponse>("/files/rename", { oldPath, newPath });
+			return await this.post<FileOperationResponse>("/files/rename", {
+				oldPath,
+				newPath,
+			});
 		} catch (error) {
 			throw new ServiceError("RENAME_FAILED", "Failed to rename", error);
 		}
@@ -154,9 +183,15 @@ export class FileService extends BaseService {
 	/**
 	 * 复制文件或目录
 	 */
-	async copy(source: string, destination: string): Promise<FileOperationResponse> {
+	async copy(
+		source: string,
+		destination: string,
+	): Promise<FileOperationResponse> {
 		try {
-			return await this.post<FileOperationResponse>("/files/copy", { source, destination });
+			return await this.post<FileOperationResponse>("/files/copy", {
+				source,
+				destination,
+			});
 		} catch (error) {
 			throw new ServiceError("COPY_FAILED", "Failed to copy", error);
 		}
@@ -165,9 +200,15 @@ export class FileService extends BaseService {
 	/**
 	 * 移动文件或目录
 	 */
-	async move(source: string, destination: string): Promise<FileOperationResponse> {
+	async move(
+		source: string,
+		destination: string,
+	): Promise<FileOperationResponse> {
 		try {
-			return await this.post<FileOperationResponse>("/files/move", { source, destination });
+			return await this.post<FileOperationResponse>("/files/move", {
+				source,
+				destination,
+			});
 		} catch (error) {
 			throw new ServiceError("MOVE_FAILED", "Failed to move", error);
 		}
@@ -180,7 +221,11 @@ export class FileService extends BaseService {
 		try {
 			return await this.post<ExecuteResponse>("/execute", request);
 		} catch (error) {
-			throw new ServiceError("EXECUTE_FAILED", "Failed to execute command", error);
+			throw new ServiceError(
+				"EXECUTE_FAILED",
+				"Failed to execute command",
+				error,
+			);
 		}
 	}
 
@@ -189,10 +234,17 @@ export class FileService extends BaseService {
 	 */
 	async searchFiles(request: SearchFilesRequest): Promise<SearchResult[]> {
 		try {
-			const response = await this.post<{ results: SearchResult[] }>("/files/search", request);
+			const response = await this.post<{ results: SearchResult[] }>(
+				"/files/search",
+				request,
+			);
 			return response.results;
 		} catch (error) {
-			throw new ServiceError("SEARCH_FILES_FAILED", "Failed to search files", error);
+			throw new ServiceError(
+				"SEARCH_FILES_FAILED",
+				"Failed to search files",
+				error,
+			);
 		}
 	}
 
@@ -211,7 +263,11 @@ export class FileService extends BaseService {
 		try {
 			return await this.post("/files/info", { path });
 		} catch (error) {
-			throw new ServiceError("GET_FILE_INFO_FAILED", "Failed to get file info", error);
+			throw new ServiceError(
+				"GET_FILE_INFO_FAILED",
+				"Failed to get file info",
+				error,
+			);
 		}
 	}
 
@@ -248,13 +304,19 @@ export class FileService extends BaseService {
 	 */
 	async downloadFile(path: string): Promise<Blob> {
 		try {
-			const response = await fetch(`/api/files/download?path=${encodeURIComponent(path)}`);
+			const response = await fetch(
+				`/api/files/download?path=${encodeURIComponent(path)}`,
+			);
 			if (!response.ok) {
 				throw new Error(`Download failed: ${response.statusText}`);
 			}
 			return await response.blob();
 		} catch (error) {
-			throw new ServiceError("DOWNLOAD_FAILED", "Failed to download file", error);
+			throw new ServiceError(
+				"DOWNLOAD_FAILED",
+				"Failed to download file",
+				error,
+			);
 		}
 	}
 
@@ -275,7 +337,11 @@ export class FileService extends BaseService {
 				excludePatterns,
 			});
 		} catch (error) {
-			throw new ServiceError("GET_TREE_FAILED", "Failed to get directory tree", error);
+			throw new ServiceError(
+				"GET_TREE_FAILED",
+				"Failed to get directory tree",
+				error,
+			);
 		}
 	}
 
@@ -290,10 +356,17 @@ export class FileService extends BaseService {
 		}>,
 	): Promise<Array<FileOperationResponse>> {
 		try {
-			const response = await this.post<{ results: FileOperationResponse[] }>("/files/batch", { operations });
+			const response = await this.post<{ results: FileOperationResponse[] }>(
+				"/files/batch",
+				{ operations },
+			);
 			return response.results;
 		} catch (error) {
-			throw new ServiceError("BATCH_OPERATION_FAILED", "Failed to perform batch operation", error);
+			throw new ServiceError(
+				"BATCH_OPERATION_FAILED",
+				"Failed to perform batch operation",
+				error,
+			);
 		}
 	}
 
@@ -311,7 +384,11 @@ export class FileService extends BaseService {
 			const params = path ? { path } : {};
 			return await this.get("/files/disk-usage", params);
 		} catch (error) {
-			throw new ServiceError("GET_DISK_USAGE_FAILED", "Failed to get disk usage", error);
+			throw new ServiceError(
+				"GET_DISK_USAGE_FAILED",
+				"Failed to get disk usage",
+				error,
+			);
 		}
 	}
 }

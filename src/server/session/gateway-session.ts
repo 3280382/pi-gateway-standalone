@@ -16,8 +16,8 @@ import {
 	SessionManager,
 	SettingsManager,
 } from "@mariozechner/pi-coding-agent";
+import type { LlmLogManager } from "@server/llm/log-manager";
 import { WebSocket } from "ws";
-import type { LlmLogManager } from "../../core/llm/log-manager";
 import { AGENT_DIR, getLocalSessionsDir } from "./utils";
 
 /**
@@ -96,13 +96,17 @@ export class GatewaySession {
 
 		this.workingDir = workingDir;
 		const localSessionsDir = getLocalSessionsDir(workingDir);
-		console.log(`[Gateway] 使用workingDir初始化: ${workingDir}, localSessionsDir: ${localSessionsDir}`);
+		console.log(
+			`[Gateway] 使用workingDir初始化: ${workingDir}, localSessionsDir: ${localSessionsDir}`,
+		);
 
 		let sessionManager: ReturnType<typeof SessionManager.create> | undefined;
 		if (sessionId) {
 			// 尝试在本地会话目录中按部分UUID查找会话
 			const sessions = await SessionManager.list(workingDir, localSessionsDir);
-			const matching = sessions.find((s) => s.id.startsWith(sessionId) || s.path.includes(sessionId));
+			const matching = sessions.find(
+				(s) => s.id.startsWith(sessionId) || s.path.includes(sessionId),
+			);
 			if (matching) {
 				sessionManager = SessionManager.open(matching.path, localSessionsDir);
 			}
@@ -129,7 +133,9 @@ export class GatewaySession {
 		console.log(`[Gateway] 系统提示: ${systemPrompt ? "自定义" : "默认"}`);
 		const appendSystemPrompt = loader.getAppendSystemPrompt();
 		if (appendSystemPrompt.length > 0) {
-			console.log(`[Gateway] 附加系统提示: ${appendSystemPrompt.length} 个文件`);
+			console.log(
+				`[Gateway] 附加系统提示: ${appendSystemPrompt.length} 个文件`,
+			);
 		}
 
 		const { session } = await createAgentSession({
@@ -146,7 +152,9 @@ export class GatewaySession {
 		this.session = session;
 		this.setupEventHandlers();
 
-		console.log(`[Gateway] 会话已创建: sessionId=${session.sessionId}, sessionFile=${session.sessionFile}`);
+		console.log(
+			`[Gateway] 会话已创建: sessionId=${session.sessionId}, sessionFile=${session.sessionFile}`,
+		);
 
 		// 如果可用，设置默认模型为kimi-k2.5
 		const defaultModel = this.modelRegistry.find("deepseek", "deepseek-chat");
@@ -156,14 +164,33 @@ export class GatewaySession {
 		}
 
 		// 为此会话设置LLM日志文件
-		console.log(`[Gateway] 使用sessionFile=${session.sessionFile}, sessionId=${session.sessionId}调用setLogFile`);
+		console.log(
+			`[Gateway] 使用sessionFile=${session.sessionFile}, sessionId=${session.sessionId}调用setLogFile`,
+		);
 		this.llmLogManager.setLogFile(session.sessionFile, session.sessionId);
-		console.log(`[Gateway] LLM日志: ${this.llmLogManager.getLogFilePath() || "禁用（内存会话）"}`);
+		console.log(
+			`[Gateway] LLM日志: ${this.llmLogManager.getLogFilePath() || "禁用（内存会话）"}`,
+		);
+
+		// 获取技能列表
+		const skills = loader.getSkills().skills;
 
 		return {
 			sessionId: session.sessionId,
 			sessionFile: session.sessionFile,
 			workingDir: this.workingDir,
+			model: session.model?.id || null,
+			modelProvider: session.model?.provider || null,
+			thinkingLevel: session.thinkingLevel,
+			systemPrompt: systemPrompt || "",
+			agentsFiles: agentsFiles.map((f: any) => ({
+				path: f.path,
+				content: f.content,
+			})),
+			skills: skills.map((s: any) => ({
+				name: s.name,
+				description: s.description,
+			})),
 		};
 	}
 
@@ -215,7 +242,9 @@ export class GatewaySession {
 					this.send({
 						type: "tool_update",
 						toolCallId: event.toolCallId,
-						chunk: (event as unknown as { partialResult?: string }).partialResult ?? "",
+						chunk:
+							(event as unknown as { partialResult?: string }).partialResult ??
+							"",
 					});
 					break;
 				}
@@ -286,7 +315,10 @@ export class GatewaySession {
 	 */
 	async prompt(
 		text: string,
-		images?: Array<{ type: "image"; source: { type: "base64"; mediaType: string; data: string } }>,
+		images?: Array<{
+			type: "image";
+			source: { type: "base64"; mediaType: string; data: string };
+		}>,
 	) {
 		if (!this.session) {
 			this.send({ type: "error", error: "会话未初始化" });
@@ -295,11 +327,13 @@ export class GatewaySession {
 
 		try {
 			// 转换图像为正确格式
-			const convertedImages: ImageContent[] | undefined = images?.map((img) => ({
-				type: "image" as const,
-				data: img.source.data,
-				mimeType: img.source.mediaType,
-			}));
+			const convertedImages: ImageContent[] | undefined = images?.map(
+				(img) => ({
+					type: "image" as const,
+					data: img.source.data,
+					mimeType: img.source.mediaType,
+				}),
+			);
 
 			if (this.isStreaming) {
 				await this.session.prompt(text, {
@@ -412,7 +446,9 @@ export class GatewaySession {
 	 * 设置思考级别
 	 * @param thinkingLevel 思考级别
 	 */
-	async setThinkingLevel(thinkingLevel: "off" | "minimal" | "low" | "medium" | "high" | "xhigh") {
+	async setThinkingLevel(
+		thinkingLevel: "off" | "minimal" | "low" | "medium" | "high" | "xhigh",
+	) {
 		if (!this.session) return;
 		try {
 			this.session.setThinkingLevel(thinkingLevel);
@@ -434,7 +470,11 @@ export class GatewaySession {
 	 * @param args 参数
 	 * @param toolCallId 工具调用ID
 	 */
-	async executeTool(toolName: string, args: Record<string, unknown>, toolCallId: string) {
+	async executeTool(
+		toolName: string,
+		args: Record<string, unknown>,
+		toolCallId: string,
+	) {
 		if (!this.session) {
 			this.send({ type: "error", error: "会话未初始化" });
 			return;
@@ -463,7 +503,10 @@ export class GatewaySession {
 			});
 
 			// 执行工具（toolCallId, args, signal）
-			const result = await tool.execute(toolCallId, args as Record<string, string>);
+			const result = await tool.execute(
+				toolCallId,
+				args as Record<string, string>,
+			);
 
 			// 发送结束事件
 			this.send({
@@ -540,13 +583,21 @@ export class GatewaySession {
 		if (!this.session) return;
 		try {
 			// 从会话文件获取目标会话的cwd
-			const targetSessionManager = SessionManager.open(sessionPath, getLocalSessionsDir(this.workingDir));
+			const targetSessionManager = SessionManager.open(
+				sessionPath,
+				getLocalSessionsDir(this.workingDir),
+			);
 			const targetCwd = targetSessionManager.getCwd();
 
 			// 如果cwd不同，需要重新初始化以加载正确的AGENTS.md/SYSTEM.md
 			if (targetCwd !== this.workingDir) {
-				console.log(`[Gateway] 会话cwd不匹配: ${this.workingDir} -> ${targetCwd}, 重新初始化...`);
-				const info = await this.initialize(targetCwd, targetSessionManager.getSessionId());
+				console.log(
+					`[Gateway] 会话cwd不匹配: ${this.workingDir} -> ${targetCwd}, 重新初始化...`,
+				);
+				const info = await this.initialize(
+					targetCwd,
+					targetSessionManager.getSessionId(),
+				);
 				this.send({
 					type: "session_loaded",
 					success: true,
@@ -585,7 +636,12 @@ export class GatewaySession {
 		// 移除前导/
 		const cmd = command.slice(1).trim();
 		if (!cmd) {
-			this.send({ type: "command_result", command, output: "空命令", isError: true });
+			this.send({
+				type: "command_result",
+				command,
+				output: "空命令",
+				isError: true,
+			});
 			return;
 		}
 
@@ -612,7 +668,9 @@ export class GatewaySession {
 
 			child.on("close", (code: number | null) => {
 				const isError = code !== 0;
-				const result = errorOutput ? `${output}\n${errorOutput}`.trim() : output.trim();
+				const result = errorOutput
+					? `${output}\n${errorOutput}`.trim()
+					: output.trim();
 				this.send({
 					type: "command_result",
 					command,

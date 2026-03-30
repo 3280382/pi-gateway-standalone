@@ -21,8 +21,14 @@ describe("New Chat Store", () => {
 			const { setMessages } = useNewChatStore.getState();
 
 			const messages = [
-				new MessageModel({ role: "user", content: [{ type: "text", text: "Hello" }] }).toJSON(),
-				new MessageModel({ role: "assistant", content: [{ type: "text", text: "Hi there!" }] }).toJSON(),
+				new MessageModel({
+					role: "user",
+					content: [{ type: "text", text: "Hello" }],
+				}).toJSON(),
+				new MessageModel({
+					role: "assistant",
+					content: [{ type: "text", text: "Hi there!" }],
+				}).toJSON(),
 			];
 
 			setMessages(messages);
@@ -112,7 +118,8 @@ describe("New Chat Store", () => {
 		});
 
 		it("应该设置流式内容", () => {
-			const { setStreamingContent, appendStreamingContent } = useNewChatStore.getState();
+			const { setStreamingContent, appendStreamingContent } =
+				useNewChatStore.getState();
 
 			setStreamingContent("Hello");
 			appendStreamingContent(" World");
@@ -122,7 +129,8 @@ describe("New Chat Store", () => {
 		});
 
 		it("应该设置流式思考内容", () => {
-			const { setStreamingThinking, appendStreamingThinking } = useNewChatStore.getState();
+			const { setStreamingThinking, appendStreamingThinking } =
+				useNewChatStore.getState();
 
 			setStreamingThinking("Thinking...");
 			appendStreamingThinking(" more thoughts");
@@ -132,7 +140,8 @@ describe("New Chat Store", () => {
 		});
 
 		it("应该重置流式状态", () => {
-			const { setStreaming, setStreamingContent, resetStreaming } = useNewChatStore.getState();
+			const { setStreaming, setStreamingContent, resetStreaming } =
+				useNewChatStore.getState();
 
 			setStreaming(true);
 			setStreamingContent("Some content");
@@ -266,14 +275,18 @@ describe("New Chat Store", () => {
 		});
 
 		it("应该获取最后一条消息", () => {
-			const lastMessage = chatStoreSelectors.getLastMessage(useNewChatStore.getState());
+			const lastMessage = chatStoreSelectors.getLastMessage(
+				useNewChatStore.getState(),
+			);
 
 			expect(lastMessage?.id).toBe("msg-3");
 			expect(lastMessage?.role).toBe("user");
 		});
 
 		it("应该获取用户消息", () => {
-			const userMessages = chatStoreSelectors.getUserMessages(useNewChatStore.getState());
+			const userMessages = chatStoreSelectors.getUserMessages(
+				useNewChatStore.getState(),
+			);
 
 			expect(userMessages).toHaveLength(2);
 			expect(userMessages[0].id).toBe("msg-1");
@@ -281,20 +294,26 @@ describe("New Chat Store", () => {
 		});
 
 		it("应该获取助手消息", () => {
-			const assistantMessages = chatStoreSelectors.getAssistantMessages(useNewChatStore.getState());
+			const assistantMessages = chatStoreSelectors.getAssistantMessages(
+				useNewChatStore.getState(),
+			);
 
 			expect(assistantMessages).toHaveLength(1);
 			expect(assistantMessages[0].id).toBe("msg-2");
 		});
 
 		it("应该获取消息计数", () => {
-			const count = chatStoreSelectors.getMessageCount(useNewChatStore.getState());
+			const count = chatStoreSelectors.getMessageCount(
+				useNewChatStore.getState(),
+			);
 
 			expect(count).toBe(3);
 		});
 
 		it("应该获取字数统计", () => {
-			const wordCount = chatStoreSelectors.getWordCount(useNewChatStore.getState());
+			const wordCount = chatStoreSelectors.getWordCount(
+				useNewChatStore.getState(),
+			);
 
 			// "Hello" + "Hi there!" + "Another message" = 5 words
 			expect(wordCount).toBe(5);
@@ -335,7 +354,8 @@ describe("New Chat Store", () => {
 
 	describe("重置状态", () => {
 		it("应该重置所有状态", () => {
-			const { setInputText, setStreaming, addMessage, reset } = useNewChatStore.getState();
+			const { setInputText, setStreaming, addMessage, reset } =
+				useNewChatStore.getState();
 
 			setInputText("Hello");
 			setStreaming(true);

@@ -9,6 +9,7 @@
   <title>Pi Gateway - AI Coding Agent</title>
   <script type="module">
     import RefreshRuntime from "/@react-refresh"
+
     RefreshRuntime.injectIntoGlobalHook(window)
     window.$RefreshReg$ = () => {}
     window.$RefreshSig$ = () => (type) => type
@@ -35,11 +36,11 @@
   
   <!-- Error handling -->
   <script>
-    window.onerror = function(msg, url, line, col, error) {
+    window.onerror = (msg, url, line, col, error) => {
       document.body.innerHTML += '<div style="color:red;padding:20px;">Error: ' + msg + ' at ' + line + ':' + col + '</div>';
       return false;
     };
-    window.addEventListener('error', function(e) {
+    window.addEventListener('error', (e) => {
       console.error('Error:', e);
     });
   </script>

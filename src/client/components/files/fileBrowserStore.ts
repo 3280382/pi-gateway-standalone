@@ -4,13 +4,24 @@
 
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { ExecutionResult, FileBrowserState, FileContent, FileItem, SortField, SortOrder, ViewMode } from "./types";
+import type {
+	ExecutionResult,
+	FileBrowserState,
+	FileContent,
+	FileItem,
+	SortField,
+	SortOrder,
+	ViewMode,
+} from "./types";
 
 // ============================================================================
 // Initial State Factory
 // ============================================================================
 
-const createInitialState = (): Omit<FileBrowserState, keyof FileBrowserActions> => ({
+const createInitialState = (): Omit<
+	FileBrowserState,
+	keyof FileBrowserActions
+> => ({
 	currentPath: "",
 	files: [],
 
@@ -85,7 +96,9 @@ interface FileBrowserActions {
 // Store Creation
 // ============================================================================
 
-export const useFileBrowserStore = create<FileBrowserState & FileBrowserActions>()(
+export const useFileBrowserStore = create<
+	FileBrowserState & FileBrowserActions
+>()(
 	devtools(
 		(set, get) => ({
 			...createInitialState(),
@@ -113,7 +126,13 @@ export const useFileBrowserStore = create<FileBrowserState & FileBrowserActions>
 			},
 
 			toggleSortOrder: () => {
-				set((state) => ({ sortOrder: state.sortOrder === "asc" ? "desc" : "asc" }), false, "toggleSortOrder");
+				set(
+					(state) => ({
+						sortOrder: state.sortOrder === "asc" ? "desc" : "asc",
+					}),
+					false,
+					"toggleSortOrder",
+				);
 			},
 
 			setFilterQuery: (query: string) => {
@@ -124,7 +143,9 @@ export const useFileBrowserStore = create<FileBrowserState & FileBrowserActions>
 			selectFile: (path: string, multi = false) => {
 				set(
 					(state) => ({
-						selectedFiles: multi ? new Set([...state.selectedFiles, path]) : new Set([path]),
+						selectedFiles: multi
+							? new Set([...state.selectedFiles, path])
+							: new Set([path]),
 					}),
 					false,
 					"selectFile",
@@ -160,7 +181,9 @@ export const useFileBrowserStore = create<FileBrowserState & FileBrowserActions>
 			toggleSelection: (path: string, multi = false) => {
 				set(
 					(state) => {
-						const newSet = multi ? new Set(state.selectedFiles) : new Set<string>();
+						const newSet = multi
+							? new Set(state.selectedFiles)
+							: new Set<string>();
 						if (state.selectedFiles.has(path)) {
 							newSet.delete(path);
 						} else {
@@ -288,7 +311,9 @@ export const useFileBrowserStore = create<FileBrowserState & FileBrowserActions>
 // Selectors
 // ============================================================================
 
-export const selectFilteredAndSortedFiles = (state: FileBrowserState): FileItem[] => {
+export const selectFilteredAndSortedFiles = (
+	state: FileBrowserState,
+): FileItem[] => {
 	let files = [...state.files];
 
 	// Apply filter

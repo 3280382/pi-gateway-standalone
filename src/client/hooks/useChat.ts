@@ -9,7 +9,6 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { wsClient } from "../api/client";
 import { useChatStore } from "@/stores/chatStore";
 import type {
 	AgentEndMessage,
@@ -24,6 +23,7 @@ import type {
 	ToolStartMessage,
 	ToolUpdateMessage,
 } from "@/types/chat";
+import { wsClient } from "../api/client";
 
 // ============================================================================
 // Types
@@ -113,7 +113,10 @@ export function useChat(): UseChatReturn {
 
 	// Register a handler and track it for cleanup
 	const registerHandler = useCallback(
-		<T extends ChatWebSocketMessage["type"]>(event: T, handler: (data: any) => void) => {
+		<T extends ChatWebSocketMessage["type"]>(
+			event: T,
+			handler: (data: any) => void,
+		) => {
 			const unsubscribe = wsClient.on(event, handler);
 			handlersRef.current.push(unsubscribe);
 			return unsubscribe;
@@ -205,7 +208,12 @@ export function useChat(): UseChatReturn {
 				if (data.error) {
 					existing.error = data.error;
 					existing.status = "error";
-					store.updateToolStatus(data.toolCallId, "error", undefined, data.error);
+					store.updateToolStatus(
+						data.toolCallId,
+						"error",
+						undefined,
+						data.error,
+					);
 				}
 			}
 		});
@@ -218,7 +226,12 @@ export function useChat(): UseChatReturn {
 					existing.error = data.error;
 					existing.status = "error";
 					existing.endTime = new Date();
-					store.updateToolStatus(data.toolCallId, "error", undefined, data.error);
+					store.updateToolStatus(
+						data.toolCallId,
+						"error",
+						undefined,
+						data.error,
+					);
 				} else {
 					existing.output = data.output || existing.output;
 					existing.status = "success";

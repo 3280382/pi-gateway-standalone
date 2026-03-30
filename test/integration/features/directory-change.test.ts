@@ -13,7 +13,7 @@ describe("Directory Change", () => {
 
 	beforeAll(async () => {
 		// Start server
-		const serverPath = join(__dirname, "..", "dist", "server.js");
+		const serverPath = join(__dirname, "..", "..", "..", "dist", "server.js");
 		serverProcess = spawn("node", [serverPath], {
 			env: { ...process.env, PORT: String(SERVER_PORT) },
 			stdio: "pipe",
@@ -21,7 +21,10 @@ describe("Directory Change", () => {
 
 		// Wait for server to start
 		await new Promise<void>((resolve, reject) => {
-			const timeout = setTimeout(() => reject(new Error("Server startup timeout")), 15000);
+			const timeout = setTimeout(
+				() => reject(new Error("Server startup timeout")),
+				15000,
+			);
 			serverProcess.stdout?.on("data", (data) => {
 				if (data.toString().includes("Pi Gateway Server")) {
 					clearTimeout(timeout);
@@ -79,7 +82,8 @@ describe("Directory Change", () => {
 
 			const hasFunction = await page.evaluate(() => {
 				return (
-					typeof (window as { loadAndRenderRecentSession?: () => void }).loadAndRenderRecentSession !== "undefined"
+					typeof (window as { loadAndRenderRecentSession?: () => void })
+						.loadAndRenderRecentSession !== "undefined"
 				);
 			});
 

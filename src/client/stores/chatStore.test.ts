@@ -9,7 +9,18 @@ import { useChatStore } from "./chatStore";
 describe("ChatStore", () => {
 	beforeEach(() => {
 		// Reset store to initial state
-		useChatStore.getState().reset();
+		const store = useChatStore.getState();
+		if ("reset" in store && typeof store.reset === "function") {
+			store.reset();
+		} else {
+			// 如果reset方法不存在，手动重置状态
+			store.messages = [];
+			store.inputText = "";
+			store.isStreaming = false;
+			store.streamingContent = "";
+			store.streamingThinking = "";
+			store.activeTools = new Map();
+		}
 	});
 
 	it("should add messages", () => {

@@ -75,13 +75,17 @@ export async function waitForReload(
 		await new Promise((r) => setTimeout(r, interval));
 	}
 
-	throw new Error(`Server did not reload within ${timeout}ms (PID still ${previousPid})`);
+	throw new Error(
+		`Server did not reload within ${timeout}ms (PID still ${previousPid})`,
+	);
 }
 
 /**
  * Check if development server is running
  */
-export async function isDevServerRunning(port: number = DEFAULT_DEV_PORT): Promise<boolean> {
+export async function isDevServerRunning(
+	port: number = DEFAULT_DEV_PORT,
+): Promise<boolean> {
 	try {
 		const controller = new AbortController();
 		const timeout = setTimeout(() => controller.abort(), 2000);
@@ -113,7 +117,11 @@ export async function getTestServerUrl(): Promise<string | null> {
  * Wait for server to be ready (any version)
  * Use this when you just need the server running, not specifically new code
  */
-export async function waitForServer(url: string, maxAttempts: number = 30, interval: number = 1000): Promise<boolean> {
+export async function waitForServer(
+	url: string,
+	maxAttempts: number = 30,
+	interval: number = 1000,
+): Promise<boolean> {
 	for (let i = 0; i < maxAttempts; i++) {
 		try {
 			const response = await fetch(`${url}/api/models`, {

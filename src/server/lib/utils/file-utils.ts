@@ -27,7 +27,9 @@ export function isPathAllowed(targetPath: string): boolean {
 
 	// 允许主目录、当前工作目录或/tmp内的路径
 	const allowedPrefixes = [home, cwd, "/tmp"];
-	return allowedPrefixes.some((prefix) => resolved.startsWith(path.resolve(prefix)));
+	return allowedPrefixes.some((prefix) =>
+		resolved.startsWith(path.resolve(prefix)),
+	);
 }
 
 /**
@@ -268,7 +270,10 @@ export interface DirectoryTreeNode {
 /**
  * 获取目录树（限制深度）
  */
-export function getDirectoryTree(rootPath: string, maxDepth: number = 3): DirectoryTreeNode | null {
+export function getDirectoryTree(
+	rootPath: string,
+	maxDepth: number = 3,
+): DirectoryTreeNode | null {
 	try {
 		const stats = statSync(rootPath);
 		if (!stats.isDirectory()) {
@@ -281,7 +286,10 @@ export function getDirectoryTree(rootPath: string, maxDepth: number = 3): Direct
 			};
 		}
 
-		const readDirectory = (currentPath: string, depth: number): DirectoryTreeNode => {
+		const readDirectory = (
+			currentPath: string,
+			depth: number,
+		): DirectoryTreeNode => {
 			const name = path.basename(currentPath);
 			const stats = statSync(currentPath);
 

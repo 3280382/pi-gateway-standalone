@@ -13,6 +13,7 @@ export interface WorkingDirectory {
 
 export interface Session {
 	id: string;
+	path: string;
 	name: string;
 	messageCount: number;
 	lastModified: Date;

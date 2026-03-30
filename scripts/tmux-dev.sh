@@ -78,8 +78,16 @@ start_frontend() {
     echo -e "${BLUE}在前端窗格启动服务...${NC}"
     tmux send-keys -t $SESSION_NAME:0.0 C-c
     sleep 0.5
-    tmux send-keys -t $SESSION_NAME:0.0 "cd $GATEWAY_DIR && npx vite --host 127.0.0.1 --port 5173" C-m
-    echo -e "${GREEN}✅ 前端启动命令已发送${NC}"
+    # 创建简单的日志文件名
+    local frontend_log="$GATEWAY_DIR/logs/frontend_current.log"
+    mkdir -p "$GATEWAY_DIR/logs"
+    # 重命名旧日志文件
+    if [ -f "$frontend_log" ]; then
+        local old_timestamp=$(date -r "$frontend_log" +%Y%m%d_%H%M%S 2>/dev/null || date +%Y%m%d_%H%M%S)
+        mv "$frontend_log" "$GATEWAY_DIR/logs/frontend_${old_timestamp}.log" 2>/dev/null || true
+    fi
+    tmux send-keys -t $SESSION_NAME:0.0 "cd $GATEWAY_DIR && echo '前端日志: $frontend_log' && npx vite --host 127.0.0.1 --port 5173 2>&1 | tee -a '$frontend_log'" C-m
+    echo -e "${GREEN}✅ 前端启动命令已发送 (当前日志: frontend_current.log)${NC}"
 }
 
 # 函数：启动后端
@@ -87,8 +95,16 @@ start_backend() {
     echo -e "${BLUE}在后端窗格启动服务...${NC}"
     tmux send-keys -t $SESSION_NAME:0.1 C-c
     sleep 0.5
-    tmux send-keys -t $SESSION_NAME:0.1 "cd $GATEWAY_DIR && npx tsx watch src/server/server.ts" C-m
-    echo -e "${GREEN}✅ 后端启动命令已发送${NC}"
+    # 创建简单的日志文件名
+    local backend_log="$GATEWAY_DIR/logs/backend_current.log"
+    mkdir -p "$GATEWAY_DIR/logs"
+    # 重命名旧日志文件
+    if [ -f "$backend_log" ]; then
+        local old_timestamp=$(date -r "$backend_log" +%Y%m%d_%H%M%S 2>/dev/null || date +%Y%m%d_%H%M%S)
+        mv "$backend_log" "$GATEWAY_DIR/logs/backend_${old_timestamp}.log" 2>/dev/null || true
+    fi
+    tmux send-keys -t $SESSION_NAME:0.1 "cd $GATEWAY_DIR && echo '后端日志: $backend_log' && npx tsx watch src/server/server.ts 2>&1 | tee -a '$backend_log'" C-m
+    echo -e "${GREEN}✅ 后端启动命令已发送 (当前日志: backend_current.log)${NC}"
 }
 
 # 函数：停止前端

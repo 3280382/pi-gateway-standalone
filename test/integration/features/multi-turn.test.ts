@@ -11,14 +11,17 @@ describe("Multi-turn Conversation", () => {
 	let ws: WebSocket;
 
 	beforeAll(async () => {
-		const serverPath = join(__dirname, "..", "dist", "server.js");
+		const serverPath = join(__dirname, "..", "..", "..", "dist", "server.js");
 		serverProcess = spawn("node", [serverPath], {
 			env: { ...process.env, PORT: String(SERVER_PORT) },
 			stdio: "pipe",
 		});
 
 		await new Promise<void>((resolve, reject) => {
-			const timeout = setTimeout(() => reject(new Error("Server startup timeout")), 15000);
+			const timeout = setTimeout(
+				() => reject(new Error("Server startup timeout")),
+				15000,
+			);
 			serverProcess.stdout?.on("data", (data) => {
 				if (data.toString().includes("Pi Gateway Server")) {
 					clearTimeout(timeout);
@@ -37,7 +40,10 @@ describe("Multi-turn Conversation", () => {
 	function connectAndInit(): Promise<WebSocket> {
 		return new Promise((resolve, reject) => {
 			const socket = new WebSocket(WS_URL);
-			const timeout = setTimeout(() => reject(new Error("Connection timeout")), 5000);
+			const timeout = setTimeout(
+				() => reject(new Error("Connection timeout")),
+				5000,
+			);
 
 			socket.on("open", () => {
 				socket.send(
@@ -63,9 +69,16 @@ describe("Multi-turn Conversation", () => {
 		});
 	}
 
-	function waitForMessage(socket: WebSocket, type: string, timeoutMs = 30000): Promise<any> {
+	function waitForMessage(
+		socket: WebSocket,
+		type: string,
+		timeoutMs = 30000,
+	): Promise<any> {
 		return new Promise((resolve, reject) => {
-			const timeout = setTimeout(() => reject(new Error(`Timeout waiting for ${type}`)), timeoutMs);
+			const timeout = setTimeout(
+				() => reject(new Error(`Timeout waiting for ${type}`)),
+				timeoutMs,
+			);
 			const handler = (data: WebSocket.Data) => {
 				const msg = JSON.parse(data.toString());
 				if (msg.type === type) {

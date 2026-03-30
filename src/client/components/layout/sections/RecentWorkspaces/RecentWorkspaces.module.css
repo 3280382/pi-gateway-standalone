@@ -1,56 +1,63 @@
-/**
- * RecentWorkspaces Section Styles - Ultra compact
- */
+/* ============================================
+   RecentWorkspaces - Compact list
+   ============================================ */
 
 .section {
-  padding: 0 12px;
-  margin-bottom: 12px;
+	padding: 8px 12px;
+	border-bottom: 1px solid #21262d;
 }
 
+.loading,
 .empty {
-  color: var(--text-muted);
-  font-size: var(--font-xs);
-  padding: 8px;
-  text-align: center;
+	padding: 12px;
+	color: #7d8590;
+	font-size: 12px;
+	text-align: center;
 }
 
 .list {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
 }
 
 .item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: var(--font-xs);
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.1s ease;
-  overflow: hidden;
-  font-family: var(--font-mono);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 10px;
+	background: transparent;
+	border: none;
+	border-radius: 6px;
+	color: #e6edf3;
+	font-size: 12px;
+	cursor: pointer;
+	text-align: left;
+	width: 100%;
 }
 
 .item:hover {
-  background: var(--bg-hover);
+	background: #21262d;
 }
 
-.item svg {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
-  color: var(--text-muted);
+.info {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	flex: 1;
 }
 
 .name {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.path {
+	font-size: 10px;
+	color: #7d8590;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }

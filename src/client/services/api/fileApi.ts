@@ -43,7 +43,9 @@ export async function browseDirectory(path: string): Promise<BrowseResponse> {
 
 // 获取文件树
 export async function getFileTree(path: string): Promise<TreeResponse> {
-	const response = await fetch(`/api/files/tree?path=${encodeURIComponent(path)}`);
+	const response = await fetch(
+		`/api/files/tree?path=${encodeURIComponent(path)}`,
+	);
 
 	if (!response.ok) {
 		throw new Error(`Failed to load file tree: ${response.statusText}`);
@@ -54,7 +56,9 @@ export async function getFileTree(path: string): Promise<TreeResponse> {
 
 // 读取文件内容
 export async function readFile(path: string): Promise<FileContentResponse> {
-	const response = await fetch(`/api/files/content?path=${encodeURIComponent(path)}`);
+	const response = await fetch(
+		`/api/files/content?path=${encodeURIComponent(path)}`,
+	);
 
 	if (!response.ok) {
 		throw new Error(`Failed to read file: ${response.statusText}`);
@@ -82,11 +86,33 @@ export function getRawFileUrl(path: string): string {
 }
 
 // 执行文件
-export async function executeFile(path: string): Promise<ReadableStream<Uint8Array>> {
+export async function executeFile(
+	path: string,
+): Promise<ReadableStream<Uint8Array>> {
+	// 获取文件所在目录作为工作目录
+	const dir = path.split("/").slice(0, -1).join("/") || "/";
+	const fileName = path.split("/").pop() || "";
+
+	// 构建执行命令
+	let command = `./${fileName}`;
+
+	// 根据文件类型调整命令
+	if (fileName.endsWith(".py")) {
+		command = `python3 "${path}"`;
+	} else if (fileName.endsWith(".js")) {
+		command = `node "${path}"`;
+	} else if (fileName.endsWith(".sh") || fileName.endsWith(".bash")) {
+		command = `bash "${path}"`;
+	}
+
 	const response = await fetch("/api/execute", {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ path }),
+		body: JSON.stringify({
+			command: command,
+			cwd: dir,
+			streaming: true,
+		}),
 	});
 
 	if (!response.ok) {

@@ -68,7 +68,10 @@ function createTestStore(): TestSearchState & TestSearchActions {
 
 		prevResult() {
 			if (this.results.length === 0) return;
-			this.currentIndex = this.currentIndex <= 0 ? this.results.length - 1 : this.currentIndex - 1;
+			this.currentIndex =
+				this.currentIndex <= 0
+					? this.results.length - 1
+					: this.currentIndex - 1;
 		},
 
 		clearSearch() {

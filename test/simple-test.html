@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件浏览器功能测试</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { color: green; }
+        .error { color: red; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow: auto; }
+        .mobile-test { background: #f0f8ff; }
+    </style>
+</head>
+<body>
+    <h1>文件浏览器功能测试</h1>
+    
+    <div class="test-section">
+        <h2>1. 服务状态检查</h2>
+        <button onclick="testFrontend()">测试前端服务</button>
+        <button onclick="testBackend()">测试后端API</button>
+        <div id="service-status"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 文件浏览功能测试</h2>
+        <input type="text" id="path-input" value="/root" placeholder="输入路径">
+        <button onclick="testBrowse()">浏览目录</button>
+        <div id="browse-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 文件读取测试</h2>
+        <input type="text" id="file-input" value="/root/pi-gateway-standalone/package.json" placeholder="输入文件路径">
+        <button onclick="testReadFile()">读取文件</button>
+        <div id="read-result"></div>
+    </div>
+    
+    <div class="test-section mobile-test">
+        <h2>4. 移动端特性检测</h2>
+        <button onclick="detectMobileFeatures()">检测移动端特性</button>
+        <div id="mobile-features"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. 完整功能测试</h2>
+        <button onclick="runFullTest()">运行完整测试</button>
+        <div id="full-test-result"></div>
+    </div>
+
+    <script>
+        function log(containerId, message, isError = false) {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = isError ? 'error' : 'success';
+            div.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            container.appendChild(div);
+        }
+        
+        function clearLog(containerId) {
+            document.getElementById(containerId).innerHTML = '';
+        }
+        
+        async function testFrontend() {
+            clearLog('service-status');
+            log('service-status', '测试前端服务...');
+            
+            try {
+                const response = await fetch('http://127.0.0.1:5173/');
+                if (response.ok) {
+                    log('service-status', `✅ 前端服务正常 (HTTP ${response.status})`);
+                } else {
+                    log('service-status', `❌ 前端服务异常 (HTTP ${response.status})`, true);
+                }
+            } catch (error) {
+                log('service-status', `❌ 前端服务错误: ${error.message}`, true);
+            }
+        }
+        
+        async function testBackend() {
+            clearLog('service-status');
+            log('service-status', '测试后端API...');
+            
+            try {
+                const response = await fetch('http://127.0.0.1:3000/api/version');
+                if (response.ok) {
+                    const data = await response.json();
+                    log('service-status', `✅ 后端API正常: ${data.nodeVersion} on ${data.platform}`);
+                } else {
+                    log('service-status', `❌ 后端API异常 (HTTP ${response.status})`, true);
+                }
+            } catch (error) {
+                log('service-status', `❌ 后端API错误: ${error.message}`, true);
+            }
+        }
+        
+        async function testBrowse() {
+            clearLog('browse-result');
+            const path = document.getElementById('path-input').value;
+            log('browse-result', `浏览目录: ${path}`);
+            
+            try {
+                const response = await fetch('http://127.0.0.1:3000/api/browse', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('browse-result', `✅ 浏览成功: ${data.currentPath}`);
+                    log('browse-result', `找到 ${data.items.length} 个项目`);
+                    
+                    // 显示前5个项目
+                    const preview = data.items.slice(0, 5).map(item => 
+                        `${item.name} (${item.isDirectory ? '目录' : '文件'})`
+                    ).join(', ');
+                    log('browse-result', `示例: ${preview}${data.items.length > 5 ? '...' : ''}`);
+                    
+                    // 验证数据结构
+                    const hasRequiredFields = data.items.every(item => 
+                        item.name && item.path && typeof item.isDirectory === 'boolean'
+                    );
+                    log('browse-result', `数据结构: ${hasRequiredFields ? '✅ 正确' : '❌ 有问题'}`);
+                } else {
+                    const errorText = await response.text();
+                    log('browse-result', `❌ 浏览失败 (HTTP ${response.status}): ${errorText}`, true);
+                }
+            } catch (error) {
+                log('browse-result', `❌ 浏览错误: ${error.message}`, true);
+            }
+        }
+        
+        async function testReadFile() {
+            clearLog('read-result');
+            const filePath = document.getElementById('file-input').value;
+            log('read-result', `读取文件: ${filePath}`);
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:3000/api/files/content?path=${encodeURIComponent(filePath)}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('read-result', `✅ 读取成功: ${data.content.length} 字符`);
+                    
+                    // 显示预览
+                    const preview = data.content.substring(0, 100).replace(/\n/g, ' ');
+                    log('read-result', `预览: ${preview}...`);
+                } else {
+                    const errorText = await response.text();
+                    log('read-result', `❌ 读取失败 (HTTP ${response.status}): ${errorText}`, true);
+                }
+            } catch (error) {
+                log('read-result', `❌ 读取错误: ${error.message}`, true);
+            }
+        }
+        
+        function detectMobileFeatures() {
+            clearLog('mobile-features');
+            log('mobile-features', '检测移动端特性...');
+            
+            // 用户代理检测
+            const userAgent = navigator.userAgent;
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+            log('mobile-features', `用户代理: ${userAgent.substring(0, 50)}...`);
+            log('mobile-features', `移动设备: ${isMobile ? '✅ 是' : '❌ 否'}`);
+            
+            // 屏幕尺寸
+            log('mobile-features', `屏幕尺寸: ${window.screen.width} × ${window.screen.height}`);
+            log('mobile-features', `视口尺寸: ${window.innerWidth} × ${window.innerHeight}`);
+            
+            // 触摸支持
+            const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            log('mobile-features', `触摸支持: ${hasTouch ? '✅ 有' : '❌ 无'}`);
+            
+            // 设备方向
+            const hasOrientation = 'ondeviceorientation' in window;
+            log('mobile-features', `方向检测: ${hasOrientation ? '✅ 支持' : '❌ 不支持'}`);
+            
+            // 网络状态
+            const hasNetwork = 'ononline' in window;
+            log('mobile-features', `网络检测: ${hasNetwork ? '✅ 支持' : '❌ 不支持'}`);
+            
+            // 建议
+            if (!isMobile && window.innerWidth > 768) {
+                log('mobile-features', '💡 建议: 使用开发者工具模拟移动设备测试', false);
+            }
+        }
+        
+        async function runFullTest() {
+            clearLog('full-test-result');
+            log('full-test-result', '开始完整功能测试...');
+            
+            // 测试序列
+            const tests = [
+                { name: '前端服务', fn: testFrontendAsync },
+                { name: '后端API', fn: testBackendAsync },
+                { name: '文件浏览', fn: () => testBrowseAsync('/root') },
+                { name: '文件读取', fn: () => testReadFileAsync('/root/pi-gateway-standalone/package.json') }
+            ];
+            
+            let passed = 0;
+            let failed = 0;
+            
+            for (const test of tests) {
+                log('full-test-result', `运行测试: ${test.name}...`);
+                try {
+                    await test.fn();
+                    log('full-test-result', `✅ ${test.name} 通过`);
+                    passed++;
+                } catch (error) {
+                    log('full-test-result', `❌ ${test.name} 失败: ${error.message}`, true);
+                    failed++;
+                }
+            }
+            
+            log('full-test-result', `测试完成: ${passed} 通过, ${failed} 失败`);
+            log('full-test-result', failed === 0 ? '🎉 所有测试通过!' : '⚠️ 有测试失败，需要修复');
+        }
+        
+        // 异步版本的测试函数
+        async function testFrontendAsync() {
+            const response = await fetch('http://127.0.0.1:5173/');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        }
+        
+        async function testBackendAsync() {
+            const response = await fetch('http://127.0.0.1:3000/api/version');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        }
+        
+        async function testBrowseAsync(path) {
+            const response = await fetch('http://127.0.0.1:3000/api/browse', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path })
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (!data.items || !Array.isArray(data.items)) {
+                throw new Error('返回数据格式错误');
+            }
+        }
+        
+        async function testReadFileAsync(filePath) {
+            const response = await fetch(`http://127.0.0.1:3000/api/files/content?path=${encodeURIComponent(filePath)}`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (!data.content || typeof data.content !== 'string') {
+                throw new Error('返回数据格式错误');
+            }
+        }
+        
+        // 页面加载时自动检测移动端特性
+        window.addEventListener('load', detectMobileFeatures);
+    </script>
+</body>
+</html>

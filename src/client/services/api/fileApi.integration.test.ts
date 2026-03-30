@@ -4,7 +4,12 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { BrowseResponse, FileExecuteResponse, FileItem, FileReadResponse } from "../components/files/types";
+import type {
+	BrowseResponse,
+	FileExecuteResponse,
+	FileItem,
+	FileReadResponse,
+} from "../components/files/types";
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -28,7 +33,9 @@ async function browseDirectory(path: string): Promise<FileItem[]> {
 	}));
 }
 
-async function readFile(path: string): Promise<{ content: string; language?: string }> {
+async function readFile(
+	path: string,
+): Promise<{ content: string; language?: string }> {
 	const encodedPath = encodeURIComponent(path);
 	const response = await fetch(`/api/file/read?path=${encodedPath}`);
 
@@ -71,8 +78,19 @@ describe("FileApi Integration", () => {
 	describe("browseDirectory", () => {
 		it("should return file list on success", async () => {
 			const mockFiles = [
-				{ name: "file1.txt", path: "/test/file1.txt", type: "file", size: 100, modified: "2024-01-01" },
-				{ name: "folder1", path: "/test/folder1", type: "directory", modified: "2024-01-02" },
+				{
+					name: "file1.txt",
+					path: "/test/file1.txt",
+					type: "file",
+					size: 100,
+					modified: "2024-01-01",
+				},
+				{
+					name: "folder1",
+					path: "/test/folder1",
+					type: "directory",
+					modified: "2024-01-02",
+				},
 			];
 
 			(global.fetch as any).mockResolvedValueOnce({
@@ -94,7 +112,9 @@ describe("FileApi Integration", () => {
 				statusText: "Not Found",
 			});
 
-			await expect(browseDirectory("/invalid")).rejects.toThrow("Failed to browse: Not Found");
+			await expect(browseDirectory("/invalid")).rejects.toThrow(
+				"Failed to browse: Not Found",
+			);
 		});
 
 		it("should encode path parameter", async () => {
@@ -105,7 +125,9 @@ describe("FileApi Integration", () => {
 
 			await browseDirectory("/path with spaces");
 
-			expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining(encodeURIComponent("/path with spaces")));
+			expect(global.fetch).toHaveBeenCalledWith(
+				expect.stringContaining(encodeURIComponent("/path with spaces")),
+			);
 		});
 	});
 
@@ -127,7 +149,9 @@ describe("FileApi Integration", () => {
 				statusText: "File not found",
 			});
 
-			await expect(readFile("/missing.txt")).rejects.toThrow("Failed to read file: File not found");
+			await expect(readFile("/missing.txt")).rejects.toThrow(
+				"Failed to read file: File not found",
+			);
 		});
 	});
 
@@ -143,7 +167,10 @@ describe("FileApi Integration", () => {
 			expect(global.fetch).toHaveBeenCalledWith("/api/file/write", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ path: "/test/file.txt", content: "New content" }),
+				body: JSON.stringify({
+					path: "/test/file.txt",
+					content: "New content",
+				}),
 			});
 		});
 
@@ -153,7 +180,9 @@ describe("FileApi Integration", () => {
 				statusText: "Permission denied",
 			});
 
-			await expect(writeFile("/readonly.txt", "content")).rejects.toThrow("Permission denied");
+			await expect(writeFile("/readonly.txt", "content")).rejects.toThrow(
+				"Permission denied",
+			);
 		});
 	});
 

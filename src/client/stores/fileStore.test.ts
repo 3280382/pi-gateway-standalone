@@ -129,7 +129,9 @@ function createTestStore(): TestFileState & TestFileActions {
 			// Filter by text
 			if (this.filterText) {
 				const lowerText = this.filterText.toLowerCase();
-				result = result.filter((item) => item.name.toLowerCase().includes(lowerText));
+				result = result.filter((item) =>
+					item.name.toLowerCase().includes(lowerText),
+				);
 			}
 
 			// Sort
@@ -154,10 +156,12 @@ function createTestStore(): TestFileState & TestFileActions {
 						comparison = (b.size || 0) - (a.size || 0);
 						break;
 					case "time-asc":
-						comparison = new Date(a.modified).getTime() - new Date(b.modified).getTime();
+						comparison =
+							new Date(a.modified).getTime() - new Date(b.modified).getTime();
 						break;
 					case "time-desc":
-						comparison = new Date(b.modified).getTime() - new Date(a.modified).getTime();
+						comparison =
+							new Date(b.modified).getTime() - new Date(a.modified).getTime();
 						break;
 					case "type": {
 						const aExt = a.name.split(".").pop() || "";
@@ -177,10 +181,33 @@ function createTestStore(): TestFileState & TestFileActions {
 
 // 测试数据
 const mockFiles: FileItem[] = [
-	{ name: "file1.txt", path: "/home/file1.txt", isDirectory: false, size: 100, modified: "2024-01-15T00:00:00Z" },
-	{ name: "file2.js", path: "/home/file2.js", isDirectory: false, size: 500, modified: "2024-01-10T00:00:00Z" },
-	{ name: "folder1", path: "/home/folder1", isDirectory: true, modified: "2024-01-20T00:00:00Z" },
-	{ name: "file3.md", path: "/home/file3.md", isDirectory: false, size: 200, modified: "2024-01-05T00:00:00Z" },
+	{
+		name: "file1.txt",
+		path: "/home/file1.txt",
+		isDirectory: false,
+		size: 100,
+		modified: "2024-01-15T00:00:00Z",
+	},
+	{
+		name: "file2.js",
+		path: "/home/file2.js",
+		isDirectory: false,
+		size: 500,
+		modified: "2024-01-10T00:00:00Z",
+	},
+	{
+		name: "folder1",
+		path: "/home/folder1",
+		isDirectory: true,
+		modified: "2024-01-20T00:00:00Z",
+	},
+	{
+		name: "file3.md",
+		path: "/home/file3.md",
+		isDirectory: false,
+		size: 200,
+		modified: "2024-01-05T00:00:00Z",
+	},
 ];
 
 describe("FileStore", () => {

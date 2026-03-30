@@ -12,7 +12,7 @@ describe("WebSocket Server", () => {
 
 	beforeAll(async () => {
 		// Start server
-		const serverPath = join(__dirname, "..", "dist", "server.js");
+		const serverPath = join(__dirname, "..", "..", "..", "dist", "server.js");
 		serverProcess = spawn("node", [serverPath], {
 			env: { ...process.env, PORT: String(SERVER_PORT) },
 			stdio: "pipe",
@@ -20,7 +20,10 @@ describe("WebSocket Server", () => {
 
 		// Wait for server to start
 		await new Promise<void>((resolve, reject) => {
-			const timeout = setTimeout(() => reject(new Error("Server startup timeout")), 15000);
+			const timeout = setTimeout(
+				() => reject(new Error("Server startup timeout")),
+				15000,
+			);
 			serverProcess.stdout?.on("data", (data) => {
 				if (data.toString().includes("Pi Gateway Server")) {
 					clearTimeout(timeout);
@@ -46,7 +49,10 @@ describe("WebSocket Server", () => {
 			ws = new WebSocket(WS_URL);
 
 			await new Promise<void>((resolve, reject) => {
-				const timeout = setTimeout(() => reject(new Error("Connection timeout")), 5000);
+				const timeout = setTimeout(
+					() => reject(new Error("Connection timeout")),
+					5000,
+				);
 				ws.on("open", () => {
 					clearTimeout(timeout);
 					resolve();
@@ -64,7 +70,10 @@ describe("WebSocket Server", () => {
 			ws = new WebSocket(WS_URL);
 
 			await new Promise<void>((resolve, reject) => {
-				const timeout = setTimeout(() => reject(new Error("Connection timeout")), 5000);
+				const timeout = setTimeout(
+					() => reject(new Error("Connection timeout")),
+					5000,
+				);
 				ws.on("open", () => {
 					clearTimeout(timeout);
 					resolve();
@@ -73,13 +82,18 @@ describe("WebSocket Server", () => {
 			});
 
 			// Send init message
-			const responsePromise = new Promise<Record<string, unknown>>((resolve, reject) => {
-				const timeout = setTimeout(() => reject(new Error("Response timeout")), 5000);
-				ws.on("message", (data) => {
-					clearTimeout(timeout);
-					resolve(JSON.parse(data.toString()));
-				});
-			});
+			const responsePromise = new Promise<Record<string, unknown>>(
+				(resolve, reject) => {
+					const timeout = setTimeout(
+						() => reject(new Error("Response timeout")),
+						5000,
+					);
+					ws.on("message", (data) => {
+						clearTimeout(timeout);
+						resolve(JSON.parse(data.toString()));
+					});
+				},
+			);
 
 			ws.send(
 				JSON.stringify({
@@ -100,14 +114,20 @@ describe("WebSocket Server", () => {
 
 			await Promise.all([
 				new Promise<void>((resolve, reject) => {
-					const timeout = setTimeout(() => reject(new Error("WS1 timeout")), 5000);
+					const timeout = setTimeout(
+						() => reject(new Error("WS1 timeout")),
+						5000,
+					);
 					ws1.on("open", () => {
 						clearTimeout(timeout);
 						resolve();
 					});
 				}),
 				new Promise<void>((resolve, reject) => {
-					const timeout = setTimeout(() => reject(new Error("WS2 timeout")), 5000);
+					const timeout = setTimeout(
+						() => reject(new Error("WS2 timeout")),
+						5000,
+					);
 					ws2.on("open", () => {
 						clearTimeout(timeout);
 						resolve();
@@ -137,11 +157,13 @@ describe("WebSocket Server", () => {
 		});
 
 		it("should handle init message", async () => {
-			const responsePromise = new Promise<Record<string, unknown>>((resolve) => {
-				ws.on("message", (data) => {
-					resolve(JSON.parse(data.toString()));
-				});
-			});
+			const responsePromise = new Promise<Record<string, unknown>>(
+				(resolve) => {
+					ws.on("message", (data) => {
+						resolve(JSON.parse(data.toString()));
+					});
+				},
+			);
 
 			ws.send(
 				JSON.stringify({
@@ -165,11 +187,13 @@ describe("WebSocket Server", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 
-			const responsePromise = new Promise<Record<string, unknown>>((resolve) => {
-				ws.once("message", (data) => {
-					resolve(JSON.parse(data.toString()));
-				});
-			});
+			const responsePromise = new Promise<Record<string, unknown>>(
+				(resolve) => {
+					ws.once("message", (data) => {
+						resolve(JSON.parse(data.toString()));
+					});
+				},
+			);
 
 			ws.send(
 				JSON.stringify({
@@ -195,11 +219,13 @@ describe("WebSocket Server", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 
-			const responsePromise = new Promise<Record<string, unknown>>((resolve) => {
-				ws.once("message", (data) => {
-					resolve(JSON.parse(data.toString()));
-				});
-			});
+			const responsePromise = new Promise<Record<string, unknown>>(
+				(resolve) => {
+					ws.once("message", (data) => {
+						resolve(JSON.parse(data.toString()));
+					});
+				},
+			);
 
 			ws.send(JSON.stringify({ type: "new_session" }));
 
@@ -219,11 +245,13 @@ describe("WebSocket Server", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 
-			const responsePromise = new Promise<Record<string, unknown>>((resolve) => {
-				ws.once("message", (data) => {
-					resolve(JSON.parse(data.toString()));
-				});
-			});
+			const responsePromise = new Promise<Record<string, unknown>>(
+				(resolve) => {
+					ws.once("message", (data) => {
+						resolve(JSON.parse(data.toString()));
+					});
+				},
+			);
 
 			ws.send(JSON.stringify({ type: "list_models" }));
 
@@ -254,14 +282,23 @@ describe("WebSocket Server", () => {
 			ws.send(JSON.stringify({ type: "list_models" }));
 			const modelsResponse = await modelsPromise;
 
-			if (modelsResponse.models && Array.isArray(modelsResponse.models) && modelsResponse.models.length > 0) {
-				const model = modelsResponse.models[0] as { provider: string; id: string };
+			if (
+				modelsResponse.models &&
+				Array.isArray(modelsResponse.models) &&
+				modelsResponse.models.length > 0
+			) {
+				const model = modelsResponse.models[0] as {
+					provider: string;
+					id: string;
+				};
 
-				const responsePromise = new Promise<Record<string, unknown>>((resolve) => {
-					ws.once("message", (data) => {
-						resolve(JSON.parse(data.toString()));
-					});
-				});
+				const responsePromise = new Promise<Record<string, unknown>>(
+					(resolve) => {
+						ws.once("message", (data) => {
+							resolve(JSON.parse(data.toString()));
+						});
+					},
+				);
 
 				ws.send(
 					JSON.stringify({
@@ -278,11 +315,13 @@ describe("WebSocket Server", () => {
 		});
 
 		it("should return error for invalid message", async () => {
-			const responsePromise = new Promise<Record<string, unknown>>((resolve) => {
-				ws.on("message", (data) => {
-					resolve(JSON.parse(data.toString()));
-				});
-			});
+			const responsePromise = new Promise<Record<string, unknown>>(
+				(resolve) => {
+					ws.on("message", (data) => {
+						resolve(JSON.parse(data.toString()));
+					});
+				},
+			);
 
 			ws.send(JSON.stringify({ type: "invalid_type" }));
 
@@ -291,11 +330,13 @@ describe("WebSocket Server", () => {
 		});
 
 		it("should handle malformed JSON", async () => {
-			const responsePromise = new Promise<Record<string, unknown>>((resolve) => {
-				ws.on("message", (data) => {
-					resolve(JSON.parse(data.toString()));
-				});
-			});
+			const responsePromise = new Promise<Record<string, unknown>>(
+				(resolve) => {
+					ws.on("message", (data) => {
+						resolve(JSON.parse(data.toString()));
+					});
+				},
+			);
 
 			ws.send("not valid json");
 
@@ -334,11 +375,13 @@ describe("WebSocket Server", () => {
 		});
 
 		it("should create new session and return info", async () => {
-			const responsePromise = new Promise<Record<string, unknown>>((resolve) => {
-				ws.once("message", (data) => {
-					resolve(JSON.parse(data.toString()));
-				});
-			});
+			const responsePromise = new Promise<Record<string, unknown>>(
+				(resolve) => {
+					ws.once("message", (data) => {
+						resolve(JSON.parse(data.toString()));
+					});
+				},
+			);
 
 			ws.send(JSON.stringify({ type: "new_session" }));
 
@@ -350,11 +393,13 @@ describe("WebSocket Server", () => {
 
 		it("should load existing session", async () => {
 			// First list sessions
-			const sessionsPromise = new Promise<Record<string, unknown>>((resolve) => {
-				ws.once("message", (data) => {
-					resolve(JSON.parse(data.toString()));
-				});
-			});
+			const sessionsPromise = new Promise<Record<string, unknown>>(
+				(resolve) => {
+					ws.once("message", (data) => {
+						resolve(JSON.parse(data.toString()));
+					});
+				},
+			);
 
 			ws.send(
 				JSON.stringify({
@@ -372,11 +417,13 @@ describe("WebSocket Server", () => {
 			) {
 				const session = sessionsResponse.sessions[0] as { path: string };
 
-				const responsePromise = new Promise<Record<string, unknown>>((resolve) => {
-					ws.once("message", (data) => {
-						resolve(JSON.parse(data.toString()));
-					});
-				});
+				const responsePromise = new Promise<Record<string, unknown>>(
+					(resolve) => {
+						ws.once("message", (data) => {
+							resolve(JSON.parse(data.toString()));
+						});
+					},
+				);
 
 				ws.send(
 					JSON.stringify({
@@ -405,11 +452,13 @@ describe("WebSocket Server", () => {
 		});
 
 		it("should handle missing workingDir in init", async () => {
-			const responsePromise = new Promise<Record<string, unknown>>((resolve) => {
-				ws.on("message", (data) => {
-					resolve(JSON.parse(data.toString()));
-				});
-			});
+			const responsePromise = new Promise<Record<string, unknown>>(
+				(resolve) => {
+					ws.on("message", (data) => {
+						resolve(JSON.parse(data.toString()));
+					});
+				},
+			);
 
 			ws.send(JSON.stringify({ type: "init" }));
 
@@ -428,11 +477,13 @@ describe("WebSocket Server", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 
-			const responsePromise = new Promise<Record<string, unknown>>((resolve) => {
-				ws.once("message", (data) => {
-					resolve(JSON.parse(data.toString()));
-				});
-			});
+			const responsePromise = new Promise<Record<string, unknown>>(
+				(resolve) => {
+					ws.once("message", (data) => {
+						resolve(JSON.parse(data.toString()));
+					});
+				},
+			);
 
 			ws.send(
 				JSON.stringify({
@@ -458,11 +509,13 @@ describe("WebSocket Server", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 
-			const responsePromise = new Promise<Record<string, unknown>>((resolve) => {
-				ws.once("message", (data) => {
-					resolve(JSON.parse(data.toString()));
-				});
-			});
+			const responsePromise = new Promise<Record<string, unknown>>(
+				(resolve) => {
+					ws.once("message", (data) => {
+						resolve(JSON.parse(data.toString()));
+					});
+				},
+			);
 
 			ws.send(
 				JSON.stringify({

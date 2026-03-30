@@ -40,19 +40,26 @@ const mockDOM = () => {
 				return this.children.find((c: any) => c.dataset?.toolId === id);
 			}
 			if (sel === ".tool-content") {
-				return this.children.find((c: any) => c.classList?.contains("tool-content"));
+				return this.children.find((c: any) =>
+					c.classList?.contains("tool-content"),
+				);
 			}
 			if (sel === ".tool-status") {
-				return this.children.find((c: any) => c.classList?.contains("tool-status"));
+				return this.children.find((c: any) =>
+					c.classList?.contains("tool-status"),
+				);
 			}
 			if (sel === ".write-preview") {
-				return this.children.find((c: any) => c.classList?.contains("write-preview"));
+				return this.children.find((c: any) =>
+					c.classList?.contains("write-preview"),
+				);
 			}
 			return null;
 		},
 		querySelectorAll: function (sel: string) {
 			return this.children.filter((c: any) => {
-				if (sel === ".tool-execution") return c.classList?.contains("tool-execution");
+				if (sel === ".tool-execution")
+					return c.classList?.contains("tool-execution");
 				return false;
 			});
 		},

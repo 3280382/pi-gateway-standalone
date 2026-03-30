@@ -3,8 +3,13 @@
  * 处理会话相关的API请求
  */
 
-import { DefaultResourceLoader, SessionManager } from "@mariozechner/pi-coding-agent";
+import {
+	DefaultResourceLoader,
+	SessionManager,
+} from "@mariozechner/pi-coding-agent";
 import type { Request, Response } from "express";
+import * as fs from "fs/promises";
+import * as path from "path";
 import { expandPath } from "../lib/utils/file-utils";
 import { Logger, LogLevel } from "../lib/utils/logger";
 import { AGENT_DIR, getLocalSessionsDir } from "../session/utils";
@@ -16,15 +21,19 @@ const logger = new Logger({ level: LogLevel.INFO });
  */
 export async function getSessions(req: Request, res: Response) {
 	const cwd = (req.query.cwd as string) || process.cwd();
+	const localSessionsDir = getLocalSessionsDir(cwd);
+
 	try {
-		const localSessionsDir = getLocalSessionsDir(cwd);
 		const sessions = await SessionManager.list(cwd, localSessionsDir);
 
-		logger.info(`获取会话列表，目录: ${cwd}, 数量: ${sessions.length}`);
+		logger.info(`[getSessions] 加载会话: ${cwd}, 数量: ${sessions.length}`);
+
 		res.json({
 			sessions: sessions.map((s) => ({
 				id: s.id,
 				path: s.path,
+				name:
+					s.firstMessage?.slice(0, 50) || s.path.split("/").pop() || "Untitled",
 				firstMessage: s.firstMessage,
 				messageCount: s.messageCount,
 				cwd: s.cwd,
@@ -32,8 +41,10 @@ export async function getSessions(req: Request, res: Response) {
 			})),
 		});
 	} catch (error) {
-		logger.error(`获取会话列表错误: ${error instanceof Error ? error.message : String(error)}`, { cwd });
-		res.status(500).json({ error: String(error) });
+		logger.error(
+			`[getSessions] 错误: ${error instanceof Error ? error.message : String(error)}`,
+		);
+		res.json({ sessions: [] });
 	}
 }
 
@@ -48,13 +59,37 @@ export async function loadSession(req: Request, res: Response) {
 	}
 
 	try {
-		const { readFile } = await import("fs/promises");
+		const { readFile, access } = await import("fs/promises");
+
+		// Check if file exists
+		try {
+			await access(sessionPath);
+		} catch {
+			logger.error(`会话文件不存在: ${sessionPath}`);
+			res
+				.status(404)
+				.json({ error: "Session file not found", path: sessionPath });
+			return;
+		}
+
 		const content = await readFile(sessionPath, "utf-8");
 		const lines = content
 			.trim()
 			.split("\n")
 			.filter((line) => line.trim());
-		const entries = lines.map((line) => JSON.parse(line));
+
+		// Parse each line with error handling
+		const entries = [];
+		for (let i = 0; i < lines.length; i++) {
+			try {
+				entries.push(JSON.parse(lines[i]));
+			} catch (parseError) {
+				logger.warn(
+					`解析会话文件第 ${i + 1} 行失败: ${lines[i].slice(0, 100)}`,
+				);
+				// Skip invalid lines but continue processing
+			}
+		}
 
 		// 从会话文件路径提取会话ID
 		const sessionId = sessionPath.split("/").pop()?.replace(".jsonl", "") || "";
@@ -66,8 +101,11 @@ export async function loadSession(req: Request, res: Response) {
 			entries,
 		});
 	} catch (error) {
-		logger.error(`加载会话错误: ${error instanceof Error ? error.message : String(error)}`, { sessionPath });
-		res.status(500).json({ error: String(error) });
+		logger.error(
+			`加载会话错误: ${error instanceof Error ? error.message : String(error)}`,
+			{ sessionPath },
+		);
+		res.status(500).json({ error: String(error), path: sessionPath });
 	}
 }
 
@@ -116,10 +154,15 @@ AGENTS.md文件: ${agentsFiles.length} 个
 			})),
 		};
 
-		logger.info(`获取系统提示，目录: ${targetCwd}, AGENTS.md文件数: ${agentsFiles.length}`);
+		logger.info(
+			`获取系统提示，目录: ${targetCwd}, AGENTS.md文件数: ${agentsFiles.length}`,
+		);
 		res.json(response);
 	} catch (error) {
-		logger.error(`获取系统提示错误: ${error instanceof Error ? error.message : String(error)}`, { targetCwd });
+		logger.error(
+			`获取系统提示错误: ${error instanceof Error ? error.message : String(error)}`,
+			{ targetCwd },
+		);
 		res.status(500).json({ error: String(error) });
 	}
 }

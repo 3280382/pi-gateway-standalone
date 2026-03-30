@@ -2,170 +2,179 @@
  * Chat Example - 展示新架构用法的示例组件
  */
 
-import React, { useState, useCallback } from 'react';
-import { Button } from '../ui/Button/Button';
-import { Input } from '../ui/Input/Input';
-import { Select } from '../ui/Select/Select';
-import { chatController } from '../../controllers/chat.controller';
-import { useNewChatStore, chatStoreSelectors } from '../../store/new-chat.store';
-import { MessageModel } from '../../models/message.model';
+import type React from "react";
+import { useCallback, useState } from "react";
+import { chatStoreSelectors, useNewChatStore } from "@/stores/new-chat.store";
+import { chatController } from "../../controllers/chat.controller";
+import { MessageModel } from "../../models/message.model";
+import { Button } from "../ui/Button/Button";
+import { Input } from "../ui/Input/Input";
+import { Select } from "../ui/Select/Select";
 
 export function ChatExample() {
-  // 从store获取状态
-  const { messages, isStreaming, inputText, setInputText } = useNewChatStore();
-  const [selectedModel, setSelectedModel] = useState<string>('kimi-k2.5');
-  const [models, setModels] = useState<Array<{ value: string; label: string }>>([]);
-  
-  // 加载可用模型
-  const loadModels = useCallback(async () => {
-    try {
-      const availableModels = await chatController.getAvailableModels();
-      const modelOptions = availableModels.map(model => ({
-        value: model.id,
-        label: `${model.name} (${model.provider})`
-      }));
-      setModels(modelOptions);
-    } catch (error) {
-      console.error('Failed to load models:', error);
-    }
-  }, []);
-  
-  // 发送消息
-  const handleSend = useCallback(async () => {
-    if (!inputText.trim()) return;
-    
-    try {
-      // 设置模型
-      await chatController.setCurrentModel(selectedModel);
-      
-      // 发送消息
-      await chatController.sendMessage(inputText);
-    } catch (error) {
-      console.error('Failed to send message:', error);
-    }
-  }, [inputText, selectedModel]);
-  
-  // 中止生成
-  const handleAbort = useCallback(async () => {
-    await chatController.abortGeneration();
-  }, []);
-  
-  // 清除聊天
-  const handleClear = useCallback(async () => {
-    await chatController.clearChatHistory();
-  }, []);
-  
-  // 输入处理
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputText(e.target.value);
-  }, [setInputText]);
-  
-  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  }, [handleSend]);
-  
-  // 消息渲染
-  const renderMessage = useCallback((message: MessageModel) => {
-    const isUser = message.role === 'user';
-    
-    return (
-      <div
-        key={message.id}
-        className={`message ${isUser ? 'message-user' : 'message-assistant'}`}
-      >
-        <div className="message-header">
-          <span className="message-role">{isUser ? '👤 You' : '🤖 AI'}</span>
-          <span className="message-time">{message.formatTime()}</span>
-        </div>
-        <div className="message-content">
-          {message.getTextContent()}
-        </div>
-        {message.hasTools() && (
-          <div className="message-tools">
-            <span className="tools-badge">Tools used: {message.getToolContent().length}</span>
-          </div>
-        )}
-      </div>
-    );
-  }, []);
-  
-  return (
-    <div className="chat-example">
-      <div className="chat-header">
-        <h3>Chat Example</h3>
-        <div className="chat-controls">
-          <Select
-            options={models}
-            value={selectedModel}
-            onChange={setSelectedModel}
-            placeholder="Select model"
-            size="small"
-            onFocus={loadModels}
-          />
-          <Button
-            variant="ghost"
-            size="small"
-            onClick={handleClear}
-            disabled={messages.length === 0}
-          >
-            Clear Chat
-          </Button>
-        </div>
-      </div>
-      
-      <div className="chat-messages">
-        {messages.length === 0 ? (
-          <div className="empty-state">
-            <p>No messages yet. Start a conversation!</p>
-          </div>
-        ) : (
-          messages.map(msg => renderMessage(new MessageModel(msg)))
-        )}
-        
-        {isStreaming && (
-          <div className="streaming-indicator">
-            <div className="typing-dots">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <p>AI is thinking...</p>
-            <Button
-              variant="outline"
-              size="small"
-              onClick={handleAbort}
-              className="abort-button"
-            >
-              Stop
-            </Button>
-          </div>
-        )}
-      </div>
-      
-      <div className="chat-input-area">
-        <Input
-          value={inputText}
-          onChange={handleInputChange}
-          onKeyPress={handleKeyPress}
-          placeholder="Type your message here..."
-          fullWidth
-          rightIcon={
-            <Button
-              variant="primary"
-              onClick={handleSend}
-              disabled={!inputText.trim() || isStreaming}
-              loading={isStreaming}
-            >
-              Send
-            </Button>
-          }
-        />
-      </div>
-      
-      <style jsx>{`
+	// 从store获取状态
+	const { messages, isStreaming, inputText, setInputText } = useNewChatStore();
+	const [selectedModel, setSelectedModel] = useState<string>("kimi-k2.5");
+	const [models, setModels] = useState<Array<{ value: string; label: string }>>(
+		[],
+	);
+
+	// 加载可用模型
+	const loadModels = useCallback(async () => {
+		try {
+			const availableModels = await chatController.getAvailableModels();
+			const modelOptions = availableModels.map((model) => ({
+				value: model.id,
+				label: `${model.name} (${model.provider})`,
+			}));
+			setModels(modelOptions);
+		} catch (error) {
+			console.error("Failed to load models:", error);
+		}
+	}, []);
+
+	// 发送消息
+	const handleSend = useCallback(async () => {
+		if (!inputText.trim()) return;
+
+		try {
+			// 设置模型
+			await chatController.setCurrentModel(selectedModel);
+
+			// 发送消息
+			await chatController.sendMessage(inputText);
+		} catch (error) {
+			console.error("Failed to send message:", error);
+		}
+	}, [inputText, selectedModel]);
+
+	// 中止生成
+	const handleAbort = useCallback(async () => {
+		await chatController.abortGeneration();
+	}, []);
+
+	// 清除聊天
+	const handleClear = useCallback(async () => {
+		await chatController.clearChatHistory();
+	}, []);
+
+	// 输入处理
+	const handleInputChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			setInputText(e.target.value);
+		},
+		[setInputText],
+	);
+
+	const handleKeyPress = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (e.key === "Enter" && !e.shiftKey) {
+				e.preventDefault();
+				handleSend();
+			}
+		},
+		[handleSend],
+	);
+
+	// 消息渲染
+	const renderMessage = useCallback((message: MessageModel) => {
+		const isUser = message.role === "user";
+
+		return (
+			<div
+				key={message.id}
+				className={`message ${isUser ? "message-user" : "message-assistant"}`}
+			>
+				<div className="message-header">
+					<span className="message-role">{isUser ? "👤 You" : "🤖 AI"}</span>
+					<span className="message-time">{message.formatTime()}</span>
+				</div>
+				<div className="message-content">{message.getTextContent()}</div>
+				{message.hasTools() && (
+					<div className="message-tools">
+						<span className="tools-badge">
+							Tools used: {message.getToolContent().length}
+						</span>
+					</div>
+				)}
+			</div>
+		);
+	}, []);
+
+	return (
+		<div className="chat-example">
+			<div className="chat-header">
+				<h3>Chat Example</h3>
+				<div className="chat-controls">
+					<Select
+						options={models}
+						value={selectedModel}
+						onChange={setSelectedModel}
+						placeholder="Select model"
+						size="small"
+						onFocus={loadModels}
+					/>
+					<Button
+						variant="ghost"
+						size="small"
+						onClick={handleClear}
+						disabled={messages.length === 0}
+					>
+						Clear Chat
+					</Button>
+				</div>
+			</div>
+
+			<div className="chat-messages">
+				{messages.length === 0 ? (
+					<div className="empty-state">
+						<p>No messages yet. Start a conversation!</p>
+					</div>
+				) : (
+					messages.map((msg) => renderMessage(new MessageModel(msg)))
+				)}
+
+				{isStreaming && (
+					<div className="streaming-indicator">
+						<div className="typing-dots">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+						<p>AI is thinking...</p>
+						<Button
+							variant="outline"
+							size="small"
+							onClick={handleAbort}
+							className="abort-button"
+						>
+							Stop
+						</Button>
+					</div>
+				)}
+			</div>
+
+			<div className="chat-input-area">
+				<Input
+					value={inputText}
+					onChange={handleInputChange}
+					onKeyPress={handleKeyPress}
+					placeholder="Type your message here..."
+					fullWidth
+					rightIcon={
+						<Button
+							variant="primary"
+							onClick={handleSend}
+							disabled={!inputText.trim() || isStreaming}
+							loading={isStreaming}
+						>
+							Send
+						</Button>
+					}
+				/>
+			</div>
+
+			<style jsx>{`
         .chat-example {
           display: flex;
           flex-direction: column;
@@ -310,6 +319,6 @@ export function ChatExample() {
           background-color: var(--color-bg-secondary);
         }
       `}</style>
-    </div>
-  );
+		</div>
+	);
 }

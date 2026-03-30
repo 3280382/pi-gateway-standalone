@@ -4,7 +4,13 @@
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import type { FontSize, SearchFilters, Session, SidebarState, Theme } from "@/types/sidebar";
+import type {
+	FontSize,
+	SearchFilters,
+	Session,
+	SidebarState,
+	Theme,
+} from "@/types/sidebar";
 
 // ============================================================================
 // Initial State Factory
@@ -80,15 +86,21 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 
 				addRecentWorkspace: (path: string) => {
 					const current = get().recentWorkspaces;
+					// Normalize path (remove trailing slash)
+					const normalizedPath = path.replace(/\/$/, "");
 					// Remove if exists, add to front, limit to 5
-					const filtered = current.filter((w) => w !== path);
-					const updated = [path, ...filtered].slice(0, 5);
+					const filtered = current.filter((w) => w !== normalizedPath);
+					const updated = [normalizedPath, ...filtered].slice(0, 5);
 					set({ recentWorkspaces: updated }, false, "addRecentWorkspace");
 				},
 
 				removeRecentWorkspace: (path: string) => {
 					const current = get().recentWorkspaces;
-					set({ recentWorkspaces: current.filter((w) => w !== path) }, false, "removeRecentWorkspace");
+					set(
+						{ recentWorkspaces: current.filter((w) => w !== path) },
+						false,
+						"removeRecentWorkspace",
+					);
 				},
 
 				setSessions: (sessions: Session[]) => {
@@ -143,6 +155,7 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 			}),
 			{
 				name: "sidebar-storage",
+				version: 1,
 				partialize: (state) => ({
 					theme: state.theme,
 					fontSize: state.fontSize,
@@ -160,9 +173,11 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 // ============================================================================
 
 export const selectWorkingDir = (state: SidebarState) => state.workingDir;
-export const selectRecentWorkspaces = (state: SidebarState) => state.recentWorkspaces;
+export const selectRecentWorkspaces = (state: SidebarState) =>
+	state.recentWorkspaces;
 export const selectSessions = (state: SidebarState) => state.sessions;
-export const selectSelectedSessionId = (state: SidebarState) => state.selectedSessionId;
+export const selectSelectedSessionId = (state: SidebarState) =>
+	state.selectedSessionId;
 export const selectSearchQuery = (state: SidebarState) => state.searchQuery;
 export const selectSearchFilters = (state: SidebarState) => state.searchFilters;
 export const selectTheme = (state: SidebarState) => state.theme;

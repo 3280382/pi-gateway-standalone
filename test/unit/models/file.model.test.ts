@@ -242,7 +242,12 @@ describe("FileModel", () => {
 
 	describe("文件属性检测", () => {
 		it("应该检测是否可编辑", () => {
-			const editableFiles = ["script.js", "style.css", "README.md", "config.yaml"];
+			const editableFiles = [
+				"script.js",
+				"style.css",
+				"README.md",
+				"config.yaml",
+			];
 			const nonEditableFiles = ["image.jpg", "archive.zip", "binary.exe"];
 
 			editableFiles.forEach((filename) => {
@@ -282,7 +287,12 @@ describe("FileModel", () => {
 		});
 
 		it("应该检测是否可执行", () => {
-			const executableFiles = ["script.sh", "program.py", "app.js", "binary.exe"];
+			const executableFiles = [
+				"script.sh",
+				"program.py",
+				"app.js",
+				"binary.exe",
+			];
 			const nonExecutableFiles = ["data.json", "image.png", "doc.md"];
 
 			executableFiles.forEach((filename) => {
@@ -369,7 +379,12 @@ describe("FileModel", () => {
 		});
 
 		it("应该检测是否是配置文件", () => {
-			const configFiles = [".env", "config.json", "settings.yaml", "app.config"];
+			const configFiles = [
+				".env",
+				"config.json",
+				"settings.yaml",
+				"app.config",
+			];
 			const nonConfigFiles = ["script.js", "image.jpg", "README.md"];
 
 			configFiles.forEach((filename) => {

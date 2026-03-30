@@ -3,7 +3,11 @@
  * 提供通用的数据格式化功能
  */
 
-import type { ApiMeta, ApiResponse, ErrorCode } from "../../../shared/types/api.types";
+import type {
+	ApiMeta,
+	ApiResponse,
+	ErrorCode,
+} from "../../../shared/types/api.types";
 
 export class Formatter {
 	/**
@@ -65,7 +69,10 @@ export class Formatter {
 	/**
 	 * 格式化日期
 	 */
-	static formatDate(date: Date | string, format: "iso" | "local" | "relative" = "iso"): string {
+	static formatDate(
+		date: Date | string,
+		format: "iso" | "local" | "relative" = "iso",
+	): string {
 		const d = typeof date === "string" ? new Date(date) : date;
 
 		switch (format) {
@@ -217,7 +224,8 @@ export class Formatter {
 	 * 格式化时间戳
 	 */
 	static formatTimestamp(timestamp: number | string): string {
-		const date = typeof timestamp === "string" ? new Date(timestamp) : new Date(timestamp);
+		const date =
+			typeof timestamp === "string" ? new Date(timestamp) : new Date(timestamp);
 		return date.toISOString();
 	}
 

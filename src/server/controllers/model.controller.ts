@@ -28,7 +28,9 @@ export async function getModels(_req: Request, res: Response) {
 			})),
 		});
 	} catch (error) {
-		logger.error(`获取模型列表错误: ${error instanceof Error ? error.message : String(error)}`);
+		logger.error(
+			`获取模型列表错误: ${error instanceof Error ? error.message : String(error)}`,
+		);
 		res.status(500).json({ error: String(error) });
 	}
 }

@@ -1,190 +1,190 @@
 .inputContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
 }
 
 .label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-text);
-  display: flex;
-  align-items: center;
-  gap: 4px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color-text);
+	display: flex;
+	align-items: center;
+	gap: 4px;
 }
 
 .required {
-  color: var(--color-danger);
-  font-size: 18px;
+	color: var(--color-danger);
+	font-size: 18px;
 }
 
 .inputWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
+	position: relative;
+	display: flex;
+	align-items: center;
 }
 
 .input,
 .textarea {
-  font-family: inherit;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  transition: all 0.2s ease;
-  outline: none;
-  width: 100%;
+	font-family: inherit;
+	border: 1px solid var(--color-border);
+	border-radius: 6px;
+	background-color: var(--color-bg);
+	color: var(--color-text);
+	transition: all 0.2s ease;
+	outline: none;
+	width: 100%;
 }
 
 .input:focus,
 .textarea:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-alpha);
+	border-color: var(--color-primary);
+	box-shadow: 0 0 0 3px var(--color-primary-alpha);
 }
 
 /* Variants */
 .input.variant-default,
 .textarea.variant-default {
-  background-color: var(--color-bg);
+	background-color: var(--color-bg);
 }
 
 .input.variant-filled,
 .textarea.variant-filled {
-  background-color: var(--color-bg-secondary);
-  border-color: transparent;
+	background-color: var(--color-bg-secondary);
+	border-color: transparent;
 }
 
 .input.variant-filled:focus,
 .textarea.variant-filled:focus {
-  border-color: var(--color-primary);
-  background-color: var(--color-bg);
+	border-color: var(--color-primary);
+	background-color: var(--color-bg);
 }
 
 .input.variant-outline,
 .textarea.variant-outline {
-  background-color: transparent;
-  border-width: 2px;
+	background-color: transparent;
+	border-width: 2px;
 }
 
 /* Sizes */
 .input.size-small,
 .textarea.size-small {
-  padding: 6px 10px;
-  font-size: 13px;
-  min-height: 32px;
+	padding: 6px 10px;
+	font-size: 13px;
+	min-height: 32px;
 }
 
 .input.size-medium,
 .textarea.size-medium {
-  padding: 10px 12px;
-  font-size: 14px;
-  min-height: 40px;
+	padding: 10px 12px;
+	font-size: 14px;
+	min-height: 40px;
 }
 
 .input.size-large,
 .textarea.size-large {
-  padding: 12px 14px;
-  font-size: 16px;
-  min-height: 48px;
+	padding: 12px 14px;
+	font-size: 16px;
+	min-height: 48px;
 }
 
 /* Textarea specific */
 .textarea {
-  resize: vertical;
-  min-height: 80px;
-  line-height: 1.5;
+	resize: vertical;
+	min-height: 80px;
+	line-height: 1.5;
 }
 
 /* Icon handling */
 .hasLeftIcon {
-  padding-left: 40px;
+	padding-left: 40px;
 }
 
 .hasRightIcon {
-  padding-right: 40px;
+	padding-right: 40px;
 }
 
 .leftIcon,
 .rightIcon {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-secondary);
-  pointer-events: none;
+	position: absolute;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--color-text-secondary);
+	pointer-events: none;
 }
 
 .leftIcon {
-  left: 12px;
+	left: 12px;
 }
 
 .rightIcon {
-  right: 12px;
+	right: 12px;
 }
 
 /* States */
 .input.error,
 .textarea.error {
-  border-color: var(--color-danger);
+	border-color: var(--color-danger);
 }
 
 .input.error:focus,
 .textarea.error:focus {
-  border-color: var(--color-danger);
-  box-shadow: 0 0 0 3px var(--color-danger-alpha);
+	border-color: var(--color-danger);
+	box-shadow: 0 0 0 3px var(--color-danger-alpha);
 }
 
 .input.disabled,
 .textarea.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background-color: var(--color-bg-disabled);
+	opacity: 0.5;
+	cursor: not-allowed;
+	background-color: var(--color-bg-disabled);
 }
 
 .input.fullWidth,
 .textarea.fullWidth {
-  width: 100%;
+	width: 100%;
 }
 
 /* Helper and error text */
 .helperText {
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  margin-top: 2px;
+	font-size: 12px;
+	color: var(--color-text-secondary);
+	margin-top: 2px;
 }
 
 .errorText {
-  font-size: 12px;
-  color: var(--color-danger);
-  margin-top: 2px;
+	font-size: 12px;
+	color: var(--color-danger);
+	margin-top: 2px;
 }
 
 /* Focus styles for accessibility */
 .input:focus-visible,
 .textarea:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+	outline: 2px solid var(--color-primary);
+	outline-offset: 2px;
 }
 
 /* Dark mode adjustments */
 @media (prefers-color-scheme: dark) {
-  .input,
-  .textarea {
-    background-color: var(--color-bg-dark);
-    border-color: var(--color-border-dark);
-    color: var(--color-text-dark);
-  }
-  
-  .input.variant-filled,
-  .textarea.variant-filled {
-    background-color: var(--color-bg-secondary-dark);
-  }
-  
-  .label {
-    color: var(--color-text-dark);
-  }
-  
-  .helperText {
-    color: var(--color-text-secondary-dark);
-  }
+	.input,
+	.textarea {
+		background-color: var(--color-bg-dark);
+		border-color: var(--color-border-dark);
+		color: var(--color-text-dark);
+	}
+
+	.input.variant-filled,
+	.textarea.variant-filled {
+		background-color: var(--color-bg-secondary-dark);
+	}
+
+	.label {
+		color: var(--color-text-dark);
+	}
+
+	.helperText {
+		color: var(--color-text-secondary-dark);
+	}
 }

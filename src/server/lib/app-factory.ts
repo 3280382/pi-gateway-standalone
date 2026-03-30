@@ -3,16 +3,20 @@
  * 创建和配置Express应用程序
  */
 
+import type { ApiResponse } from "@shared/types/api.types";
 import compression from "compression";
 import cors from "cors";
-import express, { type Application, type NextFunction, type Request, type Response } from "express";
+import express, {
+	type Application,
+	type NextFunction,
+	type Request,
+	type Response,
+} from "express";
 import helmet from "helmet";
 import { createServer, type Server } from "http";
 import morgan from "morgan";
 import { join } from "path";
-
 import { Config } from "../config";
-import type { ApiResponse } from "../../../shared/types/api.types";
 import { ApiError, ErrorFactory } from "./errors/api.error";
 import { Logger, LogLevel } from "./utils/logger";
 
@@ -99,7 +103,11 @@ export class AppFactory {
 		// 开发模式缓存控制
 		if (Config.isDevelopment()) {
 			this.app.use((req: Request, res: Response, next: NextFunction) => {
-				if (req.url.endsWith(".js") || req.url.endsWith(".html") || req.url.includes(".js?v=")) {
+				if (
+					req.url.endsWith(".js") ||
+					req.url.endsWith(".html") ||
+					req.url.includes(".js?v=")
+				) {
 					res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 					res.setHeader("Pragma", "no-cache");
 					res.setHeader("Expires", "0");
@@ -124,9 +132,14 @@ export class AppFactory {
 		);
 
 		// 防止MIME类型嗅探
-		this.app.use((_req: Request, res: Response, next: NextFunction) => {
+		this.app.use((req: Request, res: Response, next: NextFunction) => {
 			res.setHeader("X-Content-Type-Options", "nosniff");
-			res.setHeader("X-Frame-Options", "DENY");
+			// 允许iframe嵌入原始文件API（用于HTML预览）
+			if (req.path === "/api/files/raw") {
+				res.setHeader("X-Frame-Options", "SAMEORIGIN");
+			} else {
+				res.setHeader("X-Frame-Options", "DENY");
+			}
 			res.setHeader("X-XSS-Protection", "1; mode=block");
 			next();
 		});
@@ -183,8 +196,14 @@ export class AppFactory {
 				etag: staticConfig.etag,
 				lastModified: staticConfig.lastModified,
 				setHeaders: (res: Response, path: string) => {
-					if (Config.isDevelopment() && (path.endsWith(".js") || path.endsWith(".html"))) {
-						res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+					if (
+						Config.isDevelopment() &&
+						(path.endsWith(".js") || path.endsWith(".html"))
+					) {
+						res.setHeader(
+							"Cache-Control",
+							"no-cache, no-store, must-revalidate",
+						);
 						res.setHeader("Pragma", "no-cache");
 						res.setHeader("Expires", "0");
 					}
@@ -209,36 +228,40 @@ export class AppFactory {
 	 */
 	private configureErrorHandling(): void {
 		// 全局错误处理（404处理将在路由注册后添加）
-		this.app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {
-			this.logger.error("Unhandled error", {}, error);
+		this.app.use(
+			(error: any, _req: Request, res: Response, _next: NextFunction) => {
+				this.logger.error("Unhandled error", {}, error);
 
-			// 如果是ApiError，使用其状态码和消息
-			if (error instanceof ApiError) {
+				// 如果是ApiError，使用其状态码和消息
+				if (error instanceof ApiError) {
+					const response: ApiResponse = {
+						success: false,
+						error: {
+							code: error.code,
+							message: error.message,
+							details: error.details,
+						},
+					};
+
+					return res.status(error.statusCode).json(response);
+				}
+
+				// 未知错误
+				const statusCode = error.statusCode || error.status || 500;
 				const response: ApiResponse = {
 					success: false,
 					error: {
-						code: error.code,
-						message: error.message,
-						details: error.details,
+						code: "INTERNAL_ERROR",
+						message: Config.isProduction()
+							? "Internal server error"
+							: error.message,
+						details: Config.isProduction() ? undefined : { stack: error.stack },
 					},
 				};
 
-				return res.status(error.statusCode).json(response);
-			}
-
-			// 未知错误
-			const statusCode = error.statusCode || error.status || 500;
-			const response: ApiResponse = {
-				success: false,
-				error: {
-					code: "INTERNAL_ERROR",
-					message: Config.isProduction() ? "Internal server error" : error.message,
-					details: Config.isProduction() ? undefined : { stack: error.stack },
-				},
-			};
-
-			res.status(statusCode).json(response);
-		});
+				res.status(statusCode).json(response);
+			},
+		);
 	}
 
 	/**

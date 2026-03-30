@@ -3,74 +3,74 @@
  */
 
 .section {
-  padding: 0 12px;
-  margin-bottom: 12px;
+	padding: 0 12px;
+	margin-bottom: 12px;
 }
 
 .loading,
 .empty {
-  color: var(--text-muted);
-  font-size: var(--font-xs);
-  padding: 12px;
-  text-align: center;
+	color: var(--text-muted);
+	font-size: var(--font-xs);
+	padding: 12px;
+	text-align: center;
 }
 
 .list {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
 }
 
 .item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.1s ease;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 10px;
+	background: transparent;
+	border: none;
+	border-radius: var(--radius-md);
+	color: var(--text-secondary);
+	text-align: left;
+	cursor: pointer;
+	transition: all 0.1s ease;
 }
 
 .item:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+	background: var(--bg-hover);
+	color: var(--text-primary);
 }
 
 .item.selected {
-  background: var(--accent-bg-blue);
-  color: var(--accent-blue);
+	background: var(--accent-bg-blue);
+	color: var(--accent-blue);
 }
 
 .icon {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  opacity: 0.6;
+	flex-shrink: 0;
+	width: 14px;
+	height: 14px;
+	opacity: 0.6;
 }
 
 .item.selected .icon {
-  opacity: 1;
+	opacity: 1;
 }
 
 .info {
-  min-width: 0;
-  flex: 1;
+	min-width: 0;
+	flex: 1;
 }
 
 .name {
-  font-size: var(--font-sm);
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 1px;
+	font-size: var(--font-sm);
+	font-weight: 500;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin-bottom: 1px;
 }
 
 .meta {
-  font-size: var(--font-xs);
-  opacity: 0.6;
+	font-size: var(--font-xs);
+	opacity: 0.6;
 }

@@ -39,7 +39,13 @@ function createTestStore(): TestUIState & TestUIActions {
 
 	const state: TestUIState = { ...defaults };
 
-	const fontSizes: TestUIState["fontSize"][] = ["tiny", "small", "medium", "large", "xlarge"];
+	const fontSizes: TestUIState["fontSize"][] = [
+		"tiny",
+		"small",
+		"medium",
+		"large",
+		"xlarge",
+	];
 
 	return {
 		...state,
@@ -161,7 +167,13 @@ describe("UIStore", () => {
 		});
 
 		it("should cycle through all font sizes", () => {
-			const sizes: TestUIState["fontSize"][] = ["tiny", "small", "medium", "large", "xlarge"];
+			const sizes: TestUIState["fontSize"][] = [
+				"tiny",
+				"small",
+				"medium",
+				"large",
+				"xlarge",
+			];
 			store.setFontSize("tiny");
 
 			sizes.slice(1).forEach((expectedSize) => {

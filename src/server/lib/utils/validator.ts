@@ -23,7 +23,10 @@ export class Validator {
 	/**
 	 * 验证对象是否符合规则
 	 */
-	static validate<T extends Record<string, any>>(data: T, rules: ValidationRule[]): ValidationResult {
+	static validate<T extends Record<string, any>>(
+		data: T,
+		rules: ValidationRule[],
+	): ValidationResult {
 		const errors: ApiError[] = [];
 		const validatedData: Record<string, any> = {};
 
@@ -31,7 +34,10 @@ export class Validator {
 			const value = data[rule.field];
 
 			// 检查必填字段
-			if (rule.required && (value === undefined || value === null || value === "")) {
+			if (
+				rule.required &&
+				(value === undefined || value === null || value === "")
+			) {
 				errors.push({
 					code: ErrorCode.VALIDATION_ERROR,
 					message: rule.message || `字段 ${rule.field} 是必填的`,
@@ -41,7 +47,10 @@ export class Validator {
 			}
 
 			// 如果字段是可选的且为空，跳过验证
-			if (!rule.required && (value === undefined || value === null || value === "")) {
+			if (
+				!rule.required &&
+				(value === undefined || value === null || value === "")
+			) {
 				continue;
 			}
 
@@ -62,7 +71,9 @@ export class Validator {
 				});
 			} else {
 				// 验证成功，应用转换
-				validatedData[rule.field] = rule.transform ? rule.transform(value) : value;
+				validatedData[rule.field] = rule.transform
+					? rule.transform(value)
+					: value;
 			}
 		}
 
@@ -194,7 +205,10 @@ export class Validator {
 	/**
 	 * 验证正则表达式
 	 */
-	static matches(regex: RegExp, message?: string): (value: string) => boolean | string {
+	static matches(
+		regex: RegExp,
+		message?: string,
+	): (value: string) => boolean | string {
 		return (value: string) => {
 			if (!regex.test(value)) {
 				return message || `格式不正确`;
@@ -265,7 +279,9 @@ export class Validator {
 	/**
 	 * 验证数组中的每个元素
 	 */
-	static arrayItems(rules: ValidationRule[]): (value: any[]) => boolean | string {
+	static arrayItems(
+		rules: ValidationRule[],
+	): (value: any[]) => boolean | string {
 		return (value: any[]) => {
 			if (!Array.isArray(value)) {
 				return "必须是数组";
@@ -286,7 +302,11 @@ export class Validator {
 
 // 常用验证规则
 export const commonRules = {
-	string: (field: string, required = true, options?: { min?: number; max?: number }) => {
+	string: (
+		field: string,
+		required = true,
+		options?: { min?: number; max?: number },
+	) => {
 		const rules: ValidationRule[] = [
 			{
 				field,
@@ -314,7 +334,11 @@ export const commonRules = {
 		return rules;
 	},
 
-	number: (field: string, required = true, options?: { min?: number; max?: number }) => {
+	number: (
+		field: string,
+		required = true,
+		options?: { min?: number; max?: number },
+	) => {
 		const rules: ValidationRule[] = [
 			{
 				field,

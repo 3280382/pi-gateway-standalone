@@ -19,7 +19,10 @@ export class ApiError extends Error {
 	}
 }
 
-export async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
+export async function fetchApi<T>(
+	path: string,
+	options?: RequestInit,
+): Promise<T> {
 	const url = `${API_BASE}${path}`;
 
 	const response = await fetch(url, {
@@ -106,7 +109,9 @@ class WebSocketClient {
 		this.reconnectAttempts++;
 		const delay = this.reconnectDelay * 2 ** (this.reconnectAttempts - 1);
 
-		console.log(`[WebSocket] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
+		console.log(
+			`[WebSocket] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`,
+		);
 
 		setTimeout(() => {
 			this.connect(url);

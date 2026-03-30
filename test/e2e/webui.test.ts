@@ -21,7 +21,10 @@ describe("WebUI", () => {
 
 		// Wait for server to start
 		await new Promise<void>((resolve, reject) => {
-			const timeout = setTimeout(() => reject(new Error("Server startup timeout")), 15000);
+			const timeout = setTimeout(
+				() => reject(new Error("Server startup timeout")),
+				15000,
+			);
 			serverProcess.stdout?.on("data", (data) => {
 				if (data.toString().includes("Pi Gateway Server")) {
 					clearTimeout(timeout);
@@ -162,7 +165,9 @@ describe("WebUI", () => {
 
 			const levels = ["off", "minimal", "low", "medium", "high", "xhigh"];
 			for (const level of levels) {
-				const item = page.locator(`#thinkingList .model-item[data-level="${level}"]`);
+				const item = page.locator(
+					`#thinkingList .model-item[data-level="${level}"]`,
+				);
 				expect(await item.count()).toBe(1);
 			}
 
@@ -187,7 +192,9 @@ describe("WebUI", () => {
 			await page.goto(SERVER_URL);
 			await page.waitForTimeout(2000);
 
-			const sessionItems = await page.locator("#sessionList .session-item").count();
+			const sessionItems = await page
+				.locator("#sessionList .session-item")
+				.count();
 			// May be 0 or more depending on existing sessions
 			expect(sessionItems).toBeGreaterThanOrEqual(0);
 		});
@@ -213,7 +220,10 @@ describe("WebUI", () => {
 			});
 
 			// Type multi-line text
-			await page.fill("#messageInput", "Line 1\nLine 2\nLine 3\nLine 4\nLine 5");
+			await page.fill(
+				"#messageInput",
+				"Line 1\nLine 2\nLine 3\nLine 4\nLine 5",
+			);
 
 			// Height should have changed
 			const newHeight = await page.evaluate(() => {
@@ -330,14 +340,20 @@ describe("WebUI", () => {
 			await page.waitForTimeout(300);
 
 			// Sidebar should be open
-			const hasOpenClass = await sidebar.evaluate((el) => el.classList.contains("open"));
+			const hasOpenClass = await sidebar.evaluate((el) =>
+				el.classList.contains("open"),
+			);
 			expect(hasOpenClass).toBe(true);
 
 			// Use JavaScript click on overlay to close sidebar
-			await page.locator("#sidebarOverlay").evaluate((el) => (el as HTMLElement).click());
+			await page
+				.locator("#sidebarOverlay")
+				.evaluate((el) => (el as HTMLElement).click());
 			await page.waitForTimeout(800);
 
-			const stillOpen = await sidebar.evaluate((el) => el.classList.contains("open"));
+			const stillOpen = await sidebar.evaluate((el) =>
+				el.classList.contains("open"),
+			);
 			// If still open, the click might not have worked, but that's a UI issue not a functional one
 			// We'll accept either state to make test more robust
 			expect(stillOpen !== undefined).toBe(true);

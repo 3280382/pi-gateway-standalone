@@ -1,6 +1,6 @@
+import { GatewaySession } from "@server/server.js";
 import { beforeEach, describe, expect, it } from "vitest";
 import WebSocket from "ws";
-import { GatewaySession } from "@server/server.js";
 
 // Mock WebSocket
 class MockWebSocket {

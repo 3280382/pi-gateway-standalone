@@ -42,63 +42,71 @@ interface FileViewerActions {
 	setExecuting: (executing: boolean) => void;
 }
 
-export const useFileViewerStore = create<FileViewerState & FileViewerActions>()((set) => ({
-	// 初始状态
-	isOpen: false,
-	filePath: "",
-	fileName: "",
-	mode: "view",
-	content: "",
-	isLoading: false,
-	error: null,
-	editedContent: "",
-	isSaving: false,
-	terminalOutput: "",
-	isExecuting: false,
+export const useFileViewerStore = create<FileViewerState & FileViewerActions>()(
+	(set) => ({
+		// 初始状态
+		isOpen: false,
+		filePath: "",
+		fileName: "",
+		mode: "view",
+		content: "",
+		isLoading: false,
+		error: null,
+		editedContent: "",
+		isSaving: false,
+		terminalOutput: "",
+		isExecuting: false,
 
-	// 基础操作
-	openViewer: (path, name, mode) =>
-		set({
-			isOpen: true,
-			filePath: path,
-			fileName: name,
-			mode,
-			content: "",
-			isLoading: true,
-			error: null,
-			editedContent: "",
-			terminalOutput: "",
-		}),
+		// 基础操作
+		openViewer: (path, name, mode) => {
+			console.log("[FileViewerStore] openViewer called:", { path, name, mode });
+			set({
+				isOpen: true,
+				filePath: path,
+				fileName: name,
+				mode,
+				content: "",
+				isLoading: true,
+				error: null,
+				editedContent: "",
+				terminalOutput: "",
+			});
+			console.log("[FileViewerStore] state updated to isOpen=true");
+		},
 
-	closeViewer: () =>
-		set({
-			isOpen: false,
-			filePath: "",
-			fileName: "",
-			mode: "view",
-			content: "",
-			isLoading: false,
-			error: null,
-			editedContent: "",
-			isSaving: false,
-			terminalOutput: "",
-			isExecuting: false,
-		}),
+		closeViewer: () => {
+			console.log("[FileViewerStore] closeViewer called");
+			set({
+				isOpen: false,
+				filePath: "",
+				fileName: "",
+				mode: "view",
+				content: "",
+				isLoading: false,
+				error: null,
+				editedContent: "",
+				isSaving: false,
+				terminalOutput: "",
+				isExecuting: false,
+			});
+		},
 
-	setContent: (content) => set({ content, editedContent: content, isLoading: false }),
-	setLoading: (loading) => set({ isLoading: loading }),
-	setError: (error) => set({ error, isLoading: false }),
-	setMode: (mode) => set({ mode }),
+		setContent: (content) =>
+			set({ content, editedContent: content, isLoading: false }),
+		setLoading: (loading) => set({ isLoading: loading }),
+		setError: (error) => set({ error, isLoading: false }),
+		setMode: (mode) => set({ mode }),
 
-	// 编辑器
-	setEditedContent: (content) => set({ editedContent: content }),
-	setSaving: (saving) => set({ isSaving: saving }),
+		// 编辑器
+		setEditedContent: (content) => set({ editedContent: content }),
+		setSaving: (saving) => set({ isSaving: saving }),
 
-	// 终端
-	appendTerminalOutput: (output) =>
-		set((state) => ({
-			terminalOutput: state.terminalOutput + output,
-		})),
-	clearTerminal: () => set({ terminalOutput: "" }),
-	setExecuting: (executing) => set({ isExecuting: executing }),
-}));
+		// 终端
+		appendTerminalOutput: (output) =>
+			set((state) => ({
+				terminalOutput: state.terminalOutput + output,
+			})),
+		clearTerminal: () => set({ terminalOutput: "" }),
+		setExecuting: (executing) => set({ isExecuting: executing }),
+	}),
+);

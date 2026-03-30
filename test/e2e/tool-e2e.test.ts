@@ -22,7 +22,10 @@ describe("Tool E2E Test", () => {
 		});
 
 		await new Promise<void>((resolve, reject) => {
-			const timeout = setTimeout(() => reject(new Error("Server startup timeout")), 15000);
+			const timeout = setTimeout(
+				() => reject(new Error("Server startup timeout")),
+				15000,
+			);
 			serverProcess.stdout?.on("data", (data) => {
 				if (data.toString().includes("Pi Gateway Server")) {
 					clearTimeout(timeout);
@@ -59,7 +62,15 @@ describe("Tool E2E Test", () => {
 					const msg = JSON.parse(data.toString());
 					const timestamp = Date.now();
 
-					if (["toolcall_delta", "tool_start", "tool_end", "message_start", "message_end"].includes(msg.type)) {
+					if (
+						[
+							"toolcall_delta",
+							"tool_start",
+							"tool_end",
+							"message_start",
+							"message_end",
+						].includes(msg.type)
+					) {
 						events.push({
 							type: msg.type,
 							toolCallId: msg.toolCallId,
@@ -101,7 +112,9 @@ describe("Tool E2E Test", () => {
 			const startTime = events[0]?.timestamp || 0;
 			events.forEach((e, i) => {
 				const relTime = e.timestamp - startTime;
-				console.log(`${i + 1}. [+${relTime}ms] ${e.type} ${e.toolCallId || ""} ${e.toolName || ""}`);
+				console.log(
+					`${i + 1}. [+${relTime}ms] ${e.type} ${e.toolCallId || ""} ${e.toolName || ""}`,
+				);
 			});
 
 			const toolEvents = new Map<string, string[]>();
@@ -151,7 +164,11 @@ describe("Tool E2E Test", () => {
 		async () => {
 			const ws = new WebSocket(WS_URL);
 
-			const toolStarts: Array<{ toolName: string; toolCallId: string; timestamp: number }> = [];
+			const toolStarts: Array<{
+				toolName: string;
+				toolCallId: string;
+				timestamp: number;
+			}> = [];
 
 			await new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(() => {

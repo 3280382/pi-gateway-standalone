@@ -8,7 +8,7 @@ import { getTestServerUrl, isDevServerRunning } from "./test-utils.js";
 describe("LLM Log Host List", () => {
 	it("should include all required LLM provider hosts", async () => {
 		const serverCode = await import("fs").then((fs) =>
-			fs.readFileSync("/root/pi-mono/packages/gateway/dist/server.js", "utf-8"),
+			fs.readFileSync("/root/pi-gateway-standalone/dist/server.js", "utf-8"),
 		);
 
 		const requiredHosts = [
@@ -33,7 +33,7 @@ describe("LLM Log Host List", () => {
 
 	it("should use llmLogManagerRef in fetch interceptor", async () => {
 		const serverCode = await import("fs").then((fs) =>
-			fs.readFileSync("/root/pi-mono/packages/gateway/dist/server.js", "utf-8"),
+			fs.readFileSync("/root/pi-gateway-standalone/dist/server.js", "utf-8"),
 		);
 
 		expect(serverCode).toContain("llmLogManagerRef");
@@ -42,7 +42,7 @@ describe("LLM Log Host List", () => {
 
 	it("should set up global fetch interceptor at the start of the file", async () => {
 		const serverCode = await import("fs").then((fs) =>
-			fs.readFileSync("/root/pi-mono/packages/gateway/dist/server.js", "utf-8"),
+			fs.readFileSync("/root/pi-gateway-standalone/dist/server.js", "utf-8"),
 		);
 
 		const interceptorSetupPos = serverCode.indexOf("globalThis.fetch = ");
@@ -59,8 +59,14 @@ describe("LLM Log Manager", () => {
 		const logBuffer: Array<{ type: string; content: string }> = [];
 		let flushCalled = false;
 
-		logBuffer.push({ type: "request", content: JSON.stringify({ method: "POST" }) });
-		logBuffer.push({ type: "response", content: JSON.stringify({ status: 200 }) });
+		logBuffer.push({
+			type: "request",
+			content: JSON.stringify({ method: "POST" }),
+		});
+		logBuffer.push({
+			type: "response",
+			content: JSON.stringify({ status: 200 }),
+		});
 
 		expect(logBuffer.length).toBe(2);
 
@@ -81,7 +87,9 @@ describe("Development Server Detection", () => {
 		// This test documents the current state
 		// If running: tests can use existing server
 		// If not running: tests should start temporary server
-		console.log(`[Test] Dev server on port 3000: ${isRunning ? "RUNNING" : "NOT RUNNING"}`);
+		console.log(
+			`[Test] Dev server on port 3000: ${isRunning ? "RUNNING" : "NOT RUNNING"}`,
+		);
 
 		// Just verify the function works
 		expect(typeof isRunning).toBe("boolean");
@@ -96,7 +104,9 @@ describe("Development Server Detection", () => {
 			const response = await fetch(`${serverUrl}/api/models`);
 			expect(response.ok).toBe(true);
 		} else {
-			console.log("[Test] No dev server running - tests would start temporary server");
+			console.log(
+				"[Test] No dev server running - tests would start temporary server",
+			);
 		}
 	});
 });

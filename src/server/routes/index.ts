@@ -2,8 +2,8 @@
  * API路由注册
  */
 
+import type { LlmLogManager } from "@server/llm/log-manager";
 import type { Application } from "express";
-import type { LlmLogManager } from "../lib/llm/log-manager";
 import {
 	browseDirectory,
 	executeCommand,
@@ -14,13 +14,21 @@ import {
 } from "../controllers/file.controller";
 import { createLlmLogController } from "../controllers/llm-log.controller";
 import { getModels } from "../controllers/model.controller";
-import { getSystemPrompt, loadSession } from "../controllers/session.controller";
+import {
+	getSessions,
+	getSystemPrompt,
+	loadSession,
+} from "../controllers/session.controller";
 import { createVersionController } from "../controllers/version.controller";
 
 /**
  * 注册所有API路由
  */
-export function registerRoutes(app: Application, llmLogManager: LlmLogManager, serverStartTime: number) {
+export function registerRoutes(
+	app: Application,
+	llmLogManager: LlmLogManager,
+	serverStartTime: number,
+) {
 	// 创建控制器实例
 	const versionController = createVersionController(serverStartTime);
 	const llmLogController = createLlmLogController(llmLogManager);
@@ -34,13 +42,14 @@ export function registerRoutes(app: Application, llmLogManager: LlmLogManager, s
 
 	// 模型API
 	app.get("/api/models", getModels);
+	app.post("/api/models", async (req, res) => {
+		const { model, provider } = req.body;
+		// Model change is handled via WebSocket, this is just for confirmation
+		res.json({ success: true, model, provider });
+	});
 
 	// 会话API
-	app.get("/api/sessions", (_req, res) => {
-		res.json({
-			sessions: [],
-		});
-	});
+	app.get("/api/sessions", getSessions);
 	app.post("/api/session/load", loadSession);
 	app.get("/api/system-prompt", getSystemPrompt);
 
@@ -69,8 +78,8 @@ export function registerRoutes(app: Application, llmLogManager: LlmLogManager, s
 	// 工作空间API
 	app.get("/api/workspace/current", (_req, res) => {
 		res.json({
-			path: "/root/pi-mono/packages/gateway",
-			name: "gateway",
+			path: "/root/pi-gateway-standalone",
+			name: "pi-gateway-standalone",
 			isCurrent: true,
 			sessionCount: 0,
 			lastAccessed: new Date().toISOString(),
@@ -79,22 +88,44 @@ export function registerRoutes(app: Application, llmLogManager: LlmLogManager, s
 
 	app.get("/api/working-dir", (_req, res) => {
 		res.json({
-			cwd: "/root/pi-mono/packages/gateway",
+			cwd: "/root/pi-gateway-standalone",
 		});
 	});
 
+	// 内存中存储最近工作区（重启后丢失，后续可改为持久化）
+	const recentWorkspaces = new Map<
+		string,
+		{ path: string; name: string; lastAccessed: string }
+	>();
+
 	app.get("/api/workspace/recent", (_req, res) => {
-		res.json({
-			workspaces: [
-				{
-					path: "/root/pi-mono/packages/gateway",
-					name: "gateway",
-					isCurrent: true,
-					sessionCount: 0,
-					lastAccessed: new Date().toISOString(),
-				},
-			],
+		const workspaces = Array.from(recentWorkspaces.values())
+			.sort(
+				(a, b) =>
+					new Date(b.lastAccessed).getTime() -
+					new Date(a.lastAccessed).getTime(),
+			)
+			.slice(0, 10);
+		res.json({ workspaces });
+	});
+
+	app.post("/api/workspace/recent", (req, res) => {
+		const { path } = req.body;
+		if (!path || typeof path !== "string") {
+			return res.status(400).json({ error: "Path is required" });
+		}
+		const name = path.split("/").pop() || path;
+		recentWorkspaces.set(path, {
+			path,
+			name,
+			lastAccessed: new Date().toISOString(),
 		});
+		res.json({ success: true });
+	});
+
+	app.delete("/api/workspace/recent", (_req, res) => {
+		recentWorkspaces.clear();
+		res.json({ success: true });
 	});
 
 	console.log("[API] 所有路由已注册");
