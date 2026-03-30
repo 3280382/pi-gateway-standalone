@@ -25,7 +25,7 @@
 	flex-shrink: 0;
 	height: 64px;
 	background: #161b22;
-	border-bottom: 1px solid #30363d;
+	border-bottom: 0px solid #30363d;
 	overflow: hidden;
 	z-index: 100;
 }
@@ -38,15 +38,12 @@
 	display: flex;
 	flex-direction: row;
 	overflow: hidden;
-	position: relative;
 }
 
 /* 主内容区 - 占据剩余空间 */
 .content {
 	flex: 1;
-	height: 100%;
 	overflow: hidden;
-	position: relative;
 	display: flex;
 	flex-direction: column;
 }
@@ -55,7 +52,6 @@
 .contentBody {
 	flex: 1;
 	overflow: auto;
-	position: relative;
 }
 
 /* ============================================
@@ -63,6 +59,7 @@
    ============================================ */
 .inputArea {
 	flex-shrink: 0;
+        height: 44px;
 	padding: 12px 16px;
 	background: #0d1117;
 	border-top: 2px solid #30363d;
@@ -193,7 +190,7 @@
 	}
 
 	.content {
-		width: 100%;
+		
 	}
 }
 

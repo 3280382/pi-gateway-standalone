@@ -1,26 +1,5 @@
 /**
  * AppLayout - 统一布局控制器
- *
- * 布局结构（从上至下）：
- * ┌─────────────────────────────────────┐
- * │ Header (固定高度 64px)              │
- * │ - TopBar 组件                        │
- * ├──────────┬──────────────────────────┤
- * │          │                          │
- * │ Sidebar  │   Content (主内容区)      │
- * │ (可隐藏) │   - 聊天视图: MessageList │
- * │          │   - 文件视图: FileBrowser │
- * │          │                          │
- * ├──────────┴──────────────────────────┤
- * │ InputArea (可选，高度自适应)         │
- * │ - 仅聊天视图显示                     │
- * ├─────────────────────────────────────┤
- * │ Footer (固定高度 44px)              │
- * │ - BottomMenu 组件                    │
- * ├─────────────────────────────────────┤
- * │ BottomPanel (可弹出，默认200px)     │
- * │ - 终端/预览等内容                    │
- * └─────────────────────────────────────┘
  */
 
 import { useChatController } from "@/services/api/chatApi";
@@ -71,13 +50,10 @@ export function AppLayout({
 				/>
 			</header>
 
-			{/* 2. 主体区域 - 仅内容区 */}
+			{/* 2. 主体区域 - 内容区 + 输入框 */}
 			<div className={styles.body}>
-				{/* 主内容区 - 包含消息列表和输入框 */}
 				<main className={styles.content}>
 					<div className={styles.contentBody}>{children}</div>
-
-					{/* 输入框 - 在Content底部 */}
 					{showInput && (
 						<div className={styles.inputArea}>
 							<InputArea
@@ -111,7 +87,7 @@ export function AppLayout({
 				/>
 			</footer>
 
-			{/* 4. 侧边栏 - 在整个layout层面overlay，覆盖Header、Body、Footer */}
+			{/* 4. 侧边栏 - 覆盖顶部和中间，不覆盖底部 */}
 			{isSidebarVisible && (
 				<aside className={styles.sidebarOverlay}>
 					<SidebarPanel
@@ -122,7 +98,7 @@ export function AppLayout({
 				</aside>
 			)}
 
-			{/* 5. 底部弹出面板 - overlay在Content上方 */}
+			{/* 5. 底部弹出面板 */}
 			{isBottomPanelOpen && (
 				<div
 					className={styles.bottomPanel}
