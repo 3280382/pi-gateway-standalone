@@ -1,180 +1,82 @@
-# Pi Gateway Standalone - Development Rules
+# Pi Gateway Standalone - AI Assistant Guide
 
-## 🎯 PROJECT IDENTIFICATION
-
-**Current Project**: pi-gateway-standalone
-**Location**: /root/pi-gateway-standalone
-**GitHub**: https://github.com/3280382/pi-gateway-standalone
-
-## First Message
-
-If the user did not give you a concrete task in their first message,
-**ALWAYS read these documents in parallel**:
-- `README.md` - Project overview and quick start
-- `DEVELOPMENT.md` - Development workflow and architecture
-- `FEATURES.md` - Feature specification and UI layout
-
-Only after reading these, ask which specific feature or module to work on.
-
-## Project Overview
-
-This is a **standalone** Pi Gateway project, independent from the pi-mono monorepo.
+## Project Identification
 
 - **Name**: pi-gateway-standalone
-- **Location**: ~/pi-gateway-standalone
-- **Type**: Modular Monolith (client/server/shared)
+- **Location**: /root/pi-gateway-standalone
+- **GitHub**: https://github.com/3280382/pi-gateway-standalone
 
-## Architecture
+## First Message Rule
+
+If the user did not give a concrete task, **ALWAYS read in parallel**:
+1. `README.md` - Project overview
+2. `DEVELOPMENT.md` - Development guide
+3. `FEATURES.md` - Feature specification
+
+Then ask which specific feature to work on.
+
+## Architecture Overview
 
 ```
 src/
-├── client/    # React frontend (browser)
+├── client/           # React frontend
 │   ├── components/
-│   │   ├── layout/     # AppLayout, TopBar, BottomMenu, Sidebar
-│   │   ├── chat/       # MessageList, InputArea, MessageItem
-│   │   └── files/      # FileBrowser, FileViewer, FileToolbar
-│   ├── stores/         # Zustand state management
-│   └── services/       # API & WebSocket services
-├── server/    # Express backend (Node.js)
-│   ├── session/        # GatewaySession management
-│   ├── routes/         # Express routes
-│   └── server.ts       # Server entry
-└── shared/    # Shared types and constants
+│   │   ├── layout/   # AppLayout, TopBar, BottomMenu, Sidebar
+│   │   ├── chat/     # MessageList, InputArea
+│   │   └── files/    # FileBrowser
+│   ├── stores/       # Zustand state management
+│   └── services/     # API & WebSocket services
+├── server/           # Express backend
+│   ├── session/      # GatewaySession management
+│   └── routes/       # API routes
+└── shared/           # Shared types
 ```
 
-## Key Architecture Components
+## Key Design Principles
 
-### 1. AppLayout System
+### 1. Unified AppLayout
 
-All views use the unified `AppLayout` component:
+All views share the same layout structure:
+- **Header** (64px): TopBar with controls
+- **Sidebar** (280px): Collapsible, contains workspaces/sessions
+- **Content**: Main area for MessageList or FileBrowser
+- **Footer** (44px): BottomMenu for view switching
+- **BottomPanel**: Overlay panel for terminal/preview
 
-```
-┌─────────────────────────────────┐
-│ Header (64px) - TopBar          │
-│ Row1: Model | Thinking | Status │
-│ Row2: Working Dir | Search      │
-├──────────┬──────────────────────┤
-│ Sidebar  │  Content             │
-│ (280px)  │  ├─ contentBody      │
-│          │  └─ inputArea        │
-├──────────┴──────────────────────┤
-│ Footer (44px) - BottomMenu      │
-├─────────────────────────────────┤
-│ BottomPanel (popup terminal)    │
-└─────────────────────────────────┘
-```
+### 2. State Management Boundaries
 
-**Design Principle**: Layout styles are centralized in `AppLayout.module.css`. Child components only handle content rendering, not layout positioning.
+- **LayoutContext**: React Context for UI state (sidebar visibility, current view)
+- **sessionStore (persisted)**: User settings saved to localStorage
+- **chatStore**: Ephemeral chat state (messages, streaming status)
+- **GatewaySession**: Backend session management
 
-### 2. State Management
-
-**Frontend (Zustand + Persist)**:
-```typescript
-// sessionStore.ts - Persisted to localStorage
-{
-  currentDir,        // Current working directory
-  currentSessionId,  // Current session ID
-  currentModel,      // Selected model
-  thinkingLevel,     // Thinking level
-  theme,             // Theme preference
-  recentWorkspaces,  // Recent workspaces
-}
-```
-
-**Backend (GatewaySession)**:
-```typescript
-class GatewaySession {
-  session: AgentSession | null;  // pi-coding-agent session
-  workingDir: string;             // Working directory
-  ws: WebSocket;                  // WebSocket connection
-  
-  initialize(workingDir, sessionId?)  // Init session
-  dispose()                           // Cleanup & auto-save
-}
-```
-
-### 3. Working Directory & Session Lifecycle
+### 3. Working Directory & Session
 
 ```
-Working Directory  →  Session File  →  PID
-     (static)           (static)     (dynamic)
+Working Directory ──► Session File ──► PID
+    (static)            (static)      (dynamic)
 ```
 
-When switching directories:
-1. Frontend sends `change_dir` message
-2. Backend disposes current session
-3. Starts new pi process in new directory
-4. Loads/creates session file
-5. Returns new PID
+When switching directories, the backend disposes the current session and starts a new pi process in the new directory.
 
-## Development Workflow
-
-### Prerequisites
-
-- Node.js >= 18
-- tmux (for 3-pane development)
-
-### Start Development
-
-```bash
-# Tmux 3-pane mode (recommended)
-bash scripts/start-tmux-dev.sh
-
-# Layout:
-# ┌─────────┬─────────┐  ← Top 33% (frontend | backend)
-# ├─────────┴─────────┤
-# │   AI/pi (bottom)  │  ← Bottom 67%
-# └───────────────────┘
-```
-
-### Key Commands
-
-```bash
-# Development
-npm run dev                    # Start dev server
-bash scripts/start-tmux-dev.sh # Tmux 3-pane mode
-
-# Build & Check
-npm run build                  # Production build
-npm run check                  # Biome + TypeScript check
-
-# Testing
-npm test                       # Run all tests
-npm run test:unit             # Unit tests only
-
-# Service Management
-node scripts/tmux-controller.js status    # Check status
-node scripts/tmux-controller.js restart-frontend
-```
-
-## Code Quality Rules
-
-### TypeScript
-- Strict mode enabled
-- No `any` types unless absolutely necessary
-- Use path aliases: `@/*`, `@shared/*`, `@server/*`
+## Development Rules
 
 ### Boundaries
-- `client/` cannot import `@server/*`
-- `server/` cannot import `@client/*`
-- `shared/` only types/constants, no runtime logic
+
+| From | Cannot Import To |
+|------|------------------|
+| `client/` | `@server/*` |
+| `server/` | `@client/*` |
+| `shared/` | Runtime logic (types only) |
 
 ### Before Committing
-```bash
-npm run check  # Fix all errors, warnings, infos
-```
-
-## Testing
 
 ```bash
-timeout 120 npm test                 # Unit + Integration tests
-timeout 60 npm run test:unit        # Unit tests only
-timeout 180 npm run test:e2e         # E2E tests
+npm run check  # Fix all errors, warnings
 ```
 
-## Git
+### Commit Format
 
-### Commit Message Format
 ```
 type(scope): subject
 
@@ -184,28 +86,36 @@ Example:
 feat(chat): add message search
 ```
 
-## Documentation
+## Common Tasks
 
-- `README.md` - Project overview
-- `DEVELOPMENT.md` - Development guide
-- `FEATURES.md` - Feature specification
-- `CHANGELOG.md` - Version history
-
-## Service Verification
+### Complete Workflow
 
 ```bash
-# Check logs
-tail -20 logs/frontend_current.log
-tail -20 logs/backend_current.log
-
-# Verify endpoints
-timeout 5 curl -s http://127.0.0.1:5173 > /dev/null && echo "Frontend OK"
-timeout 5 curl -s http://127.0.0.1:3000/api/settings > /dev/null && echo "Backend OK"
+npm run build      # 1. Build
+npm run check      # 2. Lint & type check
+npm test           # 3. Test
+node scripts/tmux-controller.js status  # 4. Verify services
 ```
 
-## Dependencies
+### View Switching
 
-Published npm packages:
-- `@mariozechner/pi-ai`
-- `@mariozechner/pi-agent-core`
-- `@mariozechner/pi-coding-agent`
+App.tsx uses `currentView` from LayoutContext:
+- `'chat'`: Shows MessageList + InputArea
+- `'files'`: Shows FileBrowser, no InputArea
+
+### State Updates
+
+```typescript
+// ✅ Correct: Select specific action
+const setCurrentDir = useSessionStore((s) => s.setCurrentDir);
+
+// ❌ Wrong: Destructures entire store
+const store = useSessionStore();  // Causes unnecessary re-renders
+```
+
+## Documentation
+
+- `README.md` - Quick start, overview
+- `DEVELOPMENT.md` - Detailed development guide
+- `FEATURES.md` - UI specification
+- `CHANGELOG.md` - Version history

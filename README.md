@@ -70,10 +70,12 @@ PID                   →  动态进程号
 
 | 文档 | 说明 |
 |------|------|
-| [DEVELOPMENT.md](./DEVELOPMENT.md) | 开发指南、架构说明、开发规范 |
-| [FEATURES.md](./FEATURES.md) | 功能规格书（界面布局、功能清单、交互流程） |
-| [AGENTS.md](./AGENTS.md) | AI 助手指令和项目规范 |
+| [README.md](./README.md) | 项目概述和快速开始（本文档） |
+| [DEVELOPMENT.md](./DEVELOPMENT.md) | 开发指南、架构说明、API 参考 |
+| [FEATURES.md](./FEATURES.md) | 功能规格书（界面布局、功能清单） |
+| [AGENTS.md](./AGENTS.md) | AI 助手指令和开发规则 |
 | [CHANGELOG.md](./CHANGELOG.md) | 版本变更历史 |
+| [docs/ERROR_HANDLING.md](./docs/ERROR_HANDLING.md) | 错误处理最佳实践 |
 
 ## 常用命令
 
@@ -112,6 +114,27 @@ DEBUG=true
 - Chrome/Edge 90+
 - Firefox 90+
 - Safari 15+
+
+## 与 Monorepo 的关系
+
+本项目是从 pi-mono monorepo 独立出来的 Gateway 项目。
+
+| 特性 | Standalone | Monorepo |
+|------|------------|----------|
+| 依赖管理 | npm 直接安装 | workspace 链接 |
+| 版本管理 | 独立 | 统一 |
+| 部署 | 独立部署 | 集成部署 |
+
+### 本地包开发调试
+
+如需从本地 monorepo 链接包：
+
+```bash
+cd /path/to/pi-mono/packages/coding-agent
+npm link
+cd /path/to/pi-gateway-standalone
+npm link @mariozechner/pi-coding-agent
+```
 
 ## 许可证
 

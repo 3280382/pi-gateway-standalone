@@ -215,6 +215,50 @@ tail -f logs/backend_current.log   # 后端日志
 - **集成测试**: API 路由、WebSocket 消息
 - **E2E 测试**: 完整用户流程（Playwright）
 
+## WebSocket API
+
+### 消息类型
+
+| 消息类型 | 方向 | 说明 |
+|---------|------|------|
+| `init` | C→S | 初始化 session，返回完整 session 信息 |
+| `prompt` | C→S | 发送消息给 AI |
+| `abort` | C→S | 中止生成 |
+| `change_dir` | C→S | 切换工作目录 |
+| `new_session` | C→S | 创建新 session |
+| `list_sessions` | C→S | 列出工作目录的所有 session |
+| `load_session` | C→S | 加载指定 session |
+| `set_model` | C→S | 设置模型 |
+| `thinking_level_change` | C→S | 切换思考级别 |
+| `initialized` | S→C | init 完成响应 |
+| `dir_changed` | S→C | 目录切换完成 |
+| `session_loaded` | S→C | session 加载完成 |
+| `sessions_list` | S→C | session 列表 |
+
+### 示例
+
+```typescript
+// 初始化 Session
+websocketService.send("init", {
+  workingDir: "/root/project",
+  sessionId: "optional-existing-session-id"
+});
+
+// 响应
+{
+  type: "initialized",
+  sessionId: "xxx",
+  sessionFile: "/path/to/session.jsonl",
+  workingDir: "/root/project",
+  model: "claude-3-5-sonnet",
+  thinkingLevel: "medium",
+  systemPrompt: "...",
+  agentsFiles: [...],
+  skills: [...],
+  pid: 12345
+}
+```
+
 ## 调试技巧
 
 1. **前端热重载**: Vite 自动重载，无需手动刷新
