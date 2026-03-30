@@ -11,6 +11,10 @@
 	overflow: hidden;
 }
 
+.sidebarHidden {
+	display: none;
+}
+
 /* Header */
 .header {
 	display: flex;

@@ -41,23 +41,7 @@
 	position: relative;
 }
 
-/* 侧边栏 - 固定宽度280px，可隐藏 */
-.sidebar {
-	flex-shrink: 0;
-	width: 0;
-	height: 100%;
-	background: #161b22;
-	border-right: 1px solid #30363d;
-	overflow: hidden;
-	transition: width 0.2s ease;
-	z-index: 50;
-}
-
-.sidebarVisible {
-	width: 280px;
-}
-
-/* 主内容区 - 占据剩余空间，相对定位用于overlay */
+/* 主内容区 - 占据剩余空间 */
 .content {
 	flex: 1;
 	height: 100%;
@@ -95,7 +79,34 @@
 	z-index: 150;
 }
 
-/* 3.3 底部弹出面板 - overlay模式，定位在Content上方，从BottomMenu上方弹出 */
+/* ============================================
+   5. Sidebar Overlay - 遮挡顶部和中间内容，不遮挡底部菜单
+   ============================================ */
+.sidebarOverlay {
+	position: absolute;
+	top: 64px; /* 从顶部菜单下方开始 */
+	left: 0;
+	bottom: 44px; /* 在底部菜单上方结束 */
+	width: 280px;
+	background: #161b22;
+	border-right: 1px solid #30363d;
+	z-index: 300;
+	box-shadow: 4px 0 12px rgba(0, 0, 0, 0.5);
+	animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+	from {
+		transform: translateX(-100%);
+	}
+	to {
+		transform: translateX(0);
+	}
+}
+
+/* ============================================
+   6. 底部弹出面板 - overlay模式
+   ============================================ */
 .bottomPanel {
 	position: absolute;
 	left: 0;
@@ -176,17 +187,9 @@
 		height: 56px;
 	}
 
-	.sidebar {
-		position: absolute;
-		left: 0;
-		top: 56px;
-		bottom: 0;
-		z-index: 200;
-		box-shadow: 2px 0 8px rgba(0, 0, 0, 0.5);
-	}
-
-	.sidebarVisible {
+	.sidebarOverlay {
 		width: 260px;
+		top: 56px; /* 移动端顶部菜单高度 */
 	}
 
 	.content {

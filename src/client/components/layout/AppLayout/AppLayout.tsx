@@ -71,24 +71,13 @@ export function AppLayout({
 				/>
 			</header>
 
-			{/* 2. 主体区域 - 侧边栏 + 内容(InputArea在Content内) */}
+			{/* 2. 主体区域 - 仅内容区 */}
 			<div className={styles.body}>
-				{/* 左侧边栏 - 可隐藏overlay */}
-				<aside
-					className={`${styles.sidebar} ${isSidebarVisible ? styles.sidebarVisible : ""}`}
-				>
-					<SidebarPanel
-						isVisible={isSidebarVisible}
-						onSwitchView={setCurrentView}
-						currentView={currentView}
-					/>
-				</aside>
-
 				{/* 主内容区 - 包含消息列表和输入框 */}
 				<main className={styles.content}>
 					<div className={styles.contentBody}>{children}</div>
 
-					{/* 输入框 - 在Content底部，会被BottomPanel overlay遮住 */}
+					{/* 输入框 - 在Content底部 */}
 					{showInput && (
 						<div className={styles.inputArea}>
 							<InputArea
@@ -122,7 +111,18 @@ export function AppLayout({
 				/>
 			</footer>
 
-			{/* 4. 底部弹出面板 - overlay在Content上方，从BottomMenu上方弹出 */}
+			{/* 4. 侧边栏 - 在整个layout层面overlay，覆盖Header、Body、Footer */}
+			{isSidebarVisible && (
+				<aside className={styles.sidebarOverlay}>
+					<SidebarPanel
+						isVisible={isSidebarVisible}
+						onSwitchView={setCurrentView}
+						currentView={currentView}
+					/>
+				</aside>
+			)}
+
+			{/* 5. 底部弹出面板 - overlay在Content上方 */}
 			{isBottomPanelOpen && (
 				<div
 					className={styles.bottomPanel}
