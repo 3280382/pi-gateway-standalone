@@ -18,12 +18,16 @@ interface AppLayoutProps {
 	children: React.ReactNode;
 	showInput?: boolean;
 	bottomPanelContent?: React.ReactNode;
+	onBashCommand?: (command: string) => void;
+	onSlashCommand?: (command: string, args: string) => void;
 }
 
 export function AppLayout({
 	children,
 	showInput = true,
 	bottomPanelContent,
+	onBashCommand,
+	onSlashCommand,
 }: AppLayoutProps) {
 	const {
 		isSidebarVisible,
@@ -200,10 +204,20 @@ export function AppLayout({
 									inputText.trim() && controller.sendMessage(inputText)
 								}
 								onAbort={controller.abortGeneration}
-								onBashCommand={(cmd) => controller.sendMessage(`/bash ${cmd}`)}
+								onBashCommand={(cmd) => {
+									if (onBashCommand) {
+										onBashCommand(cmd);
+									} else {
+										controller.sendMessage(`/bash ${cmd}`);
+									}
+								}}
 								onSlashCommand={(cmd, args) => {
-									if (cmd === "clear") controller.clearMessages();
-									else controller.sendMessage(`/${cmd} ${args}`.trim());
+									if (onSlashCommand) {
+										onSlashCommand(cmd, args);
+									} else {
+										if (cmd === "clear") controller.clearMessages();
+										else controller.sendMessage(`/${cmd} ${args}`.trim());
+									}
 								}}
 							/>
 						</div>

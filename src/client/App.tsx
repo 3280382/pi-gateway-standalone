@@ -7,10 +7,9 @@
  * - Chat 视图和 Files 视图共享相同的布局框架
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { websocketService } from "@/services/websocket.service";
 import { useChatStore, filterMessages } from "@/stores/chatStore";
-import { useMemo } from "react";
 import { useNewChatStore } from "@/stores/new-chat.store";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
@@ -25,6 +24,14 @@ import { LlmLogPanel } from "./components/llm-log";
 import { XTermPanel } from "./components/terminal";
 import { fileController, sessionController } from "./controllers";
 import "./styles/global.css";
+
+// Command execution result type
+interface CommandResult {
+	command: string;
+	output: string;
+	isError: boolean;
+	timestamp: Date;
+}
 
 function AppContent() {
 	const [isLoading, setIsLoading] = useState(true);
@@ -62,9 +69,61 @@ function AppContent() {
 		return result;
 	}, [messages, searchQuery, searchFilters]);
 
-	// 终端输出状态（用于文件浏览器）
+	// 终端输出状态（用于文件浏览器和命令执行）
 	const [terminalOutput, setTerminalOutput] = useState<string>("");
 	const [terminalCommand, setTerminalCommand] = useState<string>("");
+	const [commandResults, setCommandResults] = useState<CommandResult[]>([]);
+	const [isExecuting, setIsExecuting] = useState(false);
+
+	// 监听命令执行结果
+	useEffect(() => {
+		const unsubscribe = websocketService.on("command_result", (data) => {
+			console.log("[App] Command result:", data);
+			const result: CommandResult = {
+				command: data.command,
+				output: data.output,
+				isError: data.isError,
+				timestamp: new Date(),
+			};
+			setCommandResults((prev) => [...prev, result]);
+			setTerminalOutput(data.output);
+			setIsExecuting(false);
+		});
+
+		return () => unsubscribe();
+	}, []);
+
+	// 处理 bash 命令（!command）
+	const handleBashCommand = useCallback((command: string) => {
+		console.log("[App] Executing bash command:", command);
+		setIsExecuting(true);
+		setTerminalOutput(`$ ${command}\n`);
+		websocketService.executeCommand(command);
+	}, []);
+
+	// 处理 slash 命令（/command）
+	const handleSlashCommand = useCallback((command: string, args: string) => {
+		console.log("[App] Executing slash command:", command, args);
+		
+		// 内置 slash 命令
+		switch (command) {
+			case "clear":
+				useChatStore.getState().clearMessages();
+				setCommandResults([]);
+				setTerminalOutput("");
+				break;
+			case "bash":
+				if (args) {
+					setIsExecuting(true);
+					setTerminalOutput(`$ ${args}\n`);
+					websocketService.executeCommand(args);
+				}
+				break;
+			default:
+				// 未知命令，作为普通消息发送
+				websocketService.send("prompt", { text: `/${command} ${args}` });
+		}
+	}, []);
 
 	// 初始化应用
 	useEffect(() => {
@@ -199,6 +258,23 @@ function AppContent() {
 	// 渲染聊天视图的底部面板内容
 	const renderChatBottomPanel = () => {
 		if (!isBottomPanelOpen) return null;
+		// 如果有命令执行结果，显示终端面板
+		if (commandResults.length > 0 || isExecuting) {
+			return (
+				<XTermPanel
+					height={bottomPanelHeight}
+					onClose={closeBottomPanel}
+					onHeightChange={setBottomPanelHeight}
+					output={terminalOutput}
+					initialCommand={terminalCommand}
+					onExecuteCommand={(cmd) => {
+						console.log("[Terminal] Executing:", cmd);
+						setTerminalOutput(`Executing: ${cmd}\n`);
+						websocketService.executeCommand(cmd);
+					}}
+				/>
+			);
+		}
 		return (
 			<LlmLogPanel
 				height={bottomPanelHeight}
@@ -315,7 +391,12 @@ function AppContent() {
 	// 聊天视图 - 显示输入框和LLM日志底部面板
 	if (currentView === "chat") {
 		return (
-			<AppLayout showInput={true} bottomPanelContent={renderChatBottomPanel()}>
+			<AppLayout 
+				showInput={true} 
+				bottomPanelContent={renderChatBottomPanel()}
+				onBashCommand={handleBashCommand}
+				onSlashCommand={handleSlashCommand}
+			>
 				<MessageList
 					messages={filteredMessages}
 					currentStreamingMessage={currentStreamingMessage}
