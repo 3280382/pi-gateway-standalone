@@ -148,53 +148,20 @@ export function MessageItem({
 	);
 }
 
-// 用户消息内容 - 带头像图标
+// 用户消息内容
 function UserContent({ text }: { text: string }) {
 	if (!text) return null;
 	return (
 		<div className={styles.userText}>
-			<UserIcon />
 			<CompactMarkdown content={text} />
 		</div>
 	);
 }
 
 // 统一的图标组件
-function UserIcon() {
-	return (
-		<svg className={styles.inlineIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-			<circle cx="12" cy="8" r="4" />
-			<path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
-		</svg>
-	);
-}
 
-function AIIcon() {
-	return (
-		<svg className={styles.aiIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-			<rect x="3" y="3" width="18" height="18" rx="4" />
-			<path d="M8 16V8l4 5 4-5v8" />
-		</svg>
-	);
-}
 
-function ToolIcon() {
-	return (
-		<svg className={styles.toolIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-			<rect x="4" y="4" width="16" height="16" rx="2" />
-			<path d="M8 12h8M12 8v8" />
-		</svg>
-	);
-}
 
-function ThinkingIcon() {
-	return (
-		<svg className={styles.thinkingIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-			<circle cx="12" cy="12" r="9" />
-			<path d="M12 8v4l3 3" />
-		</svg>
-	);
-}
 
 // 按轮次分组的内容块
 interface TurnGroup {
@@ -315,7 +282,7 @@ function AIContent({
 												key={`text-${group.turnNumber}-${idx}`}
 												className={styles.textSection}
 											>
-												{isFirstText && <AIIcon />}
+												
 												<CompactMarkdownWithCode content={block.text} />
 											</div>
 										);
@@ -325,7 +292,7 @@ function AIContent({
 											key={`text-${group.turnNumber}-${idx}`}
 											className={styles.textSection}
 										>
-											{isFirstText && <AIIcon />}
+											
 											<CompactMarkdown content={block.text} />
 										</div>
 									) : null;
@@ -372,7 +339,7 @@ function ThinkingBlock({
 				</pre>
 			) : (
 				<div className={styles.thinkingCollapsed}>
-					<ThinkingIcon />
+					
 					<span className={styles.collapsedText}>{firstLine}</span>
 				</div>
 			)}
@@ -494,7 +461,7 @@ function ToolResultBlock({ content, isStreaming }: ToolResultBlockProps) {
 				</pre>
 			) : (
 				<div className={styles.toolCollapsed}>
-					<ToolIcon />
+					
 					<span className={styles.collapsedText}>{content.toolName || "tool"}</span>
 					<span className={styles.collapsedPreview}>{firstLine}</span>
 				</div>
