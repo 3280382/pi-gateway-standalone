@@ -46,6 +46,8 @@ export function AppLayout({
 	const userScrolledRef = useRef(false);
 	const isProgrammaticScrollRef = useRef(false);
 	const scrollTimeoutRef = useRef<number | null>(null);
+	const lastMessageCountRef = useRef(0);
+	const lastStreamingContentRef = useRef("");
 
 	// 从 store 获取消息数量和流式消息
 	const messages = useChatStore((s) => s.messages);
@@ -84,22 +86,39 @@ export function AppLayout({
 		}
 	}, []); // 只在组件挂载时执行
 
-	// 新消息添加时滚动
+	// 新消息添加时滚动（用户发送消息时重置滚动状态）
 	useEffect(() => {
+		const currentMessageCount = messages.length;
+		// 如果消息数量增加（新消息添加），重置用户滚动状态
+		if (currentMessageCount > lastMessageCountRef.current) {
+			userScrolledRef.current = false;
+			lastMessageCountRef.current = currentMessageCount;
+		}
+		
 		if (userScrolledRef.current) return;
 		scrollToBottom("smooth");
 	}, [messages.length, scrollToBottom]);
 
 	// 流式消息内容变化时滚动
 	useEffect(() => {
-		if (!currentStreamingMessage) return;
+		if (!currentStreamingMessage) {
+			lastStreamingContentRef.current = "";
+			return;
+		}
+		
+		// 获取当前流式内容的字符串表示
+		const currentContent = JSON.stringify(currentStreamingMessage.content);
+		
+		// 如果内容没有变化，不滚动
+		if (currentContent === lastStreamingContentRef.current) {
+			return;
+		}
+		
+		lastStreamingContentRef.current = currentContent;
+		
 		if (userScrolledRef.current) return;
 		scrollToBottom("auto");
-	}, [
-		currentStreamingMessage?.content?.length,
-		currentStreamingMessage?.id,
-		scrollToBottom,
-	]);
+	}, [currentStreamingMessage, scrollToBottom]);
 
 	// 监听滚动事件
 	const handleScroll = () => {
@@ -109,7 +128,11 @@ export function AppLayout({
 
 		const { scrollTop, scrollHeight, clientHeight } = container;
 		const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-		userScrolledRef.current = distanceFromBottom > 50;
+		
+		// 距离底部超过 100px 认为用户手动滚动了
+		if (distanceFromBottom > 100) {
+			userScrolledRef.current = true;
+		}
 	};
 
 	// 清理定时器
