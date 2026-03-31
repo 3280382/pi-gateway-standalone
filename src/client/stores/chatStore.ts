@@ -48,6 +48,7 @@ const createInitialState = () => ({
 	>(),
 	activeTools: new Map<string, ToolExecution>(),
 	showThinking: true,
+	showTools: true,
 	scrollToBottom: false,
 	searchQuery: "",
 	searchFilters: {
@@ -273,7 +274,9 @@ export const useChatStore = create<
 						// 添加轮次分隔标记
 						currentContent.push({
 							type: "turn_marker",
-							turnNumber: currentContent.filter((c) => c.type === "turn_marker").length + 1,
+							turnNumber:
+								currentContent.filter((c) => c.type === "turn_marker").length +
+								1,
 						});
 
 						return {
@@ -390,6 +393,37 @@ export const useChatStore = create<
 				);
 			},
 
+			// Tools visibility
+			showTools: true,
+			setShowTools: (show: boolean) => {
+				set({ showTools: show }, false, "setShowTools");
+			},
+			toggleToolsCollapse: (messageId: string) => {
+				set(
+					(state) => {
+						const updatedMessages = state.messages.map((msg) =>
+							msg.id === messageId
+								? { ...msg, isToolsCollapsed: msg.isToolsCollapsed === false }
+								: msg,
+						);
+						// 同时更新 currentStreamingMessage
+						const updatedStreamingMessage =
+							state.currentStreamingMessage?.id === messageId
+								? {
+										...state.currentStreamingMessage,
+										isToolsCollapsed:
+											state.currentStreamingMessage.isToolsCollapsed === false,
+									}
+								: state.currentStreamingMessage;
+						return {
+							messages: updatedMessages,
+							currentStreamingMessage: updatedStreamingMessage,
+						};
+					},
+					false,
+					"toggleToolsCollapse",
+				);
+			},
 			// Tool Actions
 			setActiveTool: (tool: ToolExecution) => {
 				set(
@@ -533,13 +567,26 @@ export const useChatStore = create<
 			// Thinking collapse toggle
 			toggleThinkingCollapse: (messageId: string) => {
 				set(
-					(state) => ({
-						messages: state.messages.map((msg) =>
+					(state) => {
+						const updatedMessages = state.messages.map((msg) =>
 							msg.id === messageId
 								? { ...msg, isThinkingCollapsed: !msg.isThinkingCollapsed }
 								: msg,
-						),
-					}),
+						);
+						// 同时更新 currentStreamingMessage
+						const updatedStreamingMessage =
+							state.currentStreamingMessage?.id === messageId
+								? {
+										...state.currentStreamingMessage,
+										isThinkingCollapsed:
+											!state.currentStreamingMessage.isThinkingCollapsed,
+									}
+								: state.currentStreamingMessage;
+						return {
+							messages: updatedMessages,
+							currentStreamingMessage: updatedStreamingMessage,
+						};
+					},
 					false,
 					"toggleThinkingCollapse",
 				);
@@ -831,3 +878,92 @@ export const selectIsStreaming = (
 export const selectShowThinking = (
 	state: ReturnType<typeof useChatStore.getState>,
 ) => state.showThinking;
+export const selectShowTools = (
+	state: ReturnType<typeof useChatStore.getState>,
+) => state.showTools;
+export const selectSearchQuery = (
+	state: ReturnType<typeof useChatStore.getState>,
+) => state.searchQuery;
+export const selectSearchFilters = (
+	state: ReturnType<typeof useChatStore.getState>,
+) => state.searchFilters;
+
+// ============================================================================
+// Message Filtering Helper
+// ============================================================================
+
+export interface FilterOptions {
+	query: string;
+	filters: {
+		user: boolean;
+		assistant: boolean;
+		thinking: boolean;
+		tools: boolean;
+	};
+}
+
+/**
+ * 过滤消息列表
+ * @param messages 消息列表
+ * @param options 过滤选项
+ * @returns 过滤后的消息列表
+ */
+export function filterMessages(
+	messages: Message[],
+	options: FilterOptions,
+): Message[] {
+	const { query, filters } = options;
+	const lowerQuery = query.toLowerCase().trim();
+
+	return messages.filter((message) => {
+		// 1. 按消息类型过滤
+		if (message.role === "user" && !filters.user) return false;
+		if (message.role === "assistant" && !filters.assistant) return false;
+
+		// 2. 对于 assistant 消息，检查内容类型
+		if (message.role === "assistant") {
+			const hasThinking = message.content.some((c) => c.type === "thinking");
+			const hasTools = message.content.some(
+				(c) => c.type === "tool" || c.type === "tool_use",
+			);
+
+			// 如果消息包含 thinking 但 filters.thinking 为 false，且没有文本内容，则过滤掉
+			if (hasThinking && !filters.thinking && !message.content.some((c) => c.type === "text")) {
+				return false;
+			}
+
+			// 如果消息包含 tools 但 filters.tools 为 false，且没有文本内容，则过滤掉
+			if (hasTools && !filters.tools && !message.content.some((c) => c.type === "text")) {
+				return false;
+			}
+		}
+
+		// 3. 按搜索关键词过滤（如果有关键词）
+		if (lowerQuery) {
+			const messageText = message.content
+				.map((c) => {
+					if (c.type === "text") return c.text || "";
+					if (c.type === "thinking") return c.thinking || "";
+					if (c.type === "tool" || c.type === "tool_use") {
+						return `${c.toolName || ""} ${JSON.stringify(c.args || {})} ${c.output || ""}`;
+					}
+					return "";
+				})
+				.join(" ")
+				.toLowerCase();
+
+			return messageText.includes(lowerQuery);
+		}
+
+		return true;
+	});
+}
+
+/**
+ * Selector: 获取过滤后的消息
+ */
+export const selectFilteredMessages = (options: FilterOptions) => {
+	return (state: ReturnType<typeof useChatStore.getState>): Message[] => {
+		return filterMessages(state.messages, options);
+	};
+};

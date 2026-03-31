@@ -2,6 +2,7 @@
  * WebSocket Service - 处理实时通信
  */
 
+import { wsLog } from "@/lib/logger";
 import { BaseService, ServiceError } from "./base.service";
 
 export type WebSocketEvent =
@@ -82,7 +83,7 @@ export class WebSocketService extends BaseService {
 					return;
 				}
 
-				console.log(`[WebSocket] Connecting to ${wsUrl}`);
+				wsLog.info(` Connecting to ${wsUrl}`);
 
 				this.ws = new WebSocket(wsUrl);
 
@@ -100,7 +101,7 @@ export class WebSocketService extends BaseService {
 				};
 
 				this.ws.onerror = (error) => {
-					console.error("[WebSocket] Connection error:", error);
+					wsLog.error("Connection error:", error);
 					this.emit("error", { error: error });
 					reject(new Error(`WebSocket连接错误: ${error}`));
 				};
@@ -123,13 +124,15 @@ export class WebSocketService extends BaseService {
 						);
 
 						setTimeout(() => {
-							this.connect(wsUrl).catch(console.error);
+							this.connect(wsUrl).catch((err) =>
+								wsLog.error("Connection error:", err),
+							);
 						}, delay);
 					}
 				};
 
 				this.ws.onerror = (error) => {
-					console.error("[WebSocket] Error:", error);
+					wsLog.error("Error:", error);
 					this.emit("error", error);
 					reject(
 						new ServiceError(
@@ -169,7 +172,7 @@ export class WebSocketService extends BaseService {
 	 */
 	disconnect(code?: number, reason?: string): void {
 		if (this.ws) {
-			console.log("[WebSocket] Disconnecting...");
+			wsLog.info("Disconnecting...");
 
 			this.ws.close(code || 1000, reason || "Normal closure");
 			this.ws = null;
@@ -183,7 +186,7 @@ export class WebSocketService extends BaseService {
 	 */
 	send<T = any>(type: string, data?: T): boolean {
 		if (!this.ws) {
-			console.warn("[WebSocket] Cannot send message: WebSocket is null");
+			wsLog.warn("Cannot send message: WebSocket is null");
 			return false;
 		}
 
@@ -203,7 +206,7 @@ export class WebSocketService extends BaseService {
 			this.ws.send(messageStr);
 			return true;
 		} catch (error) {
-			console.error("[WebSocket] Failed to send message:", error);
+			wsLog.error("Failed to send message:", error);
 			return false;
 		}
 	}
@@ -390,7 +393,7 @@ export class WebSocketService extends BaseService {
 			type !== "thinking_delta" &&
 			type !== "toolcall_delta"
 		) {
-			console.log(`[WebSocket] Received: ${type}`);
+			wsLog.info(` Received: ${type}`);
 		}
 
 		// 首先触发通用消息事件
@@ -410,7 +413,7 @@ export class WebSocketService extends BaseService {
 				this.emit("toolcall_delta", data);
 				break;
 			case "tool_start":
-				console.log("[WebSocket] Processing tool_start event, data:", data);
+				wsLog.info("Processing tool_start event, data:", data);
 				this.emit("tool_start", data);
 				break;
 			case "tool_update":
@@ -450,7 +453,7 @@ export class WebSocketService extends BaseService {
 				this.emit("retry_end", data);
 				break;
 			case "error":
-				console.error("[WebSocket] Server error:", data);
+				wsLog.error("Server error:", data);
 				this.emit("error", data);
 				break;
 			case "session_updated":
@@ -594,7 +597,7 @@ export class WebSocketService extends BaseService {
 		const backendHost = "127.0.0.1:3000";
 		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 		const wsUrl = `${protocol}//${backendHost}`;
-		console.log(`[WebSocket] WebSocket URL: ${wsUrl}`);
+		wsLog.info(` WebSocket URL: ${wsUrl}`);
 		return wsUrl;
 	}
 }

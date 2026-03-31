@@ -9,6 +9,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { hookLog, wsLog } from "@/lib/logger";
 import { useChatStore } from "@/stores/chatStore";
 import type {
 	AgentEndMessage,
@@ -180,12 +181,12 @@ export function useChat(): UseChatReturn {
 		// Tool start handler
 		registerHandler("tool_start", (data: ToolStartMessage) => {
 			try {
-				console.log("[useChat] tool_start event received:", data);
-				console.log("[useChat] tool_start data type:", typeof data);
+				wsLog.debug("tool_start event received:", data);
+				wsLog.debug("tool_start data type:", typeof data);
 
 				// 确保data有必要的属性
 				if (!data || typeof data !== "object") {
-					console.error("[useChat] Invalid tool_start data:", data);
+					wsLog.error("Invalid tool_start data:", data);
 					return;
 				}
 
@@ -193,7 +194,7 @@ export function useChat(): UseChatReturn {
 				const toolName = data.toolName || "unknown";
 				const args = data.args || {};
 
-				console.log("[useChat] Creating tool:", { toolCallId, toolName, args });
+				wsLog.debug("Creating tool:", { toolCallId, toolName, args });
 
 				const tool: ToolExecution = {
 					id: toolCallId,
@@ -205,12 +206,7 @@ export function useChat(): UseChatReturn {
 				streamingRef.current.tools.set(tool.id, tool);
 				store.setActiveTool(tool);
 			} catch (error) {
-				console.error(
-					"[useChat] Error in tool_start handler:",
-					error,
-					"data:",
-					data,
-				);
+				wsLog.error("Error in tool_start handler:", { error, data });
 			}
 		});
 
@@ -262,11 +258,22 @@ export function useChat(): UseChatReturn {
 					store.updateToolOutput(data.toolCallId, output, undefined);
 				}
 			}
+
+			// 如果有文件内容（写文件操作），将文件内容作为流式文本追加
+			if (data.fileContent && data.filePath) {
+				// 添加文件头部标识
+				const fileHeader = `\n\n📄 **写入文件: \`${data.filePath}\`**\n\n\`\`\`\n`;
+				store.appendStreamingContent(fileHeader);
+				// 添加文件内容
+				store.appendStreamingContent(data.fileContent);
+				// 添加代码块结束标记
+				store.appendStreamingContent("\n```\n");
+			}
 		});
 
 		// Agent start handler
 		registerHandler("agent_start", (data: AgentStartMessage) => {
-			console.log("[useChat] Agent started", data);
+			wsLog.info("Agent started", data);
 		});
 
 		// Agent end handler - finalize streaming
@@ -277,16 +284,16 @@ export function useChat(): UseChatReturn {
 
 		// Message start/end handlers
 		registerHandler("message_start", () => {
-			console.log("[useChat] Message started");
+			wsLog.info("Message started");
 		});
 
 		registerHandler("message_end", () => {
-			console.log("[useChat] Message ended");
+			wsLog.info("Message ended");
 		});
 
 		// Turn start/end handlers
 		registerHandler("turn_start", () => {
-			console.log("[useChat] Turn started - starting new turn block");
+			wsLog.info("Turn started - starting new turn block");
 			// 开始新的轮次，添加分隔标记
 			store.startNewTurn();
 			// 重置本地流式状态
@@ -297,30 +304,30 @@ export function useChat(): UseChatReturn {
 		});
 
 		registerHandler("turn_end", (data) => {
-			console.log("[useChat] Turn ended:", data);
+			wsLog.info("Turn ended:", data);
 		});
 
 		// Compaction start/end handlers
 		registerHandler("compaction_start", () => {
-			console.log("[useChat] Compaction started");
+			wsLog.info("Compaction started");
 		});
 
 		registerHandler("compaction_end", () => {
-			console.log("[useChat] Compaction ended");
+			wsLog.info("Compaction ended");
 		});
 
 		// Retry start/end handlers
 		registerHandler("retry_start", () => {
-			console.log("[useChat] Retry started");
+			wsLog.info("Retry started");
 		});
 
 		registerHandler("retry_end", () => {
-			console.log("[useChat] Retry ended");
+			wsLog.info("Retry ended");
 		});
 
 		// Error handler - using generic string type for error events
 		registerHandler("error" as string, (data) => {
-			console.error("[useChat] WebSocket error:", data);
+			wsLog.error("WebSocket error:", data);
 			store.abortStreaming();
 			clearHandlers();
 		});

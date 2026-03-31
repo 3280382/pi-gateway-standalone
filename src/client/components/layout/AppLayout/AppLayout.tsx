@@ -51,7 +51,9 @@ export function AppLayout({
 
 	// 从 store 获取消息数量和流式消息
 	const messages = useChatStore((s) => s.messages);
-	const currentStreamingMessage = useChatStore((s) => s.currentStreamingMessage);
+	const currentStreamingMessage = useChatStore(
+		(s) => s.currentStreamingMessage,
+	);
 
 	// 安全的滚动到底部函数
 	const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
@@ -94,7 +96,7 @@ export function AppLayout({
 			userScrolledRef.current = false;
 			lastMessageCountRef.current = currentMessageCount;
 		}
-		
+
 		if (userScrolledRef.current) return;
 		scrollToBottom("smooth");
 	}, [messages.length, scrollToBottom]);
@@ -105,17 +107,17 @@ export function AppLayout({
 			lastStreamingContentRef.current = "";
 			return;
 		}
-		
+
 		// 获取当前流式内容的字符串表示
 		const currentContent = JSON.stringify(currentStreamingMessage.content);
-		
+
 		// 如果内容没有变化，不滚动
 		if (currentContent === lastStreamingContentRef.current) {
 			return;
 		}
-		
+
 		lastStreamingContentRef.current = currentContent;
-		
+
 		if (userScrolledRef.current) return;
 		scrollToBottom("auto");
 	}, [currentStreamingMessage, scrollToBottom]);
@@ -128,7 +130,7 @@ export function AppLayout({
 
 		const { scrollTop, scrollHeight, clientHeight } = container;
 		const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-		
+
 		// 距离底部超过 100px 认为用户手动滚动了
 		if (distanceFromBottom > 100) {
 			userScrolledRef.current = true;
@@ -180,7 +182,9 @@ export function AppLayout({
 						ref={contentBodyRef}
 						className={styles.contentBody}
 						onScroll={handleScroll}
-					>{children}</div>
+					>
+						{children}
+					</div>
 
 					{/* 底部面板 - 直接渲染传入的内容 */}
 					{isBottomPanelOpen && bottomPanelContent}

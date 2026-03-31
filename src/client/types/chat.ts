@@ -8,7 +8,13 @@
 
 export type MessageRole = "user" | "assistant" | "system";
 
-export type ContentType = "text" | "thinking" | "tool" | "tool_use" | "image";
+export type ContentType =
+	| "text"
+	| "thinking"
+	| "tool"
+	| "tool_use"
+	| "image"
+	| "turn_marker";
 
 export interface MessageContent {
 	type: ContentType;
@@ -22,6 +28,7 @@ export interface MessageContent {
 	output?: string;
 	error?: string;
 	imageUrl?: string;
+	turnNumber?: number;
 }
 
 export interface Message {
@@ -31,6 +38,7 @@ export interface Message {
 	timestamp: Date;
 	isStreaming?: boolean;
 	isThinkingCollapsed?: boolean;
+	isToolsCollapsed?: boolean;
 	isMessageCollapsed?: boolean;
 }
 
@@ -152,12 +160,16 @@ export interface ChatController {
 	// Message Actions
 	toggleMessageCollapse: (messageId: string) => void;
 	toggleThinkingCollapse: (messageId: string) => void;
+	toggleToolsCollapse: (messageId: string) => void;
 	deleteMessage: (messageId: string) => void;
 	clearMessages: () => void;
 	regenerateMessage: (messageId: string) => void;
 
 	// Thinking Display
 	setShowThinking: (show: boolean) => void;
+
+	// Tools Display
+	setShowTools: (show: boolean) => void;
 
 	// Tool Actions
 	expandToolOutput: (toolId: string) => void;

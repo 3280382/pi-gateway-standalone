@@ -13,7 +13,7 @@ import {
 	type SystemPromptResponse,
 } from "@/services/api/systemPromptApi";
 import { websocketService } from "@/services/websocket.service";
-import { useChatStore } from "@/stores/chatStore";
+import { useChatStore, selectSearchQuery, selectSearchFilters } from "@/stores/chatStore";
 import { useModalStore } from "@/stores/modalStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
@@ -129,14 +129,31 @@ interface TopBarProps {
 	connectionStatus: "connected" | "disconnected" | "connecting";
 	pid: number | null;
 	currentView?: "chat" | "files";
+	searchQuery?: string;
+	searchFilters?: { user: boolean; assistant: boolean; thinking: boolean; tools: boolean };
+	onSearchQueryChange?: (query: string) => void;
+	onSearchFiltersChange?: (filters: { user: boolean; assistant: boolean; thinking: boolean; tools: boolean }) => void;
 }
+
+// DEBUG: Check if new code is loaded
+console.log("[TopBar] Module loaded, version: 2024-01-15-001");
 
 export function TopBar({
 	workingDir,
 	connectionStatus,
 	pid,
 	currentView = "chat",
+	searchQuery: externalSearchQuery,
+	searchFilters: externalSearchFilters,
+	onSearchQueryChange,
+	onSearchFiltersChange,
 }: TopBarProps) {
+	// Log props on every render
+	console.log("[TopBar] Render props:", { 
+		onSearchQueryChange: typeof onSearchQueryChange, 
+		onSearchFiltersChange: typeof onSearchFiltersChange,
+		externalSearchQuery: externalSearchQuery?.slice?.(0, 20)
+	});
 	const {
 		currentModel,
 		thinkingLevel,
@@ -147,9 +164,14 @@ export function TopBar({
 	const { isStreaming } = useChatStore();
 	const chatController = useChatController();
 
-	// Search state
-	const searchQuery = useSidebarStore((state) => state.searchQuery);
-	const filters = useSidebarStore((state) => state.searchFilters);
+	// Search state - 优先使用外部传入的 props，否则使用 chatStore
+	const chatStoreQuery = useChatStore(selectSearchQuery);
+	const chatStoreFilters = useChatStore(selectSearchFilters);
+	const chatStoreSetSearchQuery = useChatStore((s) => s.setSearchQuery);
+	const chatStoreSetSearchFilters = useChatStore((s) => s.setSearchFilters);
+	
+	const searchQuery = externalSearchQuery ?? chatStoreQuery;
+	const filters = externalSearchFilters ?? chatStoreFilters;
 	const sidebarController = useSidebarController();
 	// System prompt state (now using modalStore)
 	const openSystemPrompt = useModalStore((state) => state.openSystemPrompt);
@@ -196,7 +218,14 @@ export function TopBar({
 	};
 
 	const handleFilterChange = (key: keyof typeof filters) => {
-		sidebarController.setSearchFilters({ [key]: !filters[key] });
+		console.log("[TopBar] Filter changed:", key, "onSearchFiltersChange exists:", !!onSearchFiltersChange);
+		if (onSearchFiltersChange) {
+			// 使用外部传入的回调
+			onSearchFiltersChange({ ...filters, [key]: !filters[key] });
+		} else {
+			// 使用 chatStore
+			chatStoreSetSearchFilters({ [key]: !filters[key] });
+		}
 	};
 
 	const hasActiveFilters =
@@ -410,12 +439,25 @@ export function TopBar({
 							className={styles.searchInput}
 							placeholder="Search messages..."
 							value={searchQuery}
-							onChange={(e) => sidebarController.setSearchQuery(e.target.value)}
+							onChange={(e) => {
+								console.log("[TopBar] Input changed:", e.target.value, "onSearchQueryChange exists:", !!onSearchQueryChange);
+								if (onSearchQueryChange) {
+									onSearchQueryChange(e.target.value);
+								} else {
+									chatStoreSetSearchQuery(e.target.value);
+								}
+							}}
 						/>
 						{searchQuery && (
 							<button
 								className={styles.clearBtn}
-								onClick={() => sidebarController.setSearchQuery("")}
+								onClick={() => {
+								if (onSearchQueryChange) {
+									onSearchQueryChange("");
+								} else {
+									chatStoreSetSearchQuery("");
+								}
+							}}
 								title="Clear"
 							>
 								<XIcon />

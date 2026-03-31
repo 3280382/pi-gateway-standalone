@@ -239,7 +239,7 @@
 }
 
 .thinkingBody {
-	padding: 4px 0;
+	padding: 0;
 	margin: 0;
 	font-family: "JetBrains Mono", "Fira Code", monospace;
 	font-size: var(--font-base);
@@ -260,6 +260,7 @@
 	color: var(--icon-thinking);
 	width: 100%;
 	box-sizing: border-box;
+	cursor: pointer;
 }
 
 .collapsedText {
@@ -294,7 +295,7 @@
 }
 
 .toolContainer.pending {
-	background: rgba(63, 185, 80, 0.10);
+	background: rgba(63, 185, 80, 0.1);
 }
 
 .toolContainer.building {
@@ -332,15 +333,35 @@
 	color: #8b949e;
 }
 
-/* 简化后的 toolCode - 无内层边框，从第一行开始 */
-.toolCode {
+/* 工具内容展开区域 */
+.toolContent {
 	margin: 0;
-	padding: 4px 0;
+	padding: 0;
 	background: transparent;
 	font-family: "JetBrains Mono", "Fira Code", monospace;
 	font-size: var(--font-base);
 	line-height: 1.5;
 	color: #c9d1d9;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+/* 工具输出区域 */
+.toolOutput {
+	margin: 0;
+	padding: 0;
+}
+
+/* 工具输出 pre 标签 */
+.toolOutputPre {
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	font-family: inherit;
+	font-size: inherit;
+	line-height: 1.5;
+	color: inherit;
 	white-space: pre-wrap;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
@@ -352,8 +373,10 @@
 	align-items: center;
 	gap: 8px;
 	font-size: var(--font-base);
+	line-height: 1.5;
 	width: 100%;
 	box-sizing: border-box;
+	cursor: pointer;
 }
 
 .toolCollapsed .collapsedText {
@@ -375,7 +398,9 @@
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	padding: 2px 0;
+	padding: 0;
+	margin: 0;
+	line-height: 1.5;
 }
 
 .commandPrompt {
@@ -448,7 +473,7 @@
 	overflow-y: hidden;
 	font-family: "JetBrains Mono", "Fira Code", monospace;
 	font-size: var(--font-base);
-	line-height: 1.5;
+	line-height: 1;
 	max-width: 100%;
 }
 

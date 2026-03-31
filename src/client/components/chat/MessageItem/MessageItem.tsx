@@ -9,14 +9,17 @@
  */
 
 import { useMemo, useState } from "react";
+import { componentLog } from "@/lib/logger";
 import type { Message, MessageContent } from "@/types/chat";
 import styles from "./MessageItem.module.css";
 
 interface MessageItemProps {
 	message: Message;
 	showThinking: boolean;
+	showTools?: boolean;
 	onToggleCollapse: () => void;
 	onToggleThinking: () => void;
+	onToggleTools?: () => void;
 	onDelete?: () => void;
 	onRegenerate?: () => void;
 }
@@ -24,8 +27,10 @@ interface MessageItemProps {
 export function MessageItem({
 	message,
 	showThinking,
+	showTools = true,
 	onToggleCollapse,
 	onToggleThinking,
+	onToggleTools,
 	onDelete,
 	onRegenerate,
 }: MessageItemProps) {
@@ -64,16 +69,12 @@ export function MessageItem({
 
 	// 调试日志 - 仅在开发环境显示
 	if (process.env.NODE_ENV === "development") {
-		console.log(
-			"[MessageItem] Message:",
-			message.id,
-			"Role:",
-			message.role,
-			"Content types:",
-			contentBlocks.map((c) => c.type),
-			"mergedToolBlocks:",
-			allToolBlocks.length,
-		);
+		componentLog.debug("Message:", {
+			id: message.id,
+			role: message.role,
+			contentTypes: contentBlocks.map((c) => c.type),
+			mergedToolBlocks: allToolBlocks.length,
+		});
 	}
 
 	// 合并所有文本内容用于代码块解析
@@ -102,23 +103,12 @@ export function MessageItem({
 			onMouseLeave={() => setShowActions(false)}
 		>
 			{/* 操作按钮 - 只显示复制和删除 */}
-			<div
-				className={styles.actions}
-				style={{ opacity: showActions ? 1 : 0 }}
-			>
-				<button
-					className={styles.actionBtn}
-					onClick={handleCopy}
-					title="复制"
-				>
+			<div className={styles.actions} style={{ opacity: showActions ? 1 : 0 }}>
+				<button className={styles.actionBtn} onClick={handleCopy} title="复制">
 					📋
 				</button>
 				{onDelete && (
-					<button
-						className={styles.actionBtn}
-						onClick={onDelete}
-						title="删除"
-					>
+					<button className={styles.actionBtn} onClick={onDelete} title="删除">
 						🗑
 					</button>
 				)}
@@ -138,7 +128,9 @@ export function MessageItem({
 							toolBlocks={allToolBlocks}
 							textBlocks={textBlocks}
 							showThinking={showThinking}
+							showTools={showTools}
 							onToggleThinking={onToggleThinking}
+							onToggleTools={onToggleTools}
 							isStreaming={message.isStreaming}
 						/>
 					)}
@@ -160,13 +152,15 @@ function UserContent({ text }: { text: string }) {
 
 // 统一的图标组件
 
-
-
-
 // 按轮次分组的内容块
 interface TurnGroup {
 	turnNumber: number;
-	blocks: Array<MessageContent & { originalIndex: number }>;
+	blocks: Array<
+		MessageContent & {
+			originalIndex: number;
+			blockType?: "thinking" | "text" | "tool";
+		}
+	>;
 }
 
 // AI 消息内容 - 按轮次分组渲染
@@ -176,7 +170,9 @@ interface AIContentProps {
 	toolBlocks: Array<MessageContent & { originalIndex: number }>;
 	textBlocks: Array<MessageContent & { originalIndex: number }>;
 	showThinking: boolean;
+	showTools?: boolean;
 	onToggleThinking: () => void;
+	onToggleTools?: () => void;
 	isStreaming?: boolean;
 }
 
@@ -186,7 +182,9 @@ function AIContent({
 	toolBlocks,
 	textBlocks,
 	showThinking,
+	showTools = true,
 	onToggleThinking,
+	onToggleTools,
 	isStreaming,
 }: AIContentProps) {
 	// 按轮次分组所有块
@@ -262,16 +260,20 @@ function AIContent({
 										/>
 									) : null;
 								case "tool":
-									return (
+									return showTools ? (
 										<ToolResultBlock
 											key={`tool-${group.turnNumber}-${idx}`}
 											content={block}
+											isCollapsed={message.isToolsCollapsed}
+											onToggle={onToggleTools}
 											isStreaming={isStreaming}
 										/>
-									);
-								case "text":
+									) : null;
+								case "text": {
 									// 找到第一个文本块的索引
-									const firstTextIdx = group.blocks.findIndex(b => b.blockType === "text");
+									const firstTextIdx = group.blocks.findIndex(
+										(b) => b.blockType === "text",
+									);
 									const isFirstText = idx === firstTextIdx;
 									// 每轮最后一个文本块使用代码高亮
 									const isLastText =
@@ -282,7 +284,6 @@ function AIContent({
 												key={`text-${group.turnNumber}-${idx}`}
 												className={styles.textSection}
 											>
-												
 												<CompactMarkdownWithCode content={block.text} />
 											</div>
 										);
@@ -292,10 +293,10 @@ function AIContent({
 											key={`text-${group.turnNumber}-${idx}`}
 											className={styles.textSection}
 										>
-											
 											<CompactMarkdown content={block.text} />
 										</div>
 									) : null;
+								}
 								default:
 									return null;
 							}
@@ -324,10 +325,10 @@ function ThinkingBlock({
 	isStreaming,
 }: ThinkingBlockProps) {
 	// 流式时展开，非流式时默认折叠（除非用户手动展开）
-	const shouldShow = isStreaming ? true : (isCollapsed === false);
+	const shouldShow = isStreaming ? true : isCollapsed === false;
 
 	// 获取第一行内容
-	const firstLine = content.thinking?.split('\n')[0] || '';
+	const firstLine = content.thinking?.split("\n")[0] || "";
 
 	return (
 		<div className={styles.thinkingContainer} onClick={onToggle}>
@@ -339,7 +340,6 @@ function ThinkingBlock({
 				</pre>
 			) : (
 				<div className={styles.thinkingCollapsed}>
-					
 					<span className={styles.collapsedText}>{firstLine}</span>
 				</div>
 			)}
@@ -350,15 +350,19 @@ function ThinkingBlock({
 // Tool 结果块 (已完成执行)
 interface ToolResultBlockProps {
 	content: MessageContent;
+	isCollapsed?: boolean;
+	onToggle?: () => void;
 	isStreaming?: boolean;
 }
 
-function ToolResultBlock({ content, isStreaming }: ToolResultBlockProps) {
-	// 流式时展开，非流式时折叠（文件加载时默认折叠）
-	const [userExpanded, setUserExpanded] = useState<boolean | null>(null);
-
-	// 实际展开状态：流式时强制展开，否则使用用户设置或默认折叠
-	const isExpanded = isStreaming ? true : (userExpanded ?? false);
+function ToolResultBlock({
+	content,
+	isCollapsed,
+	onToggle,
+	isStreaming,
+}: ToolResultBlockProps) {
+	// 流式时展开，非流式时根据 isCollapsed 状态（默认折叠）
+	const isExpanded = isStreaming ? true : isCollapsed === false;
 
 	const status = content.error
 		? "error"
@@ -379,9 +383,10 @@ function ToolResultBlock({ content, isStreaming }: ToolResultBlockProps) {
 
 	// 获取第一行输出内容
 	const outputText = content.output || content.error || "";
-	const firstLine = typeof outputText === "string" 
-		? outputText.split("\n")[0].substring(0, 80)
-		: String(outputText).substring(0, 80);
+	const firstLine =
+		typeof outputText === "string"
+			? outputText.split("\n")[0].substring(0, 80)
+			: String(outputText).substring(0, 80);
 
 	const safeStringify = (obj: unknown): string => {
 		if (obj === null || obj === undefined) return "";
@@ -420,49 +425,46 @@ function ToolResultBlock({ content, isStreaming }: ToolResultBlockProps) {
 	};
 
 	return (
-		<div 
+		<div
 			className={`${styles.toolContainer} ${styles[status]}`}
-			onClick={() => setUserExpanded(!isExpanded)}
+			onClick={() => {
+				console.log("[ToolResultBlock] clicked, calling onToggle");
+				onToggle?.();
+			}}
 		>
 			{isExpanded ? (
-				<pre className={styles.toolCode}>
+				<div className={styles.toolContent}>
 					{/* 命令部分 */}
 					{content.args && Object.keys(content.args).length > 0 && (
 						<div className={styles.commandLine}>
 							<span className={styles.commandPrompt}>$</span>
 							<span className={styles.commandText}>
-								{formatArgsAsCommand(
-									content.toolName || "tool",
-									content.args,
-								)}
+								{formatArgsAsCommand(content.toolName || "tool", content.args)}
 							</span>
 						</div>
 					)}
 					{/* 输出部分 */}
 					{content.output && (
-						<div
-							style={{
-								marginTop: content.args ? "8px" : "0",
-								borderTop: content.args
-									? "1px solid var(--border-color)"
-									: "none",
-								paddingTop: content.args ? "8px" : "0",
-							}}
-						>
-							{safeStringify(content.output)}
+						<div className={styles.toolOutput}>
+							<pre className={styles.toolOutputPre}>
+								{safeStringify(content.output)}
+							</pre>
 						</div>
 					)}
 					{/* 错误部分 */}
 					{content.error && (
-						<div className={styles.errorText}>
-							{safeStringify(content.error)}
+						<div className={`${styles.toolOutput} ${styles.errorText}`}>
+							<pre className={styles.toolOutputPre}>
+								{safeStringify(content.error)}
+							</pre>
 						</div>
 					)}
-				</pre>
+				</div>
 			) : (
 				<div className={styles.toolCollapsed}>
-					
-					<span className={styles.collapsedText}>{content.toolName || "tool"}</span>
+					<span className={styles.collapsedText}>
+						{content.toolName || "tool"}
+					</span>
 					<span className={styles.collapsedPreview}>{firstLine}</span>
 				</div>
 			)}

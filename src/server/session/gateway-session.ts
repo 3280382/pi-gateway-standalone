@@ -18,6 +18,7 @@ import {
 } from "@mariozechner/pi-coding-agent";
 import type { LlmLogManager } from "@server/llm/log-manager";
 import { existsSync } from "fs";
+import { readFile } from "fs/promises";
 import { join } from "path";
 import { WebSocket } from "ws";
 import { AGENT_DIR, getLocalSessionsDir } from "./utils";
@@ -28,6 +29,20 @@ import { AGENT_DIR, getLocalSessionsDir } from "./utils";
 export interface ServerMessage extends Record<string, unknown> {
 	type: string;
 }
+
+/**
+ * 写文件相关工具名称列表
+ */
+const writeFileTools = [
+	"write_file",
+	"create_file",
+	"edit_file",
+	"apply_diff",
+	"writeFile",
+	"createFile",
+	"editFile",
+	"applyDiff",
+];
 
 /**
  * Gateway会话类
@@ -316,12 +331,49 @@ export class GatewaySession {
 					break;
 				}
 				case "tool_execution_end": {
-					this.send({
-						type: "tool_end",
-						toolCallId: event.toolCallId,
-						result: event.result,
-						isError: event.isError,
-					});
+					// 检查是否是写文件操作，如果是则读取文件内容并包含在工具结果中
+					const toolResult = event.result;
+					const toolName = event.toolName;
+
+					// 检查是否为写文件相关工具
+					const isWriteOperation =
+						toolName &&
+						(writeFileTools.includes(toolName) ||
+							toolName.toLowerCase().includes("write") ||
+							toolName.toLowerCase().includes("create"));
+
+					if (isWriteOperation && !event.isError) {
+						// 尝试从args中获取文件路径
+						const args = (
+							event as unknown as { args?: Record<string, unknown> }
+						).args;
+						const filePath =
+							args?.path || args?.file_path || args?.filepath || args?.filePath;
+
+						if (typeof filePath === "string") {
+							// 异步读取文件内容并随工具结果一起发送
+							this.sendToolEndWithFileContent(
+								event.toolCallId,
+								toolResult,
+								event.isError,
+								filePath,
+							);
+						} else {
+							this.send({
+								type: "tool_end",
+								toolCallId: event.toolCallId,
+								result: toolResult,
+								isError: event.isError,
+							});
+						}
+					} else {
+						this.send({
+							type: "tool_end",
+							toolCallId: event.toolCallId,
+							result: toolResult,
+							isError: event.isError,
+						});
+					}
 					break;
 				}
 				case "message_start": {
@@ -797,6 +849,61 @@ export class GatewaySession {
 	send(message: ServerMessage) {
 		if (this.ws.readyState === WebSocket.OPEN) {
 			this.ws.send(JSON.stringify(message));
+		}
+	}
+
+	/**
+	 * 读取文件内容并随工具结果一起发送（复用tool_end消息）
+	 * @param toolCallId 工具调用ID
+	 * @param toolResult 工具执行结果
+	 * @param isError 是否错误
+	 * @param filePath 文件路径
+	 */
+	async sendToolEndWithFileContent(
+		toolCallId: string,
+		toolResult: string,
+		isError: boolean,
+		filePath: string,
+	) {
+		try {
+			// 解析文件路径（支持相对路径和绝对路径）
+			const fullPath = filePath.startsWith("/")
+				? filePath
+				: join(this.workingDir, filePath);
+
+			// 检查文件是否存在
+			const { existsSync } = await import("fs");
+			if (!existsSync(fullPath)) {
+				this.send({
+					type: "tool_end",
+					toolCallId,
+					result: toolResult,
+					isError,
+				});
+				return;
+			}
+
+			// 读取文件内容
+			const content = await readFile(fullPath, "utf-8");
+
+			// 发送工具结束消息，包含文件内容
+			this.send({
+				type: "tool_end",
+				toolCallId,
+				result: toolResult,
+				isError,
+				fileContent: content,
+				filePath,
+			});
+		} catch (error) {
+			// 如果读取失败，只发送工具结果
+			console.error(`[Gateway] 读取文件内容失败: ${filePath}`, error);
+			this.send({
+				type: "tool_end",
+				toolCallId,
+				result: toolResult,
+				isError,
+			});
 		}
 	}
 

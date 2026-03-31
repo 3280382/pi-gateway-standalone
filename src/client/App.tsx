@@ -9,7 +9,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { websocketService } from "@/services/websocket.service";
-import { useChatStore } from "@/stores/chatStore";
+import { useChatStore, filterMessages } from "@/stores/chatStore";
+import { useMemo } from "react";
 import { useNewChatStore } from "@/stores/new-chat.store";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
@@ -43,6 +44,23 @@ function AppContent() {
 	const showThinking = useChatStore((s) => s.showThinking);
 	const toggleMessageCollapse = useChatStore((s) => s.toggleMessageCollapse);
 	const toggleThinkingCollapse = useChatStore((s) => s.toggleThinkingCollapse);
+	
+	// 搜索过滤
+	const searchQuery = useChatStore((s) => s.searchQuery);
+	const searchFilters = useChatStore((s) => s.searchFilters);
+	const filteredMessages = useMemo(() => {
+		console.log("[App] Filtering messages:", { 
+			totalMessages: messages.length, 
+			searchQuery, 
+			searchFilters 
+		});
+		const result = filterMessages(messages, {
+			query: searchQuery,
+			filters: searchFilters,
+		});
+		console.log("[App] Filtered result:", result.length, "messages");
+		return result;
+	}, [messages, searchQuery, searchFilters]);
 
 	// 终端输出状态（用于文件浏览器）
 	const [terminalOutput, setTerminalOutput] = useState<string>("");
@@ -299,7 +317,7 @@ function AppContent() {
 		return (
 			<AppLayout showInput={true} bottomPanelContent={renderChatBottomPanel()}>
 				<MessageList
-					messages={messages}
+					messages={filteredMessages}
 					currentStreamingMessage={currentStreamingMessage}
 					showThinking={showThinking}
 					onToggleMessageCollapse={toggleMessageCollapse}

@@ -2,7 +2,7 @@
  * ChatPanel - Main Chat Container
  */
 
-import { useCallback } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import { useChatController } from "@/services/api/chatApi";
 import {
 	selectCurrentStreamingMessage,
@@ -11,6 +11,7 @@ import {
 	selectMessages,
 	selectShowThinking,
 	useChatStore,
+	filterMessages,
 } from "@/stores/chatStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import { TopBar } from "../../layout/TopBar/TopBar";
@@ -24,9 +25,42 @@ export function ChatPanel() {
 	const inputText = useChatStore(selectInputText);
 	const isStreaming = useChatStore(selectIsStreaming);
 	const showThinking = useChatStore(selectShowThinking);
+	const showTools = useChatStore((state) => state.showTools);
 
 	const { currentDir, isConnected, serverPid } = useSessionStore();
 	const controller = useChatController();
+
+	// 搜索状态 - 使用本地 state
+	const [searchQuery, setSearchQuery] = useState("");
+	const [searchFilters, setSearchFilters] = useState({
+		user: true,
+		assistant: true,
+		thinking: true,
+		tools: true,
+	});
+
+	// DEBUG: Check state and setter
+	console.log("[ChatPanel] State check:", {
+		searchQuery,
+		setSearchQuery: typeof setSearchQuery,
+		searchFilters,
+		setSearchFilters: typeof setSearchFilters,
+	});
+
+	// 使用 useMemo 缓存过滤结果
+	const filteredMessages = useMemo(() => {
+		console.log("[ChatPanel] Filtering messages:", {
+			totalMessages: messages.length,
+			searchQuery,
+			searchFilters,
+		});
+		const result = filterMessages(messages, {
+			query: searchQuery,
+			filters: searchFilters,
+		});
+		console.log("[ChatPanel] Filtered result:", result.length, "messages");
+		return result;
+	}, [messages, searchQuery, searchFilters]);
 
 	const handleSend = useCallback(() => {
 		if (inputText.trim()) {
@@ -73,16 +107,22 @@ export function ChatPanel() {
 					workingDir={currentDir}
 					connectionStatus={connectionStatus}
 					pid={serverPid}
+					searchQuery={searchQuery}
+					searchFilters={searchFilters}
+					onSearchQueryChange={setSearchQuery}
+					onSearchFiltersChange={setSearchFilters}
 				/>
 			</div>
 
 			<div className={styles.messages}>
 				<MessageList
-					messages={messages}
+					messages={filteredMessages}
 					currentStreamingMessage={currentStreamingMessage}
 					showThinking={showThinking}
+					showTools={showTools}
 					onToggleMessageCollapse={controller.toggleMessageCollapse}
 					onToggleThinkingCollapse={controller.toggleThinkingCollapse}
+					onToggleToolsCollapse={controller.toggleToolsCollapse}
 					onDeleteMessage={controller.deleteMessage}
 					onRegenerateMessage={controller.regenerateMessage}
 				/>

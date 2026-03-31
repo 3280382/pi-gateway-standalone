@@ -109,7 +109,8 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 
 				// Search Actions
 				setSearchQuery: (query: string) => {
-					set({ searchQuery: query }, false, "setSearchQuery");
+					console.log("[SidebarStore] setSearchQuery:", query);
+				set({ searchQuery: query }, false, "setSearchQuery");
 				},
 
 				setSearchFilters: (filters: Partial<SearchFilters>) => {
@@ -158,6 +159,7 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 				version: 1,
 				partialize: (state) => ({
 					theme: state.theme,
+					searchQuery: state.searchQuery,
 					fontSize: state.fontSize,
 					searchFilters: state.searchFilters,
 					recentWorkspaces: state.recentWorkspaces,

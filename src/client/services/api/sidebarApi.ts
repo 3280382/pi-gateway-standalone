@@ -125,6 +125,7 @@ export function useSidebarController(): SidebarController {
 
 		// Search
 		setSearchQuery: (query: string) => {
+			console.log("[SidebarController] setSearchQuery:", query);
 			store.setSearchQuery(query);
 
 			// Trigger search if needed

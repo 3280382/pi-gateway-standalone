@@ -119,6 +119,10 @@ export function useChatController(): EnhancedChatController {
 			chatStore.toggleThinkingCollapse(messageId);
 		},
 
+		toggleToolsCollapse: (messageId: string) => {
+			chatStore.toggleToolsCollapse(messageId);
+		},
+
 		deleteMessage: (messageId: string) => {
 			chatStore.deleteMessage(messageId);
 		},
@@ -445,10 +449,12 @@ export function createChatController(): ChatController {
 		clearInput: () => store.clearInput(),
 		toggleMessageCollapse: (id: string) => store.toggleMessageCollapse(id),
 		toggleThinkingCollapse: (id: string) => store.toggleThinkingCollapse(id),
+		toggleToolsCollapse: (id: string) => store.toggleToolsCollapse(id),
 		deleteMessage: (id: string) => store.deleteMessage(id),
 		clearMessages: () => store.clearMessages(),
 		regenerateMessage: (id: string) => store.regenerateMessage(id),
 		setShowThinking: (show: boolean) => store.setShowThinking(show),
+		setShowTools: (show: boolean) => store.setShowTools(show),
 		expandToolOutput: () => {},
 		collapseToolOutput: () => {},
 	};

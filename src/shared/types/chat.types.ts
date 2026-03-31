@@ -9,7 +9,13 @@
 
 export type MessageRole = "user" | "assistant" | "system";
 
-export type ContentType = "text" | "thinking" | "tool" | "tool_use" | "image" | "turn_marker";
+export type ContentType =
+	| "text"
+	| "thinking"
+	| "tool"
+	| "tool_use"
+	| "image"
+	| "turn_marker";
 
 export interface MessageContent {
 	type: ContentType;
@@ -32,6 +38,7 @@ export interface Message {
 	timestamp: Date;
 	isStreaming?: boolean;
 	isThinkingCollapsed?: boolean;
+	isToolsCollapsed?: boolean;
 	isMessageCollapsed?: boolean;
 }
 
@@ -91,6 +98,7 @@ export interface ChatState {
 
 	// UI状态
 	showThinking: boolean;
+	showTools: boolean;
 	scrollToBottom: boolean;
 
 	// 搜索
@@ -149,6 +157,8 @@ export interface ToolEndMessage {
 	isError?: boolean;
 	output?: string;
 	error?: string;
+	fileContent?: string; // 写文件操作时的文件内容
+	filePath?: string; // 写文件操作时的文件路径
 }
 
 export interface AgentStartMessage {
