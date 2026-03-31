@@ -314,9 +314,11 @@ function setupStreamingHandlers(
 	// Content delta handler - handles streaming text
 	const contentHandler = websocketService.on(
 		"content_delta",
-		(data: { delta?: string }) => {
-			if (data?.delta) {
-				store.appendStreamingContent(data.delta);
+		(data: { text?: string; delta?: string }) => {
+			// 支持text或delta字段
+			const content = data?.text || data?.delta;
+			if (content) {
+				store.appendStreamingContent(content);
 			}
 		},
 	);
@@ -325,9 +327,11 @@ function setupStreamingHandlers(
 	// Thinking delta handler - handles thinking content
 	const thinkingHandler = websocketService.on(
 		"thinking_delta",
-		(data: { delta?: string }) => {
-			if (data?.delta) {
-				store.appendStreamingThinking(data.delta);
+		(data: { thinking?: string; delta?: string }) => {
+			// 支持thinking或delta字段
+			const content = data?.thinking || data?.delta;
+			if (content) {
+				store.appendStreamingThinking(content);
 			}
 		},
 	);
