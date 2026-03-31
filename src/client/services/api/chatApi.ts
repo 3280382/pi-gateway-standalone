@@ -49,6 +49,9 @@ export function useChatController(): EnhancedChatController {
 	const chatStore = useChatStore();
 	const sessionStore = useSessionStore();
 
+	// 确保全局流式处理器只设置一次
+	setupStreamingHandlers(chatStore);
+
 	return {
 		// 基础聊天功能
 		sendMessage: async (text: string) => {
@@ -86,9 +89,6 @@ export function useChatController(): EnhancedChatController {
 				chatStore.abortStreaming();
 				throw new Error("消息发送失败，请重试");
 			}
-
-			// 设置消息处理器用于流式响应
-			setupStreamingHandlers(chatStore);
 		},
 
 		abortGeneration: () => {
@@ -221,7 +221,7 @@ export function useChatController(): EnhancedChatController {
 
 				const unsubscribe = websocketService.on("model_set", (data) => {
 					clearTimeout(timeout);
-					sessionStore.getState().setCurrentModel(modelId);
+					sessionStore.setCurrentModel(modelId);
 					unsubscribe();
 					resolve();
 				});
@@ -289,7 +289,7 @@ export function useChatController(): EnhancedChatController {
 
 				const unsubscribe = websocketService.on("dir_changed", (data) => {
 					clearTimeout(timeout);
-					sessionStore.getState().setCurrentDir(data.cwd);
+					sessionStore.setCurrentDir(data.cwd);
 					chatStore.setSessionId(data.sessionId);
 					unsubscribe();
 					resolve();
@@ -302,59 +302,56 @@ export function useChatController(): EnhancedChatController {
 }
 
 // ============================================================================
-// Streaming Handlers Setup
+// Streaming Handlers Setup - 已废弃，使用全局控制器
 // ============================================================================
+
+let handlersSetup = false;
 
 function setupStreamingHandlers(
 	store: ReturnType<typeof useChatStore.getState>,
 ) {
-	// Track handlers so we can clean them up
-	const handlers: (() => void)[] = [];
+	// 防止重复设置
+	if (handlersSetup) return;
+	handlersSetup = true;
 
+	// 只设置一次全局监听器
 	// Content delta handler - handles streaming text
-	const contentHandler = websocketService.on(
+	websocketService.on(
 		"content_delta",
 		(data: { text?: string; delta?: string }) => {
-			// 支持text或delta字段
 			const content = data?.text || data?.delta;
 			if (content) {
 				store.appendStreamingContent(content);
 			}
 		},
 	);
-	handlers.push(contentHandler);
 
-	// Thinking delta handler - handles thinking content
-	const thinkingHandler = websocketService.on(
+	// Thinking delta handler
+	websocketService.on(
 		"thinking_delta",
 		(data: { thinking?: string; delta?: string }) => {
-			// 支持thinking或delta字段
 			const content = data?.thinking || data?.delta;
 			if (content) {
 				store.appendStreamingThinking(content);
 			}
 		},
 	);
-	handlers.push(thinkingHandler);
 
-	// Tool call delta handler - handles tool call streaming
-	const toolCallHandler = websocketService.on(
-		"toolcall_delta",
-		(data: unknown) => {
-			console.log("[ChatController] Tool call delta:", data);
-		},
-	);
-	handlers.push(toolCallHandler);
+	// Tool call delta handler
+	websocketService.on("toolcall_delta", (data: any) => {
+		if (data?.toolCallId && data?.toolName) {
+			store.appendToolCallDelta(
+				data.toolCallId,
+				data.toolName,
+				data.delta || "",
+			);
+		}
+	});
 
-	// Tool start handler - when a tool execution starts
-	const toolStartHandler = websocketService.on(
+	// Tool start handler
+	websocketService.on(
 		"tool_start",
-		(data: {
-			toolCallId?: string;
-			toolName: string;
-			args?: Record<string, unknown>;
-		}) => {
-			console.log("[ChatController] Tool start:", data);
+		(data: { toolCallId?: string; toolName: string; args?: any }) => {
 			const tool: ToolExecution = {
 				id: data.toolCallId || generateToolId(),
 				name: data.toolName,
@@ -365,55 +362,53 @@ function setupStreamingHandlers(
 			store.setActiveTool(tool);
 		},
 	);
-	handlers.push(toolStartHandler);
 
-	// Tool update handler - when tool produces output
-	const toolUpdateHandler = websocketService.on(
+	// Tool update handler
+	websocketService.on(
 		"tool_update",
-		(data: { toolCallId: string; output?: string }) => {
-			console.log("[ChatController] Tool update:", data);
-			if (data.output) {
-				store.updateToolOutput(data.toolCallId, data.output);
+		(data: { toolCallId: string; chunk?: string; output?: string }) => {
+			const content = data.chunk || data.output;
+			if (content) {
+				store.updateToolOutput(data.toolCallId, content);
 			}
 		},
 	);
-	handlers.push(toolUpdateHandler);
 
-	// Tool end handler - when tool execution completes
-	const toolEndHandler = websocketService.on(
+	// Tool end handler
+	websocketService.on(
 		"tool_end",
-		(data: { toolCallId: string; result?: string; error?: string }) => {
-			console.log("[ChatController] Tool end:", data);
-			if (data.error) {
-				store.updateToolOutput(data.toolCallId, "", data.error);
+		(data: {
+			toolCallId: string;
+			result?: string;
+			isError?: boolean;
+			error?: string;
+		}) => {
+			if (data.isError || data.error) {
+				store.updateToolOutput(
+					data.toolCallId,
+					data.result || "",
+					data.error || "工具执行失败",
+				);
 			} else {
 				store.updateToolOutput(data.toolCallId, data.result || "");
 			}
 		},
 	);
-	handlers.push(toolEndHandler);
 
-	// Agent end handler - finalize streaming
-	const agentEndHandler = websocketService.on("agent_end", () => {
-		console.log("[ChatController] Agent end");
-		store.finishStreaming();
-
-		// Clean up all handlers
-		for (const unsubscribe of handlers) {
-			unsubscribe();
-		}
+	// Turn start handler - 开始新的思考轮次
+	websocketService.on("turn_start", () => {
+		store.startNewTurn();
 	});
-	handlers.push(agentEndHandler);
+
+	// Agent end handler
+	websocketService.on("agent_end", () => {
+		store.finishStreaming();
+	});
 
 	// Error handler
-	const errorHandler = websocketService.on("error", (data: unknown) => {
-		console.error("[ChatController] WebSocket error:", data);
+	websocketService.on("error", () => {
 		store.abortStreaming();
-		for (const unsubscribe of handlers) {
-			unsubscribe();
-		}
 	});
-	handlers.push(errorHandler);
 }
 
 // ============================================================================
@@ -439,7 +434,6 @@ export function createChatController(): ChatController {
 			store.startStreaming();
 
 			websocketService.send("prompt", { text });
-			setupStreamingHandlers(store);
 		},
 
 		abortGeneration: () => {

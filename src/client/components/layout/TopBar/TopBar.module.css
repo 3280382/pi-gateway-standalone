@@ -274,7 +274,7 @@
 }
 
 .filterCount {
-	font-size: 9px;
+	font-size: var(--font-xs);
 	font-weight: 600;
 	min-width: 14px;
 	height: 14px;
@@ -492,7 +492,7 @@
 	background: transparent;
 	border: none;
 	color: var(--text-secondary);
-	font-size: 18px;
+	font-size: var(--font-lg);
 	cursor: pointer;
 	border-radius: var(--radius-sm);
 }
@@ -835,4 +835,291 @@
 	text-align: center;
 	color: var(--text-muted);
 	font-size: var(--font-sm);
+}
+
+/* ============================================
+   System Prompt Modal Styles - Full Width & Clean Lines
+   ============================================ */
+
+.modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(13, 17, 23, 0.95);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+	padding: 0;
+}
+
+.modalContent {
+	background: #0d1117;
+	width: 100%;
+	height: 100%;
+	max-width: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.modalHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	border-bottom: 1px solid #30363d;
+	background: #161b22;
+	flex-shrink: 0;
+}
+
+.modalHeader h3 {
+	margin: 0;
+	font-size: var(--font-base);
+	font-weight: 600;
+	color: #e6edf3;
+}
+
+/* Close button */
+.closeBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	background: transparent;
+	border: none;
+	color: #8b949e;
+	font-size: var(--font-lg);
+	line-height: 1;
+	cursor: pointer;
+	transition: color 0.15s ease;
+}
+
+.closeBtn:hover {
+	color: #e6edf3;
+}
+
+.modalBody {
+	flex: 1;
+	overflow: auto;
+	padding: 0;
+	background: #0d1117;
+}
+
+.systemPromptContent {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+/* Section with horizontal line divider only */
+.section {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	padding: 16px 20px;
+	border-bottom: 1px solid #21262d;
+}
+
+.section:last-child {
+	border-bottom: none;
+}
+
+.section h4 {
+	margin: 0 0 12px 0;
+	font-size: var(--font-xs);
+	font-weight: 600;
+	color: #58a6ff;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.emptySection {
+	padding: 12px 16px;
+	color: #484f58;
+	font-size: var(--font-sm);
+	font-style: italic;
+}
+
+/* File path - inline style */
+.filePath {
+	font-size: var(--font-sm);
+	color: #7d8590;
+	font-family: "JetBrains Mono", monospace;
+	margin-bottom: 8px;
+	padding: 4px 0;
+}
+
+/* File content - full width, no border */
+.fileContent {
+	margin: 0;
+	padding: 12px 16px;
+	background: #161b22;
+	color: #c9d1d9;
+	font-family: "JetBrains Mono", monospace;
+	font-size: var(--font-base);
+	line-height: 1.6;
+	white-space: pre-wrap;
+	word-break: break-word;
+	overflow-x: auto;
+	max-height: 500px;
+	overflow-y: auto;
+	width: 100%;
+}
+
+/* Skill list - clean layout */
+.skillList {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	width: 100%;
+}
+
+.skillItem {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 10px 0;
+	border-bottom: 1px solid #21262d;
+}
+
+.skillItem:last-child {
+	border-bottom: none;
+}
+
+.skillName {
+	font-size: var(--font-base);
+	font-weight: 600;
+	color: #a371f7;
+}
+
+.skillDesc {
+	font-size: var(--font-sm);
+	color: #8b949e;
+	line-height: 1.4;
+}
+
+.loading,
+.error {
+	padding: 80px 20px;
+	text-align: center;
+	font-size: var(--font-base);
+}
+
+.loading {
+	color: #8b949e;
+}
+
+.error {
+	color: #f85149;
+}
+
+/* Tab Bar */
+.tabBar {
+	display: flex;
+	gap: 8px;
+	padding: 12px 16px;
+	border-bottom: 1px solid #30363d;
+	background: #161b22;
+}
+
+.tab {
+	padding: 6px 14px;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	color: #7d8590;
+	font-size: var(--font-base);
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.tab:hover {
+	color: #e6edf3;
+	background: #21262d;
+	border-color: #30363d;
+}
+
+.activeTab {
+	background: rgba(88, 166, 255, 0.15);
+	color: #58a6ff;
+	border-color: rgba(88, 166, 255, 0.4);
+}
+
+.activeTab:hover {
+	background: rgba(88, 166, 255, 0.2);
+	color: #58a6ff;
+}
+
+/* Resource Items */
+.resourceItem {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 10px;
+	background: #161b22;
+	border-radius: 4px;
+	margin-bottom: 6px;
+	font-size: var(--font-sm);
+}
+
+.resourceLabel {
+	color: #7d8590;
+	font-weight: 500;
+	min-width: 70px;
+	flex-shrink: 0;
+}
+
+.resourcePath {
+	flex: 1;
+	font-family: "JetBrains Mono", "Fira Code", monospace;
+	word-break: break-all;
+	color: #e6edf3;
+}
+
+.resourcePath.exists {
+	color: #3fb950;
+}
+
+.resourcePath.notExists {
+	color: #7d8590;
+	font-style: italic;
+}
+
+.exists {
+	color: #3fb950;
+}
+
+.notExists {
+	color: #f85149;
+}
+
+.resourceMeta {
+	padding: 8px 10px;
+	color: #7d8590;
+	font-size: var(--font-sm);
+	font-style: italic;
+}
+
+.skillPathItem {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 6px 10px;
+	background: #161b22;
+	border-radius: 4px;
+	margin-bottom: 6px;
+	margin-left: 16px;
+}
+
+.skillPath {
+	font-size: var(--font-xs);
+	color: #7d8590;
+	font-family: "JetBrains Mono", "Fira Code", monospace;
+	word-break: break-all;
 }

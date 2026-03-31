@@ -12,6 +12,7 @@ import { websocketService } from "@/services/websocket.service";
 import { useChatStore } from "@/stores/chatStore";
 import { useNewChatStore } from "@/stores/new-chat.store";
 import { useSessionStore } from "@/stores/sessionStore";
+import { useSidebarStore } from "@/stores/sidebarStore";
 import { MessageList } from "./components/chat/MessageList/MessageList";
 import { FileBrowser } from "./components/files/FileBrowser";
 import {
@@ -55,23 +56,21 @@ function AppContent() {
 				const persistedDir = useSessionStore.getState().currentDir;
 				const persistedSessionId = useSessionStore.getState().currentSessionId;
 
+				console.log("[App] Loading persisted state:", {
+					persistedDir,
+					persistedSessionId,
+				});
+
 				// 快速初始化显示（使用持久化的目录）
-				if (persistedDir && persistedDir !== "/root") {
-					useSessionStore.getState().setCurrentDir(persistedDir);
+				if (persistedDir) {
 					fileController.setCurrentPath(persistedDir);
+					// 同步到 sidebarStore 用于左侧面板高亮
+					useSidebarStore.getState().setWorkingDir(persistedDir);
 				}
-				setIsLoading(false);
 
 				// 后台完整初始化
 				try {
 					await sessionController.getUserSettings();
-					const workspace = await sessionController.getCurrentWorkspace();
-
-					// 只有在没有持久化目录时才使用服务器返回的目录
-					if (!persistedDir || persistedDir === "/root") {
-						useSessionStore.getState().setCurrentDir(workspace.path);
-						fileController.setCurrentPath(workspace.path);
-					}
 
 					// WebSocket 连接
 					let wsConnected = false;
@@ -85,59 +84,79 @@ function AppContent() {
 					}
 
 					if (wsConnected) {
-						// 优先使用持久化的 sessionId，如果没有则从服务器获取
-						let sessionId = persistedSessionId;
-
-						if (!sessionId) {
-							try {
-								const sessionsRes = await fetch(
-									`/api/sessions?cwd=${encodeURIComponent(workspace.path)}`,
-								);
-								if (sessionsRes.ok) {
-									const sessionsData = await sessionsRes.json();
-									if (sessionsData.sessions?.length > 0) {
-										sessionId = sessionsData.sessions[0].id;
-									}
-								}
-							} catch (e) {
-								console.warn("[App] Failed to get sessions:", e);
-							}
-						}
-
-						const currentDir = useSessionStore.getState().currentDir;
-						const initData = await websocketService.initWorkingDirectory(
+						// 使用持久化的目录和sessionId初始化
+						const currentDir = persistedDir;
+						console.log("[App] Initializing with persisted state:", {
 							currentDir,
-							sessionId || undefined,
-						);
+							persistedSessionId,
+						});
 
-						if (initData) {
-							// 保存到 new-chat store
-							useNewChatStore.getState().setSessionId(initData.sessionId);
-							useNewChatStore.getState().setCurrentModel(initData.model);
+						try {
+							const initData = await websocketService.initWorkingDirectory(
+								currentDir,
+								persistedSessionId || undefined,
+							);
+							console.log("[App] initWorkingDirectory succeeded:", initData);
 
-							// 保存到 session store（会被持久化到 localStorage）
-							useSessionStore.getState().setCurrentSession(initData.sessionId);
-							useSessionStore.getState().setServerPid(initData.pid);
-							useSessionStore.getState().setIsConnected(true);
+							if (initData) {
+								console.log("[App] Server returned:", {
+									workingDir: initData.workingDir,
+									sessionId: initData.sessionId,
+								});
 
-							if (initData.model) {
+								// 同步服务器返回的状态到本地存储
+								useSessionStore.getState().setCurrentDir(initData.workingDir);
+								fileController.setCurrentPath(initData.workingDir);
+
+								// 同步到 sidebarStore 用于左侧面板高亮
+								useSidebarStore.getState().setWorkingDir(initData.workingDir);
+								useSidebarStore.getState().selectSession(initData.sessionId);
+
+								// 保存到 new-chat store
+								useNewChatStore.getState().setSessionId(initData.sessionId);
 								useNewChatStore.getState().setCurrentModel(initData.model);
-								useSessionStore.getState().setCurrentModel(initData.model);
-							}
-							if (initData.thinkingLevel) {
+
+								// 保存到 session store（会被持久化到 localStorage）
 								useSessionStore
 									.getState()
-									.setThinkingLevel(initData.thinkingLevel);
-							}
+									.setCurrentSession(initData.sessionId);
+								useSessionStore.getState().setServerPid(initData.pid);
+								useSessionStore.getState().setIsConnected(true);
 
-							// 加载历史消息
-							if (initData.sessionFile) {
-								await loadSessionMessages(initData.sessionFile);
+								if (initData.model) {
+									useNewChatStore.getState().setCurrentModel(initData.model);
+									useSessionStore.getState().setCurrentModel(initData.model);
+								}
+								if (initData.thinkingLevel) {
+									useSessionStore
+										.getState()
+										.setThinkingLevel(initData.thinkingLevel);
+								}
+
+								// 保存资源文件路径
+								if (initData.resourceFiles) {
+									useSessionStore
+										.getState()
+										.setResourceFiles(initData.resourceFiles);
+								}
+
+								// 加载历史消息 - 使用统一的 chatStore.loadSession
+								if (initData.sessionFile) {
+									const count = await useChatStore
+										.getState()
+										.loadSession(initData.sessionFile);
+									console.log(`[App] Loaded ${count} messages via chatStore`);
+								}
 							}
+						} catch (initErr) {
+							console.error("[App] initWorkingDirectory error:", initErr);
 						}
 					}
 				} catch (bgErr) {
 					console.error("[App] Background init error:", bgErr);
+				} finally {
+					// 所有初始化完成后关闭 loading
+					setIsLoading(false);
 				}
 			} catch (err) {
 				const errorMsg = err instanceof Error ? err.message : String(err);
@@ -148,41 +167,6 @@ function AppContent() {
 
 		initApp();
 	}, []);
-
-	// 加载会话消息
-	async function loadSessionMessages(sessionFile: string) {
-		try {
-			const response = await fetch("/api/session/load", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ sessionPath: sessionFile }),
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				if (data.entries?.length > 0) {
-					const loadedMessages = data.entries
-						.filter((entry: any) => entry.type === "message" && entry.message)
-						.map((entry: any) => ({
-							id: entry.id || `msg-${Date.now()}-${Math.random()}`,
-							role: entry.message.role || "assistant",
-							content: Array.isArray(entry.message.content)
-								? entry.message.content
-								: [{ type: "text", text: String(entry.message.content) }],
-							timestamp: new Date(
-								entry.message.timestamp || entry.timestamp || Date.now(),
-							),
-							isStreaming: false,
-							isThinkingCollapsed: true,
-							isMessageCollapsed: false,
-						}));
-					useChatStore.getState().setMessages(loadedMessages);
-				}
-			}
-		} catch (err) {
-			console.error("[App] Failed to load messages:", err);
-		}
-	}
 
 	// 处理文件执行输出
 	const handleExecuteOutput = useCallback((output: string) => {
@@ -218,7 +202,6 @@ function AppContent() {
 				initialCommand={terminalCommand}
 				onExecuteCommand={(cmd) => {
 					console.log("[Terminal] Executing:", cmd);
-					// 这里可以添加实际的命令执行逻辑
 					setTerminalOutput(`Executing: ${cmd}\n`);
 				}}
 			/>
@@ -240,7 +223,7 @@ function AppContent() {
 					color: "#ff6b6b",
 				}}
 			>
-				<h2>❌ Error</h2>
+				<h2>Error</h2>
 				<pre style={{ maxWidth: "80%", overflow: "auto" }}>{error}</pre>
 				<button
 					onClick={() => window.location.reload()}
@@ -260,20 +243,53 @@ function AppContent() {
 		);
 	}
 
-	// 加载状态
+	// 加载状态 - 显示初始化进度
 	if (isLoading) {
 		return (
 			<div
 				style={{
 					display: "flex",
+					flexDirection: "column",
 					alignItems: "center",
 					justifyContent: "center",
 					height: "100vh",
 					background: "#0d1117",
 					color: "white",
+					gap: "20px",
 				}}
 			>
-				<div>Loading...</div>
+				<div style={{ fontSize: "48px", fontWeight: "bold", color: "#58a6ff" }}>
+					π
+				</div>
+				<div style={{ fontSize: "18px", color: "#8b949e" }}>
+					Initializing Pi Gateway...
+				</div>
+				<div
+					style={{
+						width: "200px",
+						height: "4px",
+						background: "#21262d",
+						borderRadius: "2px",
+						overflow: "hidden",
+					}}
+				>
+					<div
+						style={{
+							width: "100%",
+							height: "100%",
+							background: "#58a6ff",
+							animation: "loading 1.5s infinite ease-in-out",
+							transformOrigin: "left",
+						}}
+					/>
+				</div>
+				<style>{`
+					@keyframes loading {
+						0% { transform: scaleX(0); }
+						50% { transform: scaleX(1); }
+						100% { transform: scaleX(0); transform-origin: right; }
+					}
+				`}</style>
 			</div>
 		);
 	}

@@ -2,6 +2,7 @@
  * AppLayout - 统一布局控制器 (Flex + 文档流)
  */
 
+import { useCallback, useEffect, useRef } from "react";
 import { useChatController } from "@/services/api/chatApi";
 import { useChatStore } from "@/stores/chatStore";
 import { useSessionStore } from "@/stores/sessionStore";
@@ -40,6 +41,86 @@ export function AppLayout({
 	const inputText = useChatStore((s) => s.inputText);
 	const isStreaming = useChatStore((s) => s.isStreaming);
 
+	// 滚动相关引用
+	const contentBodyRef = useRef<HTMLDivElement>(null);
+	const userScrolledRef = useRef(false);
+	const isProgrammaticScrollRef = useRef(false);
+	const scrollTimeoutRef = useRef<number | null>(null);
+
+	// 从 store 获取消息数量和流式消息
+	const messages = useChatStore((s) => s.messages);
+	const currentStreamingMessage = useChatStore((s) => s.currentStreamingMessage);
+
+	// 安全的滚动到底部函数
+	const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
+		const container = contentBodyRef.current;
+		if (!container) return;
+
+		// 标记为程序化滚动，避免触发用户滚动检测
+		isProgrammaticScrollRef.current = true;
+
+		container.scrollTo({
+			top: container.scrollHeight,
+			behavior,
+		});
+
+		// 清除之前的定时器
+		if (scrollTimeoutRef.current) {
+			clearTimeout(scrollTimeoutRef.current);
+		}
+
+		// 滚动动画完成后重置标记
+		scrollTimeoutRef.current = window.setTimeout(() => {
+			isProgrammaticScrollRef.current = false;
+		}, 500);
+	}, []);
+
+	// 初始加载和历史消息加载时滚动到底部
+	useEffect(() => {
+		if (messages.length > 0) {
+			requestAnimationFrame(() => {
+				scrollToBottom("auto");
+			});
+		}
+	}, []); // 只在组件挂载时执行
+
+	// 新消息添加时滚动
+	useEffect(() => {
+		if (userScrolledRef.current) return;
+		scrollToBottom("smooth");
+	}, [messages.length, scrollToBottom]);
+
+	// 流式消息内容变化时滚动
+	useEffect(() => {
+		if (!currentStreamingMessage) return;
+		if (userScrolledRef.current) return;
+		scrollToBottom("auto");
+	}, [
+		currentStreamingMessage?.content?.length,
+		currentStreamingMessage?.id,
+		scrollToBottom,
+	]);
+
+	// 监听滚动事件
+	const handleScroll = () => {
+		const container = contentBodyRef.current;
+		if (!container) return;
+		if (isProgrammaticScrollRef.current) return;
+
+		const { scrollTop, scrollHeight, clientHeight } = container;
+		const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+		userScrolledRef.current = distanceFromBottom > 50;
+	};
+
+	// 清理定时器
+	useEffect(() => {
+		return () => {
+			if (scrollTimeoutRef.current) {
+				clearTimeout(scrollTimeoutRef.current);
+			}
+		};
+	}, []);
+
 	return (
 		<div className={styles.layout}>
 			{/* 侧边栏 - 绝对定位，遮挡顶部和内容，不遮挡底部 */}
@@ -72,7 +153,11 @@ export function AppLayout({
 				{/* 内容区 */}
 				<div className={styles.content}>
 					{/* 可滚动内容 */}
-					<div className={styles.contentBody}>{children}</div>
+					<div
+						ref={contentBodyRef}
+						className={styles.contentBody}
+						onScroll={handleScroll}
+					>{children}</div>
 
 					{/* 底部面板 - 直接渲染传入的内容 */}
 					{isBottomPanelOpen && bottomPanelContent}

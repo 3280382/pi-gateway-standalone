@@ -9,7 +9,7 @@
 
 export type MessageRole = "user" | "assistant" | "system";
 
-export type ContentType = "text" | "thinking" | "tool" | "image";
+export type ContentType = "text" | "thinking" | "tool" | "tool_use" | "image" | "turn_marker";
 
 export interface MessageContent {
 	type: ContentType;
@@ -17,6 +17,7 @@ export interface MessageContent {
 	thinking?: string;
 	toolName?: string;
 	args?: Record<string, unknown>;
+	partialArgs?: string;
 	output?: string;
 	error?: string;
 	imageUrl?: string;
@@ -136,6 +137,7 @@ export interface ToolStartMessage {
 export interface ToolUpdateMessage {
 	type: "tool_update";
 	toolCallId: string;
+	chunk?: string;
 	output?: string;
 	error?: string;
 }
@@ -143,6 +145,8 @@ export interface ToolUpdateMessage {
 export interface ToolEndMessage {
 	type: "tool_end";
 	toolCallId: string;
+	result?: string;
+	isError?: boolean;
 	output?: string;
 	error?: string;
 }

@@ -11,6 +11,13 @@ import type { Message, ToolExecution } from "@/types/chat";
 
 export class ChatController {
 	private store = useNewChatStore;
+	private listenersSetup = false;
+	private batchUpdateTimer: ReturnType<typeof setTimeout> | null = null;
+	private pendingUpdates: {
+		content?: string;
+		thinking?: string;
+		toolCall?: { id: string; name: string; delta: string };
+	} = {};
 
 	/**
 	 * 发送消息
@@ -61,9 +68,6 @@ export class ChatController {
 				this.store.getState().abortStreaming();
 				throw new ServiceError("WEBSOCKET_SEND_FAILED", "消息发送失败，请重试");
 			}
-
-			// 监听WebSocket事件
-			this.setupWebSocketListeners();
 		} catch (error) {
 			this.handleError("sendMessage", error);
 			throw error;
@@ -371,20 +375,84 @@ export class ChatController {
 	}
 
 	/**
+	 * 批量更新消息内容 - 使用RAF优化性能
+	 */
+	private flushBatchUpdates = () => {
+		if (this.batchUpdateTimer) {
+			clearTimeout(this.batchUpdateTimer);
+			this.batchUpdateTimer = null;
+		}
+
+		if (Object.keys(this.pendingUpdates).length === 0) return;
+
+		// 使用 requestAnimationFrame 确保在浏览器空闲时更新
+		requestAnimationFrame(() => {
+			this.store.getState().batchUpdateContent(this.pendingUpdates);
+			this.pendingUpdates = {};
+		});
+	};
+
+	/**
+	 * 队列批量更新
+	 */
+	private queueBatchUpdate(updates: typeof this.pendingUpdates) {
+		// 累积更新
+		if (updates.content) {
+			this.pendingUpdates.content =
+				(this.pendingUpdates.content || "") + updates.content;
+		}
+		if (updates.thinking) {
+			this.pendingUpdates.thinking =
+				(this.pendingUpdates.thinking || "") + updates.thinking;
+		}
+		if (updates.toolCall) {
+			if (this.pendingUpdates.toolCall) {
+				this.pendingUpdates.toolCall.delta += updates.toolCall.delta;
+			} else {
+				this.pendingUpdates.toolCall = updates.toolCall;
+			}
+		}
+
+		// 使用节流，最多每16ms更新一次（约60fps）
+		if (!this.batchUpdateTimer) {
+			this.batchUpdateTimer = setTimeout(() => {
+				this.flushBatchUpdates();
+			}, 16);
+		}
+	}
+
+	/**
 	 * 设置WebSocket监听器（公开方法，供外部调用）
 	 */
 	setupWebSocketListeners(): void {
-		// 移除现有的监听器（避免重复添加）
-		// 实际实现中需要更完善的监听器管理
-
-		// 内容增量
+		// 内容增量 - 使用批量更新
 		websocketService.on("content_delta", (data) => {
-			this.store.getState().appendStreamingContent(data.text);
+			this.queueBatchUpdate({ content: data.text });
 		});
 
-		// 思考增量
+		// 思考增量 - 使用批量更新
 		websocketService.on("thinking_delta", (data) => {
-			this.store.getState().appendStreamingThinking(data.thinking);
+			this.queueBatchUpdate({ thinking: data.thinking });
+		});
+
+		// 工具调用增量 - 流式显示工具调用构建过程
+		websocketService.on("toolcall_delta", (data) => {
+			try {
+				if (data.toolCallId && data.toolName) {
+					this.queueBatchUpdate({
+						toolCall: {
+							id: data.toolCallId,
+							name: data.toolName,
+							delta: data.delta || "",
+						},
+					});
+				}
+			} catch (error) {
+				console.error(
+					"[ChatController] Error in toolcall_delta handler:",
+					error,
+				);
+			}
 		});
 
 		// 工具开始
@@ -392,20 +460,24 @@ export class ChatController {
 			try {
 				console.log("[ChatController] tool_start event received:", data);
 				console.log("[ChatController] tool_start data type:", typeof data);
-				
+
 				// 确保data有必要的属性
-				if (!data || typeof data !== 'object') {
+				if (!data || typeof data !== "object") {
 					console.error("[ChatController] Invalid tool_start data:", data);
 					return;
 				}
-				
+
 				// 检查data是否有必要的属性
 				const toolCallId = data.toolCallId || `tool-${Date.now()}`;
 				const toolName = data.toolName || "unknown";
 				const args = data.args || {};
-				
-				console.log("[ChatController] Creating tool:", { toolCallId, toolName, args });
-				
+
+				console.log("[ChatController] Creating tool:", {
+					toolCallId,
+					toolName,
+					args,
+				});
+
 				const tool: ToolExecution = {
 					id: toolCallId,
 					name: toolName,
@@ -416,7 +488,12 @@ export class ChatController {
 
 				this.store.getState().setActiveTool(tool);
 			} catch (error) {
-				console.error("[ChatController] Error in tool_start handler:", error, "data:", data);
+				console.error(
+					"[ChatController] Error in tool_start handler:",
+					error,
+					"data:",
+					data,
+				);
 			}
 		});
 
@@ -441,9 +518,7 @@ export class ChatController {
 				// 后端发送的是result和isError字段，不是output和error
 				const output = data.result || "";
 				const error = data.isError ? "工具执行失败" : undefined;
-				this.store
-					.getState()
-					.updateToolOutput(data.toolCallId, output, error);
+				this.store.getState().updateToolOutput(data.toolCallId, output, error);
 			} catch (error) {
 				console.error("[ChatController] Error in tool_end handler:", error);
 			}
@@ -451,6 +526,7 @@ export class ChatController {
 
 		// 代理结束
 		websocketService.on("agent_end", () => {
+			this.flushBatchUpdates(); // 确保所有待处理更新被刷新
 			this.finalizeStreamingMessage();
 		});
 

@@ -265,9 +265,6 @@
 
 		// Wait for DOM ready
 		function onReady() {
-			// Create toggle button
-			createToggleButton();
-
 			// Try to load eruda
 			loadEruda()
 				.then(() => {

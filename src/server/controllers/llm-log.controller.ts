@@ -20,12 +20,15 @@ export function createLlmLogController(llmLogManager: LlmLogManager) {
 		async getLlmLog(_req: Request, res: Response) {
 			try {
 				const logContent = await llmLogManager.getLogContent();
+				const logFilePath = llmLogManager.getLogFilePath();
 
-				logger.info(`获取LLM日志，条目数: ${logContent.length}`);
+				logger.info(
+					`获取LLM日志，条目数: ${logContent.length}, 日志文件: ${logFilePath}`,
+				);
 				res.json({
 					logContent,
 					enabled: llmLogManager.isEnabled(),
-					logFilePath: llmLogManager.getLogFilePath(),
+					logFilePath,
 				});
 			} catch (error) {
 				logger.error(

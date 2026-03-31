@@ -40,7 +40,7 @@
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	font-size: 12px;
+	font-size: var(--font-base);
 	font-weight: 500;
 }
 
@@ -48,7 +48,7 @@
 	padding: 1px 6px;
 	background: var(--accent-bg);
 	color: var(--accent-fg);
-	font-size: 9px;
+	font-size: var(--font-xs);
 	border-radius: 3px;
 	text-transform: uppercase;
 }
@@ -67,7 +67,7 @@
 	padding: 3px 8px;
 	border: none;
 	border-radius: 3px;
-	font-size: 11px;
+	font-size: var(--font-sm);
 	cursor: pointer;
 	transition: opacity 0.15s;
 	display: flex;
@@ -105,7 +105,7 @@
 .btnClose {
 	background: transparent;
 	color: var(--text-muted);
-	font-size: 14px;
+	font-size: var(--font-md);
 	padding: 0 4px;
 	width: 22px;
 	justify-content: center;
@@ -144,7 +144,7 @@
 	border: none;
 	color: var(--text-primary);
 	font-family: var(--font-mono, "JetBrains Mono", monospace);
-	font-size: 12px;
+	font-size: var(--font-base);
 	line-height: 1.5;
 	resize: none;
 	overflow: auto;
@@ -159,7 +159,7 @@
 	padding: 6px;
 	background: #0d1117;
 	font-family: var(--font-mono, "JetBrains Mono", monospace);
-	font-size: 12px;
+	font-size: var(--font-base);
 	line-height: 1.5;
 	color: #e6edf3;
 	overflow: auto;
@@ -169,7 +169,7 @@
 	margin: 0;
 	white-space: pre-wrap;
 	word-break: break-word;
-	font-size: 12px;
+	font-size: var(--font-base);
 	line-height: 1.5;
 }
 
@@ -213,13 +213,13 @@
 	padding: 6px;
 	background: var(--bg-primary);
 	font-family: var(--font-mono, "JetBrains Mono", monospace);
-	font-size: 12px;
+	font-size: var(--font-base);
 	line-height: 1.5;
 	overflow: auto;
 }
 
 .code code {
-	font-size: 12px;
+	font-size: var(--font-base);
 	line-height: 1.5;
 }
 

@@ -353,7 +353,9 @@ export function FileViewer() {
 					) : (
 						<pre className={`${styles.code} language-${getLanguage()}`}>
 							<code data-prism-code className={`language-${getLanguage()}`}>
-								{typeof content === 'string' ? content : JSON.stringify(content, null, 2)}
+								{typeof content === "string"
+									? content
+									: JSON.stringify(content, null, 2)}
 							</code>
 						</pre>
 					)}

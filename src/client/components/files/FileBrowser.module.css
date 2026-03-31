@@ -62,7 +62,7 @@
 	justify-content: center;
 	height: 100%;
 	color: var(--text-muted);
-	font-size: 11px;
+	font-size: var(--font-sm);
 	padding: 20px;
 }
 
@@ -98,7 +98,7 @@
 	border: none;
 	border-radius: 3px;
 	color: var(--text-secondary);
-	font-size: 10px;
+	font-size: var(--font-xs);
 	cursor: pointer;
 	transition: all 0.15s ease;
 	box-sizing: border-box;
@@ -146,7 +146,7 @@
 	padding: 3px 8px;
 	background: var(--bg-tertiary);
 	border-radius: 3px;
-	font-size: 10px;
+	font-size: var(--font-xs);
 	color: var(--text-muted);
 	overflow: hidden;
 	height: 24px;
@@ -179,7 +179,7 @@
 	border: none;
 	border-radius: 2px;
 	color: var(--text-muted);
-	font-size: 10px;
+	font-size: var(--font-xs);
 	cursor: pointer;
 	transition: all 0.15s;
 }
@@ -215,7 +215,7 @@
 	background: transparent;
 	border: none;
 	color: var(--text-primary);
-	font-size: 10px;
+	font-size: var(--font-xs);
 	min-width: 0;
 	outline: none;
 }
@@ -273,7 +273,7 @@
 	gap: 6px;
 	padding: 6px 10px;
 	cursor: pointer;
-	font-size: 11px;
+	font-size: var(--font-sm);
 	color: var(--text-primary);
 	transition: background 0.15s ease;
 	border-bottom: 1px solid var(--border-subtle);
@@ -290,7 +290,7 @@
 }
 
 .filterIcon {
-	font-size: 13px;
+	font-size: var(--font-base);
 	width: 18px;
 	text-align: center;
 }
@@ -318,7 +318,7 @@
 	border: 1px solid var(--border-subtle);
 	border-radius: 3px;
 	color: var(--text-primary);
-	font-size: 10px;
+	font-size: var(--font-xs);
 	cursor: pointer;
 	height: 24px;
 	min-width: 80px;
@@ -358,7 +358,7 @@
 	gap: 6px;
 	padding: 6px 10px;
 	cursor: pointer;
-	font-size: 11px;
+	font-size: var(--font-sm);
 	color: var(--text-primary);
 	transition: background 0.15s ease;
 	border-bottom: 1px solid var(--border-subtle);
@@ -375,7 +375,7 @@
 }
 
 .sortIcon {
-	font-size: 13px;
+	font-size: var(--font-base);
 	width: 18px;
 	text-align: center;
 }
@@ -403,7 +403,7 @@
 	gap: 6px;
 	padding: 3px 8px;
 	margin-bottom: 1px;
-	font-size: 9px;
+	font-size: var(--font-xs);
 	color: var(--text-muted);
 	border-bottom: 1px solid var(--border-subtle);
 }
@@ -427,7 +427,7 @@
 	gap: 6px;
 	padding: 3px 8px;
 	border-radius: 2px;
-	font-size: 11px;
+	font-size: var(--font-sm);
 	cursor: pointer;
 	transition: background 0.15s;
 	margin-bottom: 1px;
@@ -446,7 +446,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 12px;
+	font-size: var(--font-base);
 }
 
 .listName {
@@ -503,12 +503,12 @@
 }
 
 .gridIcon {
-	font-size: 20px;
+	font-size: var(--font-xl);
 	margin-bottom: 4px;
 }
 
 .gridName {
-	font-size: 10px;
+	font-size: var(--font-xs);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -543,7 +543,7 @@
 	padding: 3px 8px;
 	cursor: pointer;
 	transition: background 0.15s;
-	font-size: 11px;
+	font-size: var(--font-sm);
 	user-select: none;
 }
 
@@ -558,7 +558,7 @@
 }
 
 .treeIcon {
-	font-size: 12px;
+	font-size: var(--font-base);
 	width: 16px;
 	text-align: center;
 	margin-right: 4px;
@@ -573,7 +573,7 @@
 }
 
 .treeLoadingIcon {
-	font-size: 10px;
+	font-size: var(--font-xs);
 	color: var(--text-muted);
 	margin-left: 4px;
 }
@@ -585,7 +585,7 @@
 	gap: 8px;
 	padding: 24px;
 	color: var(--text-muted);
-	font-size: 12px;
+	font-size: var(--font-base);
 }
 
 .treeError {
@@ -595,7 +595,7 @@
 	gap: 8px;
 	padding: 24px;
 	color: var(--accent-red);
-	font-size: 12px;
+	font-size: var(--font-base);
 }
 
 .treeError button {
@@ -605,7 +605,7 @@
 	border-radius: 4px;
 	color: var(--text-primary);
 	cursor: pointer;
-	font-size: 11px;
+	font-size: var(--font-sm);
 }
 
 .treeError button:hover {
@@ -613,7 +613,7 @@
 }
 
 .treeExpandIcon {
-	font-size: 10px;
+	font-size: var(--font-xs);
 	color: var(--text-muted);
 	margin-left: 4px;
 }
@@ -626,7 +626,7 @@
 	padding: 12px;
 	text-align: center;
 	color: var(--text-muted);
-	font-size: 10px;
+	font-size: var(--font-xs);
 }
 
 .clearCacheBtn {
@@ -634,7 +634,7 @@
 	border: none;
 	color: var(--text-muted);
 	cursor: pointer;
-	font-size: 10px;
+	font-size: var(--font-xs);
 	padding: 2px;
 	border-radius: 2px;
 	margin-left: auto;
@@ -653,7 +653,7 @@
 	padding: 4px 8px;
 	background: var(--bg-secondary);
 	border-bottom: 1px solid var(--border-subtle);
-	font-size: 11px;
+	font-size: var(--font-sm);
 }
 
 .selectedName {
@@ -675,7 +675,7 @@
 	border: 1px solid var(--border-subtle);
 	border-radius: 3px;
 	color: var(--text-secondary);
-	font-size: 10px;
+	font-size: var(--font-xs);
 	cursor: pointer;
 	transition: all 0.15s;
 }
@@ -734,7 +734,7 @@
 }
 
 .viewerTitle {
-	font-size: 14px;
+	font-size: var(--font-md);
 	font-weight: 500;
 	color: var(--text-primary);
 	white-space: nowrap;
@@ -772,7 +772,7 @@
 	justify-content: center;
 	height: 200px;
 	color: var(--text-muted);
-	font-size: 13px;
+	font-size: var(--font-base);
 }
 
 .viewerError {
@@ -785,7 +785,7 @@
 	padding: 16px;
 	overflow: auto;
 	font-family: "JetBrains Mono", monospace;
-	font-size: 12px;
+	font-size: var(--font-base);
 	line-height: 1.5;
 }
 
@@ -802,7 +802,7 @@
 .viewerBtn {
 	padding: 6px 12px;
 	border-radius: 4px;
-	font-size: 12px;
+	font-size: var(--font-base);
 	cursor: pointer;
 	transition: all 0.15s;
 	border: 1px solid var(--border-subtle);

@@ -1,6 +1,6 @@
 /**
- * LlmLogPanel - LLM Log Viewer as Bottom Panel
- * Real-time log display with streaming updates
+ * LlmLogPanel - LLM API Log Viewer as Bottom Panel
+ * Real-time HTTP request/response log display
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -14,9 +14,23 @@ interface LlmLogPanelProps {
 
 interface LogEntry {
 	timestamp: string;
-	level: "info" | "warn" | "error" | "debug";
-	message: string;
-	details?: string;
+	type: "request" | "response";
+	model?: string;
+	content: string;
+	parsed?: {
+		method?: string;
+		url?: string;
+		status?: number;
+		statusText?: string;
+		duration?: string;
+		headers?: Record<string, string>;
+		body?: string;
+		bodyNote?: string;
+		protocol?: string;
+		host?: string;
+		pathname?: string;
+		search?: string;
+	};
 }
 
 export function LlmLogPanel({
@@ -28,6 +42,8 @@ export function LlmLogPanel({
 	const [logs, setLogs] = useState<LogEntry[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [autoScroll, setAutoScroll] = useState(true);
+	const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
+	const [showFullscreen, setShowFullscreen] = useState(false);
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
 	const isResizing = useRef(false);
 	const resizeStartY = useRef(0);
@@ -39,10 +55,9 @@ export function LlmLogPanel({
 			const response = await fetch("/api/llm-log");
 			if (response.ok) {
 				const data = await response.json();
-				if (data.logs && Array.isArray(data.logs)) {
-					// Parse log lines
-					const parsedLogs: LogEntry[] = data.logs
-						.map((line: string) => parseLogLine(line))
+				if (data.logContent && Array.isArray(data.logContent)) {
+					const parsedLogs: LogEntry[] = data.logContent
+						.map((entry: any) => parseLogEntry(entry))
 						.filter(Boolean) as LogEntry[];
 					setLogs(parsedLogs);
 				}
@@ -52,45 +67,27 @@ export function LlmLogPanel({
 		}
 	}, []);
 
-	// Parse a log line into structured format
-	const parseLogLine = (line: string): LogEntry | null => {
-		// Try to parse JSON logs
+	// Parse a log entry into structured format
+	const parseLogEntry = (entry: any): LogEntry | null => {
+		if (!entry || !entry.type) return null;
+
 		try {
-			const parsed = JSON.parse(line);
-			if (parsed.timestamp && parsed.message) {
-				return {
-					timestamp: parsed.timestamp,
-					level: parsed.level || "info",
-					message: parsed.message,
-					details: parsed.details,
-				};
-			}
+			const parsedContent = JSON.parse(entry.content);
+			return {
+				timestamp: entry.timestamp || new Date().toISOString(),
+				type: entry.type,
+				model: entry.model,
+				content: entry.content,
+				parsed: parsedContent,
+			};
 		} catch {
-			// Not JSON, parse as plain text
-		}
-
-		// Try to match common log patterns
-		const match = line.match(
-			/^(\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}:\d{2}[.,]?\d*Z?)\s+(\w+)\s+(.*)$/i,
-		);
-		if (match) {
 			return {
-				timestamp: match[1],
-				level: match[2].toLowerCase() as LogEntry["level"],
-				message: match[3],
+				timestamp: entry.timestamp || new Date().toISOString(),
+				type: entry.type,
+				model: entry.model,
+				content: entry.content,
 			};
 		}
-
-		// Fallback: treat entire line as message
-		if (line.trim()) {
-			return {
-				timestamp: new Date().toISOString(),
-				level: "info",
-				message: line,
-			};
-		}
-
-		return null;
 	};
 
 	// Initial fetch and polling
@@ -98,7 +95,6 @@ export function LlmLogPanel({
 		setIsLoading(true);
 		fetchLogs().finally(() => setIsLoading(false));
 
-		// Poll for new logs every 2 seconds
 		intervalRef.current = setInterval(fetchLogs, 2000);
 
 		return () => {
@@ -110,10 +106,10 @@ export function LlmLogPanel({
 
 	// Auto-scroll to bottom
 	useEffect(() => {
-		if (contentRef.current && autoScroll) {
+		if (contentRef.current && autoScroll && !showFullscreen) {
 			contentRef.current.scrollTop = contentRef.current.scrollHeight;
 		}
-	}, [logs, autoScroll]);
+	}, [logs, autoScroll, showFullscreen]);
 
 	// Handle manual scroll
 	const handleScroll = useCallback(() => {
@@ -139,7 +135,7 @@ export function LlmLogPanel({
 			if (!isResizing.current) return;
 			const delta = resizeStartY.current - e.clientY;
 			const newHeight = Math.max(
-				150,
+				120,
 				Math.min(600, resizeStartHeight.current + delta),
 			);
 			onHeightChange(newHeight);
@@ -164,19 +160,31 @@ export function LlmLogPanel({
 		};
 	}, [onHeightChange]);
 
-	const handleClear = useCallback(async () => {
-		try {
-			await fetch("/api/llm-log/clear", { method: "POST" });
-			setLogs([]);
-		} catch (error) {
-			console.error("[LlmLogPanel] Failed to clear logs:", error);
-		}
-	}, []);
+	// Keyboard shortcut to close fullscreen
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape" && showFullscreen) {
+				setShowFullscreen(false);
+			}
+		};
+		document.addEventListener("keydown", handleKeyDown);
+		return () => document.removeEventListener("keydown", handleKeyDown);
+	}, [showFullscreen]);
 
 	const handleRefresh = useCallback(() => {
 		setIsLoading(true);
 		fetchLogs().finally(() => setIsLoading(false));
 	}, [fetchLogs]);
+
+	const handleLogClick = (log: LogEntry) => {
+		setSelectedLog(log);
+		setShowFullscreen(true);
+	};
+
+	const handleCloseFullscreen = () => {
+		setShowFullscreen(false);
+		setTimeout(() => setSelectedLog(null), 200);
+	};
 
 	const formatTimestamp = (timestamp: string): string => {
 		try {
@@ -192,17 +200,48 @@ export function LlmLogPanel({
 		}
 	};
 
-	const getLevelColor = (level: string): string => {
-		switch (level.toLowerCase()) {
-			case "error":
-				return styles.error;
-			case "warn":
-			case "warning":
-				return styles.warn;
-			case "debug":
-				return styles.debug;
-			default:
-				return styles.info;
+	const getStatusColorClass = (status?: number): string => {
+		if (!status) return styles.info;
+		if (status >= 200 && status < 300) return styles.success;
+		if (status >= 400) return styles.error;
+		return styles.warn;
+	};
+
+	const truncateUrl = (url?: string, maxLength: number = 50): string => {
+		if (!url) return "";
+		if (url.length <= maxLength) return url;
+		return url.substring(0, maxLength) + "...";
+	};
+
+	// Format body content with syntax highlighting
+	const formatBody = (body?: string): string => {
+		if (!body) return "";
+		try {
+			// Try to parse and format JSON
+			const parsed = JSON.parse(body);
+			return JSON.stringify(parsed, null, 2);
+		} catch {
+			// Return as-is if not valid JSON
+			return body;
+		}
+	};
+
+	// Build summary text for a log entry
+	const buildSummary = (log: LogEntry): string => {
+		const { parsed, type } = log;
+		if (!parsed) return type === "request" ? "Request" : "Response";
+
+		if (type === "request") {
+			const parts: string[] = [];
+			if (parsed.method) parts.push(parsed.method);
+			if (parsed.pathname) parts.push(parsed.pathname);
+			return parts.join(" ") || "Request";
+		} else {
+			const parts: string[] = [];
+			if (parsed.status) parts.push(`${parsed.status}`);
+			if (parsed.statusText) parts.push(parsed.statusText);
+			if (parsed.duration) parts.push(`(${parsed.duration})`);
+			return parts.join(" ") || "Response";
 		}
 	};
 
@@ -217,12 +256,12 @@ export function LlmLogPanel({
 				<div className={styles.resizeGrip} />
 			</div>
 
-			{/* Header */}
+			{/* Compact Header */}
 			<div className={styles.header}>
 				<div className={styles.title}>
 					<LogIcon />
 					<span>LLM Logs</span>
-					<span className={styles.logCount}>({logs.length})</span>
+					<span className={styles.logCount}>{logs.length}</span>
 				</div>
 				<div className={styles.actions}>
 					<button
@@ -240,47 +279,178 @@ export function LlmLogPanel({
 					>
 						<RefreshIcon />
 					</button>
-					<button
-						className={styles.actionBtn}
-						onClick={handleClear}
-						title="Clear logs"
-					>
-						<ClearIcon />
-					</button>
 					<button className={styles.actionBtn} onClick={onClose} title="Close">
 						<CloseIcon />
 					</button>
 				</div>
 			</div>
 
-			{/* Log content */}
+			{/* Compact Log List */}
 			<div ref={contentRef} className={styles.content} onScroll={handleScroll}>
 				{isLoading && logs.length === 0 ? (
-					<div className={styles.loading}>Loading logs...</div>
+					<div className={styles.loading}>Loading...</div>
 				) : logs.length === 0 ? (
-					<div className={styles.empty}>No logs available</div>
+					<div className={styles.empty}>
+						<span className={styles.emptyIcon}>📡</span>
+						<span>No logs yet</span>
+					</div>
 				) : (
 					<div className={styles.logList}>
 						{logs.map((log, index) => (
 							<div
 								key={index}
-								className={`${styles.logEntry} ${getLevelColor(log.level)}`}
+								className={`${styles.logEntry} ${
+									log.type === "request" ? styles.request : styles.response
+								}`}
+								onClick={() => handleLogClick(log)}
+								title="Click to view details"
 							>
-								<span className={styles.logTime}>
-									{formatTimestamp(log.timestamp)}
-								</span>
-								<span className={styles.logLevel}>
-									{log.level.toUpperCase()}
-								</span>
-								<span className={styles.logMessage}>{log.message}</span>
-								{log.details && (
-									<pre className={styles.logDetails}>{log.details}</pre>
+								<div className={styles.logRow}>
+									<span className={styles.logTime}>
+										{formatTimestamp(log.timestamp)}
+									</span>
+									<span
+										className={`${styles.logType} ${
+											log.type === "request"
+												? styles.typeRequest
+												: styles.typeResponse
+										}`}
+									>
+										{log.type === "request" ? "→" : "←"}
+									</span>
+									<span className={styles.logSummary}>{buildSummary(log)}</span>
+									{log.parsed?.status && (
+										<span
+											className={`${styles.statusBadge} ${getStatusColorClass(
+												log.parsed.status,
+											)}`}
+										>
+											{log.parsed.status}
+										</span>
+									)}
+								</div>
+								{log.parsed?.url && (
+									<div className={styles.logUrl}>
+										{truncateUrl(log.parsed.url)}
+									</div>
 								)}
 							</div>
 						))}
 					</div>
 				)}
 			</div>
+
+			{/* Fullscreen Detail Modal */}
+			{showFullscreen && selectedLog && (
+				<div className={styles.modalOverlay} onClick={handleCloseFullscreen}>
+					<div
+						className={styles.modalContent}
+						onClick={(e) => e.stopPropagation()}
+					>
+						<div className={styles.modalHeader}>
+							<div className={styles.modalTitle}>
+								<span
+									className={
+										selectedLog.type === "request"
+											? styles.typeRequest
+											: styles.typeResponse
+									}
+								>
+									{selectedLog.type === "request" ? "➡️ Request" : "⬅️ Response"}
+								</span>
+								<span className={styles.modalTime}>
+									{formatTimestamp(selectedLog.timestamp)}
+								</span>
+							</div>
+							<button
+								className={styles.modalCloseBtn}
+								onClick={handleCloseFullscreen}
+								title="Close (Esc)"
+							>
+								<CloseIcon />
+							</button>
+						</div>
+
+						<div className={styles.modalBody}>
+							{/* Request Line / Status Line */}
+							<div className={styles.modalSection}>
+								{selectedLog.type === "request" ? (
+									<div className={styles.statusLine}>
+										<span className={styles.method}>
+											{selectedLog.parsed?.method || "GET"}
+										</span>
+										<span className={styles.fullUrl}>
+											{selectedLog.parsed?.url || "Unknown"}
+										</span>
+									</div>
+								) : (
+									<div className={styles.statusLine}>
+										<span
+											className={`${styles.statusCode} ${getStatusColorClass(
+												selectedLog.parsed?.status,
+											)}`}
+										>
+											{selectedLog.parsed?.status || "???"}
+										</span>
+										<span className={styles.statusText}>
+											{selectedLog.parsed?.statusText || "Unknown"}
+										</span>
+										{selectedLog.parsed?.duration && (
+											<span className={styles.duration}>
+												({selectedLog.parsed.duration})
+											</span>
+										)}
+									</div>
+								)}
+							</div>
+
+							{/* Headers */}
+							{selectedLog.parsed?.headers &&
+								Object.keys(selectedLog.parsed.headers).length > 0 && (
+									<div className={styles.modalSection}>
+										<div className={styles.sectionTitle}>Headers</div>
+										<div className={styles.codeBlock}>
+											{Object.entries(selectedLog.parsed.headers).map(
+												([key, value]) => (
+													<div key={key} className={styles.headerLine}>
+														<span className={styles.headerName}>{key}:</span>
+														<span className={styles.headerValue}>{value}</span>
+													</div>
+												),
+											)}
+										</div>
+									</div>
+								)}
+
+							{/* Body */}
+							{(selectedLog.parsed?.body || selectedLog.parsed?.bodyNote) && (
+								<div className={styles.modalSection}>
+									<div className={styles.sectionTitle}>Body</div>
+									{selectedLog.parsed.bodyNote ? (
+										<div className={styles.bodyNote}>
+											{selectedLog.parsed.bodyNote}
+										</div>
+									) : (
+										<pre className={styles.codeBlock}>
+											<code>{formatBody(selectedLog.parsed.body)}</code>
+										</pre>
+									)}
+								</div>
+							)}
+
+							{/* Raw JSON */}
+							<div className={styles.modalSection}>
+								<div className={styles.sectionTitle}>Raw Data</div>
+								<pre className={styles.codeBlock}>
+									<code>
+										{JSON.stringify(JSON.parse(selectedLog.content), null, 2)}
+									</code>
+								</pre>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
@@ -292,11 +462,11 @@ function LogIcon() {
 			viewBox="0 0 24 24"
 			fill="none"
 			stroke="currentColor"
-			strokeWidth={1.5}
+			strokeWidth={2}
 			strokeLinecap="round"
 			strokeLinejoin="round"
-			width="16"
-			height="16"
+			width="14"
+			height="14"
 		>
 			<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
 			<polyline points="14 2 14 8 20 8" />
@@ -313,11 +483,11 @@ function ScrollIcon() {
 			viewBox="0 0 24 24"
 			fill="none"
 			stroke="currentColor"
-			strokeWidth={1.5}
+			strokeWidth={2}
 			strokeLinecap="round"
 			strokeLinejoin="round"
-			width="14"
-			height="14"
+			width="12"
+			height="12"
 		>
 			<polyline points="6 9 12 15 18 9" />
 		</svg>
@@ -330,32 +500,14 @@ function RefreshIcon() {
 			viewBox="0 0 24 24"
 			fill="none"
 			stroke="currentColor"
-			strokeWidth={1.5}
+			strokeWidth={2}
 			strokeLinecap="round"
 			strokeLinejoin="round"
-			width="14"
-			height="14"
+			width="12"
+			height="12"
 		>
 			<polyline points="23 4 23 10 17 10" />
 			<path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-		</svg>
-	);
-}
-
-function ClearIcon() {
-	return (
-		<svg
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth={1.5}
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			width="14"
-			height="14"
-		>
-			<polyline points="3 6 5 6 21 6" />
-			<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
 		</svg>
 	);
 }
@@ -366,7 +518,7 @@ function CloseIcon() {
 			viewBox="0 0 24 24"
 			fill="none"
 			stroke="currentColor"
-			strokeWidth={1.5}
+			strokeWidth={2}
 			strokeLinecap="round"
 			strokeLinejoin="round"
 			width="14"

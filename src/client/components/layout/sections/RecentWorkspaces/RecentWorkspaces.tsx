@@ -10,11 +10,17 @@ import styles from "./RecentWorkspaces.module.css";
 
 export function RecentWorkspaces() {
 	const recentWorkspaces = useSidebarStore((state) => state.recentWorkspaces);
+	const workingDir = useSidebarStore((state) => state.workingDir);
 	const isLoading = useSidebarStore((state) => state.isLoading);
 	const controller = useSidebarController();
 	const setRecentWorkspaces = useSidebarStore(
 		(state) => state.setRecentWorkspaces,
 	);
+
+	// 获取当前工作目录路径用于高亮
+	const currentPath = workingDir?.path || "";
+
+	// 调试信息
 
 	const handleClear = () => {
 		setRecentWorkspaces([]);
@@ -60,10 +66,12 @@ export function RecentWorkspaces() {
 					const path = rawPath.replace(/\/$/, ""); // Remove trailing slash
 					const name = path.split("/").pop() || path;
 
+					const isActive = currentPath === path || currentPath === rawPath;
+
 					return (
 						<button
 							key={path}
-							className={styles.item}
+							className={`${styles.item} ${isActive ? styles.active : ""}`}
 							onClick={() => handleSelect(path)}
 							title={path}
 						>

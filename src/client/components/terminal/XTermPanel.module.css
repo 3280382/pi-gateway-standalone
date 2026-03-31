@@ -8,9 +8,9 @@
 	overflow: hidden;
 }
 
-/* Resize handle */
+/* Resize handle - Compact */
 .resizeHandle {
-	height: 6px;
+	height: 3px;
 	background: transparent;
 	cursor: ns-resize;
 	display: flex;
@@ -24,8 +24,8 @@
 }
 
 .resizeGrip {
-	width: 40px;
-	height: 3px;
+	width: 30px;
+	height: 2px;
 	background: #484f58;
 	border-radius: 2px;
 }
@@ -34,46 +34,50 @@
 	background: #fff;
 }
 
-/* Header */
+/* Header - Compact */
 .header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 8px 12px;
+	padding: 4px 10px;
 	background: #161b22;
 	border-bottom: 1px solid #30363d;
 	flex-shrink: 0;
+	min-height: 28px;
+	box-sizing: border-box;
 }
 
 .title {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	font-size: 13px;
+	gap: 6px;
+	font-size: var(--font-sm);
 	font-weight: 500;
 	color: #e6edf3;
 }
 
 .title svg {
 	color: #7ee787;
+	width: 12px;
+	height: 12px;
 }
 
 .actions {
 	display: flex;
-	gap: 4px;
+	gap: 2px;
 }
 
 .actionBtn {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 28px;
-	height: 28px;
+	width: 22px;
+	height: 22px;
 	padding: 0;
 	border: none;
 	background: transparent;
 	color: #8b949e;
-	border-radius: 4px;
+	border-radius: 3px;
 	cursor: pointer;
 	transition: all 0.15s ease;
 }
@@ -87,11 +91,25 @@
 	color: #e6edf3;
 }
 
-/* Terminal container */
+.actionBtn svg {
+	width: 12px;
+	height: 12px;
+}
+
+/* Terminal container - Compact */
 .terminal {
 	flex: 1;
-	padding: 8px;
+	padding: 4px 6px;
 	overflow: hidden;
+}
+
+/* Smaller terminal font */
+.terminal :global(.xterm-screen) {
+	font-size: 11px !important;
+}
+
+.terminal :global(.xterm-rows) {
+	font-size: 11px !important;
 }
 
 .terminal :global(.xterm) {

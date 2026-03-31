@@ -25,7 +25,8 @@ export function SidebarPanel({
 
 	// Initial data loading
 	useEffect(() => {
-		controller.loadWorkingDir();
+		// 不再自动加载workingDir，由App.tsx负责初始化以保持持久化状态
+		// controller.loadWorkingDir();
 		controller.loadRecentWorkspaces();
 	}, []);
 

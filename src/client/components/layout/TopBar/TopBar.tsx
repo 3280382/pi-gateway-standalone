@@ -5,6 +5,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { SystemPromptModal } from "@/components/modals/SystemPromptModal";
+import { useChatController } from "@/services/api/chatApi";
 import { useSidebarController } from "@/services/api/sidebarApi";
 import {
 	getSystemPrompt,
@@ -12,6 +14,7 @@ import {
 } from "@/services/api/systemPromptApi";
 import { websocketService } from "@/services/websocket.service";
 import { useChatStore } from "@/stores/chatStore";
+import { useModalStore } from "@/stores/modalStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import styles from "./TopBar.module.css";
@@ -142,34 +145,38 @@ export function TopBar({
 		serverPid,
 	} = useSessionStore();
 	const { isStreaming } = useChatStore();
+	const chatController = useChatController();
 
 	// Search state
 	const searchQuery = useSidebarStore((state) => state.searchQuery);
 	const filters = useSidebarStore((state) => state.searchFilters);
 	const sidebarController = useSidebarController();
-	const [showFilters, setShowFilters] = useState(false);
+	// System prompt state (now using modalStore)
+	const openSystemPrompt = useModalStore((state) => state.openSystemPrompt);
 
-	// System prompt state
-	const [showSystemPrompt, setShowSystemPrompt] = useState(false);
-	const [systemPromptData, setSystemPromptData] =
-		useState<SystemPromptResponse | null>(null);
-	const [systemPromptLoading, setSystemPromptLoading] = useState(false);
-	const [systemPromptError, setSystemPromptError] = useState<string | null>(
-		null,
+	// Modal/dropdown states from modalStore
+	const isDirectoryBrowserOpen = useModalStore(
+		(state) => state.isDirectoryBrowserOpen,
+	);
+	const openDirectoryBrowser = useModalStore(
+		(state) => state.openDirectoryBrowser,
+	);
+	const closeDirectoryBrowser = useModalStore(
+		(state) => state.closeDirectoryBrowser,
 	);
 
-	// Model dropdown state
+	// Filter panel state (kept local as it's inline panel, not modal)
+	const [showFilters, setShowFilters] = useState(false);
+
+	// Model dropdown state (kept local as it's a dropdown, not modal)
 	const [showModelDropdown, setShowModelDropdown] = useState(false);
 	const [models, setModels] = useState<
 		Array<{ id: string; name: string; provider: string }>
 	>([]);
 	const [modelsLoading, setModelsLoading] = useState(false);
 
-	// Thinking dropdown state
+	// Thinking dropdown state (kept local as it's a dropdown, not modal)
 	const [showThinkingDropdown, setShowThinkingDropdown] = useState(false);
-
-	// Working directory picker state
-	const [showDirPicker, setShowDirPicker] = useState(false);
 
 	const currentThinking =
 		THINKING_LEVELS.find((t) => t.id === thinkingLevel) || THINKING_LEVELS[2];
@@ -182,7 +189,7 @@ export function TopBar({
 			"current:",
 			workingDir,
 		);
-		setShowDirPicker(false);
+		closeDirectoryBrowser();
 		if (selectedPath && selectedPath !== workingDir) {
 			await sidebarController.changeWorkingDir(selectedPath);
 		}
@@ -201,25 +208,6 @@ export function TopBar({
 		filters.tools,
 	].filter(Boolean).length;
 
-	// Load system prompt when modal opens
-	useEffect(() => {
-		if (showSystemPrompt && !systemPromptData && !systemPromptLoading) {
-			setSystemPromptLoading(true);
-			setSystemPromptError(null);
-			getSystemPrompt(workingDir)
-				.then((data) => {
-					setSystemPromptData(data);
-					setSystemPromptLoading(false);
-				})
-				.catch((err) => {
-					setSystemPromptError(
-						err instanceof Error ? err.message : "Failed to load",
-					);
-					setSystemPromptLoading(false);
-				});
-		}
-	}, [showSystemPrompt, systemPromptData, systemPromptLoading, workingDir]);
-
 	// Load models when dropdown opens
 	useEffect(() => {
 		if (showModelDropdown && models.length === 0 && !modelsLoading) {
@@ -237,18 +225,17 @@ export function TopBar({
 	}, [showModelDropdown, models.length, modelsLoading]);
 
 	// Handle model selection
-	const handleModelSelect = (modelId: string) => {
+	const handleModelSelect = async (modelId: string) => {
 		const model = models.find((m) => m.id === modelId);
 		if (model) {
 			console.log("[TopBar] Switching model:", model);
-			// Send to server via WebSocket
-			const sent = websocketService.send("model_change", {
-				provider: model.provider,
-				modelId: model.id,
-			});
-			console.log("[TopBar] model_change message sent:", sent);
-			// Update local state
-			setCurrentModel(modelId);
+			try {
+				// Use chatController to set model (sends to server and waits for confirmation)
+				await chatController.setModel(model.provider, model.id);
+				console.log("[TopBar] Model set successfully");
+			} catch (error) {
+				console.error("[TopBar] Failed to set model:", error);
+			}
 		}
 		setShowModelDropdown(false);
 	};
@@ -320,7 +307,7 @@ export function TopBar({
 				{/* Left: System Prompt */}
 				<button
 					className={styles.iconBtn}
-					onClick={() => setShowSystemPrompt(true)}
+					onClick={() => openSystemPrompt()}
 					title="System Prompt"
 				>
 					<DocumentIcon />
@@ -405,7 +392,7 @@ export function TopBar({
 				{/* Left: Working Directory Button */}
 				<button
 					className={styles.workingDirBtn}
-					onClick={() => setShowDirPicker(true)}
+					onClick={() => openDirectoryBrowser()}
 					title={`Working Directory: ${workingDir || "Click to select"}`}
 				>
 					<FolderIcon className={styles.btnIcon} />
@@ -474,90 +461,15 @@ export function TopBar({
 				</div>
 			</div>
 
-			{/* System Prompt Modal */}
-			{showSystemPrompt && (
-				<div
-					className={styles.modal}
-					onClick={() => setShowSystemPrompt(false)}
-				>
-					<div
-						className={styles.modalContent}
-						onClick={(e) => e.stopPropagation()}
-					>
-						<div className={styles.modalHeader}>
-							<h3>System Prompt - {systemPromptData?.cwd || workingDir}</h3>
-							<button
-								className={styles.closeBtn}
-								onClick={() => setShowSystemPrompt(false)}
-								title="Close"
-							>
-								✕
-							</button>
-						</div>
-						<div className={styles.modalBody}>
-							{systemPromptLoading && (
-								<div className={styles.loading}>Loading...</div>
-							)}
-							{systemPromptError && (
-								<div className={styles.error}>{systemPromptError}</div>
-							)}
-							{systemPromptData && (
-								<div className={styles.systemPromptContent}>
-									{systemPromptData.agentsFiles.length > 0 && (
-										<div className={styles.section}>
-											<h4>AGENTS.md ({systemPromptData.agentsFiles.length})</h4>
-											{systemPromptData.agentsFiles.map((file, idx) => (
-												<div key={idx} className={styles.fileBlock}>
-													<div className={styles.filePath}>{file.path}</div>
-													<pre className={styles.fileContent}>
-														{file.content}
-													</pre>
-												</div>
-											))}
-										</div>
-									)}
-									{systemPromptData.systemPrompt && (
-										<div className={styles.section}>
-											<h4>SYSTEM</h4>
-											<pre className={styles.fileContent}>
-												{systemPromptData.systemPrompt}
-											</pre>
-										</div>
-									)}
-									{systemPromptData.skills.length > 0 && (
-										<div className={styles.section}>
-											<h4>Skills ({systemPromptData.skills.length})</h4>
-											<ul className={styles.skillList}>
-												{systemPromptData.skills
-													.slice(0, 10)
-													.map((skill, idx) => (
-														<li key={idx}>
-															<strong>{skill.name}</strong>:{" "}
-															{skill.description.slice(0, 100)}
-															{skill.description.length > 100 ? "..." : ""}
-														</li>
-													))}
-												{systemPromptData.skills.length > 10 && (
-													<li>
-														... and {systemPromptData.skills.length - 10} more
-													</li>
-												)}
-											</ul>
-										</div>
-									)}
-								</div>
-							)}
-						</div>
-					</div>
-				</div>
-			)}
+			{/* System Prompt Modal - managed by modalStore */}
+			<SystemPromptModal />
 
 			{/* Directory Picker Modal */}
-			{showDirPicker && (
+			{isDirectoryBrowserOpen && (
 				<DirectoryPicker
 					currentPath={workingDir || "/root"}
 					onSelect={handleDirSelect}
-					onClose={() => setShowDirPicker(false)}
+					onClose={closeDirectoryBrowser}
 				/>
 			)}
 		</div>

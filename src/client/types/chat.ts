@@ -8,7 +8,7 @@
 
 export type MessageRole = "user" | "assistant" | "system";
 
-export type ContentType = "text" | "thinking" | "tool" | "image";
+export type ContentType = "text" | "thinking" | "tool" | "tool_use" | "image";
 
 export interface MessageContent {
 	type: ContentType;
@@ -18,6 +18,7 @@ export interface MessageContent {
 	toolCallId?: string;
 	toolName?: string;
 	args?: Record<string, unknown>;
+	partialArgs?: string; // for streaming tool calls
 	output?: string;
 	error?: string;
 	imageUrl?: string;
@@ -95,6 +96,14 @@ export interface ChatState {
 	activeTools: Map<string, ToolExecution>;
 	setActiveTool: (tool: ToolExecution) => void;
 	updateToolOutput: (toolId: string, output: string, error?: string) => void;
+
+	// Streaming Tool Calls (for incremental display)
+	streamingToolCalls: Map<string, { id: string; name: string; args: string }>;
+	appendToolCallDelta: (
+		toolCallId: string,
+		toolName: string,
+		delta: string,
+	) => void;
 
 	// UI State
 	showThinking: boolean;
@@ -188,14 +197,14 @@ export interface ToolStartMessage {
 export interface ToolUpdateMessage {
 	type: "tool_update";
 	toolCallId: string;
-	chunk?: string;  // 后端发送的是chunk字段
+	chunk?: string; // 后端发送的是chunk字段
 	error?: string;
 }
 
 export interface ToolEndMessage {
 	type: "tool_end";
 	toolCallId: string;
-	result?: string;  // 后端发送的是result字段
+	result?: string; // 后端发送的是result字段
 	isError?: boolean; // 后端发送的是isError字段
 }
 

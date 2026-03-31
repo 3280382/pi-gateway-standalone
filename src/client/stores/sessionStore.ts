@@ -23,6 +23,50 @@ export interface Session {
 	lastModified: string;
 }
 
+export interface ResourceFiles {
+	systemPrompt: {
+		global: string;
+		project: string;
+		loaded: string;
+	};
+	appendSystemPrompt: Array<{
+		path: string;
+		exists: boolean;
+	}>;
+	agentsFiles: Array<{
+		path: string;
+		exists: boolean;
+	}>;
+	settings: {
+		path: string;
+		exists: boolean;
+	};
+	auth: {
+		path: string;
+		exists: boolean;
+	};
+	session: {
+		path: string;
+		exists: boolean;
+	};
+	models: {
+		path: string;
+		exists: boolean;
+	};
+	skills: {
+		global: string;
+		project: string;
+		loaded: Array<{
+			name: string;
+			path: string;
+		}>;
+	};
+	prompts: {
+		global: string;
+		project: string;
+	};
+}
+
 export interface SessionState {
 	// 当前会话
 	currentSessionId: string | null;
@@ -41,6 +85,9 @@ export interface SessionState {
 	// 服务器状态
 	serverPid: number | null;
 	isConnected: boolean;
+
+	// 资源文件路径
+	resourceFiles: ResourceFiles | null;
 }
 
 interface SessionActions {
@@ -66,6 +113,9 @@ interface SessionActions {
 	// 服务器状态
 	setServerPid: (pid: number | null) => void;
 	setIsConnected: (connected: boolean) => void;
+
+	// 资源文件
+	setResourceFiles: (files: ResourceFiles | null) => void;
 }
 
 export const useSessionStore = create<SessionState & SessionActions>()(
@@ -83,6 +133,7 @@ export const useSessionStore = create<SessionState & SessionActions>()(
 				recentWorkspaces: [],
 				serverPid: null,
 				isConnected: false,
+				resourceFiles: null,
 
 				// 会话
 				setCurrentSession: (id) => set({ currentSessionId: id }),
@@ -122,6 +173,9 @@ export const useSessionStore = create<SessionState & SessionActions>()(
 				// 服务器状态
 				setServerPid: (pid) => set({ serverPid: pid }),
 				setIsConnected: (connected) => set({ isConnected: connected }),
+
+				// 资源文件
+				setResourceFiles: (files) => set({ resourceFiles: files }),
 			}),
 			{
 				name: "session-store",

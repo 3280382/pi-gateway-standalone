@@ -13,6 +13,12 @@ export default defineConfig({
 	},
 	build: {
 		outDir: "dist",
+		// 禁用报告压缩大小，加速构建并减少输出
+		reportCompressedSize: false,
+		// 提高 chunk size 警告限制，避免警告干扰
+		chunkSizeWarningLimit: 1000,
+		// 确保构建完成后退出，不进入 watch 模式
+		watch: null,
 	},
 	server: {
 		port: 5173,

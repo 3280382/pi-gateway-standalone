@@ -17,6 +17,8 @@ import {
 	SettingsManager,
 } from "@mariozechner/pi-coding-agent";
 import type { LlmLogManager } from "@server/llm/log-manager";
+import { existsSync } from "fs";
+import { join } from "path";
 import { WebSocket } from "ws";
 import { AGENT_DIR, getLocalSessionsDir } from "./utils";
 
@@ -156,11 +158,15 @@ export class GatewaySession {
 			`[Gateway] 会话已创建: sessionId=${session.sessionId}, sessionFile=${session.sessionFile}`,
 		);
 
-		// 如果可用，设置默认模型为kimi-k2.5
-		const defaultModel = this.modelRegistry.find("deepseek", "deepseek-chat");
-		if (defaultModel) {
-			await session.setModel(defaultModel);
-			console.log(`[Gateway] 默认模型设置为: ${defaultModel.id}`);
+		// 检查 session 是否已有模型设置，如果没有则设置默认模型
+		if (!session.model) {
+			const defaultModel = this.modelRegistry.find("deepseek", "deepseek-chat");
+			if (defaultModel) {
+				await session.setModel(defaultModel);
+				console.log(`[Gateway] 默认模型设置为: ${defaultModel.id}`);
+			}
+		} else {
+			console.log(`[Gateway] 使用 session 保存的模型: ${session.model.id}`);
 		}
 
 		// 为此会话设置LLM日志文件
@@ -174,6 +180,66 @@ export class GatewaySession {
 
 		// 获取技能列表
 		const skills = loader.getSkills().skills;
+
+		// 收集所有资源文件路径
+		const settingsPath = join(AGENT_DIR, "settings.json");
+		const resourceFiles = {
+			// 系统提示文件
+			systemPrompt: {
+				global: join(AGENT_DIR, "SYSTEM.md"),
+				project: join(workingDir, ".pi", "SYSTEM.md"),
+				loaded: systemPrompt ? "custom" : "default",
+			},
+			// 附加系统提示文件
+			appendSystemPrompt: loader.getAppendSystemPrompt().map((f: any) => ({
+				path: f.path,
+				exists: existsSync(f.path),
+			})),
+			// AGENTS.md 文件
+			agentsFiles: agentsFiles.map((f: any) => ({
+				path: f.path,
+				exists: existsSync(f.path),
+			})),
+			// 设置文件
+			settings: {
+				path: settingsPath,
+				exists: existsSync(settingsPath),
+			},
+			// 认证文件
+			auth: {
+				path: join(AGENT_DIR, "auth.json"),
+				exists: existsSync(join(AGENT_DIR, "auth.json")),
+			},
+			// 会话文件
+			session: {
+				path: session.sessionFile,
+				exists: session.sessionFile ? existsSync(session.sessionFile) : false,
+			},
+			// 模型注册表
+			models: {
+				path: join(AGENT_DIR, "models.json"),
+				exists: existsSync(join(AGENT_DIR, "models.json")),
+			},
+			// 技能目录
+			skills: {
+				global: join(AGENT_DIR, "skills"),
+				project: join(workingDir, ".pi", "skills"),
+				loaded: skills.map((s: any) => ({
+					name: s.name,
+					path: s.path || "builtin",
+				})),
+			},
+			// 提示模板目录
+			prompts: {
+				global: join(AGENT_DIR, "prompts"),
+				project: join(workingDir, ".pi", "prompts"),
+			},
+		};
+
+		console.log(
+			"[Gateway] 资源文件路径:",
+			JSON.stringify(resourceFiles, null, 2),
+		);
 
 		return {
 			sessionId: session.sessionId,
@@ -191,6 +257,7 @@ export class GatewaySession {
 				name: s.name,
 				description: s.description,
 			})),
+			resourceFiles,
 		};
 	}
 
@@ -206,13 +273,13 @@ export class GatewaySession {
 					const msgEvent = event.assistantMessageEvent;
 					if (msgEvent.type === "text_delta") {
 						this.send({
-							type: "content_delta",  // 改为content_delta以匹配前端
-							text: msgEvent.delta,   // 改为text字段以匹配前端
+							type: "content_delta", // 改为content_delta以匹配前端
+							text: msgEvent.delta, // 改为text字段以匹配前端
 						});
 					} else if (msgEvent.type === "thinking_delta") {
 						this.send({
 							type: "thinking_delta",
-							thinking: msgEvent.delta,  // 改为thinking字段以匹配前端
+							thinking: msgEvent.delta, // 改为thinking字段以匹配前端
 						});
 					} else if (msgEvent.type === "toolcall_delta") {
 						// 转发工具调用增量以逐步构建工具参数
@@ -320,6 +387,9 @@ export class GatewaySession {
 			source: { type: "base64"; mediaType: string; data: string };
 		}>,
 	) {
+		console.log(
+			`[GatewaySession.prompt] 开始处理, session存在: ${!!this.session}, isStreaming: ${this.isStreaming}`,
+		);
 		if (!this.session) {
 			this.send({ type: "error", error: "会话未初始化" });
 			return;
@@ -335,6 +405,9 @@ export class GatewaySession {
 				}),
 			);
 
+			console.log(
+				`[GatewaySession.prompt] 调用session.prompt, text长度: ${text.length}`,
+			);
 			if (this.isStreaming) {
 				await this.session.prompt(text, {
 					images: convertedImages,
@@ -343,7 +416,9 @@ export class GatewaySession {
 			} else {
 				await this.session.prompt(text, { images: convertedImages });
 			}
+			console.log("[GatewaySession.prompt] session.prompt完成");
 		} catch (error) {
+			console.error("[GatewaySession.prompt] 错误:", error);
 			this.send({
 				type: "error",
 				error: error instanceof Error ? error.message : "未知错误",
@@ -425,7 +500,7 @@ export class GatewaySession {
 		try {
 			await this.session.setModel(model);
 			if (thinkingLevel) {
-				this.session.setThinkingLevel(thinkingLevel);
+				await this.session.setThinkingLevel(thinkingLevel);
 			}
 
 			this.send({

@@ -33,13 +33,13 @@
 	justify-content: center;
 	background: linear-gradient(135deg, #58a6ff, #a371f7);
 	color: white;
-	font-size: 14px;
+	font-size: var(--font-md);
 	font-weight: 700;
 	border-radius: 6px;
 }
 
 .title {
-	font-size: 14px;
+	font-size: var(--font-md);
 	font-weight: 600;
 	color: #e6edf3;
 }
@@ -71,7 +71,7 @@
 	background: rgba(248, 81, 73, 0.1);
 	border-radius: 6px;
 	color: #f85149;
-	font-size: 12px;
+	font-size: var(--font-base);
 }
 
 .error button {

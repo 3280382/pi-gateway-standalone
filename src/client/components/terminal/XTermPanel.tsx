@@ -4,8 +4,9 @@
 
 import { FitAddon } from "@xterm/addon-fit";
 import { Terminal } from "@xterm/xterm";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "@xterm/xterm/css/xterm.css";
+import { useSessionStore } from "@/stores/sessionStore";
 import styles from "./XTermPanel.module.css";
 
 interface XTermPanelProps {
@@ -32,6 +33,8 @@ export function XTermPanel({
 	const resizeStartY = useRef(0);
 	const resizeStartHeight = useRef(height);
 	const commandBuffer = useRef("");
+	const abortControllerRef = useRef<AbortController | null>(null);
+	const currentDir = useSessionStore((state) => state.currentDir);
 
 	// Initialize terminal
 	useEffect(() => {
@@ -39,8 +42,9 @@ export function XTermPanel({
 
 		const term = new Terminal({
 			cursorBlink: true,
-			fontSize: 14,
+			fontSize: 11,
 			fontFamily: 'JetBrains Mono, "Fira Code", monospace',
+			lineHeight: 1.2,
 			theme: {
 				background: "#0d1117",
 				foreground: "#e6edf3",
@@ -64,17 +68,57 @@ export function XTermPanel({
 		term.open(terminalRef.current);
 		fit.fit();
 
-		// Welcome message
-		term.writeln(
-			"\x1b[32m╔═══════════════════════════════════════════════════════╗\x1b[0m",
-		);
-		term.writeln(
-			"\x1b[32m║\x1b[0m  \x1b[36mPi Gateway Terminal\x1b[0m - Ready for commands          \x1b[32m║\x1b[0m",
-		);
-		term.writeln(
-			"\x1b[32m╚═══════════════════════════════════════════════════════╝\x1b[0m",
-		);
-		term.writeln("");
+		// Execute command on server
+		const executeCommand = async (command: string) => {
+			try {
+				// Cancel any pending request
+				if (abortControllerRef.current) {
+					abortControllerRef.current.abort();
+				}
+				abortControllerRef.current = new AbortController();
+
+				const response = await fetch("/api/execute", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						command,
+						cwd: currentDir,
+						streaming: true,
+					}),
+					signal: abortControllerRef.current.signal,
+				});
+
+				if (!response.ok) {
+					const error = await response.text();
+					term.writeln(`\x1b[31mError: ${error}\x1b[0m`);
+					return;
+				}
+
+				// Read stream
+				const reader = response.body?.getReader();
+				if (!reader) {
+					term.writeln("\x1b[31mError: No response body\x1b[0m");
+					return;
+				}
+
+				const decoder = new TextDecoder();
+				while (true) {
+					const { done, value } = await reader.read();
+					if (done) break;
+					const text = decoder.decode(value, { stream: true });
+					// Write raw output (preserve ANSI colors from server)
+					term.write(text);
+				}
+			} catch (error) {
+				if (error instanceof DOMException && error.name === "AbortError") {
+					term.writeln("\x1b[33m[Cancelled]\x1b[0m");
+				} else {
+					term.writeln(`\x1b[31mError: ${error}\x1b[0m`);
+				}
+			}
+		};
 
 		// Handle input
 		term.onData((data) => {
@@ -84,16 +128,14 @@ export function XTermPanel({
 			if (code === 13) {
 				term.writeln("");
 				if (commandBuffer.current.trim()) {
+					const cmd = commandBuffer.current;
 					if (onExecuteCommand) {
-						onExecuteCommand(commandBuffer.current);
-					} else {
-						term.writeln(`\x1b[33mExecuting: ${commandBuffer.current}\x1b[0m`);
-						// Simulate execution
-						setTimeout(() => {
-							term.writeln("\x1b[32m✓ Command executed successfully\x1b[0m");
-							prompt(term);
-						}, 500);
+						onExecuteCommand(cmd);
 					}
+					// Execute on server
+					executeCommand(cmd).then(() => {
+						prompt(term);
+					});
 				} else {
 					prompt(term);
 				}
@@ -136,6 +178,10 @@ export function XTermPanel({
 			if (onExecuteCommand) {
 				onExecuteCommand(initialCommand);
 			}
+			// Execute on server
+			executeCommand(initialCommand).then(() => {
+				prompt(term);
+			});
 		}
 
 		// Handle resize
@@ -147,10 +193,13 @@ export function XTermPanel({
 
 		return () => {
 			window.removeEventListener("resize", handleResize);
+			if (abortControllerRef.current) {
+				abortControllerRef.current.abort();
+			}
 			term.dispose();
 			terminalInstance.current = null;
 		};
-	}, [onExecuteCommand, initialCommand]);
+	}, [onExecuteCommand, initialCommand, currentDir]);
 
 	// Handle output updates
 	useEffect(() => {

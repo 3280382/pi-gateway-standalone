@@ -11,7 +11,7 @@
 .empty {
 	padding: 12px;
 	color: #7d8590;
-	font-size: 12px;
+	font-size: var(--font-base);
 	text-align: center;
 }
 
@@ -30,7 +30,7 @@
 	border: none;
 	border-radius: 6px;
 	color: #e6edf3;
-	font-size: 12px;
+	font-size: var(--font-base);
 	cursor: pointer;
 	text-align: left;
 	width: 100%;
@@ -38,6 +38,11 @@
 
 .item:hover {
 	background: #21262d;
+}
+
+.item.active {
+	background: rgba(88, 166, 255, 0.15);
+	border-left: 3px solid #58a6ff;
 }
 
 .info {
@@ -55,7 +60,7 @@
 }
 
 .path {
-	font-size: 10px;
+	font-size: var(--font-xs);
 	color: #7d8590;
 	overflow: hidden;
 	text-overflow: ellipsis;

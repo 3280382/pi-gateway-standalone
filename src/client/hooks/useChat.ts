@@ -166,13 +166,13 @@ export function useChat(): UseChatReturn {
 		};
 
 		// Content delta handler - streaming text
-		registerHandler("content", (data: ContentDeltaMessage) => {
+		registerHandler("content_delta", (data: ContentDeltaMessage) => {
 			streamingRef.current.content += data.text;
 			store.appendStreamingContent(data.text);
 		});
 
 		// Thinking delta handler - streaming thinking
-		registerHandler("thinking", (data: ThinkingDeltaMessage) => {
+		registerHandler("thinking_delta", (data: ThinkingDeltaMessage) => {
 			streamingRef.current.thinking += data.thinking;
 			store.appendStreamingThinking(data.thinking);
 		});
@@ -182,19 +182,19 @@ export function useChat(): UseChatReturn {
 			try {
 				console.log("[useChat] tool_start event received:", data);
 				console.log("[useChat] tool_start data type:", typeof data);
-				
+
 				// 确保data有必要的属性
-				if (!data || typeof data !== 'object') {
+				if (!data || typeof data !== "object") {
 					console.error("[useChat] Invalid tool_start data:", data);
 					return;
 				}
-				
+
 				const toolCallId = data.toolCallId || generateToolId();
 				const toolName = data.toolName || "unknown";
 				const args = data.args || {};
-				
+
 				console.log("[useChat] Creating tool:", { toolCallId, toolName, args });
-				
+
 				const tool: ToolExecution = {
 					id: toolCallId,
 					name: toolName,
@@ -205,7 +205,12 @@ export function useChat(): UseChatReturn {
 				streamingRef.current.tools.set(tool.id, tool);
 				store.setActiveTool(tool);
 			} catch (error) {
-				console.error("[useChat] Error in tool_start handler:", error, "data:", data);
+				console.error(
+					"[useChat] Error in tool_start handler:",
+					error,
+					"data:",
+					data,
+				);
 			}
 		});
 
@@ -244,16 +249,12 @@ export function useChat(): UseChatReturn {
 				// 后端发送的是result和isError字段，不是output和error
 				const output = data.result || "";
 				const error = data.isError ? "工具执行失败" : undefined;
-				
+
 				if (error) {
 					existing.error = error;
 					existing.status = "error";
 					existing.endTime = new Date();
-					store.updateToolOutput(
-						data.toolCallId,
-						existing.output || "",
-						error,
-					);
+					store.updateToolOutput(data.toolCallId, existing.output || "", error);
 				} else {
 					existing.output = output || existing.output;
 					existing.status = "success";
@@ -285,7 +286,14 @@ export function useChat(): UseChatReturn {
 
 		// Turn start/end handlers
 		registerHandler("turn_start", () => {
-			console.log("[useChat] Turn started");
+			console.log("[useChat] Turn started - starting new turn block");
+			// 开始新的轮次，添加分隔标记
+			store.startNewTurn();
+			// 重置本地流式状态
+			streamingRef.current.thinking = "";
+			streamingRef.current.content = "";
+			streamingRef.current.tools = new Map();
+			streamingRef.current.toolOutputs = new Map();
 		});
 
 		registerHandler("turn_end", (data) => {

@@ -78,23 +78,15 @@ export class WebSocketService extends BaseService {
 				const wsUrl = url || this.getWebSocketUrlPrivate();
 
 				if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-					console.log("[WebSocket] Already connected");
 					resolve();
 					return;
 				}
 
 				console.log(`[WebSocket] Connecting to ${wsUrl}`);
-				console.log(
-					`[WebSocket] Current hostname: ${window.location.hostname}`,
-				);
-				console.log(
-					`[WebSocket] Current protocol: ${window.location.protocol}`,
-				);
 
 				this.ws = new WebSocket(wsUrl);
 
 				this.ws.onopen = () => {
-					console.log("[WebSocket] Connected successfully");
 					this.connectionStatus = {
 						isConnected: true,
 						lastConnected: new Date().toISOString(),
@@ -196,9 +188,7 @@ export class WebSocketService extends BaseService {
 		}
 
 		if (this.ws.readyState !== WebSocket.OPEN) {
-			console.warn(
-				`[WebSocket] Cannot send message: WebSocket state is ${this.ws.readyState} (0=CONNECTING,1=OPEN,2=CLOSING,3=CLOSED)`,
-			);
+			console.warn(`[WebSocket] Cannot send message: WebSocket not OPEN`);
 			return false;
 		}
 
@@ -209,8 +199,8 @@ export class WebSocketService extends BaseService {
 				...(data || {}),
 			};
 
-			this.ws.send(JSON.stringify(message));
-			console.log(`[WebSocket] Sent: ${type}`, message);
+			const messageStr = JSON.stringify(message);
+			this.ws.send(messageStr);
 			return true;
 		} catch (error) {
 			console.error("[WebSocket] Failed to send message:", error);
@@ -389,12 +379,19 @@ export class WebSocketService extends BaseService {
 	 */
 	private handleIncomingMessage(message: any): void {
 		const { type, timestamp, sessionId } = message;
-		
+
 		// 后端直接发送属性，没有嵌套的data字段
 		// 所以我们需要从消息对象本身提取数据
 		const data = message;
-		
-		console.log(`[WebSocket] Received: ${type}`, message);
+
+		// 只在非高频事件时打印日志
+		if (
+			type !== "content_delta" &&
+			type !== "thinking_delta" &&
+			type !== "toolcall_delta"
+		) {
+			console.log(`[WebSocket] Received: ${type}`);
+		}
 
 		// 首先触发通用消息事件
 		this.emit("message", { type, data, timestamp, sessionId });
@@ -402,11 +399,11 @@ export class WebSocketService extends BaseService {
 		// 然后触发特定类型事件
 		switch (type) {
 			case "content":
-			case "content_delta":  // 也处理content_delta事件
+			case "content_delta": // 也处理content_delta事件
 				this.emit("content_delta", data);
 				break;
 			case "thinking":
-			case "thinking_delta":  // 也处理thinking_delta事件
+			case "thinking_delta": // 也处理thinking_delta事件
 				this.emit("thinking_delta", data);
 				break;
 			case "toolcall_delta":
@@ -451,6 +448,10 @@ export class WebSocketService extends BaseService {
 				break;
 			case "retry_end":
 				this.emit("retry_end", data);
+				break;
+			case "error":
+				console.error("[WebSocket] Server error:", data);
+				this.emit("error", data);
 				break;
 			case "session_updated":
 				this.emit("session_updated", data);

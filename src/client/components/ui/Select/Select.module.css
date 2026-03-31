@@ -6,7 +6,7 @@
 }
 
 .label {
-	font-size: 14px;
+	font-size: var(--font-sm);
 	font-weight: 500;
 	color: var(--color-text);
 	display: flex;
@@ -16,7 +16,7 @@
 
 .required {
 	color: var(--color-danger);
-	font-size: 18px;
+	font-size: var(--font-md);
 }
 
 .select {
@@ -66,23 +66,23 @@
 	border-width: 2px;
 }
 
-/* Sizes */
+/* Sizes - Compact */
 .select.size-small {
-	padding: 6px 10px;
-	font-size: 13px;
-	min-height: 32px;
+	padding: 4px 8px;
+	font-size: var(--font-sm);
+	min-height: 26px;
 }
 
 .select.size-medium {
-	padding: 10px 12px;
-	font-size: 14px;
-	min-height: 40px;
+	padding: 6px 10px;
+	font-size: var(--font-base);
+	min-height: 32px;
 }
 
 .select.size-large {
-	padding: 12px 14px;
-	font-size: 16px;
-	min-height: 48px;
+	padding: 8px 12px;
+	font-size: var(--font-md);
+	min-height: 38px;
 }
 
 /* Select value area */
@@ -108,7 +108,7 @@
 .optionIcon {
 	display: flex;
 	align-items: center;
-	font-size: 1.2em;
+	font-size: 1.1em;
 }
 
 .optionLabel {
@@ -130,7 +130,7 @@
 	border: none;
 	color: var(--color-text-secondary);
 	cursor: pointer;
-	font-size: 20px;
+	font-size: var(--font-md);
 	line-height: 1;
 	padding: 0 4px;
 	border-radius: 3px;
@@ -144,7 +144,7 @@
 
 .chevron {
 	color: var(--color-text-secondary);
-	font-size: 12px;
+	font-size: var(--font-base);
 	transition: transform 0.2s ease;
 }
 
@@ -187,12 +187,12 @@
 
 .searchInput {
 	width: 100%;
-	padding: 8px 12px;
+	padding: 6px 10px;
 	border: 1px solid var(--color-border);
 	border-radius: 4px;
 	background-color: var(--color-bg-secondary);
 	color: var(--color-text);
-	font-size: 14px;
+	font-size: var(--font-base);
 	outline: none;
 }
 
@@ -210,10 +210,11 @@
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	padding: 10px 12px;
+	padding: 6px 10px;
 	cursor: pointer;
 	transition: background-color 0.2s ease;
 	color: var(--color-text);
+	font-size: var(--font-base);
 }
 
 .option:hover:not(.disabledOption) {
@@ -269,15 +270,15 @@
 	width: 100%;
 }
 
-/* Helper and error text */
+/* Helper and error text - Compact */
 .helperText {
-	font-size: 12px;
+	font-size: var(--font-xs);
 	color: var(--color-text-secondary);
 	margin-top: 2px;
 }
 
 .errorText {
-	font-size: 12px;
+	font-size: var(--font-xs);
 	color: var(--color-danger);
 	margin-top: 2px;
 }

@@ -1,5 +1,6 @@
 /**
- * Chat Store - Zustand State Management
+ * Chat Store - Zustand State Management with Performance Optimizations
+ * 使用批量更新和RAF调度优化流式消息性能
  */
 
 import { create } from "zustand";
@@ -8,49 +9,44 @@ import type {
 	ChatSearchFilters,
 	ChatState,
 	Message,
-	MessageContent,
 	ToolExecution,
 } from "@/types/chat";
+
+// ============================================================================
+// Types
+// ============================================================================
+
+interface ContentPart {
+	type: "thinking" | "text" | "tool" | "tool_use" | "turn_marker";
+	thinking?: string;
+	text?: string;
+	toolCallId?: string;
+	toolName?: string;
+	args?: Record<string, unknown>;
+	partialArgs?: string;
+	output?: string;
+	error?: string;
+	turnNumber?: number;
+}
 
 // ============================================================================
 // Initial State Factory
 // ============================================================================
 
-const createInitialState = (): Omit<
-	ChatState,
-	| "setInputText"
-	| "clearInput"
-	| "addMessage"
-	| "updateMessage"
-	| "deleteMessage"
-	| "clearMessages"
-	| "setMessages"
-	| "toggleMessageCollapse"
-	| "toggleThinkingCollapse"
-	| "setShowThinking"
-	| "startStreaming"
-	| "appendStreamingContent"
-	| "appendStreamingThinking"
-	| "abortStreaming"
-	| "finishStreaming"
-	| "setActiveTool"
-	| "updateToolOutput"
-	| "setSessionId"
-	| "loadSession"
-	| "reset"
-	| "setScrollToBottom"
-	| "setSearchQuery"
-	| "setSearchFilters"
-	| "regenerateMessage"
-> => ({
-	messages: [],
-	currentStreamingMessage: null,
+const createInitialState = () => ({
+	messages: [] as Message[],
+	currentStreamingMessage: null as Message | null,
 	inputText: "",
 	isInputFocused: false,
 	isStreaming: false,
 	streamingContent: "",
 	streamingThinking: "",
-	activeTools: new Map(),
+	streamingThinkings: [] as Array<{ id: string; content: string }>, // 多轮思考支持
+	streamingToolCalls: new Map<
+		string,
+		{ id: string; name: string; args: string }
+	>(),
+	activeTools: new Map<string, ToolExecution>(),
 	showThinking: true,
 	scrollToBottom: false,
 	searchQuery: "",
@@ -60,11 +56,13 @@ const createInitialState = (): Omit<
 		thinking: true,
 		tools: true,
 	},
-	searchResults: [],
+	searchResults: [] as string[],
 	isSearching: false,
-	currentModel: null,
-	sessionId: null,
+	currentModel: null as string | null,
+	sessionId: null as string | null,
 });
+
+type State = ReturnType<typeof createInitialState>;
 
 // ============================================================================
 // Message ID Generator
@@ -75,10 +73,140 @@ function generateMessageId(): string {
 }
 
 // ============================================================================
+// Helper: Build content array preserving temporal order
+// ============================================================================
+
+// 用于追踪内容块的插入顺序
+let contentOrderCounter = 0;
+
+interface ContentPartWithOrder extends ContentPart {
+	_order: number;
+}
+
+function buildContentArray(state: State): ContentPart[] {
+	const content: ContentPartWithOrder[] = [];
+
+	// 1. 思考内容 - 支持多轮思考
+	if (state.streamingThinkings.length > 0) {
+		state.streamingThinkings.forEach((thinking) => {
+			if (thinking.content) {
+				content.push({
+					type: "thinking",
+					thinking: thinking.content,
+					_order: thinking.id
+						? parseInt(thinking.id.split("-")[1]) || contentOrderCounter++
+						: contentOrderCounter++,
+				});
+			}
+		});
+	} else if (state.streamingThinking) {
+		content.push({
+			type: "thinking",
+			thinking: state.streamingThinking,
+			_order: contentOrderCounter++,
+		});
+	}
+
+	// 2. 文本内容 - 放在思考之后但在工具之前（如果文本是主要的）
+	if (state.streamingContent) {
+		content.push({
+			type: "text",
+			text: state.streamingContent,
+			_order: contentOrderCounter++,
+		});
+	}
+
+	// 3. 工具内容 - 合并 tool_use 和 tool 为统一的显示
+	// 优先使用已完成的工具（有输出或错误）
+	state.activeTools.forEach((tool) => {
+		content.push({
+			type: "tool",
+			toolCallId: tool.id,
+			toolName: tool.name,
+			args: tool.args,
+			output: tool.output,
+			error: tool.error,
+			_order: tool.startTime ? tool.startTime.getTime() : contentOrderCounter++,
+		});
+	});
+
+	// 对于仍在流式构建中的工具调用，只在还没有完成版本时添加
+	state.streamingToolCalls.forEach((tool) => {
+		// 检查是否已经有完成的版本
+		const completedTool = state.activeTools.get(tool.id);
+		if (!completedTool) {
+			content.push({
+				type: "tool_use",
+				toolCallId: tool.id,
+				toolName: tool.name,
+				partialArgs: tool.args,
+				_order: contentOrderCounter++,
+			});
+		}
+	});
+
+	// 按时间顺序排序并返回（移除 _order 字段）
+	return content
+		.sort((a, b) => a._order - b._order)
+		.map(({ _order, ...rest }) => rest as ContentPart);
+}
+
+// ============================================================================
 // Store Creation
 // ============================================================================
 
-export const useChatStore = create<ChatState>()(
+export const useChatStore = create<
+	State & {
+		// Input Actions
+		setInputText: (text: string) => void;
+		clearInput: () => void;
+
+		// Message Actions
+		addMessage: (message: Message) => void;
+		setMessages: (messages: Message[]) => void;
+		clearMessages: () => void;
+
+		// Streaming Actions - Batch Updates
+		startStreaming: () => void;
+		startNewTurn: () => void;
+		batchUpdateContent: (updates: {
+			content?: string;
+			thinking?: string;
+			toolCall?: { id: string; name: string; delta: string };
+		}) => void;
+		abortStreaming: () => void;
+		finishStreaming: () => void;
+
+		// Tool Actions
+		setActiveTool: (tool: ToolExecution) => void;
+		updateToolOutput: (toolId: string, output: string, error?: string) => void;
+
+		// UI State
+		setShowThinking: (show: boolean) => void;
+		setScrollToBottom: (scroll: boolean) => void;
+
+		// Search
+		setSearchQuery: (query: string) => void;
+		setSearchFilters: (filters: Partial<ChatSearchFilters>) => void;
+
+		// Session
+		setSessionId: (id: string | null) => void;
+
+		// Reset
+		reset: () => void;
+
+		// Legacy compatibility
+		appendStreamingContent: (text: string) => void;
+		appendStreamingThinking: (thinking: string) => void;
+		appendToolCallDelta: (id: string, name: string, delta: string) => void;
+		updateMessage: (messageId: string, updates: Partial<Message>) => void;
+		deleteMessage: (messageId: string) => void;
+		toggleMessageCollapse: (messageId: string) => void;
+		toggleThinkingCollapse: (messageId: string) => void;
+		regenerateMessage: (messageId: string) => void;
+		loadSession: (sessionPath: string) => Promise<number>;
+	}
+>()(
 	devtools(
 		(set, get) => ({
 			...createInitialState(),
@@ -95,41 +223,9 @@ export const useChatStore = create<ChatState>()(
 			// Message Actions
 			addMessage: (message: Message) => {
 				set(
-					(state) => ({
-						messages: [...state.messages, message],
-					}),
+					(state) => ({ messages: [...state.messages, message] }),
 					false,
 					"addMessage",
-				);
-			},
-
-			updateMessage: (messageId: string, updates: Partial<Message>) => {
-				set(
-					(state) => ({
-						messages: state.messages.map((m) =>
-							m.id === messageId ? { ...m, ...updates } : m,
-						),
-					}),
-					false,
-					"updateMessage",
-				);
-			},
-
-			deleteMessage: (messageId: string) => {
-				set(
-					(state) => ({
-						messages: state.messages.filter((m) => m.id !== messageId),
-					}),
-					false,
-					"deleteMessage",
-				);
-			},
-
-			clearMessages: () => {
-				set(
-					{ messages: [], currentStreamingMessage: null },
-					false,
-					"clearMessages",
 				);
 			},
 
@@ -137,35 +233,11 @@ export const useChatStore = create<ChatState>()(
 				set({ messages, currentStreamingMessage: null }, false, "setMessages");
 			},
 
-			toggleMessageCollapse: (messageId: string) => {
-				set(
-					(state) => ({
-						messages: state.messages.map((m) =>
-							m.id === messageId
-								? { ...m, isMessageCollapsed: !m.isMessageCollapsed }
-								: m,
-						),
-					}),
-					false,
-					"toggleMessageCollapse",
-				);
+			clearMessages: () => {
+				set({ messages: [] }, false, "clearMessages");
 			},
 
-			toggleThinkingCollapse: (messageId: string) => {
-				set(
-					(state) => ({
-						messages: state.messages.map((m) =>
-							m.id === messageId
-								? { ...m, isThinkingCollapsed: !m.isThinkingCollapsed }
-								: m,
-						),
-					}),
-					false,
-					"toggleThinkingCollapse",
-				);
-			},
-
-			// Streaming Actions
+			// Streaming Actions - Optimized with batch updates
 			startStreaming: () => {
 				const streamingMessage: Message = {
 					id: generateMessageId(),
@@ -179,6 +251,9 @@ export const useChatStore = create<ChatState>()(
 						isStreaming: true,
 						streamingContent: "",
 						streamingThinking: "",
+						streamingThinkings: [], // 初始化多轮思考
+						streamingToolCalls: new Map(),
+						activeTools: new Map(), // 清理上一次的工具状态
 						currentStreamingMessage: streamingMessage,
 					},
 					false,
@@ -186,107 +261,91 @@ export const useChatStore = create<ChatState>()(
 				);
 			},
 
-			appendStreamingContent: (text: string) => {
+			// 开始新的轮次 - 在 turn_start 时调用
+			startNewTurn: () => {
 				set(
 					(state) => {
-						const newContent = state.streamingContent + text;
-						
-						// 构建完整的内容数组
-						const content = [];
-						
-						// 添加思考内容
-						if (state.streamingThinking) {
-							content.push({
-								type: "thinking",
-								thinking: state.streamingThinking,
-							});
-						}
-						
-						// 添加文本内容
-						if (newContent) {
-							content.push({
-								type: "text",
-								text: newContent,
-							});
-						}
-						
-						// 添加工具内容
-						const tools = Array.from(state.activeTools.values());
-						tools.forEach((tool) => {
-							content.push({
-								type: "tool",
-								toolCallId: tool.id,
-								toolName: tool.name,
-								args: tool.args,
-								output: tool.output,
-								error: tool.error,
-							});
+						if (!state.currentStreamingMessage) return {};
+
+						// 将当前累积的内容保存到消息中，并开始新的轮次
+						const currentContent = [...state.currentStreamingMessage.content];
+
+						// 添加轮次分隔标记
+						currentContent.push({
+							type: "turn_marker",
+							turnNumber: currentContent.filter((c) => c.type === "turn_marker").length + 1,
 						});
-						
+
 						return {
-							streamingContent: newContent,
-							currentStreamingMessage: state.currentStreamingMessage
-								? {
-										...state.currentStreamingMessage,
-										content,
-									}
-								: null,
+							currentStreamingMessage: {
+								...state.currentStreamingMessage,
+								content: currentContent,
+							},
+							// 清空当前轮次的流式状态
+							streamingThinking: "",
+							streamingContent: "",
+							streamingToolCalls: new Map(),
+							activeTools: new Map(),
 						};
 					},
 					false,
-					"appendStreamingContent",
+					"startNewTurn",
 				);
 			},
 
-			appendStreamingThinking: (thinking: string) => {
+			// Batch update - 合并所有更新一次性处理
+			batchUpdateContent: (updates: {
+				content?: string;
+				thinking?: string;
+				toolCall?: { id: string; name: string; delta: string };
+			}) => {
+				const state = get();
+				if (!state.currentStreamingMessage) return;
+
+				// 累积更新
+				let newContent = state.streamingContent;
+				let newThinking = state.streamingThinking;
+				let newToolCalls = state.streamingToolCalls;
+
+				if (updates.content) {
+					newContent += updates.content;
+				}
+
+				if (updates.thinking) {
+					newThinking += updates.thinking;
+				}
+
+				if (updates.toolCall) {
+					const { id, name, delta } = updates.toolCall;
+					newToolCalls = new Map(newToolCalls);
+					const existing = newToolCalls.get(id);
+					if (existing) {
+						newToolCalls.set(id, { ...existing, args: existing.args + delta });
+					} else {
+						newToolCalls.set(id, { id, name, args: delta });
+					}
+				}
+
+				// 只更新一次状态
+				const contentArray = buildContentArray({
+					...state,
+					streamingContent: newContent,
+					streamingThinking: newThinking,
+					streamingToolCalls: newToolCalls,
+				});
+
 				set(
-					(state) => {
-						const newThinking = state.streamingThinking + thinking;
-						
-						// 构建完整的内容数组
-						const content = [];
-						
-						// 添加思考内容
-						if (newThinking) {
-							content.push({
-								type: "thinking",
-								thinking: newThinking,
-							});
-						}
-						
-						// 添加文本内容
-						if (state.streamingContent) {
-							content.push({
-								type: "text",
-								text: state.streamingContent,
-							});
-						}
-						
-						// 添加工具内容
-						const tools = Array.from(state.activeTools.values());
-						tools.forEach((tool) => {
-							content.push({
-								type: "tool",
-								toolCallId: tool.id,
-								toolName: tool.name,
-								args: tool.args,
-								output: tool.output,
-								error: tool.error,
-							});
-						});
-						
-						return {
-							streamingThinking: newThinking,
-							currentStreamingMessage: state.currentStreamingMessage
-								? {
-										...state.currentStreamingMessage,
-										content,
-									}
-								: null,
-						};
+					{
+						streamingContent: newContent,
+						streamingThinking: newThinking,
+						streamingToolCalls: newToolCalls,
+						currentStreamingMessage: {
+							...state.currentStreamingMessage,
+							content: contentArray,
+						},
 					},
 					false,
-					"appendStreamingThinking",
+					"batchUpdateContent",
 				);
 			},
 
@@ -300,6 +359,9 @@ export const useChatStore = create<ChatState>()(
 						currentStreamingMessage: null,
 						streamingContent: "",
 						streamingThinking: "",
+						streamingThinkings: [], // 清理多轮思考
+						streamingToolCalls: new Map(),
+						activeTools: new Map(), // 清理工具状态
 					}),
 					false,
 					"abortStreaming",
@@ -319,15 +381,13 @@ export const useChatStore = create<ChatState>()(
 						currentStreamingMessage: null,
 						streamingContent: "",
 						streamingThinking: "",
+						streamingThinkings: [], // 清理多轮思考
+						streamingToolCalls: new Map(),
+						activeTools: new Map(), // 清理工具状态
 					}),
 					false,
 					"finishStreaming",
 				);
-			},
-
-			// Alias for test compatibility
-			finalizeStreamingMessage: function () {
-				return this.finishStreaming();
 			},
 
 			// Tool Actions
@@ -335,51 +395,34 @@ export const useChatStore = create<ChatState>()(
 				set(
 					(state) => {
 						const newTools = new Map(state.activeTools).set(tool.id, tool);
-						
-						// 同时更新currentStreamingMessage以包含工具内容
+
+						// 当工具开始执行时，从 streamingToolCalls 中移除
+						// 这样可以避免 tool_use 和 tool 重复显示
+						const newStreamingToolCalls = new Map(state.streamingToolCalls);
+						newStreamingToolCalls.delete(tool.id);
+
+						// 同时更新当前流式消息
 						if (state.currentStreamingMessage) {
-							// 构建完整的内容数组
-							const content = [];
-							
-							// 添加思考内容
-							if (state.streamingThinking) {
-								content.push({
-									type: "thinking",
-									thinking: state.streamingThinking,
-								});
-							}
-							
-							// 添加文本内容
-							if (state.streamingContent) {
-								content.push({
-									type: "text",
-									text: state.streamingContent,
-								});
-							}
-							
-							// 添加工具内容
-							const tools = Array.from(newTools.values());
-							tools.forEach((tool) => {
-								content.push({
-									type: "tool",
-									toolCallId: tool.id,
-									toolName: tool.name,
-									args: tool.args,
-									output: tool.output,
-									error: tool.error,
-								});
+							const contentArray = buildContentArray({
+								...state,
+								activeTools: newTools,
+								streamingToolCalls: newStreamingToolCalls,
 							});
-							
+
 							return {
 								activeTools: newTools,
+								streamingToolCalls: newStreamingToolCalls,
 								currentStreamingMessage: {
 									...state.currentStreamingMessage,
-									content,
+									content: contentArray,
 								},
 							};
 						}
-						
-						return { activeTools: newTools };
+
+						return {
+							activeTools: newTools,
+							streamingToolCalls: newStreamingToolCalls,
+						};
 					},
 					false,
 					"setActiveTool",
@@ -400,50 +443,24 @@ export const useChatStore = create<ChatState>()(
 								endTime: new Date(),
 							});
 						}
-						
-						// 同时更新currentStreamingMessage以包含工具内容
+
+						// 同时更新当前流式消息
 						if (state.currentStreamingMessage) {
-							// 构建完整的内容数组
-							const content = [];
-							
-							// 添加思考内容
-							if (state.streamingThinking) {
-								content.push({
-									type: "thinking",
-									thinking: state.streamingThinking,
-								});
-							}
-							
-							// 添加文本内容
-							if (state.streamingContent) {
-								content.push({
-									type: "text",
-									text: state.streamingContent,
-								});
-							}
-							
-							// 添加工具内容
-							const tools = Array.from(newTools.values());
-							tools.forEach((tool) => {
-								content.push({
-									type: "tool",
-									toolCallId: tool.id,
-									toolName: tool.name,
-									args: tool.args,
-									output: tool.output,
-									error: tool.error,
-								});
+							const contentArray = buildContentArray({
+								...state,
+								activeTools: newTools,
+								streamingToolCalls: state.streamingToolCalls,
 							});
-							
+
 							return {
 								activeTools: newTools,
 								currentStreamingMessage: {
 									...state.currentStreamingMessage,
-									content,
+									content: contentArray,
 								},
 							};
 						}
-						
+
 						return { activeTools: newTools };
 					},
 					false,
@@ -480,194 +497,337 @@ export const useChatStore = create<ChatState>()(
 				set({ sessionId: id }, false, "setSessionId");
 			},
 
-			// Load session from server
-			loadSession: async (sessionPath: string) => {
-				try {
-					const response = await fetch(
-						`/api/session?path=${encodeURIComponent(sessionPath)}`,
-					);
-					if (!response.ok) throw new Error("Failed to load session");
-
-					const data = await response.json();
-					const sessionMessages: any[] = data.messages || [];
-
-					// Parse session messages
-					const parsedMessages: Message[] = [];
-					const tools: ToolExecution[] = [];
-
-					// First pass: parse all messages and create a map for parent lookup
-					const messageMap = new Map<string, Message>();
-
-					for (const entry of sessionMessages) {
-						if (entry.type === "message" && entry.message) {
-							const msg = entry.message;
-							const content: MessageContent[] = [];
-
-							// Parse message content
-							if (msg.content && Array.isArray(msg.content)) {
-								for (const c of msg.content) {
-									if (c.type === "text" && c.text) {
-										content.push({ type: "text", text: c.text });
-									} else if (c.type === "thinking" && c.thinking) {
-										content.push({
-											type: "thinking",
-											thinking: c.thinking,
-											signature: c.thinkingSignature,
-										});
-									} else if (c.type === "toolCall" && c.id) {
-										// Tool call from session file uses 'name' and 'arguments'
-										content.push({
-											type: "tool",
-											toolCallId: c.id,
-											toolName: c.name || "unknown",
-											args: c.arguments || {},
-										});
-									}
-									// Note: toolResult is handled separately in second pass
-								}
-							}
-
-							const parsedMsg: Message = {
-								id: entry.id || generateMessageId(),
-								role: msg.role,
-								content,
-								timestamp: new Date(entry.timestamp || msg.timestamp),
-								isMessageCollapsed: false,
-								isThinkingCollapsed: true,
-							};
-
-							parsedMessages.push(parsedMsg);
-							messageMap.set(parsedMsg.id, parsedMsg);
-						} else if (entry.type === "tool_start") {
-							tools.push({
-								id: entry.toolCallId,
-								name: entry.toolName,
-								args: entry.args || {},
-								status: "executing",
-								startTime: new Date(entry.timestamp),
-							});
-						} else if (entry.type === "tool_end") {
-							const tool = tools.find((t) => t.id === entry.toolCallId);
-							if (tool) {
-								tool.status = entry.error ? "error" : "success";
-								tool.output = entry.output;
-								tool.error = entry.error;
-								tool.endTime = new Date(entry.timestamp);
-							}
-						}
-					}
-
-					// Second pass: handle toolResult messages
-					for (const entry of sessionMessages) {
-						if (
-							entry.type === "message" &&
-							entry.message?.role === "toolResult" &&
-							entry.parentId
-						) {
-							const parentMsg = messageMap.get(entry.parentId);
-							if (parentMsg && entry.message.toolCallId) {
-								// Find the tool content in parent message and update it
-								const toolContent = parentMsg.content.find(
-									(tc) =>
-										tc.type === "tool" &&
-										tc.toolCallId === entry.message.toolCallId,
-								);
-								if (toolContent) {
-									toolContent.output = entry.message.content?.[0]?.text || "";
-									toolContent.error = entry.message.isError
-										? "Error occurred"
-										: undefined;
-								}
-							}
-						}
-					}
-
-					// Update store
-					set(
-						{
-							messages: parsedMessages,
-							sessionId: sessionPath,
-							activeTools: new Map(tools.map((t) => [t.id, t])),
-						},
-						false,
-						"loadSession",
-					);
-
-					return parsedMessages.length;
-				} catch (error) {
-					console.error("Failed to load session:", error);
-					throw error;
-				}
-			},
-
-			// Regenerate message
-			regenerateMessage: (messageId: string) => {
-				const state = get();
-				const messageIndex = state.messages.findIndex(
-					(m) => m.id === messageId,
-				);
-				if (messageIndex === -1) return;
-
-				// Find the user message that triggered this assistant message
-				let userMessageIndex = -1;
-				for (let i = messageIndex - 1; i >= 0; i--) {
-					if (state.messages[i].role === "user") {
-						userMessageIndex = i;
-						break;
-					}
-				}
-
-				if (userMessageIndex === -1) return;
-
-				// Remove all messages from the assistant message onwards
-				const newMessages = state.messages.slice(0, messageIndex);
-
-				set(
-					{
-						messages: newMessages,
-						isStreaming: true,
-						currentStreamingMessage: {
-							id: generateMessageId(),
-							role: "assistant",
-							content: [],
-							timestamp: new Date(),
-							isStreaming: true,
-						},
-					},
-					false,
-					"regenerateMessage",
-				);
-
-				// Trigger regeneration via WebSocket
-				const userMessage = newMessages[userMessageIndex];
-				const text = userMessage.content.find((c) => c.type === "text")?.text;
-				if (text) {
-					// Send via WebSocket - this would be handled by the API layer
-					if (typeof window !== "undefined") {
-						window.dispatchEvent(
-							new CustomEvent("chat:resend", { detail: { text } }),
-						);
-					}
-				}
-			},
-
 			// Reset
 			reset: () => {
 				set(createInitialState(), false, "reset");
 			},
+
+			// Legacy compatibility methods
+			appendStreamingContent: (text: string) => {
+				get().batchUpdateContent({ content: text });
+			},
+
+			appendStreamingThinking: (thinking: string) => {
+				get().batchUpdateContent({ thinking });
+			},
+
+			appendToolCallDelta: (id: string, name: string, delta: string) => {
+				get().batchUpdateContent({ toolCall: { id, name, delta } });
+			},
+
+			// Message collapse toggle
+			toggleMessageCollapse: (messageId: string) => {
+				set(
+					(state) => ({
+						messages: state.messages.map((msg) =>
+							msg.id === messageId
+								? { ...msg, isMessageCollapsed: !msg.isMessageCollapsed }
+								: msg,
+						),
+					}),
+					false,
+					"toggleMessageCollapse",
+				);
+			},
+
+			// Thinking collapse toggle
+			toggleThinkingCollapse: (messageId: string) => {
+				set(
+					(state) => ({
+						messages: state.messages.map((msg) =>
+							msg.id === messageId
+								? { ...msg, isThinkingCollapsed: !msg.isThinkingCollapsed }
+								: msg,
+						),
+					}),
+					false,
+					"toggleThinkingCollapse",
+				);
+			},
+
+			// Load session messages from server
+			loadSession: async (sessionPath: string) => {
+				try {
+					const response = await fetch("/api/session/load", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ sessionPath }),
+					});
+
+					if (!response.ok) {
+						console.error(
+							"[ChatStore] Failed to load session:",
+							response.statusText,
+						);
+						set({ messages: [] }, false, "loadSession/error");
+						return 0;
+					}
+
+					const data = await response.json();
+					if (!data.entries?.length) {
+						set({ messages: [] }, false, "loadSession/empty");
+						return 0;
+					}
+
+					// Helper: normalize content to array
+					const normalizeContent = (rawContent: any): any[] => {
+						if (!rawContent) return [];
+						if (Array.isArray(rawContent)) return rawContent;
+						if (typeof rawContent === "string")
+							return [{ type: "text", text: rawContent }];
+						if (typeof rawContent === "object") return [rawContent];
+						return [{ type: "text", text: String(rawContent) }];
+					};
+
+					// Helper: normalize single content item
+					const normalizeContentItem = (item: any): any => {
+						if (!item || typeof item !== "object") {
+							return { type: "text", text: String(item || "") };
+						}
+
+						const type = item.type || "text";
+						switch (type) {
+							case "thinking":
+								return {
+									type: "thinking" as const,
+									thinking: item.thinking || item.text || "",
+									signature: item.thinkingSignature || item.signature,
+								};
+							case "text":
+								return { type: "text" as const, text: item.text || "" };
+							case "toolCall":
+							case "tool_use":
+								return {
+									type: "tool_use" as const,
+									toolCallId:
+										item.id || item.toolCallId || `tool-${Date.now()}`,
+									toolName: item.name || item.toolName || "unknown",
+									args: item.arguments || item.args || {},
+									partialArgs: item.partialArgs,
+								};
+							case "toolResult":
+							case "tool_result":
+							case "tool": {
+								// 处理 content 数组格式，提取文本
+								let contentText = "";
+								if (Array.isArray(item.content)) {
+									contentText = item.content
+										.filter((c: any) => c.type === "text")
+										.map((c: any) => c.text)
+										.join("");
+								} else if (typeof item.content === "string") {
+									contentText = item.content;
+								}
+
+								console.log("[normalize] toolResult:", {
+									toolCallId: item.toolCallId,
+									toolName: item.toolName,
+									contentLength: contentText.length,
+									isError: item.isError,
+								});
+
+								return {
+									type: "tool" as const,
+									toolCallId: item.toolCallId || item.id,
+									toolName: item.toolName || item.name || "unknown",
+									output: item.isError ? undefined : contentText || item.output,
+									error: item.isError ? contentText || item.error : undefined,
+									args: item.args,
+								};
+							}
+							case "image":
+								return {
+									type: "image" as const,
+									imageUrl: item.imageUrl || item.url || item.source?.data,
+								};
+							default:
+								return {
+									type: "text" as const,
+									text: item.text || String(item),
+								};
+						}
+					};
+
+					// 调试：查看所有 entry 类型
+					console.log(
+						"[loadSession] All entries:",
+						data.entries.map((e: any) => ({
+							type: e.type,
+							role: e.message?.role,
+						})),
+					);
+
+					// 第一遍：收集所有 toolCall 的参数
+					const toolCallArgsMap = new Map<string, any>();
+					data.entries.forEach((entry: any) => {
+						if (
+							entry.type === "message" &&
+							entry.message?.role === "assistant" &&
+							Array.isArray(entry.message.content)
+						) {
+							entry.message.content.forEach((item: any) => {
+								if (item.type === "toolCall" && item.id) {
+									toolCallArgsMap.set(item.id, item.arguments || {});
+									console.log(
+										"[loadSession] Found toolCall:",
+										item.id,
+										item.name,
+										item.arguments,
+									);
+								}
+							});
+						}
+					});
+
+					const loadedMessages = data.entries
+						.filter((entry: any) => entry.type === "message" && entry.message)
+						.map((entry: any) => {
+							const msg = entry.message;
+
+							// 调试
+							console.log("[loadSession] Processing message:", {
+								role: msg.role,
+								id: entry.id,
+							});
+
+							// 特殊处理 toolResult 消息
+							if (msg.role === "toolResult") {
+								// 从 toolResult 创建 tool 类型的 content
+								let contentText = "";
+								if (Array.isArray(msg.content)) {
+									contentText = msg.content
+										.filter((c: any) => c.type === "text")
+										.map((c: any) => c.text)
+										.join("");
+								} else if (typeof msg.content === "string") {
+									contentText = msg.content;
+								}
+
+								// 查找对应的 toolCall 参数
+								const args = toolCallArgsMap.get(msg.toolCallId) || {};
+								console.log("[loadSession] toolResult message:", {
+									toolCallId: msg.toolCallId,
+									toolName: msg.toolName,
+									contentLength: contentText.length,
+									hasArgs: Object.keys(args).length > 0,
+								});
+
+								return {
+									id:
+										entry.id ||
+										`msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+									role: "assistant" as const, // toolResult 转为 assistant
+									content: [
+										{
+											type: "tool" as const,
+											toolCallId: msg.toolCallId,
+											toolName: msg.toolName,
+											output: msg.isError ? undefined : contentText,
+											error: msg.isError ? contentText : undefined,
+											args: args,
+										},
+									],
+									timestamp: new Date(
+										msg.timestamp || entry.timestamp || Date.now(),
+									),
+									isStreaming: false,
+									isThinkingCollapsed: false,
+									isMessageCollapsed: false,
+								};
+							}
+
+							// 普通消息处理
+							const rawContent = msg.content;
+							const contentArray = normalizeContent(rawContent);
+
+							// 过滤掉 toolCall，避免重复显示（toolResult 已经单独处理了）
+							const filteredContent = contentArray.filter((item: any) => {
+								// 跳过 toolCall 类型，避免和 toolResult 重复
+								if (item.type === "toolCall") {
+									console.log(
+										"[loadSession] Filtering out toolCall from assistant message:",
+										item.id,
+									);
+									return false;
+								}
+								return true;
+							});
+
+							const normalizedContent =
+								filteredContent.map(normalizeContentItem);
+
+							return {
+								id:
+									entry.id ||
+									`msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+								role: msg.role || "assistant",
+								content: normalizedContent,
+								timestamp: new Date(
+									msg.timestamp || entry.timestamp || Date.now(),
+								),
+								isStreaming: false,
+								isThinkingCollapsed: false,
+								isMessageCollapsed: false,
+							};
+						});
+
+					console.log(`[ChatStore] Loaded ${loadedMessages.length} messages`);
+
+					// 调试：检查工具消息
+					loadedMessages.forEach((msg, idx) => {
+						const toolContent = msg.content.filter(
+							(c: any) => c.type === "tool",
+						);
+						if (toolContent.length > 0) {
+							console.log(
+								`[ChatStore] Message ${idx} has ${toolContent.length} tool blocks:`,
+							);
+							toolContent.forEach((t: any, i: number) => {
+								console.log(
+									`  Tool[${i}]: name=${t.toolName}, hasOutput=${!!t.output}, hasError=${!!t.error}`,
+								);
+							});
+						}
+					});
+
+					set(
+						{ messages: loadedMessages, currentStreamingMessage: null },
+						false,
+						"loadSession",
+					);
+					return loadedMessages.length;
+				} catch (err) {
+					console.error("[ChatStore] Failed to load session:", err);
+					set({ messages: [] }, false, "loadSession/error");
+					return 0;
+				}
+			},
+
+			// Stub methods for compatibility
+			updateMessage: () => {},
+			deleteMessage: () => {},
+			regenerateMessage: () => {},
 		}),
 		{ name: "ChatStore" },
 	),
 );
 
 // ============================================================================
-// Selectors
+// Selectors for Zustand - 优化重渲染性能
 // ============================================================================
 
-export const selectMessages = (state: ChatState) => state.messages;
-export const selectCurrentStreamingMessage = (state: ChatState) =>
-	state.currentStreamingMessage;
-export const selectInputText = (state: ChatState) => state.inputText;
-export const selectIsStreaming = (state: ChatState) => state.isStreaming;
-export const selectShowThinking = (state: ChatState) => state.showThinking;
-export const selectActiveTools = (state: ChatState) => state.activeTools;
+export const selectMessages = (
+	state: ReturnType<typeof useChatStore.getState>,
+) => state.messages;
+export const selectCurrentStreamingMessage = (
+	state: ReturnType<typeof useChatStore.getState>,
+) => state.currentStreamingMessage;
+export const selectInputText = (
+	state: ReturnType<typeof useChatStore.getState>,
+) => state.inputText;
+export const selectIsStreaming = (
+	state: ReturnType<typeof useChatStore.getState>,
+) => state.isStreaming;
+export const selectShowThinking = (
+	state: ReturnType<typeof useChatStore.getState>,
+) => state.showThinking;

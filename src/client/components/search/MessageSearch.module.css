@@ -11,7 +11,7 @@
 }
 
 .title {
-	font-size: 11px;
+	font-size: var(--font-sm);
 	font-weight: 600;
 	text-transform: uppercase;
 	color: var(--text-muted);
@@ -63,7 +63,7 @@
 	border: 1px solid var(--border-color);
 	border-radius: 4px;
 	color: var(--text-primary);
-	font-size: 13px;
+	font-size: var(--font-base);
 	outline: none;
 }
 
@@ -76,7 +76,7 @@
 	align-items: center;
 	gap: 8px;
 	margin-bottom: 8px;
-	font-size: 12px;
+	font-size: var(--font-base);
 	color: var(--text-muted);
 }
 
@@ -86,7 +86,7 @@
 	border: 1px solid var(--border-color);
 	border-radius: 4px;
 	color: var(--text-primary);
-	font-size: 11px;
+	font-size: var(--font-sm);
 	cursor: pointer;
 }
 
@@ -100,7 +100,7 @@
 	display: flex;
 	align-items: center;
 	gap: 4px;
-	font-size: 12px;
+	font-size: var(--font-base);
 	color: var(--text-secondary);
 	cursor: pointer;
 }

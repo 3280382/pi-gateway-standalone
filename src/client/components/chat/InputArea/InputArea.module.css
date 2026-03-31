@@ -5,7 +5,7 @@
 .container {
 	display: flex;
 	flex-direction: column;
-	padding: 4px 0;
+	padding: 0;
 	background: var(--bg-secondary);
 	position: relative;
 }
@@ -123,7 +123,7 @@
 	box-shadow: 0 0 0 2px var(--accent-blue);
 }
 
-/* Send Button - Large */
+/* Send Button - Large - Green when ready */
 .sendButton {
 	display: flex;
 	align-items: center;
@@ -132,7 +132,7 @@
 	height: 48px;
 	border: none;
 	border-radius: 50%;
-	background: var(--accent-primary);
+	background: #238636;
 	color: white;
 	cursor: pointer;
 	transition: all 0.2s ease;
@@ -140,7 +140,7 @@
 }
 
 .sendButton:hover:not(:disabled) {
-	background: var(--accent-blue);
+	background: #2ea043;
 	transform: scale(1.05);
 }
 
@@ -149,12 +149,13 @@
 	cursor: not-allowed;
 }
 
+/* Stop button - Red when streaming */
 .sendButton.stopButton {
-	background: var(--accent-danger);
+	background: #da3633;
 }
 
 .sendButton.stopButton:hover {
-	background: #ff6b6b;
+	background: #f85149;
 }
 
 .sendButton svg {

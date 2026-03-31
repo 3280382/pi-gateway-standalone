@@ -100,12 +100,18 @@ export function useSidebarController(): SidebarController {
 						reject(new Error("Timeout creating new session"));
 					}, 5000);
 
-					const unsubscribe = websocketService.on("session_created", (data) => {
-						clearTimeout(timeout);
-						store.selectSession(data.sessionId);
-						unsubscribe();
-						resolve();
-					});
+					const unsubscribe = websocketService.on(
+						"session_created",
+						async (data) => {
+							clearTimeout(timeout);
+							store.selectSession(data.sessionId);
+							// 保存新session ID到sessionStore用于持久化
+							const { useSessionStore } = await import("@/stores/sessionStore");
+							useSessionStore.getState().setCurrentSession(data.sessionId);
+							unsubscribe();
+							resolve();
+						},
+					);
 				});
 			} catch (error) {
 				const message =
@@ -171,6 +177,10 @@ export function useSidebarController(): SidebarController {
 						store.setWorkingDir(data.cwd);
 						const { useSessionStore } = await import("@/stores/sessionStore");
 						useSessionStore.getState().setCurrentDir(data.cwd);
+						// 保存新的session ID（切换目录后会创建新session）
+						if (data.sessionId) {
+							useSessionStore.getState().setCurrentSession(data.sessionId);
+						}
 						store.addRecentWorkspace(data.cwd);
 						unsub();
 						resolve();

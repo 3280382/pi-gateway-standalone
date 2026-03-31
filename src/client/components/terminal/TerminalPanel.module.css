@@ -51,7 +51,7 @@
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	font-size: 11px;
+	font-size: var(--font-sm);
 	font-weight: 600;
 	color: var(--text-primary);
 }
@@ -97,7 +97,7 @@
 	flex: 1;
 	padding: 6px 10px;
 	font-family: var(--font-mono);
-	font-size: 11px;
+	font-size: var(--font-sm);
 	line-height: 1.5;
 	overflow-y: auto;
 	background: var(--bg-primary);
@@ -108,25 +108,25 @@
 	gap: 6px;
 	white-space: pre-wrap;
 	word-break: break-all;
-	font-size: 11px;
+	font-size: var(--font-sm);
 	line-height: 1.5;
 }
 
 .prompt {
 	color: var(--accent-green);
 	flex-shrink: 0;
-	font-size: 11px;
+	font-size: var(--font-sm);
 }
 
 .text {
 	color: var(--text-primary);
-	font-size: 11px;
+	font-size: var(--font-sm);
 }
 
 .cursor {
 	color: var(--accent-green);
 	animation: blink 1s step-end infinite;
-	font-size: 11px;
+	font-size: var(--font-sm);
 }
 
 @keyframes blink {
@@ -149,7 +149,7 @@
 	border: none;
 	color: var(--text-primary);
 	font-family: var(--font-mono);
-	font-size: 11px;
+	font-size: var(--font-sm);
 	line-height: 1.5;
 	outline: none;
 	padding: 0;
@@ -157,7 +157,7 @@
 
 .commandInput::placeholder {
 	color: var(--text-muted);
-	font-size: 11px;
+	font-size: var(--font-sm);
 }
 
 /* Scrollbar */

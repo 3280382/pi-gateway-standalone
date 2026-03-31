@@ -15,7 +15,7 @@
 
 .header {
 	padding: 10px 16px;
-	font-size: 12px;
+	font-size: var(--font-base);
 	font-weight: 600;
 	text-transform: uppercase;
 	color: var(--text-muted);
@@ -33,7 +33,7 @@
 
 .categoryHeader {
 	padding: 4px 16px;
-	font-size: 10px;
+	font-size: var(--font-xs);
 	font-weight: 600;
 	text-transform: uppercase;
 	color: var(--accent-primary);
@@ -55,20 +55,20 @@
 }
 
 .icon {
-	font-size: 16px;
+	font-size: var(--font-md);
 	width: 24px;
 	text-align: center;
 }
 
 .name {
-	font-size: 13px;
+	font-size: var(--font-base);
 	font-weight: 500;
 	color: var(--text-primary);
 	min-width: 80px;
 }
 
 .description {
-	font-size: 12px;
+	font-size: var(--font-base);
 	color: var(--text-muted);
 	flex: 1;
 }

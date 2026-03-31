@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useSidebarController } from "@/services/api/sidebarApi";
 import { websocketService } from "@/services/websocket.service";
 import { useChatStore } from "@/stores/chatStore";
+import { useSessionStore } from "@/stores/sessionStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import type { Session } from "../../../../types/sidebar";
 import { IconButton, SectionHeader } from "../../../ui";
@@ -14,10 +15,28 @@ import styles from "./Sessions.module.css";
 
 export function Sessions() {
 	const sessions = useSidebarStore((state) => state.sessions);
-	const selectedId = useSidebarStore((state) => state.selectedSessionId);
+	const sidebarSelectedId = useSidebarStore((state) => state.selectedSessionId);
 	const isLoading = useSidebarStore((state) => state.isLoading);
 	const workingDir = useSidebarStore((state) => state.workingDir);
 	const controller = useSidebarController();
+
+	// 从sessionStore获取当前session ID用于激活样式
+	const currentSessionId = useSessionStore((state) => state.currentSessionId);
+
+	// 优先使用sessionStore的currentSessionId，如果没有则使用sidebarStore的selectedSessionId
+	const selectedId = currentSessionId || sidebarSelectedId;
+
+	// 调试信息
+
+	// 检查session是否匹配的辅助函数（支持短ID匹配完整路径）
+	const isSessionSelected = (sessionId: string): boolean => {
+		if (!selectedId) return false;
+		// 完全匹配
+		if (sessionId === selectedId) return true;
+		// sessionId 是完整路径，selectedId 是短ID（提取文件名中的UUID部分匹配）
+		const fileName = sessionId.split("/").pop() || "";
+		return fileName.includes(selectedId);
+	};
 
 	// 当工作目录变化时加载会话列表
 	useEffect(() => {
@@ -39,8 +58,6 @@ export function Sessions() {
 			sessionId,
 			"path:",
 			sessionPath,
-			"path type:",
-			typeof sessionPath,
 		);
 
 		// 验证 sessionPath
@@ -49,93 +66,27 @@ export function Sessions() {
 			return;
 		}
 
-		// 先选中会话
+		// 先选中会话（UI状态）
 		controller.selectSession(sessionId);
 
-		// 通过API加载会话文件内容
+		// 保存session ID到sessionStore用于持久化
+		useSessionStore.getState().setCurrentSession(sessionId);
+
+		// 使用统一的 chatStore.loadSession 加载会话消息
+		// 这个函数和 App.tsx 首次加载使用相同的转换逻辑
 		try {
-			console.log("[Sessions] Fetching session content from API...");
-			const response = await fetch("/api/session/load", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ sessionPath }),
-			});
+			console.log("[Sessions] Loading session via chatStore...");
+			const messageCount = await useChatStore
+				.getState()
+				.loadSession(sessionPath);
+			console.log(
+				`[Sessions] Loaded ${messageCount} messages from ${sessionId}`,
+			);
 
-			console.log("[Sessions] API response status:", response.status);
-
-			if (!response.ok) {
-				const errorText = await response.text();
-				console.error("[Sessions] API error response:", errorText);
-				throw new Error(
-					`Failed to load session: ${response.status} ${errorText}`,
-				);
-			}
-
-			const data = await response.json();
-			console.log("[Sessions] Session data loaded:", data);
-
-			// 将会话内容发送到聊天区域重建
-			if (data.entries && data.entries.length > 0) {
-				// 使用WebSocket通知服务器加载会话
-				websocketService.send("load_session", { sessionPath });
-
-				// 解析消息条目并加载到聊天store
-				// 会话文件格式: { type: "message", message: { role, content: [...], timestamp } }
-				const messages = data.entries
-					.filter((entry: any) => entry.type === "message" && entry.message)
-					.map((entry: any) => {
-						const msg = entry.message;
-						// 转换内容格式
-						let content = msg.content;
-						// 如果content是字符串，转换为数组格式
-						if (typeof content === "string") {
-							content = [{ type: "text", text: content }];
-						}
-						// 如果content是数组，确保格式正确
-						else if (Array.isArray(content)) {
-							content = content.map((c: any) => {
-								if (typeof c === "string") return { type: "text", text: c };
-								if (
-									c.type === "text" ||
-									c.type === "toolCall" ||
-									c.type === "toolResult"
-								)
-									return c;
-								return { type: "text", text: String(c) };
-							});
-						} else {
-							content = [{ type: "text", text: JSON.stringify(content) }];
-						}
-
-						return {
-							id: entry.id || `msg-${Date.now()}-${Math.random()}`,
-							role: msg.role || "assistant",
-							content: content,
-							timestamp: new Date(
-								msg.timestamp || entry.timestamp || Date.now(),
-							),
-							isStreaming: false,
-							isThinkingCollapsed: true,
-							isMessageCollapsed: false,
-						};
-					});
-
-				// 更新聊天store
-				useChatStore.getState().setMessages(messages);
-
-				console.log(
-					`[Sessions] Loaded session: ${sessionId}, ${data.entries.length} entries, ${messages.length} messages`,
-				);
-			} else {
-				console.log("[Sessions] No entries found in session data");
-			}
+			// 通知WebSocket服务器会话已切换
+			websocketService.send("load_session", { sessionPath });
 		} catch (err) {
 			console.error("[Sessions] Failed to load session:", err);
-			console.error("[Sessions] Error details:", {
-				name: err instanceof Error ? err.name : "Unknown",
-				message: err instanceof Error ? err.message : String(err),
-				stack: err instanceof Error ? err.stack : undefined,
-			});
 		}
 	};
 
@@ -166,7 +117,7 @@ export function Sessions() {
 						<SessionItem
 							key={session.id}
 							session={session}
-							isSelected={session.id === selectedId}
+							isSelected={isSessionSelected(session.id)}
 							onClick={() => handleSelectSession(session.id, session.path)}
 						/>
 					))

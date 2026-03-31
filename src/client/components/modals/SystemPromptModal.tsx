@@ -4,22 +4,25 @@
 
 import { useEffect, useState } from "react";
 import { useModalStore } from "@/stores/modalStore";
+import { useSessionStore } from "@/stores/sessionStore";
 import styles from "./Modals.module.css";
 
 interface SystemPromptData {
 	systemPrompt?: string;
-	appendSystemPrompt?: string[];
-	skills?: Array<{ name: string; content: string }>;
-	agentsMd?: string;
+	appendSystemPrompt?: Array<{ path: string; content: string }>;
+	skills?: Array<{ name: string; description: string }>;
+	agentsFiles?: Array<{ path: string; content: string }>;
+	cwd?: string;
 }
 
 export function SystemPromptModal() {
 	const { isSystemPromptOpen, closeSystemPrompt } = useModalStore();
 	const [data, setData] = useState<SystemPromptData | null>(null);
 	const [loading, setLoading] = useState(false);
-	const [activeTab, setActiveTab] = useState<"prompt" | "agents" | "skills">(
-		"prompt",
-	);
+	const [activeTab, setActiveTab] = useState<
+		"prompt" | "agents" | "skills" | "resources"
+	>("prompt");
+	const resourceFiles = useSessionStore((state) => state.resourceFiles);
 
 	useEffect(() => {
 		if (!isSystemPromptOpen) return;
@@ -71,6 +74,12 @@ export function SystemPromptModal() {
 					>
 						Skills ({data?.skills?.length || 0})
 					</button>
+					<button
+						className={activeTab === "resources" ? styles.activeTab : ""}
+						onClick={() => setActiveTab("resources")}
+					>
+						Resources
+					</button>
 				</div>
 
 				<div className={styles.content}>
@@ -88,29 +97,95 @@ export function SystemPromptModal() {
 										<h4>
 											➕ Append System Prompt ({data.appendSystemPrompt.length})
 										</h4>
-										{data.appendSystemPrompt.map((prompt, i) => (
-											<pre key={i} className={styles.code}>
-												{prompt}
-											</pre>
+										{data.appendSystemPrompt.map((file, i) => (
+											<div key={i} className={styles.fileBlock}>
+												<div className={styles.filePath}>{file.path}</div>
+												<pre className={styles.code}>{file.content}</pre>
+											</div>
 										))}
 									</>
 								)}
 						</div>
 					) : activeTab === "agents" ? (
 						<div className={styles.promptSection}>
-							<h4>📄 AGENTS.md</h4>
-							<pre className={styles.code}>
-								{data?.agentsMd || "No AGENTS.md loaded"}
-							</pre>
+							<h4>📄 AGENTS.md Files ({data?.agentsFiles?.length || 0})</h4>
+							{data?.agentsFiles?.map((file, i) => (
+								<div key={i} className={styles.fileBlock}>
+									<div className={styles.filePath}>{file.path}</div>
+									<pre className={styles.code}>{file.content}</pre>
+								</div>
+							))}
 						</div>
-					) : (
+					) : activeTab === "skills" ? (
 						<div className={styles.skillsList}>
 							{data?.skills?.map((skill, i) => (
 								<details key={i} className={styles.skillItem}>
 									<summary>{skill.name}</summary>
-									<pre className={styles.code}>{skill.content}</pre>
+									<div className={styles.skillDescription}>
+										{skill.description}
+									</div>
 								</details>
 							))}
+						</div>
+					) : (
+						<div className={styles.promptSection}>
+							<h4>📁 Resource Files</h4>
+							{resourceFiles ? (
+								<>
+									<div className={styles.resourceSection}>
+										<h5>System Prompt</h5>
+										<div className={styles.filePath}>
+											Global: {resourceFiles.systemPrompt.global}
+										</div>
+										<div className={styles.filePath}>
+											Project: {resourceFiles.systemPrompt.project}
+										</div>
+										<div className={styles.filePath}>
+											Status: {resourceFiles.systemPrompt.loaded}
+										</div>
+									</div>
+									<div className={styles.resourceSection}>
+										<h5>Configuration</h5>
+										<div className={styles.filePath}>
+											Settings: {resourceFiles.settings.path}{" "}
+											{resourceFiles.settings.exists ? "✓" : "✗"}
+										</div>
+										<div className={styles.filePath}>
+											Auth: {resourceFiles.auth.path}{" "}
+											{resourceFiles.auth.exists ? "✓" : "✗"}
+										</div>
+										<div className={styles.filePath}>
+											Models: {resourceFiles.models.path}{" "}
+											{resourceFiles.models.exists ? "✓" : "✗"}
+										</div>
+										<div className={styles.filePath}>
+											Session: {resourceFiles.session.path}{" "}
+											{resourceFiles.session.exists ? "✓" : "✗"}
+										</div>
+									</div>
+									<div className={styles.resourceSection}>
+										<h5>
+											AGENTS.md Files ({resourceFiles.agentsFiles.length})
+										</h5>
+										{resourceFiles.agentsFiles.map((f, i) => (
+											<div key={i} className={styles.filePath}>
+												{f.path} {f.exists ? "✓" : "✗"}
+											</div>
+										))}
+									</div>
+									<div className={styles.resourceSection}>
+										<h5>Skills ({resourceFiles.skills.loaded.length})</h5>
+										<div className={styles.filePath}>
+											Global: {resourceFiles.skills.global}
+										</div>
+										<div className={styles.filePath}>
+											Project: {resourceFiles.skills.project}
+										</div>
+									</div>
+								</>
+							) : (
+								<div className={styles.loading}>No resource files loaded</div>
+							)}
 						</div>
 					)}
 				</div>

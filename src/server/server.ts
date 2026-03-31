@@ -10,12 +10,58 @@
 // 这确保SDK使用被拦截的fetch
 // ============================================================================
 
-import { z } from "zod";
 import { Config } from "./config";
-import { AppFactory } from "./lib/app-factory";
 import { Logger, LogLevel } from "./lib/utils/logger";
 import { setupLlmInterceptors } from "./llm";
 import { LlmLogManager } from "./llm/log-manager";
+
+// ============================================================================
+// LLM日志管理器和拦截器设置 - 必须在导入SDK之前完成
+// ============================================================================
+
+// 全局LLM日志管理器
+const llmLogManager = new LlmLogManager({
+	enabled: Config.getLlmLogConfig().enabled,
+	truncateLimit: Config.getLlmLogConfig().truncateLimit,
+});
+
+// 在设置拦截器之前保存原始fetch
+const originalFetchBeforeInterceptor = globalThis.fetch;
+
+// 设置LLM拦截器（必须在导入pi-coding-agent之前）
+setupLlmInterceptors(llmLogManager, {
+	setupHttpInterceptor: true,
+	truncateLimit: Config.getLlmLogConfig().truncateLimit,
+});
+
+// 测试拦截器是否工作
+console.log("[TEST] Testing if fetch interceptor is active...");
+console.log("[TEST] globalThis.fetch type:", typeof globalThis.fetch);
+console.log(
+	"[TEST] fetch changed:",
+	globalThis.fetch !== originalFetchBeforeInterceptor,
+);
+console.log(
+	"[TEST] fetch includes debug log:",
+	globalThis.fetch.toString().includes("GLOBAL FETCH INTERCEPTOR"),
+);
+
+// 立即测试一次 fetch 调用
+console.log("[TEST] Making test fetch call to httpbin.org...");
+fetch("https://httpbin.org/get")
+	.then(() => {
+		console.log("[TEST] Test fetch call completed");
+	})
+	.catch((err) => {
+		console.log("[TEST] Test fetch call failed:", err.message);
+	});
+
+// ============================================================================
+// 现在导入其他模块（SDK将使用被拦截的fetch）
+// ============================================================================
+
+import { z } from "zod";
+import { AppFactory } from "./lib/app-factory";
 import { registerRoutes } from "./routes";
 import { GatewaySession } from "./session/gateway-session";
 
@@ -40,23 +86,7 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 
 // ============================================================================
-// LLM日志管理器和拦截器设置
-// ============================================================================
-
-// 全局LLM日志管理器
-const llmLogManager = new LlmLogManager({
-	enabled: Config.getLlmLogConfig().enabled,
-	truncateLimit: Config.getLlmLogConfig().truncateLimit,
-});
-
-// 设置LLM拦截器
-setupLlmInterceptors(llmLogManager, {
-	setupHttpInterceptor: true,
-	truncateLimit: Config.getLlmLogConfig().truncateLimit,
-});
-
-// ============================================================================
-// 现在导入SDK（它们将使用被拦截的fetch）
+// 继续导入其他模块
 // ============================================================================
 
 import { WebSocket, WebSocketServer } from "ws";
@@ -206,7 +236,11 @@ wss.on("connection", (ws) => {
 					break;
 				}
 				case "prompt": {
+					logger.info(
+						`[WebSocket] 收到prompt消息: ${message.text.substring(0, 50)}...`,
+					);
 					await gatewaySession.prompt(message.text, message.images);
+					logger.info("[WebSocket] prompt处理完成");
 					break;
 				}
 				case "steer": {
