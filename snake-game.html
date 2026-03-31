@@ -1,0 +1,264 @@
+            }
+            
+            // 添加新蛇头
+            snake.unshift(head);
+            
+            // 检查是否吃到食物
+            if (head.x === food.x && head.y === food.y) {
+                // 增加分数
+                score += 10;
+                updateScore();
+                
+                // 生成新食物
+                generateFood();
+                
+                // 增加游戏速度（最高限制）
+                if (gameSpeed > 50) {
+                    gameSpeed -= 2;
+                    clearInterval(gameLoop);
+                    gameLoop = setInterval(updateGame, gameSpeed);
+                }
+            } else {
+                // 如果没有吃到食物，移除蛇尾
+                snake.pop();
+            }
+            
+            // 重绘游戏
+            drawGame();
+        }
+
+        // 检查碰撞
+        function checkCollision(head) {
+            // 检查墙壁碰撞
+            if (head.x < 0 || head.x >= gridWidth || head.y < 0 || head.y >= gridHeight) {
+                return true;
+            }
+            
+            // 检查自身碰撞（跳过蛇头）
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        // 游戏结束
+        function gameOver() {
+            gameRunning = false;
+            clearInterval(gameLoop);
+            
+            // 更新最高分
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('snakeHighScore', highScore);
+                highScoreElement.textContent = highScore;
+                statusText.textContent = `游戏结束！新纪录：${score}分`;
+                statusText.style.background = 'rgba(255, 215, 0, 0.3)';
+            } else {
+                statusText.textContent = `游戏结束！得分：${score}分`;
+                statusText.style.background = 'rgba(244, 67, 54, 0.3)';
+            }
+            
+            // 绘制游戏结束效果
+            drawGameOver();
+        }
+
+        // 绘制游戏结束效果
+        function drawGameOver() {
+            // 半透明覆盖层
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 游戏结束文字
+            ctx.fillStyle = '#FF5252';
+            ctx.font = 'bold 36px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('游戏结束', canvas.width / 2, canvas.height / 2 - 30);
+            
+            ctx.fillStyle = '#FFF';
+            ctx.font = '24px Arial';
+            ctx.fillText(`最终得分: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
+            
+            if (score > highScore - 10) {
+                ctx.fillStyle = '#FFD700';
+                ctx.font = '20px Arial';
+                ctx.fillText('新纪录！', canvas.width / 2, canvas.height / 2 + 40);
+            }
+        }
+
+        // 更新分数显示
+        function updateScore() {
+            scoreElement.textContent = score;
+            
+            // 分数动画效果
+            scoreElement.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                scoreElement.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        // 开始游戏
+        function startGame() {
+            if (gameRunning) return;
+            
+            initGame();
+            gameRunning = true;
+            gamePaused = false;
+            statusText.textContent = '游戏中...';
+            statusText.style.background = 'rgba(76, 175, 80, 0.3)';
+            
+            drawGame();
+            gameLoop = setInterval(updateGame, gameSpeed);
+        }
+
+        // 暂停/继续游戏
+        function togglePause() {
+            if (!gameRunning) return;
+            
+            gamePaused = !gamePaused;
+            
+            if (gamePaused) {
+                clearInterval(gameLoop);
+                statusText.textContent = '游戏暂停';
+                statusText.style.background = 'rgba(33, 150, 243, 0.3)';
+                
+                // 绘制暂停效果
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#FFF';
+                ctx.font = 'bold 36px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('游戏暂停', canvas.width / 2, canvas.height / 2);
+            } else {
+                statusText.textContent = '游戏中...';
+                statusText.style.background = 'rgba(76, 175, 80, 0.3)';
+                gameLoop = setInterval(updateGame, gameSpeed);
+                drawGame();
+            }
+        }
+
+        // 重置游戏
+        function resetGame() {
+            clearInterval(gameLoop);
+            gameRunning = false;
+            gamePaused = false;
+            initGame();
+            drawGame();
+            statusText.textContent = '准备开始';
+            statusText.style.background = 'rgba(76, 175, 80, 0.2)';
+        }
+
+        // 键盘控制
+        function handleKeyDown(e) {
+            switch (e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    if (direction !== 'down') nextDirection = 'up';
+                    e.preventDefault();
+                    break;
+                    
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    if (direction !== 'up') nextDirection = 'down';
+                    e.preventDefault();
+                    break;
+                    
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    if (direction !== 'right') nextDirection = 'left';
+                    e.preventDefault();
+                    break;
+                    
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    if (direction !== 'left') nextDirection = 'right';
+                    e.preventDefault();
+                    break;
+                    
+                case ' ':
+                    togglePause();
+                    e.preventDefault();
+                    break;
+                    
+                case 'Enter':
+                    if (!gameRunning) startGame();
+                    e.preventDefault();
+                    break;
+            }
+        }
+
+        // 按钮事件监听
+        startBtn.addEventListener('click', startGame);
+        pauseBtn.addEventListener('click', togglePause);
+        resetBtn.addEventListener('click', resetGame);
+
+        // 键盘事件监听
+        document.addEventListener('keydown', handleKeyDown);
+
+        // 触摸控制（移动设备）
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (!gameRunning) startGame();
+            
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            e.preventDefault();
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            
+            const dx = touchEndX - touchStartX;
+            const dy = touchEndY - touchStartY;
+            
+            // 确定滑动方向
+            if (Math.abs(dx) > Math.abs(dy)) {
+                // 水平滑动
+                if (dx > 0 && direction !== 'left') {
+                    nextDirection = 'right';
+                } else if (dx < 0 && direction !== 'right') {
+                    nextDirection = 'left';
+                }
+            } else {
+                // 垂直滑动
+                if (dy > 0 && direction !== 'up') {
+                    nextDirection = 'down';
+                } else if (dy < 0 && direction !== 'down') {
+                    nextDirection = 'up';
+                }
+            }
+            
+            e.preventDefault();
+        });
+
+        // 初始化游戏
+        initGame();
+        drawGame();
+        
+        // 更新最高分显示
+        highScoreElement.textContent = highScore;
+
+        // 添加一些初始提示
+        console.log('中文贪吃蛇游戏已加载！');
+        console.log('使用方向键或WASD控制蛇的移动');
+        console.log('空格键暂停/继续游戏');
+        console.log('Enter键开始游戏');
+    </script>
+</body>
+</html>

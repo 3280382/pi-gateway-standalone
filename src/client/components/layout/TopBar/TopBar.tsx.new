@@ -1,0 +1,186 @@
+						<div className={styles.modalBody}>
+							{/* Tab Bar */}
+							<div className={styles.tabBar}>
+								<button
+									className={`${styles.tab} ${systemPromptTab === "prompt" ? styles.activeTab : ""}`}
+									onClick={() => setSystemPromptTab("prompt")}
+								>
+									Prompt
+								</button>
+								<button
+									className={`${styles.tab} ${systemPromptTab === "resources" ? styles.activeTab : ""}`}
+									onClick={() => setSystemPromptTab("resources")}
+								>
+									Resources
+								</button>
+							</div>
+
+							{systemPromptLoading && (
+								<div className={styles.loading}>Loading...</div>
+							)}
+							{systemPromptError && (
+								<div className={styles.error}>{systemPromptError}</div>
+							)}
+
+							{systemPromptTab === "resources" ? (
+								// Resources Tab
+								<div className={styles.systemPromptContent}>
+									{resourceFiles ? (
+										<>
+											<div className={styles.section}>
+												<h4>System Prompt</h4>
+												<div className={styles.resourceItem}>
+													<span className={styles.resourceLabel}>Global:</span>
+													<span className={styles.resourcePath}>{resourceFiles.systemPrompt.global}</span>
+												</div>
+												<div className={styles.resourceItem}>
+													<span className={styles.resourceLabel}>Project:</span>
+													<span className={styles.resourcePath}>{resourceFiles.systemPrompt.project}</span>
+												</div>
+												<div className={styles.resourceMeta}>Loaded: {resourceFiles.systemPrompt.loaded}</div>
+											</div>
+
+											<div className={styles.section}>
+												<h4>Append System Prompt</h4>
+												{resourceFiles.appendSystemPrompt.length > 0 ? (
+													resourceFiles.appendSystemPrompt.map((f, i) => (
+														<div key={i} className={styles.resourceItem}>
+															<span className={styles.resourceLabel}>File {i + 1}:</span>
+															<span className={`${styles.resourcePath} ${f.exists ? styles.exists : styles.notExists}`}>{f.path}</span>
+															<span className={f.exists ? styles.exists : styles.notExists}>{f.exists ? "✓" : "✗"}</span>
+														</div>
+													))
+												) : (
+													<div className={styles.emptySection}>No append files</div>
+												)}
+											</div>
+
+											<div className={styles.section}>
+												<h4>AGENTS.md Files ({resourceFiles.agentsFiles.length})</h4>
+												{resourceFiles.agentsFiles.map((f, i) => (
+													<div key={i} className={styles.resourceItem}>
+														<span className={styles.resourceLabel}>File {i + 1}:</span>
+														<span className={`${styles.resourcePath} ${f.exists ? styles.exists : styles.notExists}`}>{f.path}</span>
+														<span className={f.exists ? styles.exists : styles.notExists}>{f.exists ? "✓" : "✗"}</span>
+													</div>
+												))}
+											</div>
+
+											<div className={styles.section}>
+												<h4>Configuration Files</h4>
+												<div className={styles.resourceItem}>
+													<span className={styles.resourceLabel}>Settings:</span>
+													<span className={`${styles.resourcePath} ${resourceFiles.settings.exists ? styles.exists : styles.notExists}`}>{resourceFiles.settings.path}</span>
+													<span className={resourceFiles.settings.exists ? styles.exists : styles.notExists}>{resourceFiles.settings.exists ? "✓" : "✗"}</span>
+												</div>
+												<div className={styles.resourceItem}>
+													<span className={styles.resourceLabel}>Auth:</span>
+													<span className={`${styles.resourcePath} ${resourceFiles.auth.exists ? styles.exists : styles.notExists}`}>{resourceFiles.auth.path}</span>
+													<span className={resourceFiles.auth.exists ? styles.exists : styles.notExists}>{resourceFiles.auth.exists ? "✓" : "✗"}</span>
+												</div>
+												<div className={styles.resourceItem}>
+													<span className={styles.resourceLabel}>Models:</span>
+													<span className={`${styles.resourcePath} ${resourceFiles.models.exists ? styles.exists : styles.notExists}`}>{resourceFiles.models.path}</span>
+													<span className={resourceFiles.models.exists ? styles.exists : styles.notExists}>{resourceFiles.models.exists ? "✓" : "✗"}</span>
+												</div>
+												<div className={styles.resourceItem}>
+													<span className={styles.resourceLabel}>Session:</span>
+													<span className={`${styles.resourcePath} ${resourceFiles.session.exists ? styles.exists : styles.notExists}`}>{resourceFiles.session.path}</span>
+													<span className={resourceFiles.session.exists ? styles.exists : styles.notExists}>{resourceFiles.session.exists ? "✓" : "✗"}</span>
+												</div>
+											</div>
+
+											<div className={styles.section}>
+												<h4>Skills ({resourceFiles.skills.loaded.length})</h4>
+												<div className={styles.resourceItem}>
+													<span className={styles.resourceLabel}>Global:</span>
+													<span className={styles.resourcePath}>{resourceFiles.skills.global}</span>
+												</div>
+												<div className={styles.resourceItem}>
+													<span className={styles.resourceLabel}>Project:</span>
+													<span className={styles.resourcePath}>{resourceFiles.skills.project}</span>
+												</div>
+												{resourceFiles.skills.loaded.map((s, i) => (
+													<div key={i} className={styles.skillPathItem}>
+														<span className={styles.skillName}>{s.name}:</span>
+														<span className={styles.skillPath}>{s.path}</span>
+													</div>
+												))}
+											</div>
+
+											<div className={styles.section}>
+												<h4>Prompts</h4>
+												<div className={styles.resourceItem}>
+													<span className={styles.resourceLabel}>Global:</span>
+													<span className={styles.resourcePath}>{resourceFiles.prompts.global}</span>
+												</div>
+												<div className={styles.resourceItem}>
+													<span className={styles.resourceLabel}>Project:</span>
+													<span className={styles.resourcePath}>{resourceFiles.prompts.project}</span>
+												</div>
+											</div>
+										</>
+									) : (
+										<div className={styles.emptySection}>No resource files loaded</div>
+									)}
+								</div>
+							) : systemPromptData && (
+								// Prompt Tab
+								<div className={styles.systemPromptContent}>
+									{/* SYSTEM.md */}
+									{systemPromptData.systemPrompt && (
+										<div className={styles.section}>
+											<h4>SYSTEM.md</h4>
+											<pre className={styles.fileContent}>
+												{systemPromptData.systemPrompt}
+											</pre>
+										</div>
+									)}
+									{/* System Append Files - Always show section */}
+									<div className={styles.section}>
+										<h4>System Append ({systemPromptData.appendSystemPrompt.length})</h4>
+										{systemPromptData.appendSystemPrompt.length > 0 ? (
+											systemPromptData.appendSystemPrompt.map((file, idx) => (
+												<div key={idx}>
+													<div className={styles.filePath}>{file.path}</div>
+													<pre className={styles.fileContent}>
+														{file.content}
+													</pre>
+												</div>
+											))
+										) : (
+											<div className={styles.emptySection}>No append files</div>
+										)}
+									</div>
+									{/* AGENTS.md */}
+									{systemPromptData.agentsFiles.length > 0 && (
+										<div className={styles.section}>
+											<h4>AGENTS.md ({systemPromptData.agentsFiles.length})</h4>
+											{systemPromptData.agentsFiles.map((file, idx) => (
+												<div key={idx}>
+													<div className={styles.filePath}>{file.path}</div>
+													<pre className={styles.fileContent}>
+														{file.content}
+													</pre>
+												</div>
+											))}
+										</div>
+									)}
+
+									{/* Skills */}
+									{systemPromptData.skills.length > 0 && (
+										<div className={styles.section}>
+											<h4>Skills ({systemPromptData.skills.length})</h4>
+											<div className={styles.skillList}>
+												{systemPromptData.skills.map((skill, idx) => (
+													<div key={idx} className={styles.skillItem}>
+														<span className={styles.skillName}>{skill.name}</span>
+														<span className={styles.skillDesc}>{skill.description}</span>
+													</div>
+												))}
+											</div>
+										</div>
+									)}
+								</div>
+							)}
+						</div>

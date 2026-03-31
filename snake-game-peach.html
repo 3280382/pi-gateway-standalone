@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水果贪吃蛇 - 特别版 🍑</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            color: #FFB6C1;
+            text-shadow: 0 0 10px rgba(255, 182, 193, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .title-emoji {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+
+        .game-board {
+            flex: 0 0 auto;
+        }
+
+        #gameCanvas {
+            border: 3px solid #FFB6C1;
+            border-radius: 10px;
+            background-color: #0f3460;
+            box-shadow: 0 0 20px rgba(255, 182, 193, 0.3);
+        }
+
+        .game-info {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .score-board {
+            margin-bottom: 25px;
+        }
+
+        .score-title {
+            font-size: 1.5rem;
+            color: #FFB6C1;
+            margin-bottom: 10px;
+        }
+
+        .score-value {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .high-score {
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-top: 10px;
+        }
+
+        .fruit-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .fruit-stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .fruit-emoji {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .fruit-count {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .fruit-points {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .controls {
+            margin-bottom: 25px;
+        }
+
+        .controls h3 {
+            color: #FFB6C1;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .key {
+            background: #333;
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            color: #FFD700;
+        }
+
+        .game-status {
+            margin-bottom: 25px;
+        }
+
+        #statusText {
+            font-size: 1.4rem;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background: rgba(255, 182, 193, 0.2);
+            display: inline-block;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        #startBtn {
+            background: linear-gradient(135deg, #FFB6C1, #FF69B4);
+            color: white;
+        }
+
+        #startBtn:hover {
+            background: linear-gradient(135deg, #FF69B4, #FF1493);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+        }
+
+        #pauseBtn {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+        }
+
+        #pauseBtn:hover {
+            background: linear-gradient(135deg, #1976D2, #1565C0);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        #resetBtn {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        #resetBtn:hover {
+            background: linear-gradient(135deg, #d32f2f, #c62828);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        .fruit-guide {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .fruit-guide h3 {
+            color: #FFB6C1;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .fruit-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .fruit-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+        }
+
+        .fruit-item-emoji {
+            font-size: 2rem;
+            margin-right: 15px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .fruit-item-info {
+            flex: 1;
+        }
+
+        .fruit-item-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .fruit-item-points {
+            color: #FFD700;
+            font-size: 0.9rem;
+        }
+
+        .fruit-item-effect {
+            color: #aaa;
+            font-size: 0.8rem;
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .game-info {
+                width: 100%;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .fruit-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #gameCanvas {
+                width: 300px;
+                height: 300px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .fruit-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title-emoji">🍑🐍</div>
+            <h1>水果贪吃蛇</h1>
+            <div class="subtitle">收集各种水果，桃子🍑特别加分！</div>
+        </div>
+
+        <div class="game-container">
+            <div class="game-board">
+                <canvas id="gameCanvas" width="400" height="400"></canvas>
+            </div>
+
+            <div class="game-info">
+                <div class="score-board">
+                    <div class="score-title">当前分数</div>
+                    <div class="score-value" id="score">0</div>
+                    <div class="high-score">最高分: <span id="highScore">0</span></div>
+                </div>
+
+                <div class="fruit-stats" id="fruitStats">
+                    <!-- 动态生成水果统计 -->
+                </div>
+
+                <div class="game-status">
+                    <div id="statusText">点击开始游戏</div>
+                </div>
+
+                <div class="controls">
+                    <h3>游戏控制</h3>
+                    <div class="control-item">
+                        <span>移动向上</span>
+                        <span class="key">↑ 或 W</span>
+                    </div>
+                    <div class="control-item">
+                        <span>移动向下</span>
+                        <span class="key">↓ 或 S</span>
+                    </div>
+                    <div class="control-item">
+                        <span>移动向左</span>
+                        <span class="key">← 或 A</span>
+                    </div>
+                    <div class="control-item">
+                        <span>移动向右</span>
+                        <span class="key">→ 或 D</span>
+                    </div>
+                    <div class="control-item">
+                        <span>暂停游戏</span>
+                        <span class="key">空格键</span>
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button id="startBtn">开始游戏</button>
+                    <button id="pauseBtn">暂停游戏</button>
+                    <button id="resetBtn">重新开始</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="fruit-guide">
+            <h3>水果说明</h3>
+            <div class="fruit-list" id="fruitList">
+                <!-- 动态生成水果说明 -->
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2023 水果贪吃蛇特别版 | 收集桃子🍑获得高分！</p>
+        </div>
+    </div>
+
+    <script>
+        // 游戏变量
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const highScoreElement = document.getElementById('highScore');
+        const statusText = document.getElementById('statusText');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const fruitStatsElement = document.getElementById('fruitStats');
+        const fruitListElement = document.getElementById('fruitList');
+
+        // 游戏配置
+        const gridSize = 20;
+        const gridWidth = canvas.width / gridSize;
+        const gridHeight = canvas.height / gridSize;
+
+        // 水果类型定义
+        const FRUITS = [
+            { id: 'apple', emoji: '🍎', name: '红苹果', points: 10, color: '#FF5252', speedEffect: -2, spawnChance: 0.4 },
+            { id: 'peach', emoji: '🍑', name: '桃子', points: 25, color: '#FFB6C1', speedEffect: -5, spawnChance: 0.2 },
+            { id: 'cherry', emoji: '🍒', name: '樱桃', points: 15, color: '#DC143C', speedEffect: -3, spawnChance: 0.15 },
+            { id: 'grape', emoji: '🍇', name: '葡萄', points: 12, color: '#6A0DAD', speedEffect: -2, spawnChance: 0.15 },
+            { id: 'watermelon', emoji: '🍉', name: '西瓜', points: 30, color: '#228B22', speedEffect: -8, spawnChance: 0.08 },
+            { id: 'special', emoji: '⭐', name: '星星水果', points: 50, color: '#FFD700', speedEffect: -15, spawnChance: 0.02 }
+        ];
+
+        // 游戏状态
+        let snake = [];
+        let currentFruit = FRUITS[0];
+        let direction = 'right';
+        let nextDirection = 'right';
+        let gameSpeed = 150;
+        let score = 0;
+        const highScore = localStorage.getItem('fruitSnakeHighScore') || 0;
+        const gameRunning = false;
+        const gamePaused = false;
+        let gameLoop;
+        const fruitsEaten = {};
+        
+        // 初始化水果统计
+        FRUITS.forEach(fruit => {
+            fruitsEaten[fruit.id] = 0;
+        });
+
+        // 初始化游戏
+        function initGame() {
+            // 初始化蛇
+            snake = [
+                {x: 5, y: 10},
+                {x: 4, y: 10},
+                {x: 3, y: 10}
+            ];
+            
+            // 生成第一个水果
+            generateFruit();
+            
+            // 重置方向
+            direction = 'right';
+            nextDirection = 'right';
+            
+            // 重置分数和速度
+            score = 0;
+            gameSpeed = 150;
+            updateScore();
+            
+            // 重置水果统计
+            FRUITS.forEach(fruit => {
+                fruitsEaten[fruit.id] = 0;
+            });
+            updateFruitStats();
+            
+            // 更新最高分显示
+            highScoreElement.textContent = highScore;
+            
+            // 更新状态
+            statusText.textContent = '准备开始';
+            statusText.style.background = 'rgba(255, 182, 193, 0.2)';
+            
+            // 初始化水果说明
+            initFruitGuide();
+        }
+
+        // 初始化水果说明
+        function initFruitGuide() {
+            fruitListElement.innerHTML = '';
+            FRUITS.forEach(fruit => {
+                const fruitItem = document.createElement('div');
+                fruitItem.className = 'fruit-item';
+                fruitItem.innerHTML = `
+                    <div class="fruit-item-emoji">${fruit.emoji}</div>
+                    <div class="fruit-item-info">
+                        <div class="fruit-item-name">${fruit.name}</div>
+                        <div class="fruit-item-points">${fruit.points} 分</div>
+                        <div class="fruit-item-effect">速度 +${-fruit.speedEffect}ms</div>
+                    </div>
+                `;
+                fruitListElement.appendChild(fruitItem);
+            });
+        }
+
+        // 更新水果统计
+        function updateFruitStats() {
+            fruitStatsElement.innerHTML = '';
+            FRUITS.forEach(fruit => {
+                const statItem = document.createElement('div');
+                statItem.className = 'fruit-stat-item';
+                statItem.innerHTML = `
+                    <div class="fruit-emoji">${fruit.emoji}</div>
+                    <div class="fruit-count">${fruitsEaten[fruit.id]}</div>
+                    <div class="fruit-points">${fruit.points}分</div>
+                `;
+                fruitStatsElement.appendChild(statItem);
+            });
+        }
+
+        // 生成水果
+        function generateFruit() {
+            let fruitOnSnake;
+            do {
+                fruitOnSnake = false;
+                
+                // 根据概率随机选择水果类型
+                const rand = Math.random();
+                let cumulativeChance = 0;
+                
+                for (const fruit of FRUITS) {
+                    cumulativeChance += fruit.spawnChance;
+                    if (rand <= cumulativeChance) {
+                        currentFruit = fruit;
+                        break;
+                    }
+                }
+                
+                currentFruit.x = Math.floor(Math.random() * gridWidth);
+                currentFruit.y = Math.floor(Math.random() * gridHeight);
+                
+                // 检查水果是否在蛇身上
+                for (const segment of snake) {
+                    if (segment.x === currentFruit.x && segment.y === currentFruit.y) {
+                        fruitOnSnake = true;
+                        break;
+                    }
+                }
+            } while (fruitOnSnake);
+        }
+
+        // 绘制游戏
+        function drawGame() {
+            // 清空画布
+            ctx.fillStyle = '#0f3460';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制网格
+            drawGrid();
+            
+            // 绘制蛇
+            drawSnake();
+            
+            // 绘制水果
+            drawFruit();
+        }
+
+        // 绘制网格
+        function drawGrid() {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
