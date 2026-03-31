@@ -7,7 +7,7 @@
  * - Chat 视图和 Files 视图共享相同的布局框架
  */
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { websocketService } from "@/services/websocket.service";
 import { useChatStore } from "@/stores/chatStore";
 import { useNewChatStore } from "@/stores/new-chat.store";
@@ -19,24 +19,33 @@ import {
 	LayoutProvider,
 	useLayout,
 } from "./components/layout/AppLayout";
+import { LlmLogPanel } from "./components/llm-log";
+import { XTermPanel } from "./components/terminal";
 import { fileController, sessionController } from "./controllers";
 import "./styles/global.css";
 
 function AppContent() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const { currentView, setCurrentView } = useLayout();
+	const {
+		currentView,
+		isBottomPanelOpen,
+		bottomPanelHeight,
+		setBottomPanelHeight,
+		closeBottomPanel,
+	} = useLayout();
 
 	const messages = useChatStore((s) => s.messages);
 	const currentStreamingMessage = useChatStore(
 		(s) => s.currentStreamingMessage,
 	);
 	const showThinking = useChatStore((s) => s.showThinking);
-	// 直接从 store 获取 actions，避免创建新对象
 	const toggleMessageCollapse = useChatStore((s) => s.toggleMessageCollapse);
 	const toggleThinkingCollapse = useChatStore((s) => s.toggleThinkingCollapse);
-	const deleteMessage = useChatStore((s) => s.deleteMessage);
-	const regenerateMessage = useChatStore((s) => s.regenerateMessage);
+
+	// 终端输出状态（用于文件浏览器）
+	const [terminalOutput, setTerminalOutput] = useState<string>("");
+	const [terminalCommand, setTerminalCommand] = useState<string>("");
 
 	// 初始化应用
 	useEffect(() => {
@@ -65,13 +74,17 @@ function AppContent() {
 					}
 
 					// WebSocket 连接
+					let wsConnected = false;
 					try {
 						await websocketService.connect();
+						wsConnected = websocketService.isConnected;
+						console.log("[App] WebSocket connection status:", wsConnected);
 					} catch (wsErr) {
 						console.warn("[App] WebSocket connection failed:", wsErr);
+						wsConnected = false;
 					}
 
-					if (websocketService.isConnected) {
+					if (wsConnected) {
 						// 优先使用持久化的 sessionId，如果没有则从服务器获取
 						let sessionId = persistedSessionId;
 
@@ -91,11 +104,10 @@ function AppContent() {
 							}
 						}
 
-						// 初始化会话（使用持久化的目录和 sessionId）
 						const currentDir = useSessionStore.getState().currentDir;
 						const initData = await websocketService.initWorkingDirectory(
 							currentDir,
-							sessionId,
+							sessionId || undefined,
 						);
 
 						if (initData) {
@@ -172,6 +184,47 @@ function AppContent() {
 		}
 	}
 
+	// 处理文件执行输出
+	const handleExecuteOutput = useCallback((output: string) => {
+		setTerminalOutput(output);
+	}, []);
+
+	// 处理在底部面板打开
+	const handleOpenBottomPanel = useCallback((command: string) => {
+		setTerminalCommand(command);
+	}, []);
+
+	// 渲染聊天视图的底部面板内容
+	const renderChatBottomPanel = () => {
+		if (!isBottomPanelOpen) return null;
+		return (
+			<LlmLogPanel
+				height={bottomPanelHeight}
+				onClose={closeBottomPanel}
+				onHeightChange={setBottomPanelHeight}
+			/>
+		);
+	};
+
+	// 渲染文件视图的底部面板内容
+	const renderFilesBottomPanel = () => {
+		if (!isBottomPanelOpen) return null;
+		return (
+			<XTermPanel
+				height={bottomPanelHeight}
+				onClose={closeBottomPanel}
+				onHeightChange={setBottomPanelHeight}
+				output={terminalOutput}
+				initialCommand={terminalCommand}
+				onExecuteCommand={(cmd) => {
+					console.log("[Terminal] Executing:", cmd);
+					// 这里可以添加实际的命令执行逻辑
+					setTerminalOutput(`Executing: ${cmd}\n`);
+				}}
+			/>
+		);
+	};
+
 	// 错误状态
 	if (error) {
 		return (
@@ -225,25 +278,16 @@ function AppContent() {
 		);
 	}
 
-	// 聊天视图 - 显示输入框
+	// 聊天视图 - 显示输入框和LLM日志底部面板
 	if (currentView === "chat") {
 		return (
-			<AppLayout
-				showInput={true}
-				bottomPanelContent={
-					<div style={{ color: "#8b949e", padding: 20 }}>
-						Terminal Panel (Placeholder)
-					</div>
-				}
-			>
+			<AppLayout showInput={true} bottomPanelContent={renderChatBottomPanel()}>
 				<MessageList
 					messages={messages}
 					currentStreamingMessage={currentStreamingMessage}
 					showThinking={showThinking}
 					onToggleMessageCollapse={toggleMessageCollapse}
 					onToggleThinkingCollapse={toggleThinkingCollapse}
-					onDeleteMessage={deleteMessage}
-					onRegenerateMessage={regenerateMessage}
 				/>
 			</AppLayout>
 		);
@@ -251,15 +295,13 @@ function AppContent() {
 
 	// 文件浏览器视图 - 不显示输入框，使用终端面板显示执行结果
 	return (
-		<AppLayout
-			showInput={false}
-			bottomPanelContent={
-				<div style={{ color: "#8b949e", padding: 20 }}>
-					File Execution Terminal (Placeholder)
-				</div>
-			}
-		>
-			<FileBrowser externalSidebarVisible={false} onToggleSidebar={() => {}} />
+		<AppLayout showInput={false} bottomPanelContent={renderFilesBottomPanel()}>
+			<FileBrowser
+				externalSidebarVisible={false}
+				onToggleSidebar={() => {}}
+				onExecuteOutput={handleExecuteOutput}
+				onOpenBottomPanel={handleOpenBottomPanel}
+			/>
 		</AppLayout>
 	);
 }

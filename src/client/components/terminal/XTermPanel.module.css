@@ -1,0 +1,125 @@
+/* XTermPanel Styles */
+
+.panel {
+	display: flex;
+	flex-direction: column;
+	background: #0d1117;
+	border-top: 1px solid #30363d;
+	overflow: hidden;
+}
+
+/* Resize handle */
+.resizeHandle {
+	height: 6px;
+	background: transparent;
+	cursor: ns-resize;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background 0.15s ease;
+}
+
+.resizeHandle:hover {
+	background: #1f6feb;
+}
+
+.resizeGrip {
+	width: 40px;
+	height: 3px;
+	background: #484f58;
+	border-radius: 2px;
+}
+
+.resizeHandle:hover .resizeGrip {
+	background: #fff;
+}
+
+/* Header */
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 12px;
+	background: #161b22;
+	border-bottom: 1px solid #30363d;
+	flex-shrink: 0;
+}
+
+.title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+	font-weight: 500;
+	color: #e6edf3;
+}
+
+.title svg {
+	color: #7ee787;
+}
+
+.actions {
+	display: flex;
+	gap: 4px;
+}
+
+.actionBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: none;
+	background: transparent;
+	color: #8b949e;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.actionBtn:hover {
+	background: #30363d;
+	color: #e6edf3;
+}
+
+.actionBtn:hover svg {
+	color: #e6edf3;
+}
+
+/* Terminal container */
+.terminal {
+	flex: 1;
+	padding: 8px;
+	overflow: hidden;
+}
+
+.terminal :global(.xterm) {
+	height: 100%;
+}
+
+.terminal :global(.xterm-viewport) {
+	background: #0d1117 !important;
+}
+
+.terminal :global(.xterm-screen) {
+	background: #0d1117 !important;
+}
+
+/* Scrollbar styling */
+.terminal :global(.xterm-viewport::-webkit-scrollbar) {
+	width: 8px;
+}
+
+.terminal :global(.xterm-viewport::-webkit-scrollbar-track) {
+	background: #0d1117;
+}
+
+.terminal :global(.xterm-viewport::-webkit-scrollbar-thumb) {
+	background: #484f58;
+	border-radius: 4px;
+}
+
+.terminal :global(.xterm-viewport::-webkit-scrollbar-thumb:hover) {
+	background: #6e7681;
+}

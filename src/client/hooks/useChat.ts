@@ -179,23 +179,43 @@ export function useChat(): UseChatReturn {
 
 		// Tool start handler
 		registerHandler("tool_start", (data: ToolStartMessage) => {
-			const tool: ToolExecution = {
-				id: data.toolCallId || generateToolId(),
-				name: data.toolName,
-				args: data.args || {},
-				status: "executing",
-				startTime: new Date(),
-			};
-			streamingRef.current.tools.set(tool.id, tool);
-			store.addToolExecution(tool);
+			try {
+				console.log("[useChat] tool_start event received:", data);
+				console.log("[useChat] tool_start data type:", typeof data);
+				
+				// 确保data有必要的属性
+				if (!data || typeof data !== 'object') {
+					console.error("[useChat] Invalid tool_start data:", data);
+					return;
+				}
+				
+				const toolCallId = data.toolCallId || generateToolId();
+				const toolName = data.toolName || "unknown";
+				const args = data.args || {};
+				
+				console.log("[useChat] Creating tool:", { toolCallId, toolName, args });
+				
+				const tool: ToolExecution = {
+					id: toolCallId,
+					name: toolName,
+					args: args,
+					status: "executing",
+					startTime: new Date(),
+				};
+				streamingRef.current.tools.set(tool.id, tool);
+				store.setActiveTool(tool);
+			} catch (error) {
+				console.error("[useChat] Error in tool_start handler:", error, "data:", data);
+			}
 		});
 
 		// Tool update handler - partial output
 		registerHandler("tool_update", (data: ToolUpdateMessage) => {
 			const existing = streamingRef.current.tools.get(data.toolCallId);
 			if (existing) {
-				if (data.output) {
-					existing.output = (existing.output || "") + data.output;
+				// 后端发送的是chunk字段，不是output
+				if (data.chunk) {
+					existing.output = (existing.output || "") + data.chunk;
 					streamingRef.current.toolOutputs.set(data.toolCallId, {
 						type: "tool",
 						toolCallId: data.toolCallId,
@@ -203,15 +223,14 @@ export function useChat(): UseChatReturn {
 						args: existing.args,
 						output: existing.output,
 					});
-					store.updateToolStatus(data.toolCallId, "success", existing.output);
+					store.updateToolOutput(data.toolCallId, existing.output, undefined);
 				}
 				if (data.error) {
 					existing.error = data.error;
 					existing.status = "error";
-					store.updateToolStatus(
+					store.updateToolOutput(
 						data.toolCallId,
-						"error",
-						undefined,
+						existing.output || "",
 						data.error,
 					);
 				}
@@ -222,21 +241,24 @@ export function useChat(): UseChatReturn {
 		registerHandler("tool_end", (data: ToolEndMessage) => {
 			const existing = streamingRef.current.tools.get(data.toolCallId);
 			if (existing) {
-				if (data.error) {
-					existing.error = data.error;
+				// 后端发送的是result和isError字段，不是output和error
+				const output = data.result || "";
+				const error = data.isError ? "工具执行失败" : undefined;
+				
+				if (error) {
+					existing.error = error;
 					existing.status = "error";
 					existing.endTime = new Date();
-					store.updateToolStatus(
+					store.updateToolOutput(
 						data.toolCallId,
-						"error",
-						undefined,
-						data.error,
+						existing.output || "",
+						error,
 					);
 				} else {
-					existing.output = data.output || existing.output;
+					existing.output = output || existing.output;
 					existing.status = "success";
 					existing.endTime = new Date();
-					store.updateToolStatus(data.toolCallId, "success", data.output);
+					store.updateToolOutput(data.toolCallId, output, undefined);
 				}
 			}
 		});
@@ -250,6 +272,42 @@ export function useChat(): UseChatReturn {
 		registerHandler("agent_end", (_data: AgentEndMessage) => {
 			finalizeRef.current?.();
 			clearHandlers();
+		});
+
+		// Message start/end handlers
+		registerHandler("message_start", () => {
+			console.log("[useChat] Message started");
+		});
+
+		registerHandler("message_end", () => {
+			console.log("[useChat] Message ended");
+		});
+
+		// Turn start/end handlers
+		registerHandler("turn_start", () => {
+			console.log("[useChat] Turn started");
+		});
+
+		registerHandler("turn_end", (data) => {
+			console.log("[useChat] Turn ended:", data);
+		});
+
+		// Compaction start/end handlers
+		registerHandler("compaction_start", () => {
+			console.log("[useChat] Compaction started");
+		});
+
+		registerHandler("compaction_end", () => {
+			console.log("[useChat] Compaction ended");
+		});
+
+		// Retry start/end handlers
+		registerHandler("retry_start", () => {
+			console.log("[useChat] Retry started");
+		});
+
+		registerHandler("retry_end", () => {
+			console.log("[useChat] Retry ended");
 		});
 
 		// Error handler - using generic string type for error events

@@ -18,7 +18,9 @@ vi.mock("@/services/api/fileApi", () => ({
 	readFile: vi.fn(),
 	writeFile: vi.fn(),
 	executeFile: vi.fn(),
-	getRawFileUrl: vi.fn((path: string) => `/api/raw?path=${encodeURIComponent(path)}`),
+	getRawFileUrl: vi.fn(
+		(path: string) => `/api/raw?path=${encodeURIComponent(path)}`,
+	),
 }));
 
 // Mock Prism
@@ -129,7 +131,12 @@ describe("FileViewer", () => {
 
 	it("loads file content when opened", async () => {
 		const { readFile } = await import("@/services/api/fileApi");
-		(readFile as any).mockResolvedValue({ content: "File content loaded", path: "/test/file.js", size: 100, modified: new Date().toISOString() });
+		(readFile as any).mockResolvedValue({
+			content: "File content loaded",
+			path: "/test/file.js",
+			size: 100,
+			modified: new Date().toISOString(),
+		});
 
 		(useFileViewerStore as any).mockReturnValue({
 			...defaultStoreState,
@@ -273,8 +280,12 @@ describe("FileViewer", () => {
 		// Mock executeFile to return a ReadableStream
 		const { executeFile } = await import("@/services/api/fileApi");
 		const mockReader = {
-			read: vi.fn()
-				.mockResolvedValueOnce({ done: false, value: new TextEncoder().encode("Executing...\n") })
+			read: vi
+				.fn()
+				.mockResolvedValueOnce({
+					done: false,
+					value: new TextEncoder().encode("Executing...\n"),
+				})
 				.mockResolvedValueOnce({ done: true }),
 			releaseLock: vi.fn(),
 		};

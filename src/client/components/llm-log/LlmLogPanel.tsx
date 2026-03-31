@@ -1,10 +1,9 @@
 /**
- * LlmLogPanel - 底部固定式 LLM 日志面板
- * 类似终端的固定底部面板
+ * LlmLogPanel - LLM Log Viewer as Bottom Panel
+ * Real-time log display with streaming updates
  */
 
-import { useEffect, useRef, useState } from "react";
-import { useSidebarExtrasStore } from "@/stores/sidebarExtrasStore";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./LlmLogPanel.module.css";
 
 interface LlmLogPanelProps {
@@ -13,165 +12,269 @@ interface LlmLogPanelProps {
 	onHeightChange: (height: number) => void;
 }
 
+interface LogEntry {
+	timestamp: string;
+	level: "info" | "warn" | "error" | "debug";
+	message: string;
+	details?: string;
+}
+
 export function LlmLogPanel({
 	height,
 	onClose,
 	onHeightChange,
 }: LlmLogPanelProps) {
-	const { llmLogs, llmLogConfig, setLlmLogConfig, clearLlmLogs } =
-		useSidebarExtrasStore();
-	const [isResizing, setIsResizing] = useState(false);
-	const panelRef = useRef<HTMLDivElement>(null);
-	const startYRef = useRef(0);
-	const startHeightRef = useRef(height);
+	const contentRef = useRef<HTMLDivElement>(null);
+	const [logs, setLogs] = useState<LogEntry[]>([]);
+	const [isLoading, setIsLoading] = useState(false);
+	const [autoScroll, setAutoScroll] = useState(true);
+	const intervalRef = useRef<NodeJS.Timeout | null>(null);
+	const isResizing = useRef(false);
+	const resizeStartY = useRef(0);
+	const resizeStartHeight = useRef(height);
 
-	// 处理拖拽调整大小
+	// Fetch logs from API
+	const fetchLogs = useCallback(async () => {
+		try {
+			const response = await fetch("/api/llm-log");
+			if (response.ok) {
+				const data = await response.json();
+				if (data.logs && Array.isArray(data.logs)) {
+					// Parse log lines
+					const parsedLogs: LogEntry[] = data.logs
+						.map((line: string) => parseLogLine(line))
+						.filter(Boolean) as LogEntry[];
+					setLogs(parsedLogs);
+				}
+			}
+		} catch (error) {
+			console.error("[LlmLogPanel] Failed to fetch logs:", error);
+		}
+	}, []);
+
+	// Parse a log line into structured format
+	const parseLogLine = (line: string): LogEntry | null => {
+		// Try to parse JSON logs
+		try {
+			const parsed = JSON.parse(line);
+			if (parsed.timestamp && parsed.message) {
+				return {
+					timestamp: parsed.timestamp,
+					level: parsed.level || "info",
+					message: parsed.message,
+					details: parsed.details,
+				};
+			}
+		} catch {
+			// Not JSON, parse as plain text
+		}
+
+		// Try to match common log patterns
+		const match = line.match(
+			/^(\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}:\d{2}[.,]?\d*Z?)\s+(\w+)\s+(.*)$/i,
+		);
+		if (match) {
+			return {
+				timestamp: match[1],
+				level: match[2].toLowerCase() as LogEntry["level"],
+				message: match[3],
+			};
+		}
+
+		// Fallback: treat entire line as message
+		if (line.trim()) {
+			return {
+				timestamp: new Date().toISOString(),
+				level: "info",
+				message: line,
+			};
+		}
+
+		return null;
+	};
+
+	// Initial fetch and polling
 	useEffect(() => {
-		if (!isResizing) return;
+		setIsLoading(true);
+		fetchLogs().finally(() => setIsLoading(false));
 
+		// Poll for new logs every 2 seconds
+		intervalRef.current = setInterval(fetchLogs, 2000);
+
+		return () => {
+			if (intervalRef.current) {
+				clearInterval(intervalRef.current);
+			}
+		};
+	}, [fetchLogs]);
+
+	// Auto-scroll to bottom
+	useEffect(() => {
+		if (contentRef.current && autoScroll) {
+			contentRef.current.scrollTop = contentRef.current.scrollHeight;
+		}
+	}, [logs, autoScroll]);
+
+	// Handle manual scroll
+	const handleScroll = useCallback(() => {
+		if (!contentRef.current) return;
+		const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
+		const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+		setAutoScroll(isAtBottom);
+	}, []);
+
+	// Resize handlers
+	const handleResizeStart = useCallback(
+		(e: React.MouseEvent) => {
+			isResizing.current = true;
+			resizeStartY.current = e.clientY;
+			resizeStartHeight.current = height;
+			e.preventDefault();
+		},
+		[height],
+	);
+
+	useEffect(() => {
 		const handleMouseMove = (e: MouseEvent) => {
-			const deltaY = startYRef.current - e.clientY;
+			if (!isResizing.current) return;
+			const delta = resizeStartY.current - e.clientY;
 			const newHeight = Math.max(
-				100,
-				Math.min(600, startHeightRef.current + deltaY),
+				150,
+				Math.min(600, resizeStartHeight.current + delta),
 			);
 			onHeightChange(newHeight);
 		};
 
 		const handleMouseUp = () => {
-			setIsResizing(false);
+			isResizing.current = false;
 		};
 
-		document.addEventListener("mousemove", handleMouseMove);
-		document.addEventListener("mouseup", handleMouseUp);
+		if (isResizing.current) {
+			document.addEventListener("mousemove", handleMouseMove);
+			document.addEventListener("mouseup", handleMouseUp);
+			document.body.style.cursor = "ns-resize";
+			document.body.style.userSelect = "none";
+		}
 
 		return () => {
 			document.removeEventListener("mousemove", handleMouseMove);
 			document.removeEventListener("mouseup", handleMouseUp);
+			document.body.style.cursor = "";
+			document.body.style.userSelect = "";
 		};
-	}, [isResizing, onHeightChange]);
+	}, [onHeightChange]);
 
-	const startResize = (e: React.MouseEvent) => {
-		setIsResizing(true);
-		startYRef.current = e.clientY;
-		startHeightRef.current = height;
+	const handleClear = useCallback(async () => {
+		try {
+			await fetch("/api/llm-log/clear", { method: "POST" });
+			setLogs([]);
+		} catch (error) {
+			console.error("[LlmLogPanel] Failed to clear logs:", error);
+		}
+	}, []);
+
+	const handleRefresh = useCallback(() => {
+		setIsLoading(true);
+		fetchLogs().finally(() => setIsLoading(false));
+	}, [fetchLogs]);
+
+	const formatTimestamp = (timestamp: string): string => {
+		try {
+			const date = new Date(timestamp);
+			return date.toLocaleTimeString("en-US", {
+				hour12: false,
+				hour: "2-digit",
+				minute: "2-digit",
+				second: "2-digit",
+			});
+		} catch {
+			return timestamp;
+		}
 	};
 
-	// 格式化时间戳
-	const formatTime = (timestamp: string) => {
-		const date = new Date(timestamp);
-		return date.toLocaleTimeString("en-US", {
-			hour12: false,
-			hour: "2-digit",
-			minute: "2-digit",
-			second: "2-digit",
-		});
-	};
-
-	// 获取日志级别颜色
-	const getLevelColor = (level: string) => {
-		switch (level) {
+	const getLevelColor = (level: string): string => {
+		switch (level.toLowerCase()) {
 			case "error":
-				return styles.levelError;
+				return styles.error;
 			case "warn":
-				return styles.levelWarn;
+			case "warning":
+				return styles.warn;
 			case "debug":
-				return styles.levelDebug;
+				return styles.debug;
 			default:
-				return styles.levelInfo;
+				return styles.info;
 		}
 	};
 
 	return (
-		<div
-			ref={panelRef}
-			className={styles.panel}
-			style={{ height: `${height}px` }}
-		>
-			{/* 拖拽调整大小的手柄 */}
-			<div className={styles.resizeHandle} onMouseDown={startResize}>
-				<div className={styles.resizeLine} />
+		<div className={styles.panel} style={{ height: `${height}px` }}>
+			{/* Resize handle */}
+			<div
+				className={styles.resizeHandle}
+				onMouseDown={handleResizeStart}
+				title="Drag to resize"
+			>
+				<div className={styles.resizeGrip} />
 			</div>
 
-			{/* 头部工具栏 */}
+			{/* Header */}
 			<div className={styles.header}>
 				<div className={styles.title}>
 					<LogIcon />
-					<span>LLM Log</span>
-					<span className={styles.count}>({llmLogs.length})</span>
+					<span>LLM Logs</span>
+					<span className={styles.logCount}>({logs.length})</span>
 				</div>
-
-				<div className={styles.controls}>
-					{/* 启用/禁用切换 */}
+				<div className={styles.actions}>
 					<button
-						className={`${styles.toggleBtn} ${llmLogConfig.enabled ? styles.enabled : ""}`}
-						onClick={() => setLlmLogConfig({ enabled: !llmLogConfig.enabled })}
-						title={llmLogConfig.enabled ? "Disable logging" : "Enable logging"}
+						className={`${styles.actionBtn} ${autoScroll ? styles.active : ""}`}
+						onClick={() => setAutoScroll(!autoScroll)}
+						title={autoScroll ? "Auto-scroll on" : "Auto-scroll off"}
 					>
-						{llmLogConfig.enabled ? "On" : "Off"}
+						<ScrollIcon />
 					</button>
-
-					{/* 刷新间隔选择 */}
-					<select
-						className={styles.select}
-						value={llmLogConfig.refreshInterval}
-						onChange={(e) =>
-							setLlmLogConfig({ refreshInterval: Number(e.target.value) })
-						}
-						title="Refresh interval"
-					>
-						<option value={1}>1s</option>
-						<option value={5}>5s</option>
-						<option value={10}>10s</option>
-						<option value={30}>30s</option>
-						<option value={60}>1m</option>
-					</select>
-
-					{/* 清空按钮 */}
 					<button
-						className={styles.clearBtn}
-						onClick={clearLlmLogs}
+						className={styles.actionBtn}
+						onClick={handleRefresh}
+						title="Refresh"
+						disabled={isLoading}
+					>
+						<RefreshIcon />
+					</button>
+					<button
+						className={styles.actionBtn}
+						onClick={handleClear}
 						title="Clear logs"
 					>
 						<ClearIcon />
 					</button>
-
-					{/* 关闭按钮 */}
-					<button
-						className={styles.closeBtn}
-						onClick={onClose}
-						title="Close panel"
-					>
+					<button className={styles.actionBtn} onClick={onClose} title="Close">
 						<CloseIcon />
 					</button>
 				</div>
 			</div>
 
-			{/* 日志内容区域 */}
-			<div className={styles.content}>
-				{!llmLogConfig.enabled ? (
-					<div className={styles.disabledMessage}>
-						<span>Logging is disabled. Enable it to see LLM logs.</span>
-					</div>
-				) : llmLogs.length === 0 ? (
-					<div className={styles.emptyMessage}>
-						<span>No logs yet. Logs will appear here when available.</span>
-					</div>
+			{/* Log content */}
+			<div ref={contentRef} className={styles.content} onScroll={handleScroll}>
+				{isLoading && logs.length === 0 ? (
+					<div className={styles.loading}>Loading logs...</div>
+				) : logs.length === 0 ? (
+					<div className={styles.empty}>No logs available</div>
 				) : (
 					<div className={styles.logList}>
-						{llmLogs.map((log, index) => (
-							<div key={index} className={styles.logEntry}>
-								<span className={styles.timestamp}>
-									{formatTime(log.timestamp)}
+						{logs.map((log, index) => (
+							<div
+								key={index}
+								className={`${styles.logEntry} ${getLevelColor(log.level)}`}
+							>
+								<span className={styles.logTime}>
+									{formatTimestamp(log.timestamp)}
 								</span>
-								<span className={`${styles.level} ${getLevelColor(log.level)}`}>
+								<span className={styles.logLevel}>
 									{log.level.toUpperCase()}
 								</span>
-								<span className={styles.message}>{log.message}</span>
-								{log.metadata && (
-									<pre className={styles.metadata}>
-										{JSON.stringify(log.metadata, null, 2)}
-									</pre>
+								<span className={styles.logMessage}>{log.message}</span>
+								{log.details && (
+									<pre className={styles.logDetails}>{log.details}</pre>
 								)}
 							</div>
 						))}
@@ -182,10 +285,19 @@ export function LlmLogPanel({
 	);
 }
 
-// 日志图标
+// Icons
 function LogIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={1.5}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			width="16"
+			height="16"
+		>
 			<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
 			<polyline points="14 2 14 8 20 8" />
 			<line x1="16" y1="13" x2="8" y2="13" />
@@ -195,20 +307,71 @@ function LogIcon() {
 	);
 }
 
-// 清空图标
+function ScrollIcon() {
+	return (
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={1.5}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			width="14"
+			height="14"
+		>
+			<polyline points="6 9 12 15 18 9" />
+		</svg>
+	);
+}
+
+function RefreshIcon() {
+	return (
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={1.5}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			width="14"
+			height="14"
+		>
+			<polyline points="23 4 23 10 17 10" />
+			<path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+		</svg>
+	);
+}
+
 function ClearIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={1.5}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			width="14"
+			height="14"
+		>
 			<polyline points="3 6 5 6 21 6" />
 			<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
 		</svg>
 	);
 }
 
-// 关闭图标
 function CloseIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={1.5}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			width="14"
+			height="14"
+		>
 			<line x1="18" y1="6" x2="6" y2="18" />
 			<line x1="6" y1="6" x2="18" y2="18" />
 		</svg>

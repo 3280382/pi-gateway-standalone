@@ -17,6 +17,22 @@ export class ChatController {
 	 */
 	async sendMessage(text: string): Promise<void> {
 		try {
+			// 检查WebSocket连接状态
+			if (!websocketService.isConnected) {
+				console.warn(
+					"[ChatController] WebSocket not connected, attempting to connect...",
+				);
+				try {
+					await websocketService.connect();
+				} catch (error) {
+					console.error("[ChatController] Failed to connect WebSocket:", error);
+					throw new ServiceError(
+						"WEBSOCKET_NOT_CONNECTED",
+						"无法连接到服务器，请检查网络连接",
+					);
+				}
+			}
+
 			const state = this.store.getState();
 
 			// 创建用户消息
@@ -31,17 +47,8 @@ export class ChatController {
 			this.store.getState().addMessage(userMessage);
 			this.store.getState().clearInput();
 
-			// 创建流式消息
-			const streamingMessage: Message = {
-				id: this.generateMessageId(),
-				role: "assistant",
-				content: [],
-				timestamp: new Date(),
-				isStreaming: true,
-			};
-
-			this.store.getState().setCurrentStreamingMessage(streamingMessage);
-			this.store.getState().setStreaming(true);
+			// 开始流式传输（这会创建流式消息）
+			this.store.getState().startStreaming();
 
 			// 通过WebSocket发送消息
 			const success = websocketService.sendMessage(
@@ -51,10 +58,8 @@ export class ChatController {
 			);
 
 			if (!success) {
-				throw new ServiceError(
-					"WEBSOCKET_SEND_FAILED",
-					"Failed to send message via WebSocket",
-				);
+				this.store.getState().abortStreaming();
+				throw new ServiceError("WEBSOCKET_SEND_FAILED", "消息发送失败，请重试");
 			}
 
 			// 监听WebSocket事件
@@ -71,7 +76,7 @@ export class ChatController {
 	async abortGeneration(): Promise<void> {
 		try {
 			websocketService.abortGeneration();
-			this.store.getState().resetStreaming();
+			this.store.getState().abortStreaming();
 		} catch (error) {
 			this.handleError("abortGeneration", error);
 		}
@@ -82,15 +87,33 @@ export class ChatController {
 	 */
 	async loadSession(sessionId: string): Promise<void> {
 		try {
-			const response = await chatService.loadSession(sessionId);
+			// 使用WebSocket加载会话
+			return new Promise<void>((resolve, reject) => {
+				const timeout = setTimeout(() => {
+					reject(new Error("加载会话超时"));
+				}, 5000);
 
-			// 更新store
-			this.store.getState().setMessages(response.messages);
-			this.store.getState().setSessionId(sessionId);
-			this.store.getState().setCurrentModel(response.currentModel);
+				const unsubscribe = websocketService.on("session_loaded", (data) => {
+					clearTimeout(timeout);
+					if (data.success) {
+						this.store.getState().setSessionId(data.sessionId);
+						// 加载会话消息
+						this.store
+							.getState()
+							.loadSession(sessionId)
+							.then(() => {
+								unsubscribe();
+								resolve();
+							})
+							.catch(reject);
+					} else {
+						unsubscribe();
+						reject(new Error(data.error || "加载会话失败"));
+					}
+				});
 
-			// 发送WebSocket消息切换会话
-			websocketService.switchSession(sessionId, response.workspace);
+				websocketService.send("load_session", { sessionPath: sessionId });
+			});
 		} catch (error) {
 			this.handleError("loadSession", error);
 			throw error;
@@ -99,6 +122,7 @@ export class ChatController {
 
 	/**
 	 * 保存当前会话
+	 * 注意：会话在服务器端自动保存，此方法主要用于前端状态同步
 	 */
 	async saveCurrentSession(): Promise<void> {
 		try {
@@ -108,7 +132,8 @@ export class ChatController {
 				throw new ServiceError("NO_SESSION_ID", "No session ID available");
 			}
 
-			await chatService.saveSession(state.sessionId, state.messages);
+			// 会话在服务器端自动保存，这里只需确保状态一致
+			console.log("[ChatController] 会话状态已同步，服务器端自动保存");
 		} catch (error) {
 			this.handleError("saveCurrentSession", error);
 			throw error;
@@ -120,16 +145,23 @@ export class ChatController {
 	 */
 	async createSession(name: string, workspace?: string): Promise<string> {
 		try {
-			const session = await chatService.createSession(name, workspace);
+			// 使用WebSocket创建新会话
+			return new Promise<string>((resolve, reject) => {
+				const timeout = setTimeout(() => {
+					reject(new Error("创建新会话超时"));
+				}, 5000);
 
-			// 更新store
-			this.store.getState().reset();
-			this.store.getState().setSessionId(session.id);
+				const unsubscribe = websocketService.on("session_created", (data) => {
+					clearTimeout(timeout);
+					// 更新store
+					this.store.getState().reset();
+					this.store.getState().setSessionId(data.sessionId);
+					unsubscribe();
+					resolve(data.sessionId);
+				});
 
-			// 发送WebSocket消息切换会话
-			websocketService.switchSession(session.id, workspace);
-
-			return session.id;
+				websocketService.send("new_session");
+			});
 		} catch (error) {
 			this.handleError("createSession", error);
 			throw error;
@@ -161,7 +193,20 @@ export class ChatController {
 		Array<{ id: string; name: string; provider: string; description: string }>
 	> {
 		try {
-			return await chatService.getAvailableModels();
+			// 使用WebSocket获取模型列表
+			return new Promise((resolve, reject) => {
+				const timeout = setTimeout(() => {
+					reject(new Error("获取模型列表超时"));
+				}, 5000);
+
+				const unsubscribe = websocketService.on("models_list", (data) => {
+					clearTimeout(timeout);
+					unsubscribe();
+					resolve(data.models || []);
+				});
+
+				websocketService.listModels();
+			});
 		} catch (error) {
 			this.handleError("getAvailableModels", error);
 			throw error;
@@ -173,8 +218,25 @@ export class ChatController {
 	 */
 	async setCurrentModel(modelId: string): Promise<void> {
 		try {
-			await chatService.setCurrentModel(modelId);
-			this.store.getState().setCurrentModel(modelId);
+			// 查找模型提供者（这里需要从模型列表中获取）
+			// 暂时使用默认提供者
+			const provider = "deepseek"; // 默认提供者
+
+			// 使用WebSocket设置模型
+			return new Promise<void>((resolve, reject) => {
+				const timeout = setTimeout(() => {
+					reject(new Error("设置模型超时"));
+				}, 5000);
+
+				const unsubscribe = websocketService.on("model_set", (data) => {
+					clearTimeout(timeout);
+					this.store.getState().setCurrentModel(modelId);
+					unsubscribe();
+					resolve();
+				});
+
+				websocketService.setModel(provider, modelId);
+			});
 		} catch (error) {
 			this.handleError("setCurrentModel", error);
 			throw error;
@@ -186,7 +248,13 @@ export class ChatController {
 	 */
 	async getSystemPrompt(): Promise<string> {
 		try {
-			return await chatService.getSystemPrompt();
+			// 系统提示通过HTTP API获取
+			const response = await fetch("/api/system-prompt");
+			if (!response.ok) {
+				throw new Error(`获取系统提示失败: ${response.status}`);
+			}
+			const data = await response.json();
+			return data.systemPrompt || "";
 		} catch (error) {
 			this.handleError("getSystemPrompt", error);
 			throw error;
@@ -198,7 +266,8 @@ export class ChatController {
 	 */
 	async updateSystemPrompt(prompt: string): Promise<void> {
 		try {
-			await chatService.updateSystemPrompt(prompt);
+			// 系统提示更新可能通过其他方式处理
+			console.warn("[ChatController] 更新系统提示功能暂未实现");
 		} catch (error) {
 			this.handleError("updateSystemPrompt", error);
 			throw error;
@@ -213,7 +282,8 @@ export class ChatController {
 			const state = this.store.getState();
 
 			if (state.sessionId) {
-				await chatService.clearChatHistory(state.sessionId);
+				// 清除聊天历史可以通过创建新会话实现
+				await this.createSession("New Session");
 			}
 
 			this.store.getState().clearMessages();
@@ -228,9 +298,7 @@ export class ChatController {
 	 */
 	async regenerateMessage(messageId: string): Promise<void> {
 		try {
-			await chatService.regenerateMessage(messageId);
-
-			// 从store中移除该消息及之后的所有消息
+			// 重新生成消息通过发送相同的用户消息实现
 			const state = this.store.getState();
 			const messageIndex = state.messages.findIndex((m) => m.id === messageId);
 
@@ -267,14 +335,14 @@ export class ChatController {
 		},
 	): Promise<Message[]> {
 		try {
-			const results = await chatService.searchMessages(query, filters);
+			// 搜索消息功能暂未实现
+			console.warn("[ChatController] 搜索消息功能暂未实现");
 
 			// 更新store中的搜索结果
-			const resultIds = results.map((m) => m.id);
-			this.store.getState().setSearchResults(resultIds);
+			this.store.getState().setSearchResults([]);
 			this.store.getState().setSearching(false);
 
-			return results;
+			return [];
 		} catch (error) {
 			this.store.getState().setSearching(false);
 			this.handleError("searchMessages", error);
@@ -321,54 +389,105 @@ export class ChatController {
 
 		// 工具开始
 		websocketService.on("tool_start", (data) => {
-			const tool: ToolExecution = {
-				id: data.toolCallId,
-				name: data.toolName,
-				args: data.args || {},
-				status: "executing",
-				startTime: new Date(),
-			};
+			try {
+				console.log("[ChatController] tool_start event received:", data);
+				console.log("[ChatController] tool_start data type:", typeof data);
+				
+				// 确保data有必要的属性
+				if (!data || typeof data !== 'object') {
+					console.error("[ChatController] Invalid tool_start data:", data);
+					return;
+				}
+				
+				// 检查data是否有必要的属性
+				const toolCallId = data.toolCallId || `tool-${Date.now()}`;
+				const toolName = data.toolName || "unknown";
+				const args = data.args || {};
+				
+				console.log("[ChatController] Creating tool:", { toolCallId, toolName, args });
+				
+				const tool: ToolExecution = {
+					id: toolCallId,
+					name: toolName,
+					args: args,
+					status: "executing",
+					startTime: new Date(),
+				};
 
-			this.store.getState().setActiveTool(data.toolCallId, tool);
+				this.store.getState().setActiveTool(tool);
+			} catch (error) {
+				console.error("[ChatController] Error in tool_start handler:", error, "data:", data);
+			}
 		});
 
 		// 工具更新
 		websocketService.on("tool_update", (data) => {
-			const updates: Partial<ToolExecution> = {};
-
-			if (data.output !== undefined) {
-				updates.output = data.output;
+			try {
+				console.log("[ChatController] tool_update event received:", data);
+				// 后端发送的是chunk字段，不是output
+				const output = data.chunk || "";
+				this.store
+					.getState()
+					.updateToolOutput(data.toolCallId, output, undefined);
+			} catch (error) {
+				console.error("[ChatController] Error in tool_update handler:", error);
 			}
-
-			if (data.error !== undefined) {
-				updates.error = data.error;
-				updates.status = "error";
-			}
-
-			this.store.getState().updateActiveTool(data.toolCallId, updates);
 		});
 
 		// 工具结束
 		websocketService.on("tool_end", (data) => {
-			const updates: Partial<ToolExecution> = {
-				status: data.error ? "error" : "success",
-				endTime: new Date(),
-			};
-
-			if (data.output !== undefined) {
-				updates.output = data.output;
+			try {
+				console.log("[ChatController] tool_end event received:", data);
+				// 后端发送的是result和isError字段，不是output和error
+				const output = data.result || "";
+				const error = data.isError ? "工具执行失败" : undefined;
+				this.store
+					.getState()
+					.updateToolOutput(data.toolCallId, output, error);
+			} catch (error) {
+				console.error("[ChatController] Error in tool_end handler:", error);
 			}
-
-			if (data.error !== undefined) {
-				updates.error = data.error;
-			}
-
-			this.store.getState().updateActiveTool(data.toolCallId, updates);
 		});
 
 		// 代理结束
 		websocketService.on("agent_end", () => {
 			this.finalizeStreamingMessage();
+		});
+
+		// 消息开始/结束
+		websocketService.on("message_start", () => {
+			console.log("[ChatController] Message started");
+		});
+
+		websocketService.on("message_end", () => {
+			console.log("[ChatController] Message ended");
+		});
+
+		// 轮次开始/结束
+		websocketService.on("turn_start", () => {
+			console.log("[ChatController] Turn started");
+		});
+
+		websocketService.on("turn_end", (data) => {
+			console.log("[ChatController] Turn ended:", data);
+		});
+
+		// 压缩开始/结束
+		websocketService.on("compaction_start", () => {
+			console.log("[ChatController] Compaction started");
+		});
+
+		websocketService.on("compaction_end", () => {
+			console.log("[ChatController] Compaction ended");
+		});
+
+		// 重试开始/结束
+		websocketService.on("retry_start", () => {
+			console.log("[ChatController] Retry started");
+		});
+
+		websocketService.on("retry_end", () => {
+			console.log("[ChatController] Retry ended");
 		});
 
 		// 连接状态变化
@@ -380,7 +499,7 @@ export class ChatController {
 			console.log("[ChatController] WebSocket disconnected");
 			// 如果正在流式生成，中止
 			if (this.store.getState().isStreaming) {
-				this.store.getState().resetStreaming();
+				this.store.getState().abortStreaming();
 			}
 		});
 	}
@@ -393,47 +512,14 @@ export class ChatController {
 
 		if (!state.currentStreamingMessage) return;
 
-		const content = [];
-
-		// 添加思考内容
-		if (state.streamingThinking) {
-			content.push({
-				type: "thinking",
-				thinking: state.streamingThinking,
-			});
-		}
-
-		// 添加文本内容
-		if (state.streamingContent) {
-			content.push({
-				type: "text",
-				text: state.streamingContent,
-			});
-		}
-
-		// 添加工具内容
-		const tools = Array.from(state.activeTools.values());
-		tools.forEach((tool) => {
-			content.push({
-				type: "tool",
-				toolCallId: tool.id,
-				toolName: tool.name,
-				args: tool.args,
-				output: tool.output,
-				error: tool.error,
-			});
-		});
-
-		// 更新消息
+		// 完成消息
 		const finalMessage: Message = {
 			...state.currentStreamingMessage,
-			content,
 			isStreaming: false,
 		};
 
 		this.store.getState().addMessage(finalMessage);
-		this.store.getState().resetStreaming();
-		this.store.getState().clearActiveTools();
+		this.store.getState().finishStreaming();
 	}
 
 	/**
@@ -454,7 +540,7 @@ export class ChatController {
 
 		// 如果是流式生成错误，重置状态
 		if (method === "sendMessage" && this.store.getState().isStreaming) {
-			this.store.getState().resetStreaming();
+			this.store.getState().abortStreaming();
 		}
 	}
 }

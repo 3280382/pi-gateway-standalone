@@ -48,7 +48,8 @@ describe("MessageItem", () => {
 	it("calls onToggleCollapse when collapse button clicked", () => {
 		render(<MessageItem {...defaultProps} />);
 		// Trigger mouse enter to show actions
-		const messageDiv = screen.getByText("AI").closest("[class*='_message_']") ||
+		const messageDiv =
+			screen.getByText("AI").closest("[class*='_message_']") ||
 			screen.getByText("AI").parentElement?.parentElement;
 		if (messageDiv) {
 			fireEvent.mouseEnter(messageDiv);

@@ -45,18 +45,18 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
 	// 视图状态
 	const [currentView, setCurrentView] = useState<ViewType>("chat");
 
-	// 侧边栏状态 - 桌面端默认显示，移动端默认隐藏
+	// 侧边栏状态 - 默认隐藏，防止闪现问题
 	const [isSidebarVisible, setIsSidebarVisible] = useState(() => {
 		if (typeof window !== "undefined") {
 			return window.innerWidth >= 768;
 		}
-		return true;
+		return false; // 默认隐藏，防止服务端/客户端不匹配导致闪现
 	});
 
 	// 底部面板状态
 	const [isBottomPanelOpen, setIsBottomPanelOpen] = useState(false);
 	const [bottomPanelType, setBottomPanelType] = useState<BottomPanelType>(null);
-	const [bottomPanelHeight, setBottomPanelHeight] = useState(200);
+	const [bottomPanelHeight, setBottomPanelHeight] = useState(300);
 
 	// 输入框显示
 	const [showInputArea, setShowInputArea] = useState(true);

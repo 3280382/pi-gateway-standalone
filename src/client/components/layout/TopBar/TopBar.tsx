@@ -4,7 +4,7 @@
  * Row 2: Working Directory + Search & Filter
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSidebarController } from "@/services/api/sidebarApi";
 import {
 	getSystemPrompt,
@@ -125,9 +125,15 @@ interface TopBarProps {
 	workingDir: string;
 	connectionStatus: "connected" | "disconnected" | "connecting";
 	pid: number | null;
+	currentView?: "chat" | "files";
 }
 
-export function TopBar({ workingDir, connectionStatus, pid }: TopBarProps) {
+export function TopBar({
+	workingDir,
+	connectionStatus,
+	pid,
+	currentView = "chat",
+}: TopBarProps) {
 	const {
 		currentModel,
 		thinkingLevel,
@@ -295,6 +301,18 @@ export function TopBar({ workingDir, connectionStatus, pid }: TopBarProps) {
 		return ".../" + parts.slice(-2).join("/");
 	};
 
+	// Files 视图：显示文件工具栏
+	if (currentView === "files") {
+		return (
+			<FileToolbarTopBar
+				workingDir={workingDir}
+				connectionStatus={connectionStatus}
+				pid={pid}
+			/>
+		);
+	}
+
+	// Chat 视图：完整显示
 	return (
 		<div className={styles.topBar}>
 			{/* Row 1: System Prompt, Model, Thinking, Status */}
@@ -709,5 +727,284 @@ function FolderIcon({ className }: { className?: string }) {
 		>
 			<path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
 		</svg>
+	);
+}
+
+// ============================================
+// FileToolbarTopBar - Files 视图的顶部工具栏
+// ============================================
+import {
+	type FilterType,
+	type SortMode,
+	useFileStore,
+} from "@/stores/fileStore";
+
+const FILE_FILTER_OPTIONS: {
+	value: FilterType;
+	icon: string;
+	label: string;
+}[] = [
+	{ value: "all", icon: "📁", label: "All Files" },
+	{ value: "dir", icon: "📂", label: "Directories" },
+	{ value: "text", icon: "📄", label: "Text Files" },
+	{ value: "html", icon: "🌐", label: "HTML/CSS" },
+	{ value: "js", icon: "📜", label: "JavaScript/TS" },
+	{ value: "py", icon: "🐍", label: "Python" },
+	{ value: "sh", icon: "⚡", label: "Shell Scripts" },
+	{ value: "java", icon: "☕", label: "Java" },
+	{ value: "json", icon: "📋", label: "JSON/Data" },
+	{ value: "md", icon: "📝", label: "Markdown" },
+	{ value: "image", icon: "🖼️", label: "Images" },
+	{ value: "code", icon: "💻", label: "All Code" },
+];
+
+const FILE_SORT_OPTIONS: { value: SortMode; icon: string; label: string }[] = [
+	{ value: "time-desc", icon: "🕐", label: "Time ↓" },
+	{ value: "time-asc", icon: "🕐", label: "Time ↑" },
+	{ value: "name-asc", icon: "🔤", label: "Name A-Z" },
+	{ value: "name-desc", icon: "🔤", label: "Name Z-A" },
+	{ value: "size-desc", icon: "📊", label: "Size ↓" },
+	{ value: "size-asc", icon: "📊", label: "Size ↑" },
+	{ value: "type", icon: "📎", label: "Type" },
+];
+
+interface FileToolbarTopBarProps {
+	workingDir: string;
+	connectionStatus: "connected" | "disconnected" | "connecting";
+	pid: number | null;
+}
+
+function FileToolbarTopBar({
+	workingDir,
+	connectionStatus,
+	pid,
+}: FileToolbarTopBarProps) {
+	const fileStore = useFileStore();
+	const [isFilterOpen, setIsFilterOpen] = useState(false);
+	const [isSortOpen, setIsSortOpen] = useState(false);
+	const filterRef = useRef<HTMLDivElement>(null);
+	const sortRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const handleClickOutside = (e: MouseEvent) => {
+			if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+				setIsFilterOpen(false);
+			}
+			if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+				setIsSortOpen(false);
+			}
+		};
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => document.removeEventListener("mousedown", handleClickOutside);
+	}, []);
+
+	const selectedFilter =
+		FILE_FILTER_OPTIONS.find((opt) => opt.value === fileStore.filterType) ||
+		FILE_FILTER_OPTIONS[0];
+
+	return (
+		<div className={styles.topBar}>
+			{/* Row 1: 路径导航 */}
+			<div className={styles.topRow}>
+				<button
+					className={styles.iconBtn}
+					onClick={() => fileStore.navigateHome()}
+					title="Home"
+				>
+					<svg
+						width="16"
+						height="16"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth={2}
+					>
+						<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+						<polyline points="9 22 9 12 15 12 15 22" />
+					</svg>
+				</button>
+				<button
+					className={styles.iconBtn}
+					onClick={() => fileStore.setCurrentPath(fileStore.currentPath)}
+					title="Refresh"
+				>
+					<svg
+						width="16"
+						height="16"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth={2}
+					>
+						<polyline points="23 4 23 10 17 10" />
+						<path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+					</svg>
+				</button>
+				<div className={styles.pathBar}>
+					<FolderIcon className={styles.btnIcon} />
+					<span>{fileStore.currentPath}</span>
+				</div>
+				<div className={styles.spacer} />
+				<div
+					className={styles.status}
+					title={`${connectionStatus}${pid ? ` (PID: ${pid})` : ""}`}
+				>
+					<span className={`${styles.statusDot} ${styles[connectionStatus]}`} />
+					{pid && <span className={styles.pid}>{pid}</span>}
+				</div>
+			</div>
+
+			{/* Row 2: 过滤 + 排序 + 视图 */}
+			<div className={styles.bottomRow}>
+				{/* 过滤 */}
+				<div className={styles.filterCombo} ref={filterRef}>
+					<input
+						type="text"
+						className={styles.filterComboInput}
+						placeholder="Filter..."
+						value={
+							fileStore.filterType === "custom"
+								? fileStore.filterText
+								: selectedFilter.label
+						}
+						onChange={(e) => {
+							const option = FILE_FILTER_OPTIONS.find(
+								(opt) =>
+									opt.label.toLowerCase() === e.target.value.toLowerCase(),
+							);
+							if (option) {
+								fileStore.setFilterType(option.value);
+								fileStore.setFilterText("");
+							} else {
+								fileStore.setFilterType("custom");
+								fileStore.setFilterText(e.target.value);
+							}
+						}}
+						onClick={() => setIsFilterOpen(true)}
+					/>
+					<button
+						className={styles.filterComboBtn}
+						onClick={() => setIsFilterOpen(!isFilterOpen)}
+					>
+						<svg
+							width="12"
+							height="12"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth={2}
+						>
+							<polyline points="6 9 12 15 18 9" />
+						</svg>
+					</button>
+					{isFilterOpen && (
+						<div className={styles.filterDropdown}>
+							{FILE_FILTER_OPTIONS.map((option) => (
+								<div
+									key={option.value}
+									className={`${styles.filterDropdownItem} ${fileStore.filterType === option.value ? styles.active : ""}`}
+									onClick={() => {
+										fileStore.setFilterType(option.value);
+										setIsFilterOpen(false);
+									}}
+								>
+									<span>{option.icon}</span>
+									<span>{option.label}</span>
+								</div>
+							))}
+						</div>
+					)}
+				</div>
+
+				{/* 排序 */}
+				<div className={styles.sortCombo} ref={sortRef}>
+					<button
+						className={styles.sortComboBtn}
+						onClick={() => setIsSortOpen(!isSortOpen)}
+					>
+						<span>
+							{
+								FILE_SORT_OPTIONS.find(
+									(opt) => opt.value === fileStore.sortMode,
+								)?.icon
+							}
+						</span>
+						<span>
+							{
+								FILE_SORT_OPTIONS.find(
+									(opt) => opt.value === fileStore.sortMode,
+								)?.label
+							}
+						</span>
+						<svg
+							width="10"
+							height="10"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth={2}
+						>
+							<polyline points="6 9 12 15 18 9" />
+						</svg>
+					</button>
+					{isSortOpen && (
+						<div className={styles.sortDropdown}>
+							{FILE_SORT_OPTIONS.map((option) => (
+								<div
+									key={option.value}
+									className={`${styles.sortDropdownItem} ${fileStore.sortMode === option.value ? styles.active : ""}`}
+									onClick={() => {
+										fileStore.setSortMode(option.value);
+										setIsSortOpen(false);
+									}}
+								>
+									<span>{option.icon}</span>
+									<span>{option.label}</span>
+								</div>
+							))}
+						</div>
+					)}
+				</div>
+
+				{/* 视图切换 */}
+				<button
+					className={styles.iconBtn}
+					onClick={() => fileStore.toggleViewMode()}
+					title={fileStore.viewMode === "grid" ? "List View" : "Grid View"}
+				>
+					{fileStore.viewMode === "grid" ? (
+						<svg
+							width="16"
+							height="16"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth={2}
+						>
+							<line x1="8" y1="6" x2="21" y2="6" />
+							<line x1="8" y1="12" x2="21" y2="12" />
+							<line x1="8" y1="18" x2="21" y2="18" />
+							<line x1="3" y1="6" x2="3.01" y2="6" />
+							<line x1="3" y1="12" x2="3.01" y2="12" />
+							<line x1="3" y1="18" x2="3.01" y2="18" />
+						</svg>
+					) : (
+						<svg
+							width="16"
+							height="16"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth={2}
+						>
+							<rect x="3" y="3" width="7" height="7" />
+							<rect x="14" y="3" width="7" height="7" />
+							<rect x="14" y="14" width="7" height="7" />
+							<rect x="3" y="14" width="7" height="7" />
+						</svg>
+					)}
+				</button>
+			</div>
+		</div>
 	);
 }

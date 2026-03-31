@@ -1,11 +1,12 @@
 /**
- * AppLayout - 统一布局控制器
+ * AppLayout - 统一布局控制器 (Flex + 文档流)
  */
 
 import { useChatController } from "@/services/api/chatApi";
 import { useChatStore } from "@/stores/chatStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import { InputArea } from "../../chat/InputArea/InputArea";
+import { FileSidebar } from "../../files/FileSidebar";
 import { BottomMenu } from "../BottomMenu";
 import { SidebarPanel } from "../SidebarPanel/SidebarPanel";
 import { TopBar } from "../TopBar/TopBar";
@@ -41,19 +42,42 @@ export function AppLayout({
 
 	return (
 		<div className={styles.layout}>
-			{/* 1. 顶部菜单 - 固定高度64px */}
+			{/* 侧边栏 - 绝对定位，遮挡顶部和内容，不遮挡底部 */}
+			<aside
+				className={`${styles.sidebar} ${isSidebarVisible ? styles.sidebarVisible : styles.sidebarHidden}`}
+			>
+				{currentView === "chat" ? (
+					<SidebarPanel
+						isVisible={isSidebarVisible}
+						onSwitchView={setCurrentView}
+						currentView={currentView}
+					/>
+				) : (
+					<FileSidebar visible={isSidebarVisible} />
+				)}
+			</aside>
+
+			{/* 1. Header - 顶部菜单 (固定68px) */}
 			<header className={styles.header}>
 				<TopBar
 					workingDir={currentDir}
 					connectionStatus={isConnected ? "connected" : "disconnected"}
 					pid={serverPid}
+					currentView={currentView}
 				/>
 			</header>
 
-			{/* 2. 主体区域 - 内容区 + 输入框 */}
-			<div className={styles.body}>
-				<main className={styles.content}>
+			{/* 2. Main - 主区域 (flex: 1) */}
+			<div className={styles.main}>
+				{/* 内容区 */}
+				<div className={styles.content}>
+					{/* 可滚动内容 */}
 					<div className={styles.contentBody}>{children}</div>
+
+					{/* 底部面板 - 直接渲染传入的内容 */}
+					{isBottomPanelOpen && bottomPanelContent}
+
+					{/* 输入框 */}
 					{showInput && (
 						<div className={styles.inputArea}>
 							<InputArea
@@ -72,10 +96,10 @@ export function AppLayout({
 							/>
 						</div>
 					)}
-				</main>
+				</div>
 			</div>
 
-			{/* 3. 底部菜单 - 始终可见 */}
+			{/* 3. Footer - 底部菜单 (固定44px) */}
 			<footer className={styles.footer}>
 				<BottomMenu
 					isSidebarVisible={isSidebarVisible}
@@ -86,61 +110,6 @@ export function AppLayout({
 					onToggleBottomPanel={() => toggleBottomPanel("terminal")}
 				/>
 			</footer>
-
-			{/* 4. 侧边栏 - 覆盖顶部和中间，不覆盖底部 */}
-			{isSidebarVisible && (
-				<aside className={styles.sidebarOverlay}>
-					<SidebarPanel
-						isVisible={isSidebarVisible}
-						onSwitchView={setCurrentView}
-						currentView={currentView}
-					/>
-				</aside>
-			)}
-
-			{/* 5. 底部弹出面板 */}
-			{isBottomPanelOpen && (
-				<div
-					className={styles.bottomPanel}
-					style={{ height: bottomPanelHeight }}
-				>
-					<div className={styles.resizer}>
-						<div
-							className={styles.dragHandle}
-							onMouseDown={(e) => {
-								const startY = e.clientY;
-								const startHeight = bottomPanelHeight;
-
-								const handleMouseMove = (e: MouseEvent) => {
-									const delta = startY - e.clientY;
-									setBottomPanelHeight(
-										Math.max(100, Math.min(500, startHeight + delta)),
-									);
-								};
-
-								const handleMouseUp = () => {
-									document.removeEventListener("mousemove", handleMouseMove);
-									document.removeEventListener("mouseup", handleMouseUp);
-								};
-
-								document.addEventListener("mousemove", handleMouseMove);
-								document.addEventListener("mouseup", handleMouseUp);
-							}}
-						/>
-						<button
-							className={styles.closeBtn}
-							onClick={() => toggleBottomPanel(null)}
-						>
-							×
-						</button>
-					</div>
-					<div className={styles.panelContent}>
-						{bottomPanelContent || (
-							<div className={styles.emptyPanel}>Terminal Panel</div>
-						)}
-					</div>
-				</div>
-			)}
 		</div>
 	);
 }

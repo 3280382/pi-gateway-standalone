@@ -87,7 +87,9 @@ describe("TopBar", () => {
 		const docBtn = screen.getByTitle("System Prompt");
 		fireEvent.click(docBtn);
 		// Modal should open
-		expect(screen.getByText("System Prompt - /home/user/project")).toBeInTheDocument();
+		expect(
+			screen.getByText("System Prompt - /home/user/project"),
+		).toBeInTheDocument();
 	});
 
 	it("opens model selector when model button clicked", () => {

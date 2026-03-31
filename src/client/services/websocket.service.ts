@@ -2,11 +2,6 @@
  * WebSocket Service - 处理实时通信
  */
 
-import type {
-	ChatWebSocketMessage,
-	Message,
-	ToolExecution,
-} from "@/types/chat";
 import { BaseService, ServiceError } from "./base.service";
 
 export type WebSocketEvent =
@@ -22,6 +17,14 @@ export type WebSocketEvent =
 	| "tool_end"
 	| "agent_start"
 	| "agent_end"
+	| "message_start"
+	| "message_end"
+	| "turn_start"
+	| "turn_end"
+	| "compaction_start"
+	| "compaction_end"
+	| "retry_start"
+	| "retry_end"
 	| "session_updated"
 	| "system_notification"
 	| "initialized"
@@ -30,7 +33,10 @@ export type WebSocketEvent =
 	| "session_loaded"
 	| "sessions_list"
 	| "model_set"
-	| "thinking_set";
+	| "thinking_set"
+	| "models_list"
+	| "llm_log_set"
+	| "command_result";
 
 export interface WebSocketMessage<T = any> {
 	type: string;
@@ -69,7 +75,7 @@ export class WebSocketService extends BaseService {
 	connect(url?: string): Promise<void> {
 		return new Promise((resolve, reject) => {
 			try {
-				const wsUrl = url || this.getWebSocketUrl();
+				const wsUrl = url || this.getWebSocketUrlPrivate();
 
 				if (this.ws && this.ws.readyState === WebSocket.OPEN) {
 					console.log("[WebSocket] Already connected");
@@ -78,10 +84,17 @@ export class WebSocketService extends BaseService {
 				}
 
 				console.log(`[WebSocket] Connecting to ${wsUrl}`);
+				console.log(
+					`[WebSocket] Current hostname: ${window.location.hostname}`,
+				);
+				console.log(
+					`[WebSocket] Current protocol: ${window.location.protocol}`,
+				);
+
 				this.ws = new WebSocket(wsUrl);
 
 				this.ws.onopen = () => {
-					console.log("[WebSocket] Connected");
+					console.log("[WebSocket] Connected successfully");
 					this.connectionStatus = {
 						isConnected: true,
 						lastConnected: new Date().toISOString(),
@@ -92,6 +105,12 @@ export class WebSocketService extends BaseService {
 
 					this.emit("connected", this.connectionStatus);
 					resolve();
+				};
+
+				this.ws.onerror = (error) => {
+					console.error("[WebSocket] Connection error:", error);
+					this.emit("error", { error: error });
+					reject(new Error(`WebSocket连接错误: ${error}`));
 				};
 
 				this.ws.onclose = (event) => {
@@ -171,8 +190,15 @@ export class WebSocketService extends BaseService {
 	 * 注意：后端期望直接的消息对象，而不是嵌套在data字段中
 	 */
 	send<T = any>(type: string, data?: T): boolean {
-		if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-			console.warn("[WebSocket] Cannot send message: WebSocket not connected");
+		if (!this.ws) {
+			console.warn("[WebSocket] Cannot send message: WebSocket is null");
+			return false;
+		}
+
+		if (this.ws.readyState !== WebSocket.OPEN) {
+			console.warn(
+				`[WebSocket] Cannot send message: WebSocket state is ${this.ws.readyState} (0=CONNECTING,1=OPEN,2=CLOSING,3=CLOSED)`,
+			);
 			return false;
 		}
 
@@ -213,7 +239,7 @@ export class WebSocketService extends BaseService {
 	/**
 	 * 切换会话（对应后端的load_session类型）
 	 */
-	switchSession(sessionId: string, workspace?: string): boolean {
+	switchSession(sessionId: string, _workspace?: string): boolean {
 		return this.send("load_session", {
 			sessionPath: sessionId, // 注意：后端期望sessionPath字段
 		});
@@ -226,9 +252,9 @@ export class WebSocketService extends BaseService {
 	initWorkingDirectory(path: string, sessionId?: string): Promise<any> {
 		return new Promise((resolve, reject) => {
 			// 设置一次性监听器等待initialized响应
-			const unsubscribe = this.on("initialized", (data) => {
+			const unsubscribe = this.on("initialized", (_data: unknown) => {
 				unsubscribe();
-				resolve(data);
+				resolve(_data);
 			});
 
 			// 5秒超时
@@ -253,9 +279,51 @@ export class WebSocketService extends BaseService {
 	/**
 	 * 切换工作目录 - 已弃用，使用initWorkingDirectory
 	 */
-	switchWorkingDirectory(path: string): boolean {
+	switchWorkingDirectory(path: string): Promise<unknown> {
 		console.warn("switchWorkingDirectory已弃用，请使用initWorkingDirectory");
 		return this.initWorkingDirectory(path);
+	}
+
+	/**
+	 * 流式传输时引导（对应后端的steer类型）
+	 */
+	steer(text: string): boolean {
+		return this.send("steer", { text });
+	}
+
+	/**
+	 * 执行命令（对应后端的command类型）
+	 */
+	executeCommand(command: string): boolean {
+		return this.send("command", { text: command });
+	}
+
+	/**
+	 * 列出可用模型（对应后端的list_models类型）
+	 */
+	listModels(): boolean {
+		return this.send("list_models");
+	}
+
+	/**
+	 * 设置LLM日志（对应后端的set_llm_log类型）
+	 */
+	setLlmLogEnabled(enabled: boolean): boolean {
+		return this.send("set_llm_log", { enabled });
+	}
+
+	/**
+	 * 列出会话（对应后端的list_sessions类型）
+	 */
+	listSessions(cwd: string): boolean {
+		return this.send("list_sessions", { cwd });
+	}
+
+	/**
+	 * 设置模型（对应后端的set_model类型）
+	 */
+	setModel(provider: string, modelId: string, thinkingLevel?: string): boolean {
+		return this.send("set_model", { provider, modelId, thinkingLevel });
 	}
 
 	/**
@@ -314,19 +382,19 @@ export class WebSocketService extends BaseService {
 	/**
 	 * 获取WebSocket URL
 	 */
-	private getWebSocketUrl(): string {
-		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-		const host = window.location.host;
-		return `${protocol}//${host}/ws`;
-	}
+	// 私有方法已重命名为 getWebSocketUrlPrivate
 
 	/**
 	 * 处理传入消息
 	 */
 	private handleIncomingMessage(message: any): void {
-		const { type, data, timestamp, sessionId } = message;
-
-		console.log(`[WebSocket] Received: ${type}`, data ? "(with data)" : "");
+		const { type, timestamp, sessionId } = message;
+		
+		// 后端直接发送属性，没有嵌套的data字段
+		// 所以我们需要从消息对象本身提取数据
+		const data = message;
+		
+		console.log(`[WebSocket] Received: ${type}`, message);
 
 		// 首先触发通用消息事件
 		this.emit("message", { type, data, timestamp, sessionId });
@@ -334,15 +402,18 @@ export class WebSocketService extends BaseService {
 		// 然后触发特定类型事件
 		switch (type) {
 			case "content":
+			case "content_delta":  // 也处理content_delta事件
 				this.emit("content_delta", data);
 				break;
 			case "thinking":
+			case "thinking_delta":  // 也处理thinking_delta事件
 				this.emit("thinking_delta", data);
 				break;
 			case "toolcall_delta":
 				this.emit("toolcall_delta", data);
 				break;
 			case "tool_start":
+				console.log("[WebSocket] Processing tool_start event, data:", data);
 				this.emit("tool_start", data);
 				break;
 			case "tool_update":
@@ -356,6 +427,30 @@ export class WebSocketService extends BaseService {
 				break;
 			case "agent_end":
 				this.emit("agent_end", data);
+				break;
+			case "message_start":
+				this.emit("message_start", data);
+				break;
+			case "message_end":
+				this.emit("message_end", data);
+				break;
+			case "turn_start":
+				this.emit("turn_start", data);
+				break;
+			case "turn_end":
+				this.emit("turn_end", data);
+				break;
+			case "compaction_start":
+				this.emit("compaction_start", data);
+				break;
+			case "compaction_end":
+				this.emit("compaction_end", data);
+				break;
+			case "retry_start":
+				this.emit("retry_start", data);
+				break;
+			case "retry_end":
+				this.emit("retry_end", data);
 				break;
 			case "session_updated":
 				this.emit("session_updated", data);
@@ -380,6 +475,15 @@ export class WebSocketService extends BaseService {
 				break;
 			case "thinking_set":
 				this.emit("thinking_set", message);
+				break;
+			case "models_list":
+				this.emit("models_list", message);
+				break;
+			case "llm_log_set":
+				this.emit("llm_log_set", message);
+				break;
+			case "command_result":
+				this.emit("command_result", message);
 				break;
 			// "pong"事件已移除，因为后端不支持
 			// case "pong":
@@ -424,8 +528,26 @@ export class WebSocketService extends BaseService {
 			"tool_end",
 			"agent_start",
 			"agent_end",
+			"message_start",
+			"message_end",
+			"turn_start",
+			"turn_end",
+			"compaction_start",
+			"compaction_end",
+			"retry_start",
+			"retry_end",
 			"session_updated",
 			"system_notification",
+			"initialized",
+			"dir_changed",
+			"session_created",
+			"session_loaded",
+			"sessions_list",
+			"model_set",
+			"thinking_set",
+			"models_list",
+			"llm_log_set",
+			"command_result",
 		];
 
 		events.forEach((event) => {
@@ -447,6 +569,32 @@ export class WebSocketService extends BaseService {
 	 */
 	get readyState(): number {
 		return this.ws?.readyState ?? WebSocket.CLOSED;
+	}
+
+	/**
+	 * 获取WebSocket URL（用于调试）
+	 * 注意：这是一个公共方法，调用私有方法
+	 */
+	/**
+	 * 获取WebSocket URL（用于调试）
+	 * 注意：这是一个公共方法，调用私有方法
+	 */
+	getWebSocketUrl(): string {
+		// 调用私有方法
+		return this.getWebSocketUrlPrivate();
+	}
+
+	/**
+	 * 私有方法别名，避免递归调用
+	 */
+	private getWebSocketUrlPrivate(): string {
+		// 前端运行在5173端口，后端运行在3000端口
+		// 简化逻辑：直接连接到127.0.0.1:3000
+		const backendHost = "127.0.0.1:3000";
+		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+		const wsUrl = `${protocol}//${backendHost}`;
+		console.log(`[WebSocket] WebSocket URL: ${wsUrl}`);
+		return wsUrl;
 	}
 }
 

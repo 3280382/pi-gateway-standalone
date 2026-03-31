@@ -12,7 +12,6 @@ import { FileBrowserErrorBoundary } from "./FileBrowserErrorBoundary";
 import { FileGrid } from "./FileGrid";
 import { FileList } from "./FileList";
 import { FileSidebar } from "./FileSidebar";
-import { FileToolbar } from "./FileToolbar";
 import { FileViewer } from "./FileViewer";
 
 interface FileBrowserProps {
@@ -175,16 +174,6 @@ export function FileBrowser({
 				</FileBrowserErrorBoundary>
 				{/* 主内容区 */}
 				<div className={styles.main}>
-					{/* 工具栏 */}
-					<FileBrowserErrorBoundary componentName="File Toolbar">
-						<FileToolbar
-							currentPath={currentPath}
-							onRefresh={() => loadDirectory(currentPath)}
-							onToggleSidebar={onToggleSidebar}
-							onExecuteOutput={onExecuteOutput}
-							onOpenBottomPanel={onOpenBottomPanel}
-						/>
-					</FileBrowserErrorBoundary>
 					{/* 选中文件操作栏 */}
 					<FileBrowserErrorBoundary componentName="File Action Bar">
 						<FileActionBar

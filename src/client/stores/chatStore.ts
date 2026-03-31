@@ -188,17 +188,51 @@ export const useChatStore = create<ChatState>()(
 
 			appendStreamingContent: (text: string) => {
 				set(
-					(state) => ({
-						streamingContent: state.streamingContent + text,
-						currentStreamingMessage: state.currentStreamingMessage
-							? {
-									...state.currentStreamingMessage,
-									content: [
-										{ type: "text", text: state.streamingContent + text },
-									],
-								}
-							: null,
-					}),
+					(state) => {
+						const newContent = state.streamingContent + text;
+						
+						// 构建完整的内容数组
+						const content = [];
+						
+						// 添加思考内容
+						if (state.streamingThinking) {
+							content.push({
+								type: "thinking",
+								thinking: state.streamingThinking,
+							});
+						}
+						
+						// 添加文本内容
+						if (newContent) {
+							content.push({
+								type: "text",
+								text: newContent,
+							});
+						}
+						
+						// 添加工具内容
+						const tools = Array.from(state.activeTools.values());
+						tools.forEach((tool) => {
+							content.push({
+								type: "tool",
+								toolCallId: tool.id,
+								toolName: tool.name,
+								args: tool.args,
+								output: tool.output,
+								error: tool.error,
+							});
+						});
+						
+						return {
+							streamingContent: newContent,
+							currentStreamingMessage: state.currentStreamingMessage
+								? {
+										...state.currentStreamingMessage,
+										content,
+									}
+								: null,
+						};
+					},
 					false,
 					"appendStreamingContent",
 				);
@@ -206,9 +240,51 @@ export const useChatStore = create<ChatState>()(
 
 			appendStreamingThinking: (thinking: string) => {
 				set(
-					(state) => ({
-						streamingThinking: state.streamingThinking + thinking,
-					}),
+					(state) => {
+						const newThinking = state.streamingThinking + thinking;
+						
+						// 构建完整的内容数组
+						const content = [];
+						
+						// 添加思考内容
+						if (newThinking) {
+							content.push({
+								type: "thinking",
+								thinking: newThinking,
+							});
+						}
+						
+						// 添加文本内容
+						if (state.streamingContent) {
+							content.push({
+								type: "text",
+								text: state.streamingContent,
+							});
+						}
+						
+						// 添加工具内容
+						const tools = Array.from(state.activeTools.values());
+						tools.forEach((tool) => {
+							content.push({
+								type: "tool",
+								toolCallId: tool.id,
+								toolName: tool.name,
+								args: tool.args,
+								output: tool.output,
+								error: tool.error,
+							});
+						});
+						
+						return {
+							streamingThinking: newThinking,
+							currentStreamingMessage: state.currentStreamingMessage
+								? {
+										...state.currentStreamingMessage,
+										content,
+									}
+								: null,
+						};
+					},
 					false,
 					"appendStreamingThinking",
 				);
@@ -257,9 +333,54 @@ export const useChatStore = create<ChatState>()(
 			// Tool Actions
 			setActiveTool: (tool: ToolExecution) => {
 				set(
-					(state) => ({
-						activeTools: new Map(state.activeTools).set(tool.id, tool),
-					}),
+					(state) => {
+						const newTools = new Map(state.activeTools).set(tool.id, tool);
+						
+						// 同时更新currentStreamingMessage以包含工具内容
+						if (state.currentStreamingMessage) {
+							// 构建完整的内容数组
+							const content = [];
+							
+							// 添加思考内容
+							if (state.streamingThinking) {
+								content.push({
+									type: "thinking",
+									thinking: state.streamingThinking,
+								});
+							}
+							
+							// 添加文本内容
+							if (state.streamingContent) {
+								content.push({
+									type: "text",
+									text: state.streamingContent,
+								});
+							}
+							
+							// 添加工具内容
+							const tools = Array.from(newTools.values());
+							tools.forEach((tool) => {
+								content.push({
+									type: "tool",
+									toolCallId: tool.id,
+									toolName: tool.name,
+									args: tool.args,
+									output: tool.output,
+									error: tool.error,
+								});
+							});
+							
+							return {
+								activeTools: newTools,
+								currentStreamingMessage: {
+									...state.currentStreamingMessage,
+									content,
+								},
+							};
+						}
+						
+						return { activeTools: newTools };
+					},
 					false,
 					"setActiveTool",
 				);
@@ -279,6 +400,50 @@ export const useChatStore = create<ChatState>()(
 								endTime: new Date(),
 							});
 						}
+						
+						// 同时更新currentStreamingMessage以包含工具内容
+						if (state.currentStreamingMessage) {
+							// 构建完整的内容数组
+							const content = [];
+							
+							// 添加思考内容
+							if (state.streamingThinking) {
+								content.push({
+									type: "thinking",
+									thinking: state.streamingThinking,
+								});
+							}
+							
+							// 添加文本内容
+							if (state.streamingContent) {
+								content.push({
+									type: "text",
+									text: state.streamingContent,
+								});
+							}
+							
+							// 添加工具内容
+							const tools = Array.from(newTools.values());
+							tools.forEach((tool) => {
+								content.push({
+									type: "tool",
+									toolCallId: tool.id,
+									toolName: tool.name,
+									args: tool.args,
+									output: tool.output,
+									error: tool.error,
+								});
+							});
+							
+							return {
+								activeTools: newTools,
+								currentStreamingMessage: {
+									...state.currentStreamingMessage,
+									content,
+								},
+							};
+						}
+						
 						return { activeTools: newTools };
 					},
 					false,

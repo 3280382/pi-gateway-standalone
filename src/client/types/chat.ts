@@ -78,28 +78,53 @@ export interface ChatState {
 	// Input
 	inputText: string;
 	isInputFocused: boolean;
+	setInputText: (text: string) => void;
+	clearInput: () => void;
 
 	// Streaming
 	isStreaming: boolean;
 	streamingContent: string;
 	streamingThinking: string;
+	startStreaming: () => void;
+	appendStreamingContent: (text: string) => void;
+	appendStreamingThinking: (thinking: string) => void;
+	abortStreaming: () => void;
+	finishStreaming: () => void;
 
 	// Tools
 	activeTools: Map<string, ToolExecution>;
+	setActiveTool: (tool: ToolExecution) => void;
+	updateToolOutput: (toolId: string, output: string, error?: string) => void;
 
 	// UI State
 	showThinking: boolean;
 	scrollToBottom: boolean;
+	setShowThinking: (show: boolean) => void;
+	setScrollToBottom: (scroll: boolean) => void;
 
 	// Search
 	searchQuery: string;
 	searchFilters: ChatSearchFilters;
 	searchResults: string[]; // Message IDs that match search
 	isSearching: boolean;
+	setSearchQuery: (query: string) => void;
+	setSearchFilters: (filters: Partial<ChatSearchFilters>) => void;
 
 	// Model/Session
 	currentModel: string | null;
 	sessionId: string | null;
+	setSessionId: (id: string | null) => void;
+
+	// Message Actions
+	addMessage: (message: Message) => void;
+	updateMessage: (messageId: string, updates: Partial<Message>) => void;
+	deleteMessage: (messageId: string) => void;
+	clearMessages: () => void;
+	toggleMessageCollapse: (messageId: string) => void;
+	toggleThinkingCollapse: (messageId: string) => void;
+	regenerateMessage: (messageId: string) => void;
+	loadSession: (sessionPath: string) => Promise<number>;
+	reset: () => void;
 }
 
 // ============================================================================
@@ -163,15 +188,15 @@ export interface ToolStartMessage {
 export interface ToolUpdateMessage {
 	type: "tool_update";
 	toolCallId: string;
-	output?: string;
+	chunk?: string;  // 后端发送的是chunk字段
 	error?: string;
 }
 
 export interface ToolEndMessage {
 	type: "tool_end";
 	toolCallId: string;
-	output?: string;
-	error?: string;
+	result?: string;  // 后端发送的是result字段
+	isError?: boolean; // 后端发送的是isError字段
 }
 
 export interface AgentStartMessage {
@@ -183,6 +208,40 @@ export interface AgentEndMessage {
 	type: "agent_end";
 }
 
+export interface MessageStartMessage {
+	type: "message_start";
+}
+
+export interface MessageEndMessage {
+	type: "message_end";
+}
+
+export interface TurnStartMessage {
+	type: "turn_start";
+}
+
+export interface TurnEndMessage {
+	type: "turn_end";
+	message?: any;
+	toolResults?: any[];
+}
+
+export interface CompactionStartMessage {
+	type: "compaction_start";
+}
+
+export interface CompactionEndMessage {
+	type: "compaction_end";
+}
+
+export interface RetryStartMessage {
+	type: "retry_start";
+}
+
+export interface RetryEndMessage {
+	type: "retry_end";
+}
+
 export type ChatWebSocketMessage =
 	| ContentDeltaMessage
 	| ThinkingDeltaMessage
@@ -191,7 +250,15 @@ export type ChatWebSocketMessage =
 	| ToolUpdateMessage
 	| ToolEndMessage
 	| AgentStartMessage
-	| AgentEndMessage;
+	| AgentEndMessage
+	| MessageStartMessage
+	| MessageEndMessage
+	| TurnStartMessage
+	| TurnEndMessage
+	| CompactionStartMessage
+	| CompactionEndMessage
+	| RetryStartMessage
+	| RetryEndMessage;
 
 // ============================================================================
 // Component Props

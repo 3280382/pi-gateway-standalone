@@ -206,13 +206,13 @@ export class GatewaySession {
 					const msgEvent = event.assistantMessageEvent;
 					if (msgEvent.type === "text_delta") {
 						this.send({
-							type: "text_delta",
-							delta: msgEvent.delta,
+							type: "content_delta",  // 改为content_delta以匹配前端
+							text: msgEvent.delta,   // 改为text字段以匹配前端
 						});
 					} else if (msgEvent.type === "thinking_delta") {
 						this.send({
 							type: "thinking_delta",
-							delta: msgEvent.delta,
+							thinking: msgEvent.delta,  // 改为thinking字段以匹配前端
 						});
 					} else if (msgEvent.type === "toolcall_delta") {
 						// 转发工具调用增量以逐步构建工具参数
