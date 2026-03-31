@@ -242,7 +242,7 @@
 	padding: 4px 0;
 	margin: 0;
 	font-family: "JetBrains Mono", "Fira Code", monospace;
-	font-size: var(--font-sm);
+	font-size: var(--font-base);
 	line-height: 1.5;
 	color: #c9b07a;
 	background: transparent;
@@ -268,7 +268,7 @@
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	font-size: var(--font-sm);
+	font-size: var(--font-base);
 	color: var(--icon-thinking);
 	width: 100%;
 	box-sizing: border-box;
@@ -350,7 +350,7 @@
 	padding: 4px 0;
 	background: transparent;
 	font-family: "JetBrains Mono", "Fira Code", monospace;
-	font-size: var(--font-xs);
+	font-size: var(--font-base);
 	line-height: 1.5;
 	color: #c9d1d9;
 	white-space: pre-wrap;
@@ -376,7 +376,7 @@
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	font-size: var(--font-sm);
+	font-size: var(--font-base);
 	width: 100%;
 	box-sizing: border-box;
 }
@@ -472,7 +472,7 @@
 	overflow-x: auto;
 	overflow-y: hidden;
 	font-family: "JetBrains Mono", "Fira Code", monospace;
-	font-size: var(--font-sm);
+	font-size: var(--font-base);
 	line-height: 1.5;
 	max-width: 100%;
 }
@@ -518,11 +518,11 @@
 
 	.thinkingBody,
 	.toolCode {
-		font-size: var(--font-sm);
+		font-size: var(--font-base);
 	}
 
 	.codePre {
-		font-size: var(--font-sm);
+		font-size: var(--font-base);
 		padding: 8px 10px;
 	}
 }
