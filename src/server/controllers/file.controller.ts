@@ -338,7 +338,7 @@ export async function writeFileContent(req: Request, res: Response) {
  * 4. 记录详细日志
  */
 
-// 禁止删除的系统关键目录
+// 禁止删除的系统关键目录（仅系统目录，不包括用户目录）
 const PROTECTED_PATHS = [
 	"/",
 	"/bin",
@@ -348,13 +348,13 @@ const PROTECTED_PATHS = [
 	"/lib",
 	"/lib64",
 	"/proc",
-	"/root",
 	"/run",
 	"/sbin",
 	"/sys",
 	"/usr",
 	"/var",
-	"/home",
+	// 注意：/root 和 /home 被移除，因为用户需要管理自己的文件
+	// 这些路径通过 isPathAllowed 进行基础保护
 ];
 
 const MAX_DELETE_COUNT = 100;
