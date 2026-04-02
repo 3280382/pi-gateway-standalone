@@ -78,30 +78,36 @@ src/
 
 ## 核心架构组件
 
-### 1. AppLayout 统一布局系统
+### 1. 应用布局架构
 
-所有视图共享统一的布局框架：
+采用分层布局设计：
 
 ```
-┌─────────────────────────────────────────┐
-│ Header (64px) - AppHeader               │
-│ ├─ Row1: 模型 | Thinking | 状态指示器   │
-│ └─ Row2: 工作目录 | 搜索框              │
-├──────────┬──────────────────────────────┤
-│ Sidebar  │  Content                     │
-│ (可隐藏) │  ├─ contentBody (消息/文件)  │
-│ 280px    │  └─ inputArea (聊天输入框)   │
-├──────────┴──────────────────────────────┤
-│ Footer (44px) - AppFooter               │
-├─────────────────────────────────────────┤
-│ BottomPanel - 可弹出终端/预览           │
-└─────────────────────────────────────────┘
+App (100vh flex column)
+├── PageContainer (flex: 1)
+│   ├── ChatPage
+│   │   └── ChatLayout
+│   │       ├── AppHeader (76px)
+│   │       ├── SidebarPanel (280px overlay)
+│   │       └── ChatPanel (flex: 1)
+│   │           ├── MessageList
+│   │           └── InputArea
+│   │
+│   └── FilesPage
+│       └── FilesLayout
+│           ├── FileToolbar
+│           ├── FileSidebar (280px overlay)
+│           └── FileBrowser (flex: 1)
+│
+└── Footer (44px)
 ```
 
 **设计原则**:
-- 布局样式集中在 `AppLayout.module.css`
-- 子组件只负责内容渲染，不控制布局位置
-- 通过 `LayoutContext` 统一管理侧边栏、底部面板状态
+- **App 层级**: 只包含 Footer（全局控件）和 PageContainer
+- **Feature 层级**: 每个视图独立管理自己的 Header、Sidebar、Content
+- **Chat Sidebar**: 固定定位 overlay，滑动动画
+- **Files Sidebar**: 固定定位 overlay，异步加载目录树
+- **LayoutContext**: 跨组件状态共享（sidebar 显隐、底部面板等）
 
 ### 2. 状态管理架构
 
