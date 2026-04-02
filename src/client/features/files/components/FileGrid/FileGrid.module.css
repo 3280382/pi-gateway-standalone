@@ -84,21 +84,28 @@
 /* Pinch gesture hint */
 .pinchHint {
   position: fixed;
-  bottom: 60px;
+  bottom: 80px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 8px 16px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  padding: 10px 20px;
+  background: var(--accent-blue);
+  color: white;
   border-radius: var(--radius-md);
   font-size: var(--font-sm);
-  color: var(--text-secondary);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  animation: slideUpFade 0.3s ease;
   z-index: 100;
+  pointer-events: none;
 }
 
-.pinchHint.visible {
-  opacity: 1;
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }

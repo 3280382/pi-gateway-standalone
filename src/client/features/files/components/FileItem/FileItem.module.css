@@ -1,0 +1,274 @@
+/**
+ * FileItem Styles - Optimized for gesture interaction
+ */
+
+/* Grid Item */
+.gridItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  background: var(--bg-tertiary);
+  border: 2px solid transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+.gridItem:hover {
+  background: var(--bg-hover);
+  transform: translateY(-2px);
+}
+
+.gridItem.pressed {
+  transform: scale(0.95);
+  background: var(--accent-bg-blue);
+}
+
+.gridItem.selected {
+  background: var(--accent-bg-blue);
+  border-color: var(--accent-blue);
+}
+
+.gridItem.directory {
+  background: var(--accent-bg-yellow);
+}
+
+.gridItem.directory:hover {
+  background: var(--accent-yellow);
+  opacity: 0.9;
+}
+
+.gridItem.dropTarget {
+  border-color: var(--accent-green);
+  background: var(--accent-bg-green);
+  transform: scale(1.05);
+}
+
+.gridItem.dragging {
+  opacity: 0.4;
+  transform: scale(0.9);
+}
+
+/* Ripple effect */
+.ripple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, var(--accent-blue) 0%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0.5;
+  animation: rippleEffect 0.4s ease-out;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+@keyframes rippleEffect {
+  to {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+/* Checkbox */
+.checkbox {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 18px;
+  color: var(--accent-blue);
+  cursor: pointer;
+  z-index: 10;
+  padding: 4px;
+  background: var(--bg-secondary);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s;
+}
+
+.checkbox:active {
+  transform: scale(0.9);
+}
+
+/* Selection ring */
+.selectionRing {
+  position: absolute;
+  inset: 4px;
+  border: 2px solid var(--accent-blue);
+  border-radius: var(--radius-md);
+  pointer-events: none;
+  animation: ringPulse 2s infinite;
+}
+
+@keyframes ringPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Grid specific */
+.gridIcon {
+  font-size: 40px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.gridName {
+  font-size: var(--font-xs);
+  text-align: center;
+  word-break: break-word;
+  max-width: 100%;
+  color: var(--text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+/* List Item */
+.listItem {
+  display: grid;
+  grid-template-columns: auto auto 1fr 80px 120px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  position: relative;
+  background: transparent;
+  border-left: 3px solid transparent;
+  touch-action: manipulation;
+}
+
+.listItem:hover {
+  background: var(--bg-hover);
+}
+
+.listItem.pressed {
+  background: var(--accent-bg-blue);
+}
+
+.listItem.selected {
+  background: var(--accent-bg-blue);
+  border-left-color: var(--accent-blue);
+}
+
+.listItem.directory {
+  background: var(--accent-bg-yellow);
+}
+
+.listItem.directory:hover {
+  background: var(--accent-yellow);
+  opacity: 0.9;
+}
+
+.listItem.dropTarget {
+  border: 2px dashed var(--accent-green);
+  background: var(--accent-bg-green);
+}
+
+.listItem.dragging {
+  opacity: 0.4;
+}
+
+/* List specific */
+.listItem .checkbox {
+  position: static;
+  background: transparent;
+  box-shadow: none;
+  width: auto;
+  height: auto;
+  padding: 0;
+}
+
+.listIcon {
+  font-size: 20px;
+  width: 28px;
+  text-align: center;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.listName {
+  font-size: var(--font-sm);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.listSize {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.listModified {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .gridItem {
+    padding: 12px 8px;
+  }
+  
+  .gridIcon {
+    font-size: 32px;
+  }
+  
+  .listItem {
+    grid-template-columns: auto auto 1fr 60px 80px;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  
+  .listSize,
+  .listModified {
+    font-size: 10px;
+  }
+}
+
+/* Prevent text selection during gestures */
+.gridItem *,
+.listItem * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Improve touch response */
+@media (pointer: coarse) {
+  .gridItem,
+  .listItem {
+    min-height: 44px;
+  }
+  
+  .checkbox {
+    min-width: 32px;
+    min-height: 32px;
+  }
+}

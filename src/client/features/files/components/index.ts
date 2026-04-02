@@ -6,7 +6,11 @@ export { BatchActionBar } from "./BatchActionBar";
 export { FileActionBar } from "./FileActionBar";
 export { FileBrowser } from "./FileBrowser";
 export { FileGrid } from "./FileGrid";
+export { FileItem } from "./FileItem";
 export { FileList } from "./FileList";
 export { FileSidebar } from "./FileSidebar";
 export { FileToolbar } from "./FileToolbar";
 export { FileViewer } from "./FileViewer";
+
+// Hooks
+export { useGesture } from "./hooks/useGesture";

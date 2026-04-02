@@ -1,23 +1,20 @@
 /**
- * FileGrid - Enhanced grid view with multi-select, gestures, and drag-drop
+ * FileGrid - Optimized grid view with gesture handling
  */
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
-import { getFileIcon } from "@/services/api/fileApi";
-import { type FileItem, useFileStore } from "@/stores/fileStore";
+import React, { memo, useCallback, useRef, useState } from "react";
+import type { FileItem as FileItemType } from "@/stores/fileStore";
+import { useFileStore } from "@/stores/fileStore";
 import { useFileViewerStore } from "@/stores/fileViewerStore";
+import { FileItem } from "../FileItem";
 import styles from "./FileGrid.module.css";
 
 interface FileGridProps {
-	items: FileItem[];
+	items: FileItemType[];
 }
 
-interface TouchState {
-	startX: number;
-	startY: number;
-	startTime: number;
-	startDistance: number | null;
-	isPinch: boolean;
-	isLongPress: boolean;
+interface PinchState {
+	startDistance: number;
+	isPinching: boolean;
 }
 
 export const FileGrid = memo<FileGridProps>(({ items }) => {
@@ -34,15 +31,17 @@ export const FileGrid = memo<FileGridProps>(({ items }) => {
 	} = useFileStore();
 
 	const { openViewer } = useFileViewerStore();
-	const containerRef = useRef<HTMLDivElement>(null);
-	const touchState = useRef<TouchState | null>(null);
-	const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 	const [dropTarget, setDropTarget] = useState<string | null>(null);
 	const [draggingItem, setDraggingItem] = useState<string | null>(null);
+	const [showPinchHint, setShowPinchHint] = useState(false);
+	
+	const containerRef = useRef<HTMLDivElement>(null);
+	const pinchState = useRef<PinchState | null>(null);
+	const pinchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-	// Single click opens file directly, double click navigates directory
-	const handleClick = useCallback(
-		(item: FileItem) => {
+	// Handle tap (single click)
+	const handleTap = useCallback(
+		(item: FileItemType) => {
 			if (isMultiSelectMode) {
 				toggleSelection(item.path);
 				return;
@@ -51,16 +50,16 @@ export const FileGrid = memo<FileGridProps>(({ items }) => {
 			if (item.isDirectory) {
 				setCurrentPath(item.path);
 			} else {
-				// Single click opens file directly
+				// Single tap opens file directly
 				openViewer(item.path, item.name, "view");
 			}
 		},
 		[isMultiSelectMode, toggleSelection, setCurrentPath, openViewer],
 	);
 
-	// Double click to navigate
-	const handleDoubleClick = useCallback(
-		(item: FileItem) => {
+	// Handle double tap
+	const handleDoubleTap = useCallback(
+		(item: FileItemType) => {
 			if (isMultiSelectMode) return;
 			if (item.isDirectory) {
 				setCurrentPath(item.path);
@@ -69,121 +68,98 @@ export const FileGrid = memo<FileGridProps>(({ items }) => {
 		[isMultiSelectMode, setCurrentPath],
 	);
 
-	// Touch handlers for pinch-to-multi-select
-	const getTouchDistance = (touches: React.TouchList): number => {
-		if (touches.length < 2) return 0;
-		const dx = touches[0].clientX - touches[1].clientX;
-		const dy = touches[0].clientY - touches[1].clientY;
-		return Math.sqrt(dx * dx + dy * dy);
-	};
-
-	const handleTouchStart = useCallback(
-		(e: React.TouchEvent, item: FileItem) => {
-			const touches = e.touches;
-
-			// Pinch detection (2 fingers)
-			if (touches.length === 2) {
-				touchState.current = {
-					startX: (touches[0].clientX + touches[1].clientX) / 2,
-					startY: (touches[0].clientY + touches[1].clientY) / 2,
-					startTime: Date.now(),
-					startDistance: getTouchDistance(touches),
-					isPinch: true,
-					isLongPress: false,
-				};
-				return;
+	// Handle long press
+	const handleLongPress = useCallback(
+		(item: FileItemType) => {
+			// Enable multi-select mode on long press
+			if (!isMultiSelectMode) {
+				setMultiSelectMode(true);
 			}
-
-			// Single touch - long press detection
-			if (touches.length === 1) {
-				touchState.current = {
-					startX: touches[0].clientX,
-					startY: touches[0].clientY,
-					startTime: Date.now(),
-					startDistance: null,
-					isPinch: false,
-					isLongPress: false,
-				};
-
-				// Start long press timer for drag
-				longPressTimer.current = setTimeout(() => {
-					touchState.current!.isLongPress = true;
-					setDraggedItem(item);
-					setIsDragging(true);
-					setDraggingItem(item.path);
-				}, 500);
-			}
+			toggleSelection(item.path);
+			
+			// Setup drag
+			setDraggedItem(item);
+			setIsDragging(true);
+			setDraggingItem(item.path);
 		},
-		[setDraggedItem, setIsDragging],
+		[isMultiSelectMode, setMultiSelectMode, toggleSelection, setDraggedItem, setIsDragging],
 	);
 
-	const handleTouchMove = useCallback(
-		(e: React.TouchEvent) => {
-			if (!touchState.current) return;
+	// Handle pinch gesture
+	const handlePinchStart = useCallback(() => {
+		pinchState.current = {
+			startDistance: 0,
+			isPinching: true,
+		};
+	}, []);
 
-			const touches = e.touches;
+	const handlePinch = useCallback(
+		(scale: number) => {
+			if (!pinchState.current?.isPinching) return;
 
-			// Pinch gesture detection
-			if (touchState.current.isPinch && touches.length === 2) {
-				const currentDistance = getTouchDistance(touches);
-				const startDistance = touchState.current.startDistance;
-
-				if (startDistance && currentDistance < startDistance * 0.7) {
-					// Pinch in detected - enable multi-select
-					if (!isMultiSelectMode) {
-						setMultiSelectMode(true);
-					}
+			// Pinch in (scale < 0.7) triggers multi-select
+			if (scale < 0.7 && !isMultiSelectMode) {
+				setMultiSelectMode(true);
+				setShowPinchHint(true);
+				
+				if (pinchTimeoutRef.current) {
+					clearTimeout(pinchTimeoutRef.current);
 				}
-			}
-
-			// Cancel long press if moved too much
-			if (touches.length === 1 && longPressTimer.current) {
-				const dx = touches[0].clientX - touchState.current.startX;
-				const dy = touches[0].clientY - touchState.current.startY;
-				if (Math.sqrt(dx * dx + dy * dy) > 10) {
-					clearTimeout(longPressTimer.current);
-					longPressTimer.current = null;
-				}
+				pinchTimeoutRef.current = setTimeout(() => {
+					setShowPinchHint(false);
+				}, 2000);
 			}
 		},
 		[isMultiSelectMode, setMultiSelectMode],
 	);
 
-	const handleTouchEnd = useCallback(
-		(e: React.TouchEvent, item: FileItem) => {
-			if (longPressTimer.current) {
-				clearTimeout(longPressTimer.current);
-				longPressTimer.current = null;
+	// Touch handlers for container-level pinch detection
+	const handleContainerTouchStart = useCallback(
+		(e: React.TouchEvent) => {
+			if (e.touches.length === 2) {
+				const t1 = e.touches[0];
+				const t2 = e.touches[1];
+				const distance = Math.sqrt(
+					Math.pow(t2.clientX - t1.clientX, 2) +
+						Math.pow(t2.clientY - t1.clientY, 2),
+				);
+				pinchState.current = {
+					startDistance: distance,
+					isPinching: true,
+				};
 			}
-
-			if (!touchState.current) return;
-
-			const duration = Date.now() - touchState.current.startTime;
-
-			// If it was a long press, we're in drag mode
-			if (touchState.current.isLongPress) {
-				touchState.current = null;
-				return;
-			}
-
-			// Normal tap
-			if (duration < 300 && !touchState.current.isPinch) {
-				handleClick(item);
-			}
-
-			touchState.current = null;
 		},
-		[handleClick],
+		[],
 	);
+
+	const handleContainerTouchMove = useCallback(
+		(e: React.TouchEvent) => {
+			if (!pinchState.current?.isPinching || e.touches.length !== 2) return;
+
+			const t1 = e.touches[0];
+			const t2 = e.touches[1];
+			const currentDistance = Math.sqrt(
+				Math.pow(t2.clientX - t1.clientX, 2) +
+					Math.pow(t2.clientY - t1.clientY, 2),
+			);
+
+			const scale = currentDistance / pinchState.current.startDistance;
+			handlePinch(scale);
+		},
+		[handlePinch],
+	);
+
+	const handleContainerTouchEnd = useCallback(() => {
+		pinchState.current = null;
+	}, []);
 
 	// Drag and drop handlers
 	const handleDragStart = useCallback(
-		(e: React.DragEvent, item: FileItem) => {
+		(e: React.DragEvent, item: FileItemType) => {
 			setDraggedItem(item);
 			setIsDragging(true);
 			setDraggingItem(item.path);
 
-			// If not in multi-select mode, select this item
 			if (!isMultiSelectMode && selectedItems.length === 0) {
 				selectForAction(item.path, item.name);
 			}
@@ -191,31 +167,22 @@ export const FileGrid = memo<FileGridProps>(({ items }) => {
 			e.dataTransfer.effectAllowed = "move";
 			e.dataTransfer.setData("text/plain", item.path);
 		},
-		[
-			isMultiSelectMode,
-			selectedItems.length,
-			setDraggedItem,
-			setIsDragging,
-			selectForAction,
-		],
+		[setDraggedItem, setIsDragging, isMultiSelectMode, selectedItems.length, selectForAction],
 	);
 
-	const handleDragOver = useCallback(
-		(e: React.DragEvent, item: FileItem) => {
-			if (!item.isDirectory) return;
-			e.preventDefault();
-			e.dataTransfer.dropEffect = "move";
-			setDropTarget(item.path);
-		},
-		[],
-	);
+	const handleDragOver = useCallback((e: React.DragEvent, item: FileItemType) => {
+		if (!item.isDirectory) return;
+		e.preventDefault();
+		e.dataTransfer.dropEffect = "move";
+		setDropTarget(item.path);
+	}, []);
 
 	const handleDragLeave = useCallback(() => {
 		setDropTarget(null);
 	}, []);
 
 	const handleDrop = useCallback(
-		async (e: React.DragEvent, targetItem: FileItem) => {
+		async (e: React.DragEvent, targetItem: FileItemType) => {
 			e.preventDefault();
 			setDropTarget(null);
 			setIsDragging(false);
@@ -226,7 +193,6 @@ export const FileGrid = memo<FileGridProps>(({ items }) => {
 			const draggedPath = e.dataTransfer.getData("text/plain");
 			if (draggedPath === targetItem.path) return;
 
-			// Move items
 			try {
 				await moveSelectedItems(targetItem.path);
 			} catch (error) {
@@ -243,58 +209,44 @@ export const FileGrid = memo<FileGridProps>(({ items }) => {
 		setDropTarget(null);
 	}, [setDraggedItem, setIsDragging]);
 
-	// Cleanup
-	useEffect(() => {
-		return () => {
-			if (longPressTimer.current) {
-				clearTimeout(longPressTimer.current);
-			}
-		};
-	}, []);
-
 	return (
-		<div
-			ref={containerRef}
-			className={styles.grid}
-			onTouchMove={handleTouchMove}
-		>
-			{items.map((item) => {
-				const isSelected = selectedItems.includes(item.path);
-				const icon = getFileIcon(item.extension, item.isDirectory);
-				const isDropTarget = dropTarget === item.path;
-				const isDragging = draggingItem === item.path;
-
-				return (
-					<div
+		<>
+			<div
+				ref={containerRef}
+				className={styles.grid}
+				onTouchStart={handleContainerTouchStart}
+				onTouchMove={handleContainerTouchMove}
+				onTouchEnd={handleContainerTouchEnd}
+			>
+				{items.map((item) => (
+					<FileItem
 						key={item.path}
-						className={`${styles.gridItem} ${
-							item.isDirectory ? styles.directory : ""
-						} ${isSelected ? styles.selected : ""} ${
-							isDropTarget ? styles.dropTarget : ""
-						} ${isDragging ? styles.dragging : ""}`}
-						onClick={() => handleClick(item)}
-						onDoubleClick={() => handleDoubleClick(item)}
-						onTouchStart={(e) => handleTouchStart(e, item)}
-						onTouchEnd={(e) => handleTouchEnd(e, item)}
-						draggable={!item.isDirectory || isMultiSelectMode}
-						onDragStart={(e) => handleDragStart(e, item)}
-						onDragOver={(e) => handleDragOver(e, item)}
+						item={item}
+						isSelected={selectedItems.includes(item.path)}
+						isMultiSelectMode={isMultiSelectMode}
+						isDropTarget={dropTarget === item.path}
+						isDragging={draggingItem === item.path}
+						onTap={handleTap}
+						onDoubleTap={handleDoubleTap}
+						onLongPress={handleLongPress}
+						onDragStart={handleDragStart}
+						onDragOver={handleDragOver}
 						onDragLeave={handleDragLeave}
-						onDrop={(e) => handleDrop(e, item)}
+						onDrop={handleDrop}
 						onDragEnd={handleDragEnd}
-						title={item.name}
-					>
-						{isMultiSelectMode && (
-							<div className={styles.checkbox}>
-								{isSelected ? "☑" : "☐"}
-							</div>
-						)}
-						<span className={styles.gridIcon}>{icon}</span>
-						<span className={styles.gridName}>{item.name}</span>
-					</div>
-				);
-			})}
-		</div>
+						onToggleSelect={toggleSelection}
+						viewMode="grid"
+					/>
+				))}
+			</div>
+
+			{/* Pinch hint */}
+			{showPinchHint && (
+				<div className={styles.pinchHint}>
+					Multi-select mode enabled
+				</div>
+			)}
+		</>
 	);
 });
 
