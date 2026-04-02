@@ -6,6 +6,7 @@
 import type { CommandResult } from "@/hooks/app";
 import { useChatMessages } from "@/hooks/app";
 import { ChatLayout } from "./layout";
+import styles from "./page.module.css";
 
 interface ChatPageProps {
 	terminalOutput: string;
@@ -22,5 +23,9 @@ export function ChatPage(props: ChatPageProps) {
 	// 使用聊天消息 hook
 	useChatMessages();
 
-	return <ChatLayout {...props} />;
+	return (
+		<div className={styles.page}>
+			<ChatLayout {...props} />
+		</div>
+	);
 }

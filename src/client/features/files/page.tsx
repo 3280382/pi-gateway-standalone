@@ -7,6 +7,7 @@ import { useCallback, useEffect } from "react";
 import { useFileStore } from "@/stores/fileStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import { FilesLayout } from "./layout";
+import styles from "./page.module.css";
 
 interface FilesPageProps {
 	terminalOutput: string;
@@ -29,5 +30,9 @@ export function FilesPage(props: FilesPageProps) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	return <FilesLayout {...props} />;
+	return (
+		<div className={styles.page}>
+			<FilesLayout {...props} />
+		</div>
+	);
 }
