@@ -143,7 +143,6 @@ export function useChatController(): EnhancedChatController {
 		},
 
 		toggleToolsCollapse: (messageId: string) => {
-			console.log("[ChatAPI] toggleToolsCollapse called:", messageId);
 			chatStore.toggleToolsCollapse(messageId);
 		},
 
