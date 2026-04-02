@@ -3,11 +3,13 @@
  * 包含文件浏览器、终端底部面板
  */
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { AppLayout } from "@/app/layout/AppLayout";
 import { useLayout } from "@/app/layout/AppLayout/LayoutContext";
 import { XTermPanel } from "@/app/layout/panels/TerminalPanel";
 import { FileBrowser } from "@/features/files/components/FileBrowser";
+import { useFileStore } from "@/stores/fileStore";
+import { useSessionStore } from "@/stores/sessionStore";
 
 interface FilesPageProps {
 	terminalOutput: string;
@@ -27,6 +29,17 @@ export function FilesPage({
 	setBottomPanelHeight,
 }: FilesPageProps) {
 	const { isBottomPanelOpen, bottomPanelHeight } = useLayout();
+
+	// 同步聊天界面的当前目录到文件浏览器
+	const { currentDir } = useSessionStore();
+	const { currentPath, setCurrentPath } = useFileStore();
+
+	useEffect(() => {
+		// 第一次打开文件浏览器时，使用聊天界面的当前目录
+		if (currentDir && currentDir !== currentPath) {
+			setCurrentPath(currentDir);
+		}
+	}, [currentDir, currentPath, setCurrentPath]);
 
 	// 处理文件执行输出
 	const handleExecuteOutput = useCallback((output: string) => {

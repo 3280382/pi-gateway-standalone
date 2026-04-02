@@ -219,6 +219,17 @@ export function AppLayout({
 										else controller.sendMessage(`/${cmd} ${args}`.trim());
 									}
 								}}
+								onSendWithImages={(text, images) => {
+									const imageData = images.map(img => ({
+										type: "image" as const,
+										source: {
+											type: "base64" as const,
+											mediaType: img.mimeType,
+											data: img.base64,
+										},
+									}));
+									controller.sendMessage(text, imageData);
+								}}
 							/>
 						</div>
 					)}

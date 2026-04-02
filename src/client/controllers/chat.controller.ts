@@ -7,6 +7,7 @@ import { ServiceError } from "@/services/base.service";
 import { chatService } from "@/services/chat.service";
 import { websocketService } from "@/services/websocket.service";
 import { useChatStore } from "@/stores/chatStore";
+import type { ImageUpload } from "@/features/chat/components/InputArea/InputArea";
 import type { Message, ToolExecution } from "@/types/chat";
 
 export class ChatController {
@@ -20,9 +21,9 @@ export class ChatController {
 	} = {};
 
 	/**
-	 * 发送消息
+	 * 发送消息（支持图片）
 	 */
-	async sendMessage(text: string): Promise<void> {
+	async sendMessage(text: string, images?: ImageUpload[]): Promise<void> {
 		try {
 			// 检查WebSocket连接状态
 			if (!websocketService.isConnected) {
@@ -42,11 +43,34 @@ export class ChatController {
 
 			const state = this.store.getState();
 
+			// 构建消息内容（文本 + 图片）
+			const content: Message["content"] = [{ type: "text", text }];
+			
+			// 添加图片
+			if (images && images.length > 0) {
+				for (const img of images) {
+					content.push({
+						type: "image",
+						imageUrl: img.preview,
+					});
+				}
+				
+				// 添加OCR文本作为上下文
+				const ocrTexts = images
+					.filter((img) => img.ocrText)
+					.map((img) => `[Image OCR]: ${img.ocrText}`)
+					.join("\n");
+				
+				if (ocrTexts) {
+					content.push({ type: "text", text: `\n${ocrTexts}` });
+				}
+			}
+
 			// 创建用户消息
 			const userMessage: Message = {
 				id: this.generateMessageId(),
 				role: "user",
-				content: [{ type: "text", text }],
+				content,
 				timestamp: new Date(),
 			};
 
@@ -57,11 +81,22 @@ export class ChatController {
 			// 开始流式传输（这会创建流式消息）
 			this.store.getState().startStreaming();
 
-			// 通过WebSocket发送消息
+			// 准备发送的图片数据
+			const imageData = images?.map((img) => ({
+				type: "image" as const,
+				source: {
+					type: "base64" as const,
+					mediaType: img.mimeType,
+					data: img.base64,
+				},
+			}));
+
+			// 通过WebSocket发送消息（带图片）
 			const success = websocketService.sendMessage(
 				text,
 				state.sessionId,
 				state.currentModel,
+				imageData,
 			);
 
 			if (!success) {

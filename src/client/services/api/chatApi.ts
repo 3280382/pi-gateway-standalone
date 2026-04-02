@@ -53,9 +53,12 @@ export function useChatController(): EnhancedChatController {
 	setupStreamingHandlers(chatStore);
 
 	return {
-		// 基础聊天功能
-		sendMessage: async (text: string) => {
-			if (!text.trim()) return Promise.resolve();
+		// 基础聊天功能（支持图片）
+		sendMessage: async (text: string, images?: Array<{
+			type: "image";
+			source: { type: "base64"; mediaType: string; data: string };
+		}>) => {
+			if (!text.trim() && (!images || images.length === 0)) return Promise.resolve();
 
 			// 检查WebSocket连接状态
 			if (!websocketService.isConnected) {
@@ -70,11 +73,20 @@ export function useChatController(): EnhancedChatController {
 				}
 			}
 
+			// 构建消息内容（文本 + 图片）
+			const content: Message["content"] = [{ type: "text", text }];
+			if (images && images.length > 0) {
+				content.push(...images.map(img => ({
+					type: "image" as const,
+					imageUrl: `data:${img.source.mediaType};base64,${img.source.data}`,
+				})));
+			}
+
 			// 添加用户消息
 			const userMessage: Message = {
 				id: generateMessageId(),
 				role: "user",
-				content: [{ type: "text", text }],
+				content,
 				timestamp: new Date(),
 			};
 
@@ -83,7 +95,7 @@ export function useChatController(): EnhancedChatController {
 			chatStore.startStreaming();
 
 			// 通过WebSocket发送消息
-			const success = websocketService.send("prompt", { text });
+			const success = websocketService.send("prompt", { text, images });
 
 			if (!success) {
 				chatStore.abortStreaming();

@@ -16,6 +16,7 @@ import {
 } from "../controllers/file.controller";
 import { createLlmLogController } from "../controllers/llm-log.controller";
 import { getModels } from "../controllers/model.controller";
+import { performOCR } from "../controllers/ocr.controller";
 import {
 	getSessions,
 	getSystemPrompt,
@@ -64,6 +65,9 @@ export function registerRoutes(
 	app.post("/api/files/batch-delete", batchDeleteFiles);
 	app.post("/api/files/batch-move", batchMoveFiles);
 	app.post("/api/execute", executeCommand);
+
+	// OCR API
+	app.post("/api/ocr", performOCR);
 
 	// LLM日志API
 	app.get("/api/llm-log", llmLogController.getLlmLog);

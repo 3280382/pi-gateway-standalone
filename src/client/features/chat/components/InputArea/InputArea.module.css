@@ -1,50 +1,86 @@
 /**
- * InputArea Styles - Ultra compact, minimal
+ * InputArea Styles - Enhanced with @mention and image upload
  */
 
 .container {
 	display: flex;
 	flex-direction: column;
-	padding: 0;
+	padding: 8px 12px;
 	background: var(--bg-secondary);
 	position: relative;
+	gap: 6px;
 }
 
-/* Mode Indicator - smaller */
+/* Hidden file input */
+.hiddenInput {
+	display: none;
+}
+
+/* Mode Indicator */
 .modeIndicator {
 	position: absolute;
-	top: 0;
-	left: 20px;
-	transform: translateY(-50%);
+	top: -8px;
+	left: 16px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 24px;
-	height: 24px;
+	width: 20px;
+	height: 20px;
 	background: var(--accent-bg-blue);
 	border-radius: 50%;
 	color: var(--accent-blue);
 	z-index: 1;
-	pointer-events: none;
 }
 
 .modeIndicator svg {
-	width: 12px;
-	height: 12px;
+	width: 10px;
+	height: 10px;
 }
 
-/* Command Menu - Compact */
+/* Toolbar - Compact */
+.toolbar {
+	display: flex;
+	gap: 4px;
+	padding: 0 4px;
+}
+
+.toolbarBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border: none;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--text-secondary);
+	font-size: 14px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.toolbarBtn:hover:not(:disabled) {
+	background: var(--bg-hover);
+	color: var(--text-primary);
+}
+
+.toolbarBtn:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+/* Command Menu */
 .commandMenu {
 	position: absolute;
 	bottom: 100%;
 	left: 12px;
 	right: 60px;
-	max-height: 200px;
+	max-height: 180px;
 	overflow-y: auto;
 	background: var(--bg-elevated);
-	border-radius: var(--radius-md);
+	border-radius: 8px;
 	box-shadow: var(--shadow-lg);
-	margin-bottom: 6px;
+	margin-bottom: 4px;
 	z-index: 100;
 	padding: 4px;
 }
@@ -56,10 +92,10 @@
 	width: 100%;
 	padding: 6px 10px;
 	border: none;
-	border-radius: var(--radius-sm);
+	border-radius: 6px;
 	background: transparent;
 	color: var(--text-primary);
-	font-size: var(--font-sm);
+	font-size: 13px;
 	cursor: pointer;
 	transition: background 0.15s ease;
 	text-align: left;
@@ -71,7 +107,7 @@
 }
 
 .commandIcon {
-	font-size: var(--font-md);
+	font-size: 14px;
 	width: 20px;
 	text-align: center;
 }
@@ -80,24 +116,192 @@
 	font-weight: 500;
 }
 
-/* Input Wrapper */
-.inputWrapper {
+/* File Picker for @mention */
+.filePicker {
+	position: absolute;
+	bottom: 100%;
+	left: 12px;
+	right: 60px;
+	max-height: 240px;
+	overflow-y: auto;
+	background: var(--bg-elevated);
+	border-radius: 8px;
+	box-shadow: var(--shadow-lg);
+	margin-bottom: 4px;
+	z-index: 100;
+	padding: 8px;
+}
+
+.filePickerHeader {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 8px 8px;
+	border-bottom: 1px solid var(--border-color);
+	margin-bottom: 4px;
+	font-size: 12px;
+	color: var(--text-secondary);
+}
+
+.filePickerHeader svg {
+	width: 14px;
+	height: 14px;
+}
+
+.fileItem {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	padding: 6px 8px;
+	border: none;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--text-primary);
+	font-size: 13px;
+	cursor: pointer;
+	transition: background 0.15s ease;
+	text-align: left;
+}
+
+.fileItem:hover,
+.fileItem.selected {
+	background: var(--bg-hover);
+}
+
+.fileIcon {
+	font-size: 14px;
+}
+
+.fileName {
+	font-weight: 500;
+	flex: 1;
+}
+
+.filePath {
+	font-size: 11px;
+	color: var(--text-secondary);
+	max-width: 150px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Image Preview Bar */
+.imagePreviewBar {
+	display: flex;
+	gap: 8px;
+	padding: 4px;
+	overflow-x: auto;
+	background: var(--bg-tertiary);
+	border-radius: 6px;
+}
+
+.imagePreviewItem {
+	position: relative;
+	width: 60px;
+	height: 60px;
+	border-radius: 6px;
+	overflow: hidden;
+	flex-shrink: 0;
+}
+
+.imagePreviewItem img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.ocrIndicator {
+	position: absolute;
+	bottom: 2px;
+	left: 2px;
+	padding: 1px 4px;
+	background: rgba(0, 0, 0, 0.7);
+	color: white;
+	font-size: 9px;
+	border-radius: 3px;
+}
+
+.ocrBadge {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	padding: 1px 4px;
+	background: #238636;
+	color: white;
+	font-size: 9px;
+	border-radius: 3px;
+}
+
+.removeImageBtn {
+	position: absolute;
+	top: 2px;
+	right: 2px;
+	width: 16px;
+	height: 16px;
+	border: none;
+	border-radius: 50%;
+	background: rgba(218, 54, 51, 0.9);
+	color: white;
+	font-size: 12px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+}
+
+.togglePreviewBtn {
+	padding: 4px 8px;
+	border: none;
+	border-radius: 4px;
+	background: var(--bg-hover);
+	color: var(--text-secondary);
+	font-size: 11px;
+	cursor: pointer;
+	flex-shrink: 0;
+}
+
+.imageCountBar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 4px 8px;
+	background: var(--bg-tertiary);
+	border-radius: 6px;
+	font-size: 12px;
+	color: var(--text-secondary);
+}
+
+.imageCountBar button {
+	padding: 2px 8px;
+	border: none;
+	border-radius: 4px;
+	background: var(--bg-hover);
+	color: var(--text-primary);
+	font-size: 11px;
+	cursor: pointer;
+}
+
+/* Input Row */
+.inputRow {
 	display: flex;
 	gap: 8px;
 	align-items: flex-end;
 }
 
-/* Textarea - Large */
+/* Textarea - Default 2 rows */
 .textarea {
 	flex: 1;
-	min-height: 48px;
+	min-height: 56px;
 	max-height: 200px;
-	padding: 12px 16px;
+	padding: 10px 14px;
 	background: var(--bg-tertiary);
 	border: none;
-	border-radius: var(--radius-md);
+	border-radius: 8px;
 	color: var(--text-primary);
-	font-size: var(--font-base);
+	font-size: 15px;
 	font-family: var(--font-sans);
 	line-height: 1.5;
 	resize: none;
@@ -123,13 +327,13 @@
 	box-shadow: 0 0 0 2px var(--accent-blue);
 }
 
-/* Send Button - Large - Green when ready */
+/* Send Button */
 .sendButton {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 48px;
-	height: 48px;
+	width: 44px;
+	height: 44px;
 	border: none;
 	border-radius: 50%;
 	background: #238636;
@@ -149,7 +353,6 @@
 	cursor: not-allowed;
 }
 
-/* Stop button - Red when streaming */
 .sendButton.stopButton {
 	background: #da3633;
 }
@@ -163,16 +366,23 @@
 	height: 18px;
 }
 
-/* Scrollbar for command menu */
-.commandMenu::-webkit-scrollbar {
+/* Scrollbar */
+.commandMenu::-webkit-scrollbar,
+.filePicker::-webkit-scrollbar,
+.imagePreviewBar::-webkit-scrollbar {
 	width: 4px;
+	height: 4px;
 }
 
-.commandMenu::-webkit-scrollbar-track {
+.commandMenu::-webkit-scrollbar-track,
+.filePicker::-webkit-scrollbar-track,
+.imagePreviewBar::-webkit-scrollbar-track {
 	background: transparent;
 }
 
-.commandMenu::-webkit-scrollbar-thumb {
+.commandMenu::-webkit-scrollbar-thumb,
+.filePicker::-webkit-scrollbar-thumb,
+.imagePreviewBar::-webkit-scrollbar-thumb {
 	background: var(--border-color);
 	border-radius: 2px;
 }

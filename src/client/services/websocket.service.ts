@@ -214,11 +214,20 @@ export class WebSocketService extends BaseService {
 	/**
 	 * 发送聊天消息（对应后端的prompt类型）
 	 */
-	sendMessage(text: string, sessionId?: string, model?: string): boolean {
+	sendMessage(
+		text: string,
+		sessionId?: string,
+		model?: string,
+		images?: Array<{
+			type: "image";
+			source: { type: "base64"; mediaType: string; data: string };
+		}>,
+	): boolean {
 		return this.send("prompt", {
 			text,
 			sessionId,
 			model,
+			images,
 		});
 	}
 

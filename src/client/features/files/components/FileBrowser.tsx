@@ -159,7 +159,7 @@ export function FileBrowser({
 		},
 		[setItems, setLoading, setError, setCurrentPath, getCachedPath, setCachedPath],
 	);
-	// 初始加载 - 使用缓存避免重复请求
+	// 路径变化时加载新目录
 	useEffect(() => {
 		fileBrowserDebug.info("FileBrowser组件挂载/更新", {
 			currentPath,
@@ -169,11 +169,9 @@ export function FileBrowser({
 			filteredItemsCount: filteredItems.length,
 		});
 
-		// 如果当前路径没有数据，才加载
-		if (items.length === 0) {
-			loadDirectory(currentPath);
-		}
-	}, [currentPath, loadDirectory, items.length]);
+		// 路径变化时加载新目录（使用缓存）
+		loadDirectory(currentPath);
+	}, [currentPath, loadDirectory]);
 	// 监听状态变化
 	useEffect(() => {
 		if (error) {

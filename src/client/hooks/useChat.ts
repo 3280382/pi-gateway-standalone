@@ -127,30 +127,9 @@ export function useChat(): UseChatReturn {
 
 	// Finalize the streaming message into the message list
 	const finalizeStreamingMessage = useCallback(() => {
-		const content: MessageContent[] = [];
-
-		// Add thinking content if present
-		if (streamingRef.current.thinking) {
-			content.push({
-				type: "thinking",
-				thinking: streamingRef.current.thinking,
-			});
-		}
-
-		// Add text content if present
-		if (streamingRef.current.content) {
-			content.push({
-				type: "text",
-				text: streamingRef.current.content,
-			});
-		}
-
-		// Add tool outputs
-		streamingRef.current.toolOutputs.forEach((toolContent) => {
-			content.push(toolContent);
-		});
-
-		store.finalizeStreamingMessage();
+		// 工具内容已经通过 setActiveTool 和 updateToolOutput 添加到 store 中
+		// 直接调用 finishStreaming 完成流式消息
+		store.finishStreaming();
 	}, [store]);
 
 	// Store finalize function in ref
