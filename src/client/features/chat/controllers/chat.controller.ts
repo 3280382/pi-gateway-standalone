@@ -122,6 +122,55 @@ export class ChatController {
 	}
 
 	/**
+	 * 设置输入文本
+	 */
+	setInputText(text: string): void {
+		this.store.getState().setInputText(text);
+	}
+
+	/**
+	 * 清空输入
+	 */
+	clearInput(): void {
+		this.store.getState().clearInput();
+	}
+
+	/**
+	 * 切换消息折叠状态
+	 */
+	toggleMessageCollapse(messageId: string): void {
+		this.store.getState().toggleMessageCollapse(messageId);
+	}
+
+	/**
+	 * 切换思考内容折叠状态
+	 */
+	toggleThinkingCollapse(messageId: string): void {
+		this.store.getState().toggleThinkingCollapse(messageId);
+	}
+
+	/**
+	 * 切换工具折叠状态
+	 */
+	toggleToolsCollapse(messageId: string): void {
+		this.store.getState().toggleToolsCollapse(messageId);
+	}
+
+	/**
+	 * 删除消息
+	 */
+	deleteMessage(messageId: string): void {
+		this.store.getState().deleteMessage(messageId);
+	}
+
+	/**
+	 * 重新生成消息
+	 */
+	regenerateMessage(messageId: string): void {
+		this.store.getState().regenerateMessage(messageId);
+	}
+
+	/**
 	 * 加载会话
 	 */
 	async loadSession(sessionId: string): Promise<void> {
@@ -569,7 +618,6 @@ export class ChatController {
 
 		// 代理结束
 		websocketService.on("agent_end", () => {
-			console.log("[ChatController] agent_end received, calling finalizeStreamingMessage");
 			this.flushBatchUpdates(); // 确保所有待处理更新被刷新
 			this.finalizeStreamingMessage();
 		});

@@ -480,7 +480,6 @@ export const useChatStore = create<
 			},
 
 			finishStreaming: () => {
-				console.log("[ChatStore] finishStreaming called, messages count:", get().messages.length);
 				set(
 					(state) => {
 						// 构建当前轮次的新内容
