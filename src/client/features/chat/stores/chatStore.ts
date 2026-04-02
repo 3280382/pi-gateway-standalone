@@ -85,6 +85,7 @@ interface ContentPartWithOrder extends ContentPart {
 }
 
 function buildContentArray(state: State): ContentPart[] {
+	console.log("[buildContentArray] streamingContent length:", state.streamingContent?.length, "streamingThinking length:", state.streamingThinking?.length, "streamingThinkings count:", state.streamingThinkings?.length);
 	const content: ContentPartWithOrder[] = [];
 
 	// 使用基础时间戳确保相对顺序：thinking < text < tools
@@ -506,10 +507,16 @@ export const useChatStore = create<
 						const existingContent =
 							state.currentStreamingMessage?.content || [];
 						
+						console.log("[ChatStore] existingContent length:", existingContent.length, "currentContent length:", currentContent.length);
+						console.log("[ChatStore] existingContent:", existingContent.map((c: any) => c.type));
+						console.log("[ChatStore] currentContent:", currentContent.map((c: any) => c.type));
+						
 						// 过滤掉已保存到 existingContent 中的内容，避免重复
 						// existingContent 中已经有之前轮次的完整内容
 						// currentContent 只包含当前轮次的内容
 						const finalContent = [...existingContent, ...currentContent];
+						
+						console.log("[ChatStore] finalContent length:", finalContent.length);
 
 						const finalMessage = state.currentStreamingMessage
 							? {
