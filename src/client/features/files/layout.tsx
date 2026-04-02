@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from "react";
-import { useLayout } from "@/core/layout/AppLayout/LayoutContext";
+import { useLayout } from "@/core/layout/LayoutContext";
 import { FileToolbar } from "./components/FileToolbar";
 import { FileSidebar } from "./components/FileSidebar";
 import { XTermPanel } from "@/core/layout/panels/TerminalPanel";

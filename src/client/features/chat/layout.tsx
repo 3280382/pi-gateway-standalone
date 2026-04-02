@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from "react";
-import { useLayout } from "@/core/layout/AppLayout/LayoutContext";
+import { useLayout } from "@/core/layout/LayoutContext";
 import { AppHeader } from "@/core/layout/AppHeader";
 import { SidebarPanel } from "@/features/chat/sidebar/components/SidebarPanel/SidebarPanel";
 import { LlmLogPanel } from "@/core/layout/panels/LlmLogPanel";
