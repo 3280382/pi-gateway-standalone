@@ -388,11 +388,20 @@ export const useChatStore = create<
 						// 获取之前已保存的内容
 						const existingContent = state.currentStreamingMessage.content || [];
 
+						// 找到最后一个 turn_marker，保留它及之前的内容（之前轮次）
+						const lastTurnMarkerIndex = existingContent
+							.map((c: any) => c.type)
+							.lastIndexOf("turn_marker");
+						const previousRounds =
+							lastTurnMarkerIndex >= 0
+								? existingContent.slice(0, lastTurnMarkerIndex + 1)
+								: [];
+
 						return {
 							currentStreamingMessage: {
 								...state.currentStreamingMessage,
-								// 追加当前内容到之前的内容，而不是覆盖
-								content: [...existingContent, ...currentContent],
+								// 保留之前轮次 + 当前轮次（避免重复）
+								content: [...previousRounds, ...currentContent],
 							},
 							// 清空当前轮次的流式状态，开始新一轮
 							streamingThinking: "",
