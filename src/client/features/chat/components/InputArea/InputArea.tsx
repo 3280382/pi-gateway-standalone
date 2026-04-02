@@ -519,7 +519,16 @@ export function InputArea({
 			<div className={styles.toolbar}>
 				<button
 					className={styles.toolbarBtn}
-					onClick={() => insertAtCursor("@", 'file')}
+					onClick={() => {
+						// Add @ at the end and trigger file picker
+						const newValue = value + "@";
+						onChange(newValue);
+						loadFileList();
+						setFileFilter('');
+						setShowFilePicker(true);
+						setSelectedFileIndex(0);
+						textareaRef.current?.focus();
+					}}
 					title="Mention file (@)"
 					disabled={isStreaming}
 				>
@@ -527,7 +536,15 @@ export function InputArea({
 				</button>
 				<button
 					className={styles.toolbarBtn}
-					onClick={() => insertAtCursor("/", 'command')}
+					onClick={() => {
+						// Add / at the end and trigger command menu
+						const newValue = value + "/";
+						onChange(newValue);
+						setCommandFilter('');
+						setShowCommands(true);
+						setSelectedIndex(0);
+						textareaRef.current?.focus();
+					}}
 					title="Slash command (/)"
 					disabled={isStreaming}
 				>
