@@ -10,7 +10,7 @@ import { useChatStore } from "@/stores/chatStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import type { Session } from "../../../../types/sidebar";
-import { IconButton, SectionHeader } from "../../../ui";
+import { IconButton, SectionHeader } from "@/shared/components/ui";
 import styles from "./Sessions.module.css";
 
 export function Sessions() {

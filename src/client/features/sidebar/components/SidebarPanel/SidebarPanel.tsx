@@ -5,7 +5,9 @@
 import { useEffect } from "react";
 import { useSidebarController } from "@/services/api/sidebarApi";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import { RecentWorkspaces, Sessions, Settings } from "../sections";
+import { RecentWorkspaces } from "../RecentWorkspaces/RecentWorkspaces";
+import { Sessions } from "../Sessions/Sessions";
+import { Settings } from "../Settings/Settings";
 import styles from "./SidebarPanel.module.css";
 
 interface SidebarPanelProps {

@@ -1,5 +1,7 @@
-// Re-export useChat hook from hooks directory
-export { useChat } from "@/hooks/useChat";
+/**
+ * Chat 组件导出
+ */
+
 export { ChatPanel } from "./ChatPanel/ChatPanel";
 export { InputArea } from "./InputArea/InputArea";
 export { MessageItem } from "./MessageItem/MessageItem";

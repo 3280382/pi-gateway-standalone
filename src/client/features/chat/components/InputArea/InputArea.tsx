@@ -3,7 +3,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SLASH_COMMANDS } from "../../commands/slashCommands";
+import { SLASH_COMMANDS } from "@/features/chat/types/slashCommands";
 import styles from "./InputArea.module.css";
 
 interface InputAreaProps {
