@@ -10,8 +10,8 @@ import { BatchActionBar } from "./BatchActionBar";
 import { FileActionBar } from "./FileActionBar";
 import styles from "./FileBrowser.module.css";
 import { FileBrowserErrorBoundary } from "./FileBrowserErrorBoundary";
-import { FileGrid } from "./FileGrid/FileGrid";
-import { FileList } from "./FileList/FileList";
+import { FileGrid } from "./FileGrid";
+import { FileList } from "./FileList";
 import { FileSidebar } from "./FileSidebar";
 import { FileViewer } from "./FileViewer";
 

@@ -6,7 +6,7 @@ import { memo, useCallback, useState } from "react";
 import type { FileItem as FileItemType } from "@/stores/fileStore";
 import { useFileStore } from "@/stores/fileStore";
 import { useFileViewerStore } from "@/stores/fileViewerStore";
-import { FileItem } from "../FileItem";
+import { FileItem } from "./FileItem";
 import styles from "./FileList.module.css";
 
 interface FileListProps {

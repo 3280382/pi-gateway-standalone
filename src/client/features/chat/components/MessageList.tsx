@@ -6,7 +6,7 @@
  */
 
 import type { Message } from "@/types/chat";
-import { MessageItem } from "../MessageItem/MessageItem";
+import { MessageItem } from "./MessageItem";
 import styles from "./MessageList.module.css";
 
 interface MessageListProps {

@@ -2,10 +2,9 @@
  * ChatPanel - Main Chat Container
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback } from "react";
 import { useChatController } from "@/services/api/chatApi";
 import {
-	filterMessages,
 	selectCurrentStreamingMessage,
 	selectInputText,
 	selectIsStreaming,
@@ -13,10 +12,8 @@ import {
 	selectShowThinking,
 	useChatStore,
 } from "@/stores/chatStore";
-import { useSessionStore } from "@/stores/sessionStore";
-import { TopBar } from "../../layout/TopBar/TopBar";
-import { InputArea } from "../InputArea/InputArea";
-import { MessageList } from "../MessageList/MessageList";
+import { InputArea } from "./InputArea";
+import { MessageList } from "./MessageList";
 import styles from "./ChatPanel.module.css";
 
 export function ChatPanel() {
@@ -27,40 +24,7 @@ export function ChatPanel() {
 	const showThinking = useChatStore(selectShowThinking);
 	const showTools = useChatStore((state) => state.showTools);
 
-	const { currentDir, isConnected, serverPid } = useSessionStore();
 	const controller = useChatController();
-
-	// 搜索状态 - 使用本地 state
-	const [searchQuery, setSearchQuery] = useState("");
-	const [searchFilters, setSearchFilters] = useState({
-		user: true,
-		assistant: true,
-		thinking: true,
-		tools: true,
-	});
-
-	// DEBUG: Check state and setter
-	console.log("[ChatPanel] State check:", {
-		searchQuery,
-		setSearchQuery: typeof setSearchQuery,
-		searchFilters,
-		setSearchFilters: typeof setSearchFilters,
-	});
-
-	// 使用 useMemo 缓存过滤结果
-	const filteredMessages = useMemo(() => {
-		console.log("[ChatPanel] Filtering messages:", {
-			totalMessages: messages.length,
-			searchQuery,
-			searchFilters,
-		});
-		const result = filterMessages(messages, {
-			query: searchQuery,
-			filters: searchFilters,
-		});
-		console.log("[ChatPanel] Filtered result:", result.length, "messages");
-		return result;
-	}, [messages, searchQuery, searchFilters]);
 
 	const handleSend = useCallback(() => {
 		if (inputText.trim()) {
@@ -98,28 +62,13 @@ export function ChatPanel() {
 		[controller],
 	);
 
-	const connectionStatus = isConnected ? "connected" : "disconnected";
-
 	return (
 		<div className={styles.panel}>
-			<div className={styles.header}>
-				<TopBar
-					workingDir={currentDir}
-					connectionStatus={connectionStatus}
-					pid={serverPid}
-					searchQuery={searchQuery}
-					searchFilters={searchFilters}
-					onSearchQueryChange={setSearchQuery}
-					onSearchFiltersChange={setSearchFilters}
-				/>
-			</div>
-
 			<div className={styles.messages}>
 				<MessageList
-					messages={filteredMessages}
+					messages={messages}
 					currentStreamingMessage={currentStreamingMessage}
 					showThinking={showThinking}
-					showTools={showTools}
 					onToggleMessageCollapse={controller.toggleMessageCollapse}
 					onToggleThinkingCollapse={controller.toggleThinkingCollapse}
 					onToggleToolsCollapse={controller.toggleToolsCollapse}
