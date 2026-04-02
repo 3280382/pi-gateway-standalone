@@ -50,9 +50,7 @@ export function FileBrowser({
 	const fileViewerStore = useFileViewerStore();
 	// 加载目录内容（无缓存）
 	const loadDirectory = useCallback(
-		async (path: string, forceRefresh = false) => {
-			}
-
+		async (path: string) => {
 			fileBrowserDebug.info("开始加载目录", { path });
 			setLoading(true);
 			setError(null);
