@@ -476,10 +476,19 @@ export const useChatStore = create<
 			},
 
 			abortStreaming: () => {
+				// 应用未完成的 RAF 更新
+				const finalContentToApply = pendingContentUpdates.content || "";
+				const finalThinkingToApply = pendingContentUpdates.thinking || "";
+				pendingContentUpdates = {};
+				
 				set(
 					(state) => {
-						// 构建当前轮次的新内容
-						const currentContent = buildContentArray(state);
+						// 构建当前轮次的新内容（包含未完成的 RAF 更新）
+						const currentContent = buildContentArray({
+							...state,
+							streamingContent: state.streamingContent + finalContentToApply,
+							streamingThinking: state.streamingThinking + finalThinkingToApply,
+						});
 
 						// 合并之前轮次的内容（如果有）和当前轮次内容
 						const existingContent =
@@ -515,14 +524,24 @@ export const useChatStore = create<
 			},
 
 			finishStreaming: () => {
+				// 先应用 RAF 批处理中未完成的更新，确保内容完整
+				const finalContentToApply = pendingContentUpdates.content || "";
+				const finalThinkingToApply = pendingContentUpdates.thinking || "";
+				// 清空待处理更新，防止重复应用
+				pendingContentUpdates = {};
+				
 				set(
 					(state) => {
 						// 获取之前轮次的内容（从 currentStreamingMessage.content）
 						const existingContent =
 							state.currentStreamingMessage?.content || [];
 						
-						// 构建当前轮次的新内容
-						const currentContent = buildContentArray(state);
+						// 构建当前轮次的新内容（包含未完成的 RAF 更新）
+						const currentContent = buildContentArray({
+							...state,
+							streamingContent: state.streamingContent + finalContentToApply,
+							streamingThinking: state.streamingThinking + finalThinkingToApply,
+						});
 
 						// 找到最后一个 turn_marker 的位置
 						const lastTurnMarkerIndex = existingContent.map((c: any) => c.type).lastIndexOf('turn_marker');

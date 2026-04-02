@@ -631,8 +631,7 @@ export class ChatController {
 	 * 完成流式消息
 	 */
 	private finalizeStreamingMessage(): void {
-		// 使用 finishStreaming 完成消息，它会将消息添加到 messages 数组
-		// 不需要额外调用 addMessage，避免重复添加
+		// finishStreaming 内部会处理未完成的 RAF 更新
 		this.store.getState().finishStreaming();
 	}
 
