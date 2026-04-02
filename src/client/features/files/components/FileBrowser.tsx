@@ -153,7 +153,7 @@ export function FileBrowser({
 			return;
 		}
 		lastLoadedPathRef.current = currentPath;
-		
+
 		fileBrowserDebug.info("FileBrowser组件挂载/更新", {
 			currentPath,
 			isLoading,

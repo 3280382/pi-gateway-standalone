@@ -3,9 +3,9 @@
  * 包装 ChatLayout 并提供数据
  */
 
-import { ChatLayout } from "./layout";
 import type { CommandResult } from "@/hooks/app";
 import { useChatMessages } from "@/hooks/app";
+import { ChatLayout } from "./layout";
 
 interface ChatPageProps {
 	terminalOutput: string;

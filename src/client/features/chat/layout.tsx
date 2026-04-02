@@ -4,11 +4,11 @@
  */
 
 import { useCallback } from "react";
+import { useLayout } from "@/features/core/layout/AppLayout/LayoutContext";
 import { LlmLogPanel } from "@/features/core/layout/panels/LlmLogPanel";
 import { XTermPanel } from "@/features/core/layout/panels/TerminalPanel";
-import { useLayout } from "@/features/core/layout/AppLayout/LayoutContext";
-import { ChatPanel } from "./components/ChatPanel";
 import type { CommandResult } from "@/hooks/app";
+import { ChatPanel } from "./components/ChatPanel";
 
 interface ChatLayoutProps {
 	terminalOutput: string;
@@ -16,6 +16,7 @@ interface ChatLayoutProps {
 	commandResults: CommandResult[];
 	isExecuting: boolean;
 	onBashCommand: (command: string) => void;
+	onSlashCommand: (command: string, args: string) => void;
 	closeBottomPanel: () => void;
 	setBottomPanelHeight: (height: number) => void;
 }
@@ -26,6 +27,7 @@ export function ChatLayout({
 	commandResults,
 	isExecuting,
 	onBashCommand,
+	onSlashCommand,
 	closeBottomPanel,
 	setBottomPanelHeight,
 }: ChatLayoutProps) {

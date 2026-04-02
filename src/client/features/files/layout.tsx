@@ -3,8 +3,8 @@
  */
 
 import { useCallback } from "react";
-import { XTermPanel } from "@/features/core/layout/panels/TerminalPanel";
 import { useLayout } from "@/features/core/layout/AppLayout/LayoutContext";
+import { XTermPanel } from "@/features/core/layout/panels/TerminalPanel";
 import { FileBrowser } from "./components/FileBrowser";
 
 interface FilesLayoutProps {
@@ -20,6 +20,7 @@ export function FilesLayout({
 	terminalOutput,
 	terminalCommand,
 	onBashCommand,
+	onOpenBottomPanel,
 	closeBottomPanel,
 	setBottomPanelHeight,
 }: FilesLayoutProps) {
@@ -53,7 +54,9 @@ export function FilesLayout({
 			<FileBrowser
 				externalSidebarVisible={false}
 				onToggleSidebar={() => {}}
-				onExecuteOutput={(output) => console.log("[Files] Execute output:", output)}
+				onExecuteOutput={(output) =>
+					console.log("[Files] Execute output:", output)
+				}
 				onOpenBottomPanel={onOpenBottomPanel}
 			/>
 			{renderBottomPanel()}

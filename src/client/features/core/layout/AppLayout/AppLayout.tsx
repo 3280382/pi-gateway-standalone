@@ -3,9 +3,9 @@
  */
 
 import { useCallback, useEffect, useRef } from "react";
-import { InputArea } from "@/features/chat/components/InputArea/InputArea";
+import { InputArea } from "@/features/chat/components/InputArea";
 import { FileSidebar } from "@/features/files/components/FileSidebar";
-import { SidebarPanel } from "@/features/sidebar/components/SidebarPanel/SidebarPanel";
+import { SidebarPanel } from "@/features/sidebar/components/SidebarPanel";
 import { useChatController } from "@/services/api/chatApi";
 import { websocketService } from "@/services/websocket.service";
 import { useChatStore } from "@/stores/chatStore";

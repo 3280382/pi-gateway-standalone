@@ -4,9 +4,9 @@
  */
 
 import { useCallback, useEffect } from "react";
-import { FilesLayout } from "./layout";
 import { useFileStore } from "@/stores/fileStore";
 import { useSessionStore } from "@/stores/sessionStore";
+import { FilesLayout } from "./layout";
 
 interface FilesPageProps {
 	terminalOutput: string;

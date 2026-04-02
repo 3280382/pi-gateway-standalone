@@ -6,8 +6,8 @@ import { memo, useCallback, useRef, useState } from "react";
 import type { FileItem as FileItemType } from "@/stores/fileStore";
 import { useFileStore } from "@/stores/fileStore";
 import { useFileViewerStore } from "@/stores/fileViewerStore";
-import { FileItem } from "./FileItem";
 import styles from "./FileGrid.module.css";
+import { FileItem } from "./FileItem";
 
 interface FileGridProps {
 	items: FileItemType[];

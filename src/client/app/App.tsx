@@ -7,12 +7,15 @@
  * - Chat/Files: 各自独立的完整功能模块
  */
 
-import { LayoutProvider, useLayout } from "@/features/core/layout/AppLayout/LayoutContext";
-import { useAppInitialization, useTerminalCommands } from "@/hooks/app";
 import { ChatPage } from "@/features/chat/page";
-import { FilesPage } from "@/features/files/page";
+import {
+	LayoutProvider,
+	useLayout,
+} from "@/features/core/layout/AppLayout/LayoutContext";
 import { ErrorScreen } from "@/features/core/pages/ErrorScreen";
 import { LoadingScreen } from "@/features/core/pages/LoadingScreen";
+import { FilesPage } from "@/features/files/page";
+import { useAppInitialization, useTerminalCommands } from "@/hooks/app";
 import { Footer } from "./Footer";
 import "@/styles/global.css";
 

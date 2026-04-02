@@ -20,7 +20,7 @@ describe("Browser Load Test", () => {
 		});
 
 		it("App.tsx file should exist", () => {
-			const appPath = join(projectRoot, "src/client/App.tsx");
+			const appPath = join(projectRoot, "src/client/app/App.tsx");
 			expect(existsSync(appPath)).toBe(true);
 		});
 	});

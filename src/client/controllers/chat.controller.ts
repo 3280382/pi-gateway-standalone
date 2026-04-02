@@ -3,7 +3,7 @@
  * 处理聊天相关的业务逻辑
  */
 
-import type { ImageUpload } from "@/features/chat/components/InputArea/InputArea";
+import type { ImageUpload } from "@/features/chat/components/InputArea";
 import { ServiceError } from "@/services/base.service";
 import { chatService } from "@/services/chat.service";
 import { websocketService } from "@/services/websocket.service";

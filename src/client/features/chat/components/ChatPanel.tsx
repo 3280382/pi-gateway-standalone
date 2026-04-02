@@ -12,9 +12,9 @@ import {
 	selectShowThinking,
 	useChatStore,
 } from "@/stores/chatStore";
+import styles from "./ChatPanel.module.css";
 import { InputArea } from "./InputArea";
 import { MessageList } from "./MessageList";
-import styles from "./ChatPanel.module.css";
 
 export function ChatPanel() {
 	const messages = useChatStore(selectMessages);
