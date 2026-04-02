@@ -29,17 +29,34 @@ bash dev-start.sh
 
 ```
 src/
-├── client/           # 前端：组件、状态管理、API 客户端
-│   ├── components/   # UI 组件
-│   │   ├── layout/   # 布局组件 (AppLayout, TopBar, BottomMenu, Sidebar)
-│   │   ├── chat/     # 聊天组件 (MessageList, InputArea)
-│   │   └── files/    # 文件浏览器组件
-│   ├── stores/       # Zustand 状态管理
-│   └── services/     # API 和 WebSocket 服务
-├── server/           # 后端：Express 路由、控制器、业务逻辑
-│   ├── session/      # 会话管理 (GatewaySession)
-│   └── routes/       # API 路由
-└── shared/           # 共享：API 契约类型
+├── client/                 # 前端：组件、状态管理、API 客户端
+│   ├── app/                # 应用核心层
+│   │   ├── layout/         # 全局布局组件 (AppLayout, AppHeader, AppFooter)
+│   │   ├── navigation/     # 导航组件
+│   │   └── providers/      # 全局 Provider
+│   ├── features/           # 功能域（按业务划分）
+│   │   ├── chat/           # 聊天功能 (MessageList, InputArea, MessageItem)
+│   │   ├── files/          # 文件功能 (FileBrowser, FileGrid, FileList)
+│   │   ├── header/         # 顶部菜单 (ModelSelector, DirectoryPicker, SearchBox)
+│   │   ├── sidebar/        # 侧边栏 (RecentWorkspaces, Sessions, Settings)
+│   │   ├── footer/         # 底部菜单
+│   │   ├── panels/         # 面板 (TerminalPanel, LlmLogPanel)
+│   │   └── system/         # 系统功能 (modals, search)
+│   ├── shared/             # 共享资源
+│   │   ├── components/     # 通用组件 (Button, Input, IconButton)
+│   │   ├── hooks/          # 通用 Hooks
+│   │   ├── styles/         # 全局样式
+│   │   └── utils/          # 工具函数
+│   ├── stores/             # 全局状态 (sessionStore, chatStore, fileStore)
+│   ├── services/           # API 和 WebSocket 服务
+│   ├── hooks/              # 全局 Hooks
+│   ├── pages/              # 页面组件 (ChatPage, FilesPage)
+│   └── controllers/        # 控制器 (chatController)
+├── server/                 # 后端：Express 路由、控制器、业务逻辑
+│   ├── session/            # 会话管理 (GatewaySession)
+│   ├── routes/             # API 路由
+│   └── llm/                # LLM 相关 (interceptor, log-manager)
+└── shared/                 # 共享：API 契约类型
 ```
 
 ## 核心特性

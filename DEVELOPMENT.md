@@ -32,24 +32,95 @@ bash dev-start.sh  # 非 tmux，直接在后台运行
 
 ```
 src/
-├── client/              # 🎨 前端代码
-│   ├── components/
-│   │   ├── layout/      # 布局组件
-│   │   │   ├── AppLayout/      # 统一布局控制器
-│   │   │   ├── TopBar/         # 顶部菜单
-│   │   │   ├── BottomMenu/     # 底部菜单
-│   │   │   ├── SidebarPanel/   # 侧边栏
-│   │   │   └── AppLayout/      # 布局上下文
-│   │   ├── chat/        # 聊天组件
-│   │   └── files/       # 文件浏览器
-│   ├── stores/          # Zustand 状态管理
-│   ├── services/        # API 和 WebSocket 服务
-│   └── App.tsx          # 根组件
-├── server/              # 🖥️ 后端代码
-│   ├── session/         # GatewaySession 会话管理
-│   ├── routes/          # Express 路由
-│   └── server.ts        # 服务器入口
-└── shared/              # 🔗 共享类型
+├── client/                 # 🎨 前端代码
+│   ├── app/                # 应用核心层
+│   │   ├── layout/         # 全局布局组件
+│   │   │   ├── AppLayout/        # 统一布局控制器 + LayoutContext
+│   │   │   ├── AppHeader/        # 应用头部容器
+│   │   │   ├── AppFooter/        # 应用底部容器
+│   │   │   └── panels/           # 面板组件
+│   │   │       ├── TerminalPanel/     # 终端面板 (XTerm)
+│   │   │       └── LlmLogPanel/       # LLM 日志面板
+│   │   ├── navigation/     # 导航组件
+│   │   └── providers/      # 全局 Provider
+│   ├── features/           # 功能域（按业务划分）
+│   │   ├── chat/           # 💬 聊天功能
+│   │   │   ├── components/
+│   │   │   │   ├── ChatPanel/         # 聊天面板
+│   │   │   │   ├── InputArea/         # 输入框（@/ 命令支持）
+│   │   │   │   ├── MessageList/       # 消息列表
+│   │   │   │   └── MessageItem/       # 消息项（思考块、工具调用）
+│   │   │   ├── hooks/               # 聊天相关 Hooks
+│   │   │   ├── stores/              # 聊天状态 (chatStore)
+│   │   │   └── types.ts             # 聊天类型定义
+│   │   ├── files/          # 📁 文件功能
+│   │   │   ├── components/
+│   │   │   │   ├── BatchActionBar/    # 批量操作栏
+│   │   │   │   ├── FileGrid/          # 文件网格视图
+│   │   │   │   ├── FileList/          # 文件列表视图
+│   │   │   │   └── FileItem/          # 文件项
+│   │   │   ├── hooks/               # 文件相关 Hooks
+│   │   │   ├── stores/              # 文件状态 (fileStore)
+│   │   │   └── types.ts             # 文件类型定义
+│   │   ├── header/         # 🎛️ 顶部菜单功能
+│   │   │   ├── components/
+│   │   │   │   ├── Header/            # 头部容器
+│   │   │   │   ├── ModelSelector/     # 模型选择器
+│   │   │   │   ├── ThinkingSelector/  # Thinking 级别选择
+│   │   │   │   ├── DirectoryPicker/   # 目录选择器
+│   │   │   │   ├── SearchBox/         # 搜索框
+│   │   │   │   └── ConnectionStatus/  # 连接状态
+│   │   │   ├── modals/              # 模态框
+│   │   │   ├── hooks/               # 头部相关 Hooks
+│   │   │   └── stores/              # 头部状态
+│   │   ├── sidebar/        # 📋 侧边栏功能
+│   │   │   ├── components/
+│   │   │   │   ├── SidebarPanel/      # 侧边栏容器
+│   │   │   │   ├── RecentWorkspaces/  # 最近工作区
+│   │   │   │   ├── Sessions/          # 会话列表
+│   │   │   │   ├── Settings/          # 设置面板
+│   │   │   │   └── WorkingDirectory/  # 工作目录
+│   │   │   └── stores/              # 侧边栏状态
+│   │   ├── footer/         # 🦶 底部菜单功能
+│   │   ├── panels/         # 📟 面板功能
+│   │   └── system/         # ⚙️ 系统功能（搜索、模态框）
+│   ├── shared/             # 🔧 共享资源
+│   │   ├── components/
+│   │   │   ├── ui/                  # 基础 UI 组件
+│   │   │   │   ├── Button/          # 按钮
+│   │   │   │   ├── Input/           # 输入框
+│   │   │   │   ├── IconButton/      # 图标按钮
+│   │   │   │   ├── Select/          # 选择器
+│   │   │   │   └── ...
+│   │   │   └── layout/              # 布局容器
+│   │   ├── hooks/          # 通用 Hooks
+│   │   ├── styles/         # 全局样式
+│   │   └── utils/          # 工具函数
+│   ├── stores/             # 🗄️ 全局状态 (Zustand)
+│   │   ├── sessionStore.ts        # 会话设置（持久化）
+│   │   ├── chatStore.ts           # 聊天状态
+│   │   ├── fileStore.ts           # 文件浏览器状态
+│   │   ├── sidebarStore.ts        # 侧边栏状态
+│   │   ├── modalStore.ts          # 模态框状态
+│   │   ├── searchStore.ts         # 搜索状态
+│   │   └── llmLogStore.ts         # LLM 日志状态
+│   ├── services/           # 🌐 API 和 WebSocket 服务
+│   │   ├── api/                   # REST API
+│   │   └── websocket.service.ts   # WebSocket 服务
+│   ├── controllers/        # 🎮 控制器
+│   ├── hooks/              # 全局 Hooks
+│   ├── pages/              # 📄 页面组件
+│   │   ├── ChatPage.tsx
+│   │   ├── FilesPage.tsx
+│   │   ├── LoadingScreen.tsx
+│   │   └── ErrorScreen.tsx
+│   └── App.tsx             # 根组件
+├── server/                 # 🖥️ 后端代码
+│   ├── session/            # GatewaySession 会话管理
+│   ├── routes/             # Express 路由
+│   ├── llm/                # LLM 相关
+│   └── server.ts           # 服务器入口
+└── shared/                 # 🔗 共享类型
 ```
 
 ## 核心架构组件
@@ -60,7 +131,7 @@ src/
 
 ```
 ┌─────────────────────────────────────────┐
-│ Header (64px) - TopBar                  │
+│ Header (64px) - AppHeader               │
 │ ├─ Row1: 模型 | Thinking | 状态指示器   │
 │ └─ Row2: 工作目录 | 搜索框              │
 ├──────────┬──────────────────────────────┤
@@ -68,7 +139,7 @@ src/
 │ (可隐藏) │  ├─ contentBody (消息/文件)  │
 │ 280px    │  └─ inputArea (聊天输入框)   │
 ├──────────┴──────────────────────────────┤
-│ Footer (44px) - BottomMenu              │
+│ Footer (44px) - AppFooter               │
 ├─────────────────────────────────────────┤
 │ BottomPanel - 可弹出终端/预览           │
 └─────────────────────────────────────────┘
@@ -83,6 +154,8 @@ src/
 
 #### 前端状态 (Zustand + Persist)
 
+**全局 Stores** (`src/client/stores/`):
+
 ```typescript
 // sessionStore.ts - 持久化到 localStorage
 {
@@ -94,13 +167,38 @@ src/
   recentWorkspaces,  // 最近工作区
 }
 
-// chatStore.ts - 内存状态
+// chatStore.ts - 聊天状态
 {
   messages,          // 消息列表
   isStreaming,       // 是否正在流式输出
   inputText,         // 输入框文本
+  activeMessageId,   // 当前激活的消息
+}
+
+// fileStore.ts - 文件浏览器状态
+{
+  currentPath,       // 当前路径
+  items,             // 文件列表
+  viewMode,          // 视图模式 (grid/list)
+  selectedItems,     // 选中的文件
+  isLoading,         // 加载状态
+}
+
+// sidebarStore.ts - 侧边栏状态
+{
+  isVisible,         // 是否可见
+  activeTab,         // 激活的标签
+}
+
+// modalStore.ts - 模态框状态
+{
+  activeModal,       // 当前激活的模态框
+  modalData,         // 模态框数据
 }
 ```
+
+**Feature Stores** (`src/client/features/*/stores/`):
+各功能域可拥有独立的局部状态管理
 
 #### 后端状态 (GatewaySession)
 
@@ -167,12 +265,39 @@ UI = f(State)
 
 ```
 src/client/
-├── app/                    # 应用核心层 (layout, providers)
-├── features/               # 功能域 (chat/, files/, sidebar/)
-├── shared/                 # 共享资源 (components, hooks, utils)
-├── pages/                  # 页面组件
+├── app/                    # 应用核心层
+│   ├── layout/             # 全局布局 (AppLayout, AppHeader, AppFooter, panels)
+│   ├── navigation/         # 导航组件
+│   └── providers/          # 全局 Provider
+├── features/               # 功能域（按业务划分）
+│   ├── chat/               # 聊天功能 (InputArea, MessageList, ChatPanel)
+│   ├── files/              # 文件功能 (FileGrid, FileList, BatchActionBar)
+│   ├── header/             # 顶部菜单 (ModelSelector, DirectoryPicker, SearchBox)
+│   ├── sidebar/            # 侧边栏 (RecentWorkspaces, Sessions, Settings)
+│   ├── footer/             # 底部菜单
+│   ├── panels/             # 面板 (TerminalPanel, LlmLogPanel)
+│   └── system/             # 系统功能 (modals, search)
+├── shared/                 # 共享资源
+│   ├── components/         # 通用组件
+│   │   ├── ui/             # 基础 UI (Button, Input, IconButton, Select)
+│   │   └── layout/         # 布局容器
+│   ├── hooks/              # 通用 Hooks
+│   ├── styles/             # 全局样式
+│   └── utils/              # 工具函数
 ├── stores/                 # 全局状态 (Zustand)
+│   ├── sessionStore.ts     # 会话设置（持久化）
+│   ├── chatStore.ts        # 聊天状态
+│   ├── fileStore.ts        # 文件浏览器状态
+│   ├── sidebarStore.ts     # 侧边栏状态
+│   ├── modalStore.ts       # 模态框状态
+│   ├── searchStore.ts      # 搜索状态
+│   └── llmLogStore.ts      # LLM 日志状态
 ├── services/               # API 服务
+│   ├── api/                # REST API 客户端
+│   └── websocket.service.ts # WebSocket 服务
+├── controllers/            # 控制器
+├── hooks/                  # 全局 Hooks
+├── pages/                  # 页面组件
 └── types/                  # 全局类型
 ```
 
