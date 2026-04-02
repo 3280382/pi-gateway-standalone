@@ -496,6 +496,7 @@ export const useChatStore = create<
 			},
 
 			finishStreaming: () => {
+				console.log("[ChatStore] finishStreaming called");
 				set(
 					(state) => {
 						// 构建当前轮次的新内容
