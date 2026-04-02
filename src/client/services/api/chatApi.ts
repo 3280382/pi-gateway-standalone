@@ -54,11 +54,15 @@ export function useChatController(): EnhancedChatController {
 
 	return {
 		// 基础聊天功能（支持图片）
-		sendMessage: async (text: string, images?: Array<{
-			type: "image";
-			source: { type: "base64"; mediaType: string; data: string };
-		}>) => {
-			if (!text.trim() && (!images || images.length === 0)) return Promise.resolve();
+		sendMessage: async (
+			text: string,
+			images?: Array<{
+				type: "image";
+				source: { type: "base64"; mediaType: string; data: string };
+			}>,
+		) => {
+			if (!text.trim() && (!images || images.length === 0))
+				return Promise.resolve();
 
 			// 检查WebSocket连接状态
 			if (!websocketService.isConnected) {
@@ -76,10 +80,12 @@ export function useChatController(): EnhancedChatController {
 			// 构建消息内容（文本 + 图片）
 			const content: Message["content"] = [{ type: "text", text }];
 			if (images && images.length > 0) {
-				content.push(...images.map(img => ({
-					type: "image" as const,
-					imageUrl: `data:${img.source.mediaType};base64,${img.source.data}`,
-				})));
+				content.push(
+					...images.map((img) => ({
+						type: "image" as const,
+						imageUrl: `data:${img.source.mediaType};base64,${img.source.data}`,
+					})),
+				);
 			}
 
 			// 添加用户消息

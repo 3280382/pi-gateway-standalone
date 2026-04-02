@@ -7,9 +7,9 @@ import { InputArea } from "@/features/chat/components/InputArea/InputArea";
 import { FileSidebar } from "@/features/files/components/FileSidebar";
 import { SidebarPanel } from "@/features/sidebar/components/SidebarPanel/SidebarPanel";
 import { useChatController } from "@/services/api/chatApi";
+import { websocketService } from "@/services/websocket.service";
 import { useChatStore } from "@/stores/chatStore";
 import { useSessionStore } from "@/stores/sessionStore";
-import { websocketService } from "@/services/websocket.service";
 import { AppFooter } from "../AppFooter/AppFooter";
 import { AppHeader } from "../AppHeader/AppHeader";
 import styles from "./AppLayout.module.css";
@@ -156,13 +156,13 @@ export function AppLayout({
 		try {
 			// 清除当前消息
 			controller.clearMessages();
-			
+
 			// 发送新建会话命令到服务器
 			websocketService.send("new_session", {});
-			
+
 			// 清空输入
 			controller.setInputText("");
-			
+
 			console.log("[AppLayout] New session created");
 		} catch (error) {
 			console.error("[AppLayout] Failed to create new session:", error);
@@ -239,7 +239,7 @@ export function AppLayout({
 									}
 								}}
 								onSendWithImages={(text, images) => {
-									const imageData = images.map(img => ({
+									const imageData = images.map((img) => ({
 										type: "image" as const,
 										source: {
 											type: "base64" as const,

@@ -4,8 +4,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SLASH_COMMANDS } from "@/features/chat/types/slashCommands";
-import { useFileStore } from "@/stores/fileStore";
 import { browseDirectory } from "@/services/api/fileApi";
+import { useFileStore } from "@/stores/fileStore";
 import styles from "./InputArea.module.css";
 
 interface InputAreaProps {
@@ -52,7 +52,7 @@ export function InputArea({
 	const [showCommands, setShowCommands] = useState(false);
 	const [commandFilter, setCommandFilter] = useState("");
 	const [selectedIndex, setSelectedIndex] = useState(0);
-	
+
 	// @mention file selection
 	const [showFilePicker, setShowFilePicker] = useState(false);
 	const [fileFilter, setFileFilter] = useState("");
@@ -60,7 +60,7 @@ export function InputArea({
 	const [isLoadingFiles, setIsLoadingFiles] = useState(false);
 	const [selectedFileIndex, setSelectedFileIndex] = useState(0);
 	const { currentPath } = useFileStore();
-	
+
 	// Image uploads
 	const [images, setImages] = useState<ImageUpload[]>([]);
 	const [showImagePreview, setShowImagePreview] = useState(true);
@@ -200,13 +200,26 @@ export function InputArea({
 			}
 		}
 
-		if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !showCommands && !showFilePicker) {
+		if (
+			e.key === "Enter" &&
+			(e.ctrlKey || e.metaKey) &&
+			!showCommands &&
+			!showFilePicker
+		) {
 			e.preventDefault();
 			handleSend();
 			return;
 		}
 
-		if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey && !showCommands && !showFilePicker && !isBashMode) {
+		if (
+			e.key === "Enter" &&
+			!e.shiftKey &&
+			!e.ctrlKey &&
+			!e.metaKey &&
+			!showCommands &&
+			!showFilePicker &&
+			!isBashMode
+		) {
 			return;
 		}
 	};
@@ -298,7 +311,7 @@ export function InputArea({
 			reader.onload = async (event) => {
 				const base64 = event.target?.result as string;
 				const imageId = `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-				
+
 				const newImage: ImageUpload = {
 					id: imageId,
 					file,
@@ -335,7 +348,10 @@ export function InputArea({
 		e.target.value = "";
 	};
 
-	const performOCR = async (base64Image: string, mimeType: string): Promise<string> => {
+	const performOCR = async (
+		base64Image: string,
+		mimeType: string,
+	): Promise<string> => {
 		try {
 			const response = await fetch("/api/ocr", {
 				method: "POST",
@@ -360,35 +376,38 @@ export function InputArea({
 		onChange(e.target.value);
 	};
 
-	const insertAtCursor = (text: string, triggerAction?: 'file' | 'command' | 'bash') => {
+	const insertAtCursor = (
+		text: string,
+		triggerAction?: "file" | "command" | "bash",
+	) => {
 		const textarea = textareaRef.current;
 		if (!textarea) {
 			onChange(value + text);
 			return;
 		}
-		
+
 		// Ensure textarea is focused first
 		textarea.focus();
-		
+
 		const start = textarea.selectionStart;
 		const end = textarea.selectionEnd;
 		const newValue = value.substring(0, start) + text + value.substring(end);
 		onChange(newValue);
-		
+
 		// Set cursor position after the inserted text
 		const newCursorPos = start + text.length;
 		textarea.setSelectionRange(newCursorPos, newCursorPos);
-		
+
 		// Trigger corresponding action
-		if (triggerAction === 'file') {
+		if (triggerAction === "file") {
 			// Load files and show picker immediately
 			loadFileList().then(() => {
-				setFileFilter('');
+				setFileFilter("");
 				setShowFilePicker(true);
 				setSelectedFileIndex(0);
 			});
-		} else if (triggerAction === 'command') {
-			setCommandFilter('');
+		} else if (triggerAction === "command") {
+			setCommandFilter("");
 			setShowCommands(true);
 			setSelectedIndex(0);
 		}
@@ -468,9 +487,7 @@ export function InputArea({
 							{img.isProcessingOCR && (
 								<div className={styles.ocrIndicator}>⋯</div>
 							)}
-							{img.ocrText && (
-								<div className={styles.ocrBadge}>T</div>
-							)}
+							{img.ocrText && <div className={styles.ocrBadge}>T</div>}
 							<button
 								className={styles.removeImageBtn}
 								onClick={() => removeImage(img.id)}
@@ -534,7 +551,7 @@ export function InputArea({
 						const newValue = value + "@";
 						onChange(newValue);
 						loadFileList();
-						setFileFilter('');
+						setFileFilter("");
 						setShowFilePicker(true);
 						setSelectedFileIndex(0);
 						textareaRef.current?.focus();
@@ -550,7 +567,7 @@ export function InputArea({
 						// Add / at the end and trigger command menu
 						const newValue = value + "/";
 						onChange(newValue);
-						setCommandFilter('');
+						setCommandFilter("");
 						setShowCommands(true);
 						setSelectedIndex(0);
 						textareaRef.current?.focus();
@@ -608,7 +625,12 @@ function PlusIcon() {
 
 function ImageIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="1.5"
+		>
 			<rect x="3" y="3" width="18" height="18" rx="3" />
 			<circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
 			<path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" />
@@ -618,7 +640,12 @@ function ImageIcon() {
 
 function FileIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="1.5"
+		>
 			<path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9l-7-7z" />
 			<polyline points="13 2 13 9 20 9" />
 		</svg>
@@ -635,7 +662,12 @@ function FolderIcon() {
 
 function DocIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="1.5"
+		>
 			<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
 			<line x1="16" y1="13" x2="8" y2="13" />
 			<line x1="16" y1="17" x2="8" y2="17" />

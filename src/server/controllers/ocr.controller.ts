@@ -24,16 +24,16 @@ export async function performOCR(req: Request, res: Response): Promise<void> {
 		// Check if pi-coding-agent has OCR capabilities via SDK
 		// For now, return a placeholder response
 		// In production, this should call the actual OCR service
-		
+
 		// Extract base64 data (remove data URL prefix if present)
 		const base64Data = image.includes(",") ? image.split(",")[1] : image;
-		
+
 		// TODO: Integrate with actual OCR service
 		// This could be:
 		// 1. A local Tesseract.js instance
 		// 2. A cloud OCR service (Google Vision, AWS Textract, etc.)
 		// 3. The pi-coding-agent SDK if it has OCR capabilities
-		
+
 		res.json({
 			success: true,
 			text: "", // Empty for now - will be populated by actual OCR

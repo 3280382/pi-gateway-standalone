@@ -3,11 +3,11 @@
  * 处理聊天相关的业务逻辑
  */
 
+import type { ImageUpload } from "@/features/chat/components/InputArea/InputArea";
 import { ServiceError } from "@/services/base.service";
 import { chatService } from "@/services/chat.service";
 import { websocketService } from "@/services/websocket.service";
 import { useChatStore } from "@/stores/chatStore";
-import type { ImageUpload } from "@/features/chat/components/InputArea/InputArea";
 import type { Message, ToolExecution } from "@/types/chat";
 
 export class ChatController {
@@ -45,7 +45,7 @@ export class ChatController {
 
 			// 构建消息内容（文本 + 图片）
 			const content: Message["content"] = [{ type: "text", text }];
-			
+
 			// 添加图片
 			if (images && images.length > 0) {
 				for (const img of images) {
@@ -54,13 +54,13 @@ export class ChatController {
 						imageUrl: img.preview,
 					});
 				}
-				
+
 				// 添加OCR文本作为上下文
 				const ocrTexts = images
 					.filter((img) => img.ocrText)
 					.map((img) => `[Image OCR]: ${img.ocrText}`)
 					.join("\n");
-				
+
 				if (ocrTexts) {
 					content.push({ type: "text", text: `\n${ocrTexts}` });
 				}

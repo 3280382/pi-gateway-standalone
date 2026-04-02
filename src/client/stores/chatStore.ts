@@ -445,11 +445,12 @@ export const useChatStore = create<
 					(state) => {
 						// 构建当前轮次的新内容
 						const currentContent = buildContentArray(state);
-						
+
 						// 合并之前轮次的内容（如果有）和当前轮次内容
-						const existingContent = state.currentStreamingMessage?.content || [];
+						const existingContent =
+							state.currentStreamingMessage?.content || [];
 						const finalContent = [...existingContent, ...currentContent];
-						
+
 						const finalMessage = state.currentStreamingMessage
 							? {
 									...state.currentStreamingMessage,
@@ -483,11 +484,12 @@ export const useChatStore = create<
 					(state) => {
 						// 构建当前轮次的新内容
 						const currentContent = buildContentArray(state);
-						
+
 						// 合并之前轮次的内容（如果有）和当前轮次内容
-						const existingContent = state.currentStreamingMessage?.content || [];
+						const existingContent =
+							state.currentStreamingMessage?.content || [];
 						const finalContent = [...existingContent, ...currentContent];
-						
+
 						const finalMessage = state.currentStreamingMessage
 							? {
 									...state.currentStreamingMessage,
@@ -945,7 +947,7 @@ export const useChatStore = create<
 									),
 									isStreaming: false,
 									isThinkingCollapsed: true,
-								isToolsCollapsed: true, // 默认折叠工具内容
+									isToolsCollapsed: true, // 默认折叠工具内容
 									isMessageCollapsed: false,
 								};
 							}

@@ -39,8 +39,6 @@ export function FileBrowser({
 		setError,
 		setCurrentPath,
 		getFilteredAndSortedItems,
-		getCachedPath,
-		setCachedPath,
 	} = useFileStore();
 	// 使用外部状态或内部状态
 	const sidebarVisible =
@@ -50,18 +48,9 @@ export function FileBrowser({
 	const filteredItems = getFilteredAndSortedItems();
 	// 获取文件查看器状态用于key
 	const fileViewerStore = useFileViewerStore();
-	// 加载目录内容（带缓存）
+	// 加载目录内容（无缓存）
 	const loadDirectory = useCallback(
 		async (path: string, forceRefresh = false) => {
-			// 检查缓存
-			if (!forceRefresh) {
-				const cached = getCachedPath(path);
-				if (cached) {
-					fileBrowserDebug.info("使用缓存的目录数据", { path, itemCount: cached.length });
-					setItems(cached);
-					setError(null);
-					return;
-				}
 			}
 
 			fileBrowserDebug.info("开始加载目录", { path });
@@ -93,7 +82,6 @@ export function FileBrowser({
 
 				fileBrowserDebug.debug("设置文件项", { itemCount: itemsToSet.length });
 				setItems(itemsToSet);
-				setCachedPath(path, itemsToSet); // 保存到缓存
 				setCurrentPath(data.currentPath);
 
 				fileBrowserDebug.info("目录加载完成", {
@@ -157,7 +145,7 @@ export function FileBrowser({
 				setLoading(false);
 			}
 		},
-		[setItems, setLoading, setError, setCurrentPath, getCachedPath, setCachedPath],
+		[setItems, setLoading, setError, setCurrentPath],
 	);
 	// 路径变化时加载新目录
 	useEffect(() => {
@@ -169,7 +157,7 @@ export function FileBrowser({
 			filteredItemsCount: filteredItems.length,
 		});
 
-		// 路径变化时加载新目录（使用缓存）
+		// 路径变化时加载新目录（每次都从服务器获取）
 		loadDirectory(currentPath);
 	}, [currentPath, loadDirectory]);
 	// 监听状态变化
