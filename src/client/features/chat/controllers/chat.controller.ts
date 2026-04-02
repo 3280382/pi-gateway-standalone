@@ -587,7 +587,8 @@ export class ChatController {
 
 		// 轮次开始/结束
 		websocketService.on("turn_start", () => {
-			console.log("[ChatController] Turn started");
+			console.log("[ChatController] Turn started, calling startNewTurn");
+			this.store.getState().startNewTurn();
 		});
 
 		websocketService.on("turn_end", (data) => {

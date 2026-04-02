@@ -370,6 +370,9 @@ export const useChatStore = create<
 
 			// 开始新的轮次 - 在 turn_start 时调用
 			startNewTurn: () => {
+				// 清空 RAF 批处理的待处理更新，避免旧内容被重复添加
+				pendingContentUpdates = {};
+
 				set(
 					(state) => {
 						if (!state.currentStreamingMessage) return {};
