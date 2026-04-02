@@ -294,11 +294,13 @@ export function useChat(): UseChatReturn {
 		// Turn start/end handlers
 		registerHandler("turn_start", () => {
 			wsLog.info("Turn started - starting new turn block");
-			// 开始新的轮次，添加分隔标记
+			// 先将当前工具输出保存到 ref（如果需要）
+			// 注意：store.startNewTurn() 已经把当前内容保存到消息中了
 			store.startNewTurn();
-			// 重置本地流式状态
+			// 重置本地流式状态用于新一轮
 			streamingRef.current.thinking = "";
 			streamingRef.current.content = "";
+			// 工具状态由 store 管理，这里只需要重置本地 ref
 			streamingRef.current.tools = new Map();
 			streamingRef.current.toolOutputs = new Map();
 		});

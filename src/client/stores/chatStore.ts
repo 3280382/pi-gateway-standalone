@@ -268,8 +268,8 @@ export const useChatStore = create<
 					(state) => {
 						if (!state.currentStreamingMessage) return {};
 
-						// 将当前累积的内容保存到消息中，并开始新的轮次
-						const currentContent = [...state.currentStreamingMessage.content];
+						// 先构建当前轮次的完整内容（包括工具）
+						const currentContent = buildContentArray(state);
 
 						// 添加轮次分隔标记
 						currentContent.push({
@@ -284,7 +284,7 @@ export const useChatStore = create<
 								...state.currentStreamingMessage,
 								content: currentContent,
 							},
-							// 清空当前轮次的流式状态
+							// 清空当前轮次的流式状态，开始新一轮
 							streamingThinking: "",
 							streamingContent: "",
 							streamingToolCalls: new Map(),
@@ -354,18 +354,29 @@ export const useChatStore = create<
 
 			abortStreaming: () => {
 				set(
-					(state) => ({
-						isStreaming: false,
-						messages: state.currentStreamingMessage
-							? [...state.messages, state.currentStreamingMessage]
-							: state.messages,
-						currentStreamingMessage: null,
-						streamingContent: "",
-						streamingThinking: "",
-						streamingThinkings: [], // 清理多轮思考
-						streamingToolCalls: new Map(),
-						activeTools: new Map(), // 清理工具状态
-					}),
+					(state) => {
+						// 确保最终内容包含所有工具数据
+						const finalContent = buildContentArray(state);
+						const finalMessage = state.currentStreamingMessage
+							? {
+									...state.currentStreamingMessage,
+									content: finalContent,
+								}
+							: null;
+
+						return {
+							isStreaming: false,
+							messages: finalMessage
+								? [...state.messages, finalMessage]
+								: state.messages,
+							currentStreamingMessage: null,
+							streamingContent: "",
+							streamingThinking: "",
+							streamingThinkings: [],
+							streamingToolCalls: new Map(),
+							activeTools: new Map(),
+						};
+					},
 					false,
 					"abortStreaming",
 				);
@@ -373,21 +384,30 @@ export const useChatStore = create<
 
 			finishStreaming: () => {
 				set(
-					(state) => ({
-						isStreaming: false,
-						messages: state.currentStreamingMessage
-							? [
-									...state.messages,
-									{ ...state.currentStreamingMessage, isStreaming: false },
-								]
-							: state.messages,
-						currentStreamingMessage: null,
-						streamingContent: "",
-						streamingThinking: "",
-						streamingThinkings: [], // 清理多轮思考
-						streamingToolCalls: new Map(),
-						activeTools: new Map(), // 清理工具状态
-					}),
+					(state) => {
+						// 确保最终内容包含所有工具数据
+						const finalContent = buildContentArray(state);
+						const finalMessage = state.currentStreamingMessage
+							? {
+									...state.currentStreamingMessage,
+									content: finalContent,
+									isStreaming: false,
+								}
+							: null;
+
+						return {
+							isStreaming: false,
+							messages: finalMessage
+								? [...state.messages, finalMessage]
+								: state.messages,
+							currentStreamingMessage: null,
+							streamingContent: "",
+							streamingThinking: "",
+							streamingThinkings: [],
+							streamingToolCalls: new Map(),
+							activeTools: new Map(),
+						};
+					},
 					false,
 					"finishStreaming",
 				);
@@ -399,13 +419,20 @@ export const useChatStore = create<
 				set({ showTools: show }, false, "setShowTools");
 			},
 			toggleToolsCollapse: (messageId: string) => {
+				console.log("[ChatStore] toggleToolsCollapse called:", messageId);
 				set(
 					(state) => {
+						const targetMsg = state.messages.find(m => m.id === messageId);
+						console.log("[ChatStore] Target message found:", !!targetMsg, "current isToolsCollapsed:", targetMsg?.isToolsCollapsed);
+						
 						const updatedMessages = state.messages.map((msg) =>
 							msg.id === messageId
 								? { ...msg, isToolsCollapsed: msg.isToolsCollapsed === false }
 								: msg,
 						);
+						const updatedMsg = updatedMessages.find(m => m.id === messageId);
+						console.log("[ChatStore] Updated isToolsCollapsed:", updatedMsg?.isToolsCollapsed);
+						
 						// 同时更新 currentStreamingMessage
 						const updatedStreamingMessage =
 							state.currentStreamingMessage?.id === messageId
@@ -428,7 +455,13 @@ export const useChatStore = create<
 			setActiveTool: (tool: ToolExecution) => {
 				set(
 					(state) => {
-						const newTools = new Map(state.activeTools).set(tool.id, tool);
+						// 保留 streamingToolCalls 中的参数（如果有）
+						const streamingTool = state.streamingToolCalls.get(tool.id);
+						const mergedTool = streamingTool
+							? { ...tool, args: { ...tool.args, _streamingArgs: streamingTool.args } }
+							: tool;
+
+						const newTools = new Map(state.activeTools).set(tool.id, mergedTool);
 
 						// 当工具开始执行时，从 streamingToolCalls 中移除
 						// 这样可以避免 tool_use 和 tool 重复显示
@@ -928,12 +961,20 @@ export function filterMessages(
 			);
 
 			// 如果消息包含 thinking 但 filters.thinking 为 false，且没有文本内容，则过滤掉
-			if (hasThinking && !filters.thinking && !message.content.some((c) => c.type === "text")) {
+			if (
+				hasThinking &&
+				!filters.thinking &&
+				!message.content.some((c) => c.type === "text")
+			) {
 				return false;
 			}
 
 			// 如果消息包含 tools 但 filters.tools 为 false，且没有文本内容，则过滤掉
-			if (hasTools && !filters.tools && !message.content.some((c) => c.type === "text")) {
+			if (
+				hasTools &&
+				!filters.tools &&
+				!message.content.some((c) => c.type === "text")
+			) {
 				return false;
 			}
 		}

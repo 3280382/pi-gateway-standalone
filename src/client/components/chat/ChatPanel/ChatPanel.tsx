@@ -2,16 +2,16 @@
  * ChatPanel - Main Chat Container
  */
 
-import { useCallback, useMemo, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useChatController } from "@/services/api/chatApi";
 import {
+	filterMessages,
 	selectCurrentStreamingMessage,
 	selectInputText,
 	selectIsStreaming,
 	selectMessages,
 	selectShowThinking,
 	useChatStore,
-	filterMessages,
 } from "@/stores/chatStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import { TopBar } from "../../layout/TopBar/TopBar";

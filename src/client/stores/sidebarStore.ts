@@ -110,7 +110,7 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 				// Search Actions
 				setSearchQuery: (query: string) => {
 					console.log("[SidebarStore] setSearchQuery:", query);
-				set({ searchQuery: query }, false, "setSearchQuery");
+					set({ searchQuery: query }, false, "setSearchQuery");
 				},
 
 				setSearchFilters: (filters: Partial<SearchFilters>) => {

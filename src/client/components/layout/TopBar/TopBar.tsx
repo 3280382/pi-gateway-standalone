@@ -13,7 +13,11 @@ import {
 	type SystemPromptResponse,
 } from "@/services/api/systemPromptApi";
 import { websocketService } from "@/services/websocket.service";
-import { useChatStore, selectSearchQuery, selectSearchFilters } from "@/stores/chatStore";
+import {
+	selectSearchFilters,
+	selectSearchQuery,
+	useChatStore,
+} from "@/stores/chatStore";
 import { useModalStore } from "@/stores/modalStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
@@ -130,9 +134,19 @@ interface TopBarProps {
 	pid: number | null;
 	currentView?: "chat" | "files";
 	searchQuery?: string;
-	searchFilters?: { user: boolean; assistant: boolean; thinking: boolean; tools: boolean };
+	searchFilters?: {
+		user: boolean;
+		assistant: boolean;
+		thinking: boolean;
+		tools: boolean;
+	};
 	onSearchQueryChange?: (query: string) => void;
-	onSearchFiltersChange?: (filters: { user: boolean; assistant: boolean; thinking: boolean; tools: boolean }) => void;
+	onSearchFiltersChange?: (filters: {
+		user: boolean;
+		assistant: boolean;
+		thinking: boolean;
+		tools: boolean;
+	}) => void;
 }
 
 // DEBUG: Check if new code is loaded
@@ -149,10 +163,10 @@ export function TopBar({
 	onSearchFiltersChange,
 }: TopBarProps) {
 	// Log props on every render
-	console.log("[TopBar] Render props:", { 
-		onSearchQueryChange: typeof onSearchQueryChange, 
+	console.log("[TopBar] Render props:", {
+		onSearchQueryChange: typeof onSearchQueryChange,
 		onSearchFiltersChange: typeof onSearchFiltersChange,
-		externalSearchQuery: externalSearchQuery?.slice?.(0, 20)
+		externalSearchQuery: externalSearchQuery?.slice?.(0, 20),
 	});
 	const {
 		currentModel,
@@ -169,7 +183,7 @@ export function TopBar({
 	const chatStoreFilters = useChatStore(selectSearchFilters);
 	const chatStoreSetSearchQuery = useChatStore((s) => s.setSearchQuery);
 	const chatStoreSetSearchFilters = useChatStore((s) => s.setSearchFilters);
-	
+
 	const searchQuery = externalSearchQuery ?? chatStoreQuery;
 	const filters = externalSearchFilters ?? chatStoreFilters;
 	const sidebarController = useSidebarController();
@@ -218,7 +232,12 @@ export function TopBar({
 	};
 
 	const handleFilterChange = (key: keyof typeof filters) => {
-		console.log("[TopBar] Filter changed:", key, "onSearchFiltersChange exists:", !!onSearchFiltersChange);
+		console.log(
+			"[TopBar] Filter changed:",
+			key,
+			"onSearchFiltersChange exists:",
+			!!onSearchFiltersChange,
+		);
 		if (onSearchFiltersChange) {
 			// 使用外部传入的回调
 			onSearchFiltersChange({ ...filters, [key]: !filters[key] });
@@ -440,7 +459,12 @@ export function TopBar({
 							placeholder="Search messages..."
 							value={searchQuery}
 							onChange={(e) => {
-								console.log("[TopBar] Input changed:", e.target.value, "onSearchQueryChange exists:", !!onSearchQueryChange);
+								console.log(
+									"[TopBar] Input changed:",
+									e.target.value,
+									"onSearchQueryChange exists:",
+									!!onSearchQueryChange,
+								);
 								if (onSearchQueryChange) {
 									onSearchQueryChange(e.target.value);
 								} else {
@@ -452,12 +476,12 @@ export function TopBar({
 							<button
 								className={styles.clearBtn}
 								onClick={() => {
-								if (onSearchQueryChange) {
-									onSearchQueryChange("");
-								} else {
-									chatStoreSetSearchQuery("");
-								}
-							}}
+									if (onSearchQueryChange) {
+										onSearchQueryChange("");
+									} else {
+										chatStoreSetSearchQuery("");
+									}
+								}}
 								title="Clear"
 							>
 								<XIcon />

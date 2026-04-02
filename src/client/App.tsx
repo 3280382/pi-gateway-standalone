@@ -7,9 +7,9 @@
  * - Chat 视图和 Files 视图共享相同的布局框架
  */
 
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { websocketService } from "@/services/websocket.service";
-import { useChatStore, filterMessages } from "@/stores/chatStore";
+import { filterMessages, useChatStore } from "@/stores/chatStore";
 import { useNewChatStore } from "@/stores/new-chat.store";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
@@ -51,15 +51,15 @@ function AppContent() {
 	const showThinking = useChatStore((s) => s.showThinking);
 	const toggleMessageCollapse = useChatStore((s) => s.toggleMessageCollapse);
 	const toggleThinkingCollapse = useChatStore((s) => s.toggleThinkingCollapse);
-	
+
 	// 搜索过滤
 	const searchQuery = useChatStore((s) => s.searchQuery);
 	const searchFilters = useChatStore((s) => s.searchFilters);
 	const filteredMessages = useMemo(() => {
-		console.log("[App] Filtering messages:", { 
-			totalMessages: messages.length, 
-			searchQuery, 
-			searchFilters 
+		console.log("[App] Filtering messages:", {
+			totalMessages: messages.length,
+			searchQuery,
+			searchFilters,
 		});
 		const result = filterMessages(messages, {
 			query: searchQuery,
@@ -104,7 +104,7 @@ function AppContent() {
 	// 处理 slash 命令（/command）
 	const handleSlashCommand = useCallback((command: string, args: string) => {
 		console.log("[App] Executing slash command:", command, args);
-		
+
 		// 内置 slash 命令
 		switch (command) {
 			case "clear":
@@ -391,8 +391,8 @@ function AppContent() {
 	// 聊天视图 - 显示输入框和LLM日志底部面板
 	if (currentView === "chat") {
 		return (
-			<AppLayout 
-				showInput={true} 
+			<AppLayout
+				showInput={true}
 				bottomPanelContent={renderChatBottomPanel()}
 				onBashCommand={handleBashCommand}
 				onSlashCommand={handleSlashCommand}

@@ -1,15 +1,16 @@
 /**
- * MessageItem - 重构版消息显示组件
+ * MessageItem - 扁平化重构版
  *
- * 特性:
- * 1. 完全独立的消息块 - 每种类型有自己的容器和样式
- * 2. 紧凑布局 - 减少内边距和间距
- * 3. 正确的溢出控制 - 防止内容撑破布局
- * 4. 统一的消息类型处理 - 支持从文件加载和流式消息
+ * 优化后的层级结构（最大 3-4 层）：
+ * .message
+ *   > .actions
+ *   > pre.thinkingBody (thinking - 本身既是容器又是内容)
+ *   > .textSection (text)
+ *   > .toolContent (tool)
+ *   > .codeContainer (code block)
  */
 
 import { useMemo, useState } from "react";
-import { componentLog } from "@/lib/logger";
 import type { Message, MessageContent } from "@/types/chat";
 import styles from "./MessageItem.module.css";
 
@@ -32,53 +33,23 @@ export function MessageItem({
 	onToggleThinking,
 	onToggleTools,
 	onDelete,
-	onRegenerate,
 }: MessageItemProps) {
 	const isUser = message.role === "user";
 	const isCollapsed = message.isMessageCollapsed ?? false;
 	const [showActions, setShowActions] = useState(false);
 
-	// 分类消息内容 - 保持原始顺序
-	const contentBlocks = useMemo(() => {
+	// 直接按原始顺序渲染内容块
+	const blocks = useMemo(() => {
 		return message.content.map((c, idx) => ({ ...c, originalIndex: idx }));
 	}, [message.content]);
 
-	// 提取各类内容
-	const thinkingBlocks = contentBlocks.filter((c) => c.type === "thinking");
-	const textBlocks = contentBlocks.filter((c) => c.type === "text");
-
-	// 合并 tool 和 tool_use 块，避免重复显示
-	// tool_use 是流式构建中的工具调用，tool 是已完成的工具执行
-	// 如果同一个 toolCallId 同时存在 tool 和 tool_use，只保留 tool（完成的）
-	const toolCallIds = new Set<string>();
-	const allToolBlocks = contentBlocks.filter((c) => {
-		if (c.type === "tool") {
-			toolCallIds.add(c.toolCallId || "");
-			return true;
-		}
-		if (c.type === "tool_use") {
-			// 只保留还没有完成版本的 tool_use
-			if (!toolCallIds.has(c.toolCallId || "")) {
-				toolCallIds.add(c.toolCallId || "");
-				return true;
-			}
-			return false;
-		}
-		return false;
-	});
-
-	// 调试日志 - 仅在开发环境显示
-	if (process.env.NODE_ENV === "development") {
-		componentLog.debug("Message:", {
-			id: message.id,
-			role: message.role,
-			contentTypes: contentBlocks.map((c) => c.type),
-			mergedToolBlocks: allToolBlocks.length,
-		});
-	}
-
-	// 合并所有文本内容用于代码块解析
-	const fullText = textBlocks.map((c) => c.text).join("");
+	// 合并所有文本
+	const fullText = useMemo(() => {
+		return blocks
+			.filter((c) => c.type === "text")
+			.map((c) => c.text)
+			.join("");
+	}, [blocks]);
 
 	// 处理复制
 	const handleCopy = () => {
@@ -102,7 +73,7 @@ export function MessageItem({
 			onMouseEnter={() => setShowActions(true)}
 			onMouseLeave={() => setShowActions(false)}
 		>
-			{/* 操作按钮 - 只显示复制和删除 */}
+			{/* 操作按钮 */}
 			<div className={styles.actions} style={{ opacity: showActions ? 1 : 0 }}>
 				<button className={styles.actionBtn} onClick={handleCopy} title="复制">
 					📋
@@ -114,409 +85,234 @@ export function MessageItem({
 				)}
 			</div>
 
-			{/* Content Blocks - 按原始顺序渲染 */}
+			{/* 内容 - 直接渲染，减少嵌套 */}
 			{!isCollapsed && (
-				<div className={styles.content}>
+				<>
 					{isUser ? (
-						// 用户消息 - 带头像图标
-						<UserContent text={fullText} />
-					) : (
-						// AI 消息 - 按类型分别渲染
-						<AIContent
-							message={message}
-							thinkingBlocks={thinkingBlocks}
-							toolBlocks={allToolBlocks}
-							textBlocks={textBlocks}
-							showThinking={showThinking}
-							showTools={showTools}
-							onToggleThinking={onToggleThinking}
-							onToggleTools={onToggleTools}
-							isStreaming={message.isStreaming}
+						// 用户消息 - 单层渲染
+						<span
+							className={styles.userText}
+							dangerouslySetInnerHTML={{ __html: formatMarkdown(fullText) }}
 						/>
-					)}
-				</div>
-			)}
-		</div>
-	);
-}
-
-// 用户消息内容
-function UserContent({ text }: { text: string }) {
-	if (!text) return null;
-	return (
-		<div className={styles.userText}>
-			<CompactMarkdown content={text} />
-		</div>
-	);
-}
-
-// 统一的图标组件
-
-// 按轮次分组的内容块
-interface TurnGroup {
-	turnNumber: number;
-	blocks: Array<
-		MessageContent & {
-			originalIndex: number;
-			blockType?: "thinking" | "text" | "tool";
-		}
-	>;
-}
-
-// AI 消息内容 - 按轮次分组渲染
-interface AIContentProps {
-	message: Message;
-	thinkingBlocks: Array<MessageContent & { originalIndex: number }>;
-	toolBlocks: Array<MessageContent & { originalIndex: number }>;
-	textBlocks: Array<MessageContent & { originalIndex: number }>;
-	showThinking: boolean;
-	showTools?: boolean;
-	onToggleThinking: () => void;
-	onToggleTools?: () => void;
-	isStreaming?: boolean;
-}
-
-function AIContent({
-	message,
-	thinkingBlocks,
-	toolBlocks,
-	textBlocks,
-	showThinking,
-	showTools = true,
-	onToggleThinking,
-	onToggleTools,
-	isStreaming,
-}: AIContentProps) {
-	// 按轮次分组所有块
-	const turnGroups = useMemo(() => {
-		// 合并所有块并保留原始索引
-		const allBlocks = [
-			...thinkingBlocks.map((b) => ({ ...b, blockType: "thinking" as const })),
-			...textBlocks.map((b) => ({ ...b, blockType: "text" as const })),
-			...toolBlocks.map((b) => ({ ...b, blockType: "tool" as const })),
-		].sort((a, b) => a.originalIndex - b.originalIndex);
-
-		// 按轮次分组
-		const groups: TurnGroup[] = [];
-		let currentGroup: TurnGroup = { turnNumber: 1, blocks: [] };
-
-		for (const block of allBlocks) {
-			if (block.type === "turn_marker") {
-				// 如果有内容，保存当前组
-				if (currentGroup.blocks.length > 0) {
-					groups.push({ ...currentGroup });
-				}
-				// 开始新组
-				currentGroup = {
-					turnNumber: block.turnNumber || groups.length + 2,
-					blocks: [],
-				};
-			} else {
-				currentGroup.blocks.push(block);
-			}
-		}
-
-		// 添加最后一组
-		if (currentGroup.blocks.length > 0) {
-			groups.push(currentGroup);
-		}
-
-		// 如果没有分组（没有turn_marker），返回一个包含所有块的分组
-		if (groups.length === 0 && allBlocks.length > 0) {
-			groups.push({ turnNumber: 1, blocks: allBlocks });
-		}
-
-		return groups;
-	}, [thinkingBlocks, toolBlocks, textBlocks]);
-
-	return (
-		<div className={styles.aiContent}>
-			{turnGroups.map((group, groupIdx) => (
-				<div
-					key={`turn-${group.turnNumber}`}
-					className={styles.turnGroup}
-					data-turn={group.turnNumber}
-				>
-					{/* 轮次分隔线（非第一轮时显示） */}
-					{groupIdx > 0 && (
-						<div className={styles.turnDivider}>
-							<span className={styles.turnLabel}>Round {group.turnNumber}</span>
-						</div>
-					)}
-
-					{/* 渲染该轮次的所有块 */}
-					<div className={styles.turnContent}>
-						{group.blocks.map((block, idx) => {
-							switch (block.blockType) {
+					) : (
+						// AI 消息 - 直接渲染块列表
+						blocks.map((block, idx) => {
+							switch (block.type) {
 								case "thinking":
 									return showThinking ? (
-										<ThinkingBlock
-											key={`thinking-${group.turnNumber}-${idx}`}
+										<ThinkingContent
+											key={`thinking-${idx}`}
 											content={block}
 											isCollapsed={message.isThinkingCollapsed}
 											onToggle={onToggleThinking}
-											isFirst={idx === 0}
-											isStreaming={isStreaming}
+											isStreaming={message.isStreaming}
 										/>
 									) : null;
 								case "tool":
 									return showTools ? (
-										<ToolResultBlock
-											key={`tool-${group.turnNumber}-${idx}`}
+										<ToolContent
+											key={`tool-${block.toolCallId || idx}`}
 											content={block}
 											isCollapsed={message.isToolsCollapsed}
 											onToggle={onToggleTools}
-											isStreaming={isStreaming}
+											isStreaming={message.isStreaming}
 										/>
 									) : null;
-								case "text": {
-									// 找到第一个文本块的索引
-									const firstTextIdx = group.blocks.findIndex(
-										(b) => b.blockType === "text",
-									);
-									const isFirstText = idx === firstTextIdx;
-									// 每轮最后一个文本块使用代码高亮
-									const isLastText =
-										idx === group.blocks.length - 1 && block.text;
-									if (isLastText) {
-										return (
-											<div
-												key={`text-${group.turnNumber}-${idx}`}
-												className={styles.textSection}
-											>
-												<CompactMarkdownWithCode content={block.text} />
-											</div>
-										);
-									}
-									return block.text ? (
-										<div
-											key={`text-${group.turnNumber}-${idx}`}
-											className={styles.textSection}
-										>
-											<CompactMarkdown content={block.text} />
-										</div>
+								case "tool_use":
+									// 流式中的 tool_use，按 building 状态显示
+									return showTools ? (
+										<ToolUseContent
+											key={`tool-use-${block.toolCallId || idx}`}
+											content={block}
+										/>
 									) : null;
-								}
+								case "text":
+									return block.text ? (
+										<TextContent key={`text-${idx}`} content={block.text} />
+									) : null;
 								default:
 									return null;
 							}
-						})}
-					</div>
-				</div>
-			))}
-		</div>
-	);
-}
-
-// Thinking 块组件
-interface ThinkingBlockProps {
-	content: MessageContent;
-	isCollapsed?: boolean;
-	onToggle: () => void;
-	isFirst: boolean;
-	isStreaming?: boolean;
-}
-
-function ThinkingBlock({
-	content,
-	isCollapsed,
-	onToggle,
-	isFirst,
-	isStreaming,
-}: ThinkingBlockProps) {
-	// 流式时展开，非流式时默认折叠（除非用户手动展开）
-	const shouldShow = isStreaming ? true : isCollapsed === false;
-
-	// 获取第一行内容
-	const firstLine = content.thinking?.split("\n")[0] || "";
-
-	return (
-		<div className={styles.thinkingContainer} onClick={onToggle}>
-			{shouldShow ? (
-				<pre className={styles.thinkingBody}>
-					{content.thinking || (
-						<span style={{ opacity: 0.5 }}>(empty thinking content)</span>
+						})
 					)}
-				</pre>
-			) : (
-				<div className={styles.thinkingCollapsed}>
-					<span className={styles.collapsedText}>{firstLine}</span>
-				</div>
+				</>
 			)}
 		</div>
 	);
 }
 
-// Tool 结果块 (已完成执行)
-interface ToolResultBlockProps {
+// Thinking 块 - 直接使用 pre 作为根容器
+interface ThinkingContentProps {
 	content: MessageContent;
 	isCollapsed?: boolean;
 	onToggle?: () => void;
 	isStreaming?: boolean;
 }
 
-function ToolResultBlock({
+function ThinkingContent({
 	content,
 	isCollapsed,
 	onToggle,
 	isStreaming,
-}: ToolResultBlockProps) {
-	// 流式时展开，非流式时根据 isCollapsed 状态（默认折叠）
+}: ThinkingContentProps) {
+	// 流式时强制展开，非流式时根据 isCollapsed 状态
+	const shouldShow = isStreaming ? true : isCollapsed === false;
+	const firstLine = content.thinking?.split("\n")[0] || "";
+
+	if (!shouldShow) {
+		return (
+			<div className={styles.thinkingCollapsed} onClick={onToggle}>
+				<span className={styles.collapsedText}>{firstLine}</span>
+			</div>
+		);
+	}
+
+	return (
+		<pre className={styles.thinkingBody} onClick={onToggle}>
+			{content.thinking || (
+				<span style={{ opacity: 0.5 }}>(empty thinking content)</span>
+			)}
+		</pre>
+	);
+}
+
+// Tool 块 (已完成执行)
+interface ToolContentProps {
+	content: MessageContent;
+	isCollapsed?: boolean;
+	onToggle?: () => void;
+	isStreaming?: boolean;
+}
+
+function ToolContent({ content, isCollapsed, onToggle, isStreaming }: ToolContentProps) {
+	// 流式时强制展开，非流式时根据 isCollapsed 状态
 	const isExpanded = isStreaming ? true : isCollapsed === false;
+	const status = content.error ? "error" : content.output ? "success" : "pending";
 
-	const status = content.error
-		? "error"
-		: content.output
-			? "success"
-			: "pending";
-
-	const getStatusIcon = () => {
-		switch (status) {
-			case "success":
-				return <span className={styles.statusSuccess}>●</span>;
-			case "error":
-				return <span className={styles.statusError}>●</span>;
-			default:
-				return <span className={styles.statusPending}>●</span>;
-		}
-	};
-
-	// 获取第一行输出内容
-	const outputText = content.output || content.error || "";
-	const firstLine =
-		typeof outputText === "string"
+	const firstLine = useMemo(() => {
+		const outputText = content.output || content.error || "";
+		return typeof outputText === "string"
 			? outputText.split("\n")[0].substring(0, 80)
 			: String(outputText).substring(0, 80);
+	}, [content.output, content.error]);
 
-	const safeStringify = (obj: unknown): string => {
-		if (obj === null || obj === undefined) return "";
-		if (typeof obj === "string") return obj;
-		try {
-			return JSON.stringify(obj, null, 2);
-		} catch {
-			return String(obj);
+	// 获取工具参数（优先使用 args，如果没有则尝试解析 _streamingArgs）
+	const toolArgs = useMemo(() => {
+		if (content.args && Object.keys(content.args).length > 0) {
+			// 如果有 _streamingArgs，尝试解析它
+			const streamingArgs = (content.args as Record<string, unknown>)._streamingArgs;
+			if (streamingArgs && typeof streamingArgs === "string") {
+				try {
+					// 尝试解析为 JSON
+					return JSON.parse(streamingArgs);
+				} catch {
+					// 如果不是有效的 JSON，尝试作为原始参数对象返回
+					try {
+						// 可能 _streamingArgs 是对象字符串表示，尝试提取键值对
+						const matches = streamingArgs.match(/(\w+)=([^\s,]+)/g);
+						if (matches) {
+							const parsed: Record<string, string> = {};
+							matches.forEach((match) => {
+								const [key, value] = match.split("=");
+								if (key && value) {
+									parsed[key] = value.replace(/^["']|["']$/g, "");
+								}
+							});
+							return Object.keys(parsed).length > 0 ? parsed : { _raw: streamingArgs };
+						}
+					} catch {
+						// 忽略解析错误
+					}
+					return { _raw: streamingArgs };
+				}
+			}
+			// 返回 args 但不包含 _streamingArgs 字段
+			const { _streamingArgs, ...restArgs } = content.args as Record<string, unknown>;
+			return Object.keys(restArgs).length > 0 ? restArgs : {};
+		}
+		return {};
+	}, [content.args]);
+
+	// 阻止事件冒泡，防止触发消息其他点击
+	const handleClick = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		console.log("[ToolContent] Clicked, isExpanded:", isExpanded, "onToggle exists:", !!onToggle);
+		if (onToggle) {
+			onToggle();
+		} else {
+			console.warn("[ToolContent] onToggle is undefined!");
 		}
 	};
 
-	// 将参数格式化为命令行样式
-	const formatArgsAsCommand = (
-		toolName: string,
-		args: Record<string, unknown>,
-	): string => {
-		if (!args || Object.keys(args).length === 0) return toolName;
-
-		const argStr = Object.entries(args)
-			.map(([key, value]) => {
-				const val = String(value);
-				// 如果有空格、特殊字符或多行，用引号包裹
-				if (
-					val.includes(" ") ||
-					val.includes('"') ||
-					val.includes("\n") ||
-					val.includes("\t")
-				) {
-					return `${key}="${val.replace(/"/g, '\\"')}"`;
-				}
-				return `${key}=${val}`;
-			})
-			.join(" ");
-
-		return `${toolName} ${argStr}`;
-	};
+	if (!isExpanded) {
+		return (
+			<div
+				className={`${styles.toolContainer} ${styles[status]} ${styles.collapsed}`}
+				onClick={handleClick}
+			>
+				<span className={styles.collapsedText}>{content.toolName || "tool"}</span>
+				<span className={styles.collapsedPreview}>{firstLine}</span>
+			</div>
+		);
+	}
 
 	return (
 		<div
 			className={`${styles.toolContainer} ${styles[status]}`}
-			onClick={() => {
-				console.log("[ToolResultBlock] clicked, calling onToggle");
-				onToggle?.();
-			}}
+			onClick={handleClick}
 		>
-			{isExpanded ? (
-				<div className={styles.toolContent}>
-					{/* 命令部分 */}
-					{content.args && Object.keys(content.args).length > 0 && (
-						<div className={styles.commandLine}>
-							<span className={styles.commandPrompt}>$</span>
-							<span className={styles.commandText}>
-								{formatArgsAsCommand(content.toolName || "tool", content.args)}
-							</span>
-						</div>
-					)}
-					{/* 输出部分 */}
-					{content.output && (
-						<div className={styles.toolOutput}>
-							<pre className={styles.toolOutputPre}>
-								{safeStringify(content.output)}
-							</pre>
-						</div>
-					)}
-					{/* 错误部分 */}
-					{content.error && (
-						<div className={`${styles.toolOutput} ${styles.errorText}`}>
-							<pre className={styles.toolOutputPre}>
-								{safeStringify(content.error)}
-							</pre>
-						</div>
-					)}
-				</div>
-			) : (
-				<div className={styles.toolCollapsed}>
-					<span className={styles.collapsedText}>
-						{content.toolName || "tool"}
+			{Object.keys(toolArgs).length > 0 && (
+				<div className={styles.commandLine}>
+					<span className={styles.commandPrompt}>$</span>
+					<span className={styles.commandText}>
+						{formatArgsAsCommand(content.toolName || "tool", toolArgs)}
 					</span>
-					<span className={styles.collapsedPreview}>{firstLine}</span>
 				</div>
+			)}
+			{content.output && (
+				<pre className={styles.toolOutputPre}>{safeStringify(content.output)}</pre>
+			)}
+			{content.error && (
+				<pre className={`${styles.toolOutputPre} ${styles.errorText}`}>
+					{safeStringify(content.error)}
+				</pre>
 			)}
 		</div>
 	);
 }
 
-// Tool Use 块 (流式中)
-function ToolUseBlock({ content }: { content: MessageContent }) {
-	const [isExpanded, setIsExpanded] = useState(true);
-
+// Tool Use 块 (流式构建中)
+function ToolUseContent({ content }: { content: MessageContent }) {
 	return (
 		<div className={`${styles.toolContainer} ${styles.building}`}>
-			<button
-				className={styles.toolHeader}
-				onClick={() => setIsExpanded(!isExpanded)}
-			>
+			<div className={styles.commandLine}>
 				<span className={`${styles.toolStatus} ${styles.pulse}`}>◐</span>
-				<span className={styles.toolName}>{content.toolName || "tool"}</span>
-				<span className={styles.toolToggle}>{isExpanded ? "▲" : "▼"}</span>
-			</button>
-			{isExpanded && content.partialArgs && (
-				<div className={styles.toolBody}>
-					<pre className={styles.toolCode}>{content.partialArgs}</pre>
-				</div>
-			)}
+				<span className={styles.commandText}>
+					{content.toolName || "tool"}
+					{content.partialArgs ? `: ${content.partialArgs}` : ""}
+				</span>
+			</div>
 		</div>
 	);
 }
 
-// 紧凑的 Markdown 渲染器 (用户消息)
-function CompactMarkdown({ content }: { content: string }) {
-	const formatted = useMemo(() => {
-		return formatMarkdown(content);
-	}, [content]);
+// Text 块 - 直接渲染，支持代码块
+function TextContent({ content }: { content: string }) {
+	const parts = useMemo(() => parseContentWithCode(content), [content]);
 
+	if (parts.length === 1 && parts[0].type === "text") {
+		// 纯文本，直接渲染，减少一层 div
+		return (
+			<span
+				className={styles.markdownText}
+				dangerouslySetInnerHTML={{ __html: formatMarkdown(parts[0].content) }}
+			/>
+		);
+	}
+
+	// 混合内容
 	return (
-		<span
-			className={styles.markdownText}
-			dangerouslySetInnerHTML={{ __html: formatted }}
-		/>
-	);
-}
-
-// 带代码块的 Markdown 渲染器 (AI 消息)
-function CompactMarkdownWithCode({ content }: { content: string }) {
-	const parts = useMemo(() => {
-		return parseContentWithCode(content);
-	}, [content]);
-
-	return (
-		<div className={styles.textContainer}>
+		<>
 			{parts.map((part, idx) =>
 				part.type === "code" ? (
 					<CodeBlock key={idx} code={part.content} language={part.language} />
@@ -530,11 +326,11 @@ function CompactMarkdownWithCode({ content }: { content: string }) {
 					/>
 				),
 			)}
-		</div>
+		</>
 	);
 }
 
-// 代码块组件
+// 代码块
 function CodeBlock({ code, language }: { code: string; language?: string }) {
 	const [copied, setCopied] = useState(false);
 
@@ -571,7 +367,6 @@ interface ContentPart {
 	language?: string;
 }
 
-// 解析内容，分离代码块
 function parseContentWithCode(content: string): ContentPart[] {
 	if (!content) return [];
 
@@ -587,45 +382,33 @@ function parseContentWithCode(content: string): ContentPart[] {
 				content: content.slice(lastIndex, match.index),
 			});
 		}
-
 		parts.push({
 			type: "code",
 			language: match[1] || "text",
 			content: match[2].trim(),
 		});
-
 		lastIndex = match.index + match[0].length;
 	}
 
 	if (lastIndex < content.length) {
-		parts.push({
-			type: "text",
-			content: content.slice(lastIndex),
-		});
+		parts.push({ type: "text", content: content.slice(lastIndex) });
 	}
 
 	return parts.length > 0 ? parts : [{ type: "text", content }];
 }
 
-// 格式化 Markdown
 function formatMarkdown(content: string): string {
 	if (!content) return "";
-
 	return (
 		content
-			// 转义 HTML
 			.replace(/&/g, "&amp;")
 			.replace(/</g, "&lt;")
 			.replace(/>/g, "&gt;")
-			// 粗体
 			.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
 			.replace(/__([^_]+)__/g, "<strong>$1</strong>")
-			// 斜体
 			.replace(/\*([^*]+)\*/g, "<em>$1</em>")
 			.replace(/_([^_]+)_/g, "<em>$1</em>")
-			// 行内代码
 			.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
-			// 链接
 			.replace(
 				/\[([^\]]+)\]\(([^)]+)\)/g,
 				'<a href="$2" target="_blank" rel="noopener">$1</a>',
@@ -633,46 +416,12 @@ function formatMarkdown(content: string): string {
 	);
 }
 
-// 语法高亮
 function highlightCode(code: string): string {
 	if (!code) return "";
-
 	const keywords = [
-		"const",
-		"let",
-		"var",
-		"function",
-		"return",
-		"if",
-		"else",
-		"for",
-		"while",
-		"import",
-		"export",
-		"from",
-		"class",
-		"interface",
-		"type",
-		"async",
-		"await",
-		"try",
-		"catch",
-		"throw",
-		"new",
-		"this",
-		"true",
-		"false",
-		"null",
-		"undefined",
-		"def",
-		"print",
-		"in",
-		"range",
-		"len",
-		"self",
-		"pass",
-		"break",
-		"continue",
+		"const", "let", "var", "function", "return", "if", "else", "for", "while",
+		"import", "export", "from", "class", "interface", "type", "async", "await",
+		"try", "catch", "throw", "new", "this", "true", "false", "null", "undefined",
 	];
 
 	let html = code
@@ -680,27 +429,51 @@ function highlightCode(code: string): string {
 		.replace(/</g, "&lt;")
 		.replace(/>/g, "&gt;");
 
-	// 字符串
 	html = html.replace(
 		/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
 		'<span class="token-string">$1</span>',
 	);
-
-	// 注释
 	html = html.replace(
 		/(\/\/.*$|\/\*[\s\S]*?\*\/|#.*$)/gm,
 		'<span class="token-comment">$1</span>',
 	);
-
-	// 数字
 	html = html.replace(
 		/\b(\d+\.?\d*)\b/g,
 		'<span class="token-number">$1</span>',
 	);
-
-	// 关键字
 	const keywordRegex = new RegExp(`\\b(${keywords.join("|")})\\b`, "g");
 	html = html.replace(keywordRegex, '<span class="token-keyword">$1</span>');
 
 	return html;
+}
+
+function safeStringify(obj: unknown): string {
+	if (obj === null || obj === undefined) return "";
+	if (typeof obj === "string") return obj;
+	try {
+		return JSON.stringify(obj, null, 2);
+	} catch {
+		return String(obj);
+	}
+}
+
+function formatArgsAsCommand(toolName: string, args: Record<string, unknown>): string {
+	if (!args || Object.keys(args).length === 0) return toolName;
+	
+	// 处理 _raw 字段（原始参数字符串）
+	if (args._raw && typeof args._raw === "string") {
+		return `${toolName} ${args._raw}`;
+	}
+	
+	const argStr = Object.entries(args)
+		.filter(([key]) => !key.startsWith("_")) // 过滤掉内部字段
+		.map(([key, value]) => {
+			const val = String(value);
+			if (val.includes(" ") || val.includes('"') || val.includes("\n") || val.includes("\t")) {
+				return `${key}="${val.replace(/"/g, '\\"')}"`;
+			}
+			return `${key}=${val}`;
+		})
+		.join(" ");
+	return argStr ? `${toolName} ${argStr}` : toolName;
 }

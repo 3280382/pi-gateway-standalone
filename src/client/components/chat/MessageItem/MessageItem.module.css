@@ -1,11 +1,13 @@
 /* ============================================================================
-   MessageItem Styles - 重构版
+   MessageItem Styles - 扁平化版本
    
-   设计原则:
-   1. 完全隔离 - 每个消息块独立，不影响其他元素
-   2. 紧凑布局 - 减少内边距和间距
-   3. 溢出控制 - 所有内容区域都有正确的 overflow 处理
-   4. 独立容器 - Thinking/Tools/Text 各自有自己的样式容器
+   DOM 层级优化后最大深度：3-4 层
+   .message
+     > .actions
+     > pre.thinkingBody (thinking)
+     > .markdownText (text)
+     > .toolContainer (tool)
+     > .codeContainer (code)
    ============================================================================ */
 
 /* ----------------------------------------------------------------------------
@@ -41,7 +43,7 @@
 	background: rgba(31, 111, 235, 0.12);
 }
 
-/* AI 消息 - 轻微背景色以便区分 */
+/* AI 消息 - 轻微背景色 */
 .assistant {
 	background: rgba(255, 255, 255, 0.03);
 }
@@ -58,6 +60,7 @@
 	position: absolute;
 	right: 10px;
 	top: 6px;
+	z-index: 10;
 }
 
 .message:hover .actions {
@@ -86,101 +89,21 @@
 }
 
 /* ----------------------------------------------------------------------------
-   内容区域 - 独立容器
+   用户消息文本 - 单层渲染
    ---------------------------------------------------------------------------- */
 
-.content {
-	display: flex;
-	flex-direction: column;
-	gap: 0;
-	width: 100%;
-	max-width: 100%;
-	overflow: hidden;
-	margin: 0;
-	padding: 0;
-}
-
-/* AI 内容布局 */
-.aiContent {
-	display: flex;
-	flex-direction: column;
-	gap: 0;
-	width: 100%;
-	margin: 0;
-	padding: 0;
-}
-
-/* 统一的图标颜色 */
-:root {
-	--icon-user: #58a6ff;
-	--icon-ai: #a371f7;
-	--icon-tool: #3fb950;
-	--icon-thinking: #d29922;
-}
-
-/* 用户文本 */
 .userText {
 	font-size: var(--font-base);
 	line-height: 1.4;
 	color: var(--text-primary, #e6edf3);
+	white-space: pre-wrap;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
-	display: flex;
-	align-items: flex-start;
-	gap: 6px;
-	width: 100%;
-	margin: 0;
-	padding: 0;
-}
-
-/* 统一图标样式 */
-.inlineIcon,
-.aiIcon,
-.toolIcon,
-.thinkingIcon {
-	width: 16px;
-	height: 16px;
-	flex-shrink: 0;
-	margin-top: 3px;
-}
-
-/* 各类型图标颜色 */
-.inlineIcon {
-	color: var(--icon-user);
-}
-
-.aiIcon {
-	color: var(--icon-ai);
-}
-
-.toolIcon {
-	color: var(--icon-tool);
-}
-
-.thinkingIcon {
-	color: var(--icon-thinking);
-}
-
-/* 文本容器 */
-.textContainer {
-	width: 100%;
-	max-width: 100%;
-	overflow: hidden;
-}
-
-.textSection {
-	width: 100%;
-	max-width: 100%;
-	overflow: hidden;
-	display: flex;
-	align-items: flex-start;
-	gap: 6px;
-	margin: 0;
-	padding: 0;
+	padding: 6px 12px;
 }
 
 /* ----------------------------------------------------------------------------
-   Markdown 文本样式
+   AI 消息文本
    ---------------------------------------------------------------------------- */
 
 .markdownText {
@@ -190,6 +113,8 @@
 	white-space: pre-wrap;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
+	padding: 6px 12px;
+	display: block;
 }
 
 .markdownText :global(.inline-code) {
@@ -220,45 +145,41 @@
 }
 
 /* ----------------------------------------------------------------------------
-   Thinking 块 - 独立容器，黄色主题，无header行，无边框
+   Thinking 块 - 直接使用 pre 作为容器
    ---------------------------------------------------------------------------- */
 
-.thinkingContainer {
-	background: rgba(210, 153, 34, 0.12);
-	border: none;
-	border-radius: 4px;
-	overflow: hidden;
-	width: 100%;
-	cursor: pointer;
-	transition: background 0.15s ease;
-	margin: 0;
-}
-
-.thinkingContainer:hover {
-	background: rgba(210, 153, 34, 0.18);
-}
-
 .thinkingBody {
-	padding: 0;
+	width: 100%;
+	padding: 6px 12px;
 	margin: 0;
 	font-family: "JetBrains Mono", "Fira Code", monospace;
 	font-size: var(--font-base);
 	line-height: 1.5;
 	color: #c9b07a;
-	background: transparent;
+	background: rgba(210, 153, 34, 0.12);
 	white-space: pre-wrap;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
+	cursor: pointer;
+	transition: background 0.15s ease;
+	border: none;
+	border-radius: 0;
+	box-sizing: border-box;
+}
+
+.thinkingBody:hover {
+	background: rgba(210, 153, 34, 0.18);
 }
 
 .thinkingCollapsed {
-	padding: 4px 0;
+	width: 100%;
+	padding: 6px 12px;
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	font-size: var(--font-base);
-	color: var(--icon-thinking);
-	width: 100%;
+	color: #d29922;
+	background: rgba(210, 153, 34, 0.12);
 	box-sizing: border-box;
 	cursor: pointer;
 }
@@ -272,20 +193,31 @@
 }
 
 /* ----------------------------------------------------------------------------
-   Tool 块 - 独立容器，不同状态不同颜色，无header行，无内层边框，无边框
+   Tool 块 - 直接使用 div 作为容器
    ---------------------------------------------------------------------------- */
 
 .toolContainer {
-	border-radius: 4px;
-	overflow: hidden;
 	width: 100%;
-	border: none;
-	cursor: pointer;
-	transition: background 0.1s ease;
+	padding: 6px 12px;
 	margin: 0;
+	font-family: "JetBrains Mono", "Fira Code", monospace;
+	font-size: var(--font-base);
+	line-height: 1.5;
+	color: #c9d1d9;
+	border: none;
+	border-radius: 0;
+	box-sizing: border-box;
+	cursor: pointer;
+	transition: filter 0.1s ease;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
 }
 
-/* Tool 状态颜色 - 使用统一的绿色，加深背景 */
+.toolContainer:hover {
+	filter: brightness(1.1);
+}
+
 .toolContainer.success {
 	background: rgba(63, 185, 80, 0.15);
 }
@@ -299,11 +231,11 @@
 }
 
 .toolContainer.building {
-	background: rgba(63, 185, 80, 0.12);
+	background: rgba(63, 185, 80, 0.08);
 }
 
-.toolContainer:hover {
-	filter: brightness(1.1);
+.toolStatus {
+	display: inline-block;
 }
 
 .toolStatus.pulse {
@@ -311,76 +243,18 @@
 }
 
 @keyframes pulse {
-	0%,
-	100% {
-		opacity: 1;
-	}
-	50% {
-		opacity: 0.4;
-	}
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.4; }
 }
 
-/* 状态指示器颜色 */
-.statusSuccess {
-	color: #3fb950;
-}
-
-.statusError {
-	color: #f85149;
-}
-
-.statusPending {
-	color: #8b949e;
-}
-
-/* 工具内容展开区域 */
-.toolContent {
-	margin: 0;
-	padding: 0;
-	background: transparent;
-	font-family: "JetBrains Mono", "Fira Code", monospace;
-	font-size: var(--font-base);
-	line-height: 1.5;
-	color: #c9d1d9;
-	white-space: pre-wrap;
-	word-wrap: break-word;
-	overflow-wrap: break-word;
-}
-
-/* 工具输出区域 */
-.toolOutput {
-	margin: 0;
-	padding: 0;
-}
-
-/* 工具输出 pre 标签 */
-.toolOutputPre {
-	margin: 0;
-	padding: 0;
-	background: transparent;
-	font-family: inherit;
-	font-size: inherit;
-	line-height: 1.5;
-	color: inherit;
-	white-space: pre-wrap;
-	word-wrap: break-word;
-	overflow-wrap: break-word;
-}
-
-.toolCollapsed {
-	padding: 4px 0;
+.toolContainer.collapsed {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	font-size: var(--font-base);
-	line-height: 1.5;
-	width: 100%;
-	box-sizing: border-box;
-	cursor: pointer;
 }
 
-.toolCollapsed .collapsedText {
-	color: var(--icon-tool);
+.toolContainer.collapsed .collapsedText {
+	color: #3fb950;
 	font-weight: 500;
 }
 
@@ -398,7 +272,6 @@
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	padding: 0;
 	margin: 0;
 	line-height: 1.5;
 }
@@ -415,28 +288,53 @@
 	word-break: break-all;
 }
 
+/* 工具输出 */
+.toolOutputPre {
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	font-family: inherit;
+	font-size: inherit;
+	line-height: 1.5;
+	color: inherit;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
 .errorText {
 	color: #ff7b72;
 }
 
+/* 状态指示器 */
+.statusSuccess {
+	color: #3fb950;
+}
+.statusError {
+	color: #f85149;
+}
+.statusPending {
+	color: #8b949e;
+}
+
 /* ----------------------------------------------------------------------------
-   代码块 - 独立容器，无边框
+   代码块
    ---------------------------------------------------------------------------- */
 
 .codeContainer {
-	margin: 6px 0;
-	border-radius: 6px;
+	width: 100%;
+	margin: 0;
+	border-radius: 0;
 	overflow: hidden;
 	border: none;
-	width: 100%;
-	max-width: 100%;
+	box-sizing: border-box;
 }
 
 .codeHeader {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 4px 8px;
+	padding: 4px 12px;
 	background: #0d1117;
 	border-bottom: none;
 }
@@ -473,7 +371,7 @@
 	overflow-y: hidden;
 	font-family: "JetBrains Mono", "Fira Code", monospace;
 	font-size: var(--font-base);
-	line-height: 1;
+	line-height: 1.4;
 	max-width: 100%;
 }
 
@@ -488,15 +386,12 @@
 .codePre :global(.token-keyword) {
 	color: #ff7b72;
 }
-
 .codePre :global(.token-string) {
 	color: #a5d6ff;
 }
-
 .codePre :global(.token-number) {
 	color: #79c0ff;
 }
-
 .codePre :global(.token-comment) {
 	color: #8b949e;
 	font-style: italic;
@@ -507,54 +402,22 @@
    ---------------------------------------------------------------------------- */
 
 @media (max-width: 768px) {
-	.message {
-		padding: 5px 8px;
-	}
-
+	.userText,
 	.markdownText,
-	.userText {
+	.thinkingBody,
+	.toolContainer {
+		padding: 5px 8px;
 		font-size: var(--font-md);
 	}
 
-	.thinkingBody,
-	.toolCode {
-		font-size: var(--font-base);
-	}
-
 	.codePre {
-		font-size: var(--font-base);
 		padding: 8px 10px;
+		font-size: var(--font-base);
 	}
-}
 
-/* ----------------------------------------------------------------------------
-   轮次分组样式
-   ---------------------------------------------------------------------------- */
-
-.turnGroup {
-	display: flex;
-	flex-direction: column;
-	gap: 0;
-	width: 100%;
-	margin: 0;
-	padding: 0;
-}
-
-.turnDivider {
-	display: none;
-}
-
-.turnLabel {
-	display: none;
-}
-
-.turnContent {
-	display: flex;
-	flex-direction: column;
-	gap: 0;
-	width: 100%;
-	margin: 0;
-	padding: 0;
+	.codeHeader {
+		padding: 4px 8px;
+	}
 }
 
 /* ----------------------------------------------------------------------------
@@ -571,12 +434,8 @@
 		display: none !important;
 	}
 
-	.thinkingContainer,
+	.thinkingBody,
 	.toolContainer {
 		border: 1px solid #ddd;
-	}
-
-	.turnDivider {
-		display: none;
 	}
 }
