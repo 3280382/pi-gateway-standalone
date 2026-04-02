@@ -4,10 +4,10 @@
  */
 
 import { useCallback } from "react";
-import { useLayout } from "@/features/core/layout/AppLayout/LayoutContext";
+import { useLayout } from "@/core/layout/AppLayout/LayoutContext";
 import { FileToolbar } from "./components/FileToolbar";
 import { FileSidebar } from "./components/FileSidebar";
-import { XTermPanel } from "@/features/core/layout/panels/TerminalPanel";
+import { XTermPanel } from "@/core/layout/panels/TerminalPanel";
 import { FileBrowser } from "./components/FileBrowser";
 import { useFileStore } from "@/stores/fileStore";
 import styles from "./FilesLayout.module.css";

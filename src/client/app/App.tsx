@@ -6,9 +6,9 @@
  * - PageContainer: 每个 feature 自己控制 Sidebar/Header/Content/Panel
  */
 
-import { LayoutProvider, useLayout } from "@/features/core/layout/AppLayout/LayoutContext";
-import { ErrorScreen } from "@/features/core/pages/ErrorScreen";
-import { LoadingScreen } from "@/features/core/pages/LoadingScreen";
+import { LayoutProvider, useLayout } from "@/core/layout/AppLayout/LayoutContext";
+import { ErrorScreen } from "@/core/pages/ErrorScreen";
+import { LoadingScreen } from "@/core/pages/LoadingScreen";
 import { ChatPage } from "@/features/chat/page";
 import { FilesPage } from "@/features/files/page";
 import { useAppInitialization, useTerminalCommands } from "@/hooks/app";
