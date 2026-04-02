@@ -2,8 +2,8 @@
  * ChatPanel - Main Chat Container
  */
 
-import { useCallback } from "react";
-import { useChatController } from "@/features/chat/services/api/chatApi";
+import { useCallback, useEffect, useRef } from "react";
+import { chatController } from "@/features/chat/controllers";
 import {
 	selectCurrentStreamingMessage,
 	selectInputText,
@@ -24,60 +24,85 @@ export function ChatPanel() {
 	const showThinking = useChatStore(selectShowThinking);
 	const showTools = useChatStore((state) => state.showTools);
 
-	const controller = useChatController();
+	const messagesRef = useRef<HTMLDivElement>(null);
+	const shouldScrollRef = useRef(true);
+
+	// Auto-scroll to bottom when messages change or streaming
+	useEffect(() => {
+		if (messagesRef.current && shouldScrollRef.current) {
+			messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+		}
+	}, [messages, currentStreamingMessage]);
+
+	// Handle scroll to detect if user has manually scrolled up
+	const handleScroll = useCallback(() => {
+		if (messagesRef.current) {
+			const { scrollTop, scrollHeight, clientHeight } = messagesRef.current;
+			const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+			shouldScrollRef.current = isAtBottom;
+		}
+	}, []);
 
 	const handleSend = useCallback(() => {
 		if (inputText.trim()) {
-			controller.sendMessage(inputText);
+			chatController.sendMessage(inputText);
+			// Reset scroll flag on new message
+			shouldScrollRef.current = true;
 		}
-	}, [inputText, controller]);
+	}, [inputText]);
 
 	const handleBashCommand = useCallback(
 		(command: string) => {
-			controller.setInputText(`/bash ${command}`);
-			setTimeout(() => controller.sendMessage(`/bash ${command}`), 0);
+			chatController.setInputText(`/bash ${command}`);
+			setTimeout(() => chatController.sendMessage(`/bash ${command}`), 0);
+			shouldScrollRef.current = true;
 		},
-		[controller],
+		[],
 	);
 
 	const handleSlashCommand = useCallback(
 		(command: string, args: string) => {
 			switch (command) {
 				case "clear":
-					controller.clearMessages();
+					chatController.clearMessages();
 					break;
 				case "new":
-					controller.clearMessages();
+					chatController.clearMessages();
 					break;
 				case "bash":
-					if (args) controller.sendMessage(`/bash ${args}`);
+					if (args) chatController.sendMessage(`/bash ${args}`);
 					break;
 				case "read":
-					if (args) controller.sendMessage(`/read ${args}`);
+					if (args) chatController.sendMessage(`/read ${args}`);
 					break;
 				default:
-					controller.sendMessage(`/${command} ${args}`.trim());
+					chatController.sendMessage(`/${command} ${args}`.trim());
 			}
+			shouldScrollRef.current = true;
 		},
-		[controller],
+		[],
 	);
 
 	const handleNewSession = useCallback(() => {
-		controller.clearMessages();
-	}, [controller]);
+		chatController.clearMessages();
+	}, []);
 
 	return (
 		<div className={styles.panel}>
-			<div className={styles.messages}>
+			<div
+				ref={messagesRef}
+				className={styles.messages}
+				onScroll={handleScroll}
+			>
 				<MessageList
 					messages={messages}
 					currentStreamingMessage={currentStreamingMessage}
 					showThinking={showThinking}
-					onToggleMessageCollapse={controller.toggleMessageCollapse}
-					onToggleThinkingCollapse={controller.toggleThinkingCollapse}
-					onToggleToolsCollapse={controller.toggleToolsCollapse}
-					onDeleteMessage={controller.deleteMessage}
-					onRegenerateMessage={controller.regenerateMessage}
+					onToggleMessageCollapse={chatController.toggleMessageCollapse}
+					onToggleThinkingCollapse={chatController.toggleThinkingCollapse}
+					onToggleToolsCollapse={chatController.toggleToolsCollapse}
+					onDeleteMessage={chatController.deleteMessage}
+					onRegenerateMessage={chatController.regenerateMessage}
 				/>
 			</div>
 
@@ -85,9 +110,9 @@ export function ChatPanel() {
 				<InputArea
 					value={inputText}
 					isStreaming={isStreaming}
-					onChange={controller.setInputText}
+					onChange={chatController.setInputText}
 					onSend={handleSend}
-					onAbort={controller.abortGeneration}
+					onAbort={chatController.abortGeneration}
 					onBashCommand={handleBashCommand}
 					onSlashCommand={handleSlashCommand}
 					onNewSession={handleNewSession}

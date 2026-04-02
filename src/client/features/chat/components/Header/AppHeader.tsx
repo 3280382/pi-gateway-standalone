@@ -6,7 +6,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SystemPromptModal } from "@/features/chat/components/modals/SystemPromptModal";
-import { useChatController } from "@/features/chat/services/api/chatApi";
+import { chatController } from "@/features/chat/controllers";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import {
 	selectSearchFilters,
@@ -177,7 +177,7 @@ export function AppHeader({
 	const connectionStatus = isConnected ? "connected" : "disconnected";
 	const pid = serverPid;
 	const { isStreaming } = useChatStore();
-	const chatController = useChatController();
+
 
 	// Search state - 优先使用外部传入的 props，否则使用 chatStore
 	const chatStoreQuery = useChatStore(selectSearchQuery);
