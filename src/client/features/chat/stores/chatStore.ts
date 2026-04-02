@@ -208,8 +208,6 @@ function scheduleRafUpdate(
 		const newThinking =
 			state.streamingThinking + (pendingContentUpdates.thinking || "");
 
-		console.log("[RAF Update] streamingThinking:", state.streamingThinking.substring(0, 50) + "...", "+ new:", (pendingContentUpdates.thinking || "").substring(0, 50) + "...", "=", newThinking.substring(0, 50) + "...");
-
 		// 只更新一次状态
 		const contentArray = buildContentArray({
 			...state,
@@ -369,10 +367,14 @@ export const useChatStore = create<
 								1,
 						});
 
+						// 获取之前已保存的内容
+						const existingContent = state.currentStreamingMessage.content || [];
+
 						return {
 							currentStreamingMessage: {
 								...state.currentStreamingMessage,
-								content: currentContent,
+								// 追加当前内容到之前的内容，而不是覆盖
+								content: [...existingContent, ...currentContent],
 							},
 							// 清空当前轮次的流式状态，开始新一轮
 							streamingThinking: "",
@@ -488,9 +490,13 @@ export const useChatStore = create<
 						// 构建当前轮次的新内容
 						const currentContent = buildContentArray(state);
 
-						// 合并之前轮次的内容（如果有）和当前轮次内容
+						// 获取之前轮次的内容（从 currentStreamingMessage.content）
 						const existingContent =
 							state.currentStreamingMessage?.content || [];
+						
+						// 过滤掉已保存到 existingContent 中的内容，避免重复
+						// existingContent 中已经有之前轮次的完整内容
+						// currentContent 只包含当前轮次的内容
 						const finalContent = [...existingContent, ...currentContent];
 
 						const finalMessage = state.currentStreamingMessage
@@ -711,7 +717,6 @@ export const useChatStore = create<
 			},
 
 			appendStreamingThinking: (thinking: string) => {
-				console.log("[ChatStore] appendStreamingThinking called:", thinking.substring(0, 50) + "...");
 				pendingContentUpdates.thinking =
 					(pendingContentUpdates.thinking || "") + thinking;
 				scheduleRafUpdate(get, set);
