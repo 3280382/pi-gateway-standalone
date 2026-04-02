@@ -152,6 +152,30 @@ import type { ApiResponse } from '@shared/types/api.types';
 
 ## 开发规范
 
+### 前端架构原则
+
+```
+UI = f(State)
+```
+
+- **函数组件 + Hooks**: 全面使用 Function Component
+- **单向数据流**: 数据自上而下，事件自下而上
+- **严格分层**: 视图(UI) ← 逻辑(Hooks) ← 状态(Store) ← 服务(API)
+- **不可变性**: 所有状态更新必须返回新对象
+
+### 项目结构
+
+```
+src/client/
+├── app/                    # 应用核心层 (layout, providers)
+├── features/               # 功能域 (chat/, files/, sidebar/)
+├── shared/                 # 共享资源 (components, hooks, utils)
+├── pages/                  # 页面组件
+├── stores/                 # 全局状态 (Zustand)
+├── services/               # API 服务
+└── types/                  # 全局类型
+```
+
 ### 组件开发
 
 ```typescript
@@ -172,16 +196,100 @@ function MessageList({ messages }: MessageListProps) {
 }
 ```
 
-### 状态更新
+**组件规范**:
+- 单一职责，组件不超过 200 行
+- Props 必须定义 TypeScript 接口
+- 事件命名使用 `on + 动词 + 名词` (如 `onToggleCollapse`)
+- 使用稳定 key，禁止使用 index
+
+### 状态管理
+
+| 状态类型 | 工具 | 使用场景 |
+|----------|------|----------|
+| 局部状态 | useState | 表单输入、开关状态 |
+| 功能域状态 | Zustand | 聊天消息、文件列表 |
+| 全局状态 | Zustand | 用户信息、主题设置 |
 
 ```typescript
+// ✅ 正确: 使用 Selector 订阅局部状态
+const messages = useChatStore((s) => s.messages);
+const isStreaming = useChatStore((s) => s.isStreaming);
+
+// ❌ 错误: 解构获取整个 store
+const store = useChatStore();  // 会导致不必要的重渲染
+
 // ✅ 正确: 直接调用 store action
 const setCurrentDir = useSessionStore((s) => s.setCurrentDir);
 setCurrentDir('/new/path');
-
-// ❌ 错误: 解构获取整个 store
-const store = useSessionStore();  // 会导致不必要的重渲染
 ```
+
+### Hooks 规范
+
+```typescript
+// ✅ 必须以 use 开头
+function useChat() { }
+function useVirtualList() { }
+
+// useEffect 适用场景
+useEffect(() => {
+  const subscription = websocketService.subscribe(callback);
+  return () => subscription.unsubscribe();  // 必须清理
+}, []);
+
+// ❌ 禁止: 在组件中直接 fetch
+useEffect(() => {
+  fetch('/api/data').then(...);  // 应该放在 services/
+}, []);
+```
+
+### 性能优化
+
+```typescript
+// ✅ 大数据列表使用虚拟滚动
+import { FixedSizeList } from 'react-window';
+
+// ✅ 使用 useMemo 缓存计算
+const filteredMessages = useMemo(() => 
+  messages.filter(m => m.visible),
+  [messages]
+);
+
+// ✅ 使用 useCallback 缓存回调
+const handleToggle = useCallback((id: string) => {
+  toggleMessage(id);
+}, [toggleMessage]);
+```
+
+### 代码风格
+
+| 类型 | 规范 | 示例 |
+|------|------|------|
+| 组件 | PascalCase | `MessageItem`, `ChatPage` |
+| Hooks | camelCase + use | `useChat`, `useVirtualList` |
+| Store | camelCase + Store | `chatStore`, `sessionStore` |
+| 类型 | PascalCase | `Message`, `ChatState` |
+| 接口 | PascalCase + Props | `MessageItemProps` |
+
+**导入顺序**:
+```typescript
+// 1. React 核心
+// 2. 第三方库
+// 3. 内部共享 (@/shared/*)
+// 4. 功能域内 (../store/*)
+// 5. 类型
+// 6. 样式
+```
+
+### 常见错误
+
+| 错误 | 正确做法 |
+|------|----------|
+| `document.getElementById` | 使用 React ref |
+| `Math.random()` 作为 key | 使用稳定唯一 ID |
+| 直接修改数组/对象 | 返回新对象 `[...arr]` |
+| 在 render 中创建新函数 | 使用 useCallback |
+| 组件 > 200 行 | 拆分组件 |
+| props 穿透超过 3 层 | 使用 Context 或 Store |
 
 ## 常用命令
 

@@ -71,11 +71,21 @@ PID                   →  动态进程号
 | 文档 | 说明 |
 |------|------|
 | [README.md](./README.md) | 项目概述和快速开始（本文档） |
-| [DEVELOPMENT.md](./DEVELOPMENT.md) | 开发指南、架构说明、API 参考 |
+| [DEVELOPMENT.md](./DEVELOPMENT.md) | 开发指南、架构说明、API 参考、代码规范 |
 | [FEATURES.md](./FEATURES.md) | 功能规格书（界面布局、功能清单） |
 | [AGENTS.md](./AGENTS.md) | AI 助手指令和开发规则 |
 | [CHANGELOG.md](./CHANGELOG.md) | 版本变更历史 |
 | [docs/ERROR_HANDLING.md](./docs/ERROR_HANDLING.md) | 错误处理最佳实践 |
+
+### 快速开发规范
+
+- **组件**: 函数组件 + Hooks，不超过 200 行
+- **状态**: Zustand 管理，使用 Selector 订阅局部状态
+- **结构**: `app/` → `features/` → `shared/` → `pages/`
+- **命名**: 组件 PascalCase，Hooks `use` 开头，Store `*Store`
+- **性能**: 大数据用虚拟滚动，缓存用 useMemo/useCallback
+
+详见 [DEVELOPMENT.md](./DEVELOPMENT.md) 完整规范。
 
 ## 常用命令
 
