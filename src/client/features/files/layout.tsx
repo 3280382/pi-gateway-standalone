@@ -65,7 +65,7 @@ export function FilesLayout({
 				{/* Sidebar */}
 				{isSidebarVisible && (
 					<aside className={styles.sidebar}>
-						<SidebarPanel isVisible={isSidebarVisible} />
+						<SidebarPanel isVisible={isSidebarVisible} currentView="files" />
 					</aside>
 				)}
 

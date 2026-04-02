@@ -52,7 +52,7 @@ export function SidebarPanel({
 					</div>
 				)}
 				<RecentWorkspaces />
-				<Sessions />
+				{currentView === "chat" && <Sessions />}
 				<Settings />
 			</div>
 		</aside>

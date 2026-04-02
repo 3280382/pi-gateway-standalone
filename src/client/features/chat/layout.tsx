@@ -82,7 +82,7 @@ export function ChatLayout({
 				{/* Sidebar */}
 				{isSidebarVisible && (
 					<aside className={styles.sidebar}>
-						<SidebarPanel isVisible={isSidebarVisible} />
+						<SidebarPanel isVisible={isSidebarVisible} currentView="chat" />
 					</aside>
 				)}
 

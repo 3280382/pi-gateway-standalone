@@ -62,6 +62,10 @@ export function ChatPanel() {
 		[controller],
 	);
 
+	const handleNewSession = useCallback(() => {
+		controller.clearMessages();
+	}, [controller]);
+
 	return (
 		<div className={styles.panel}>
 			<div className={styles.messages}>
@@ -86,6 +90,7 @@ export function ChatPanel() {
 					onAbort={controller.abortGeneration}
 					onBashCommand={handleBashCommand}
 					onSlashCommand={handleSlashCommand}
+					onNewSession={handleNewSession}
 				/>
 			</div>
 		</div>
