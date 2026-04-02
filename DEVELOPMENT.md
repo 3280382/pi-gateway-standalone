@@ -33,93 +33,63 @@ bash dev-start.sh  # 非 tmux，直接在后台运行
 ```
 src/
 ├── client/                 # 🎨 前端代码
-│   ├── app/                # 应用核心层
-│   │   ├── layout/         # 全局布局组件
-│   │   │   ├── AppLayout/        # 统一布局控制器 + LayoutContext
-│   │   │   ├── AppHeader/        # 应用头部容器
-│   │   │   ├── AppFooter/        # 应用底部容器
-│   │   │   └── panels/           # 面板组件
-│   │   │       ├── TerminalPanel/     # 终端面板 (XTerm)
-│   │   │       └── LlmLogPanel/       # LLM 日志面板
-│   │   ├── navigation/     # 导航组件
-│   │   └── providers/      # 全局 Provider
 │   ├── features/           # 功能域（按业务划分）
+│   │   ├── core/           # 🎯 核心应用功能
+│   │   │   ├── layout/           # 全局布局组件
+│   │   │   │   ├── AppLayout/         # 统一布局控制器 + LayoutContext
+│   │   │   │   ├── AppHeader/         # 应用头部容器
+│   │   │   │   ├── AppFooter/         # 应用底部容器
+│   │   │   │   └── panels/            # 面板组件
+│   │   │   │       ├── TerminalPanel/      # 终端面板 (XTerm)
+│   │   │   │       └── LlmLogPanel/        # LLM 日志面板
+│   │   │   ├── pages/            # 页面组件
+│   │   │   │   ├── ChatPage.tsx
+│   │   │   │   ├── FilesPage.tsx
+│   │   │   │   ├── LoadingScreen.tsx
+│   │   │   │   └── ErrorScreen.tsx
+│   │   │   ├── providers/        # 全局 Provider
+│   │   │   └── navigation/       # 导航组件
 │   │   ├── chat/           # 💬 聊天功能
 │   │   │   ├── components/
-│   │   │   │   ├── ChatPanel/         # 聊天面板
-│   │   │   │   ├── InputArea/         # 输入框（@/ 命令支持）
-│   │   │   │   ├── MessageList/       # 消息列表
-│   │   │   │   └── MessageItem/       # 消息项（思考块、工具调用）
-│   │   │   ├── hooks/               # 聊天相关 Hooks
-│   │   │   ├── stores/              # 聊天状态 (chatStore)
-│   │   │   └── types.ts             # 聊天类型定义
+│   │   │   │   ├── ChatPanel/
+│   │   │   │   ├── InputArea/
+│   │   │   │   ├── MessageList/
+│   │   │   │   └── MessageItem/
+│   │   │   ├── hooks/
+│   │   │   ├── stores/
+│   │   │   └── types.ts
 │   │   ├── files/          # 📁 文件功能
 │   │   │   ├── components/
-│   │   │   │   ├── BatchActionBar/    # 批量操作栏
-│   │   │   │   ├── FileGrid/          # 文件网格视图
-│   │   │   │   ├── FileList/          # 文件列表视图
-│   │   │   │   └── FileItem/          # 文件项
-│   │   │   ├── hooks/               # 文件相关 Hooks
-│   │   │   ├── stores/              # 文件状态 (fileStore)
-│   │   │   └── types.ts             # 文件类型定义
-│   │   ├── header/         # 🎛️ 顶部菜单功能
-│   │   │   ├── components/
-│   │   │   │   ├── Header/            # 头部容器
-│   │   │   │   ├── ModelSelector/     # 模型选择器
-│   │   │   │   ├── ThinkingSelector/  # Thinking 级别选择
-│   │   │   │   ├── DirectoryPicker/   # 目录选择器
-│   │   │   │   ├── SearchBox/         # 搜索框
-│   │   │   │   └── ConnectionStatus/  # 连接状态
-│   │   │   ├── modals/              # 模态框
-│   │   │   ├── hooks/               # 头部相关 Hooks
-│   │   │   └── stores/              # 头部状态
-│   │   ├── sidebar/        # 📋 侧边栏功能
-│   │   │   ├── components/
-│   │   │   │   ├── SidebarPanel/      # 侧边栏容器
-│   │   │   │   ├── RecentWorkspaces/  # 最近工作区
-│   │   │   │   ├── Sessions/          # 会话列表
-│   │   │   │   ├── Settings/          # 设置面板
-│   │   │   │   └── WorkingDirectory/  # 工作目录
-│   │   │   └── stores/              # 侧边栏状态
-│   │   ├── footer/         # 🦶 底部菜单功能
-│   │   ├── panels/         # 📟 面板功能
-│   │   └── system/         # ⚙️ 系统功能（搜索、模态框）
+│   │   │   ├── hooks/
+│   │   │   ├── stores/
+│   │   │   └── types.ts
+│   │   ├── header/         # 🎛️ 顶部菜单
+│   │   ├── sidebar/        # 📋 侧边栏
+│   │   ├── footer/         # 🦶 底部菜单
+│   │   ├── panels/         # 📟 面板
+│   │   └── system/         # ⚙️ 系统功能
 │   ├── shared/             # 🔧 共享资源
 │   │   ├── components/
-│   │   │   ├── ui/                  # 基础 UI 组件
-│   │   │   │   ├── Button/          # 按钮
-│   │   │   │   ├── Input/           # 输入框
-│   │   │   │   ├── IconButton/      # 图标按钮
-│   │   │   │   ├── Select/          # 选择器
+│   │   │   ├── ui/               # 基础 UI 组件
+│   │   │   │   ├── Button/
+│   │   │   │   ├── Input/
+│   │   │   │   ├── IconButton/
 │   │   │   │   └── ...
-│   │   │   └── layout/              # 布局容器
-│   │   ├── hooks/          # 通用 Hooks
-│   │   ├── styles/         # 全局样式
-│   │   └── utils/          # 工具函数
+│   │   │   ├── layout/           # 布局容器
+│   │   │   └── ErrorBoundary.tsx # 错误边界
+│   │   ├── hooks/
+│   │   ├── styles/
+│   │   └── utils/
 │   ├── stores/             # 🗄️ 全局状态 (Zustand)
-│   │   ├── sessionStore.ts        # 会话设置（持久化）
-│   │   ├── chatStore.ts           # 聊天状态
-│   │   ├── fileStore.ts           # 文件浏览器状态
-│   │   ├── sidebarStore.ts        # 侧边栏状态
-│   │   ├── modalStore.ts          # 模态框状态
-│   │   ├── searchStore.ts         # 搜索状态
-│   │   └── llmLogStore.ts         # LLM 日志状态
-│   ├── services/           # 🌐 API 和 WebSocket 服务
-│   │   ├── api/                   # REST API
-│   │   └── websocket.service.ts   # WebSocket 服务
-│   ├── controllers/        # 🎮 控制器
+│   ├── services/           # 🌐 API 服务
 │   ├── hooks/              # 全局 Hooks
-│   ├── pages/              # 📄 页面组件
-│   │   ├── ChatPage.tsx
-│   │   ├── FilesPage.tsx
-│   │   ├── LoadingScreen.tsx
-│   │   └── ErrorScreen.tsx
-│   └── App.tsx             # 根组件
+│   ├── controllers/        # 🎮 控制器
+│   └── App.tsx
 ├── server/                 # 🖥️ 后端代码
-│   ├── session/            # GatewaySession 会话管理
-│   ├── routes/             # Express 路由
-│   ├── llm/                # LLM 相关
-│   └── server.ts           # 服务器入口
+│   ├── session/
+│   ├── routes/
+│   ├── llm/
+│   └── server.ts
 └── shared/                 # 🔗 共享类型
 ```
 
@@ -265,11 +235,12 @@ UI = f(State)
 
 ```
 src/client/
-├── app/                    # 应用核心层
-│   ├── layout/             # 全局布局 (AppLayout, AppHeader, AppFooter, panels)
-│   ├── navigation/         # 导航组件
-│   └── providers/          # 全局 Provider
 ├── features/               # 功能域（按业务划分）
+│   ├── core/               # 核心应用功能
+│   │   ├── layout/         # 全局布局 (AppLayout, AppHeader, AppFooter, panels)
+│   │   ├── pages/          # 页面组件 (ChatPage, FilesPage, LoadingScreen)
+│   │   ├── providers/      # 全局 Provider
+│   │   └── navigation/     # 导航组件
 │   ├── chat/               # 聊天功能 (InputArea, MessageList, ChatPanel)
 │   ├── files/              # 文件功能 (FileGrid, FileList, BatchActionBar)
 │   ├── header/             # 顶部菜单 (ModelSelector, DirectoryPicker, SearchBox)
@@ -280,7 +251,8 @@ src/client/
 ├── shared/                 # 共享资源
 │   ├── components/         # 通用组件
 │   │   ├── ui/             # 基础 UI (Button, Input, IconButton, Select)
-│   │   └── layout/         # 布局容器
+│   │   ├── layout/         # 布局容器
+│   │   └── ErrorBoundary.tsx
 │   ├── hooks/              # 通用 Hooks
 │   ├── styles/             # 全局样式
 │   └── utils/              # 工具函数
@@ -297,7 +269,6 @@ src/client/
 │   └── websocket.service.ts # WebSocket 服务
 ├── controllers/            # 控制器
 ├── hooks/                  # 全局 Hooks
-├── pages/                  # 页面组件
 └── types/                  # 全局类型
 ```
 

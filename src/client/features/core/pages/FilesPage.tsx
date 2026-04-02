@@ -4,9 +4,9 @@
  */
 
 import { useCallback, useEffect } from "react";
-import { AppLayout } from "@/app/layout/AppLayout";
-import { useLayout } from "@/app/layout/AppLayout/LayoutContext";
-import { XTermPanel } from "@/app/layout/panels/TerminalPanel";
+import { AppLayout } from "@/features/core/layout/AppLayout";
+import { useLayout } from "@/features/core/layout/AppLayout/LayoutContext";
+import { XTermPanel } from "@/features/core/layout/panels/TerminalPanel";
 import { FileBrowser } from "@/features/files/components/FileBrowser";
 import { useFileStore } from "@/stores/fileStore";
 import { useSessionStore } from "@/stores/sessionStore";

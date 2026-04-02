@@ -30,11 +30,12 @@ bash dev-start.sh
 ```
 src/
 ├── client/                 # 前端：组件、状态管理、API 客户端
-│   ├── app/                # 应用核心层
-│   │   ├── layout/         # 全局布局组件 (AppLayout, AppHeader, AppFooter)
-│   │   ├── navigation/     # 导航组件
-│   │   └── providers/      # 全局 Provider
 │   ├── features/           # 功能域（按业务划分）
+│   │   ├── core/           # 核心应用功能
+│   │   │   ├── layout/     # 全局布局 (AppLayout, AppHeader, AppFooter, panels)
+│   │   │   ├── pages/      # 页面组件 (ChatPage, FilesPage, LoadingScreen)
+│   │   │   ├── providers/  # 全局 Provider
+│   │   │   └── navigation/ # 导航组件
 │   │   ├── chat/           # 聊天功能 (MessageList, InputArea, MessageItem)
 │   │   ├── files/          # 文件功能 (FileBrowser, FileGrid, FileList)
 │   │   ├── header/         # 顶部菜单 (ModelSelector, DirectoryPicker, SearchBox)
@@ -43,14 +44,13 @@ src/
 │   │   ├── panels/         # 面板 (TerminalPanel, LlmLogPanel)
 │   │   └── system/         # 系统功能 (modals, search)
 │   ├── shared/             # 共享资源
-│   │   ├── components/     # 通用组件 (Button, Input, IconButton)
+│   │   ├── components/     # 通用组件 (Button, Input, IconButton, ErrorBoundary)
 │   │   ├── hooks/          # 通用 Hooks
 │   │   ├── styles/         # 全局样式
 │   │   └── utils/          # 工具函数
 │   ├── stores/             # 全局状态 (sessionStore, chatStore, fileStore)
 │   ├── services/           # API 和 WebSocket 服务
 │   ├── hooks/              # 全局 Hooks
-│   ├── pages/              # 页面组件 (ChatPage, FilesPage)
 │   └── controllers/        # 控制器 (chatController)
 ├── server/                 # 后端：Express 路由、控制器、业务逻辑
 │   ├── session/            # 会话管理 (GatewaySession)

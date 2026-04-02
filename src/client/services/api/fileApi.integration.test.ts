@@ -9,7 +9,7 @@ import type {
 	FileExecuteResponse,
 	FileItem,
 	FileReadResponse,
-} from "../components/files/types";
+} from "../../features/files/components/types";
 
 // Mock fetch
 global.fetch = vi.fn();

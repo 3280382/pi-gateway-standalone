@@ -4,10 +4,10 @@
  */
 
 import { useCallback } from "react";
-import { AppLayout } from "@/app/layout/AppLayout";
-import { useLayout } from "@/app/layout/AppLayout/LayoutContext";
-import { LlmLogPanel } from "@/app/layout/panels/LlmLogPanel";
-import { XTermPanel } from "@/app/layout/panels/TerminalPanel";
+import { AppLayout } from "@/features/core/layout/AppLayout";
+import { useLayout } from "@/features/core/layout/AppLayout/LayoutContext";
+import { LlmLogPanel } from "@/features/core/layout/panels/LlmLogPanel";
+import { XTermPanel } from "@/features/core/layout/panels/TerminalPanel";
 import { MessageList } from "@/features/chat/components/MessageList/MessageList";
 import type { CommandResult } from "@/hooks/app";
 import { useChatMessages } from "@/hooks/app";

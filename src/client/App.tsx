@@ -10,9 +10,9 @@
 import {
 	LayoutProvider,
 	useLayout,
-} from "./app/layout/AppLayout/LayoutContext";
+} from "./features/core/layout/AppLayout/LayoutContext";
 import { useAppInitialization, useTerminalCommands } from "./hooks/app";
-import { ChatPage, ErrorScreen, FilesPage, LoadingScreen } from "./pages";
+import { ChatPage, ErrorScreen, FilesPage, LoadingScreen } from "./features/core/pages";
 import "./styles/global.css";
 
 /**
