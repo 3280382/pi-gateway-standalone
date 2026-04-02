@@ -3,13 +3,13 @@
  */
 
 import { useCallback, useEffect, useRef } from "react";
+import { InputArea } from "@/features/chat/components/InputArea/InputArea";
+import { FileSidebar } from "@/features/files/components/FileSidebar";
+import { SidebarPanel } from "@/features/sidebar/components/SidebarPanel/SidebarPanel";
 import { useChatController } from "@/services/api/chatApi";
 import { useChatStore } from "@/stores/chatStore";
 import { useSessionStore } from "@/stores/sessionStore";
-import { InputArea } from "@/features/chat/components/InputArea/InputArea";
-import { FileSidebar } from "@/features/files/components/FileSidebar";
 import { AppFooter } from "../AppFooter/AppFooter";
-import { SidebarPanel } from "@/features/sidebar/components/SidebarPanel/SidebarPanel";
 import { AppHeader } from "../AppHeader/AppHeader";
 import styles from "./AppLayout.module.css";
 import { useLayout } from "./LayoutContext";

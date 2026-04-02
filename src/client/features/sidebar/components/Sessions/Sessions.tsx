@@ -6,11 +6,11 @@
 import { useEffect } from "react";
 import { useSidebarController } from "@/services/api/sidebarApi";
 import { websocketService } from "@/services/websocket.service";
+import { IconButton, SectionHeader } from "@/shared/components/ui";
 import { useChatStore } from "@/stores/chatStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import type { Session } from "../../../../types/sidebar";
-import { IconButton, SectionHeader } from "@/shared/components/ui";
 import styles from "./Sessions.module.css";
 
 export function Sessions() {

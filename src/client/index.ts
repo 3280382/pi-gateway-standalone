@@ -3,10 +3,8 @@
  * 导出所有模块供外部使用
  */
 
-// 导出组件
-export { Button, IconButton } from "./components/ui/Button/Button";
-export { Input, TextArea } from "./components/ui/Input/Input";
-export { Select } from "./components/ui/Select/Select";
+// 导出共享 UI 组件
+export { Button, IconButton, Input, Select } from "./shared/components/ui";
 // 导出控制器
 export { chatController } from "./controllers/chat.controller";
 export { fileController } from "./controllers/file.controller";

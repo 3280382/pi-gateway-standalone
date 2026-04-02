@@ -4,10 +4,10 @@
  */
 
 import { useCallback } from "react";
-import { FileBrowser } from "@/features/files/components/FileBrowser";
 import { AppLayout } from "@/app/layout/AppLayout";
 import { useLayout } from "@/app/layout/AppLayout/LayoutContext";
 import { XTermPanel } from "@/app/layout/panels/TerminalPanel";
+import { FileBrowser } from "@/features/files/components/FileBrowser";
 
 interface FilesPageProps {
 	terminalOutput: string;

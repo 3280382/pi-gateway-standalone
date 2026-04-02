@@ -4,11 +4,11 @@
  */
 
 import { useCallback } from "react";
-import { MessageList } from "@/features/chat/components/MessageList/MessageList";
 import { AppLayout } from "@/app/layout/AppLayout";
 import { useLayout } from "@/app/layout/AppLayout/LayoutContext";
 import { LlmLogPanel } from "@/app/layout/panels/LlmLogPanel";
 import { XTermPanel } from "@/app/layout/panels/TerminalPanel";
+import { MessageList } from "@/features/chat/components/MessageList/MessageList";
 import type { CommandResult } from "@/hooks/app";
 import { useChatMessages } from "@/hooks/app";
 

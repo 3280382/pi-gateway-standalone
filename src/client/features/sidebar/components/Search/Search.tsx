@@ -3,8 +3,8 @@
  */
 
 import { useSidebarController } from "@/services/api/sidebarApi";
-import { useSidebarStore } from "@/stores/sidebarStore";
 import { IconButton, SectionHeader } from "@/shared/components/ui";
+import { useSidebarStore } from "@/stores/sidebarStore";
 import styles from "./Search.module.css";
 
 export function Search() {

@@ -78,7 +78,7 @@ function generateMessageId(): string {
 // ============================================================================
 
 // 用于追踪内容块的插入顺序 - 使用稳定的时间戳
-let contentOrderCounter = 0;
+const contentOrderCounter = 0;
 
 interface ContentPartWithOrder extends ContentPart {
 	_order: number;
@@ -89,7 +89,7 @@ function buildContentArray(state: State): ContentPart[] {
 
 	// 使用基础时间戳确保相对顺序：thinking < text < tools
 	// thinking 使用 0-99999 范围
-	// text 使用 100000-199999 范围  
+	// text 使用 100000-199999 范围
 	// tools 使用 200000+ 范围（基于实际时间戳）
 	const BASE_THINKING = 0;
 	const BASE_TEXT = 100000;

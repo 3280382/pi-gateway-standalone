@@ -63,6 +63,13 @@ export interface FileState {
 	// 选中文件（用于操作）
 	selectedActionFile: string | null;
 	selectedActionFileName: string | null;
+
+	// 多选模式
+	isMultiSelectMode: boolean;
+	
+	// 拖拽状态
+	draggedItem: FileItem | null;
+	isDragging: boolean;
 }
 
 interface FileActions {
@@ -97,6 +104,21 @@ interface FileActions {
 		path: string,
 		onOutput?: (output: string) => void,
 	) => Promise<string | undefined>;
+
+	// 多选模式
+	setMultiSelectMode: (enabled: boolean) => void;
+	toggleMultiSelectMode: () => void;
+	selectItem: (path: string) => void;
+	deselectItem: (path: string) => void;
+	isSelected: (path: string) => boolean;
+
+	// 批量操作
+	deleteSelectedItems: () => Promise<void>;
+	moveSelectedItems: (targetPath: string) => Promise<void>;
+
+	// 拖拽
+	setDraggedItem: (item: FileItem | null) => void;
+	setIsDragging: (isDragging: boolean) => void;
 }
 
 export const useFileStore = create<FileState & FileActions>()(
@@ -116,6 +138,9 @@ export const useFileStore = create<FileState & FileActions>()(
 			sidebarVisible: false,
 			selectedActionFile: null,
 			selectedActionFileName: null,
+			isMultiSelectMode: false,
+			draggedItem: null,
+			isDragging: false,
 
 			// 导航
 			setCurrentPath: (path) => set({ currentPath: path }),
@@ -171,6 +196,115 @@ export const useFileStore = create<FileState & FileActions>()(
 			setError: (error) => set({ error }),
 			toggleSidebar: () =>
 				set((state) => ({ sidebarVisible: !state.sidebarVisible })),
+
+			// 多选模式
+			setMultiSelectMode: (enabled) =>
+				set({ isMultiSelectMode: enabled }),
+
+			toggleMultiSelectMode: () =>
+				set((state) => ({
+					isMultiSelectMode: !state.isMultiSelectMode,
+					selectedItems: !state.isMultiSelectMode ? [] : state.selectedItems,
+				})),
+
+			selectItem: (path) =>
+				set((state) => ({
+					selectedItems: state.selectedItems.includes(path)
+						? state.selectedItems
+						: [...state.selectedItems, path],
+				})),
+
+			deselectItem: (path) =>
+				set((state) => ({
+					selectedItems: state.selectedItems.filter((p) => p !== path),
+				})),
+
+			isSelected: (path) => {
+				return get().selectedItems.includes(path);
+			},
+
+			// 批量操作
+			deleteSelectedItems: async () => {
+				const { selectedItems, currentPath } = get();
+				if (selectedItems.length === 0) return;
+
+				try {
+					const response = await fetch("/api/files/batch-delete", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ paths: selectedItems }),
+					});
+					if (!response.ok) throw new Error("Failed to delete files");
+
+					// 刷新当前目录
+					const state = get();
+					const data = await fetch("/api/browse", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ path: currentPath }),
+					}).then((r) => r.json());
+
+					const itemsToSet = [
+						...(data.parentPath !== data.currentPath
+							? [{ name: "..", path: data.parentPath, isDirectory: true, modified: "" }]
+							: []),
+						...data.items,
+					];
+
+					set({
+						items: itemsToSet,
+						selectedItems: [],
+						isMultiSelectMode: false,
+					});
+				} catch (error) {
+					console.error("Batch delete error:", error);
+					set({ error: "Failed to delete selected files" });
+					throw error;
+				}
+			},
+
+			moveSelectedItems: async (targetPath) => {
+				const { selectedItems } = get();
+				if (selectedItems.length === 0) return;
+
+				try {
+					const response = await fetch("/api/files/batch-move", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ paths: selectedItems, targetPath }),
+					});
+					if (!response.ok) throw new Error("Failed to move files");
+
+					// 刷新当前目录
+					const { currentPath } = get();
+					const data = await fetch("/api/browse", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ path: currentPath }),
+					}).then((r) => r.json());
+
+					const itemsToSet = [
+						...(data.parentPath !== data.currentPath
+							? [{ name: "..", path: data.parentPath, isDirectory: true, modified: "" }]
+							: []),
+						...data.items,
+					];
+
+					set({
+						items: itemsToSet,
+						selectedItems: [],
+						isMultiSelectMode: false,
+					});
+				} catch (error) {
+					console.error("Batch move error:", error);
+					set({ error: "Failed to move selected files" });
+					throw error;
+				}
+			},
+
+			// 拖拽
+			setDraggedItem: (item) => set({ draggedItem: item }),
+			setIsDragging: (isDragging) => set({ isDragging }),
 
 			// 获取过滤和排序后的列表
 			getFilteredAndSortedItems: () => {

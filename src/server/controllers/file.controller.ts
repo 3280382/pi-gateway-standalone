@@ -330,6 +330,177 @@ export async function writeFileContent(req: Request, res: Response) {
 }
 
 /**
+ * 批量删除文件
+ */
+export async function batchDeleteFiles(req: Request, res: Response) {
+	const { paths } = req.body;
+
+	if (!paths || !Array.isArray(paths) || paths.length === 0) {
+		res.status(400).json({ error: "paths参数必填且必须是非空数组" });
+		return;
+	}
+
+	const results = [];
+	const errors = [];
+
+	try {
+		const { unlink, stat } = await import("fs/promises");
+
+		for (const filePath of paths) {
+			const targetPath = expandPath(filePath);
+
+			if (!isPathAllowed(targetPath)) {
+				errors.push({ path: filePath, error: "访问被拒绝" });
+				continue;
+			}
+
+			try {
+				const stats = await stat(targetPath);
+				
+				if (stats.isDirectory()) {
+					// 递归删除目录
+					const { rmdir } = await import("fs/promises");
+					await rmdir(targetPath, { recursive: true });
+				} else {
+					// 删除文件
+					await unlink(targetPath);
+				}
+				
+				results.push({ path: filePath, success: true });
+				logger.info(`删除成功: ${targetPath}`);
+			} catch (error) {
+				const errorMsg = error instanceof Error ? error.message : String(error);
+				errors.push({ path: filePath, error: errorMsg });
+				logger.error(`删除失败: ${targetPath}, 错误: ${errorMsg}`);
+			}
+		}
+
+		logger.info(`批量删除完成: ${results.length} 成功, ${errors.length} 失败`);
+		res.json({
+			success: errors.length === 0,
+			deleted: results.length,
+			errors: errors.length > 0 ? errors : undefined,
+		});
+	} catch (error) {
+		logger.error(
+			`批量删除错误: ${error instanceof Error ? error.message : String(error)}`,
+		);
+		res.status(500).json({ error: String(error) });
+	}
+}
+
+/**
+ * 批量移动文件
+ */
+export async function batchMoveFiles(req: Request, res: Response) {
+	const { paths, targetPath } = req.body;
+
+	if (!paths || !Array.isArray(paths) || paths.length === 0) {
+		res.status(400).json({ error: "paths参数必填且必须是非空数组" });
+		return;
+	}
+
+	if (!targetPath) {
+		res.status(400).json({ error: "targetPath参数必填" });
+		return;
+	}
+
+	const expandedTarget = expandPath(targetPath);
+
+	if (!isPathAllowed(expandedTarget)) {
+		res.status(403).json({ error: "目标路径访问被拒绝" });
+		return;
+	}
+
+	const results = [];
+	const errors = [];
+
+	try {
+		const { rename, stat, mkdir } = await import("fs/promises");
+
+		// 确保目标目录存在
+		try {
+			const targetStats = await stat(expandedTarget);
+			if (!targetStats.isDirectory()) {
+				res.status(400).json({ error: "目标路径必须是目录" });
+				return;
+			}
+		} catch {
+			// 目录不存在，创建它
+			await mkdir(expandedTarget, { recursive: true });
+		}
+
+		for (const filePath of paths) {
+			const sourcePath = expandPath(filePath);
+
+			if (!isPathAllowed(sourcePath)) {
+				errors.push({ path: filePath, error: "源路径访问被拒绝" });
+				continue;
+			}
+
+			try {
+				const fileName = path.basename(sourcePath);
+				const destPath = path.join(expandedTarget, fileName);
+
+				// 检查目标是否已存在
+				try {
+					await stat(destPath);
+					// 文件已存在，添加数字后缀
+					const ext = path.extname(fileName);
+					const base = path.basename(fileName, ext);
+					let newDestPath = destPath;
+					let counter = 1;
+					
+					while (true) {
+						const newName = `${base} (${counter})${ext}`;
+						newDestPath = path.join(expandedTarget, newName);
+						try {
+							await stat(newDestPath);
+							counter++;
+						} catch {
+							break;
+						}
+					}
+					
+					await rename(sourcePath, newDestPath);
+					results.push({ 
+						path: filePath, 
+						success: true, 
+						destination: newDestPath 
+					});
+				} catch {
+					// 目标不存在，直接移动
+					await rename(sourcePath, destPath);
+					results.push({ 
+						path: filePath, 
+						success: true, 
+						destination: destPath 
+					});
+				}
+				
+				logger.info(`移动成功: ${sourcePath} -> ${expandedTarget}`);
+			} catch (error) {
+				const errorMsg = error instanceof Error ? error.message : String(error);
+				errors.push({ path: filePath, error: errorMsg });
+				logger.error(`移动失败: ${sourcePath}, 错误: ${errorMsg}`);
+			}
+		}
+
+		logger.info(`批量移动完成: ${results.length} 成功, ${errors.length} 失败`);
+		res.json({
+			success: errors.length === 0,
+			moved: results.length,
+			errors: errors.length > 0 ? errors : undefined,
+		});
+	} catch (error) {
+		logger.error(
+			`批量移动错误: ${error instanceof Error ? error.message : String(error)}`,
+		);
+		res.status(500).json({ error: String(error) });
+	}
+}
+
+/**
  * 执行命令（用于文件执行）
  */
 export async function executeCommand(req: Request, res: Response) {

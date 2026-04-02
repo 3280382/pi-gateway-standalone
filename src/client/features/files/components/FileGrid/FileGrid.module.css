@@ -1,0 +1,104 @@
+/**
+ * FileGrid Styles
+ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+  padding: 16px;
+  overflow-y: auto;
+  touch-action: pan-y pinch-zoom;
+}
+
+.gridItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  background: var(--bg-tertiary);
+  border: 2px solid transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.gridItem:hover {
+  background: var(--bg-hover);
+  transform: translateY(-2px);
+}
+
+.gridItem.selected {
+  background: var(--accent-bg-blue);
+  border-color: var(--accent-blue);
+}
+
+.gridItem.directory {
+  background: var(--accent-bg-yellow);
+}
+
+.gridItem.directory:hover {
+  background: var(--accent-yellow);
+  opacity: 0.8;
+}
+
+.gridItem.dropTarget {
+  border-color: var(--accent-green);
+  background: var(--accent-bg-green);
+  transform: scale(1.05);
+}
+
+.gridItem.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+.checkbox {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  font-size: 16px;
+  color: var(--accent-blue);
+}
+
+.gridIcon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.gridName {
+  font-size: var(--font-xs);
+  text-align: center;
+  word-break: break-word;
+  max-width: 100%;
+  color: var(--text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Pinch gesture hint */
+.pinchHint {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 100;
+}
+
+.pinchHint.visible {
+  opacity: 1;
+}

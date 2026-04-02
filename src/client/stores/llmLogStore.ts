@@ -91,4 +91,5 @@ export const useLlmLogStore = create<LlmLogState & LlmLogActions>()(
 // Selectors
 export const selectLlmLogConfig = (state: LlmLogState) => state.config;
 export const selectLlmLogs = (state: LlmLogState) => state.logs;
-export const selectIsLlmLogModalOpen = (state: LlmLogState) => state.isModalOpen;
+export const selectIsLlmLogModalOpen = (state: LlmLogState) =>
+	state.isModalOpen;

@@ -1,0 +1,62 @@
+/**
+ * BottomMenu Styles - Flex 布局内，非 fixed
+ */
+
+.bottomMenu {
+	position: relative;
+	width: 100%;
+	height: 44px;
+	background: var(--bg-secondary);
+	border-top: 1px solid var(--border-subtle);
+	display: flex;
+	align-items: center;
+	padding: 0 12px;
+}
+
+/* Left group - fixed to left */
+.leftGroup {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+/* Center group - centered in remaining space */
+.centerGroup {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.menuButton {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	background: transparent;
+	border: none;
+	border-radius: var(--radius-md);
+	color: var(--text-secondary);
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.menuButton:hover {
+	background: var(--bg-hover);
+	color: var(--text-primary);
+}
+
+.menuButton.active {
+	color: var(--accent-primary);
+	background: var(--accent-bg-blue);
+}
+
+.menuButton svg {
+	width: 20px;
+	height: 20px;
+}

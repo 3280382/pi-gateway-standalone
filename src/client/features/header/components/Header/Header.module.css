@@ -1,0 +1,77 @@
+.header {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 8px 12px;
+	background: var(--bg-secondary);
+	border-bottom: 1px solid var(--border-color);
+}
+
+.topRow {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.bottomRow {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.iconBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	background: var(--bg-tertiary);
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-sm);
+	color: var(--text-secondary);
+	cursor: pointer;
+	transition: all 0.2s;
+}
+
+.iconBtn:hover {
+	background: var(--bg-hover);
+	border-color: var(--border-accent);
+	color: var(--text-primary);
+}
+
+.modelSelector {
+	position: relative;
+}
+
+.workingDirBtn {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	background: var(--bg-tertiary);
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-sm);
+	color: var(--text-primary);
+	font-size: var(--font-sm);
+	cursor: pointer;
+	transition: all 0.2s;
+	max-width: 200px;
+}
+
+.workingDirBtn:hover {
+	background: var(--bg-hover);
+	border-color: var(--border-accent);
+}
+
+.workingDirBtn span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.btnIcon {
+	color: var(--accent-yellow);
+	flex-shrink: 0;
+}

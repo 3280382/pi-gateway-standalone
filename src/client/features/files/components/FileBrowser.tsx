@@ -1,16 +1,17 @@
 /**
- * FileBrowser - 文件浏览器主组件
+ * FileBrowser - 文件浏览器主组件 (Enhanced with multi-select, gestures, drag-drop)
  */
 import React, { useCallback, useEffect } from "react";
 import { fileBrowserDebug, withLogging } from "@/lib/debug";
 import { browseDirectory } from "@/services/api/fileApi";
 import { useFileStore } from "@/stores/fileStore";
 import { useFileViewerStore } from "@/stores/fileViewerStore";
+import { BatchActionBar } from "./BatchActionBar";
 import { FileActionBar } from "./FileActionBar";
 import styles from "./FileBrowser.module.css";
 import { FileBrowserErrorBoundary } from "./FileBrowserErrorBoundary";
-import { FileGrid } from "./FileGrid";
-import { FileList } from "./FileList";
+import { FileGrid } from "./FileGrid/FileGrid";
+import { FileList } from "./FileList/FileList";
 import { FileSidebar } from "./FileSidebar";
 import { FileViewer } from "./FileViewer";
 
@@ -174,6 +175,11 @@ export function FileBrowser({
 				</FileBrowserErrorBoundary>
 				{/* 主内容区 */}
 				<div className={styles.main}>
+					{/* 批量操作栏 - 多选模式 */}
+					<FileBrowserErrorBoundary componentName="Batch Action Bar">
+						<BatchActionBar />
+					</FileBrowserErrorBoundary>
+
 					{/* 选中文件操作栏 */}
 					<FileBrowserErrorBoundary componentName="File Action Bar">
 						<FileActionBar

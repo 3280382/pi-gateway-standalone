@@ -5,6 +5,8 @@
 import type { LlmLogManager } from "@server/llm/log-manager";
 import type { Application } from "express";
 import {
+	batchDeleteFiles,
+	batchMoveFiles,
 	browseDirectory,
 	executeCommand,
 	getDirectoryTree,
@@ -59,6 +61,8 @@ export function registerRoutes(
 	app.get("/api/files/content", getFileContent);
 	app.get("/api/files/raw", getRawFile);
 	app.post("/api/files/write", writeFileContent);
+	app.post("/api/files/batch-delete", batchDeleteFiles);
+	app.post("/api/files/batch-move", batchMoveFiles);
 	app.post("/api/execute", executeCommand);
 
 	// LLM日志API

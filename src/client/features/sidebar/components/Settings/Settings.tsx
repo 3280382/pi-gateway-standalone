@@ -3,11 +3,11 @@
  */
 
 import { useSidebarController } from "@/services/api/sidebarApi";
+import { SectionHeader } from "@/shared/components/ui";
 import { useLlmLogStore } from "@/stores/llmLogStore";
 import { useModalStore } from "@/stores/modalStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import type { FontSize, Theme } from "@/types/sidebar";
-import { SectionHeader } from "@/shared/components/ui";
 import styles from "./Settings.module.css";
 
 export function Settings() {
