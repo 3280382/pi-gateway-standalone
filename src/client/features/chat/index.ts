@@ -3,7 +3,7 @@
  */
 
 // Re-export from global stores/hooks/services for convenience
-export { useChatStore } from "@/stores/chatStore";
+export { useChatStore } from "@/features/chat/stores/chatStore";
 // Components
 export { ChatPanel } from "./components/ChatPanel";
 export { InputArea } from "./components/InputArea";

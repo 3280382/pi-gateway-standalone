@@ -1,11 +1,11 @@
 import React from "react";
-import { fileActionBarDebug } from "@/lib/debug";
-import { executeFile } from "@/services/api/fileApi";
 /**
  * FileActionBar - 选中文件操作栏
  */
-import { useFileStore } from "@/stores/fileStore";
-import { useFileViewerStore } from "@/stores/fileViewerStore";
+import { useFileStore } from "@/features/files/stores/fileStore";
+import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
+import { fileActionBarDebug } from "@/lib/debug";
+import { executeFile } from "@/features/files/services/api/fileApi";
 import styles from "./FileBrowser.module.css";
 
 interface FileActionBarProps {

@@ -4,11 +4,11 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fileController, sessionController } from "@/controllers";
-import { websocketService } from "@/services/websocket.service";
-import { useChatStore } from "@/stores/chatStore";
-import { useSessionStore } from "@/stores/sessionStore";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { fileController, sessionController } from "@/shared/controllers";
+import { useChatStore } from "@/features/chat/stores/chatStore";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { websocketService } from "@/shared/services/websocket.service";
+import { useSessionStore } from "@/shared/stores/sessionStore";
 
 interface InitState {
 	isLoading: boolean;

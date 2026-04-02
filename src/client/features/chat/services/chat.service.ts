@@ -3,7 +3,7 @@
  */
 
 import type { Message, ToolExecution } from "@/types/chat";
-import { BaseService, ServiceError } from "./base.service";
+import { BaseService, ServiceError } from "@/shared/services/base.service";
 
 export interface SendMessageRequest {
 	text: string;

@@ -2,10 +2,10 @@
  * Search Section
  */
 
-import { useSidebarController } from "@/services/api/sidebarApi";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { IconButton } from "@/shared/ui/IconButton/IconButton";
 import { SectionHeader } from "@/shared/ui/SectionHeader/SectionHeader";
-import { useSidebarStore } from "@/stores/sidebarStore";
 import styles from "./Search.module.css";
 
 export function Search() {

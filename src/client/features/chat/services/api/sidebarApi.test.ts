@@ -4,7 +4,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import * as client from "./client";
+import * as client from "@/shared/services/api/client";
 import { createSidebarController } from "./sidebarApi";
 
 // Mock fetch globally

@@ -3,8 +3,8 @@
  */
 
 import { useEffect } from "react";
-import { useFileStore } from "@/stores/fileStore";
-import { useSessionStore } from "@/stores/sessionStore";
+import { useFileStore } from "@/features/files/stores/fileStore";
+import { useSessionStore } from "@/shared/stores/sessionStore";
 import { FilesLayout } from "./layout";
 
 interface FilesPageProps {

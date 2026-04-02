@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from "react";
-import { filterMessages, useChatStore } from "@/stores/chatStore";
+import { filterMessages, useChatStore } from "@/features/chat/stores/chatStore";
 
 export interface UseChatMessagesReturn {
 	// 消息列表

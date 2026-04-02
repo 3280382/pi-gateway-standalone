@@ -3,7 +3,6 @@
  */
 
 import { useCallback } from "react";
-import { useChatController } from "@/services/api/chatApi";
 import {
 	selectCurrentStreamingMessage,
 	selectInputText,
@@ -11,7 +10,8 @@ import {
 	selectMessages,
 	selectShowThinking,
 	useChatStore,
-} from "@/stores/chatStore";
+} from "@/features/chat/stores/chatStore";
+import { useChatController } from "@/features/chat/services/api/chatApi";
 import styles from "./ChatPanel.module.css";
 import { InputArea } from "./InputArea";
 import { MessageList } from "./MessageList";

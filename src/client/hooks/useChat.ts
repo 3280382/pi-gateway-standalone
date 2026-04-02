@@ -9,8 +9,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useChatStore } from "@/features/chat/stores/chatStore";
 import { hookLog, wsLog } from "@/lib/logger";
-import { useChatStore } from "@/stores/chatStore";
 import type {
 	AgentEndMessage,
 	AgentStartMessage,

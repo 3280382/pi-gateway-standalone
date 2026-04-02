@@ -3,9 +3,9 @@
  */
 import type React from "react";
 import { memo, useCallback, useState } from "react";
-import type { FileItem as FileItemType } from "@/stores/fileStore";
-import { useFileStore } from "@/stores/fileStore";
-import { useFileViewerStore } from "@/stores/fileViewerStore";
+import type { FileItem as FileItemType } from "@/features/files/stores/fileStore";
+import { useFileStore } from "@/features/files/stores/fileStore";
+import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
 import { FileItem } from "./FileItem";
 import styles from "./FileList.module.css";
 

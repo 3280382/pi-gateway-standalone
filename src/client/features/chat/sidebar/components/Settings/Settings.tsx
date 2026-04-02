@@ -2,12 +2,12 @@
  * Settings Section - Ultra Compact
  */
 
+import { useLlmLogStore } from "@/features/chat/stores/llmLogStore";
+import { useModalStore } from "@/features/chat/stores/modalStore";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { IconButton } from "@/shared/ui/IconButton/IconButton";
 import { SectionHeader } from "@/shared/ui/SectionHeader/SectionHeader";
-import { useSidebarController } from "@/services/api/sidebarApi";
-import { useLlmLogStore } from "@/stores/llmLogStore";
-import { useModalStore } from "@/stores/modalStore";
-import { useSidebarStore } from "@/stores/sidebarStore";
 import type { FontSize, Theme } from "@/types/sidebar";
 import styles from "./Settings.module.css";
 

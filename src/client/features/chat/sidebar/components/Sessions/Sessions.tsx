@@ -4,13 +4,13 @@
  */
 
 import { useEffect } from "react";
+import { useChatStore } from "@/features/chat/stores/chatStore";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
+import { websocketService } from "@/shared/services/websocket.service";
+import { useSessionStore } from "@/shared/stores/sessionStore";
 import { IconButton } from "@/shared/ui/IconButton/IconButton";
 import { SectionHeader } from "@/shared/ui/SectionHeader/SectionHeader";
-import { useSidebarController } from "@/services/api/sidebarApi";
-import { websocketService } from "@/services/websocket.service";
-import { useChatStore } from "@/stores/chatStore";
-import { useSessionStore } from "@/stores/sessionStore";
-import { useSidebarStore } from "@/stores/sidebarStore";
 import type { Session } from "../../../../types/sidebar";
 import styles from "./Sessions.module.css";
 

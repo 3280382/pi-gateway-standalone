@@ -5,7 +5,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useFileViewerStore } from "@/stores/fileViewerStore";
+import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
 import { FileViewer } from "./FileViewer";
 
 // Mock store

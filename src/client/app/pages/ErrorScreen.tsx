@@ -2,7 +2,13 @@
  * ErrorScreen - 应用错误页面
  */
 
-export function ErrorScreen({ error, onRetry }: { error: string; onRetry: () => void }) {
+export function ErrorScreen({
+	error,
+	onRetry,
+}: {
+	error: string;
+	onRetry: () => void;
+}) {
 	return (
 		<div
 			style={{
@@ -16,7 +22,9 @@ export function ErrorScreen({ error, onRetry }: { error: string; onRetry: () => 
 				color: "var(--text-primary)",
 			}}
 		>
-			<h2 style={{ color: "var(--accent-red)", marginBottom: "16px" }}>Error</h2>
+			<h2 style={{ color: "var(--accent-red)", marginBottom: "16px" }}>
+				Error
+			</h2>
 			<pre
 				style={{
 					background: "var(--bg-secondary)",

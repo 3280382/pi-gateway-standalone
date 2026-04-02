@@ -3,8 +3,8 @@
  * Connects Zustand Store with Backend API
  */
 
-import { websocketService } from "@/services/websocket.service";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { websocketService } from "@/shared/services/websocket.service";
 import type {
 	FontSize,
 	SearchFilters,
@@ -14,7 +14,7 @@ import type {
 	Theme,
 	WorkingDirResponse,
 } from "@/types/sidebar";
-import { fetchApi } from "./client";
+import { fetchApi } from "@/shared/services/api/client";
 
 // ============================================================================
 // Controller Hook
@@ -106,7 +106,9 @@ export function useSidebarController(): SidebarController {
 							clearTimeout(timeout);
 							store.selectSession(data.sessionId);
 							// 保存新session ID到sessionStore用于持久化
-							const { useSessionStore } = await import("@/stores/sessionStore");
+							const { useSessionStore } = await import(
+								"@/shared/stores/sessionStore"
+							);
 							useSessionStore.getState().setCurrentSession(data.sessionId);
 							unsubscribe();
 							resolve();
@@ -176,7 +178,9 @@ export function useSidebarController(): SidebarController {
 					const unsub = websocketService.on("dir_changed", async (data) => {
 						clearTimeout(timeout);
 						store.setWorkingDir(data.cwd);
-						const { useSessionStore } = await import("@/stores/sessionStore");
+						const { useSessionStore } = await import(
+							"@/shared/stores/sessionStore"
+						);
 						useSessionStore.getState().setCurrentDir(data.cwd);
 						// 保存新的session ID（切换目录后会创建新session）
 						if (data.sessionId) {
@@ -283,7 +287,9 @@ export function createSidebarController(): SidebarController {
 						// 同步更新sidebarStore
 						store.setWorkingDir(data.cwd);
 						// 同步更新sessionStore
-						const { useSessionStore } = await import("@/stores/sessionStore");
+						const { useSessionStore } = await import(
+							"@/shared/stores/sessionStore"
+						);
 						useSessionStore.getState().setCurrentDir(data.cwd);
 						// 添加到最近工作区（Zustand persist 会自动保存到 localStorage）
 						store.addRecentWorkspace(data.cwd);

@@ -4,8 +4,8 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { websocketService } from "@/services/websocket.service";
-import { useChatStore } from "@/stores/chatStore";
+import { useChatStore } from "@/features/chat/stores/chatStore";
+import { websocketService } from "@/shared/services/websocket.service";
 
 export interface CommandResult {
 	command: string;

@@ -3,8 +3,8 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { useLlmLogStore } from "@/stores/llmLogStore";
-import { useModalStore } from "@/stores/modalStore";
+import { useLlmLogStore } from "@/features/chat/stores/llmLogStore";
+import { useModalStore } from "@/features/chat/stores/modalStore";
 import styles from "./Modals.module.css";
 
 interface LogEntry {

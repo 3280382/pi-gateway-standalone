@@ -3,8 +3,8 @@
  */
 
 import { useEffect, useState } from "react";
-import { useModalStore } from "@/stores/modalStore";
-import { useSessionStore } from "@/stores/sessionStore";
+import { useModalStore } from "@/features/chat/stores/modalStore";
+import { useSessionStore } from "@/shared/stores/sessionStore";
 import styles from "./Modals.module.css";
 
 interface Model {

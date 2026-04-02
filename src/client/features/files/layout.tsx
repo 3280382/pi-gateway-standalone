@@ -5,11 +5,11 @@
 
 import { useCallback } from "react";
 import { useLayout } from "@/app/LayoutContext";
-import { FileToolbar } from "./components/FileToolbar";
-import { FileSidebar } from "./components/FileSidebar";
 import { XTermPanel } from "@/features/chat/components/panels/TerminalPanel";
+import { useFileStore } from "@/features/files/stores/fileStore";
 import { FileBrowser } from "./components/FileBrowser";
-import { useFileStore } from "@/stores/fileStore";
+import { FileSidebar } from "./components/FileSidebar";
+import { FileToolbar } from "./components/FileToolbar";
 import styles from "./FilesLayout.module.css";
 
 interface FilesLayoutProps {
@@ -29,7 +29,8 @@ export function FilesLayout({
 	closeBottomPanel,
 	setBottomPanelHeight,
 }: FilesLayoutProps) {
-	const { isSidebarVisible, isBottomPanelOpen, bottomPanelHeight } = useLayout();
+	const { isSidebarVisible, isBottomPanelOpen, bottomPanelHeight } =
+		useLayout();
 	const { currentPath, loadDirectory, setCurrentPath } = useFileStore();
 
 	const renderBottomPanel = useCallback(() => {
@@ -69,10 +70,7 @@ export function FilesLayout({
 			{/* Body: FileSidebar + Content */}
 			<div className={styles.body}>
 				{/* FileSidebar - 异步加载的目录树 */}
-				<FileSidebar
-					visible={isSidebarVisible}
-					onNavigate={setCurrentPath}
-				/>
+				<FileSidebar visible={isSidebarVisible} onNavigate={setCurrentPath} />
 
 				{/* Content */}
 				<main className={styles.content}>

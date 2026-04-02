@@ -3,7 +3,7 @@
  * 在多选模式下显示在顶部
  */
 import React, { useState } from "react";
-import { useFileStore } from "@/stores/fileStore";
+import { useFileStore } from "@/features/files/stores/fileStore";
 import styles from "./BatchActionBar.module.css";
 
 export function BatchActionBar() {

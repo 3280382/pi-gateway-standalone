@@ -2,7 +2,7 @@
  * FileBrowser API - HTTP Client for File Operations
  */
 
-import { fetchApi } from "@/services/api/client";
+import { fetchApi } from "@/shared/services/api/client";
 import type {
 	BrowseResponse,
 	FileExecuteResponse,

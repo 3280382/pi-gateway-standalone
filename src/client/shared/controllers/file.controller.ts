@@ -3,13 +3,13 @@
  * 处理文件相关的业务逻辑
  */
 
-import { ServiceError } from "@/services/base.service";
+import { ServiceError } from "@/shared/services/base.service";
 import type {
 	BrowseResponse,
 	ExecuteResponse,
 	FileContentResponse,
-} from "@/services/file.service";
-import { fileService } from "@/services/file.service";
+} from "@/shared/services/file.service";
+import { fileService } from "@/shared/services/file.service";
 
 export class FileController {
 	private currentPath: string = "";

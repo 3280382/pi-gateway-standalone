@@ -6,21 +6,21 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SystemPromptModal } from "@/features/chat/components/modals/SystemPromptModal";
-import { useChatController } from "@/services/api/chatApi";
-import { useSidebarController } from "@/services/api/sidebarApi";
-import {
-	getSystemPrompt,
-	type SystemPromptResponse,
-} from "@/services/api/systemPromptApi";
-import { websocketService } from "@/services/websocket.service";
 import {
 	selectSearchFilters,
 	selectSearchQuery,
 	useChatStore,
-} from "@/stores/chatStore";
-import { useModalStore } from "@/stores/modalStore";
-import { useSessionStore } from "@/stores/sessionStore";
-import { useSidebarStore } from "@/stores/sidebarStore";
+} from "@/features/chat/stores/chatStore";
+import { useModalStore } from "@/features/chat/stores/modalStore";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { useChatController } from "@/features/chat/services/api/chatApi";
+import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
+import {
+	getSystemPrompt,
+	type SystemPromptResponse,
+} from "@/shared/services/api/systemPromptApi";
+import { websocketService } from "@/shared/services/websocket.service";
+import { useSessionStore } from "@/shared/stores/sessionStore";
 import styles from "./AppHeader.module.css";
 
 // DirectoryPicker component for selecting working directory
@@ -171,7 +171,7 @@ export function AppHeader({
 		currentDir,
 		isConnected,
 	} = useSessionStore();
-	
+
 	// 从 store 获取数据
 	const workingDir = currentDir;
 	const connectionStatus = isConnected ? "connected" : "disconnected";
@@ -716,7 +716,7 @@ import {
 	type FilterType,
 	type SortMode,
 	useFileStore,
-} from "@/stores/fileStore";
+} from "@/features/files/stores/fileStore";
 
 const FILE_FILTER_OPTIONS: {
 	value: FilterType;

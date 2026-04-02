@@ -6,7 +6,7 @@ import { FitAddon } from "@xterm/addon-fit";
 import { Terminal } from "@xterm/xterm";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "@xterm/xterm/css/xterm.css";
-import { useSessionStore } from "@/stores/sessionStore";
+import { useSessionStore } from "@/shared/stores/sessionStore";
 import styles from "./XTermPanel.module.css";
 
 interface XTermPanelProps {

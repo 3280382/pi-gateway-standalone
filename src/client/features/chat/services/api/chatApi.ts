@@ -3,9 +3,9 @@
  * 连接Zustand Store与后端WebSocket，实现所有后端支持的功能
  */
 
-import { websocketService } from "@/services/websocket.service";
-import { useChatStore } from "@/stores/chatStore";
-import { useSessionStore } from "@/stores/sessionStore";
+import { useChatStore } from "@/features/chat/stores/chatStore";
+import { websocketService } from "@/shared/services/websocket.service";
+import { useSessionStore } from "@/shared/stores/sessionStore";
 import type { ChatController, Message, ToolExecution } from "@/types/chat";
 
 // ============================================================================

@@ -4,8 +4,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SLASH_COMMANDS } from "@/features/chat/types/slashCommands";
-import { browseDirectory } from "@/services/api/fileApi";
-import { useFileStore } from "@/stores/fileStore";
+import { useFileStore } from "@/features/files/stores/fileStore";
+import { browseDirectory } from "@/features/files/services/api/fileApi";
 import styles from "./InputArea.module.css";
 
 interface InputAreaProps {
@@ -362,8 +362,7 @@ export function InputArea({
 				const data = await response.json();
 				return data.text || "";
 			}
-		} catch (err) {
-		}
+		} catch (err) {}
 		return "";
 	};
 

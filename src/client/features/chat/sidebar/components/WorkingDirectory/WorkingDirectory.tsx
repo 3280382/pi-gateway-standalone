@@ -4,9 +4,9 @@
  */
 
 import { useEffect, useState } from "react";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { SectionHeader } from "@/shared/ui/SectionHeader/SectionHeader";
-import { useSidebarController } from "@/services/api/sidebarApi";
-import { useSidebarStore } from "@/stores/sidebarStore";
 import styles from "./WorkingDirectory.module.css";
 
 export function WorkingDirectory() {

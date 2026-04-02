@@ -2,7 +2,7 @@
  * File API - 文件操作
  */
 
-import type { FileItem } from "@/stores/fileStore";
+import type { FileItem } from "@/features/files/stores/fileStore";
 
 export interface BrowseResponse {
 	currentPath: string;

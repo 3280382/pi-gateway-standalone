@@ -8,8 +8,8 @@ import type {
 	SessionStats,
 	UserSettings,
 	WorkspaceInfo,
-} from "@/services/session.service";
-import { sessionService } from "@/services/session.service";
+} from "@/shared/services/session.service";
+import { sessionService } from "@/shared/services/session.service";
 import { fileController } from "./file.controller";
 
 export class SessionController {

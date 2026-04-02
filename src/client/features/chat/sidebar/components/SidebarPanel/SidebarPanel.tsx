@@ -3,8 +3,8 @@
  */
 
 import { useEffect } from "react";
-import { useSidebarController } from "@/services/api/sidebarApi";
-import { useSidebarStore } from "@/stores/sidebarStore";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { RecentWorkspaces } from "../RecentWorkspaces/RecentWorkspaces";
 import { Sessions } from "../Sessions/Sessions";
 import { Settings } from "../Settings/Settings";

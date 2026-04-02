@@ -6,12 +6,12 @@
 import { useCallback } from "react";
 import { useLayout } from "@/app/LayoutContext";
 import { AppHeader } from "@/features/chat/components/Header";
-import { SidebarPanel } from "@/features/chat/sidebar/components/SidebarPanel/SidebarPanel";
 import { LlmLogPanel } from "@/features/chat/components/panels/LlmLogPanel";
 import { XTermPanel } from "@/features/chat/components/panels/TerminalPanel";
+import { SidebarPanel } from "@/features/chat/sidebar/components/SidebarPanel/SidebarPanel";
 import type { CommandResult } from "@/hooks/app";
-import { ChatPanel } from "./components/ChatPanel";
 import styles from "./ChatLayout.module.css";
+import { ChatPanel } from "./components/ChatPanel";
 
 interface ChatLayoutProps {
 	terminalOutput: string;
@@ -33,7 +33,8 @@ export function ChatLayout({
 	closeBottomPanel,
 	setBottomPanelHeight,
 }: ChatLayoutProps) {
-	const { isSidebarVisible, isBottomPanelOpen, bottomPanelHeight } = useLayout();
+	const { isSidebarVisible, isBottomPanelOpen, bottomPanelHeight } =
+		useLayout();
 
 	const renderBottomPanel = useCallback(() => {
 		if (!isBottomPanelOpen) return null;

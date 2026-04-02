@@ -4,10 +4,10 @@
  */
 
 import type { ImageUpload } from "@/features/chat/components/InputArea";
-import { ServiceError } from "@/services/base.service";
-import { chatService } from "@/services/chat.service";
-import { websocketService } from "@/services/websocket.service";
-import { useChatStore } from "@/stores/chatStore";
+import { useChatStore } from "@/features/chat/stores/chatStore";
+import { ServiceError } from "@/shared/services/base.service";
+import { chatService } from "@/features/chat/services/chat.service";
+import { websocketService } from "@/shared/services/websocket.service";
 import type { Message, ToolExecution } from "@/types/chat";
 
 export class ChatController {

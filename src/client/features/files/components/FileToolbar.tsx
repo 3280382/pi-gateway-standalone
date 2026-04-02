@@ -6,7 +6,7 @@ import {
 	type FilterType,
 	type SortMode,
 	useFileStore,
-} from "@/stores/fileStore";
+} from "@/features/files/stores/fileStore";
 import styles from "./FileBrowser.module.css";
 
 // 可执行文件扩展名

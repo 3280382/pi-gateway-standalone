@@ -19,7 +19,8 @@ export function LoadingScreen() {
 				style={{
 					fontSize: "48px",
 					fontWeight: "bold",
-					background: "linear-gradient(135deg, var(--accent-blue), var(--accent-purple))",
+					background:
+						"linear-gradient(135deg, var(--accent-blue), var(--accent-purple))",
 					WebkitBackgroundClip: "text",
 					WebkitTextFillColor: "transparent",
 					marginBottom: "16px",
@@ -27,7 +28,9 @@ export function LoadingScreen() {
 			>
 				π
 			</div>
-			<div style={{ color: "var(--text-secondary)" }}>Initializing Pi Gateway...</div>
+			<div style={{ color: "var(--text-secondary)" }}>
+				Initializing Pi Gateway...
+			</div>
 		</div>
 	);
 }
