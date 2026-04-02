@@ -91,7 +91,8 @@ export function InputArea({
 		const lastAtIndex = value.lastIndexOf("@");
 		if (lastAtIndex !== -1) {
 			const afterAt = value.slice(lastAtIndex + 1);
-			if (!afterAt.includes(" ") && (lastAtIndex === 0 || value[lastAtIndex - 1] === " ")) {
+			// Show picker when @ is at word boundary (start of input, after space, or after newline)
+			if (!afterAt.includes(" ")) {
 				setFileFilter(afterAt.toLowerCase());
 				setShowFilePicker(true);
 				setSelectedFileIndex(0);
