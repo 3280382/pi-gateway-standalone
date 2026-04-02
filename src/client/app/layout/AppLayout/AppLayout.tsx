@@ -9,6 +9,7 @@ import { SidebarPanel } from "@/features/sidebar/components/SidebarPanel/Sidebar
 import { useChatController } from "@/services/api/chatApi";
 import { useChatStore } from "@/stores/chatStore";
 import { useSessionStore } from "@/stores/sessionStore";
+import { websocketService } from "@/services/websocket.service";
 import { AppFooter } from "../AppFooter/AppFooter";
 import { AppHeader } from "../AppHeader/AppHeader";
 import styles from "./AppLayout.module.css";
@@ -150,6 +151,24 @@ export function AppLayout({
 		};
 	}, []);
 
+	// 新建会话
+	const handleNewSession = useCallback(async () => {
+		try {
+			// 清除当前消息
+			controller.clearMessages();
+			
+			// 发送新建会话命令到服务器
+			websocketService.send("new_session", {});
+			
+			// 清空输入
+			controller.setInputText("");
+			
+			console.log("[AppLayout] New session created");
+		} catch (error) {
+			console.error("[AppLayout] Failed to create new session:", error);
+		}
+	}, [controller]);
+
 	return (
 		<div className={styles.layout}>
 			{/* 侧边栏 - 绝对定位，遮挡顶部和内容，不遮挡底部 */}
@@ -230,6 +249,7 @@ export function AppLayout({
 									}));
 									controller.sendMessage(text, imageData);
 								}}
+								onNewSession={handleNewSession}
 							/>
 						</div>
 					)}

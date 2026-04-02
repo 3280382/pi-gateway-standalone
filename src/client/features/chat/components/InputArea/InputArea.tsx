@@ -1,5 +1,5 @@
 /**
- * InputArea - Enhanced with @mention, image upload, and modern design
+ * InputArea - Modern minimal design with session control
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -17,6 +17,7 @@ interface InputAreaProps {
 	onBashCommand?: (command: string) => void;
 	onSlashCommand?: (command: string, args: string) => void;
 	onSendWithImages?: (text: string, images: ImageUpload[]) => void;
+	onNewSession?: () => void;
 }
 
 export interface ImageUpload {
@@ -44,6 +45,7 @@ export function InputArea({
 	onBashCommand,
 	onSlashCommand,
 	onSendWithImages,
+	onNewSession,
 }: InputAreaProps) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -372,7 +374,7 @@ export function InputArea({
 		? "Generating..."
 		: isBashMode
 			? "Enter bash command (Ctrl+Enter to execute)..."
-			: "Message... Ctrl+Enter to send, Enter for new line";
+			: "Message... Ctrl+Enter to send";
 
 	return (
 		<div className={styles.container}>
@@ -462,41 +464,6 @@ export function InputArea({
 				</div>
 			)}
 
-			<div className={styles.toolbar}>
-				<button
-					className={`${styles.toolbarBtn} ${styles.atBtn}`}
-					onClick={() => insertAtCursor("@")}
-					title="Mention file (@)"
-					disabled={isStreaming}
-				>
-					<span className={styles.atIcon}>@</span>
-				</button>
-				<button
-					className={`${styles.toolbarBtn} ${styles.slashBtn}`}
-					onClick={() => insertAtCursor("/")}
-					title="Slash command (/)"
-					disabled={isStreaming}
-				>
-					<span className={styles.slashIcon}>/</span>
-				</button>
-				<button
-					className={`${styles.toolbarBtn} ${styles.bashBtn}`}
-					onClick={() => insertAtCursor("!")}
-					title="Bash command (!)"
-					disabled={isStreaming}
-				>
-					<span className={styles.bashIcon}>!</span>
-				</button>
-				<button
-					className={`${styles.toolbarBtn} ${styles.uploadBtn}`}
-					onClick={handleFileUpload}
-					title="Upload image/file"
-					disabled={isStreaming}
-				>
-					<ImageIcon />
-				</button>
-			</div>
-
 			<div className={styles.inputRow}>
 				<textarea
 					ref={textareaRef}
@@ -508,12 +475,59 @@ export function InputArea({
 					rows={2}
 					disabled={isStreaming}
 				/>
+				<div className={styles.buttonColumn}>
+					<button
+						className={`${styles.sendButton} ${isStreaming ? styles.stopButton : ""}`}
+						onClick={handleSend}
+						title={isStreaming ? "Stop" : "Send (Ctrl+Enter)"}
+					>
+						{isStreaming ? <StopIcon /> : <SendIcon />}
+					</button>
+					{onNewSession && (
+						<button
+							className={styles.newSessionButton}
+							onClick={onNewSession}
+							title="New Session"
+							disabled={isStreaming}
+						>
+							<PlusIcon />
+						</button>
+					)}
+				</div>
+			</div>
+
+			<div className={styles.toolbar}>
 				<button
-					className={`${styles.sendButton} ${isStreaming ? styles.stopButton : ""}`}
-					onClick={handleSend}
-					title={isStreaming ? "Stop" : "Send (Ctrl+Enter)"}
+					className={styles.toolbarBtn}
+					onClick={() => insertAtCursor("@")}
+					title="Mention file (@)"
+					disabled={isStreaming}
 				>
-					{isStreaming ? <StopIcon /> : <SendIcon />}
+					<span className={styles.btnIcon}>@</span>
+				</button>
+				<button
+					className={styles.toolbarBtn}
+					onClick={() => insertAtCursor("/")}
+					title="Slash command (/)"
+					disabled={isStreaming}
+				>
+					<span className={styles.btnIcon}>/</span>
+				</button>
+				<button
+					className={styles.toolbarBtn}
+					onClick={() => insertAtCursor("!")}
+					title="Bash command (!)"
+					disabled={isStreaming}
+				>
+					<span className={styles.btnIcon}>!</span>
+				</button>
+				<button
+					className={styles.toolbarBtn}
+					onClick={handleFileUpload}
+					title="Upload image/file"
+					disabled={isStreaming}
+				>
+					<ImageIcon />
 				</button>
 			</div>
 		</div>
@@ -523,7 +537,6 @@ export function InputArea({
 function SendIcon() {
 	return (
 		<svg viewBox="0 0 24 24" fill="currentColor">
-			<path d="M3 20.59L20.59 3L21.71 4.41L4.41 21.71L3 20.59ZM5.41 3L21.71 19.29L20.59 20.71L4.29 4.41L5.41 3ZM12 2L12 4L12 2ZM12 20L12 22L12 20ZM2 12L4 12L2 12ZM20 12L22 12L20 12ZM17.66 6.34L19.07 4.93L17.66 6.34ZM4.93 19.07L6.34 17.66L4.93 19.07ZM19.07 17.66L17.66 19.07L19.07 17.66ZM6.34 4.93L4.93 6.34L6.34 4.93Z" opacity="0" />
 			<path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
 		</svg>
 	);
@@ -533,6 +546,15 @@ function StopIcon() {
 	return (
 		<svg viewBox="0 0 24 24" fill="currentColor">
 			<rect x="6" y="6" width="12" height="12" rx="2" />
+		</svg>
+	);
+}
+
+function PlusIcon() {
+	return (
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+			<line x1="12" y1="5" x2="12" y2="19" />
+			<line x1="5" y1="12" x2="19" y2="12" />
 		</svg>
 	);
 }
