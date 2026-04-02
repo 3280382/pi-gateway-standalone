@@ -12,9 +12,9 @@
 	line-height: 1.5;
 }
 
-/* 用户消息 - 亮蓝色，明显一点 */
+/* 用户消息 - 统一蓝色 */
 .user {
-	background: rgba(88, 166, 255, 0.25);
+	background: rgba(88, 166, 255, 0.12);
 }
 
 /* AI 消息 - clean */
@@ -46,9 +46,8 @@
 	height: 20px;
 	padding: 0;
 	border: none;
-	background: rgba(255, 255, 255, 0.1);
-	backdrop-filter: blur(4px);
-	color: var(--text-secondary, #6b7280);
+	background: rgba(88, 166, 255, 0.15);
+	color: #58a6ff;
 	border-radius: 4px;
 	cursor: pointer;
 	font-size: 11px;
@@ -56,8 +55,8 @@
 }
 
 .actionBtn:hover {
-	background: rgba(255, 255, 255, 0.15);
-	color: var(--text-primary, #e5e7eb);
+	background: rgba(88, 166, 255, 0.25);
+	color: #79b8ff;
 }
 
 /* Text content - 统一最小字体，偏细 */
