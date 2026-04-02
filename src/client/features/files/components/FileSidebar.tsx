@@ -3,9 +3,9 @@
  */
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
+import { browseDirectory } from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { fileSidebarDebug } from "@/lib/debug";
-import { browseDirectory } from "@/features/files/services/api/fileApi";
 import styles from "./FileBrowser.module.css";
 
 interface FileSidebarProps {

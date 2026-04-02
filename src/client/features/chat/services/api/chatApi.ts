@@ -4,9 +4,13 @@
  */
 
 import { useChatStore } from "@/features/chat/stores/chatStore";
+import type {
+	ChatController,
+	Message,
+	ToolExecution,
+} from "@/features/chat/types/chat";
 import { websocketService } from "@/shared/services/websocket.service";
 import { useSessionStore } from "@/shared/stores/sessionStore";
-import type { ChatController, Message, ToolExecution } from "@/features/chat/types/chat";
 
 // ============================================================================
 // Message ID Generator
@@ -49,8 +53,9 @@ export function useChatController(): EnhancedChatController {
 	const chatStore = useChatStore();
 	const sessionStore = useSessionStore();
 
-	// 确保全局流式处理器只设置一次
-	setupStreamingHandlers(chatStore);
+	// 注意：全局流式处理器现在由 chat.controller.ts 的 ChatController 设置
+	// 这里不再重复设置，避免消息重复处理
+	// setupStreamingHandlers(chatStore);
 
 	return {
 		// 基础聊天功能（支持图片）

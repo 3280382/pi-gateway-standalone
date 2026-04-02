@@ -4,7 +4,6 @@
  */
 
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import { websocketService } from "@/shared/services/websocket.service";
 import type {
 	FontSize,
 	SearchFilters,
@@ -15,6 +14,7 @@ import type {
 	WorkingDirResponse,
 } from "@/features/chat/types/sidebar";
 import { fetchApi } from "@/shared/services/api/client";
+import { websocketService } from "@/shared/services/websocket.service";
 
 // ============================================================================
 // Controller Hook

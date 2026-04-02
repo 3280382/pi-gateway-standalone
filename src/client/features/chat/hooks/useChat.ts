@@ -10,7 +10,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useChatStore } from "@/features/chat/stores/chatStore";
-import { hookLog, wsLog } from "@/lib/logger";
 import type {
 	AgentEndMessage,
 	AgentStartMessage,
@@ -24,6 +23,7 @@ import type {
 	ToolStartMessage,
 	ToolUpdateMessage,
 } from "@/features/chat/types/chat";
+import { hookLog, wsLog } from "@/lib/logger";
 import { wsClient } from "../api/client";
 
 // ============================================================================

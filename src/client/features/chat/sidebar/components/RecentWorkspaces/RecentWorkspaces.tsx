@@ -3,8 +3,8 @@
  * 使用 Zustand persist 存储（自动保存到 localStorage）
  */
 
-import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { IconButton } from "@/shared/ui/IconButton/IconButton";
 import { SectionHeader } from "@/shared/ui/SectionHeader/SectionHeader";
 import styles from "./RecentWorkspaces.module.css";

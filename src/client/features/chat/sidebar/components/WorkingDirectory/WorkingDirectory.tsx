@@ -4,8 +4,8 @@
  */
 
 import { useEffect, useState } from "react";
-import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { SectionHeader } from "@/shared/ui/SectionHeader/SectionHeader";
 import styles from "./WorkingDirectory.module.css";
 

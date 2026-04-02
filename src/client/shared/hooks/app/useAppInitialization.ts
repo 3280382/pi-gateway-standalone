@@ -4,9 +4,10 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fileController, sessionController } from "@/shared/controllers";
+import { chatController } from "@/features/chat/controllers";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { fileController, sessionController } from "@/shared/controllers";
 import { websocketService } from "@/shared/services/websocket.service";
 import { useSessionStore } from "@/shared/stores/sessionStore";
 
@@ -71,6 +72,9 @@ export function useAppInitialization(): InitResult {
 				await websocketService.connect();
 				wsConnected = websocketService.isConnected;
 				console.log("[AppInit] WebSocket connection status:", wsConnected);
+
+				// 设置 chat controller 的 WebSocket 监听器
+				chatController.setupWebSocketListeners();
 			} catch (wsErr) {
 				console.warn("[AppInit] WebSocket connection failed:", wsErr);
 			}

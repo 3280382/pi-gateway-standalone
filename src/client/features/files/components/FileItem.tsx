@@ -11,10 +11,10 @@
  */
 import type React from "react";
 import { memo, useCallback, useRef, useState } from "react";
-import type { FileItem as FileItemType } from "@/features/files/stores/fileStore";
 import { useGesture } from "@/features/files/hooks/useGesture";
-import { formatDate, formatFileSize } from "@/lib/formatters";
 import { getFileIcon } from "@/features/files/services/api/fileApi";
+import type { FileItem as FileItemType } from "@/features/files/stores/fileStore";
+import { formatDate, formatFileSize } from "@/lib/formatters";
 import styles from "./FileItem.module.css";
 
 interface FileItemProps {

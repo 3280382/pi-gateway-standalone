@@ -4,11 +4,11 @@
  */
 
 import type { ImageUpload } from "@/features/chat/components/InputArea";
-import { useChatStore } from "@/features/chat/stores/chatStore";
-import { ServiceError } from "@/shared/services/base.service";
 import { chatService } from "@/features/chat/services/chat.service";
-import { websocketService } from "@/shared/services/websocket.service";
+import { useChatStore } from "@/features/chat/stores/chatStore";
 import type { Message, ToolExecution } from "@/features/chat/types/chat";
+import { ServiceError } from "@/shared/services/base.service";
+import { websocketService } from "@/shared/services/websocket.service";
 
 export class ChatController {
 	private store = useChatStore;
@@ -460,6 +460,14 @@ export class ChatController {
 	 * 设置WebSocket监听器（公开方法，供外部调用）
 	 */
 	setupWebSocketListeners(): void {
+		// 防止重复设置监听器
+		if (this.listenersSetup) {
+			console.log("[ChatController] WebSocket listeners already setup, skipping");
+			return;
+		}
+		this.listenersSetup = true;
+		console.log("[ChatController] Setting up WebSocket listeners");
+
 		// 内容增量 - 使用批量更新
 		websocketService.on("content_delta", (data) => {
 			this.queueBatchUpdate({ content: data.text });

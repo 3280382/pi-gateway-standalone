@@ -6,6 +6,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SystemPromptModal } from "@/features/chat/components/modals/SystemPromptModal";
+import { useChatController } from "@/features/chat/services/api/chatApi";
+import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import {
 	selectSearchFilters,
 	selectSearchQuery,
@@ -13,8 +15,6 @@ import {
 } from "@/features/chat/stores/chatStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import { useChatController } from "@/features/chat/services/api/chatApi";
-import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import {
 	getSystemPrompt,
 	type SystemPromptResponse,

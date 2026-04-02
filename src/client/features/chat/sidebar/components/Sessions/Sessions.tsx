@@ -4,9 +4,9 @@
  */
 
 import { useEffect } from "react";
+import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { websocketService } from "@/shared/services/websocket.service";
 import { useSessionStore } from "@/shared/stores/sessionStore";
 import { IconButton } from "@/shared/ui/IconButton/IconButton";
