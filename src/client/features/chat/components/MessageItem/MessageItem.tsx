@@ -1,9 +1,18 @@
 /**
  * MessageItem - 扁平化重构版
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Message, MessageContent } from "@/types/chat";
 import styles from "./MessageItem.module.css";
+
+// 声明全局 Prism
+declare global {
+	interface Window {
+		Prism: {
+			highlightElement: (element: Element) => void;
+		};
+	}
+}
 
 interface MessageItemProps {
 	message: Message;
@@ -314,9 +323,10 @@ function TextContent({ content }: { content: string }) {
 	);
 }
 
-// 代码块
+// 代码块 - 使用 Prism.js
 function CodeBlock({ code, language }: { code: string; language?: string }) {
 	const [copied, setCopied] = useState(false);
+	const codeRef = useRef<HTMLElement>(null);
 
 	const handleCopy = () => {
 		navigator.clipboard.writeText(code);
@@ -324,7 +334,17 @@ function CodeBlock({ code, language }: { code: string; language?: string }) {
 		setTimeout(() => setCopied(false), 2000);
 	};
 
-	const highlightedCode = useMemo(() => highlightCode(code), [code]);
+	// 使用 Prism.js 高亮
+	useEffect(() => {
+		if (codeRef.current && window.Prism) {
+			window.Prism.highlightElement(codeRef.current);
+		}
+	}, [code, language]);
+
+	// 确定语言类名
+	const langClass = language
+		? `language-${language}`
+		: "language-text";
 
 	return (
 		<div className={styles.codeContainer}>
@@ -334,8 +354,10 @@ function CodeBlock({ code, language }: { code: string; language?: string }) {
 					{copied ? "✓" : "📋"}
 				</button>
 			</div>
-			<pre className={styles.codePre}>
-				<code dangerouslySetInnerHTML={{ __html: highlightedCode }} />
+			<pre className={`${styles.codePre} ${langClass}`}>
+				<code ref={codeRef} className={langClass}>
+					{code}
+				</code>
 			</pre>
 		</div>
 	);
@@ -393,69 +415,6 @@ function formatMarkdown(content: string): string {
 			/\[([^\]]+)\]\(([^)]+)\)/g,
 			'<a href="$2" target="_blank" rel="noopener">$1</a>',
 		);
-}
-
-function highlightCode(code: string): string {
-	if (!code) return "";
-
-	// 如果内容已经包含语法高亮标记，则不再处理
-	if (code.includes('class="token-') || code.includes("class='token-")) {
-		return code
-			.replace(/&/g, "&amp;")
-			.replace(/</g, "&lt;")
-			.replace(/>/g, "&gt;");
-	}
-
-	const keywords = [
-		"const",
-		"let",
-		"var",
-		"function",
-		"return",
-		"if",
-		"else",
-		"for",
-		"while",
-		"import",
-		"export",
-		"from",
-		"class",
-		"interface",
-		"type",
-		"async",
-		"await",
-		"try",
-		"catch",
-		"throw",
-		"new",
-		"this",
-		"true",
-		"false",
-		"null",
-		"undefined",
-	];
-
-	let html = code
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;");
-
-	html = html.replace(
-		/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
-		'<span class="token-string">$1</span>',
-	);
-	html = html.replace(
-		/(\/\/.*$|\/\*[\s\S]*?\*\/|#.*$)/gm,
-		'<span class="token-comment">$1</span>',
-	);
-	html = html.replace(
-		/\b(\d+\.?\d*)\b/g,
-		'<span class="token-number">$1</span>',
-	);
-	const keywordRegex = new RegExp(`\\b(${keywords.join("|")})\\b`, "g");
-	html = html.replace(keywordRegex, '<span class="token-keyword">$1</span>');
-
-	return html;
 }
 
 function safeStringify(obj: unknown): string {
