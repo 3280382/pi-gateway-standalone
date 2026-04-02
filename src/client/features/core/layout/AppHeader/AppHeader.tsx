@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SystemPromptModal } from "@/features/system/components/modals/SystemPromptModal";
+import { SystemPromptModal } from "@/features/chat/components/modals/SystemPromptModal";
 import { useChatController } from "@/services/api/chatApi";
 import { useSidebarController } from "@/services/api/sidebarApi";
 import {
