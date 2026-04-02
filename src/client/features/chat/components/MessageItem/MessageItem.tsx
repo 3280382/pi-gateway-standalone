@@ -397,6 +397,15 @@ function formatMarkdown(content: string): string {
 
 function highlightCode(code: string): string {
 	if (!code) return "";
+
+	// 如果内容已经包含语法高亮标记，则不再处理
+	if (code.includes('class="token-') || code.includes("class='token-")) {
+		return code
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;");
+	}
+
 	const keywords = [
 		"const",
 		"let",
