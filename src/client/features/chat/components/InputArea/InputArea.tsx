@@ -105,7 +105,7 @@ export function InputArea({
 		}
 	}, [value]);
 
-	const loadFileList = async () => {
+	const loadFileList = async (): Promise<void> => {
 		try {
 			const data = await browseDirectory(currentPath);
 			const items = [
@@ -117,6 +117,7 @@ export function InputArea({
 			setFileList(items);
 		} catch (err) {
 			console.error("Failed to load files:", err);
+			setFileList([]);
 		}
 	};
 
@@ -355,7 +356,7 @@ export function InputArea({
 		onChange(e.target.value);
 	};
 
-	const insertAtCursor = (text: string) => {
+	const insertAtCursor = (text: string, triggerAction?: 'file' | 'command' | 'bash') => {
 		const textarea = textareaRef.current;
 		if (!textarea) {
 			onChange(value + text);
@@ -373,6 +374,20 @@ export function InputArea({
 		// Set cursor position after the inserted text
 		const newCursorPos = start + text.length;
 		textarea.setSelectionRange(newCursorPos, newCursorPos);
+		
+		// Trigger corresponding action
+		if (triggerAction === 'file') {
+			// Load files and show picker immediately
+			loadFileList().then(() => {
+				setFileFilter('');
+				setShowFilePicker(true);
+				setSelectedFileIndex(0);
+			});
+		} else if (triggerAction === 'command') {
+			setCommandFilter('');
+			setShowCommands(true);
+			setSelectedIndex(0);
+		}
 	};
 
 	const placeholder = isStreaming
@@ -504,7 +519,7 @@ export function InputArea({
 			<div className={styles.toolbar}>
 				<button
 					className={styles.toolbarBtn}
-					onClick={() => insertAtCursor("@")}
+					onClick={() => insertAtCursor("@", 'file')}
 					title="Mention file (@)"
 					disabled={isStreaming}
 				>
@@ -512,7 +527,7 @@ export function InputArea({
 				</button>
 				<button
 					className={styles.toolbarBtn}
-					onClick={() => insertAtCursor("/")}
+					onClick={() => insertAtCursor("/", 'command')}
 					title="Slash command (/)"
 					disabled={isStreaming}
 				>
