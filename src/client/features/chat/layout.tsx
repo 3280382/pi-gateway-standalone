@@ -4,11 +4,11 @@
  */
 
 import { useCallback } from "react";
-import { useLayout } from "@/core/layout/LayoutContext";
-import { AppHeader } from "@/core/layout/AppHeader";
+import { useLayout } from "@/app/LayoutContext";
+import { AppHeader } from "@/features/chat/components/Header";
 import { SidebarPanel } from "@/features/chat/sidebar/components/SidebarPanel/SidebarPanel";
-import { LlmLogPanel } from "@/core/layout/panels/LlmLogPanel";
-import { XTermPanel } from "@/core/layout/panels/TerminalPanel";
+import { LlmLogPanel } from "@/features/chat/components/panels/LlmLogPanel";
+import { XTermPanel } from "@/features/chat/components/panels/TerminalPanel";
 import type { CommandResult } from "@/hooks/app";
 import { ChatPanel } from "./components/ChatPanel";
 import styles from "./ChatLayout.module.css";

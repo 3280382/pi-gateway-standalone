@@ -3,7 +3,7 @@
  * 控制视图切换（Chat/Files）和侧边栏显隐
  */
 
-import { useLayout } from "@/core/layout/LayoutContext";
+import { useLayout } from "@/app/LayoutContext";
 import styles from "./Footer.module.css";
 
 export function Footer() {
