@@ -126,6 +126,12 @@ export const FileItem = memo<FileItemProps>(
 
 				setIsPressed(false);
 
+				// If clicking checkbox, don't process as tap
+				if (isClickingCheckbox.current) {
+					touchStartRef.current = null;
+					return;
+				}
+
 				// If we were scrolling, don't process as tap
 				if (isScrollingRef.current || touchMovedRef.current) {
 					touchStartRef.current = null;
@@ -224,11 +230,34 @@ export const FileItem = memo<FileItemProps>(
 			[item, onDoubleTap],
 		);
 
+		// Track if clicking on checkbox to prevent tap handler
+		const isClickingCheckbox = useRef(false);
+
 		// Handle checkbox click
 		const handleCheckboxClick = useCallback(
 			(e: React.MouseEvent) => {
+				e.preventDefault();
 				e.stopPropagation();
+				isClickingCheckbox.current = true;
 				onToggleSelect(item.path);
+				// Reset after a short delay
+				setTimeout(() => {
+					isClickingCheckbox.current = false;
+				}, 100);
+			},
+			[item.path, onToggleSelect],
+		);
+
+		// Handle checkbox touch
+		const handleCheckboxTouch = useCallback(
+			(e: React.TouchEvent) => {
+				e.preventDefault();
+				e.stopPropagation();
+				isClickingCheckbox.current = true;
+				onToggleSelect(item.path);
+				setTimeout(() => {
+					isClickingCheckbox.current = false;
+				}, 100);
 			},
 			[item.path, onToggleSelect],
 		);
@@ -268,8 +297,11 @@ export const FileItem = memo<FileItemProps>(
 					<div
 						className={styles.checkbox}
 						onClick={handleCheckboxClick}
+						onTouchStart={handleCheckboxTouch}
+						onTouchEnd={(e) => e.preventDefault()}
 						role="checkbox"
 						aria-checked={isSelected}
+						data-checkbox="true"
 					>
 						{isSelected ? "☑" : "☐"}
 					</div>

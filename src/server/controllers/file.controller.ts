@@ -331,61 +331,166 @@ export async function writeFileContent(req: Request, res: Response) {
 
 /**
  * 批量删除文件
+ * 安全限制：
+ * 1. 最多删除 100 个文件
+ * 2. 禁止删除系统关键目录
+ * 3. 所有路径必须通过 isPathAllowed 检查
+ * 4. 记录详细日志
  */
+
+// 禁止删除的系统关键目录
+const PROTECTED_PATHS = [
+	"/",
+	"/bin",
+	"/boot",
+	"/dev",
+	"/etc",
+	"/lib",
+	"/lib64",
+	"/proc",
+	"/root",
+	"/run",
+	"/sbin",
+	"/sys",
+	"/usr",
+	"/var",
+	"/home",
+];
+
+const MAX_DELETE_COUNT = 100;
+
 export async function batchDeleteFiles(req: Request, res: Response) {
 	const { paths } = req.body;
 
+	// 参数校验
 	if (!paths || !Array.isArray(paths) || paths.length === 0) {
 		res.status(400).json({ error: "paths参数必填且必须是非空数组" });
 		return;
 	}
 
+	// 数量限制
+	if (paths.length > MAX_DELETE_COUNT) {
+		res.status(400).json({
+			error: `一次最多只能删除 ${MAX_DELETE_COUNT} 个文件`,
+			maxAllowed: MAX_DELETE_COUNT,
+			requested: paths.length,
+		});
+		return;
+	}
+
 	const results = [];
 	const errors = [];
+	let totalSize = 0;
 
 	try {
-		const { unlink, stat } = await import("fs/promises");
+		const { unlink, stat, rmdir } = await import("fs/promises");
 
+		// 第一阶段：验证所有路径
+		const validatedPaths = [];
 		for (const filePath of paths) {
 			const targetPath = expandPath(filePath);
 
+			// 检查是否在允许的路径范围内
 			if (!isPathAllowed(targetPath)) {
-				errors.push({ path: filePath, error: "访问被拒绝" });
+				errors.push({ path: filePath, error: "访问被拒绝 - 路径不在允许范围内" });
 				continue;
 			}
 
+			// 检查是否是受保护的系统目录
+			const isProtected = PROTECTED_PATHS.some(
+				(protectedPath) =>
+					targetPath === protectedPath ||
+					targetPath.startsWith(protectedPath + "/"),
+			);
+			if (isProtected) {
+				errors.push({
+					path: filePath,
+					error: "访问被拒绝 - 系统关键目录受保护",
+				});
+				logger.warn(`尝试删除受保护路径: ${targetPath}`);
+				continue;
+			}
+
+			// 检查文件/目录是否存在
 			try {
 				const stats = await stat(targetPath);
-				
-				if (stats.isDirectory()) {
-					// 递归删除目录
-					const { rmdir } = await import("fs/promises");
-					await rmdir(targetPath, { recursive: true });
-				} else {
-					// 删除文件
-					await unlink(targetPath);
-				}
-				
-				results.push({ path: filePath, success: true });
-				logger.info(`删除成功: ${targetPath}`);
-			} catch (error) {
-				const errorMsg = error instanceof Error ? error.message : String(error);
-				errors.push({ path: filePath, error: errorMsg });
-				logger.error(`删除失败: ${targetPath}, 错误: ${errorMsg}`);
+				validatedPaths.push({
+					originalPath: filePath,
+					resolvedPath: targetPath,
+					isDirectory: stats.isDirectory(),
+					size: stats.size,
+				});
+				totalSize += stats.size;
+			} catch {
+				errors.push({ path: filePath, error: "文件或目录不存在" });
 			}
 		}
 
-		logger.info(`批量删除完成: ${results.length} 成功, ${errors.length} 失败`);
-		res.json({
-			success: errors.length === 0,
+		// 如果没有有效路径，直接返回
+		if (validatedPaths.length === 0) {
+			res.status(400).json({
+				error: "没有可删除的有效文件或目录",
+				validated: 0,
+				requested: paths.length,
+				errors,
+			});
+			return;
+		}
+
+		// 第二阶段：执行删除
+		logger.info(
+			`开始批量删除: ${validatedPaths.length} 个项目, 总大小: ${totalSize} 字节`,
+		);
+
+		for (const { originalPath, resolvedPath, isDirectory, size } of validatedPaths) {
+			try {
+				if (isDirectory) {
+					// 递归删除目录
+					await rmdir(resolvedPath, { recursive: true });
+					logger.info(`删除目录成功: ${resolvedPath}`);
+				} else {
+					// 删除文件
+					await unlink(resolvedPath);
+					logger.info(`删除文件成功: ${resolvedPath}, 大小: ${size} 字节`);
+				}
+
+				results.push({
+					path: originalPath,
+					success: true,
+					isDirectory,
+					size,
+				});
+			} catch (error) {
+				const errorMsg = error instanceof Error ? error.message : String(error);
+				errors.push({ path: originalPath, error: errorMsg });
+				logger.error(`删除失败: ${resolvedPath}, 错误: ${errorMsg}`);
+			}
+		}
+
+		// 记录完整结果
+		const success = errors.length === 0;
+		const statusCode = success ? 200 : errors.length < paths.length ? 207 : 400;
+
+		logger.info(
+			`批量删除完成: ${results.length} 成功, ${errors.length} 失败, 总大小: ${totalSize} 字节`,
+		);
+
+		res.status(statusCode).json({
+			success,
 			deleted: results.length,
+			failed: errors.length,
+			totalSize,
+			results: success ? undefined : results,
 			errors: errors.length > 0 ? errors : undefined,
 		});
 	} catch (error) {
 		logger.error(
-			`批量删除错误: ${error instanceof Error ? error.message : String(error)}`,
+			`批量删除系统错误: ${error instanceof Error ? error.message : String(error)}`,
 		);
-		res.status(500).json({ error: String(error) });
+		res.status(500).json({
+			error: "删除操作失败",
+			details: error instanceof Error ? error.message : String(error),
+		});
 	}
 }
 
