@@ -3,17 +3,18 @@
  */
 
 .footer {
-	position: relative;
+	position: sticky;
+	bottom: 0;
 	width: 100%;
 	height: 44px;
 	min-height: 44px;
-	background: #161b22;
-	border-top: 1px solid #30363d;
+	background: #ff0000 !important;
+	border-top: 3px solid #00ff00;
 	display: flex;
 	align-items: center;
 	padding: 0 12px;
 	flex-shrink: 0;
-	z-index: 100;
+	z-index: 99999;
 }
 
 /* Left group - 固定在左侧 */
@@ -47,23 +48,24 @@
 	justify-content: center;
 	gap: 4px;
 	padding: 6px 12px;
-	background: transparent;
-	border: none;
+	background: #ffffff;
+	border: 2px solid #0000ff;
 	border-radius: 6px;
-	color: #7d8590;
+	color: #000000;
 	cursor: pointer;
 	transition: all 0.2s ease;
 	font-size: 14px;
+	font-weight: bold;
 }
 
 .button:hover {
-	background: #21262d;
-	color: #e6edf3;
+	background: #ffff00;
+	color: #000000;
 }
 
 .button.active {
-	color: #58a6ff;
-	background: rgba(88, 166, 255, 0.12);
+	color: #ff0000;
+	background: #ffffff;
 }
 
 /* 图标按钮（仅图标无文字） */
