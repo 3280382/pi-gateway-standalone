@@ -216,15 +216,22 @@ function scheduleRafUpdate(
 			streamingThinking: newThinking,
 		});
 
-		// 获取之前已保存的内容（多轮思考/工具的结果）
+		// 获取之前已保存的内容
 		const existingContent = state.currentStreamingMessage.content || [];
 
-		// 合并：保留 existingContent 中的内容，只替换当前的流式内容
-		// 过滤掉 existingContent 中的 thinking/text/tools（它们会在 currentContentArray 中重建）
-		// 保留 turn_marker 和其他非流式内容
-		const preservedContent = existingContent.filter(
-			(c: any) => c.type === 'turn_marker' || c.type === 'separator'
-		);
+		// 找到最后一个 turn_marker 的位置
+		// turn_marker 之前的所有内容是之前轮次的（已固定）
+		// turn_marker 之后的内容是当前轮次的（需要被 currentContentArray 替换）
+		const lastTurnMarkerIndex = existingContent.map((c: any) => c.type).lastIndexOf('turn_marker');
+		
+		let preservedContent: any[];
+		if (lastTurnMarkerIndex >= 0) {
+			// 保留 turn_marker 及之前的所有内容（之前轮次）
+			preservedContent = existingContent.slice(0, lastTurnMarkerIndex + 1);
+		} else {
+			// 没有 turn_marker，说明是第一轮，不保留任何内容
+			preservedContent = [];
+		}
 
 		set(
 			(s) => ({
@@ -233,7 +240,7 @@ function scheduleRafUpdate(
 				currentStreamingMessage: s.currentStreamingMessage
 					? {
 							...s.currentStreamingMessage,
-							// 合并保留的内容 + 当前流式内容
+							// 之前轮次的内容 + 当前轮次的完整内容
 							content: [...preservedContent, ...currentContentArray],
 						}
 					: null,

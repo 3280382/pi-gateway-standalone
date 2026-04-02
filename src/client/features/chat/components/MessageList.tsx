@@ -33,10 +33,11 @@ export function MessageList({
   onRegenerateMessage,
 }: MessageListProps) {
   // 防止重复：如果 currentStreamingMessage 的 ID 已经在 messages 中，则不添加
+  // 这发生在 finishStreaming 将消息添加到 messages 但 currentStreamingMessage 还未被设为 null 时
   const allMessages = currentStreamingMessage
     ? messages.some(m => m.id === currentStreamingMessage.id)
-      ? messages
-      : [...messages, currentStreamingMessage]
+      ? messages  // ID 已存在于 messages 中，不重复添加
+      : [...messages, currentStreamingMessage]  // ID 不存在，添加流式消息
     : messages;
 
   if (allMessages.length === 0) {
