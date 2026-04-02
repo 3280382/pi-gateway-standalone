@@ -438,3 +438,14 @@
   background: rgba(88, 166, 255, 0.3);
   border-radius: 2px;
 }
+
+/* Loading state in file picker */
+.loadingItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 12px;
+  color: #64748b;
+  font-size: 13px;
+  font-style: italic;
+}

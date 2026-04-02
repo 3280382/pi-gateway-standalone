@@ -57,6 +57,7 @@ export function InputArea({
 	const [showFilePicker, setShowFilePicker] = useState(false);
 	const [fileFilter, setFileFilter] = useState("");
 	const [fileList, setFileList] = useState<FileItem[]>([]);
+	const [isLoadingFiles, setIsLoadingFiles] = useState(false);
 	const [selectedFileIndex, setSelectedFileIndex] = useState(0);
 	const { currentPath } = useFileStore();
 	
@@ -106,6 +107,7 @@ export function InputArea({
 	}, [value]);
 
 	const loadFileList = async (): Promise<void> => {
+		setIsLoadingFiles(true);
 		try {
 			const data = await browseDirectory(currentPath);
 			const items = [
@@ -118,6 +120,8 @@ export function InputArea({
 		} catch (err) {
 			console.error("Failed to load files:", err);
 			setFileList([]);
+		} finally {
+			setIsLoadingFiles(false);
 		}
 	};
 
@@ -425,28 +429,34 @@ export function InputArea({
 				</div>
 			)}
 
-			{showFilePicker && filteredFiles.length > 0 && (
+			{showFilePicker && (
 				<div className={styles.filePicker}>
 					<div className={styles.filePickerHeader}>
 						<FileIcon />
 						<span>Select file or directory</span>
 					</div>
-					{filteredFiles.map((file, index) => (
-						<button
-							key={file.path}
-							className={`${styles.fileItem} ${
-								index === selectedFileIndex ? styles.selected : ""
-							}`}
-							onClick={() => selectFile(file)}
-							onMouseEnter={() => setSelectedFileIndex(index)}
-						>
-							<span className={styles.fileIcon}>
-								{file.isDirectory ? <FolderIcon /> : <DocIcon />}
-							</span>
-							<span className={styles.fileName}>{file.name}</span>
-							<span className={styles.filePath}>{file.path}</span>
-						</button>
-					))}
+					{isLoadingFiles ? (
+						<div className={styles.loadingItem}>Loading files...</div>
+					) : filteredFiles.length > 0 ? (
+						filteredFiles.map((file, index) => (
+							<button
+								key={file.path}
+								className={`${styles.fileItem} ${
+									index === selectedFileIndex ? styles.selected : ""
+								}`}
+								onClick={() => selectFile(file)}
+								onMouseEnter={() => setSelectedFileIndex(index)}
+							>
+								<span className={styles.fileIcon}>
+									{file.isDirectory ? <FolderIcon /> : <DocIcon />}
+								</span>
+								<span className={styles.fileName}>{file.name}</span>
+								<span className={styles.filePath}>{file.path}</span>
+							</button>
+						))
+					) : (
+						<div className={styles.loadingItem}>No files found</div>
+					)}
 				</div>
 			)}
 
