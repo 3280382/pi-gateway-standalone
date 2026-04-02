@@ -208,6 +208,8 @@ function scheduleRafUpdate(
 		const newThinking =
 			state.streamingThinking + (pendingContentUpdates.thinking || "");
 
+		console.log("[RAF Update] streamingThinking:", state.streamingThinking.substring(0, 50) + "...", "+ new:", (pendingContentUpdates.thinking || "").substring(0, 50) + "...", "=", newThinking.substring(0, 50) + "...");
+
 		// 只更新一次状态
 		const contentArray = buildContentArray({
 			...state,
@@ -709,6 +711,7 @@ export const useChatStore = create<
 			},
 
 			appendStreamingThinking: (thinking: string) => {
+				console.log("[ChatStore] appendStreamingThinking called:", thinking.substring(0, 50) + "...");
 				pendingContentUpdates.thinking =
 					(pendingContentUpdates.thinking || "") + thinking;
 				scheduleRafUpdate(get, set);
