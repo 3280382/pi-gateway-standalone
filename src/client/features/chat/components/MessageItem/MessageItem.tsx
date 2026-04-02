@@ -1,15 +1,6 @@
 /**
  * MessageItem - 扁平化重构版
- *
- * 优化后的层级结构（最大 3-4 层）：
- * .message
- *   > .actions
- *   > pre.thinkingBody (thinking - 本身既是容器又是内容)
- *   > .textSection (text)
- *   > .toolContent (tool)
- *   > .codeContainer (code block)
  */
-
 import { useMemo, useState } from "react";
 import type { Message, MessageContent } from "@/types/chat";
 import styles from "./MessageItem.module.css";
@@ -38,12 +29,10 @@ export function MessageItem({
 	const isCollapsed = message.isMessageCollapsed ?? false;
 	const [showActions, setShowActions] = useState(false);
 
-	// 直接按原始顺序渲染内容块
 	const blocks = useMemo(() => {
 		return message.content.map((c, idx) => ({ ...c, originalIndex: idx }));
 	}, [message.content]);
 
-	// 合并所有文本
 	const fullText = useMemo(() => {
 		return blocks
 			.filter((c) => c.type === "text")
@@ -51,7 +40,6 @@ export function MessageItem({
 			.join("");
 	}, [blocks]);
 
-	// 处理复制
 	const handleCopy = () => {
 		const text = message.content
 			.map((c) => {
@@ -73,7 +61,6 @@ export function MessageItem({
 			onMouseEnter={() => setShowActions(true)}
 			onMouseLeave={() => setShowActions(false)}
 		>
-			{/* 操作按钮 */}
 			<div className={styles.actions} style={{ opacity: showActions ? 1 : 0 }}>
 				<button className={styles.actionBtn} onClick={handleCopy} title="复制">
 					📋
@@ -85,17 +72,14 @@ export function MessageItem({
 				)}
 			</div>
 
-			{/* 内容 - 直接渲染，减少嵌套 */}
 			{!isCollapsed && (
 				<>
 					{isUser ? (
-						// 用户消息 - 单层渲染
 						<span
 							className={styles.userText}
 							dangerouslySetInnerHTML={{ __html: formatMarkdown(fullText) }}
 						/>
 					) : (
-						// AI 消息 - 直接渲染块列表
 						blocks.map((block, idx) => {
 							switch (block.type) {
 								case "thinking":
@@ -119,7 +103,6 @@ export function MessageItem({
 										/>
 									) : null;
 								case "tool_use":
-									// 流式中的 tool_use，按 building 状态显示
 									return showTools ? (
 										<ToolUseContent
 											key={`tool-use-${block.toolCallId || idx}`}
@@ -141,7 +124,7 @@ export function MessageItem({
 	);
 }
 
-// Thinking 块 - 直接使用 pre 作为根容器
+// Thinking 块
 interface ThinkingContentProps {
 	content: MessageContent;
 	isCollapsed?: boolean;
@@ -155,7 +138,6 @@ function ThinkingContent({
 	onToggle,
 	isStreaming,
 }: ThinkingContentProps) {
-	// 流式时强制展开，非流式时默认折叠（thinking 通常较长，默认折叠）
 	const shouldShow = isStreaming ? true : isCollapsed === false;
 	const firstLine = content.thinking?.split("\n")[0] || "";
 
@@ -176,7 +158,7 @@ function ThinkingContent({
 	);
 }
 
-// Tool 块 (已完成执行)
+// Tool 块
 interface ToolContentProps {
 	content: MessageContent;
 	isCollapsed?: boolean;
@@ -190,7 +172,6 @@ function ToolContent({
 	onToggle,
 	isStreaming,
 }: ToolContentProps) {
-	// 流式时强制展开，非流式时默认收缩（isCollapsed === false 时才展开）
 	const isExpanded = isStreaming ? true : isCollapsed === false;
 	const status = content.error
 		? "error"
@@ -198,47 +179,30 @@ function ToolContent({
 			? "success"
 			: "pending";
 
-	const firstLine = useMemo(() => {
-		const outputText = content.output || content.error || "";
-		return typeof outputText === "string"
-			? outputText.split("\n")[0].substring(0, 80)
-			: String(outputText).substring(0, 80);
-	}, [content.output, content.error]);
-
-	// 获取工具参数（优先使用 args，如果没有则尝试解析 _streamingArgs）
 	const toolArgs = useMemo(() => {
 		if (content.args && Object.keys(content.args).length > 0) {
-			// 如果有 _streamingArgs，尝试解析它
 			const streamingArgs = (content.args as Record<string, unknown>)
 				._streamingArgs;
 			if (streamingArgs && typeof streamingArgs === "string") {
 				try {
-					// 尝试解析为 JSON
 					return JSON.parse(streamingArgs);
 				} catch {
-					// 如果不是有效的 JSON，尝试作为原始参数对象返回
-					try {
-						// 可能 _streamingArgs 是对象字符串表示，尝试提取键值对
-						const matches = streamingArgs.match(/(\w+)=([^\s,]+)/g);
-						if (matches) {
-							const parsed: Record<string, string> = {};
-							matches.forEach((match) => {
-								const [key, value] = match.split("=");
-								if (key && value) {
-									parsed[key] = value.replace(/^["']|["']$/g, "");
-								}
-							});
-							return Object.keys(parsed).length > 0
-								? parsed
-								: { _raw: streamingArgs };
-						}
-					} catch {
-						// 忽略解析错误
+					const matches = streamingArgs.match(/(\w+)=([^\s,]+)/g);
+					if (matches) {
+						const parsed: Record<string, string> = {};
+						matches.forEach((match) => {
+							const [key, value] = match.split("=");
+							if (key && value) {
+								parsed[key] = value.replace(/^["']|["']$/g, "");
+							}
+						});
+						return Object.keys(parsed).length > 0
+							? parsed
+							: { _raw: streamingArgs };
 					}
 					return { _raw: streamingArgs };
 				}
 			}
-			// 返回 args 但不包含 _streamingArgs 字段
 			const { _streamingArgs, ...restArgs } = content.args as Record<
 				string,
 				unknown
@@ -248,20 +212,16 @@ function ToolContent({
 		return {};
 	}, [content.args]);
 
-	// 阻止事件冒泡，防止触发消息其他点击
+	const previewLine = useMemo(() => {
+		const toolName = content.toolName || "tool";
+		const argsStr = formatArgsAsCommand(toolName, toolArgs);
+		const fullCmd = argsStr || toolName;
+		return fullCmd.split("\n")[0].substring(0, 60);
+	}, [content.toolName, toolArgs]);
+
 	const handleClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		console.log(
-			"[ToolContent] Clicked, isExpanded:",
-			isExpanded,
-			"onToggle exists:",
-			!!onToggle,
-		);
-		if (onToggle) {
-			onToggle();
-		} else {
-			console.warn("[ToolContent] onToggle is undefined!");
-		}
+		onToggle?.();
 	};
 
 	if (!isExpanded) {
@@ -269,11 +229,13 @@ function ToolContent({
 			<div
 				className={`${styles.toolContainer} ${styles[status]} ${styles.collapsed}`}
 				onClick={handleClick}
+				title={previewLine}
 			>
-				<span className={styles.collapsedText}>
-					{content.toolName || "tool"}
+				<span className={styles.collapsedIcon}>
+					{status === "success" ? "✓" : status === "error" ? "✗" : "◐"}
 				</span>
-				<span className={styles.collapsedPreview}>{firstLine}</span>
+				<span className={styles.collapsedText}>{content.toolName}</span>
+				<span className={styles.collapsedPreview}>{previewLine}</span>
 			</div>
 		);
 	}
@@ -305,7 +267,7 @@ function ToolContent({
 	);
 }
 
-// Tool Use 块 (流式构建中)
+// Tool Use 块
 function ToolUseContent({ content }: { content: MessageContent }) {
 	return (
 		<div className={`${styles.toolContainer} ${styles.building}`}>
@@ -320,12 +282,11 @@ function ToolUseContent({ content }: { content: MessageContent }) {
 	);
 }
 
-// Text 块 - 直接渲染，支持代码块
+// Text 块
 function TextContent({ content }: { content: string }) {
 	const parts = useMemo(() => parseContentWithCode(content), [content]);
 
 	if (parts.length === 1 && parts[0].type === "text") {
-		// 纯文本，直接渲染，减少一层 div
 		return (
 			<span
 				className={styles.markdownText}
@@ -334,7 +295,6 @@ function TextContent({ content }: { content: string }) {
 		);
 	}
 
-	// 混合内容
 	return (
 		<>
 			{parts.map((part, idx) =>
@@ -381,10 +341,7 @@ function CodeBlock({ code, language }: { code: string; language?: string }) {
 	);
 }
 
-// ============================================================================
 // 工具函数
-// ============================================================================
-
 interface ContentPart {
 	type: "text" | "code";
 	content: string;
@@ -508,13 +465,12 @@ function formatArgsAsCommand(
 ): string {
 	if (!args || Object.keys(args).length === 0) return toolName;
 
-	// 处理 _raw 字段（原始参数字符串）
 	if (args._raw && typeof args._raw === "string") {
 		return `${toolName} ${args._raw}`;
 	}
 
 	const argStr = Object.entries(args)
-		.filter(([key]) => !key.startsWith("_")) // 过滤掉内部字段
+		.filter(([key]) => !key.startsWith("_"))
 		.map(([key, value]) => {
 			const val = String(value);
 			if (
