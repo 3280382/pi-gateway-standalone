@@ -627,17 +627,8 @@ export class ChatController {
 	 * 完成流式消息
 	 */
 	private finalizeStreamingMessage(): void {
-		const state = this.store.getState();
-
-		if (!state.currentStreamingMessage) return;
-
-		// 完成消息
-		const finalMessage: Message = {
-			...state.currentStreamingMessage,
-			isStreaming: false,
-		};
-
-		this.store.getState().addMessage(finalMessage);
+		// 使用 finishStreaming 完成消息，它会将消息添加到 messages 数组
+		// 不需要额外调用 addMessage，避免重复添加
 		this.store.getState().finishStreaming();
 	}
 

@@ -255,11 +255,11 @@ export function useChat(): UseChatReturn {
 			wsLog.info("Agent started", data);
 		});
 
-		// Agent end handler - finalize streaming
-		registerHandler("agent_end", (_data: AgentEndMessage) => {
-			finalizeRef.current?.();
-			clearHandlers();
-		});
+		// Agent end handler - 禁用，由 chatController 统一处理
+		// registerHandler("agent_end", (_data: AgentEndMessage) => {
+		// 	finalizeRef.current?.();
+		// 	clearHandlers();
+		// });
 
 		// Message start/end handlers
 		registerHandler("message_start", () => {

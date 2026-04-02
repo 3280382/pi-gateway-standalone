@@ -428,15 +428,15 @@ function setupStreamingHandlers(
 		store.startNewTurn();
 	});
 
-	// Agent end handler
-	websocketService.on("agent_end", () => {
-		store.finishStreaming();
-	});
+	// Agent end handler - 禁用，由 chatController 统一处理
+	// websocketService.on("agent_end", () => {
+	// 	store.finishStreaming();
+	// });
 
-	// Error handler
-	websocketService.on("error", () => {
-		store.abortStreaming();
-	});
+	// Error handler - 禁用，由 chatController 统一处理
+	// websocketService.on("error", () => {
+	// 	store.abortStreaming();
+	// });
 }
 
 // ============================================================================
