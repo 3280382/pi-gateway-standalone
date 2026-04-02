@@ -209,11 +209,21 @@ function scheduleRafUpdate(
 			state.streamingThinking + (pendingContentUpdates.thinking || "");
 
 		// 只更新一次状态
-		const contentArray = buildContentArray({
+		const currentContentArray = buildContentArray({
 			...state,
 			streamingContent: newContent,
 			streamingThinking: newThinking,
 		});
+
+		// 获取之前已保存的内容（多轮思考/工具的结果）
+		const existingContent = state.currentStreamingMessage.content || [];
+
+		// 合并：保留 existingContent 中的内容，只替换当前的流式内容
+		// 过滤掉 existingContent 中的 thinking/text/tools（它们会在 currentContentArray 中重建）
+		// 保留 turn_marker 和其他非流式内容
+		const preservedContent = existingContent.filter(
+			(c: any) => c.type === 'turn_marker' || c.type === 'separator'
+		);
 
 		set(
 			(s) => ({
@@ -222,7 +232,8 @@ function scheduleRafUpdate(
 				currentStreamingMessage: s.currentStreamingMessage
 					? {
 							...s.currentStreamingMessage,
-							content: contentArray,
+							// 合并保留的内容 + 当前流式内容
+							content: [...preservedContent, ...currentContentArray],
 						}
 					: null,
 			}),
