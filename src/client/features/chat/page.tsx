@@ -1,12 +1,10 @@
 /**
  * ChatPage - 聊天页面
- * 包装 ChatLayout 并提供数据
  */
 
 import type { CommandResult } from "@/hooks/app";
 import { useChatMessages } from "@/hooks/app";
 import { ChatLayout } from "./layout";
-import styles from "./page.module.css";
 
 interface ChatPageProps {
 	terminalOutput: string;
@@ -20,12 +18,6 @@ interface ChatPageProps {
 }
 
 export function ChatPage(props: ChatPageProps) {
-	// 使用聊天消息 hook
 	useChatMessages();
-
-	return (
-		<div className={styles.page}>
-			<ChatLayout {...props} />
-		</div>
-	);
+	return <ChatLayout {...props} />;
 }

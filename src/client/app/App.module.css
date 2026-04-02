@@ -1,6 +1,6 @@
 /**
  * App Layout Styles
- * 简单结构：PageContainer + Footer
+ * 纯 Flex 布局：PageContainer + Footer
  */
 
 .app {
@@ -16,6 +16,5 @@
 	display: flex;
 	flex-direction: column;
 	min-height: 0;
-	max-height: calc(100vh - 44px);
 	overflow: hidden;
 }
