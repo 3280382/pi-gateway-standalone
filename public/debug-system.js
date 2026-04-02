@@ -218,7 +218,7 @@
 		btn.textContent = "🐛";
 		btn.style.cssText = `
       position: fixed;
-      bottom: 20px;
+      bottom: 80px;
       right: 20px;
       width: 44px;
       height: 44px;
