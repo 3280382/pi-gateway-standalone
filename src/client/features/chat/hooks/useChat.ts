@@ -367,8 +367,8 @@ export function useChat(): UseChatReturn {
 		store.clearInput();
 		store.startStreaming();
 
-		// Setup streaming handlers
-		setupStreamingHandlers();
+		// Setup streaming handlers - 禁用，由 chatController 统一处理
+		// setupStreamingHandlers();
 
 		// Send via WebSocket
 		if (isBash) {
