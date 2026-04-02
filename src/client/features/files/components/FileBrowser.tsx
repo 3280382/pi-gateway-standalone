@@ -1,7 +1,7 @@
 /**
  * FileBrowser - 文件浏览器主组件 (Enhanced with multi-select, gestures, drag-drop)
  */
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { fileBrowserDebug, withLogging } from "@/lib/debug";
 import { browseDirectory } from "@/services/api/fileApi";
 import { useFileStore } from "@/stores/fileStore";
@@ -146,7 +146,14 @@ export function FileBrowser({
 		[setItems, setLoading, setError, setCurrentPath],
 	);
 	// 路径变化时加载新目录
+	const lastLoadedPathRef = useRef<string>("");
 	useEffect(() => {
+		// 避免重复加载相同路径
+		if (currentPath === lastLoadedPathRef.current) {
+			return;
+		}
+		lastLoadedPathRef.current = currentPath;
+		
 		fileBrowserDebug.info("FileBrowser组件挂载/更新", {
 			currentPath,
 			isLoading,
