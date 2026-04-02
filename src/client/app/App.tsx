@@ -18,6 +18,7 @@ import { FilesPage } from "@/features/files/page";
 import { useAppInitialization, useTerminalCommands } from "@/hooks/app";
 import { Footer } from "./Footer";
 import "@/styles/global.css";
+import styles from "./App.module.css";
 
 /**
  * AppContent - 应用内容组件
@@ -50,9 +51,9 @@ function AppContent() {
 	}
 
 	return (
-		<div className="app">
+		<div className={styles.app}>
 			{/* 主内容区域 - 由当前 feature 完全接管 */}
-			<main className="page-container">
+			<main className={styles.pageContainer}>
 				{currentView === "chat" ? (
 					<ChatPage
 						terminalOutput={terminalOutput}
