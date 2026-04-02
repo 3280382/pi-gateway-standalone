@@ -1,6 +1,6 @@
 /**
  * ChatLayout - 聊天功能布局
- * 包含：Header、Sidebar、Content、Panel
+ * 包含：Header、Sidebar(overlay)、Content、Panel
  */
 
 import { useCallback } from "react";
@@ -77,14 +77,14 @@ export function ChatLayout({
 				<AppHeader />
 			</header>
 
-			{/* Body: Sidebar + Content */}
+			{/* Body */}
 			<div className={styles.body}>
-				{/* Sidebar */}
-				{isSidebarVisible && (
-					<aside className={styles.sidebar}>
-						<SidebarPanel isVisible={isSidebarVisible} currentView="chat" />
-					</aside>
-				)}
+				{/* Sidebar - overlay 模式 */}
+				<aside
+					className={`${styles.sidebar} ${isSidebarVisible ? styles.sidebarVisible : styles.sidebarHidden}`}
+				>
+					<SidebarPanel isVisible={isSidebarVisible} currentView="chat" />
+				</aside>
 
 				{/* Content */}
 				<main className={styles.content}>
