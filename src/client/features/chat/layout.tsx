@@ -1,14 +1,17 @@
 /**
- * ChatLayout - 聊天功能布局
- * 整合 ChatPanel 和底部面板
+ * ChatLayout - 聊天功能完整布局
+ * 包含：Header、Sidebar、Content、Panel
  */
 
 import { useCallback } from "react";
 import { useLayout } from "@/features/core/layout/AppLayout/LayoutContext";
+import { AppHeader } from "@/features/core/layout/AppHeader";
+import { SidebarPanel } from "@/features/sidebar/components/SidebarPanel/SidebarPanel";
 import { LlmLogPanel } from "@/features/core/layout/panels/LlmLogPanel";
 import { XTermPanel } from "@/features/core/layout/panels/TerminalPanel";
 import type { CommandResult } from "@/hooks/app";
 import { ChatPanel } from "./components/ChatPanel";
+import styles from "./ChatLayout.module.css";
 
 interface ChatLayoutProps {
 	terminalOutput: string;
@@ -27,11 +30,10 @@ export function ChatLayout({
 	commandResults,
 	isExecuting,
 	onBashCommand,
-	onSlashCommand,
 	closeBottomPanel,
 	setBottomPanelHeight,
 }: ChatLayoutProps) {
-	const { isBottomPanelOpen, bottomPanelHeight } = useLayout();
+	const { isSidebarVisible, isBottomPanelOpen, bottomPanelHeight } = useLayout();
 
 	const renderBottomPanel = useCallback(() => {
 		if (!isBottomPanelOpen) return null;
@@ -69,9 +71,27 @@ export function ChatLayout({
 	]);
 
 	return (
-		<div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-			<ChatPanel />
-			{renderBottomPanel()}
+		<div className={styles.layout}>
+			{/* Header */}
+			<header className={styles.header}>
+				<AppHeader />
+			</header>
+
+			{/* Body: Sidebar + Content */}
+			<div className={styles.body}>
+				{/* Sidebar */}
+				{isSidebarVisible && (
+					<aside className={styles.sidebar}>
+						<SidebarPanel />
+					</aside>
+				)}
+
+				{/* Content */}
+				<main className={styles.content}>
+					<ChatPanel />
+					{renderBottomPanel()}
+				</main>
+			</div>
 		</div>
 	);
 }

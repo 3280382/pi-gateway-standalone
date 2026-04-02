@@ -3,17 +3,14 @@
  *
  * 新架构：
  * - Footer: 唯一全局控件（底部视图切换）
- * - PageContainer: 由当前 feature 完全接管（包含自己的 Header/Sidebar/Panel）
+ * - PageContainer: 由当前 feature 完全接管（包含自己的 Header/Sidebar/Panel/Modals）
  * - Chat/Files: 各自独立的完整功能模块
  */
 
-import { ChatPage } from "@/features/chat/page";
-import {
-	LayoutProvider,
-	useLayout,
-} from "@/features/core/layout/AppLayout/LayoutContext";
+import { LayoutProvider, useLayout } from "@/features/core/layout/AppLayout/LayoutContext";
 import { ErrorScreen } from "@/features/core/pages/ErrorScreen";
 import { LoadingScreen } from "@/features/core/pages/LoadingScreen";
+import { ChatPage } from "@/features/chat/page";
 import { FilesPage } from "@/features/files/page";
 import { useAppInitialization, useTerminalCommands } from "@/hooks/app";
 import { Footer } from "./Footer";
@@ -52,7 +49,7 @@ function AppContent() {
 
 	return (
 		<div className={styles.app}>
-			{/* 主内容区域 - 由当前 feature 完全接管 */}
+			{/* PageContainer: 每个 feature 自己控制 Header/Sidebar/Panel/Modals */}
 			<main className={styles.pageContainer}>
 				{currentView === "chat" ? (
 					<ChatPage
@@ -77,7 +74,7 @@ function AppContent() {
 				)}
 			</main>
 
-			{/* 唯一全局控件 */}
+			{/* Footer: 唯一全局控件 */}
 			<Footer />
 		</div>
 	);

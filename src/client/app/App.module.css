@@ -1,5 +1,6 @@
 /**
  * App Layout Styles
+ * 简单结构：PageContainer + Footer
  */
 
 .app {
@@ -10,7 +11,7 @@
 	overflow: hidden;
 }
 
-.page-container {
+.pageContainer {
 	flex: 1;
 	display: flex;
 	flex-direction: column;

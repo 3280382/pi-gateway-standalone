@@ -4,9 +4,10 @@
  */
 
 import { useEffect } from "react";
+import { IconButton } from "@/shared/ui/IconButton/IconButton";
+import { SectionHeader } from "@/shared/ui/SectionHeader/SectionHeader";
 import { useSidebarController } from "@/services/api/sidebarApi";
 import { websocketService } from "@/services/websocket.service";
-import { IconButton, SectionHeader } from "@/shared/ui";
 import { useChatStore } from "@/stores/chatStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useSidebarStore } from "@/stores/sidebarStore";

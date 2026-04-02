@@ -1,11 +1,15 @@
 /**
- * FilesLayout - 文件功能布局
+ * FilesLayout - 文件功能完整布局
+ * 包含：Header、Sidebar、Content、Panel
  */
 
 import { useCallback } from "react";
 import { useLayout } from "@/features/core/layout/AppLayout/LayoutContext";
+import { AppHeader } from "@/features/core/layout/AppHeader";
+import { SidebarPanel } from "@/features/sidebar/components/SidebarPanel/SidebarPanel";
 import { XTermPanel } from "@/features/core/layout/panels/TerminalPanel";
 import { FileBrowser } from "./components/FileBrowser";
+import styles from "./FilesLayout.module.css";
 
 interface FilesLayoutProps {
 	terminalOutput: string;
@@ -24,7 +28,7 @@ export function FilesLayout({
 	closeBottomPanel,
 	setBottomPanelHeight,
 }: FilesLayoutProps) {
-	const { isBottomPanelOpen, bottomPanelHeight } = useLayout();
+	const { isSidebarVisible, isBottomPanelOpen, bottomPanelHeight } = useLayout();
 
 	const renderBottomPanel = useCallback(() => {
 		if (!isBottomPanelOpen) return null;
@@ -50,16 +54,34 @@ export function FilesLayout({
 	]);
 
 	return (
-		<div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-			<FileBrowser
-				externalSidebarVisible={false}
-				onToggleSidebar={() => {}}
-				onExecuteOutput={(output) =>
-					console.log("[Files] Execute output:", output)
-				}
-				onOpenBottomPanel={onOpenBottomPanel}
-			/>
-			{renderBottomPanel()}
+		<div className={styles.layout}>
+			{/* Header */}
+			<header className={styles.header}>
+				<AppHeader />
+			</header>
+
+			{/* Body: Sidebar + Content */}
+			<div className={styles.body}>
+				{/* Sidebar */}
+				{isSidebarVisible && (
+					<aside className={styles.sidebar}>
+						<SidebarPanel />
+					</aside>
+				)}
+
+				{/* Content */}
+				<main className={styles.content}>
+					<FileBrowser
+						externalSidebarVisible={false}
+						onToggleSidebar={() => {}}
+						onExecuteOutput={(output) =>
+							console.log("[Files] Execute output:", output)
+						}
+						onOpenBottomPanel={onOpenBottomPanel}
+					/>
+					{renderBottomPanel()}
+				</main>
+			</div>
 		</div>
 	);
 }

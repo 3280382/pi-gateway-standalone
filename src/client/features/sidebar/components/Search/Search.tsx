@@ -3,7 +3,8 @@
  */
 
 import { useSidebarController } from "@/services/api/sidebarApi";
-import { IconButton, SectionHeader } from "@/shared/ui";
+import { IconButton } from "@/shared/ui/IconButton/IconButton";
+import { SectionHeader } from "@/shared/ui/SectionHeader/SectionHeader";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import styles from "./Search.module.css";
 

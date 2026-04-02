@@ -35,7 +35,7 @@
 /* Right group - 占位保持对称 */
 .rightGroup {
 	flex-shrink: 0;
-	width: 80px; /* 与 leftGroup 大致相同宽度 */
+	width: 80px;
 }
 
 /* 按钮样式 */
@@ -65,10 +65,9 @@
 }
 
 /* 图标按钮（仅图标无文字） */
-.button:has(svg:only-child) {
-	width: 36px;
-	height: 36px;
-	padding: 0;
+.button svg:first-child:last-child {
+	width: 20px;
+	height: 20px;
 }
 
 .button svg {
