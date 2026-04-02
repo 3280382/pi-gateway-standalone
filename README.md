@@ -30,33 +30,45 @@ bash dev-start.sh
 ```
 src/
 ├── client/                 # 前端：组件、状态管理、API 客户端
-│   ├── features/           # 功能域（按业务划分）
-│   │   ├── core/           # 核心应用功能
-│   │   │   ├── layout/     # 全局布局 (AppLayout, AppHeader, AppFooter, panels)
-│   │   │   ├── pages/      # 页面组件 (ChatPage, FilesPage, LoadingScreen)
-│   │   │   ├── providers/  # 全局 Provider
-│   │   │   └── navigation/ # 导航组件
-│   │   ├── chat/           # 聊天功能 (MessageList, InputArea, MessageItem)
-│   │   ├── files/          # 文件功能 (FileBrowser, FileGrid, FileList)
-│   │   ├── header/         # 顶部菜单 (ModelSelector, DirectoryPicker, SearchBox)
-│   │   ├── sidebar/        # 侧边栏 (RecentWorkspaces, Sessions, Settings)
-│   │   ├── footer/         # 底部菜单
-│   │   ├── panels/         # 面板 (TerminalPanel, LlmLogPanel)
-│   │   └── system/         # 系统功能 (modals, search)
-│   ├── shared/             # 共享资源
-│   │   ├── components/     # 通用组件 (Button, Input, IconButton, ErrorBoundary)
-│   │   ├── hooks/          # 通用 Hooks
-│   │   ├── styles/         # 全局样式
-│   │   └── utils/          # 工具函数
-│   ├── stores/             # 全局状态 (sessionStore, chatStore, fileStore)
-│   ├── services/           # API 和 WebSocket 服务
+│   ├── app/                # 🎯 应用根层（最简）
+│   │   ├── App.tsx         # 根组件：Footer + PageContainer
+│   │   └── Footer.tsx      # 唯一全局控件（底部视图切换）
+│   ├── features/           # 📦 功能域（独立完整）
+│   │   ├── core/           # 核心共享组件
+│   │   │   ├── layout/     # AppLayout, AppHeader, panels
+│   │   │   └── pages/      # ErrorScreen, LoadingScreen
+│   │   ├── chat/           # 💬 聊天功能（自包含）
+│   │   │   ├── layout.tsx  # Chat 布局框架
+│   │   │   ├── page.tsx    # Chat 页面
+│   │   │   ├── index.ts    # 统一导出
+│   │   │   └── components/ # Chat 专属组件（扁平）
+│   │   │       ├── ChatPanel.tsx
+│   │   │       ├── InputArea.tsx
+│   │   │       ├── MessageList.tsx
+│   │   │       └── MessageItem.tsx
+│   │   ├── files/          # 📁 文件功能（自包含）
+│   │   │   ├── layout.tsx  # Files 布局框架
+│   │   │   ├── page.tsx    # Files 页面
+│   │   │   ├── index.ts    # 统一导出
+│   │   │   └── components/ # Files 专属组件（扁平）
+│   │   │       ├── FileBrowser.tsx
+│   │   │       ├── FileGrid.tsx
+│   │   │       ├── FileList.tsx
+│   │   │       └── FileItem.tsx
+│   │   ├── header/         # 顶部菜单组件（供 feature 使用）
+│   │   ├── sidebar/        # 侧边栏组件（供 feature 使用）
+│   │   └── system/         # 系统功能（modals, search）
+│   ├── shared/             # 🔧 共享资源（无业务逻辑）
+│   │   └── ui/             # 原子 UI 组件
+│   │       ├── Button.tsx
+│   │       ├── Input.tsx
+│   │       └── ErrorBoundary.tsx
+│   ├── stores/             # 🗄️ 全局状态 (Zustand)
+│   ├── services/           # 🌐 API 服务
 │   ├── hooks/              # 全局 Hooks
-│   └── controllers/        # 控制器 (chatController)
-├── server/                 # 后端：Express 路由、控制器、业务逻辑
-│   ├── session/            # 会话管理 (GatewaySession)
-│   ├── routes/             # API 路由
-│   └── llm/                # LLM 相关 (interceptor, log-manager)
-└── shared/                 # 共享：API 契约类型
+│   └── controllers/        # 🎮 控制器
+├── server/                 # 🖥️ 后端代码
+└── shared/                 # 🔗 共享类型
 ```
 
 ## 核心特性

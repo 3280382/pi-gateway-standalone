@@ -28,68 +28,51 @@ bash dev-start.sh  # 非 tmux，直接在后台运行
 
 ## 项目架构
 
-采用**模块化单体架构 (Modular Monolith)**：
+采用**模块化单体架构 (Modular Monolith)** - 扁平化设计：
 
 ```
 src/
-├── client/                 # 🎨 前端代码
-│   ├── features/           # 功能域（按业务划分）
-│   │   ├── core/           # 🎯 核心应用功能
-│   │   │   ├── layout/           # 全局布局组件
-│   │   │   │   ├── AppLayout/         # 统一布局控制器 + LayoutContext
-│   │   │   │   ├── AppHeader/         # 应用头部容器
-│   │   │   │   ├── AppFooter/         # 应用底部容器
-│   │   │   │   └── panels/            # 面板组件
-│   │   │   │       ├── TerminalPanel/      # 终端面板 (XTerm)
-│   │   │   │       └── LlmLogPanel/        # LLM 日志面板
-│   │   │   ├── pages/            # 页面组件
-│   │   │   │   ├── ChatPage.tsx
-│   │   │   │   ├── FilesPage.tsx
-│   │   │   │   ├── LoadingScreen.tsx
-│   │   │   │   └── ErrorScreen.tsx
-│   │   │   ├── providers/        # 全局 Provider
-│   │   │   └── navigation/       # 导航组件
-│   │   ├── chat/           # 💬 聊天功能
-│   │   │   ├── components/
-│   │   │   │   ├── ChatPanel/
-│   │   │   │   ├── InputArea/
-│   │   │   │   ├── MessageList/
-│   │   │   │   └── MessageItem/
-│   │   │   ├── hooks/
-│   │   │   ├── stores/
-│   │   │   └── types.ts
-│   │   ├── files/          # 📁 文件功能
-│   │   │   ├── components/
-│   │   │   ├── hooks/
-│   │   │   ├── stores/
-│   │   │   └── types.ts
-│   │   ├── header/         # 🎛️ 顶部菜单
-│   │   ├── sidebar/        # 📋 侧边栏
-│   │   ├── footer/         # 🦶 底部菜单
-│   │   ├── panels/         # 📟 面板
-│   │   └── system/         # ⚙️ 系统功能
-│   ├── shared/             # 🔧 共享资源
-│   │   ├── components/
-│   │   │   ├── ui/               # 基础 UI 组件
-│   │   │   │   ├── Button/
-│   │   │   │   ├── Input/
-│   │   │   │   ├── IconButton/
-│   │   │   │   └── ...
-│   │   │   ├── layout/           # 布局容器
-│   │   │   └── ErrorBoundary.tsx # 错误边界
-│   │   ├── hooks/
-│   │   ├── styles/
-│   │   └── utils/
+├── client/
+│   ├── app/                # 🎯 应用根层（最简）
+│   │   ├── App.tsx         # 根组件：Footer + PageContainer
+│   │   └── Footer.tsx      # 唯一全局控件
+│   │
+│   ├── features/           # 📦 功能域（独立完整，扁平化）
+│   │   ├── core/           # 核心共享组件
+│   │   │   ├── layout/     # AppLayout, AppHeader, panels
+│   │   │   └── pages/      # ErrorScreen, LoadingScreen
+│   │   │
+│   │   ├── chat/           # 💬 聊天功能（自包含）
+│   │   │   ├── layout.tsx      # Chat 布局框架
+│   │   │   ├── page.tsx        # Chat 页面
+│   │   │   ├── index.ts        # 统一导出
+│   │   │   └── components/     # Chat 专属组件（扁平，无子目录）
+│   │   │       ├── ChatPanel.tsx
+│   │   │       ├── InputArea.tsx
+│   │   │       ├── MessageList.tsx
+│   │   │       └── MessageItem.tsx
+│   │   │
+│   │   └── files/          # 📁 文件功能（自包含）
+│   │       ├── layout.tsx      # Files 布局框架
+│   │       ├── page.tsx        # Files 页面
+│   │       ├── index.ts        # 统一导出
+│   │       └── components/     # Files 专属组件（扁平，无子目录）
+│   │           ├── FileBrowser.tsx
+│   │           ├── FileGrid.tsx
+│   │           ├── FileList.tsx
+│   │           └── FileItem.tsx
+│   │
+│   ├── shared/             # 🔧 真正共享（无业务逻辑）
+│   │   └── ui/             # 原子 UI 组件
+│   │       ├── Button.tsx
+│   │       ├── Input.tsx
+│   │       └── ErrorBoundary.tsx
+│   │
 │   ├── stores/             # 🗄️ 全局状态 (Zustand)
 │   ├── services/           # 🌐 API 服务
-│   ├── hooks/              # 全局 Hooks
-│   ├── controllers/        # 🎮 控制器
-│   └── App.tsx
+│   └── controllers/        # 🎮 控制器
+│
 ├── server/                 # 🖥️ 后端代码
-│   ├── session/
-│   ├── routes/
-│   ├── llm/
-│   └── server.ts
 └── shared/                 # 🔗 共享类型
 ```
 
