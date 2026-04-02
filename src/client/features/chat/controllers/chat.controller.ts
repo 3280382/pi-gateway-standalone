@@ -13,12 +13,7 @@ import { websocketService } from "@/shared/services/websocket.service";
 export class ChatController {
 	private store = useChatStore;
 	private listenersSetup = false;
-	private batchUpdateTimer: ReturnType<typeof setTimeout> | null = null;
-	private pendingUpdates: {
-		content?: string;
-		thinking?: string;
-		toolCall?: { id: string; name: string; delta: string };
-	} = {};
+
 
 	/**
 	 * 发送消息（支持图片）
@@ -466,53 +461,6 @@ export class ChatController {
 	}
 
 	/**
-	 * 批量更新消息内容 - 使用RAF优化性能
-	 */
-	private flushBatchUpdates = () => {
-		if (this.batchUpdateTimer) {
-			clearTimeout(this.batchUpdateTimer);
-			this.batchUpdateTimer = null;
-		}
-
-		if (Object.keys(this.pendingUpdates).length === 0) return;
-
-		// 使用 requestAnimationFrame 确保在浏览器空闲时更新
-		requestAnimationFrame(() => {
-			this.store.getState().batchUpdateContent(this.pendingUpdates);
-			this.pendingUpdates = {};
-		});
-	};
-
-	/**
-	 * 队列批量更新
-	 */
-	private queueBatchUpdate(updates: typeof this.pendingUpdates) {
-		// 累积更新
-		if (updates.content) {
-			this.pendingUpdates.content =
-				(this.pendingUpdates.content || "") + updates.content;
-		}
-		if (updates.thinking) {
-			this.pendingUpdates.thinking =
-				(this.pendingUpdates.thinking || "") + updates.thinking;
-		}
-		if (updates.toolCall) {
-			if (this.pendingUpdates.toolCall) {
-				this.pendingUpdates.toolCall.delta += updates.toolCall.delta;
-			} else {
-				this.pendingUpdates.toolCall = updates.toolCall;
-			}
-		}
-
-		// 使用节流，最多每16ms更新一次（约60fps）
-		if (!this.batchUpdateTimer) {
-			this.batchUpdateTimer = setTimeout(() => {
-				this.flushBatchUpdates();
-			}, 16);
-		}
-	}
-
-	/**
 	 * 设置WebSocket监听器（公开方法，供外部调用）
 	 */
 	setupWebSocketListeners(): void {
@@ -524,27 +472,29 @@ export class ChatController {
 		this.listenersSetup = true;
 		console.log("[ChatController] Setting up WebSocket listeners");
 
-		// 内容增量 - 使用批量更新
+		// 内容增量 - 使用 RAF 批处理优化
 		websocketService.on("content_delta", (data) => {
-			this.queueBatchUpdate({ content: data.text });
+			if (data?.text || data?.delta) {
+				this.store.getState().appendStreamingContent(data.text || data.delta);
+			}
 		});
 
-		// 思考增量 - 使用批量更新
+		// 思考增量 - 使用 RAF 批处理优化
 		websocketService.on("thinking_delta", (data) => {
-			this.queueBatchUpdate({ thinking: data.thinking });
+			if (data?.thinking || data?.delta) {
+				this.store.getState().appendStreamingThinking(data.thinking || data.delta);
+			}
 		});
 
 		// 工具调用增量 - 流式显示工具调用构建过程
 		websocketService.on("toolcall_delta", (data) => {
 			try {
-				if (data.toolCallId && data.toolName) {
-					this.queueBatchUpdate({
-						toolCall: {
-							id: data.toolCallId,
-							name: data.toolName,
-							delta: data.delta || "",
-						},
-					});
+				if (data?.toolCallId && data?.toolName) {
+					this.store.getState().appendToolCallDelta(
+						data.toolCallId,
+						data.toolName,
+						data.delta || "",
+					);
 				}
 			} catch (error) {
 				console.error(
@@ -625,7 +575,6 @@ export class ChatController {
 
 		// 代理结束
 		websocketService.on("agent_end", () => {
-			this.flushBatchUpdates(); // 确保所有待处理更新被刷新
 			this.finalizeStreamingMessage();
 		});
 
