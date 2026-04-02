@@ -569,6 +569,7 @@ export class ChatController {
 
 		// 代理结束
 		websocketService.on("agent_end", () => {
+			console.log("[ChatController] agent_end received, calling finalizeStreamingMessage");
 			this.flushBatchUpdates(); // 确保所有待处理更新被刷新
 			this.finalizeStreamingMessage();
 		});
