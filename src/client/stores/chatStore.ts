@@ -443,8 +443,13 @@ export const useChatStore = create<
 			abortStreaming: () => {
 				set(
 					(state) => {
-						// 确保最终内容包含所有工具数据
-						const finalContent = buildContentArray(state);
+						// 构建当前轮次的新内容
+						const currentContent = buildContentArray(state);
+						
+						// 合并之前轮次的内容（如果有）和当前轮次内容
+						const existingContent = state.currentStreamingMessage?.content || [];
+						const finalContent = [...existingContent, ...currentContent];
+						
 						const finalMessage = state.currentStreamingMessage
 							? {
 									...state.currentStreamingMessage,
@@ -476,8 +481,13 @@ export const useChatStore = create<
 			finishStreaming: () => {
 				set(
 					(state) => {
-						// 确保最终内容包含所有工具数据
-						const finalContent = buildContentArray(state);
+						// 构建当前轮次的新内容
+						const currentContent = buildContentArray(state);
+						
+						// 合并之前轮次的内容（如果有）和当前轮次内容
+						const existingContent = state.currentStreamingMessage?.content || [];
+						const finalContent = [...existingContent, ...currentContent];
+						
 						const finalMessage = state.currentStreamingMessage
 							? {
 									...state.currentStreamingMessage,
