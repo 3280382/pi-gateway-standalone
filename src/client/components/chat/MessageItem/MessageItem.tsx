@@ -190,8 +190,8 @@ function ToolContent({
 	onToggle,
 	isStreaming,
 }: ToolContentProps) {
-	// 流式时强制展开，非流式时默认展开（isCollapsed !== true）
-	const isExpanded = isStreaming ? true : isCollapsed !== true;
+	// 流式时强制展开，非流式时默认收缩（isCollapsed === false 时才展开）
+	const isExpanded = isStreaming ? true : isCollapsed === false;
 	const status = content.error
 		? "error"
 		: content.output
