@@ -1,5 +1,5 @@
 /**
- * InputArea - Enhanced with @file mention and image upload
+ * InputArea - Enhanced with @mention, image upload, and modern design
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -62,12 +62,12 @@ export function InputArea({
 	const [images, setImages] = useState<ImageUpload[]>([]);
 	const [showImagePreview, setShowImagePreview] = useState(true);
 
-	// Default to 2 rows height
+	// Auto-resize textarea
 	useEffect(() => {
 		const textarea = textareaRef.current;
 		if (textarea) {
 			textarea.style.height = "auto";
-			const newHeight = Math.max(textarea.scrollHeight, 56); // min 56px for 2 rows
+			const newHeight = Math.max(textarea.scrollHeight, 64);
 			textarea.style.height = `${Math.min(newHeight, 200)}px`;
 		}
 	}, [value]);
@@ -89,7 +89,6 @@ export function InputArea({
 		const lastAtIndex = value.lastIndexOf("@");
 		if (lastAtIndex !== -1) {
 			const afterAt = value.slice(lastAtIndex + 1);
-			// Only show if no space after @ and not in the middle of a word
 			if (!afterAt.includes(" ") && (lastAtIndex === 0 || value[lastAtIndex - 1] === " ")) {
 				setFileFilter(afterAt.toLowerCase());
 				setShowFilePicker(true);
@@ -118,12 +117,10 @@ export function InputArea({
 		}
 	};
 
-	// Check if in bash mode
 	const isBashMode = useMemo(() => {
 		return value.trimStart().startsWith("!");
 	}, [value]);
 
-	// Filtered commands
 	const filteredCommands = useMemo(() => {
 		if (!commandFilter) return SLASH_COMMANDS;
 		return SLASH_COMMANDS.filter(
@@ -133,7 +130,6 @@ export function InputArea({
 		);
 	}, [commandFilter]);
 
-	// Filtered files for @mention
 	const filteredFiles = useMemo(() => {
 		if (!fileFilter) return fileList;
 		return fileList.filter(
@@ -144,7 +140,6 @@ export function InputArea({
 	}, [fileFilter, fileList]);
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
-		// File picker navigation
 		if (showFilePicker && filteredFiles.length > 0) {
 			if (e.key === "ArrowDown") {
 				e.preventDefault();
@@ -171,7 +166,6 @@ export function InputArea({
 			}
 		}
 
-		// Command menu navigation
 		if (showCommands && filteredCommands.length > 0) {
 			if (e.key === "ArrowDown") {
 				e.preventDefault();
@@ -198,17 +192,13 @@ export function InputArea({
 			}
 		}
 
-		// Enter without modifier = newline (allows IME enter for new line)
-		// Ctrl/Cmd + Enter = send
 		if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !showCommands && !showFilePicker) {
 			e.preventDefault();
 			handleSend();
 			return;
 		}
 
-		// In bash mode, allow Enter for multi-line, use Ctrl+Enter to execute
 		if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey && !showCommands && !showFilePicker && !isBashMode) {
-			// Let it insert newline (default behavior for textarea)
 			return;
 		}
 	};
@@ -222,7 +212,6 @@ export function InputArea({
 		const trimmedValue = value.trim();
 		if (!trimmedValue && images.length === 0) return;
 
-		// Handle bash commands
 		if (isBashMode) {
 			const command = trimmedValue.slice(1);
 			if (onBashCommand) {
@@ -232,7 +221,6 @@ export function InputArea({
 			return;
 		}
 
-		// Handle slash commands
 		if (trimmedValue.startsWith("/")) {
 			const parts = trimmedValue.slice(1).split(" ");
 			const cmd = parts[0];
@@ -245,7 +233,6 @@ export function InputArea({
 			return;
 		}
 
-		// Send with images if present
 		if (images.length > 0 && onSendWithImages) {
 			onSendWithImages(trimmedValue, images);
 			onChange("");
@@ -253,7 +240,6 @@ export function InputArea({
 			return;
 		}
 
-		// Regular message
 		onSend();
 	}, [
 		value,
@@ -316,7 +302,6 @@ export function InputArea({
 
 				setImages((prev) => [...prev, newImage]);
 
-				// Process OCR for images
 				if (file.type.startsWith("image/")) {
 					try {
 						const ocrText = await performOCR(base64, file.type);
@@ -328,7 +313,6 @@ export function InputArea({
 							),
 						);
 					} catch (err) {
-						console.error("OCR failed:", err);
 						setImages((prev) =>
 							prev.map((img) =>
 								img.id === imageId ? { ...img, isProcessingOCR: false } : img,
@@ -340,13 +324,10 @@ export function InputArea({
 			reader.readAsDataURL(file);
 		}
 
-		// Clear input
 		e.target.value = "";
 	};
 
 	const performOCR = async (base64Image: string, mimeType: string): Promise<string> => {
-		// Use the backend OCR endpoint if available, or fallback to local processing
-		// For now, we'll send a request to process the image
 		try {
 			const response = await fetch("/api/ocr", {
 				method: "POST",
@@ -358,7 +339,7 @@ export function InputArea({
 				return data.text || "";
 			}
 		} catch (err) {
-			console.log("OCR endpoint not available, using image without OCR");
+			console.log("OCR endpoint not available");
 		}
 		return "";
 	};
@@ -371,15 +352,30 @@ export function InputArea({
 		onChange(e.target.value);
 	};
 
+	const insertAtCursor = (text: string) => {
+		const textarea = textareaRef.current;
+		if (!textarea) {
+			onChange(value + text);
+			return;
+		}
+		const start = textarea.selectionStart;
+		const end = textarea.selectionEnd;
+		const newValue = value.substring(0, start) + text + value.substring(end);
+		onChange(newValue);
+		setTimeout(() => {
+			textarea.selectionStart = textarea.selectionEnd = start + text.length;
+			textarea.focus();
+		}, 0);
+	};
+
 	const placeholder = isStreaming
 		? "Generating..."
 		: isBashMode
-			? "Enter bash command..."
-			: "Message... (Ctrl+Enter to send)";
+			? "Enter bash command (Ctrl+Enter to execute)..."
+			: "Message... Ctrl+Enter to send, Enter for new line";
 
 	return (
 		<div className={styles.container}>
-			{/* Hidden file input */}
 			<input
 				ref={fileInputRef}
 				type="file"
@@ -389,14 +385,6 @@ export function InputArea({
 				onChange={handleFileSelect}
 			/>
 
-			{/* Bash mode indicator */}
-			{isBashMode && (
-				<div className={styles.modeIndicator}>
-					<TerminalIcon />
-				</div>
-			)}
-
-			{/* Slash command menu */}
 			{showCommands && filteredCommands.length > 0 && (
 				<div className={styles.commandMenu}>
 					{filteredCommands.map((cmd, index) => (
@@ -415,7 +403,6 @@ export function InputArea({
 				</div>
 			)}
 
-			{/* File picker for @mention */}
 			{showFilePicker && filteredFiles.length > 0 && (
 				<div className={styles.filePicker}>
 					<div className={styles.filePickerHeader}>
@@ -432,7 +419,7 @@ export function InputArea({
 							onMouseEnter={() => setSelectedFileIndex(index)}
 						>
 							<span className={styles.fileIcon}>
-								{file.isDirectory ? "📁" : "📄"}
+								{file.isDirectory ? <FolderIcon /> : <DocIcon />}
 							</span>
 							<span className={styles.fileName}>{file.name}</span>
 							<span className={styles.filePath}>{file.path}</span>
@@ -441,23 +428,22 @@ export function InputArea({
 				</div>
 			)}
 
-			{/* Image previews */}
 			{images.length > 0 && showImagePreview && (
 				<div className={styles.imagePreviewBar}>
 					{images.map((img) => (
 						<div key={img.id} className={styles.imagePreviewItem}>
-							<img src={img.preview} alt="Upload preview" />
+							<img src={img.preview} alt="Upload" />
 							{img.isProcessingOCR && (
-								<div className={styles.ocrIndicator}>OCR...</div>
+								<div className={styles.ocrIndicator}>⋯</div>
 							)}
 							{img.ocrText && (
-								<div className={styles.ocrBadge}>OCR</div>
+								<div className={styles.ocrBadge}>T</div>
 							)}
 							<button
 								className={styles.removeImageBtn}
 								onClick={() => removeImage(img.id)}
 							>
-								×
+								<CloseIcon />
 							</button>
 						</div>
 					))}
@@ -476,27 +462,41 @@ export function InputArea({
 				</div>
 			)}
 
-			{/* Toolbar */}
 			<div className={styles.toolbar}>
 				<button
-					className={styles.toolbarBtn}
-					onClick={() => onChange(value + "@")}
-					title="@mention file"
+					className={`${styles.toolbarBtn} ${styles.atBtn}`}
+					onClick={() => insertAtCursor("@")}
+					title="Mention file (@)"
 					disabled={isStreaming}
 				>
-					@📎
+					<span className={styles.atIcon}>@</span>
 				</button>
 				<button
-					className={styles.toolbarBtn}
-					onClick={handleFileUpload}
-					title="Upload file/image"
+					className={`${styles.toolbarBtn} ${styles.slashBtn}`}
+					onClick={() => insertAtCursor("/")}
+					title="Slash command (/)"
 					disabled={isStreaming}
 				>
-					📤
+					<span className={styles.slashIcon}>/</span>
+				</button>
+				<button
+					className={`${styles.toolbarBtn} ${styles.bashBtn}`}
+					onClick={() => insertAtCursor("!")}
+					title="Bash command (!)"
+					disabled={isStreaming}
+				>
+					<span className={styles.bashIcon}>!</span>
+				</button>
+				<button
+					className={`${styles.toolbarBtn} ${styles.uploadBtn}`}
+					onClick={handleFileUpload}
+					title="Upload image/file"
+					disabled={isStreaming}
+				>
+					<ImageIcon />
 				</button>
 			</div>
 
-			{/* Input row */}
 			<div className={styles.inputRow}>
 				<textarea
 					ref={textareaRef}
@@ -520,12 +520,11 @@ export function InputArea({
 	);
 }
 
-// Icons
 function SendIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-			<line x1="22" y1="2" x2="11" y2="13" />
-			<polygon points="22,2 15,22 11,13 2,9" />
+		<svg viewBox="0 0 24 24" fill="currentColor">
+			<path d="M3 20.59L20.59 3L21.71 4.41L4.41 21.71L3 20.59ZM5.41 3L21.71 19.29L20.59 20.71L4.29 4.41L5.41 3ZM12 2L12 4L12 2ZM12 20L12 22L12 20ZM2 12L4 12L2 12ZM20 12L22 12L20 12ZM17.66 6.34L19.07 4.93L17.66 6.34ZM4.93 19.07L6.34 17.66L4.93 19.07ZM19.07 17.66L17.66 19.07L19.07 17.66ZM6.34 4.93L4.93 6.34L6.34 4.93Z" opacity="0" />
+			<path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
 		</svg>
 	);
 }
@@ -538,20 +537,49 @@ function StopIcon() {
 	);
 }
 
-function TerminalIcon() {
+function ImageIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-			<polyline points="4 17 10 11 4 5" />
-			<line x1="12" y1="19" x2="20" y2="19" />
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+			<rect x="3" y="3" width="18" height="18" rx="3" />
+			<circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
+			<path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" />
 		</svg>
 	);
 }
 
 function FileIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-			<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-			<polyline points="14 2 14 8 20 8" />
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+			<path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9l-7-7z" />
+			<polyline points="13 2 13 9 20 9" />
+		</svg>
+	);
+}
+
+function FolderIcon() {
+	return (
+		<svg viewBox="0 0 24 24" fill="currentColor">
+			<path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+		</svg>
+	);
+}
+
+function DocIcon() {
+	return (
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+			<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+			<line x1="16" y1="13" x2="8" y2="13" />
+			<line x1="16" y1="17" x2="8" y2="17" />
+			<polyline points="10 9 9 9 8 9" />
+		</svg>
+	);
+}
+
+function CloseIcon() {
+	return (
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+			<line x1="18" y1="6" x2="6" y2="18" />
+			<line x1="6" y1="6" x2="18" y2="18" />
 		</svg>
 	);
 }
