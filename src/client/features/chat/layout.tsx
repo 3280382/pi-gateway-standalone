@@ -1,11 +1,12 @@
 /**
  * ChatLayout - 聊天功能布局
- * 包含：Header、Content、Panel（Sidebar 在 App 级别）
+ * 包含：Header、Sidebar、Content、Panel
  */
 
 import { useCallback } from "react";
 import { useLayout } from "@/features/core/layout/AppLayout/LayoutContext";
 import { AppHeader } from "@/features/core/layout/AppHeader";
+import { SidebarPanel } from "@/features/sidebar/components/SidebarPanel/SidebarPanel";
 import { LlmLogPanel } from "@/features/core/layout/panels/LlmLogPanel";
 import { XTermPanel } from "@/features/core/layout/panels/TerminalPanel";
 import type { CommandResult } from "@/hooks/app";
@@ -32,7 +33,7 @@ export function ChatLayout({
 	closeBottomPanel,
 	setBottomPanelHeight,
 }: ChatLayoutProps) {
-	const { isBottomPanelOpen, bottomPanelHeight } = useLayout();
+	const { isSidebarVisible, isBottomPanelOpen, bottomPanelHeight } = useLayout();
 
 	const renderBottomPanel = useCallback(() => {
 		if (!isBottomPanelOpen) return null;
@@ -76,11 +77,21 @@ export function ChatLayout({
 				<AppHeader />
 			</header>
 
-			{/* Content（Sidebar 在 App 级别 overlay）*/}
-			<main className={styles.content}>
-				<ChatPanel />
-				{renderBottomPanel()}
-			</main>
+			{/* Body: Sidebar + Content */}
+			<div className={styles.body}>
+				{/* Sidebar */}
+				{isSidebarVisible && (
+					<aside className={styles.sidebar}>
+						<SidebarPanel isVisible={isSidebarVisible} currentView="chat" />
+					</aside>
+				)}
+
+				{/* Content */}
+				<main className={styles.content}>
+					<ChatPanel />
+					{renderBottomPanel()}
+				</main>
+			</div>
 		</div>
 	);
 }
