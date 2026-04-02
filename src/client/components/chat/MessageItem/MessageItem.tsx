@@ -184,10 +184,19 @@ interface ToolContentProps {
 	isStreaming?: boolean;
 }
 
-function ToolContent({ content, isCollapsed, onToggle, isStreaming }: ToolContentProps) {
+function ToolContent({
+	content,
+	isCollapsed,
+	onToggle,
+	isStreaming,
+}: ToolContentProps) {
 	// 流式时强制展开，非流式时根据 isCollapsed 状态
 	const isExpanded = isStreaming ? true : isCollapsed === false;
-	const status = content.error ? "error" : content.output ? "success" : "pending";
+	const status = content.error
+		? "error"
+		: content.output
+			? "success"
+			: "pending";
 
 	const firstLine = useMemo(() => {
 		const outputText = content.output || content.error || "";
@@ -200,7 +209,8 @@ function ToolContent({ content, isCollapsed, onToggle, isStreaming }: ToolConten
 	const toolArgs = useMemo(() => {
 		if (content.args && Object.keys(content.args).length > 0) {
 			// 如果有 _streamingArgs，尝试解析它
-			const streamingArgs = (content.args as Record<string, unknown>)._streamingArgs;
+			const streamingArgs = (content.args as Record<string, unknown>)
+				._streamingArgs;
 			if (streamingArgs && typeof streamingArgs === "string") {
 				try {
 					// 尝试解析为 JSON
@@ -218,7 +228,9 @@ function ToolContent({ content, isCollapsed, onToggle, isStreaming }: ToolConten
 									parsed[key] = value.replace(/^["']|["']$/g, "");
 								}
 							});
-							return Object.keys(parsed).length > 0 ? parsed : { _raw: streamingArgs };
+							return Object.keys(parsed).length > 0
+								? parsed
+								: { _raw: streamingArgs };
 						}
 					} catch {
 						// 忽略解析错误
@@ -227,7 +239,10 @@ function ToolContent({ content, isCollapsed, onToggle, isStreaming }: ToolConten
 				}
 			}
 			// 返回 args 但不包含 _streamingArgs 字段
-			const { _streamingArgs, ...restArgs } = content.args as Record<string, unknown>;
+			const { _streamingArgs, ...restArgs } = content.args as Record<
+				string,
+				unknown
+			>;
 			return Object.keys(restArgs).length > 0 ? restArgs : {};
 		}
 		return {};
@@ -236,7 +251,12 @@ function ToolContent({ content, isCollapsed, onToggle, isStreaming }: ToolConten
 	// 阻止事件冒泡，防止触发消息其他点击
 	const handleClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		console.log("[ToolContent] Clicked, isExpanded:", isExpanded, "onToggle exists:", !!onToggle);
+		console.log(
+			"[ToolContent] Clicked, isExpanded:",
+			isExpanded,
+			"onToggle exists:",
+			!!onToggle,
+		);
 		if (onToggle) {
 			onToggle();
 		} else {
@@ -250,7 +270,9 @@ function ToolContent({ content, isCollapsed, onToggle, isStreaming }: ToolConten
 				className={`${styles.toolContainer} ${styles[status]} ${styles.collapsed}`}
 				onClick={handleClick}
 			>
-				<span className={styles.collapsedText}>{content.toolName || "tool"}</span>
+				<span className={styles.collapsedText}>
+					{content.toolName || "tool"}
+				</span>
 				<span className={styles.collapsedPreview}>{firstLine}</span>
 			</div>
 		);
@@ -270,7 +292,9 @@ function ToolContent({ content, isCollapsed, onToggle, isStreaming }: ToolConten
 				</div>
 			)}
 			{content.output && (
-				<pre className={styles.toolOutputPre}>{safeStringify(content.output)}</pre>
+				<pre className={styles.toolOutputPre}>
+					{safeStringify(content.output)}
+				</pre>
 			)}
 			{content.error && (
 				<pre className={`${styles.toolOutputPre} ${styles.errorText}`}>
@@ -399,29 +423,50 @@ function parseContentWithCode(content: string): ContentPart[] {
 
 function formatMarkdown(content: string): string {
 	if (!content) return "";
-	return (
-		content
-			.replace(/&/g, "&amp;")
-			.replace(/</g, "&lt;")
-			.replace(/>/g, "&gt;")
-			.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-			.replace(/__([^_]+)__/g, "<strong>$1</strong>")
-			.replace(/\*([^*]+)\*/g, "<em>$1</em>")
-			.replace(/_([^_]+)_/g, "<em>$1</em>")
-			.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
-			.replace(
-				/\[([^\]]+)\]\(([^)]+)\)/g,
-				'<a href="$2" target="_blank" rel="noopener">$1</a>',
-			)
-	);
+	return content
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+		.replace(/__([^_]+)__/g, "<strong>$1</strong>")
+		.replace(/\*([^*]+)\*/g, "<em>$1</em>")
+		.replace(/_([^_]+)_/g, "<em>$1</em>")
+		.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
+		.replace(
+			/\[([^\]]+)\]\(([^)]+)\)/g,
+			'<a href="$2" target="_blank" rel="noopener">$1</a>',
+		);
 }
 
 function highlightCode(code: string): string {
 	if (!code) return "";
 	const keywords = [
-		"const", "let", "var", "function", "return", "if", "else", "for", "while",
-		"import", "export", "from", "class", "interface", "type", "async", "await",
-		"try", "catch", "throw", "new", "this", "true", "false", "null", "undefined",
+		"const",
+		"let",
+		"var",
+		"function",
+		"return",
+		"if",
+		"else",
+		"for",
+		"while",
+		"import",
+		"export",
+		"from",
+		"class",
+		"interface",
+		"type",
+		"async",
+		"await",
+		"try",
+		"catch",
+		"throw",
+		"new",
+		"this",
+		"true",
+		"false",
+		"null",
+		"undefined",
 	];
 
 	let html = code
@@ -457,19 +502,27 @@ function safeStringify(obj: unknown): string {
 	}
 }
 
-function formatArgsAsCommand(toolName: string, args: Record<string, unknown>): string {
+function formatArgsAsCommand(
+	toolName: string,
+	args: Record<string, unknown>,
+): string {
 	if (!args || Object.keys(args).length === 0) return toolName;
-	
+
 	// 处理 _raw 字段（原始参数字符串）
 	if (args._raw && typeof args._raw === "string") {
 		return `${toolName} ${args._raw}`;
 	}
-	
+
 	const argStr = Object.entries(args)
 		.filter(([key]) => !key.startsWith("_")) // 过滤掉内部字段
 		.map(([key, value]) => {
 			const val = String(value);
-			if (val.includes(" ") || val.includes('"') || val.includes("\n") || val.includes("\t")) {
+			if (
+				val.includes(" ") ||
+				val.includes('"') ||
+				val.includes("\n") ||
+				val.includes("\t")
+			) {
 				return `${key}="${val.replace(/"/g, '\\"')}"`;
 			}
 			return `${key}=${val}`;

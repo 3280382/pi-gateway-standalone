@@ -422,17 +422,25 @@ export const useChatStore = create<
 				console.log("[ChatStore] toggleToolsCollapse called:", messageId);
 				set(
 					(state) => {
-						const targetMsg = state.messages.find(m => m.id === messageId);
-						console.log("[ChatStore] Target message found:", !!targetMsg, "current isToolsCollapsed:", targetMsg?.isToolsCollapsed);
-						
+						const targetMsg = state.messages.find((m) => m.id === messageId);
+						console.log(
+							"[ChatStore] Target message found:",
+							!!targetMsg,
+							"current isToolsCollapsed:",
+							targetMsg?.isToolsCollapsed,
+						);
+
 						const updatedMessages = state.messages.map((msg) =>
 							msg.id === messageId
 								? { ...msg, isToolsCollapsed: msg.isToolsCollapsed === false }
 								: msg,
 						);
-						const updatedMsg = updatedMessages.find(m => m.id === messageId);
-						console.log("[ChatStore] Updated isToolsCollapsed:", updatedMsg?.isToolsCollapsed);
-						
+						const updatedMsg = updatedMessages.find((m) => m.id === messageId);
+						console.log(
+							"[ChatStore] Updated isToolsCollapsed:",
+							updatedMsg?.isToolsCollapsed,
+						);
+
 						// 同时更新 currentStreamingMessage
 						const updatedStreamingMessage =
 							state.currentStreamingMessage?.id === messageId
@@ -458,10 +466,16 @@ export const useChatStore = create<
 						// 保留 streamingToolCalls 中的参数（如果有）
 						const streamingTool = state.streamingToolCalls.get(tool.id);
 						const mergedTool = streamingTool
-							? { ...tool, args: { ...tool.args, _streamingArgs: streamingTool.args } }
+							? {
+									...tool,
+									args: { ...tool.args, _streamingArgs: streamingTool.args },
+								}
 							: tool;
 
-						const newTools = new Map(state.activeTools).set(tool.id, mergedTool);
+						const newTools = new Map(state.activeTools).set(
+							tool.id,
+							mergedTool,
+						);
 
 						// 当工具开始执行时，从 streamingToolCalls 中移除
 						// 这样可以避免 tool_use 和 tool 重复显示
