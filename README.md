@@ -30,44 +30,45 @@ bash dev-start.sh
 ```
 src/
 ├── client/                 # 前端：组件、状态管理、API 客户端
-│   ├── app/                # 🎯 应用根层（最简）
-│   │   ├── App.tsx         # 根组件：Footer + PageContainer
-│   │   └── Footer.tsx      # 唯一全局控件（底部视图切换）
-│   ├── features/           # 📦 功能域（独立完整）
-│   │   ├── chat/           # 💬 聊天功能（自包含）
-│   │   │   ├── layout.tsx  # Chat 布局框架
-│   │   │   ├── page.tsx    # Chat 页面
-│   │   │   ├── components/ # Chat 专属组件
-│   │   │   │   ├── ChatPanel.tsx
-│   │   │   │   ├── InputArea.tsx
-│   │   │   │   ├── MessageList.tsx
-│   │   │   │   ├── MessageItem.tsx
-│   │   │   │   └── modals/   # 聊天专用模态框
-│   │   │   └── sidebar/      # 聊天专用侧边栏
-│   │   │       └── components/
-│   │   │           ├── SidebarPanel.tsx
-│   │   │           ├── RecentWorkspaces.tsx
-│   │   │           ├── Sessions.tsx
-│   │   │           └── Settings.tsx
-│   │   ├── files/          # 📁 文件功能（自包含）
-│   │   │   ├── layout.tsx  # Files 布局框架
-│   │   │   ├── page.tsx    # Files 页面
-│   │   │   └── components/ # Files 专属组件
-│   │   │       ├── FileBrowser.tsx
-│   │   │       ├── FileGrid.tsx
-│   │   │       ├── FileList.tsx
-│   │   │       ├── FileSidebar.tsx    # 文件浏览器专用侧边栏
-│   │   │       └── FileToolbar.tsx    # 文件浏览器专用工具栏
-│   │   └── core/           # 🔧 核心共享组件
-│   │       ├── layout/     # AppLayout, AppHeader, panels
-│   │       └── pages/      # ErrorScreen, LoadingScreen
-│   ├── shared/             # 🔧 共享资源（无业务逻辑）
-│   │   └── ui/             # 原子 UI 组件
-│   ├── stores/             # 🗄️ 全局状态 (Zustand)
-│   ├── services/           # 🌐 API 服务
-│   └── controllers/        # 🎮 控制器
+│   ├── app/                # 🎯 应用根层
+│   │   ├── App.tsx         # 根组件
+│   │   ├── Footer.tsx      # 底部视图切换
+│   │   ├── LayoutContext/  # 全局布局状态
+│   │   └── pages/          # ErrorScreen, LoadingScreen
+│   │
+│   ├── features/           # 📦 功能域（完全自包含）
+│   │   ├── chat/           # 💬 聊天功能
+│   │   │   ├── components/     # ChatPanel, InputArea, MessageList...
+│   │   │   ├── sidebar/        # SidebarPanel, Sessions, Settings...
+│   │   │   ├── stores/         # chatStore, sidebarStore, searchStore...
+│   │   │   ├── services/       # chatApi, sidebarApi...
+│   │   │   ├── controllers/    # chat.controller
+│   │   │   ├── hooks/          # useChat
+│   │   │   └── types/          # chat, sidebar
+│   │   │
+│   │   └── files/          # 📁 文件功能
+│   │       ├── components/     # FileBrowser, FileGrid...
+│   │       ├── stores/         # fileStore, fileViewerStore
+│   │       ├── services/       # fileApi
+│   │       └── hooks/          # useDragDrop, useGesture
+│   │
+│   ├── shared/             # 🔧 全局共享（最少必要）
+│   │   ├── ui/                 # Button, Input, Select...
+│   │   ├── stores/             # sessionStore
+│   │   ├── services/           # websocket.service, base.service...
+│   │   ├── controllers/        # file.controller, session.controller
+│   │   ├── hooks/              # useAppInitialization, useChatMessages...
+│   │   └── types/              # 全局类型定义
+│   │
+│   ├── lib/                # 工具库 (debug, logger, utils)
+│   └── hooks/index.ts      # 兼容性入口
+│
 ├── server/                 # 🖥️ 后端代码
 └── shared/                 # 🔗 共享类型
+
+已删除的目录:
+- stores/, services/, controllers/, types/ → 合并到 features/ 或 shared/
+- core/, models/ → 已移除
 ```
 
 ## 核心特性
