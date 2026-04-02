@@ -181,7 +181,7 @@ function ToolContent({
 	onToggle,
 	isStreaming,
 }: ToolContentProps) {
-	const isExpanded = isStreaming ? true : isCollapsed === false;
+	const isExpanded = isStreaming ? true : isCollapsed !== true;
 	const status = content.error
 		? "error"
 		: content.output
