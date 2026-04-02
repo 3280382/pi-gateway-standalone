@@ -430,21 +430,25 @@ export function InputArea({
 				onChange={handleFileSelect}
 			/>
 
-			{showCommands && filteredCommands.length > 0 && (
+			{showCommands && (
 				<div className={styles.commandMenu}>
-					{filteredCommands.map((cmd, index) => (
-						<button
-							key={cmd.name}
-							className={`${styles.commandItem} ${
-								index === selectedIndex ? styles.selected : ""
-							}`}
-							onClick={() => selectCommand(cmd)}
-							onMouseEnter={() => setSelectedIndex(index)}
-						>
-							<span className={styles.commandIcon}>{cmd.icon}</span>
-							<span className={styles.commandName}>{cmd.name}</span>
-						</button>
-					))}
+					{filteredCommands.length > 0 ? (
+						filteredCommands.map((cmd, index) => (
+							<button
+								key={cmd.name}
+								className={`${styles.commandItem} ${
+									index === selectedIndex ? styles.selected : ""
+								}`}
+								onClick={() => selectCommand(cmd)}
+								onMouseEnter={() => setSelectedIndex(index)}
+							>
+								<span className={styles.commandIcon}>{cmd.icon}</span>
+								<span className={styles.commandName}>{cmd.name}</span>
+							</button>
+						))
+					) : (
+						<div className={styles.loadingItem}>No commands found</div>
+					)}
 				</div>
 			)}
 
@@ -546,11 +550,13 @@ export function InputArea({
 			<div className={styles.toolbar}>
 				<button
 					className={styles.toolbarBtn}
-					onClick={() => {
-						// Add @ at the end and trigger file picker
+					onClick={async () => {
+						// Add @ at the end
 						const newValue = value + "@";
 						onChange(newValue);
-						loadFileList();
+						// Load files first
+						await loadFileList();
+						// Then show picker
 						setFileFilter("");
 						setShowFilePicker(true);
 						setSelectedFileIndex(0);
@@ -564,7 +570,7 @@ export function InputArea({
 				<button
 					className={styles.toolbarBtn}
 					onClick={() => {
-						// Add / at the end and trigger command menu
+						// Add / at the end and trigger command menu immediately
 						const newValue = value + "/";
 						onChange(newValue);
 						setCommandFilter("");
