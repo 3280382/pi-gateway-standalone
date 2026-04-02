@@ -485,6 +485,7 @@ export const useChatStore = create<
 			},
 
 			finishStreaming: () => {
+				console.log("[ChatStore] finishStreaming called, current messages count:", get().messages.length);
 				set(
 					(state) => {
 						// 构建当前轮次的新内容
@@ -509,11 +510,14 @@ export const useChatStore = create<
 								}
 							: null;
 
+						const newMessages = finalMessage
+							? [...state.messages, finalMessage]
+							: state.messages;
+						console.log("[ChatStore] finishStreaming: adding message, new count:", newMessages.length, "previous count:", state.messages.length);
+
 						return {
 							isStreaming: false,
-							messages: finalMessage
-								? [...state.messages, finalMessage]
-								: state.messages,
+							messages: newMessages,
 							currentStreamingMessage: null,
 							streamingContent: "",
 							streamingThinking: "",

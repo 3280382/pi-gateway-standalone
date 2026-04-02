@@ -470,7 +470,7 @@ export class ChatController {
 			return;
 		}
 		this.listenersSetup = true;
-		console.log("[ChatController] Setting up WebSocket listeners");
+		console.log("[ChatController] Setting up WebSocket listeners, listenersSetup:", this.listenersSetup);
 
 		// 内容增量 - 使用 RAF 批处理优化
 		websocketService.on("content_delta", (data) => {
@@ -575,6 +575,7 @@ export class ChatController {
 
 		// 代理结束
 		websocketService.on("agent_end", () => {
+			console.log("[ChatController] agent_end received, calling finalizeStreamingMessage");
 			this.finalizeStreamingMessage();
 		});
 
