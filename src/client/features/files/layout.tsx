@@ -1,13 +1,15 @@
 /**
  * FilesLayout - 文件功能布局
- * 包含：Header、Content、Panel（Sidebar 在 App 级别）
+ * 包含：FileToolbar、FileSidebar、FileBrowser、Panel
  */
 
 import { useCallback } from "react";
 import { useLayout } from "@/features/core/layout/AppLayout/LayoutContext";
-import { AppHeader } from "@/features/core/layout/AppHeader";
+import { FileToolbar } from "./components/FileToolbar";
+import { FileSidebar } from "./components/FileSidebar";
 import { XTermPanel } from "@/features/core/layout/panels/TerminalPanel";
 import { FileBrowser } from "./components/FileBrowser";
+import { useFileStore } from "@/stores/fileStore";
 import styles from "./FilesLayout.module.css";
 
 interface FilesLayoutProps {
@@ -27,7 +29,8 @@ export function FilesLayout({
 	closeBottomPanel,
 	setBottomPanelHeight,
 }: FilesLayoutProps) {
-	const { isBottomPanelOpen, bottomPanelHeight } = useLayout();
+	const { isSidebarVisible, isBottomPanelOpen, bottomPanelHeight } = useLayout();
+	const { currentPath, loadDirectory, setCurrentPath } = useFileStore();
 
 	const renderBottomPanel = useCallback(() => {
 		if (!isBottomPanelOpen) return null;
@@ -54,23 +57,36 @@ export function FilesLayout({
 
 	return (
 		<div className={styles.layout}>
-			{/* Header */}
+			{/* FileToolbar - 文件浏览器专用顶部工具栏 */}
 			<header className={styles.header}>
-				<AppHeader />
+				<FileToolbar
+					currentPath={currentPath}
+					onRefresh={() => loadDirectory(currentPath)}
+					onNavigate={setCurrentPath}
+				/>
 			</header>
 
-			{/* Content（Sidebar 在 App 级别 overlay）*/}
-			<main className={styles.content}>
-				<FileBrowser
-					externalSidebarVisible={false}
-					onToggleSidebar={() => {}}
-					onExecuteOutput={(output) =>
-						console.log("[Files] Execute output:", output)
-					}
-					onOpenBottomPanel={onOpenBottomPanel}
+			{/* Body: FileSidebar + Content */}
+			<div className={styles.body}>
+				{/* FileSidebar - 异步加载的目录树 */}
+				<FileSidebar
+					visible={isSidebarVisible}
+					onNavigate={setCurrentPath}
 				/>
-				{renderBottomPanel()}
-			</main>
+
+				{/* Content */}
+				<main className={styles.content}>
+					<FileBrowser
+						externalSidebarVisible={isSidebarVisible}
+						onToggleSidebar={() => {}}
+						onExecuteOutput={(output) =>
+							console.log("[Files] Execute output:", output)
+						}
+						onOpenBottomPanel={onOpenBottomPanel}
+					/>
+					{renderBottomPanel()}
+				</main>
+			</div>
 		</div>
 	);
 }

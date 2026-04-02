@@ -1,5 +1,5 @@
 /**
- * FilesLayout Styles - 纯 Flex，Sidebar 在 App 级别
+ * FilesLayout Styles - 包含 FileToolbar 和 FileSidebar
  */
 
 .layout {
@@ -12,9 +12,15 @@
 
 .header {
   flex-shrink: 0;
-  height: 76px;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-subtle);
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .content {
