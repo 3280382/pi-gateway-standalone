@@ -4,7 +4,7 @@
  */
 
 import { useSidebarController } from "@/services/api/sidebarApi";
-import { IconButton, SectionHeader } from "@/shared/components/ui";
+import { IconButton, SectionHeader } from "@/shared/ui";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import styles from "./RecentWorkspaces.module.css";
 

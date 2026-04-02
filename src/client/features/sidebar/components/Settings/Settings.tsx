@@ -3,7 +3,7 @@
  */
 
 import { useSidebarController } from "@/services/api/sidebarApi";
-import { SectionHeader } from "@/shared/components/ui";
+import { SectionHeader } from "@/shared/ui";
 import { useLlmLogStore } from "@/stores/llmLogStore";
 import { useModalStore } from "@/stores/modalStore";
 import { useSidebarStore } from "@/stores/sidebarStore";

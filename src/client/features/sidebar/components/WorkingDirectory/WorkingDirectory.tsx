@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { useSidebarController } from "@/services/api/sidebarApi";
-import { SectionHeader } from "@/shared/components/ui";
+import { SectionHeader } from "@/shared/ui";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import styles from "./WorkingDirectory.module.css";
 

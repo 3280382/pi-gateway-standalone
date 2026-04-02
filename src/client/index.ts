@@ -28,7 +28,7 @@ export type {
 export { sessionService } from "./services/session.service";
 export { websocketService } from "./services/websocket.service";
 // 导出共享 UI 组件
-export { Button, IconButton, Input, Select } from "./shared/components/ui";
+export { Button, IconButton, Input, Select } from "./shared/ui";
 // 导出Store
 export { useChatStore } from "./stores/chatStore";
 // 导出类型
