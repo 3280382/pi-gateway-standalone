@@ -361,14 +361,18 @@ export function InputArea({
 			onChange(value + text);
 			return;
 		}
+		
+		// Ensure textarea is focused first
+		textarea.focus();
+		
 		const start = textarea.selectionStart;
 		const end = textarea.selectionEnd;
 		const newValue = value.substring(0, start) + text + value.substring(end);
 		onChange(newValue);
-		setTimeout(() => {
-			textarea.selectionStart = textarea.selectionEnd = start + text.length;
-			textarea.focus();
-		}, 0);
+		
+		// Set cursor position after the inserted text
+		const newCursorPos = start + text.length;
+		textarea.setSelectionRange(newCursorPos, newCursorPos);
 	};
 
 	const placeholder = isStreaming
