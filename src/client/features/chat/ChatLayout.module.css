@@ -1,5 +1,5 @@
 /**
- * ChatLayout Styles - 纯 Flex，无固定高度
+ * ChatLayout Styles - 纯 Flex，Sidebar 在 App 级别
  */
 
 .layout {
@@ -15,21 +15,6 @@
   height: 76px;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-subtle);
-}
-
-.body {
-  flex: 1;
-  display: flex;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.sidebar {
-  width: 280px;
-  flex-shrink: 0;
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border-subtle);
-  overflow-y: auto;
 }
 
 .content {

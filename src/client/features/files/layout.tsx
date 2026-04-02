@@ -1,12 +1,11 @@
 /**
- * FilesLayout - 文件功能完整布局
- * 包含：Header、Sidebar、Content、Panel
+ * FilesLayout - 文件功能布局
+ * 包含：Header、Content、Panel（Sidebar 在 App 级别）
  */
 
 import { useCallback } from "react";
 import { useLayout } from "@/features/core/layout/AppLayout/LayoutContext";
 import { AppHeader } from "@/features/core/layout/AppHeader";
-import { SidebarPanel } from "@/features/sidebar/components/SidebarPanel/SidebarPanel";
 import { XTermPanel } from "@/features/core/layout/panels/TerminalPanel";
 import { FileBrowser } from "./components/FileBrowser";
 import styles from "./FilesLayout.module.css";
@@ -28,7 +27,7 @@ export function FilesLayout({
 	closeBottomPanel,
 	setBottomPanelHeight,
 }: FilesLayoutProps) {
-	const { isSidebarVisible, isBottomPanelOpen, bottomPanelHeight } = useLayout();
+	const { isBottomPanelOpen, bottomPanelHeight } = useLayout();
 
 	const renderBottomPanel = useCallback(() => {
 		if (!isBottomPanelOpen) return null;
@@ -60,28 +59,18 @@ export function FilesLayout({
 				<AppHeader />
 			</header>
 
-			{/* Body: Sidebar + Content */}
-			<div className={styles.body}>
-				{/* Sidebar */}
-				{isSidebarVisible && (
-					<aside className={styles.sidebar}>
-						<SidebarPanel isVisible={isSidebarVisible} currentView="files" />
-					</aside>
-				)}
-
-				{/* Content */}
-				<main className={styles.content}>
-					<FileBrowser
-						externalSidebarVisible={false}
-						onToggleSidebar={() => {}}
-						onExecuteOutput={(output) =>
-							console.log("[Files] Execute output:", output)
-						}
-						onOpenBottomPanel={onOpenBottomPanel}
-					/>
-					{renderBottomPanel()}
-				</main>
-			</div>
+			{/* Content（Sidebar 在 App 级别 overlay）*/}
+			<main className={styles.content}>
+				<FileBrowser
+					externalSidebarVisible={false}
+					onToggleSidebar={() => {}}
+					onExecuteOutput={(output) =>
+						console.log("[Files] Execute output:", output)
+					}
+					onOpenBottomPanel={onOpenBottomPanel}
+				/>
+				{renderBottomPanel()}
+			</main>
 		</div>
 	);
 }

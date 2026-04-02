@@ -129,9 +129,6 @@ const THINKING_LEVELS = [
 ] as const;
 
 interface AppHeaderProps {
-	workingDir: string;
-	connectionStatus: "connected" | "disconnected" | "connecting";
-	pid: number | null;
 	currentView?: "chat" | "files";
 	searchQuery?: string;
 	searchFilters?: {
@@ -153,9 +150,6 @@ interface AppHeaderProps {
 console.log("[AppHeader] Module loaded, version: 2024-01-15-001");
 
 export function AppHeader({
-	workingDir,
-	connectionStatus,
-	pid,
 	currentView = "chat",
 	searchQuery: externalSearchQuery,
 	searchFilters: externalSearchFilters,
@@ -174,7 +168,14 @@ export function AppHeader({
 		setThinkingLevel,
 		setCurrentModel,
 		serverPid,
+		currentDir,
+		isConnected,
 	} = useSessionStore();
+	
+	// 从 store 获取数据
+	const workingDir = currentDir;
+	const connectionStatus = isConnected ? "connected" : "disconnected";
+	const pid = serverPid;
 	const { isStreaming } = useChatStore();
 	const chatController = useChatController();
 
