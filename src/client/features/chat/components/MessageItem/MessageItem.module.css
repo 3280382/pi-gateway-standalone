@@ -4,16 +4,16 @@
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	padding: 4px 0;
-	margin: 2px 0;
+	padding: 0;
+	margin: 0;
 	position: relative;
 	font-size: 13px;
 	line-height: 1.5;
 }
 
-/* 用户消息 -  subtle highlight */
+/* 用户消息 - 标准深蓝色背景 */
 .user {
-	background: rgba(59, 130, 246, 0.06);
+	background: rgba(37, 99, 235, 0.12);
 }
 
 /* AI 消息 - clean */
@@ -99,7 +99,7 @@
 	color: #d1d5db;
 }
 
-/* Thinking block */
+/* Thinking block - 统一背景 */
 .thinkingBody {
 	margin: 2px 12px;
 	padding: 8px 12px;
@@ -107,15 +107,15 @@
 	font-size: 12px;
 	line-height: 1.5;
 	color: #a8a29e;
-	background: rgba(202, 138, 4, 0.08);
-	border-left: 2px solid rgba(202, 138, 4, 0.4);
+	background: #161b22;
+	border-left: 2px solid rgba(202, 138, 4, 0.5);
 	border-radius: 0 4px 4px 0;
 	white-space: pre-wrap;
 	cursor: pointer;
 }
 
 .thinkingBody:hover {
-	background: rgba(202, 138, 4, 0.12);
+	background: #1c2128;
 }
 
 .thinkingCollapsed {
@@ -126,8 +126,8 @@
 	gap: 8px;
 	font-size: 12px;
 	color: #a8a29e;
-	background: rgba(202, 138, 4, 0.08);
-	border-left: 2px solid rgba(202, 138, 4, 0.4);
+	background: #161b22;
+	border-left: 2px solid rgba(202, 138, 4, 0.5);
 	border-radius: 0 4px 4px 0;
 	cursor: pointer;
 }
@@ -139,7 +139,7 @@
 	text-overflow: ellipsis;
 }
 
-/* Tool block */
+/* Tool block - 统一背景 */
 .toolContainer {
 	margin: 2px 12px;
 	padding: 8px 12px;
@@ -149,6 +149,7 @@
 	border-radius: 4px;
 	cursor: pointer;
 	transition: filter 0.1s ease;
+	background: #161b22;
 }
 
 .toolContainer:hover {
@@ -156,23 +157,23 @@
 }
 
 .toolContainer.success {
-	background: rgba(34, 197, 94, 0.08);
-	border-left: 2px solid rgba(34, 197, 94, 0.5);
+	background: #161b22;
+	border-left: 2px solid rgba(34, 197, 94, 0.6);
 }
 
 .toolContainer.error {
-	background: rgba(239, 68, 68, 0.08);
-	border-left: 2px solid rgba(239, 68, 68, 0.5);
+	background: #161b22;
+	border-left: 2px solid rgba(239, 68, 68, 0.6);
 }
 
 .toolContainer.pending {
-	background: rgba(34, 197, 94, 0.06);
-	border-left: 2px solid rgba(34, 197, 94, 0.3);
+	background: #161b22;
+	border-left: 2px solid rgba(34, 197, 94, 0.4);
 }
 
 .toolContainer.building {
-	background: rgba(34, 197, 94, 0.06);
-	border-left: 2px solid rgba(34, 197, 94, 0.3);
+	background: #161b22;
+	border-left: 2px solid rgba(34, 197, 94, 0.4);
 }
 
 .toolContainer.collapsed {
@@ -252,7 +253,7 @@
 .toolOutputPre {
 	margin: 8px 0 0 0;
 	padding: 8px;
-	background: rgba(0, 0, 0, 0.2);
+	background: #0d1117;
 	border-radius: 4px;
 	font-family: inherit;
 	font-size: 11px;
@@ -268,12 +269,12 @@
 	color: #fca5a5;
 }
 
-/* Code block */
+/* Code block - 统一背景 */
 .codeContainer {
 	margin: 4px 12px;
 	border-radius: 6px;
 	overflow: hidden;
-	background: #0d1117;
+	background: #161b22;
 	border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -282,7 +283,7 @@
 	align-items: center;
 	justify-content: space-between;
 	padding: 4px 10px;
-	background: rgba(255, 255, 255, 0.03);
+	background: #1c2128;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -317,12 +318,14 @@
 	font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
 	font-size: 12px;
 	line-height: 1.5;
+	background: #161b22;
 }
 
 .codePre code {
 	display: block;
 	color: #e5e7eb;
 	white-space: pre;
+	background: transparent;
 }
 
 /* Syntax highlighting */
