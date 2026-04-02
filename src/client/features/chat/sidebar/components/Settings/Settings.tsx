@@ -8,7 +8,7 @@ import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { IconButton } from "@/shared/ui/IconButton/IconButton";
 import { SectionHeader } from "@/shared/ui/SectionHeader/SectionHeader";
-import type { FontSize, Theme } from "@/types/sidebar";
+import type { FontSize, Theme } from "@/features/chat/types/sidebar";
 import styles from "./Settings.module.css";
 
 export function Settings() {

@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import type { Message, MessageContent } from "@/types/chat";
+import type { Message, MessageContent } from "@/features/chat/types/chat";
 
 // 模拟 chatApi 中的纯函数逻辑
 function generateMessageId(): string {

@@ -2,8 +2,8 @@
  * ChatPage - 聊天页面
  */
 
-import type { CommandResult } from "@/hooks/app";
-import { useChatMessages } from "@/hooks/app";
+import type { CommandResult } from "@/shared/hooks/app";
+import { useChatMessages } from "@/shared/hooks/app";
 import { ChatLayout } from "./layout";
 
 interface ChatPageProps {

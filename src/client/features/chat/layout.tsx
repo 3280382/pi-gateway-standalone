@@ -9,7 +9,7 @@ import { AppHeader } from "@/features/chat/components/Header";
 import { LlmLogPanel } from "@/features/chat/components/panels/LlmLogPanel";
 import { XTermPanel } from "@/features/chat/components/panels/TerminalPanel";
 import { SidebarPanel } from "@/features/chat/sidebar/components/SidebarPanel/SidebarPanel";
-import type { CommandResult } from "@/hooks/app";
+import type { CommandResult } from "@/shared/hooks/app";
 import styles from "./ChatLayout.module.css";
 import { ChatPanel } from "./components/ChatPanel";
 

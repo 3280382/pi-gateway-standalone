@@ -1,15 +1,7 @@
 /**
- * Hooks Index
- * 统一导出所有 Hooks
+ * Hooks 导出 - 统一入口
+ * 
+ * 所有 hooks 从 shared/hooks 重新导出以保持兼容性
  */
 
-export {
-	useAppInitialization,
-	useChatMessages,
-	useTerminalCommands,
-} from "./app";
-// App level hooks
-export { useChat } from "./useChat";
-export { useDragDrop } from "./useDragDrop";
-// Feature hooks
-export { useGesture } from "./useGesture";
+export * from "@/shared/hooks";

@@ -11,7 +11,7 @@ import { ErrorScreen } from "@/app/pages/ErrorScreen";
 import { LoadingScreen } from "@/app/pages/LoadingScreen";
 import { ChatPage } from "@/features/chat/page";
 import { FilesPage } from "@/features/files/page";
-import { useAppInitialization, useTerminalCommands } from "@/hooks/app";
+import { useAppInitialization, useTerminalCommands } from "@/shared/hooks/app";
 import { Footer } from "./Footer";
 import "@/styles/global.css";
 import styles from "./App.module.css";

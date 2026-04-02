@@ -1,7 +1,7 @@
 /**
- * Types Index
- * 统一导出所有类型定义
+ * Chat Feature Types
  */
 
 export * from "./chat";
 export * from "./sidebar";
+export * from "./slashCommands";

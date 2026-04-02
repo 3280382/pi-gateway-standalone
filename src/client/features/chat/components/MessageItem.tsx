@@ -2,7 +2,7 @@
  * MessageItem - 扁平化重构版 (优化版)
  */
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-import type { Message, MessageContent } from "@/types/chat";
+import type { Message, MessageContent } from "@/features/chat/types/chat";
 import styles from "./MessageItem.module.css";
 
 // 声明全局 Prism

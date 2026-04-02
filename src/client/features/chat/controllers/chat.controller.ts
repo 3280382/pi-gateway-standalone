@@ -8,7 +8,7 @@ import { useChatStore } from "@/features/chat/stores/chatStore";
 import { ServiceError } from "@/shared/services/base.service";
 import { chatService } from "@/features/chat/services/chat.service";
 import { websocketService } from "@/shared/services/websocket.service";
-import type { Message, ToolExecution } from "@/types/chat";
+import type { Message, ToolExecution } from "@/features/chat/types/chat";
 
 export class ChatController {
 	private store = useChatStore;

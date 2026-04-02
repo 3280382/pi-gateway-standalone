@@ -2,7 +2,7 @@
  * Chat Service - 处理聊天相关的业务逻辑
  */
 
-import type { Message, ToolExecution } from "@/types/chat";
+import type { Message, ToolExecution } from "@/features/chat/types/chat";
 import { BaseService, ServiceError } from "@/shared/services/base.service";
 
 export interface SendMessageRequest {

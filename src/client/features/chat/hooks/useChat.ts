@@ -23,7 +23,7 @@ import type {
 	ToolExecution,
 	ToolStartMessage,
 	ToolUpdateMessage,
-} from "@/types/chat";
+} from "@/features/chat/types/chat";
 import { wsClient } from "../api/client";
 
 // ============================================================================

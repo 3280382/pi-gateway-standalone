@@ -13,7 +13,7 @@ import type {
 	SidebarController,
 	Theme,
 	WorkingDirResponse,
-} from "@/types/sidebar";
+} from "@/features/chat/types/sidebar";
 import { fetchApi } from "@/shared/services/api/client";
 
 // ============================================================================

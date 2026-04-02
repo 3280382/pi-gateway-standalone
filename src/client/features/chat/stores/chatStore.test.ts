@@ -3,7 +3,7 @@
  */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import type { Message } from "@/types/chat";
+import type { Message } from "@/features/chat/types/chat";
 import { useChatStore } from "./chatStore";
 
 describe("ChatStore", () => {

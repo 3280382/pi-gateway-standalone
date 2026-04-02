@@ -5,7 +5,7 @@
  * This component only renders the list of messages
  */
 
-import type { Message } from "@/types/chat";
+import type { Message } from "@/features/chat/types/chat";
 import { MessageItem } from "./MessageItem";
 import styles from "./MessageList.module.css";
 

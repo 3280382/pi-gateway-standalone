@@ -6,7 +6,7 @@ import React from "react";
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { Message } from "@/types/chat";
+import type { Message } from "@/features/chat/types/chat";
 
 // Mock MessageItem component
 vi.mock("../MessageItem/MessageItem", () => ({

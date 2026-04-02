@@ -10,7 +10,7 @@ import type {
 	Session,
 	SidebarState,
 	Theme,
-} from "@/types/sidebar";
+} from "@/features/chat/types/sidebar";
 
 // ============================================================================
 // Initial State Factory

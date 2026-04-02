@@ -10,7 +10,7 @@ import type {
 	ChatState,
 	Message,
 	ToolExecution,
-} from "@/types/chat";
+} from "@/features/chat/types/chat";
 
 // ============================================================================
 // Types
