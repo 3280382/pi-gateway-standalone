@@ -1,119 +1,181 @@
 /**
- * FileList - 列表视图 (带调试日志)
+ * FileList - Optimized list view with gesture handling
  */
-import React, { memo, useRef } from "react";
-import { fileListDebug, withLogging } from "@/lib/debug";
-import { formatFileSize, getFileIcon } from "@/services/api/fileApi";
-import { type FileItem, useFileStore } from "@/stores/fileStore";
+import type React from "react";
+import { memo, useCallback, useState } from "react";
+import type { FileItem as FileItemType } from "@/stores/fileStore";
+import { useFileStore } from "@/stores/fileStore";
 import { useFileViewerStore } from "@/stores/fileViewerStore";
-import styles from "./FileBrowser.module.css";
+import { FileItem } from "../FileItem";
+import styles from "./FileList.module.css";
 
 interface FileListProps {
-	items: FileItem[];
+	items: FileItemType[];
 }
-export const FileList = memo<FileListProps>(({ items }) => {
-	fileListDebug.info("FileList组件渲染", { itemCount: items.length });
 
+export const FileList = memo<FileListProps>(({ items }) => {
 	const {
-		selectedActionFile,
-		selectedActionFileName,
-		clearSelection,
-		selectForAction,
+		selectedItems,
+		isMultiSelectMode,
 		setCurrentPath,
+		selectForAction,
+		toggleSelection,
+		setMultiSelectMode,
+		setDraggedItem,
+		setIsDragging,
+		moveSelectedItems,
 	} = useFileStore();
 
 	const { openViewer } = useFileViewerStore();
-	const handleClick = withLogging(
-		fileListDebug,
-		"handleClick",
-		(item: FileItem) => {
-			fileListDebug.debug("文件单击处理", {
-				path: item.path,
-				name: item.name,
-				isDirectory: item.isDirectory,
-			});
+	const [dropTarget, setDropTarget] = useState<string | null>(null);
+	const [draggingItem, setDraggingItem] = useState<string | null>(null);
+
+	// Handle tap
+	const handleTap = useCallback(
+		(item: FileItemType) => {
+			if (isMultiSelectMode) {
+				toggleSelection(item.path);
+				return;
+			}
 
 			if (item.isDirectory) {
-				// 目录：导航
-				fileListDebug.info("导航到目录", { path: item.path, name: item.name });
 				setCurrentPath(item.path);
 			} else {
-				// 文件：选择
-				fileListDebug.debug("选择文件", { path: item.path, name: item.name });
-				selectForAction(item.path, item.name);
-			}
-		},
-	);
-
-	const handleDoubleClick = withLogging(
-		fileListDebug,
-		"handleDoubleClick",
-		(item: FileItem) => {
-			fileListDebug.debug("文件双击处理", {
-				path: item.path,
-				name: item.name,
-				isDirectory: item.isDirectory,
-			});
-
-			if (!item.isDirectory) {
-				// 文件：打开查看器
-				fileListDebug.info("打开文件查看器", {
-					path: item.path,
-					name: item.name,
-				});
 				openViewer(item.path, item.name, "view");
 			}
 		},
+		[isMultiSelectMode, toggleSelection, setCurrentPath, openViewer],
 	);
-	const formatDate = (dateString: string) => {
-		if (!dateString) return "";
-		try {
-			return new Date(dateString).toLocaleDateString();
-		} catch {
-			return dateString;
-		}
-	};
-	if (items.length === 0) {
-		fileListDebug.debug("文件列表为空");
-		return null;
-	}
-	fileListDebug.debug("渲染文件列表", { itemCount: items.length });
+
+	// Handle double tap
+	const handleDoubleTap = useCallback(
+		(item: FileItemType) => {
+			if (isMultiSelectMode) return;
+			if (item.isDirectory) {
+				setCurrentPath(item.path);
+			}
+		},
+		[isMultiSelectMode, setCurrentPath],
+	);
+
+	// Handle long press
+	const handleLongPress = useCallback(
+		(item: FileItemType) => {
+			if (!isMultiSelectMode) {
+				setMultiSelectMode(true);
+			}
+			toggleSelection(item.path);
+			setDraggedItem(item);
+			setIsDragging(true);
+			setDraggingItem(item.path);
+		},
+		[
+			isMultiSelectMode,
+			setMultiSelectMode,
+			toggleSelection,
+			setDraggedItem,
+			setIsDragging,
+		],
+	);
+
+	// Drag and drop handlers
+	const handleDragStart = useCallback(
+		(e: React.DragEvent, item: FileItemType) => {
+			setDraggedItem(item);
+			setIsDragging(true);
+			setDraggingItem(item.path);
+
+			if (!isMultiSelectMode && selectedItems.length === 0) {
+				selectForAction(item.path, item.name);
+			}
+
+			e.dataTransfer.effectAllowed = "move";
+			e.dataTransfer.setData("text/plain", item.path);
+		},
+		[
+			setDraggedItem,
+			setIsDragging,
+			isMultiSelectMode,
+			selectedItems.length,
+			selectForAction,
+		],
+	);
+
+	const handleDragOver = useCallback(
+		(e: React.DragEvent, item: FileItemType) => {
+			if (!item.isDirectory) return;
+			e.preventDefault();
+			e.dataTransfer.dropEffect = "move";
+			setDropTarget(item.path);
+		},
+		[],
+	);
+
+	const handleDragLeave = useCallback(() => {
+		setDropTarget(null);
+	}, []);
+
+	const handleDrop = useCallback(
+		async (e: React.DragEvent, targetItem: FileItemType) => {
+			e.preventDefault();
+			setDropTarget(null);
+			setIsDragging(false);
+			setDraggingItem(null);
+
+			if (!targetItem.isDirectory) return;
+
+			const draggedPath = e.dataTransfer.getData("text/plain");
+			if (draggedPath === targetItem.path) return;
+
+			try {
+				await moveSelectedItems(targetItem.path);
+			} catch (error) {
+				console.error("Move failed:", error);
+			}
+		},
+		[moveSelectedItems, setIsDragging],
+	);
+
+	const handleDragEnd = useCallback(() => {
+		setDraggedItem(null);
+		setIsDragging(false);
+		setDraggingItem(null);
+		setDropTarget(null);
+	}, [setDraggedItem, setIsDragging]);
+
+	if (items.length === 0) return null;
 
 	return (
-		<div className={styles.list} data-testid="file-list-container">
+		<div className={styles.list}>
 			<div className={styles.listHeader}>
+				<span className={styles.headerCheckbox} />
+				<span className={styles.headerIcon} />
 				<span className={styles.headerName}>Name</span>
 				<span className={styles.headerSize}>Size</span>
 				<span className={styles.headerModified}>Modified</span>
 			</div>
-			{items.map((item) => {
-				const isSelected = selectedActionFile === item.path;
-				const icon = getFileIcon(item.extension, item.isDirectory);
-				if (isSelected) {
-					fileListDebug.verbose("渲染选中文件", {
-						name: item.name,
-						path: item.path,
-					});
-				}
-				return (
-					<div
-						key={item.path}
-						className={`${styles.listItem} ${isSelected ? styles.selected : ""} ${item.isDirectory ? styles.directory : ""}`}
-						onClick={() => handleClick(item)}
-						onDoubleClick={() => handleDoubleClick(item)}
-					>
-						<div className={styles.listIcon}>{icon}</div>
-						<div className={styles.listName}>{item.name}</div>
-						<div className={styles.listSize}>
-							{item.isDirectory ? "" : formatFileSize(item.size)}
-						</div>
-						<div className={styles.listModified}>
-							{formatDate(item.modified)}
-						</div>
-					</div>
-				);
-			})}
+			{items.map((item) => (
+				<FileItem
+					key={item.path}
+					item={item}
+					isSelected={selectedItems.includes(item.path)}
+					isMultiSelectMode={isMultiSelectMode}
+					isDropTarget={dropTarget === item.path}
+					isDragging={draggingItem === item.path}
+					onTap={handleTap}
+					onDoubleTap={handleDoubleTap}
+					onLongPress={handleLongPress}
+					onDragStart={handleDragStart}
+					onDragOver={handleDragOver}
+					onDragLeave={handleDragLeave}
+					onDrop={handleDrop}
+					onDragEnd={handleDragEnd}
+					onToggleSelect={toggleSelection}
+					viewMode="list"
+				/>
+			))}
 		</div>
 	);
 });
+
 FileList.displayName = "FileList";
