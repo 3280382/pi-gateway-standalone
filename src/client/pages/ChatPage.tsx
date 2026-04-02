@@ -5,10 +5,10 @@
 
 import { useCallback } from "react";
 import { MessageList } from "@/features/chat/components/MessageList/MessageList";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { useLayout } from "@/components/layout/AppLayout/LayoutContext";
-import { LlmLogPanel } from "@/features/system/components/llm-log";
-import { XTermPanel } from "@/features/system/components/terminal";
+import { AppLayout } from "@/app/layout/AppLayout";
+import { useLayout } from "@/app/layout/AppLayout/LayoutContext";
+import { LlmLogPanel } from "@/app/layout/panels/LlmLogPanel";
+import { XTermPanel } from "@/app/layout/panels/TerminalPanel";
 import type { CommandResult } from "@/hooks/app";
 import { useChatMessages } from "@/hooks/app";
 

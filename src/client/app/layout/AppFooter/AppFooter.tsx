@@ -1,10 +1,10 @@
 /**
- * BottomMenu - Layout with left-aligned toggles, center content
+ * AppFooter - Application footer with navigation controls
  */
 
-import styles from "./BottomMenu.module.css";
+import styles from "./AppFooter.module.css";
 
-interface BottomMenuProps {
+interface AppFooterProps {
 	isSidebarVisible: boolean;
 	currentView: "chat" | "files";
 	isBottomPanelOpen?: boolean;
@@ -13,7 +13,7 @@ interface BottomMenuProps {
 	onToggleBottomPanel?: () => void;
 }
 
-export function BottomMenu({
+export function AppFooter({
 	isSidebarVisible,
 	currentView,
 	isBottomPanelOpen,

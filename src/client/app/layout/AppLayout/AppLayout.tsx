@@ -8,9 +8,9 @@ import { useChatStore } from "@/stores/chatStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import { InputArea } from "@/features/chat/components/InputArea/InputArea";
 import { FileSidebar } from "@/features/files/components/FileSidebar";
-import { BottomMenu } from "../BottomMenu";
+import { AppFooter } from "../AppFooter/AppFooter";
 import { SidebarPanel } from "@/features/sidebar/components/SidebarPanel/SidebarPanel";
-import { TopBar } from "../TopBar/TopBar";
+import { AppHeader } from "../AppHeader/AppHeader";
 import styles from "./AppLayout.module.css";
 import { useLayout } from "./LayoutContext";
 
@@ -169,7 +169,7 @@ export function AppLayout({
 
 			{/* 1. Header - 顶部菜单 (固定68px) */}
 			<header className={styles.header}>
-				<TopBar
+				<AppHeader
 					workingDir={currentDir}
 					connectionStatus={isConnected ? "connected" : "disconnected"}
 					pid={serverPid}
@@ -227,7 +227,7 @@ export function AppLayout({
 
 			{/* 3. Footer - 底部菜单 (固定44px) */}
 			<footer className={styles.footer}>
-				<BottomMenu
+				<AppFooter
 					isSidebarVisible={isSidebarVisible}
 					currentView={currentView}
 					isBottomPanelOpen={isBottomPanelOpen}

@@ -1,5 +1,5 @@
 /**
- * TopBar - Two Row Layout
+ * AppHeader - Two Row Layout
  * Row 1: System Prompt, Model Selector, Thinking Mode, Connection Status
  * Row 2: Working Directory + Search & Filter
  */
@@ -21,7 +21,7 @@ import {
 import { useModalStore } from "@/stores/modalStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
-import styles from "./TopBar.module.css";
+import styles from "./AppHeader.module.css";
 
 // DirectoryPicker component for selecting working directory
 function DirectoryPicker({
@@ -128,7 +128,7 @@ const THINKING_LEVELS = [
 	{ id: "high", name: "XHigh", icon: "●" },
 ] as const;
 
-interface TopBarProps {
+interface AppHeaderProps {
 	workingDir: string;
 	connectionStatus: "connected" | "disconnected" | "connecting";
 	pid: number | null;
@@ -150,9 +150,9 @@ interface TopBarProps {
 }
 
 // DEBUG: Check if new code is loaded
-console.log("[TopBar] Module loaded, version: 2024-01-15-001");
+console.log("[AppHeader] Module loaded, version: 2024-01-15-001");
 
-export function TopBar({
+export function AppHeader({
 	workingDir,
 	connectionStatus,
 	pid,
@@ -161,9 +161,9 @@ export function TopBar({
 	searchFilters: externalSearchFilters,
 	onSearchQueryChange,
 	onSearchFiltersChange,
-}: TopBarProps) {
+}: AppHeaderProps) {
 	// Log props on every render
-	console.log("[TopBar] Render props:", {
+	console.log("[AppHeader] Render props:", {
 		onSearchQueryChange: typeof onSearchQueryChange,
 		onSearchFiltersChange: typeof onSearchFiltersChange,
 		externalSearchQuery: externalSearchQuery?.slice?.(0, 20),
@@ -220,7 +220,7 @@ export function TopBar({
 	// Handle working directory selection
 	const handleDirSelect = async (selectedPath: string) => {
 		console.log(
-			"[TopBar] Directory selected:",
+			"[AppHeader] Directory selected:",
 			selectedPath,
 			"current:",
 			workingDir,
@@ -233,7 +233,7 @@ export function TopBar({
 
 	const handleFilterChange = (key: keyof typeof filters) => {
 		console.log(
-			"[TopBar] Filter changed:",
+			"[AppHeader] Filter changed:",
 			key,
 			"onSearchFiltersChange exists:",
 			!!onSearchFiltersChange,
@@ -276,13 +276,13 @@ export function TopBar({
 	const handleModelSelect = async (modelId: string) => {
 		const model = models.find((m) => m.id === modelId);
 		if (model) {
-			console.log("[TopBar] Switching model:", model);
+			console.log("[AppHeader] Switching model:", model);
 			try {
 				// Use chatController to set model (sends to server and waits for confirmation)
 				await chatController.setModel(model.provider, model.id);
-				console.log("[TopBar] Model set successfully");
+				console.log("[AppHeader] Model set successfully");
 			} catch (error) {
-				console.error("[TopBar] Failed to set model:", error);
+				console.error("[AppHeader] Failed to set model:", error);
 			}
 		}
 		setShowModelDropdown(false);
@@ -290,12 +290,12 @@ export function TopBar({
 
 	// Handle thinking level selection
 	const handleThinkingSelect = (level: string) => {
-		console.log("[TopBar] Switching thinking level:", level);
+		console.log("[AppHeader] Switching thinking level:", level);
 		// Send to server via WebSocket
 		const sent = websocketService.send("thinking_level_change", {
 			thinkingLevel: level,
 		});
-		console.log("[TopBar] thinking_level_change message sent:", sent);
+		console.log("[AppHeader] thinking_level_change message sent:", sent);
 		// Update local state
 		setThinkingLevel(level as any);
 		setShowThinkingDropdown(false);
@@ -339,7 +339,7 @@ export function TopBar({
 	// Files 视图：显示文件工具栏
 	if (currentView === "files") {
 		return (
-			<FileToolbarTopBar
+			<FileToolbarAppHeader
 				workingDir={workingDir}
 				connectionStatus={connectionStatus}
 				pid={pid}
@@ -460,7 +460,7 @@ export function TopBar({
 							value={searchQuery}
 							onChange={(e) => {
 								console.log(
-									"[TopBar] Input changed:",
+									"[AppHeader] Input changed:",
 									e.target.value,
 									"onSearchQueryChange exists:",
 									!!onSearchQueryChange,
@@ -709,7 +709,7 @@ function FolderIcon({ className }: { className?: string }) {
 }
 
 // ============================================
-// FileToolbarTopBar - Files 视图的顶部工具栏
+// FileToolbarAppHeader - Files 视图的顶部工具栏
 // ============================================
 import {
 	type FilterType,
@@ -746,17 +746,17 @@ const FILE_SORT_OPTIONS: { value: SortMode; icon: string; label: string }[] = [
 	{ value: "type", icon: "📎", label: "Type" },
 ];
 
-interface FileToolbarTopBarProps {
+interface FileToolbarAppHeaderProps {
 	workingDir: string;
 	connectionStatus: "connected" | "disconnected" | "connecting";
 	pid: number | null;
 }
 
-function FileToolbarTopBar({
+function FileToolbarAppHeader({
 	workingDir,
 	connectionStatus,
 	pid,
-}: FileToolbarTopBarProps) {
+}: FileToolbarAppHeaderProps) {
 	const fileStore = useFileStore();
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
 	const [isSortOpen, setIsSortOpen] = useState(false);

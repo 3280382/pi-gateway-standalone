@@ -10,7 +10,7 @@
 import {
 	LayoutProvider,
 	useLayout,
-} from "./components/layout/AppLayout/LayoutContext";
+} from "./app/layout/AppLayout/LayoutContext";
 import { useAppInitialization, useTerminalCommands } from "./hooks/app";
 import { ChatPage, ErrorScreen, FilesPage, LoadingScreen } from "./pages";
 import "./styles/global.css";

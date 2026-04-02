@@ -5,9 +5,9 @@
 
 import { useCallback } from "react";
 import { FileBrowser } from "@/features/files/components/FileBrowser";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { useLayout } from "@/components/layout/AppLayout/LayoutContext";
-import { XTermPanel } from "@/features/system/components/terminal";
+import { AppLayout } from "@/app/layout/AppLayout";
+import { useLayout } from "@/app/layout/AppLayout/LayoutContext";
+import { XTermPanel } from "@/app/layout/panels/TerminalPanel";
 
 interface FilesPageProps {
 	terminalOutput: string;
