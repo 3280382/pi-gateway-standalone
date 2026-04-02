@@ -23,7 +23,7 @@ export class ChatController {
 	/**
 	 * 发送消息（支持图片）
 	 */
-	async sendMessage(text: string, images?: ImageUpload[]): Promise<void> {
+	sendMessage = async (text: string, images?: ImageUpload[]): Promise<void> => {
 		try {
 			// 检查WebSocket连接状态
 			if (!websocketService.isConnected) {
@@ -107,68 +107,75 @@ export class ChatController {
 			this.handleError("sendMessage", error);
 			throw error;
 		}
-	}
+	};
 
 	/**
 	 * 中止生成
 	 */
-	async abortGeneration(): Promise<void> {
+	abortGeneration = async (): Promise<void> => {
 		try {
 			websocketService.abortGeneration();
 			this.store.getState().abortStreaming();
 		} catch (error) {
 			this.handleError("abortGeneration", error);
 		}
-	}
+	};
 
 	/**
 	 * 设置输入文本
 	 */
-	setInputText(text: string): void {
+	setInputText = (text: string): void => {
 		this.store.getState().setInputText(text);
-	}
+	};
 
 	/**
 	 * 清空输入
 	 */
-	clearInput(): void {
+	clearInput = (): void => {
 		this.store.getState().clearInput();
-	}
+	};
 
 	/**
 	 * 切换消息折叠状态
 	 */
-	toggleMessageCollapse(messageId: string): void {
+	toggleMessageCollapse = (messageId: string): void => {
 		this.store.getState().toggleMessageCollapse(messageId);
-	}
+	};
 
 	/**
 	 * 切换思考内容折叠状态
 	 */
-	toggleThinkingCollapse(messageId: string): void {
+	toggleThinkingCollapse = (messageId: string): void => {
 		this.store.getState().toggleThinkingCollapse(messageId);
-	}
+	};
 
 	/**
 	 * 切换工具折叠状态
 	 */
-	toggleToolsCollapse(messageId: string): void {
+	toggleToolsCollapse = (messageId: string): void => {
 		this.store.getState().toggleToolsCollapse(messageId);
-	}
+	};
 
 	/**
 	 * 删除消息
 	 */
-	deleteMessage(messageId: string): void {
+	deleteMessage = (messageId: string): void => {
 		this.store.getState().deleteMessage(messageId);
-	}
+	};
 
 	/**
 	 * 重新生成消息
 	 */
-	regenerateMessage(messageId: string): void {
+	regenerateMessage = (messageId: string): void => {
 		this.store.getState().regenerateMessage(messageId);
-	}
+	};
+
+	/**
+	 * 清空所有消息
+	 */
+	clearMessages = (): void => {
+		this.store.getState().clearMessages();
+	};
 
 	/**
 	 * 加载会话
