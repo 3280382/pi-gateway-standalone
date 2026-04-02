@@ -52,12 +52,14 @@ function AppContent() {
 
 	return (
 		<div className={styles.app}>
-			{/* 全局 Sidebar Overlay */}
-			<aside
-				className={`${sidebarStyles.sidebar} ${isSidebarVisible ? sidebarStyles.sidebarVisible : sidebarStyles.sidebarHidden}`}
+			{/* 全局 Sidebar Overlay - 仅在 Chat 视图显示 */}
+			{currentView === "chat" && (
+				<aside
+					className={`${sidebarStyles.sidebar} ${isSidebarVisible ? sidebarStyles.sidebarVisible : sidebarStyles.sidebarHidden}`}
 			>
-				<SidebarPanel isVisible={isSidebarVisible} currentView={currentView} />
-			</aside>
+					<SidebarPanel isVisible={isSidebarVisible} currentView="chat" />
+				</aside>
+			)}
 
 			{/* PageContainer: 每个 feature 控制 Header/Content/Panel */}
 			<main className={styles.pageContainer}>
