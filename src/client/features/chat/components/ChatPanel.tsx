@@ -43,11 +43,20 @@ export function ChatPanel() {
 		}
 	}, []);
 
-	const handleSend = useCallback(() => {
+	const handleSend = useCallback(async () => {
+		console.log("[ChatPanel] handleSend called, inputText:", inputText);
 		if (inputText.trim()) {
-			chatController.sendMessage(inputText);
+			console.log("[ChatPanel] Calling chatController.sendMessage");
+			try {
+				await chatController.sendMessage(inputText);
+				console.log("[ChatPanel] sendMessage completed");
+			} catch (err) {
+				console.error("[ChatPanel] sendMessage failed:", err);
+			}
 			// Reset scroll flag on new message
 			shouldScrollRef.current = true;
+		} else {
+			console.log("[ChatPanel] inputText is empty, not sending");
 		}
 	}, [inputText]);
 
