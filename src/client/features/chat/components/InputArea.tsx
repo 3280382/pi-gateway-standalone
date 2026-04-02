@@ -363,7 +363,6 @@ export function InputArea({
 				return data.text || "";
 			}
 		} catch (err) {
-			console.log("OCR endpoint not available");
 		}
 		return "";
 	};

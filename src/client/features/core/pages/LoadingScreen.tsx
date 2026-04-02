@@ -2,16 +2,32 @@
  * LoadingScreen - 应用加载页面
  */
 
-import styles from "./PageStyles.module.css";
-
 export function LoadingScreen() {
 	return (
-		<div className={styles.loadingScreen}>
-			<div className={styles.loadingLogo}>π</div>
-			<div className={styles.loadingText}>Initializing Pi Gateway...</div>
-			<div className={styles.loadingBar}>
-				<div className={styles.loadingProgress} />
+		<div
+			style={{
+				display: "flex",
+				flexDirection: "column",
+				alignItems: "center",
+				justifyContent: "center",
+				height: "100vh",
+				background: "var(--bg-primary)",
+				color: "var(--text-primary)",
+			}}
+		>
+			<div
+				style={{
+					fontSize: "48px",
+					fontWeight: "bold",
+					background: "linear-gradient(135deg, var(--accent-blue), var(--accent-purple))",
+					WebkitBackgroundClip: "text",
+					WebkitTextFillColor: "transparent",
+					marginBottom: "16px",
+				}}
+			>
+				π
 			</div>
+			<div style={{ color: "var(--text-secondary)" }}>Initializing Pi Gateway...</div>
 		</div>
 	);
 }
