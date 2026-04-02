@@ -573,7 +573,6 @@ export class ChatController {
 
 		// 代理结束
 		websocketService.on("agent_end", () => {
-			console.log("[ChatController] agent_end handler called");
 			this.finalizeStreamingMessage();
 		});
 

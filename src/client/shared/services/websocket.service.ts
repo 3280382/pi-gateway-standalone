@@ -435,7 +435,6 @@ export class WebSocketService extends BaseService {
 				this.emit("agent_start", data);
 				break;
 			case "agent_end":
-				console.log("[WebSocketService] Emitting agent_end");
 				this.emit("agent_end", data);
 				break;
 			case "message_start":

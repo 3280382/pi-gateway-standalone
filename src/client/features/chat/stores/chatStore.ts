@@ -85,7 +85,6 @@ interface ContentPartWithOrder extends ContentPart {
 }
 
 function buildContentArray(state: State): ContentPart[] {
-	console.log("[buildContentArray] streamingContent length:", state.streamingContent?.length, "streamingThinking length:", state.streamingThinking?.length, "streamingThinkings count:", state.streamingThinkings?.length);
 	const content: ContentPartWithOrder[] = [];
 
 	// 使用基础时间戳确保相对顺序：thinking < text < tools
@@ -504,26 +503,27 @@ export const useChatStore = create<
 			},
 
 			finishStreaming: () => {
-				console.log("[ChatStore] finishStreaming called");
 				set(
 					(state) => {
-						// 构建当前轮次的新内容
-						const currentContent = buildContentArray(state);
-
 						// 获取之前轮次的内容（从 currentStreamingMessage.content）
 						const existingContent =
 							state.currentStreamingMessage?.content || [];
 						
-						console.log("[ChatStore] existingContent length:", existingContent.length, "currentContent length:", currentContent.length);
-						console.log("[ChatStore] existingContent:", existingContent.map((c: any) => c.type));
-						console.log("[ChatStore] currentContent:", currentContent.map((c: any) => c.type));
+						// 构建当前轮次的新内容
+						const currentContent = buildContentArray(state);
+
+						// 找到最后一个 turn_marker 的位置
+						const lastTurnMarkerIndex = existingContent.map((c: any) => c.type).lastIndexOf('turn_marker');
 						
-						// 过滤掉已保存到 existingContent 中的内容，避免重复
-						// existingContent 中已经有之前轮次的完整内容
-						// currentContent 只包含当前轮次的内容
-						const finalContent = [...existingContent, ...currentContent];
-						
-						console.log("[ChatStore] finalContent length:", finalContent.length);
+						let finalContent: any[];
+						if (lastTurnMarkerIndex >= 0) {
+							// 有多轮：保留 turn_marker 之前的内容 + 当前轮次内容
+							const previousRounds = existingContent.slice(0, lastTurnMarkerIndex + 1);
+							finalContent = [...previousRounds, ...currentContent];
+						} else {
+							// 只有一轮：直接使用 currentContent（existingContent 和 currentContent 内容相同）
+							finalContent = currentContent;
+						}
 
 						const finalMessage = state.currentStreamingMessage
 							? {
