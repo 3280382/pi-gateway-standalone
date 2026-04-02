@@ -60,9 +60,7 @@ export function BatchActionBar() {
 		<>
 			<div className={styles.batchBar}>
 				<div className={styles.leftSection}>
-					<span className={styles.selectedCount}>
-						{selectedCount} selected
-					</span>
+					<span className={styles.selectedCount}>{selectedCount} selected</span>
 				</div>
 				<div className={styles.actions}>
 					<button
@@ -98,8 +96,8 @@ export function BatchActionBar() {
 						</div>
 						<div className={styles.modalContent}>
 							<p className={styles.warningText}>
-								Are you sure you want to delete{" "}
-								<strong>{selectedCount}</strong> item(s)?
+								Are you sure you want to delete <strong>{selectedCount}</strong>{" "}
+								item(s)?
 							</p>
 							<p className={styles.warningSubtext}>
 								This action cannot be undone.
@@ -174,7 +172,13 @@ function LoadingSpinner() {
 			stroke="currentColor"
 			strokeWidth={2}
 		>
-			<circle cx="12" cy="12" r="10" strokeDasharray="60" strokeLinecap="round" />
+			<circle
+				cx="12"
+				cy="12"
+				r="10"
+				strokeDasharray="60"
+				strokeLinecap="round"
+			/>
 		</svg>
 	);
 }

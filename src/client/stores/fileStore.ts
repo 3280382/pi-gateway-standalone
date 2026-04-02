@@ -49,6 +49,10 @@ export interface FileState {
 	items: FileItem[];
 	selectedItems: string[];
 
+	// 路径缓存 - 避免重复加载
+	pathCache: Map<string, { items: FileItem[]; timestamp: number }>;
+	CACHE_TTL: number; // 缓存有效期(ms)
+
 	// 视图设置
 	viewMode: ViewMode;
 	sortMode: SortMode;
@@ -66,7 +70,7 @@ export interface FileState {
 
 	// 多选模式
 	isMultiSelectMode: boolean;
-	
+
 	// 拖拽状态
 	draggedItem: FileItem | null;
 	isDragging: boolean;
@@ -95,6 +99,10 @@ interface FileActions {
 	setLoading: (loading: boolean) => void;
 	setError: (error: string | null) => void;
 	toggleSidebar: () => void;
+
+	// 路径缓存
+	getCachedPath: (path: string) => FileItem[] | null;
+	setCachedPath: (path: string, items: FileItem[]) => void;
 
 	// 过滤和排序后的列表
 	getFilteredAndSortedItems: () => FileItem[];
@@ -129,6 +137,8 @@ export const useFileStore = create<FileState & FileActions>()(
 			parentPath: "/",
 			items: [],
 			selectedItems: [],
+			pathCache: new Map(),
+			CACHE_TTL: 5 * 60 * 1000, // 5分钟缓存
 			viewMode: "grid",
 			sortMode: "time-desc",
 			filterType: "all",
@@ -141,6 +151,31 @@ export const useFileStore = create<FileState & FileActions>()(
 			isMultiSelectMode: false,
 			draggedItem: null,
 			isDragging: false,
+
+			// 缓存操作
+			getCachedPath: (path: string) => {
+				const state = get();
+				const cached = state.pathCache.get(path);
+				if (!cached) return null;
+				if (Date.now() - cached.timestamp > state.CACHE_TTL) {
+					const newCache = new Map(state.pathCache);
+					newCache.delete(path);
+					set({ pathCache: newCache });
+					return null;
+				}
+				return cached.items;
+			},
+
+			setCachedPath: (path: string, items: FileItem[]) => {
+				const state = get();
+				const newCache = new Map(state.pathCache);
+				newCache.set(path, { items, timestamp: Date.now() });
+				if (newCache.size > 50) {
+					const firstKey = newCache.keys().next().value;
+					newCache.delete(firstKey);
+				}
+				set({ pathCache: newCache });
+			},
 
 			// 导航
 			setCurrentPath: (path) => set({ currentPath: path }),
@@ -198,8 +233,7 @@ export const useFileStore = create<FileState & FileActions>()(
 				set((state) => ({ sidebarVisible: !state.sidebarVisible })),
 
 			// 多选模式
-			setMultiSelectMode: (enabled) =>
-				set({ isMultiSelectMode: enabled }),
+			setMultiSelectMode: (enabled) => set({ isMultiSelectMode: enabled }),
 
 			toggleMultiSelectMode: () =>
 				set((state) => ({
@@ -246,7 +280,14 @@ export const useFileStore = create<FileState & FileActions>()(
 
 					const itemsToSet = [
 						...(data.parentPath !== data.currentPath
-							? [{ name: "..", path: data.parentPath, isDirectory: true, modified: "" }]
+							? [
+									{
+										name: "..",
+										path: data.parentPath,
+										isDirectory: true,
+										modified: "",
+									},
+								]
 							: []),
 						...data.items,
 					];
@@ -285,7 +326,14 @@ export const useFileStore = create<FileState & FileActions>()(
 
 					const itemsToSet = [
 						...(data.parentPath !== data.currentPath
-							? [{ name: "..", path: data.parentPath, isDirectory: true, modified: "" }]
+							? [
+									{
+										name: "..",
+										path: data.parentPath,
+										isDirectory: true,
+										modified: "",
+									},
+								]
 							: []),
 						...data.items,
 					];

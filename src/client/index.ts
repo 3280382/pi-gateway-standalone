@@ -3,8 +3,6 @@
  * 导出所有模块供外部使用
  */
 
-// 导出共享 UI 组件
-export { Button, IconButton, Input, Select } from "./shared/components/ui";
 // 导出控制器
 export { chatController } from "./controllers/chat.controller";
 export { fileController } from "./controllers/file.controller";
@@ -29,6 +27,8 @@ export type {
 } from "./services/session.service";
 export { sessionService } from "./services/session.service";
 export { websocketService } from "./services/websocket.service";
+// 导出共享 UI 组件
+export { Button, IconButton, Input, Select } from "./shared/components/ui";
 // 导出Store
 export { useChatStore } from "./stores/chatStore";
 // 导出类型

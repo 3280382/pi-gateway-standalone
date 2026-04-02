@@ -108,32 +108,20 @@ export function setupGlobalFetchInterceptor(
 	globalThis.fetch = async (input: any, init?: any): Promise<any> => {
 		const url = typeof input === "string" ? input : input.toString();
 
-		// Debug: Log ALL fetch calls
-		console.log(`[GLOBAL FETCH INTERCEPTOR] URL: ${url}`);
-
 		let parsedUrl: URL;
 		try {
 			parsedUrl = new URL(url);
 		} catch (e) {
 			// Not a full URL, might be a relative URL
-			console.log(
-				`[GLOBAL FETCH INTERCEPTOR] Not a full URL, skipping: ${url}`,
-			);
 			return originalFetch(input, init);
 		}
 
 		const host = parsedUrl.host;
-
-		// Debug log
-		console.log(`[LLM Interceptor] Checking host: ${host}`);
-
 		const isLlmApi = llmHosts.some((h) => host.includes(h));
 		if (!isLlmApi) {
-			console.log(`[LLM Interceptor] Skipping non-LLM API: ${host}`);
 			return originalFetch(input, init);
 		}
 
-		console.log(`[LLM Interceptor] ✅ INTERCEPTING LLM API request to: ${url}`);
 		const startTime = Date.now();
 
 		// 构建完整的请求日志

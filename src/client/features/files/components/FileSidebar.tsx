@@ -213,15 +213,12 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
 		);
 	};
 
-	// 初始加载
+	// 初始加载 - 软加载：只在第一次可见且需要数据时加载，隐藏时不清空数据
 	useEffect(() => {
-		if (visible) {
-			loadRoot();
-		} else {
-			setTree([]);
-			setLoading(true);
-		}
-	}, [visible, loadRoot]);
+		if (!visible) return; // 不可见时不加载
+		if (tree.length > 0) return; // 已有数据，不重新加载
+		loadRoot();
+	}, [visible, loadRoot, tree.length]);
 
 	const sidebarClass = visible
 		? `${styles.sidebar} ${styles.visible}`

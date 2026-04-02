@@ -17,7 +17,7 @@ import "./styles/global.css";
 
 /**
  * AppContent - 应用内容组件
- * 根据当前状态渲染不同页面
+ * 使用 CSS 控制视图显隐，避免组件卸载/挂载开销
  */
 function AppContent() {
 	// 布局上下文
@@ -53,32 +53,33 @@ function AppContent() {
 		return <LoadingScreen />;
 	}
 
-	// 聊天视图
-	if (currentView === "chat") {
-		return (
-			<ChatPage
-				terminalOutput={terminalOutput}
-				terminalCommand={terminalCommand}
-				commandResults={commandResults}
-				isExecuting={isExecuting}
-				onBashCommand={executeBashCommand}
-				onSlashCommand={executeSlashCommand}
-				closeBottomPanel={closeBottomPanel}
-				setBottomPanelHeight={setBottomPanelHeight}
-			/>
-		);
-	}
-
-	// 文件浏览器视图
+	// 同时渲染两个视图，通过 CSS 控制显隐
+	// 避免切换时组件卸载/挂载导致的重新加载
 	return (
-		<FilesPage
-			terminalOutput={terminalOutput}
-			terminalCommand={terminalCommand}
-			onBashCommand={executeBashCommand}
-			onOpenBottomPanel={setTerminalCommand}
-			closeBottomPanel={closeBottomPanel}
-			setBottomPanelHeight={setBottomPanelHeight}
-		/>
+		<>
+			<div style={{ display: currentView === "chat" ? "contents" : "none" }}>
+				<ChatPage
+					terminalOutput={terminalOutput}
+					terminalCommand={terminalCommand}
+					commandResults={commandResults}
+					isExecuting={isExecuting}
+					onBashCommand={executeBashCommand}
+					onSlashCommand={executeSlashCommand}
+					closeBottomPanel={closeBottomPanel}
+					setBottomPanelHeight={setBottomPanelHeight}
+				/>
+			</div>
+			<div style={{ display: currentView === "files" ? "contents" : "none" }}>
+				<FilesPage
+					terminalOutput={terminalOutput}
+					terminalCommand={terminalCommand}
+					onBashCommand={executeBashCommand}
+					onOpenBottomPanel={setTerminalCommand}
+					closeBottomPanel={closeBottomPanel}
+					setBottomPanelHeight={setBottomPanelHeight}
+				/>
+			</div>
+		</>
 	);
 }
 

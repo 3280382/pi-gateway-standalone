@@ -1,7 +1,8 @@
 /**
  * FileList - Optimized list view with gesture handling
  */
-import React, { memo, useCallback, useState } from "react";
+import type React from "react";
+import { memo, useCallback, useState } from "react";
 import type { FileItem as FileItemType } from "@/stores/fileStore";
 import { useFileStore } from "@/stores/fileStore";
 import { useFileViewerStore } from "@/stores/fileViewerStore";
@@ -68,7 +69,13 @@ export const FileList = memo<FileListProps>(({ items }) => {
 			setIsDragging(true);
 			setDraggingItem(item.path);
 		},
-		[isMultiSelectMode, setMultiSelectMode, toggleSelection, setDraggedItem, setIsDragging],
+		[
+			isMultiSelectMode,
+			setMultiSelectMode,
+			toggleSelection,
+			setDraggedItem,
+			setIsDragging,
+		],
 	);
 
 	// Drag and drop handlers
@@ -85,15 +92,24 @@ export const FileList = memo<FileListProps>(({ items }) => {
 			e.dataTransfer.effectAllowed = "move";
 			e.dataTransfer.setData("text/plain", item.path);
 		},
-		[setDraggedItem, setIsDragging, isMultiSelectMode, selectedItems.length, selectForAction],
+		[
+			setDraggedItem,
+			setIsDragging,
+			isMultiSelectMode,
+			selectedItems.length,
+			selectForAction,
+		],
 	);
 
-	const handleDragOver = useCallback((e: React.DragEvent, item: FileItemType) => {
-		if (!item.isDirectory) return;
-		e.preventDefault();
-		e.dataTransfer.dropEffect = "move";
-		setDropTarget(item.path);
-	}, []);
+	const handleDragOver = useCallback(
+		(e: React.DragEvent, item: FileItemType) => {
+			if (!item.isDirectory) return;
+			e.preventDefault();
+			e.dataTransfer.dropEffect = "move";
+			setDropTarget(item.path);
+		},
+		[],
+	);
 
 	const handleDragLeave = useCallback(() => {
 		setDropTarget(null);

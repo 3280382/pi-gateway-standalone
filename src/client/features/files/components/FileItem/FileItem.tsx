@@ -1,18 +1,19 @@
 /**
  * FileItem - Refactored file item component
- * 
+ *
  * Architecture:
  * - UI Layer: Pure rendering
  * - Logic Layer: Delegated to hooks (useGesture, useDragDrop)
  * - Utils: Pure functions from lib/
- * 
+ *
  * Before: 356 lines with mixed concerns
  * After: ~150 lines, focused on UI only
  */
-import React, { memo, useCallback, useState, useRef } from "react";
-import { getFileIcon } from "@/services/api/fileApi";
+import type React from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import { useGesture } from "@/hooks/useGesture";
-import { formatFileSize, formatDate } from "@/lib/formatters";
+import { formatDate, formatFileSize } from "@/lib/formatters";
+import { getFileIcon } from "@/services/api/fileApi";
 import type { FileItem as FileItemType } from "@/stores/fileStore";
 import styles from "./FileItem.module.css";
 
@@ -146,7 +147,9 @@ export const FileItem = memo<FileItemProps>(
 				)}
 
 				{/* Icon */}
-				<span className={isGrid ? styles.gridIcon : styles.listIcon}>{icon}</span>
+				<span className={isGrid ? styles.gridIcon : styles.listIcon}>
+					{icon}
+				</span>
 
 				{/* Name */}
 				<span className={isGrid ? styles.gridName : styles.listName}>

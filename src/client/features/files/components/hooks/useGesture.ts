@@ -64,7 +64,7 @@ export function useGesture(config: GestureConfig = {}) {
 	}, []);
 
 	const getDistance = (t1: TouchInfo, t2: TouchInfo): number => {
-		return Math.sqrt(Math.pow(t2.x - t1.x, 2) + Math.pow(t2.y - t1.y, 2));
+		return Math.sqrt((t2.x - t1.x) ** 2 + (t2.y - t1.y) ** 2);
 	};
 
 	const getVelocity = (start: TouchInfo, end: TouchInfo): number => {
@@ -84,8 +84,7 @@ export function useGesture(config: GestureConfig = {}) {
 				const t1 = touches[0];
 				const t2 = touches[1];
 				pinchStartDistance.current = Math.sqrt(
-					Math.pow(t2.clientX - t1.clientX, 2) +
-						Math.pow(t2.clientY - t1.clientY, 2),
+					(t2.clientX - t1.clientX) ** 2 + (t2.clientY - t1.clientY) ** 2,
 				);
 				handlers?.onPinchStart?.();
 				return;
@@ -143,8 +142,7 @@ export function useGesture(config: GestureConfig = {}) {
 				const t1 = touches[0];
 				const t2 = touches[1];
 				const currentDistance = Math.sqrt(
-					Math.pow(t2.clientX - t1.clientX, 2) +
-						Math.pow(t2.clientY - t1.clientY, 2),
+					(t2.clientX - t1.clientX) ** 2 + (t2.clientY - t1.clientY) ** 2,
 				);
 
 				if (pinchStartDistance.current) {
@@ -243,7 +241,11 @@ export function useGesture(config: GestureConfig = {}) {
 				if (distance < tapThreshold && duration < longPressDelay) {
 					gestureType.current = "tap";
 					handlers?.onTap?.();
-					setGestureState({ isPressed: false, isLongPressed: false, isDragging: false });
+					setGestureState({
+						isPressed: false,
+						isLongPressed: false,
+						isDragging: false,
+					});
 					return "tap";
 				}
 			}

@@ -2,7 +2,7 @@
  * DirectoryPicker - Directory selection modal
  */
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { DirectoryPickerProps } from "../../types";
 import styles from "./DirectoryPicker.module.css";
 
@@ -15,13 +15,25 @@ interface DirEntry {
 // Icons
 function FolderIcon({ className }: { className?: string }) {
 	return (
-		<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
+		<svg
+			width="14"
+			height="14"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+			className={className}
+		>
 			<path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
 		</svg>
 	);
 }
 
-export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPickerProps) {
+export function DirectoryPicker({
+	currentPath,
+	onSelect,
+	onClose,
+}: DirectoryPickerProps) {
 	const [path, setPath] = useState(currentPath);
 	const [entries, setEntries] = useState<DirEntry[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -70,7 +82,9 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
 			<div className={styles.picker} onClick={(e) => e.stopPropagation()}>
 				<div className={styles.header}>
 					<h4>Select Working Directory</h4>
-					<button className={styles.closeBtn} onClick={onClose}>✕</button>
+					<button className={styles.closeBtn} onClick={onClose}>
+						✕
+					</button>
 				</div>
 				<div className={styles.currentPath}>{path}</div>
 				<div className={styles.actions}>
@@ -83,7 +97,11 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
 						<div className={styles.loading}>Loading...</div>
 					) : (
 						entries.map((entry) => (
-							<div key={entry.path} className={styles.entry} onClick={() => loadDirectory(entry.path)}>
+							<div
+								key={entry.path}
+								className={styles.entry}
+								onClick={() => loadDirectory(entry.path)}
+							>
 								<FolderIcon className={styles.entryIcon} />
 								<span className={styles.entryName}>{entry.name}</span>
 							</div>

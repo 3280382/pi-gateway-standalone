@@ -178,6 +178,64 @@ function buildContentArray(state: State): ContentPart[] {
 }
 
 // ============================================================================
+// RAF Batch Update System
+// ============================================================================
+
+// RAF 批处理系统用于优化流式更新性能
+let rafId: number | null = null;
+let pendingContentUpdates: { content?: string; thinking?: string } = {};
+
+function scheduleRafUpdate(
+	getState: () => State,
+	set: (
+		fn: (state: State) => Partial<State>,
+		replace?: boolean,
+		action?: string,
+	) => void,
+) {
+	if (rafId !== null) return;
+
+	rafId = requestAnimationFrame(() => {
+		const state = getState();
+		if (!state.currentStreamingMessage) {
+			pendingContentUpdates = {};
+			rafId = null;
+			return;
+		}
+
+		const newContent =
+			state.streamingContent + (pendingContentUpdates.content || "");
+		const newThinking =
+			state.streamingThinking + (pendingContentUpdates.thinking || "");
+
+		// 只更新一次状态
+		const contentArray = buildContentArray({
+			...state,
+			streamingContent: newContent,
+			streamingThinking: newThinking,
+		});
+
+		set(
+			(s) => ({
+				streamingContent: newContent,
+				streamingThinking: newThinking,
+				currentStreamingMessage: s.currentStreamingMessage
+					? {
+							...s.currentStreamingMessage,
+							content: contentArray,
+						}
+					: null,
+			}),
+			false,
+			"rafBatchUpdate",
+		);
+
+		pendingContentUpdates = {};
+		rafId = null;
+	});
+}
+
+// ============================================================================
 // Store Creation
 // ============================================================================
 
@@ -274,6 +332,8 @@ export const useChatStore = create<
 					content: [],
 					timestamp: new Date(),
 					isStreaming: true,
+					isThinkingCollapsed: true, // 默认折叠思考内容
+					isToolsCollapsed: true, // 默认折叠工具内容
 				};
 				set(
 					{
@@ -389,6 +449,9 @@ export const useChatStore = create<
 							? {
 									...state.currentStreamingMessage,
 									content: finalContent,
+									isStreaming: false,
+									isThinkingCollapsed: true,
+									isToolsCollapsed: true,
 								}
 							: null;
 
@@ -420,6 +483,8 @@ export const useChatStore = create<
 									...state.currentStreamingMessage,
 									content: finalContent,
 									isStreaming: false,
+									isThinkingCollapsed: true,
+									isToolsCollapsed: true,
 								}
 							: null;
 
@@ -623,13 +688,17 @@ export const useChatStore = create<
 				set(createInitialState(), false, "reset");
 			},
 
-			// Legacy compatibility methods
+			// Legacy compatibility methods - 使用 RAF 批处理优化
 			appendStreamingContent: (text: string) => {
-				get().batchUpdateContent({ content: text });
+				pendingContentUpdates.content =
+					(pendingContentUpdates.content || "") + text;
+				scheduleRafUpdate(get, set);
 			},
 
 			appendStreamingThinking: (thinking: string) => {
-				get().batchUpdateContent({ thinking });
+				pendingContentUpdates.thinking =
+					(pendingContentUpdates.thinking || "") + thinking;
+				scheduleRafUpdate(get, set);
 			},
 
 			appendToolCallDelta: (id: string, name: string, delta: string) => {
@@ -866,6 +935,7 @@ export const useChatStore = create<
 									),
 									isStreaming: false,
 									isThinkingCollapsed: true,
+								isToolsCollapsed: true, // 默认折叠工具内容
 									isMessageCollapsed: false,
 								};
 							}
@@ -901,6 +971,7 @@ export const useChatStore = create<
 								),
 								isStreaming: false,
 								isThinkingCollapsed: true,
+								isToolsCollapsed: true, // 默认折叠工具内容
 								isMessageCollapsed: false,
 							};
 						});

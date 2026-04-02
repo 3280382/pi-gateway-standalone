@@ -1,7 +1,7 @@
 /**
- * MessageItem - 扁平化重构版
+ * MessageItem - 扁平化重构版 (优化版)
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import type { Message, MessageContent } from "@/types/chat";
 import styles from "./MessageItem.module.css";
 
@@ -25,113 +25,149 @@ interface MessageItemProps {
 	onRegenerate?: () => void;
 }
 
-export function MessageItem({
-	message,
-	showThinking,
-	showTools = true,
-	onToggleCollapse,
-	onToggleThinking,
-	onToggleTools,
-	onDelete,
-}: MessageItemProps) {
-	const isUser = message.role === "user";
-	const isCollapsed = message.isMessageCollapsed ?? false;
-	const [showActions, setShowActions] = useState(false);
+export const MessageItem = memo(
+	function MessageItem({
+		message,
+		showThinking,
+		showTools = true,
+		onToggleCollapse,
+		onToggleThinking,
+		onToggleTools,
+		onDelete,
+	}: MessageItemProps) {
+		const isUser = message.role === "user";
+		const isCollapsed = message.isMessageCollapsed ?? false;
+		const [showActions, setShowActions] = useState(false);
 
-	const blocks = useMemo(() => {
-		return message.content.map((c, idx) => ({ ...c, originalIndex: idx }));
-	}, [message.content]);
+		const blocks = useMemo(() => {
+			return message.content.map((c, idx) => ({ ...c, originalIndex: idx }));
+		}, [message.content]);
 
-	const fullText = useMemo(() => {
-		return blocks
-			.filter((c) => c.type === "text")
-			.map((c) => c.text)
-			.join("");
-	}, [blocks]);
+		const fullText = useMemo(() => {
+			return blocks
+				.filter((c) => c.type === "text")
+				.map((c) => c.text)
+				.join("");
+		}, [blocks]);
 
-	const handleCopy = () => {
-		const text = message.content
-			.map((c) => {
-				if (c.type === "text") return c.text || "";
-				if (c.type === "thinking") return c.thinking || "";
-				if (c.type === "tool" || c.type === "tool_use") {
-					return `[${c.toolName}] ${c.output || c.partialArgs || ""}`;
-				}
-				return "";
-			})
-			.filter(Boolean)
-			.join("\n\n");
-		navigator.clipboard.writeText(text);
-	};
+		const handleCopy = () => {
+			const text = message.content
+				.map((c) => {
+					if (c.type === "text") return c.text || "";
+					if (c.type === "thinking") return c.thinking || "";
+					if (c.type === "tool" || c.type === "tool_use") {
+						return `[${c.toolName}] ${c.output || c.partialArgs || ""}`;
+					}
+					return "";
+				})
+				.filter(Boolean)
+				.join("\n\n");
+			navigator.clipboard.writeText(text);
+		};
 
-	return (
-		<div
-			className={`${styles.message} ${isUser ? styles.user : styles.assistant}`}
-			onMouseEnter={() => setShowActions(true)}
-			onMouseLeave={() => setShowActions(false)}
-		>
-			<div className={styles.actions} style={{ opacity: showActions ? 1 : 0 }}>
-				<button className={styles.actionBtn} onClick={handleCopy} title="复制">
-					📋
-				</button>
-				{onDelete && (
-					<button className={styles.actionBtn} onClick={onDelete} title="删除">
-						🗑
+		return (
+			<div
+				className={`${styles.message} ${isUser ? styles.user : styles.assistant}`}
+				onMouseEnter={() => setShowActions(true)}
+				onMouseLeave={() => setShowActions(false)}
+			>
+				<div
+					className={styles.actions}
+					style={{ opacity: showActions ? 1 : 0 }}
+				>
+					<button
+						className={styles.actionBtn}
+						onClick={handleCopy}
+						title="复制"
+					>
+						📋
 					</button>
+					{onDelete && (
+						<button
+							className={styles.actionBtn}
+							onClick={onDelete}
+							title="删除"
+						>
+							🗑
+						</button>
+					)}
+				</div>
+
+				{!isCollapsed && (
+					<>
+						{isUser ? (
+							<span
+								className={styles.userText}
+								dangerouslySetInnerHTML={{ __html: formatMarkdown(fullText) }}
+							/>
+						) : (
+							blocks.map((block, idx) => {
+								switch (block.type) {
+									case "thinking":
+										return showThinking ? (
+											<ThinkingContent
+												key={`thinking-${idx}`}
+												content={block}
+												isCollapsed={message.isThinkingCollapsed}
+												onToggle={onToggleThinking}
+												isStreaming={message.isStreaming}
+											/>
+										) : null;
+									case "tool":
+										return showTools ? (
+											<ToolContent
+												key={`tool-${block.toolCallId || idx}`}
+												content={block}
+												isCollapsed={message.isToolsCollapsed}
+												onToggle={onToggleTools}
+												isStreaming={message.isStreaming}
+											/>
+										) : null;
+									case "tool_use":
+										return showTools ? (
+											<ToolUseContent
+												key={`tool-use-${block.toolCallId || idx}`}
+												content={block}
+											/>
+										) : null;
+									case "text":
+										return block.text ? (
+											<TextContent
+												key={`text-${idx}`}
+												content={block.text}
+												isStreaming={message.isStreaming}
+											/>
+										) : null;
+									default:
+										return null;
+								}
+							})
+						)}
+					</>
 				)}
 			</div>
-
-			{!isCollapsed && (
-				<>
-					{isUser ? (
-						<span
-							className={styles.userText}
-							dangerouslySetInnerHTML={{ __html: formatMarkdown(fullText) }}
-						/>
-					) : (
-						blocks.map((block, idx) => {
-							switch (block.type) {
-								case "thinking":
-									return showThinking ? (
-										<ThinkingContent
-											key={`thinking-${idx}`}
-											content={block}
-											isCollapsed={message.isThinkingCollapsed}
-											onToggle={onToggleThinking}
-											isStreaming={message.isStreaming}
-										/>
-									) : null;
-								case "tool":
-									return showTools ? (
-										<ToolContent
-											key={`tool-${block.toolCallId || idx}`}
-											content={block}
-											isCollapsed={message.isToolsCollapsed}
-											onToggle={onToggleTools}
-											isStreaming={message.isStreaming}
-										/>
-									) : null;
-								case "tool_use":
-									return showTools ? (
-										<ToolUseContent
-											key={`tool-use-${block.toolCallId || idx}`}
-											content={block}
-										/>
-									) : null;
-								case "text":
-									return block.text ? (
-										<TextContent key={`text-${idx}`} content={block.text} />
-									) : null;
-								default:
-									return null;
-							}
-						})
-					)}
-				</>
-			)}
-		</div>
-	);
-}
+		);
+	},
+	(prevProps, nextProps) => {
+		// 自定义比较函数：只在关键属性变化时重新渲染
+		return (
+			prevProps.message.id === nextProps.message.id &&
+			prevProps.message.isStreaming === nextProps.message.isStreaming &&
+			prevProps.showThinking === nextProps.showThinking &&
+			prevProps.showTools === nextProps.showTools &&
+			prevProps.message.isMessageCollapsed ===
+				nextProps.message.isMessageCollapsed &&
+			prevProps.message.isThinkingCollapsed ===
+				nextProps.message.isThinkingCollapsed &&
+			prevProps.message.isToolsCollapsed ===
+				nextProps.message.isToolsCollapsed &&
+			// 只在流式结束时比较内容长度，避免每字符都触发
+			(!prevProps.message.isStreaming ||
+				JSON.stringify(prevProps.message.content) ===
+					JSON.stringify(nextProps.message.content))
+		);
+	},
+);
 
 // Thinking 块
 interface ThinkingContentProps {
@@ -292,7 +328,13 @@ function ToolUseContent({ content }: { content: MessageContent }) {
 }
 
 // Text 块
-function TextContent({ content }: { content: string }) {
+function TextContent({
+	content,
+	isStreaming,
+}: {
+	content: string;
+	isStreaming?: boolean;
+}) {
 	const parts = useMemo(() => parseContentWithCode(content), [content]);
 
 	if (parts.length === 1 && parts[0].type === "text") {
@@ -308,7 +350,12 @@ function TextContent({ content }: { content: string }) {
 		<>
 			{parts.map((part, idx) =>
 				part.type === "code" ? (
-					<CodeBlock key={idx} code={part.content} language={part.language} />
+					<CodeBlock
+						key={idx}
+						code={part.content}
+						language={part.language}
+						isStreaming={isStreaming}
+					/>
 				) : (
 					<span
 						key={idx}
@@ -323,8 +370,16 @@ function TextContent({ content }: { content: string }) {
 	);
 }
 
-// 代码块 - 使用 Prism.js
-function CodeBlock({ code, language }: { code: string; language?: string }) {
+// 代码块 - 使用 Prism.js (优化：只在非流式时高亮)
+function CodeBlock({
+	code,
+	language,
+	isStreaming,
+}: {
+	code: string;
+	language?: string;
+	isStreaming?: boolean;
+}) {
 	const [copied, setCopied] = useState(false);
 	const codeRef = useRef<HTMLElement>(null);
 
@@ -334,17 +389,15 @@ function CodeBlock({ code, language }: { code: string; language?: string }) {
 		setTimeout(() => setCopied(false), 2000);
 	};
 
-	// 使用 Prism.js 高亮
+	// 使用 Prism.js 高亮 - 只在非流式时执行，避免流式过程中频繁重绘
 	useEffect(() => {
-		if (codeRef.current && window.Prism) {
+		if (codeRef.current && window.Prism && !isStreaming) {
 			window.Prism.highlightElement(codeRef.current);
 		}
-	}, [code, language]);
+	}, [code, language, isStreaming]);
 
 	// 确定语言类名
-	const langClass = language
-		? `language-${language}`
-		: "language-text";
+	const langClass = language ? `language-${language}` : "language-text";
 
 	return (
 		<div className={styles.codeContainer}>

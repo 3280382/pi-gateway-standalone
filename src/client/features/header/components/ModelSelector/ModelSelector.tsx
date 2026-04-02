@@ -2,14 +2,21 @@
  * ModelSelector - Model selection dropdown
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ModelSelectorProps } from "../../types";
 import styles from "./ModelSelector.module.css";
 
 // Icons
 function ModelIcon() {
 	return (
-		<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+		<svg
+			width="14"
+			height="14"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={1.5}
+		>
 			<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
 		</svg>
 	);
@@ -17,7 +24,14 @@ function ModelIcon() {
 
 function DropdownIcon() {
 	return (
-		<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+		<svg
+			width="12"
+			height="12"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+		>
 			<polyline points="6 9 12 15 18 9" />
 		</svg>
 	);
@@ -36,7 +50,10 @@ export function ModelSelector({
 	// Close dropdown when clicking outside
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
-			if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+			if (
+				containerRef.current &&
+				!containerRef.current.contains(e.target as Node)
+			) {
 				setIsOpen(false);
 			}
 		};
@@ -45,7 +62,8 @@ export function ModelSelector({
 	}, []);
 
 	const currentModelName = currentModel
-		? models.find((m) => m.id === currentModel)?.name || currentModel.split("-")[0]
+		? models.find((m) => m.id === currentModel)?.name ||
+			currentModel.split("-")[0]
 		: "Select Model";
 
 	const handleSelect = (modelId: string) => {

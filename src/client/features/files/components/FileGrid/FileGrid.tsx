@@ -1,7 +1,8 @@
 /**
  * FileGrid - Optimized grid view with gesture handling
  */
-import React, { memo, useCallback, useRef, useState } from "react";
+import type React from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import type { FileItem as FileItemType } from "@/stores/fileStore";
 import { useFileStore } from "@/stores/fileStore";
 import { useFileViewerStore } from "@/stores/fileViewerStore";
@@ -34,7 +35,7 @@ export const FileGrid = memo<FileGridProps>(({ items }) => {
 	const [dropTarget, setDropTarget] = useState<string | null>(null);
 	const [draggingItem, setDraggingItem] = useState<string | null>(null);
 	const [showPinchHint, setShowPinchHint] = useState(false);
-	
+
 	const containerRef = useRef<HTMLDivElement>(null);
 	const pinchState = useRef<PinchState | null>(null);
 	const pinchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -76,13 +77,19 @@ export const FileGrid = memo<FileGridProps>(({ items }) => {
 				setMultiSelectMode(true);
 			}
 			toggleSelection(item.path);
-			
+
 			// Setup drag
 			setDraggedItem(item);
 			setIsDragging(true);
 			setDraggingItem(item.path);
 		},
-		[isMultiSelectMode, setMultiSelectMode, toggleSelection, setDraggedItem, setIsDragging],
+		[
+			isMultiSelectMode,
+			setMultiSelectMode,
+			toggleSelection,
+			setDraggedItem,
+			setIsDragging,
+		],
 	);
 
 	// Handle pinch gesture
@@ -101,7 +108,7 @@ export const FileGrid = memo<FileGridProps>(({ items }) => {
 			if (scale < 0.7 && !isMultiSelectMode) {
 				setMultiSelectMode(true);
 				setShowPinchHint(true);
-				
+
 				if (pinchTimeoutRef.current) {
 					clearTimeout(pinchTimeoutRef.current);
 				}
@@ -114,23 +121,19 @@ export const FileGrid = memo<FileGridProps>(({ items }) => {
 	);
 
 	// Touch handlers for container-level pinch detection
-	const handleContainerTouchStart = useCallback(
-		(e: React.TouchEvent) => {
-			if (e.touches.length === 2) {
-				const t1 = e.touches[0];
-				const t2 = e.touches[1];
-				const distance = Math.sqrt(
-					Math.pow(t2.clientX - t1.clientX, 2) +
-						Math.pow(t2.clientY - t1.clientY, 2),
-				);
-				pinchState.current = {
-					startDistance: distance,
-					isPinching: true,
-				};
-			}
-		},
-		[],
-	);
+	const handleContainerTouchStart = useCallback((e: React.TouchEvent) => {
+		if (e.touches.length === 2) {
+			const t1 = e.touches[0];
+			const t2 = e.touches[1];
+			const distance = Math.sqrt(
+				(t2.clientX - t1.clientX) ** 2 + (t2.clientY - t1.clientY) ** 2,
+			);
+			pinchState.current = {
+				startDistance: distance,
+				isPinching: true,
+			};
+		}
+	}, []);
 
 	const handleContainerTouchMove = useCallback(
 		(e: React.TouchEvent) => {
@@ -139,8 +142,7 @@ export const FileGrid = memo<FileGridProps>(({ items }) => {
 			const t1 = e.touches[0];
 			const t2 = e.touches[1];
 			const currentDistance = Math.sqrt(
-				Math.pow(t2.clientX - t1.clientX, 2) +
-					Math.pow(t2.clientY - t1.clientY, 2),
+				(t2.clientX - t1.clientX) ** 2 + (t2.clientY - t1.clientY) ** 2,
 			);
 
 			const scale = currentDistance / pinchState.current.startDistance;
@@ -167,15 +169,24 @@ export const FileGrid = memo<FileGridProps>(({ items }) => {
 			e.dataTransfer.effectAllowed = "move";
 			e.dataTransfer.setData("text/plain", item.path);
 		},
-		[setDraggedItem, setIsDragging, isMultiSelectMode, selectedItems.length, selectForAction],
+		[
+			setDraggedItem,
+			setIsDragging,
+			isMultiSelectMode,
+			selectedItems.length,
+			selectForAction,
+		],
 	);
 
-	const handleDragOver = useCallback((e: React.DragEvent, item: FileItemType) => {
-		if (!item.isDirectory) return;
-		e.preventDefault();
-		e.dataTransfer.dropEffect = "move";
-		setDropTarget(item.path);
-	}, []);
+	const handleDragOver = useCallback(
+		(e: React.DragEvent, item: FileItemType) => {
+			if (!item.isDirectory) return;
+			e.preventDefault();
+			e.dataTransfer.dropEffect = "move";
+			setDropTarget(item.path);
+		},
+		[],
+	);
 
 	const handleDragLeave = useCallback(() => {
 		setDropTarget(null);
@@ -242,9 +253,7 @@ export const FileGrid = memo<FileGridProps>(({ items }) => {
 
 			{/* Pinch hint */}
 			{showPinchHint && (
-				<div className={styles.pinchHint}>
-					Multi-select mode enabled
-				</div>
+				<div className={styles.pinchHint}>Multi-select mode enabled</div>
 			)}
 		</>
 	);

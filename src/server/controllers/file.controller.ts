@@ -392,7 +392,10 @@ export async function batchDeleteFiles(req: Request, res: Response) {
 
 			// 检查是否在允许的路径范围内
 			if (!isPathAllowed(targetPath)) {
-				errors.push({ path: filePath, error: "访问被拒绝 - 路径不在允许范围内" });
+				errors.push({
+					path: filePath,
+					error: "访问被拒绝 - 路径不在允许范围内",
+				});
 				continue;
 			}
 
@@ -442,7 +445,12 @@ export async function batchDeleteFiles(req: Request, res: Response) {
 			`开始批量删除: ${validatedPaths.length} 个项目, 总大小: ${totalSize} 字节`,
 		);
 
-		for (const { originalPath, resolvedPath, isDirectory, size } of validatedPaths) {
+		for (const {
+			originalPath,
+			resolvedPath,
+			isDirectory,
+			size,
+		} of validatedPaths) {
 			try {
 				if (isDirectory) {
 					// 递归删除目录
@@ -555,7 +563,7 @@ export async function batchMoveFiles(req: Request, res: Response) {
 					const base = path.basename(fileName, ext);
 					let newDestPath = destPath;
 					let counter = 1;
-					
+
 					while (true) {
 						const newName = `${base} (${counter})${ext}`;
 						newDestPath = path.join(expandedTarget, newName);
@@ -566,23 +574,23 @@ export async function batchMoveFiles(req: Request, res: Response) {
 							break;
 						}
 					}
-					
+
 					await rename(sourcePath, newDestPath);
-					results.push({ 
-						path: filePath, 
-						success: true, 
-						destination: newDestPath 
+					results.push({
+						path: filePath,
+						success: true,
+						destination: newDestPath,
 					});
 				} catch {
 					// 目标不存在，直接移动
 					await rename(sourcePath, destPath);
-					results.push({ 
-						path: filePath, 
-						success: true, 
-						destination: destPath 
+					results.push({
+						path: filePath,
+						success: true,
+						destination: destPath,
 					});
 				}
-				
+
 				logger.info(`移动成功: ${sourcePath} -> ${expandedTarget}`);
 			} catch (error) {
 				const errorMsg = error instanceof Error ? error.message : String(error);

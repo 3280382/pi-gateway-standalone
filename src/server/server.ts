@@ -25,36 +25,11 @@ const llmLogManager = new LlmLogManager({
 	truncateLimit: Config.getLlmLogConfig().truncateLimit,
 });
 
-// 在设置拦截器之前保存原始fetch
-const originalFetchBeforeInterceptor = globalThis.fetch;
-
 // 设置LLM拦截器（必须在导入pi-coding-agent之前）
 setupLlmInterceptors(llmLogManager, {
 	setupHttpInterceptor: true,
 	truncateLimit: Config.getLlmLogConfig().truncateLimit,
 });
-
-// 测试拦截器是否工作
-console.log("[TEST] Testing if fetch interceptor is active...");
-console.log("[TEST] globalThis.fetch type:", typeof globalThis.fetch);
-console.log(
-	"[TEST] fetch changed:",
-	globalThis.fetch !== originalFetchBeforeInterceptor,
-);
-console.log(
-	"[TEST] fetch includes debug log:",
-	globalThis.fetch.toString().includes("GLOBAL FETCH INTERCEPTOR"),
-);
-
-// 立即测试一次 fetch 调用
-console.log("[TEST] Making test fetch call to httpbin.org...");
-fetch("https://httpbin.org/get")
-	.then(() => {
-		console.log("[TEST] Test fetch call completed");
-	})
-	.catch((err) => {
-		console.log("[TEST] Test fetch call failed:", err.message);
-	});
 
 // ============================================================================
 // 现在导入其他模块（SDK将使用被拦截的fetch）
