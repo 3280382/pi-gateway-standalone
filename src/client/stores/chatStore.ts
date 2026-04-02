@@ -77,7 +77,7 @@ function generateMessageId(): string {
 // Helper: Build content array preserving temporal order
 // ============================================================================
 
-// 用于追踪内容块的插入顺序
+// 用于追踪内容块的插入顺序 - 使用稳定的时间戳
 let contentOrderCounter = 0;
 
 interface ContentPartWithOrder extends ContentPart {
@@ -87,16 +87,23 @@ interface ContentPartWithOrder extends ContentPart {
 function buildContentArray(state: State): ContentPart[] {
 	const content: ContentPartWithOrder[] = [];
 
-	// 1. 思考内容 - 支持多轮思考
+	// 使用基础时间戳确保相对顺序：thinking < text < tools
+	// thinking 使用 0-99999 范围
+	// text 使用 100000-199999 范围  
+	// tools 使用 200000+ 范围（基于实际时间戳）
+	const BASE_THINKING = 0;
+	const BASE_TEXT = 100000;
+	const BASE_TOOL = 200000;
+
+	// 1. 思考内容 - 支持多轮思考，按原始顺序排列
 	if (state.streamingThinkings.length > 0) {
-		state.streamingThinkings.forEach((thinking) => {
+		state.streamingThinkings.forEach((thinking, index) => {
 			if (thinking.content) {
 				content.push({
 					type: "thinking",
 					thinking: thinking.content,
-					_order: thinking.id
-						? parseInt(thinking.id.split("-")[1]) || contentOrderCounter++
-						: contentOrderCounter++,
+					// 使用索引确保多轮思考的顺序
+					_order: BASE_THINKING + index * 1000,
 				});
 			}
 		});
@@ -104,49 +111,67 @@ function buildContentArray(state: State): ContentPart[] {
 		content.push({
 			type: "thinking",
 			thinking: state.streamingThinking,
-			_order: contentOrderCounter++,
+			_order: BASE_THINKING,
 		});
 	}
 
-	// 2. 文本内容 - 放在思考之后但在工具之前（如果文本是主要的）
+	// 2. 文本内容 - 放在思考之后
 	if (state.streamingContent) {
 		content.push({
 			type: "text",
 			text: state.streamingContent,
-			_order: contentOrderCounter++,
+			_order: BASE_TEXT,
 		});
 	}
 
 	// 3. 工具内容 - 合并 tool_use 和 tool 为统一的显示
-	// 优先使用已完成的工具（有输出或错误）
+	// 优先使用已完成的工具（有输出或错误），按开始时间排序
+	const toolEntries: Array<{ tool: any; isCompleted: boolean }> = [];
+
+	// 添加已完成的工具
 	state.activeTools.forEach((tool) => {
-		content.push({
-			type: "tool",
-			toolCallId: tool.id,
-			toolName: tool.name,
-			args: tool.args,
-			output: tool.output,
-			error: tool.error,
-			_order: tool.startTime ? tool.startTime.getTime() : contentOrderCounter++,
-		});
+		toolEntries.push({ tool, isCompleted: true });
 	});
 
-	// 对于仍在流式构建中的工具调用，只在还没有完成版本时添加
+	// 添加流式中的工具（只添加没有完成版本的）
 	state.streamingToolCalls.forEach((tool) => {
-		// 检查是否已经有完成的版本
-		const completedTool = state.activeTools.get(tool.id);
-		if (!completedTool) {
+		if (!state.activeTools.get(tool.id)) {
+			toolEntries.push({ tool, isCompleted: false });
+		}
+	});
+
+	// 按开始时间排序（如果可用），确保工具顺序稳定
+	toolEntries.sort((a, b) => {
+		const timeA = a.tool.startTime?.getTime() || 0;
+		const timeB = b.tool.startTime?.getTime() || 0;
+		return timeA - timeB;
+	});
+
+	// 添加到内容数组
+	toolEntries.forEach((entry, index) => {
+		const { tool, isCompleted } = entry;
+		if (isCompleted) {
+			content.push({
+				type: "tool",
+				toolCallId: tool.id,
+				toolName: tool.name,
+				args: tool.args,
+				output: tool.output,
+				error: tool.error,
+				_order: BASE_TOOL + index,
+			});
+		} else {
 			content.push({
 				type: "tool_use",
 				toolCallId: tool.id,
 				toolName: tool.name,
 				partialArgs: tool.args,
-				_order: contentOrderCounter++,
+				_order: BASE_TOOL + index,
 			});
 		}
 	});
 
-	// 按时间顺序排序并返回（移除 _order 字段）
+	// 按顺序排序并返回（移除 _order 字段）
 	return content
 		.sort((a, b) => a._order - b._order)
 		.map(({ _order, ...rest }) => rest as ContentPart);

@@ -155,7 +155,7 @@ function ThinkingContent({
 	onToggle,
 	isStreaming,
 }: ThinkingContentProps) {
-	// 流式时强制展开，非流式时根据 isCollapsed 状态
+	// 流式时强制展开，非流式时默认折叠（thinking 通常较长，默认折叠）
 	const shouldShow = isStreaming ? true : isCollapsed === false;
 	const firstLine = content.thinking?.split("\n")[0] || "";
 
@@ -190,8 +190,8 @@ function ToolContent({
 	onToggle,
 	isStreaming,
 }: ToolContentProps) {
-	// 流式时强制展开，非流式时根据 isCollapsed 状态
-	const isExpanded = isStreaming ? true : isCollapsed === false;
+	// 流式时强制展开，非流式时默认展开（isCollapsed !== true）
+	const isExpanded = isStreaming ? true : isCollapsed !== true;
 	const status = content.error
 		? "error"
 		: content.output
