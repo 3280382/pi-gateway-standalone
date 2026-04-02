@@ -374,6 +374,7 @@ export const useChatStore = create<
 							},
 							// 清空当前轮次的流式状态，开始新一轮
 							streamingThinking: "",
+							streamingThinkings: [], // 清空多轮思考
 							streamingContent: "",
 							streamingToolCalls: new Map(),
 							activeTools: new Map(),
