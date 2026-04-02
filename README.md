@@ -34,38 +34,37 @@ src/
 │   │   ├── App.tsx         # 根组件：Footer + PageContainer
 │   │   └── Footer.tsx      # 唯一全局控件（底部视图切换）
 │   ├── features/           # 📦 功能域（独立完整）
-│   │   ├── core/           # 核心共享组件
-│   │   │   ├── layout/     # AppLayout, AppHeader, panels
-│   │   │   └── pages/      # ErrorScreen, LoadingScreen
 │   │   ├── chat/           # 💬 聊天功能（自包含）
 │   │   │   ├── layout.tsx  # Chat 布局框架
 │   │   │   ├── page.tsx    # Chat 页面
-│   │   │   ├── index.ts    # 统一导出
-│   │   │   └── components/ # Chat 专属组件（扁平）
-│   │   │       ├── ChatPanel.tsx
-│   │   │       ├── InputArea.tsx
-│   │   │       ├── MessageList.tsx
-│   │   │       └── MessageItem.tsx
+│   │   │   ├── components/ # Chat 专属组件
+│   │   │   │   ├── ChatPanel.tsx
+│   │   │   │   ├── InputArea.tsx
+│   │   │   │   ├── MessageList.tsx
+│   │   │   │   ├── MessageItem.tsx
+│   │   │   │   └── modals/   # 聊天专用模态框
+│   │   │   └── sidebar/      # 聊天专用侧边栏
+│   │   │       └── components/
+│   │   │           ├── SidebarPanel.tsx
+│   │   │           ├── RecentWorkspaces.tsx
+│   │   │           ├── Sessions.tsx
+│   │   │           └── Settings.tsx
 │   │   ├── files/          # 📁 文件功能（自包含）
 │   │   │   ├── layout.tsx  # Files 布局框架
 │   │   │   ├── page.tsx    # Files 页面
-│   │   │   ├── index.ts    # 统一导出
-│   │   │   └── components/ # Files 专属组件（扁平）
+│   │   │   └── components/ # Files 专属组件
 │   │   │       ├── FileBrowser.tsx
 │   │   │       ├── FileGrid.tsx
 │   │   │       ├── FileList.tsx
-│   │   │       └── FileItem.tsx
-│   │   ├── header/         # 顶部菜单组件（供 feature 使用）
-│   │   ├── sidebar/        # 侧边栏组件（供 feature 使用）
-│   │   └── system/         # 系统功能（modals, search）
+│   │   │       ├── FileSidebar.tsx    # 文件浏览器专用侧边栏
+│   │   │       └── FileToolbar.tsx    # 文件浏览器专用工具栏
+│   │   └── core/           # 🔧 核心共享组件
+│   │       ├── layout/     # AppLayout, AppHeader, panels
+│   │       └── pages/      # ErrorScreen, LoadingScreen
 │   ├── shared/             # 🔧 共享资源（无业务逻辑）
 │   │   └── ui/             # 原子 UI 组件
-│   │       ├── Button.tsx
-│   │       ├── Input.tsx
-│   │       └── ErrorBoundary.tsx
 │   ├── stores/             # 🗄️ 全局状态 (Zustand)
 │   ├── services/           # 🌐 API 服务
-│   ├── hooks/              # 全局 Hooks
 │   └── controllers/        # 🎮 控制器
 ├── server/                 # 🖥️ 后端代码
 └── shared/                 # 🔗 共享类型
