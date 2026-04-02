@@ -214,9 +214,12 @@ export const useChatStore = create<
 		// Search
 		setSearchQuery: (query: string) => void;
 		setSearchFilters: (filters: Partial<ChatSearchFilters>) => void;
+		setSearchResults: (results: string[]) => void;
+		setSearching: (searching: boolean) => void;
 
 		// Session
 		setSessionId: (id: string | null) => void;
+		setCurrentModel: (model: string | null) => void;
 
 		// Reset
 		reset: () => void;
@@ -598,9 +601,21 @@ export const useChatStore = create<
 				);
 			},
 
+			setSearchResults: (results: string[]) => {
+				set({ searchResults: results }, false, "setSearchResults");
+			},
+
+			setSearching: (searching: boolean) => {
+				set({ isSearching: searching }, false, "setSearching");
+			},
+
 			// Session
 			setSessionId: (id: string | null) => {
 				set({ sessionId: id }, false, "setSessionId");
+			},
+
+			setCurrentModel: (model: string | null) => {
+				set({ currentModel: model }, false, "setCurrentModel");
 			},
 
 			// Reset

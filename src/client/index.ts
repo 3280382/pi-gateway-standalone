@@ -32,7 +32,7 @@ export type {
 export { sessionService } from "./services/session.service";
 export { websocketService } from "./services/websocket.service";
 // 导出Store
-export { chatStoreSelectors, useNewChatStore } from "./store/new-chat.store";
+export { useChatStore } from "./stores/chatStore";
 // 导出类型
 export type {
 	ChatState,

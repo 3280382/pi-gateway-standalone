@@ -6,11 +6,11 @@
 import { ServiceError } from "@/services/base.service";
 import { chatService } from "@/services/chat.service";
 import { websocketService } from "@/services/websocket.service";
-import { useNewChatStore } from "@/stores/new-chat.store";
+import { useChatStore } from "@/stores/chatStore";
 import type { Message, ToolExecution } from "@/types/chat";
 
 export class ChatController {
-	private store = useNewChatStore;
+	private store = useChatStore;
 	private listenersSetup = false;
 	private batchUpdateTimer: ReturnType<typeof setTimeout> | null = null;
 	private pendingUpdates: {

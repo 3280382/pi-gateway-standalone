@@ -3,7 +3,8 @@
  */
 
 import { useSidebarController } from "@/services/api/sidebarApi";
-import { useSidebarExtrasStore } from "@/stores/sidebarExtrasStore";
+import { useLlmLogStore } from "@/stores/llmLogStore";
+import { useModalStore } from "@/stores/modalStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import type { FontSize, Theme } from "@/types/sidebar";
 import { SectionHeader } from "../../../ui";
@@ -14,12 +15,10 @@ export function Settings() {
 	const fontSize = useSidebarStore((state) => state.fontSize);
 	const controller = useSidebarController();
 
-	// LLM Log settings from sidebar extras store
-	const llmLogConfig = useSidebarExtrasStore((state) => state.llmLogConfig);
-	const setLlmLogConfig = useSidebarExtrasStore(
-		(state) => state.setLlmLogConfig,
-	);
-	const openLlmLog = useSidebarExtrasStore((state) => state.openLlmLog);
+	// LLM Log settings from llmLogStore
+	const llmLogConfig = useLlmLogStore((state) => state.config);
+	const setLlmLogConfig = useLlmLogStore((state) => state.setConfig);
+	const openLlmLog = useModalStore((state) => state.openLlmLog);
 
 	return (
 		<section className={styles.section}>

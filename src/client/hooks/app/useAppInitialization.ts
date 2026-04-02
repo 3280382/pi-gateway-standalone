@@ -7,7 +7,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { fileController, sessionController } from "@/controllers";
 import { websocketService } from "@/services/websocket.service";
 import { useChatStore } from "@/stores/chatStore";
-import { useNewChatStore } from "@/stores/new-chat.store";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useSidebarStore } from "@/stores/sidebarStore";
 
@@ -121,7 +120,7 @@ export function useAppInitialization(): InitResult {
 	}) => {
 		const sessionStore = useSessionStore.getState();
 		const sidebarStore = useSidebarStore.getState();
-		const newChatStore = useNewChatStore.getState();
+		const chatStore = useChatStore.getState();
 
 		// 同步到各 store
 		sessionStore.setCurrentDir(initData.workingDir);
@@ -130,14 +129,14 @@ export function useAppInitialization(): InitResult {
 		sidebarStore.selectSession(initData.sessionId);
 
 		// 保存 session 信息
-		newChatStore.setSessionId(initData.sessionId);
+		chatStore.setSessionId(initData.sessionId);
 		sessionStore.setCurrentSession(initData.sessionId);
 		sessionStore.setServerPid(initData.pid);
 		sessionStore.setIsConnected(true);
 
 		// 保存配置
 		if (initData.model) {
-			newChatStore.setCurrentModel(initData.model);
+			chatStore.setCurrentModel(initData.model);
 			sessionStore.setCurrentModel(initData.model);
 		}
 		if (initData.thinkingLevel) {

@@ -4,7 +4,7 @@
 
 import type React from "react";
 import { useCallback, useState } from "react";
-import { chatStoreSelectors, useNewChatStore } from "@/stores/new-chat.store";
+import { useChatStore } from "@/stores/chatStore";
 import { chatController } from "../../controllers/chat.controller";
 import { MessageModel } from "../../models/message.model";
 import { Button } from "../ui/Button/Button";
@@ -13,7 +13,7 @@ import { Select } from "../ui/Select/Select";
 
 export function ChatExample() {
 	// 从store获取状态
-	const { messages, isStreaming, inputText, setInputText } = useNewChatStore();
+	const { messages, isStreaming, inputText, setInputText } = useChatStore();
 	const [selectedModel, setSelectedModel] = useState<string>("kimi-k2.5");
 	const [models, setModels] = useState<Array<{ value: string; label: string }>>(
 		[],
