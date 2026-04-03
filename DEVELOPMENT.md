@@ -368,6 +368,43 @@ const handleToggle = useCallback((id: string) => {
 | 组件 > 200 行 | 拆分组件 |
 | props 穿透超过 3 层 | 使用 Context 或 Store |
 
+## Git 工作流
+
+### 定期 Commit 原则
+
+**不要等待用户指令才 commit**，而是根据功能完成情况主动 commit：
+
+| 场景 | 操作 |
+|------|------|
+| 完成一个独立功能 | 立即 commit |
+| 修复一个 bug | 立即 commit |
+| 重构一段代码 | 立即 commit |
+| 修改超过 5 个文件 | 考虑拆分 commit |
+| 测试通过 | 立即 commit |
+
+**Commit 格式**:
+```
+type(scope): subject
+
+Types: feat, fix, docs, style, refactor, test, chore
+
+Example:
+feat(chat): add message search
+fix(files): fix sidebar duplication
+refactor(core): optimize initialization
+```
+
+**Commit 前检查**:
+```bash
+npm run build    # 确保构建成功
+```
+
+### 分支管理
+
+- `main`: 主分支，保持可部署状态
+- `feature/*`: 功能分支
+- `fix/*`: 修复分支
+
 ## 常用命令
 
 ```bash
