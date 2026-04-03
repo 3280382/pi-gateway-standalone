@@ -12,7 +12,7 @@ import styles from "./FileBrowser.module.css";
 import { FileBrowserErrorBoundary } from "./FileBrowserErrorBoundary";
 import { FileGrid } from "./FileGrid";
 import { FileList } from "./FileList";
-import { FileSidebar } from "./FileSidebar";
+
 import { FileViewer } from "./FileViewer";
 
 interface FileBrowserProps {
@@ -179,10 +179,6 @@ export function FileBrowser({
 	return (
 		<section className={styles.fileBrowserSection}>
 			<div className={styles.container}>
-				{/* 侧边栏文件树 */}
-				<FileBrowserErrorBoundary componentName="File Sidebar">
-					<FileSidebar visible={sidebarVisible} />
-				</FileBrowserErrorBoundary>
 				{/* 主内容区 */}
 				<div className={styles.main}>
 					{/* 批量操作栏 - 多选模式 */}

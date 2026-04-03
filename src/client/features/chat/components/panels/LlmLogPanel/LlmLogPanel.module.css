@@ -9,6 +9,17 @@
 	font-size: var(--font-base);
 }
 
+/* Fullscreen mode */
+.fullscreen {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1000;
+	border-top: none;
+}
+
 .resizeHandle {
 	height: 3px;
 	background: #21262d;

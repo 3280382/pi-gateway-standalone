@@ -2,7 +2,7 @@
  * SidebarPanel - Main Sidebar Container
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { RecentWorkspaces } from "../RecentWorkspaces/RecentWorkspaces";
@@ -24,6 +24,7 @@ export function SidebarPanel({
 	const workingDir = useSidebarStore((state) => state.workingDir);
 	const error = useSidebarStore((state) => state.error);
 	const controller = useSidebarController();
+	const sessionsLoadedRef = useRef<string | null>(null);
 
 	// Initial data loading
 	useEffect(() => {
@@ -34,7 +35,8 @@ export function SidebarPanel({
 
 	// Load sessions when working directory changes
 	useEffect(() => {
-		if (workingDir?.path) {
+		if (workingDir?.path && sessionsLoadedRef.current !== workingDir.path) {
+			sessionsLoadedRef.current = workingDir.path;
 			controller.loadSessions(workingDir.path);
 		}
 	}, [workingDir?.path]);

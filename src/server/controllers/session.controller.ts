@@ -26,6 +26,11 @@ export async function getSessions(req: Request, res: Response) {
 
 		logger.info(`[getSessions] 加载会话: ${cwd}, 数量: ${sessions.length}`);
 
+		// 打印第一个 session 的 path 用于调试
+		if (sessions.length > 0) {
+			logger.info(`[getSessions] 第一个 session path: ${sessions[0].path}`);
+		}
+
 		res.json({
 			sessions: sessions.map((s) => ({
 				id: s.id,
@@ -51,6 +56,8 @@ export async function getSessions(req: Request, res: Response) {
  */
 export async function loadSession(req: Request, res: Response) {
 	const { sessionPath } = req.body;
+	logger.info(`[loadSession] 收到请求: sessionPath=${sessionPath}`);
+
 	if (!sessionPath) {
 		res.status(400).json({ error: "sessionPath参数必填" });
 		return;

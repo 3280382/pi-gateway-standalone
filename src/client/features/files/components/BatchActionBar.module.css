@@ -5,10 +5,11 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 10px 16px;
+	padding: 6px 12px;
 	background: var(--accent-bg-blue);
 	border-bottom: 1px solid var(--border-color);
 	animation: slideDown 0.2s ease;
+	min-height: 36px;
 }
 
 @keyframes slideDown {
@@ -29,7 +30,7 @@
 }
 
 .selectedCount {
-	font-size: var(--font-sm);
+	font-size: var(--font-xs);
 	font-weight: 600;
 	color: var(--accent-blue);
 }
@@ -40,19 +41,19 @@
 	gap: 8px;
 }
 
-/* 统一按钮样式 */
+/* 统一按钮样式 - 更紧凑 */
 .actionBtn {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	padding: 8px 16px;
+	gap: 4px;
+	padding: 4px 10px;
 	border-radius: var(--radius-sm);
-	font-size: var(--font-sm);
+	font-size: var(--font-xs);
 	font-weight: 500;
 	cursor: pointer;
 	transition: all 0.2s ease;
-	min-width: 80px;
-	height: 36px;
+	min-width: auto;
+	height: 26px;
 	justify-content: center;
 }
 
@@ -133,8 +134,8 @@
 .modalHeader {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	padding: 16px 20px;
+	gap: 8px;
+	padding: 10px 14px;
 	border-bottom: 1px solid var(--border-color);
 }
 
@@ -149,7 +150,7 @@
 }
 
 .modalContent {
-	padding: 20px;
+	padding: 12px 14px;
 }
 
 .warningText {
@@ -193,25 +194,25 @@
 .modalActions {
 	display: flex;
 	justify-content: flex-end;
-	gap: 12px;
-	padding: 16px 20px;
+	gap: 8px;
+	padding: 10px 14px;
 	border-top: 1px solid var(--border-color);
 }
 
-/* Modal 中的按钮样式 */
+/* Modal 中的按钮样式 - 更紧凑 */
 .modalActions .cancelBtn,
 .modalActions .confirmDeleteBtn {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	padding: 8px 16px;
+	gap: 4px;
+	padding: 4px 10px;
 	border-radius: var(--radius-sm);
-	font-size: var(--font-sm);
+	font-size: var(--font-xs);
 	font-weight: 500;
 	cursor: pointer;
 	transition: all 0.2s;
-	min-width: 80px;
-	height: 36px;
+	min-width: auto;
+	height: 26px;
 	justify-content: center;
 }
 

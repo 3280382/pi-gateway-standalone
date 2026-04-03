@@ -1,0 +1,574 @@
+/* ==================== 基础重置与变量 ==================== */
+:root {
+	/* 主色调 - 深色科幻主题 */
+	--bg-primary: #0a0a0f;
+	--bg-secondary: #151520;
+	--bg-tertiary: #1e1e2e;
+
+	/* 强调色 */
+	--accent-cyan: #00d4ff;
+	--accent-purple: #a855f7;
+	--accent-pink: #ec4899;
+	--accent-green: #22c55e;
+	--accent-yellow: #eab308;
+	--accent-red: #ef4444;
+
+	/* 文字颜色 */
+	--text-primary: #ffffff;
+	--text-secondary: #a1a1aa;
+	--text-muted: #71717a;
+
+	/* 边框与阴影 */
+	--border-color: rgba(255, 255, 255, 0.1);
+	--glow-cyan: 0 0 20px rgba(0, 212, 255, 0.5);
+	--glow-purple: 0 0 20px rgba(168, 85, 247, 0.5);
+
+	/* 时间倒流特效 */
+	--rewind-bg: rgba(168, 85, 247, 0.2);
+	--rewind-glow: 0 0 30px rgba(168, 85, 247, 0.8);
+
+	/* 尺寸 */
+	--header-height: 70px;
+	--footer-height: 60px;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+	background: var(--bg-primary);
+	color: var(--text-primary);
+	min-height: 100vh;
+	overflow: hidden;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+/* ==================== 游戏容器 ==================== */
+#game-container {
+	width: 100%;
+	max-width: 1000px;
+	height: 100vh;
+	max-height: 900px;
+	display: flex;
+	flex-direction: column;
+	background: var(--bg-secondary);
+	border: 1px solid var(--border-color);
+	box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+	position: relative;
+}
+
+/* ==================== 顶部状态栏 ==================== */
+.game-header {
+	height: var(--header-height);
+	background: linear-gradient(
+		180deg,
+		var(--bg-tertiary) 0%,
+		var(--bg-secondary) 100%
+	);
+	border-bottom: 1px solid var(--border-color);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 25px;
+	flex-shrink: 0;
+}
+
+.title-section {
+	display: flex;
+	flex-direction: column;
+}
+
+.title-section h1 {
+	font-size: 1.5rem;
+	font-weight: 700;
+	background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	letter-spacing: 2px;
+}
+
+.subtitle {
+	font-size: 0.7rem;
+	color: var(--text-muted);
+	letter-spacing: 3px;
+	text-transform: uppercase;
+}
+
+.stats-section {
+	display: flex;
+	gap: 30px;
+}
+
+.stat-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 3px;
+}
+
+.stat-label {
+	font-size: 0.7rem;
+	color: var(--text-muted);
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.stat-value {
+	font-size: 1.3rem;
+	font-weight: 700;
+	color: var(--accent-cyan);
+	min-width: 50px;
+	text-align: center;
+	font-family: "Consolas", monospace;
+	text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+/* ==================== 游戏主区域 ==================== */
+.game-main {
+	flex: 1;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	background:
+		radial-gradient(
+			circle at 20% 80%,
+			rgba(0, 212, 255, 0.05) 0%,
+			transparent 50%
+		),
+		radial-gradient(
+			circle at 80% 20%,
+			rgba(168, 85, 247, 0.05) 0%,
+			transparent 50%
+		);
+	overflow: hidden;
+}
+
+/* 时间倒流指示器 */
+.time-rewind-indicator {
+	position: absolute;
+	top: 20px;
+	left: 50%;
+	transform: translateX(-50%) translateY(-100px);
+	background: var(--rewind-bg);
+	border: 2px solid var(--accent-purple);
+	border-radius: 15px;
+	padding: 15px 30px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	opacity: 0;
+	transition: all 0.3s ease;
+	backdrop-filter: blur(10px);
+	box-shadow: var(--rewind-glow);
+	z-index: 10;
+}
+
+.time-rewind-indicator.active {
+	transform: translateX(-50%) translateY(0);
+	opacity: 1;
+}
+
+.rewind-icon {
+	font-size: 2rem;
+	animation: pulse 1s infinite;
+}
+
+.rewind-text {
+	font-size: 0.9rem;
+	color: var(--accent-purple);
+	font-weight: 600;
+	letter-spacing: 2px;
+}
+
+.rewind-bar-container {
+	width: 150px;
+	height: 6px;
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 3px;
+	overflow: hidden;
+}
+
+.rewind-bar {
+	height: 100%;
+	width: 100%;
+	background: linear-gradient(90deg, var(--accent-purple), var(--accent-pink));
+	border-radius: 3px;
+	transition: width 0.1s linear;
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+	50% {
+		transform: scale(1.1);
+		opacity: 0.7;
+	}
+}
+
+/* 游戏画布 */
+#game-canvas {
+	border: 2px solid var(--border-color);
+	border-radius: 10px;
+	box-shadow:
+		0 0 30px rgba(0, 0, 0, 0.5),
+		inset 0 0 30px rgba(0, 212, 255, 0.05);
+	background: var(--bg-primary);
+	max-width: 100%;
+	max-height: calc(100vh - 200px);
+	object-fit: contain;
+}
+
+/* 时间线可视化 */
+.timeline-container {
+	width: 100%;
+	max-width: 600px;
+	margin-top: 15px;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+
+.timeline-label {
+	font-size: 0.7rem;
+	color: var(--text-muted);
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.timeline-bar {
+	height: 8px;
+	background: var(--bg-tertiary);
+	border-radius: 4px;
+	position: relative;
+	overflow: hidden;
+	border: 1px solid var(--border-color);
+}
+
+.timeline-current {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 0%;
+	background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+	border-radius: 4px;
+	transition: width 0.1s linear;
+	box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+.timeline-ghosts {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+}
+
+/* ==================== 底部控制栏 ==================== */
+.game-footer {
+	height: var(--footer-height);
+	background: var(--bg-tertiary);
+	border-top: 1px solid var(--border-color);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 25px;
+	flex-shrink: 0;
+}
+
+.controls-section {
+	display: flex;
+	gap: 25px;
+}
+
+.control-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.85rem;
+	color: var(--text-secondary);
+}
+
+.control-item kbd {
+	background: var(--bg-secondary);
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	padding: 4px 10px;
+	font-family: "Consolas", monospace;
+	font-size: 0.8rem;
+	color: var(--accent-cyan);
+	box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.shadow-count {
+	font-size: 0.9rem;
+	color: var(--text-secondary);
+}
+
+#shadow-count {
+	color: var(--accent-purple);
+	font-weight: 700;
+	font-family: "Consolas", monospace;
+}
+
+/* ==================== 遮罩层 ==================== */
+.overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(10, 10, 15, 0.95);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 100;
+	backdrop-filter: blur(5px);
+	transition: opacity 0.3s ease;
+}
+
+.overlay.hidden {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.overlay-content {
+	text-align: center;
+	padding: 50px;
+	max-width: 500px;
+}
+
+.overlay-content h1 {
+	font-size: 3rem;
+	margin-bottom: 10px;
+	background: linear-gradient(
+		135deg,
+		var(--accent-cyan),
+		var(--accent-purple),
+		var(--accent-pink)
+	);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	animation: gradient-shift 3s ease infinite;
+	background-size: 200% 200%;
+}
+
+.overlay-content h2 {
+	font-size: 2.5rem;
+	margin-bottom: 20px;
+	color: var(--accent-green);
+}
+
+@keyframes gradient-shift {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+.game-description {
+	font-size: 1.1rem;
+	color: var(--text-secondary);
+	line-height: 1.6;
+	margin-bottom: 30px;
+}
+
+.game-description strong {
+	color: var(--accent-cyan);
+}
+
+.feature-list {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-bottom: 40px;
+}
+
+.feature {
+	padding: 10px 20px;
+	background: var(--bg-tertiary);
+	border-radius: 8px;
+	border: 1px solid var(--border-color);
+	color: var(--text-secondary);
+	font-size: 0.95rem;
+}
+
+/* 按钮样式 */
+.btn-primary {
+	background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+	color: white;
+	border: none;
+	padding: 15px 50px;
+	font-size: 1.1rem;
+	font-weight: 600;
+	border-radius: 30px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+	text-transform: uppercase;
+	letter-spacing: 2px;
+}
+
+.btn-primary:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 25px rgba(0, 212, 255, 0.5);
+}
+
+.btn-primary:active {
+	transform: translateY(0);
+}
+
+/* 关卡统计 */
+.level-stats {
+	display: flex;
+	justify-content: center;
+	gap: 40px;
+	margin: 30px 0;
+}
+
+.level-stat {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+
+.level-stat span:first-child {
+	font-size: 0.8rem;
+	color: var(--text-muted);
+	text-transform: uppercase;
+}
+
+.level-stat span:last-child {
+	font-size: 1.5rem;
+	color: var(--accent-cyan);
+	font-family: "Consolas", monospace;
+	font-weight: 700;
+}
+
+.final-stats {
+	margin: 30px 0;
+	font-size: 1.2rem;
+	color: var(--text-secondary);
+}
+
+.final-stats div {
+	margin: 10px 0;
+}
+
+.final-stats span {
+	color: var(--accent-cyan);
+	font-weight: 700;
+	font-family: "Consolas", monospace;
+}
+
+/* ==================== 时间倒流特效类 ==================== */
+body.rewinding {
+	animation: rewind-effect 0.5s infinite alternate;
+}
+
+@keyframes rewind-effect {
+	0% {
+		filter: hue-rotate(0deg) saturate(1);
+	}
+	100% {
+		filter: hue-rotate(30deg) saturate(1.5);
+	}
+}
+
+/* 游戏画布时间倒流滤镜 */
+#game-canvas.rewinding {
+	filter: sepia(0.3) hue-rotate(240deg) saturate(1.5) brightness(1.1);
+	box-shadow: 0 0 40px rgba(168, 85, 247, 0.6);
+}
+
+/* ==================== 响应式设计 ==================== */
+@media (max-width: 768px) {
+	#game-container {
+		max-height: 100vh;
+		border: none;
+	}
+
+	.game-header {
+		padding: 0 15px;
+		height: 60px;
+	}
+
+	.title-section h1 {
+		font-size: 1.2rem;
+	}
+
+	.stats-section {
+		gap: 15px;
+	}
+
+	.stat-item {
+		transform: scale(0.85);
+	}
+
+	#game-canvas {
+		width: 100%;
+		height: auto;
+	}
+
+	.controls-section {
+		gap: 15px;
+	}
+
+	.control-item {
+		font-size: 0.75rem;
+	}
+
+	.control-item kbd {
+		padding: 3px 6px;
+		font-size: 0.7rem;
+	}
+
+	.overlay-content {
+		padding: 30px 20px;
+	}
+
+	.overlay-content h1 {
+		font-size: 2rem;
+	}
+
+	.overlay-content h2 {
+		font-size: 1.8rem;
+	}
+}
+
+@media (max-width: 480px) {
+	.game-footer {
+		flex-direction: column;
+		height: auto;
+		padding: 10px;
+		gap: 10px;
+	}
+
+	.controls-section {
+		gap: 10px;
+	}
+
+	.shadow-count {
+		font-size: 0.8rem;
+	}
+}

@@ -55,37 +55,31 @@ export function ChatPanel() {
 		}
 	}, [inputText]);
 
-	const handleBashCommand = useCallback(
-		(command: string) => {
-			chatController.setInputText(`/bash ${command}`);
-			setTimeout(() => chatController.sendMessage(`/bash ${command}`), 0);
-			shouldScrollRef.current = true;
-		},
-		[],
-	);
+	const handleBashCommand = useCallback((command: string) => {
+		chatController.setInputText(`/bash ${command}`);
+		setTimeout(() => chatController.sendMessage(`/bash ${command}`), 0);
+		shouldScrollRef.current = true;
+	}, []);
 
-	const handleSlashCommand = useCallback(
-		(command: string, args: string) => {
-			switch (command) {
-				case "clear":
-					chatController.clearMessages();
-					break;
-				case "new":
-					chatController.clearMessages();
-					break;
-				case "bash":
-					if (args) chatController.sendMessage(`/bash ${args}`);
-					break;
-				case "read":
-					if (args) chatController.sendMessage(`/read ${args}`);
-					break;
-				default:
-					chatController.sendMessage(`/${command} ${args}`.trim());
-			}
-			shouldScrollRef.current = true;
-		},
-		[],
-	);
+	const handleSlashCommand = useCallback((command: string, args: string) => {
+		switch (command) {
+			case "clear":
+				chatController.clearMessages();
+				break;
+			case "new":
+				chatController.clearMessages();
+				break;
+			case "bash":
+				if (args) chatController.sendMessage(`/bash ${args}`);
+				break;
+			case "read":
+				if (args) chatController.sendMessage(`/read ${args}`);
+				break;
+			default:
+				chatController.sendMessage(`/${command} ${args}`.trim());
+		}
+		shouldScrollRef.current = true;
+	}, []);
 
 	const handleNewSession = useCallback(() => {
 		chatController.clearMessages();

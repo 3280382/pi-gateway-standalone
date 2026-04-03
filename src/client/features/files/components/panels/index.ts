@@ -1,0 +1,1 @@
+export { XTermPanel } from "./TerminalPanel";

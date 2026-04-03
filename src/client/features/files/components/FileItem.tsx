@@ -61,15 +61,21 @@ export const FileItem = memo<FileItemProps>(
 
 		// 使用 useGesture hook 处理所有手势
 		const { state: gestureState, handlers } = useGesture({
-			onTap: useCallback((e?: React.MouseEvent | React.TouchEvent) => {
-				// 如果点击的是复选框，不触发 tap
-				if (e && (e.target as HTMLElement).closest('[data-checkbox="true"]')) {
-					return;
-				}
-				setShowRipple(true);
-				setTimeout(() => setShowRipple(false), 300);
-				onTap(item);
-			}, [item, onTap]),
+			onTap: useCallback(
+				(e?: React.MouseEvent | React.TouchEvent) => {
+					// 如果点击的是复选框，不触发 tap
+					if (
+						e &&
+						(e.target as HTMLElement).closest('[data-checkbox="true"]')
+					) {
+						return;
+					}
+					setShowRipple(true);
+					setTimeout(() => setShowRipple(false), 300);
+					onTap(item);
+				},
+				[item, onTap],
+			),
 			onDoubleTap: useCallback(() => {
 				onDoubleTap(item);
 			}, [item, onDoubleTap]),
@@ -84,7 +90,7 @@ export const FileItem = memo<FileItemProps>(
 				e.preventDefault();
 				e.stopPropagation();
 				// 阻止 touch 事件的默认行为
-				if ('touches' in e) {
+				if ("touches" in e) {
 					e.nativeEvent.stopImmediatePropagation?.();
 				}
 				onToggleSelect(item.path);
@@ -93,19 +99,13 @@ export const FileItem = memo<FileItemProps>(
 		);
 
 		// 阻止复选框上的 touch 事件冒泡
-		const handleCheckboxTouchStart = useCallback(
-			(e: React.TouchEvent) => {
-				e.stopPropagation();
-			},
-			[],
-		);
+		const handleCheckboxTouchStart = useCallback((e: React.TouchEvent) => {
+			e.stopPropagation();
+		}, []);
 
-		const handleCheckboxMouseDown = useCallback(
-			(e: React.MouseEvent) => {
-				e.stopPropagation();
-			},
-			[],
-		);
+		const handleCheckboxMouseDown = useCallback((e: React.MouseEvent) => {
+			e.stopPropagation();
+		}, []);
 
 		// 拖拽处理
 		const handleDragStart = useCallback(

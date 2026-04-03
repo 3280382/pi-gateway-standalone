@@ -2,10 +2,10 @@
  * Register Routes 单元测试
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { Application, Request, Response } from "express";
-import { registerRoutes } from "./registerRoutes";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LlmLogManager } from "../llm/log-manager";
+import { registerRoutes } from "./registerRoutes";
 
 describe("registerRoutes", () => {
 	let mockApp: Partial<Application>;

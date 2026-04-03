@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时空迷宫 - Time Maze</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 游戏容器 -->
+    <div id="game-container">
+        <!-- 顶部状态栏 -->
+        <header class="game-header">
+            <div class="title-section">
+                <h1>⏳ 时空迷宫</h1>
+                <span class="subtitle">Time Maze</span>
+            </div>
+            <div class="stats-section">
+                <div class="stat-item">
+                    <span class="stat-label">关卡</span>
+                    <span class="stat-value" id="level-display">1</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">分数</span>
+                    <span class="stat-value" id="score-display">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">时间</span>
+                    <span class="stat-value" id="time-display">00:00</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 游戏主区域 -->
+        <main class="game-main">
+            <!-- 时间倒流指示器 -->
+            <div class="time-rewind-indicator" id="rewind-indicator">
+                <div class="rewind-icon">⏪</div>
+                <div class="rewind-text">时间倒流中...</div>
+                <div class="rewind-bar-container">
+                    <div class="rewind-bar" id="rewind-bar"></div>
+                </div>
+            </div>
+
+            <!-- 游戏画布 -->
+            <canvas id="game-canvas" width="800" height="600"></canvas>
+            
+            <!-- 时间线可视化 -->
+            <div class="timeline-container">
+                <div class="timeline-label">时间线</div>
+                <div class="timeline-bar">
+                    <div class="timeline-current" id="timeline-current"></div>
+                    <div class="timeline-ghosts" id="timeline-ghosts"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 底部控制栏 -->
+        <footer class="game-footer">
+            <div class="controls-section">
+                <div class="control-item">
+                    <kbd>WASD</kbd>
+                    <span>移动</span>
+                </div>
+                <div class="control-item">
+                    <kbd>SPACE</kbd>
+                    <span>时间倒流</span>
+                </div>
+                <div class="control-item">
+                    <kbd>R</kbd>
+                    <span>重置关卡</span>
+                </div>
+            </div>
+            <div class="shadow-count">
+                <span>影子数量: </span>
+                <span id="shadow-count">0</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 开始界面遮罩 -->
+    <div class="overlay" id="start-overlay">
+        <div class="overlay-content">
+            <h1>⏳ 时空迷宫</h1>
+            <p class="game-description">
+                利用<strong>时间倒流</strong>能力解开迷宫谜题<br>
+                创造<strong>时间影子</strong>与你协作<br>
+                在时间的长河中找到出口
+            </p>
+            <div class="feature-list">
+                <div class="feature">⏪ 倒转时间，改变过去</div>
+                <div class="feature">👤 创造影子，协作解谜</div>
+                <div class="feature">🧩 3个精心设计的关卡</div>
+            </div>
+            <button class="btn-primary" id="start-btn">开始游戏</button>
+        </div>
+    </div>
+
+    <!-- 关卡完成遮罩 -->
+    <div class="overlay hidden" id="level-complete-overlay">
+        <div class="overlay-content">
+            <h2>🎉 关卡完成！</h2>
+            <div class="level-stats">
+                <div class="level-stat">
+                    <span>用时</span>
+                    <span id="level-time">00:00</span>
+                </div>
+                <div class="level-stat">
+                    <span>分数</span>
+                    <span id="level-score">0</span>
+                </div>
+            </div>
+            <button class="btn-primary" id="next-level-btn">下一关</button>
+        </div>
+    </div>
+
+    <!-- 游戏结束/通关遮罩 -->
+    <div class="overlay hidden" id="game-complete-overlay">
+        <div class="overlay-content">
+            <h2>🏆 恭喜通关！</h2>
+            <p>你掌握了时间的奥秘</p>
+            <div class="final-stats">
+                <div>总分数: <span id="final-score">0</span></div>
+                <div>总用时: <span id="final-time">00:00</span></div>
+            </div>
+            <button class="btn-primary" id="restart-btn">重新开始</button>
+        </div>
+    </div>
+
+    <!-- 游戏脚本 -->
+    <script src="js/main.js"></script>
+</body>
+</html>

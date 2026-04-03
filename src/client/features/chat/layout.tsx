@@ -7,29 +7,16 @@ import { useCallback } from "react";
 import { useLayout } from "@/app/LayoutContext";
 import { AppHeader } from "@/features/chat/components/Header";
 import { LlmLogPanel } from "@/features/chat/components/panels/LlmLogPanel";
-import { XTermPanel } from "@/features/chat/components/panels/TerminalPanel";
 import { SidebarPanel } from "@/features/chat/sidebar/components/SidebarPanel/SidebarPanel";
-import type { CommandResult } from "@/shared/hooks/app";
 import styles from "./ChatLayout.module.css";
 import { ChatPanel } from "./components/ChatPanel";
 
 interface ChatLayoutProps {
-	terminalOutput: string;
-	terminalCommand: string;
-	commandResults: CommandResult[];
-	isExecuting: boolean;
-	onBashCommand: (command: string) => void;
-	onSlashCommand: (command: string, args: string) => void;
 	closeBottomPanel: () => void;
 	setBottomPanelHeight: (height: number) => void;
 }
 
 export function ChatLayout({
-	terminalOutput,
-	terminalCommand,
-	commandResults,
-	isExecuting,
-	onBashCommand,
 	closeBottomPanel,
 	setBottomPanelHeight,
 }: ChatLayoutProps) {
@@ -38,19 +25,6 @@ export function ChatLayout({
 
 	const renderBottomPanel = useCallback(() => {
 		if (!isBottomPanelOpen) return null;
-
-		if (commandResults.length > 0 || isExecuting) {
-			return (
-				<XTermPanel
-					height={bottomPanelHeight}
-					onClose={closeBottomPanel}
-					onHeightChange={setBottomPanelHeight}
-					output={terminalOutput}
-					initialCommand={terminalCommand}
-					onExecuteCommand={onBashCommand}
-				/>
-			);
-		}
 
 		return (
 			<LlmLogPanel
@@ -61,14 +35,9 @@ export function ChatLayout({
 		);
 	}, [
 		isBottomPanelOpen,
-		commandResults.length,
-		isExecuting,
 		bottomPanelHeight,
-		terminalOutput,
-		terminalCommand,
 		closeBottomPanel,
 		setBottomPanelHeight,
-		onBashCommand,
 	]);
 
 	return (

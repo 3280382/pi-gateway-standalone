@@ -178,7 +178,6 @@ export function AppHeader({
 	const pid = serverPid;
 	const { isStreaming } = useChatStore();
 
-
 	// Search state - 优先使用外部传入的 props，否则使用 chatStore
 	const chatStoreQuery = useChatStore(selectSearchQuery);
 	const chatStoreFilters = useChatStore(selectSearchFilters);

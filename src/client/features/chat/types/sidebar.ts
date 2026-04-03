@@ -57,6 +57,9 @@ export interface SidebarState {
 	isLoading: boolean;
 	error: string | null;
 	selectedSessionId: string | null;
+
+	// 按工作目录保存最后选中的 session
+	lastSessionByDir: Record<string, string>;
 }
 
 // ============================================================================

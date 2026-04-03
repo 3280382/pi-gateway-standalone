@@ -221,8 +221,10 @@ function scheduleRafUpdate(
 		// 找到最后一个 turn_marker 的位置
 		// turn_marker 之前的所有内容是之前轮次的（已固定）
 		// turn_marker 之后的内容是当前轮次的（需要被 currentContentArray 替换）
-		const lastTurnMarkerIndex = existingContent.map((c: any) => c.type).lastIndexOf('turn_marker');
-		
+		const lastTurnMarkerIndex = existingContent
+			.map((c: any) => c.type)
+			.lastIndexOf("turn_marker");
+
 		let preservedContent: any[];
 		if (lastTurnMarkerIndex >= 0) {
 			// 保留 turn_marker 及之前的所有内容（之前轮次）
@@ -480,7 +482,7 @@ export const useChatStore = create<
 				const finalContentToApply = pendingContentUpdates.content || "";
 				const finalThinkingToApply = pendingContentUpdates.thinking || "";
 				pendingContentUpdates = {};
-				
+
 				set(
 					(state) => {
 						// 构建当前轮次的新内容（包含未完成的 RAF 更新）
@@ -529,13 +531,13 @@ export const useChatStore = create<
 				const finalThinkingToApply = pendingContentUpdates.thinking || "";
 				// 清空待处理更新，防止重复应用
 				pendingContentUpdates = {};
-				
+
 				set(
 					(state) => {
 						// 获取之前轮次的内容（从 currentStreamingMessage.content）
 						const existingContent =
 							state.currentStreamingMessage?.content || [];
-						
+
 						// 构建当前轮次的新内容（包含未完成的 RAF 更新）
 						const currentContent = buildContentArray({
 							...state,
@@ -544,12 +546,17 @@ export const useChatStore = create<
 						});
 
 						// 找到最后一个 turn_marker 的位置
-						const lastTurnMarkerIndex = existingContent.map((c: any) => c.type).lastIndexOf('turn_marker');
-						
+						const lastTurnMarkerIndex = existingContent
+							.map((c: any) => c.type)
+							.lastIndexOf("turn_marker");
+
 						let finalContent: any[];
 						if (lastTurnMarkerIndex >= 0) {
 							// 有多轮：保留 turn_marker 之前的内容 + 当前轮次内容
-							const previousRounds = existingContent.slice(0, lastTurnMarkerIndex + 1);
+							const previousRounds = existingContent.slice(
+								0,
+								lastTurnMarkerIndex + 1,
+							);
 							finalContent = [...previousRounds, ...currentContent];
 						} else {
 							// 只有一轮：直接使用 currentContent（existingContent 和 currentContent 内容相同）
@@ -836,6 +843,15 @@ export const useChatStore = create<
 					});
 
 					if (!response.ok) {
+						// 404 表示新会话文件还未创建，这是正常情况
+						if (response.status === 404) {
+							console.log(
+								"[ChatStore] Session file not found (new session):",
+								sessionPath,
+							);
+							set({ messages: [] }, false, "loadSession/new");
+							return 0;
+						}
 						console.error(
 							"[ChatStore] Failed to load session:",
 							response.statusText,

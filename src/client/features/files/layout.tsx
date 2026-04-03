@@ -5,7 +5,7 @@
 
 import { useCallback } from "react";
 import { useLayout } from "@/app/LayoutContext";
-import { XTermPanel } from "@/features/chat/components/panels/TerminalPanel";
+import { XTermPanel } from "@/features/files/components/panels/TerminalPanel";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { FileBrowser } from "./components/FileBrowser";
 import { FileSidebar } from "./components/FileSidebar";

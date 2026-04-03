@@ -71,9 +71,9 @@ export class WebSocketService extends BaseService {
 	}
 
 	/**
-	 * 建立WebSocket连接
+	 * 建立WebSocket连接（带超时）
 	 */
-	connect(url?: string): Promise<void> {
+	connect(url?: string, timeoutMs = 3000): Promise<void> {
 		return new Promise((resolve, reject) => {
 			try {
 				const wsUrl = url || this.getWebSocketUrlPrivate();
@@ -85,9 +85,18 @@ export class WebSocketService extends BaseService {
 
 				wsLog.info(` Connecting to ${wsUrl}`);
 
+				// 设置连接超时
+				const timeoutId = setTimeout(() => {
+					if (this.ws?.readyState !== WebSocket.OPEN) {
+						this.ws?.close();
+						reject(new Error(`WebSocket连接超时 (${timeoutMs}ms)`));
+					}
+				}, timeoutMs);
+
 				this.ws = new WebSocket(wsUrl);
 
 				this.ws.onopen = () => {
+					clearTimeout(timeoutId);
 					this.connectionStatus = {
 						isConnected: true,
 						lastConnected: new Date().toISOString(),
@@ -100,13 +109,8 @@ export class WebSocketService extends BaseService {
 					resolve();
 				};
 
-				this.ws.onerror = (error) => {
-					wsLog.error("Connection error:", error);
-					this.emit("error", { error: error });
-					reject(new Error(`WebSocket连接错误: ${error}`));
-				};
-
 				this.ws.onclose = (event) => {
+					clearTimeout(timeoutId);
 					console.log(
 						`[WebSocket] Disconnected: ${event.code} ${event.reason}`,
 					);
@@ -114,8 +118,11 @@ export class WebSocketService extends BaseService {
 
 					this.emit("disconnected", { code: event.code, reason: event.reason });
 
-					// 自动重连
-					if (this.reconnectAttempts < this.maxReconnectAttempts) {
+					// 自动重连（仅在曾经成功连接过的情况下）
+					if (
+						this.reconnectAttempts < this.maxReconnectAttempts &&
+						this.connectionStatus.lastConnected
+					) {
 						this.reconnectAttempts++;
 						const delay =
 							this.reconnectDelay * Math.min(this.reconnectAttempts, 5);
@@ -132,6 +139,7 @@ export class WebSocketService extends BaseService {
 				};
 
 				this.ws.onerror = (error) => {
+					clearTimeout(timeoutId);
 					wsLog.error("Error:", error);
 					this.emit("error", error);
 					reject(
@@ -251,7 +259,11 @@ export class WebSocketService extends BaseService {
 	 * 初始化工作目录（对应后端的init类型）
 	 * 返回Promise等待initialized响应
 	 */
-	initWorkingDirectory(path: string, sessionId?: string): Promise<any> {
+	initWorkingDirectory(
+		path: string,
+		sessionId?: string,
+		timeoutMs = 1000,
+	): Promise<any> {
 		return new Promise((resolve, reject) => {
 			// 设置一次性监听器等待initialized响应
 			const unsubscribe = this.on("initialized", (_data: unknown) => {
@@ -259,11 +271,13 @@ export class WebSocketService extends BaseService {
 				resolve(_data);
 			});
 
-			// 5秒超时
+			// 超时（默认1秒，快速失败不阻塞UI）
 			setTimeout(() => {
 				unsubscribe();
-				reject(new Error("Timeout waiting for initialization"));
-			}, 5000);
+				reject(
+					new Error(`Timeout waiting for initialization (${timeoutMs}ms)`),
+				);
+			}, timeoutMs);
 
 			// 发送init消息
 			const sent = this.send("init", {

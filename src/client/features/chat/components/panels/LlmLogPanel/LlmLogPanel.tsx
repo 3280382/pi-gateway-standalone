@@ -3,7 +3,7 @@
  * Real-time HTTP request/response log display
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./LlmLogPanel.module.css";
 
 interface LlmLogPanelProps {
@@ -43,7 +43,7 @@ export function LlmLogPanel({
 	const [isLoading, setIsLoading] = useState(false);
 	const [autoScroll, setAutoScroll] = useState(true);
 	const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
-	const [showFullscreen, setShowFullscreen] = useState(false);
+	const [isFullscreen, setIsFullscreen] = useState(false);
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
 	const isResizing = useRef(false);
 	const resizeStartY = useRef(0);
@@ -106,10 +106,10 @@ export function LlmLogPanel({
 
 	// Auto-scroll to bottom
 	useEffect(() => {
-		if (contentRef.current && autoScroll && !showFullscreen) {
+		if (contentRef.current && autoScroll && !isFullscreen) {
 			contentRef.current.scrollTop = contentRef.current.scrollHeight;
 		}
-	}, [logs, autoScroll, showFullscreen]);
+	}, [logs, autoScroll, isFullscreen]);
 
 	// Handle manual scroll
 	const handleScroll = useCallback(() => {
@@ -163,13 +163,13 @@ export function LlmLogPanel({
 	// Keyboard shortcut to close fullscreen
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Escape" && showFullscreen) {
+			if (e.key === "Escape" && isFullscreen) {
 				setShowFullscreen(false);
 			}
 		};
 		document.addEventListener("keydown", handleKeyDown);
 		return () => document.removeEventListener("keydown", handleKeyDown);
-	}, [showFullscreen]);
+	}, [isFullscreen]);
 
 	const handleRefresh = useCallback(() => {
 		setIsLoading(true);
@@ -246,7 +246,10 @@ export function LlmLogPanel({
 	};
 
 	return (
-		<div className={styles.panel} style={{ height: `${height}px` }}>
+		<div
+			className={`${styles.panel} ${isFullscreen ? styles.fullscreen : ""}`}
+			style={{ height: isFullscreen ? "100vh" : `${height}px` }}
+		>
 			{/* Resize handle */}
 			<div
 				className={styles.resizeHandle}
@@ -278,6 +281,13 @@ export function LlmLogPanel({
 						disabled={isLoading}
 					>
 						<RefreshIcon />
+					</button>
+					<button
+						className={styles.actionBtn}
+						onClick={() => setIsFullscreen(!isFullscreen)}
+						title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+					>
+						{isFullscreen ? <ExitFullscreenIcon /> : <FullscreenIcon />}
 					</button>
 					<button className={styles.actionBtn} onClick={onClose} title="Close">
 						<CloseIcon />
@@ -341,7 +351,7 @@ export function LlmLogPanel({
 			</div>
 
 			{/* Fullscreen Detail Modal */}
-			{showFullscreen && selectedLog && (
+			{isFullscreen && selectedLog && (
 				<div className={styles.modalOverlay} onClick={handleCloseFullscreen}>
 					<div
 						className={styles.modalContent}
@@ -526,6 +536,40 @@ function CloseIcon() {
 		>
 			<line x1="18" y1="6" x2="6" y2="18" />
 			<line x1="6" y1="6" x2="18" y2="18" />
+		</svg>
+	);
+}
+
+function FullscreenIcon() {
+	return (
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			width="14"
+			height="14"
+		>
+			<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+		</svg>
+	);
+}
+
+function ExitFullscreenIcon() {
+	return (
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			width="14"
+			height="14"
+		>
+			<path d="M4 14h6m-6-4v6m16-6h-6m6 4v-6M10 4v6m4-6v6m-4 14v-6m4 6v-6" />
 		</svg>
 	);
 }

@@ -2,10 +2,10 @@
  * Prompt Handler 单元测试
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebSocket } from "ws";
-import { handlePrompt } from "./prompt";
 import type { WSContext } from "../../../shared/websocket/types";
+import { handlePrompt } from "./prompt";
 
 describe("handlePrompt", () => {
 	let mockCtx: WSContext;

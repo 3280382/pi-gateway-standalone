@@ -141,6 +141,11 @@ body,
 	overflow: hidden;
 }
 
+/* 防止菜单弹出时出现滚动条 */
+body.menu-open {
+	overflow: hidden !important;
+}
+
 body {
 	font-family: var(--font-sans);
 	font-size: var(--font-base);

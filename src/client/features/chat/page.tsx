@@ -2,17 +2,10 @@
  * ChatPage - 聊天页面
  */
 
-import type { CommandResult } from "@/shared/hooks/app";
 import { useChatMessages } from "@/shared/hooks/app";
 import { ChatLayout } from "./layout";
 
 interface ChatPageProps {
-	terminalOutput: string;
-	terminalCommand: string;
-	commandResults: CommandResult[];
-	isExecuting: boolean;
-	onBashCommand: (command: string) => void;
-	onSlashCommand: (command: string, args: string) => void;
 	closeBottomPanel: () => void;
 	setBottomPanelHeight: (height: number) => void;
 }

@@ -213,11 +213,15 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
 		);
 	};
 
-	// 初始加载 - 软加载：只在第一次可见且需要数据时加载，隐藏时不清空数据
+	// 初始加载 - 延迟加载避免与 FileBrowser 并发冲突
 	useEffect(() => {
 		if (!visible) return; // 不可见时不加载
 		if (tree.length > 0) return; // 已有数据，不重新加载
-		loadRoot();
+		// 延迟 200ms 加载，避免与 FileBrowser 同时请求
+		const timer = setTimeout(() => {
+			loadRoot();
+		}, 200);
+		return () => clearTimeout(timer);
 	}, [visible, loadRoot, tree.length]);
 
 	const sidebarClass = visible

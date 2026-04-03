@@ -20,20 +20,17 @@ import styles from "./App.module.css";
  * AppContent - 应用内容组件
  */
 function AppContent() {
-	const { currentView } = useLayout();
+	const { currentView, closeBottomPanel, setBottomPanelHeight } = useLayout();
 
 	// 应用初始化状态
 	const { isLoading, error, retry } = useAppInitialization();
 
-	// 终端命令管理
+	// 终端命令管理（Files feature 需要）
 	const {
 		terminalOutput,
 		terminalCommand,
-		commandResults,
-		isExecuting,
 		setTerminalCommand,
 		executeBashCommand,
-		executeSlashCommand,
 	} = useTerminalCommands();
 
 	// 错误状态
@@ -52,14 +49,8 @@ function AppContent() {
 			<main className={styles.pageContainer}>
 				{currentView === "chat" ? (
 					<ChatPage
-						terminalOutput={terminalOutput}
-						terminalCommand={terminalCommand}
-						commandResults={commandResults}
-						isExecuting={isExecuting}
-						onBashCommand={executeBashCommand}
-						onSlashCommand={executeSlashCommand}
-						closeBottomPanel={() => {}}
-						setBottomPanelHeight={() => {}}
+						closeBottomPanel={closeBottomPanel}
+						setBottomPanelHeight={setBottomPanelHeight}
 					/>
 				) : (
 					<FilesPage
@@ -67,8 +58,8 @@ function AppContent() {
 						terminalCommand={terminalCommand}
 						onBashCommand={executeBashCommand}
 						onOpenBottomPanel={setTerminalCommand}
-						closeBottomPanel={() => {}}
-						setBottomPanelHeight={() => {}}
+						closeBottomPanel={closeBottomPanel}
+						setBottomPanelHeight={setBottomPanelHeight}
 					/>
 				)}
 			</main>

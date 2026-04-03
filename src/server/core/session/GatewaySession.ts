@@ -4,8 +4,8 @@
  */
 
 import { existsSync } from "node:fs";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import type { AgentMessage } from "@mariozechner/pi-agent-core";
 import type { ImageContent } from "@mariozechner/pi-ai";
 import {
@@ -118,18 +118,31 @@ export class GatewaySession {
 		);
 
 		let sessionManager: ReturnType<typeof SessionManager.create> | undefined;
+		console.log(`[Gateway] 查找 sessionId: ${sessionId}`);
+
 		if (sessionId) {
 			// 尝试在本地会话目录中按部分UUID查找会话
 			const sessions = await SessionManager.list(workingDir, localSessionsDir);
+			console.log(`[Gateway] 找到 ${sessions.length} 个 sessions`);
+			sessions.forEach((s, i) =>
+				console.log(`[Gateway]   [${i}] id=${s.id}, path=${s.path}`),
+			);
+
 			const matching = sessions.find(
 				(s) => s.id.startsWith(sessionId) || s.path.includes(sessionId),
 			);
+			console.log(
+				`[Gateway] 匹配结果:`,
+				matching ? `id=${matching.id}, path=${matching.path}` : "null",
+			);
+
 			if (matching) {
 				sessionManager = SessionManager.open(matching.path, localSessionsDir);
 			}
 		}
 
 		if (!sessionManager) {
+			console.log(`[Gateway] 未找到匹配，创建新 session`);
 			sessionManager = SessionManager.create(workingDir, localSessionsDir);
 		}
 
@@ -255,6 +268,9 @@ export class GatewaySession {
 			"[Gateway] 资源文件路径:",
 			JSON.stringify(resourceFiles, null, 2),
 		);
+
+		console.log(`[Gateway] 返回的 sessionFile:`, session.sessionFile);
+		console.log(`[Gateway] sessionFile 存在:`, existsSync(session.sessionFile));
 
 		return {
 			sessionId: session.sessionId,

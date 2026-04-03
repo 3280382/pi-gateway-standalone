@@ -3,10 +3,10 @@
  * Tests for the core session management functionality
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebSocket } from "ws";
-import { GatewaySession } from "./GatewaySession";
 import type { LlmLogManager } from "../../llm/log-manager";
+import { GatewaySession } from "./GatewaySession";
 
 describe("GatewaySession", () => {
 	let mockWs: Partial<WebSocket>;

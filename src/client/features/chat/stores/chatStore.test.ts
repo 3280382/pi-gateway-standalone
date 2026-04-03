@@ -79,7 +79,7 @@ describe("ChatStore", () => {
 		store.appendStreamingContent(" World");
 
 		// RAF updates are async, wait for them
-		await new Promise(resolve => setTimeout(resolve, 100));
+		await new Promise((resolve) => setTimeout(resolve, 100));
 
 		expect(useChatStore.getState().streamingContent).toBe("Hello World");
 	});

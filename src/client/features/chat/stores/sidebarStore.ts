@@ -32,6 +32,8 @@ const createInitialState = (): Omit<SidebarState, keyof SidebarActions> => ({
 	isLoading: false,
 	error: null,
 	selectedSessionId: null,
+	// 按工作目录保存最后选中的 session
+	lastSessionByDir: {} as Record<string, string>,
 });
 
 // ============================================================================
@@ -141,7 +143,22 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 				},
 
 				selectSession: (id: string | null) => {
-					set({ selectedSessionId: id }, false, "selectSession");
+					const currentDir = get().workingDir?.path;
+					const lastSessionByDir = { ...get().lastSessionByDir };
+
+					// 如果有当前目录，保存 session 到对应目录
+					if (currentDir && id) {
+						lastSessionByDir[currentDir] = id;
+					}
+
+					set(
+						{
+							selectedSessionId: id,
+							lastSessionByDir,
+						},
+						false,
+						"selectSession",
+					);
 				},
 
 				clearError: () => {
@@ -162,6 +179,7 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 					fontSize: state.fontSize,
 					searchFilters: state.searchFilters,
 					recentWorkspaces: state.recentWorkspaces,
+					lastSessionByDir: state.lastSessionByDir,
 				}),
 			},
 		),

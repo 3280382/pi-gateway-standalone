@@ -2,10 +2,10 @@
  * WebSocket Router 单元测试
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebSocket } from "ws";
-import { WSRouter, wsRouter } from "./ws-router";
 import type { WSContext } from "./types";
+import { WSRouter, wsRouter } from "./ws-router";
 
 describe("WSRouter", () => {
 	let router: WSRouter;

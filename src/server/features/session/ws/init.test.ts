@@ -2,10 +2,10 @@
  * Init Handler 单元测试
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebSocket } from "ws";
-import { handleInit } from "./init";
 import type { WSContext } from "../../../shared/websocket/types";
+import { handleInit } from "./init";
 
 describe("handleInit", () => {
 	let mockCtx: WSContext;
@@ -78,8 +78,6 @@ describe("handleInit", () => {
 
 		await handleInit(mockCtx, { workingDir: "/test/dir" });
 
-		expect(mockWs.send).toHaveBeenCalledWith(
-			expect.stringContaining("error"),
-		);
+		expect(mockWs.send).toHaveBeenCalledWith(expect.stringContaining("error"));
 	});
 });

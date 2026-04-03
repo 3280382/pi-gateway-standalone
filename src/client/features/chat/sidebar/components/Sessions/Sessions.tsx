@@ -3,7 +3,7 @@
  * 使用API获取会话列表和加载会话内容
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
@@ -17,6 +17,7 @@ import styles from "./Sessions.module.css";
 export function Sessions() {
 	const sessions = useSidebarStore((state) => state.sessions);
 	const sidebarSelectedId = useSidebarStore((state) => state.selectedSessionId);
+	const lastSessionByDir = useSidebarStore((state) => state.lastSessionByDir);
 	const isLoading = useSidebarStore((state) => state.isLoading);
 	const workingDir = useSidebarStore((state) => state.workingDir);
 	const controller = useSidebarController();
@@ -24,8 +25,11 @@ export function Sessions() {
 	// 从sessionStore获取当前session ID用于激活样式
 	const currentSessionId = useSessionStore((state) => state.currentSessionId);
 
-	// 优先使用sessionStore的currentSessionId，如果没有则使用sidebarStore的selectedSessionId
-	const selectedId = currentSessionId || sidebarSelectedId;
+	// 优先使用当前目录保存的session，其次是sessionStore的currentSessionId，最后是sidebarStore的selectedSessionId
+	const currentDir = workingDir?.path;
+	const savedSessionForDir = currentDir ? lastSessionByDir[currentDir] : null;
+	const selectedId =
+		savedSessionForDir || currentSessionId || sidebarSelectedId;
 
 	// 调试信息
 
@@ -39,12 +43,13 @@ export function Sessions() {
 		return fileName.includes(selectedId);
 	};
 
-	// 当工作目录变化时加载会话列表
-	useEffect(() => {
-		if (workingDir?.path) {
-			controller.loadSessions(workingDir.path);
-		}
-	}, [workingDir?.path]);
+	// Sessions 列表由父组件 SidebarPanel 负责加载
+	// 避免重复调用 loadSessions
+
+	// 注意：session 加载由 AppInit 统一处理，避免重复加载
+	// AppInit 会调用 initWorkingDirectory，传入浏览器保存的 sessionId
+	// 服务端返回当前 session，然后 syncSessionState 加载消息
+	// 这里只负责 UI 选中状态，不重复加载
 
 	const handleNewSession = () => {
 		controller.createNewSession();
