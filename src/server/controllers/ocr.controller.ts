@@ -26,7 +26,7 @@ export async function performOCR(req: Request, res: Response): Promise<void> {
 		// In production, this should call the actual OCR service
 
 		// Extract base64 data (remove data URL prefix if present)
-		const base64Data = image.includes(",") ? image.split(",")[1] : image;
+		const _base64Data = image.includes(",") ? image.split(",")[1] : image;
 
 		// TODO: Integrate with actual OCR service
 		// This could be:

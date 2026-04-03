@@ -3,9 +3,9 @@
  * 管理和持久化LLM API请求/响应日志
  */
 
-import { existsSync, mkdirSync } from "fs";
-import { appendFile, readFile } from "fs/promises";
-import * as path from "path";
+import { existsSync, mkdirSync } from "node:fs";
+import { appendFile, readFile } from "node:fs/promises";
+import * as path from "node:path";
 
 const { dirname } = path;
 

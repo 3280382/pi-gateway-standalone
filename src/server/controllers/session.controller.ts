@@ -8,8 +8,6 @@ import {
 	SessionManager,
 } from "@mariozechner/pi-coding-agent";
 import type { Request, Response } from "express";
-import * as fs from "fs/promises";
-import * as path from "path";
 import { expandPath } from "../lib/utils/file-utils";
 import { Logger, LogLevel } from "../lib/utils/logger";
 import { AGENT_DIR, getLocalSessionsDir } from "../session/utils";
@@ -59,7 +57,7 @@ export async function loadSession(req: Request, res: Response) {
 	}
 
 	try {
-		const { readFile, access } = await import("fs/promises");
+		const { readFile, access } = await import("node:fs/promises");
 
 		// Check if file exists
 		try {
@@ -83,7 +81,7 @@ export async function loadSession(req: Request, res: Response) {
 		for (let i = 0; i < lines.length; i++) {
 			try {
 				entries.push(JSON.parse(lines[i]));
-			} catch (parseError) {
+			} catch (_parseError) {
 				logger.warn(
 					`解析会话文件第 ${i + 1} 行失败: ${lines[i].slice(0, 100)}`,
 				);

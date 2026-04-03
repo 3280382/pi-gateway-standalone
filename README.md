@@ -22,10 +22,7 @@ bash dev-start.sh
 
 ## 项目架构
 
-采用**模块化单体架构**：
-- `src/client/` - 前端代码（浏览器运行）
-- `src/server/` - 后端代码（Node.js）
-- `src/shared/` - 共享类型和常量
+采用**模块化单体架构 (Modular Monolith)**：
 
 ```
 src/
@@ -63,12 +60,52 @@ src/
 │   ├── lib/                # 工具库 (debug, logger, utils)
 │   └── hooks/index.ts      # 兼容性入口
 │
-├── server/                 # 🖥️ 后端代码
-└── shared/                 # 🔗 共享类型
+├── server/                 # 🖥️ 后端代码 - Feature-Based 架构
+│   ├── app/
+│   │   ├── registerRoutes.ts   # HTTP 路由注册
+│   │   └── registerWS.ts       # WebSocket 处理器注册入口
+│   │
+│   ├── features/
+│   │   ├── chat/ws/            # Chat WebSocket 处理器
+│   │   │   ├── prompt.ts
+│   │   │   ├── abort.ts
+│   │   │   ├── steer.ts
+│   │   │   └── ...
+│   │   │
+│   │   ├── session/ws/         # Session WebSocket 处理器
+│   │   │   ├── init.ts
+│   │   │   ├── change-dir.ts
+│   │   │   └── ...
+│   │   │
+│   │   └── files/              # Files Feature
+│   │
+│   ├── core/
+│   │   └── session/
+│   │       ├── GatewaySession.ts   # 核心会话类
+│   │       └── utils.ts
+│   │
+│   ├── shared/
+│   │   └── websocket/
+│   │       ├── ws-router.ts    # WebSocket 路由器
+│   │       └── types.ts
+│   │
+│   ├── controllers/        # HTTP 控制器（逐步迁移到 features）
+│   ├── lib/                # 工具库
+│   ├── llm/                # LLM 日志和拦截器
+│   ├── config/             # 配置
+│   └── server.ts           # 服务器入口
+│
+└── shared/                 # 🔗 共享类型（前后端共用）
+    └── types/
+        ├── api.types.ts
+        ├── chat.types.ts
+        ├── file.types.ts
+        └── websocket.types.ts
 
 已删除的目录:
 - stores/, services/, controllers/, types/ → 合并到 features/ 或 shared/
-- core/, models/ → 已移除
+- core/, models/ → 已移除（前端）
+- server/routes/, server/middleware/, server/services/ → 已移除（后端）
 ```
 
 ## 核心特性
@@ -95,6 +132,20 @@ PID                   →  动态进程号
 ```
 切换工作目录时：终止当前 pi → 在新目录启动新 pi → 加载对应 session
 
+### 5. 后端 Feature-Based 架构
+
+**WebSocket 消息路由系统** (`shared/websocket/ws-router.ts`):
+```typescript
+// 之前: server.ts 中的巨型 switch/case
+// 之后: 使用 Router 分发
+await wsRouter.dispatch(type, ctx, payload);
+```
+
+**处理器组织** (`features/*/ws/*.ts`):
+- 每个消息类型一个文件
+- 单一职责
+- 自动注册
+
 ## 文档
 
 | 文档 | 说明 |
@@ -102,9 +153,11 @@ PID                   →  动态进程号
 | [README.md](./README.md) | 项目概述和快速开始（本文档） |
 | [DEVELOPMENT.md](./DEVELOPMENT.md) | 开发指南、架构说明、API 参考、代码规范 |
 | [FEATURES.md](./FEATURES.md) | 功能规格书（界面布局、功能清单） |
+| [LEARNING_GUIDE.md](./LEARNING_GUIDE.md) | 系统设计与学习指南 |
 | [AGENTS.md](./AGENTS.md) | AI 助手指令和开发规则 |
 | [CHANGELOG.md](./CHANGELOG.md) | 版本变更历史 |
 | [docs/ERROR_HANDLING.md](./docs/ERROR_HANDLING.md) | 错误处理最佳实践 |
+| [REFACTOR_SUMMARY.md](./REFACTOR_SUMMARY.md) | 后端架构重构摘要 |
 
 ### 快速开发规范
 
@@ -113,6 +166,7 @@ PID                   →  动态进程号
 - **结构**: `app/` → `features/` → `shared/` → `pages/`
 - **命名**: 组件 PascalCase，Hooks `use` 开头，Store `*Store`
 - **性能**: 大数据用虚拟滚动，缓存用 useMemo/useCallback
+- **后端**: Feature-Based 架构，WebSocket 使用 Router 分发
 
 详见 [DEVELOPMENT.md](./DEVELOPMENT.md) 完整规范。
 

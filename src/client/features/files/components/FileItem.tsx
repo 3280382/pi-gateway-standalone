@@ -61,7 +61,11 @@ export const FileItem = memo<FileItemProps>(
 
 		// 使用 useGesture hook 处理所有手势
 		const { state: gestureState, handlers } = useGesture({
-			onTap: useCallback(() => {
+			onTap: useCallback((e?: React.MouseEvent | React.TouchEvent) => {
+				// 如果点击的是复选框，不触发 tap
+				if (e && (e.target as HTMLElement).closest('[data-checkbox="true"]')) {
+					return;
+				}
 				setShowRipple(true);
 				setTimeout(() => setShowRipple(false), 300);
 				onTap(item);
@@ -74,14 +78,33 @@ export const FileItem = memo<FileItemProps>(
 			}, [item, onLongPress]),
 		});
 
-		// 复选框点击处理
+		// 复选框点击处理 - 阻止事件冒泡以避免触发父元素的点击/轻触
 		const handleCheckboxClick = useCallback(
 			(e: React.MouseEvent | React.TouchEvent) => {
 				e.preventDefault();
 				e.stopPropagation();
+				// 阻止 touch 事件的默认行为
+				if ('touches' in e) {
+					e.nativeEvent.stopImmediatePropagation?.();
+				}
 				onToggleSelect(item.path);
 			},
 			[item.path, onToggleSelect],
+		);
+
+		// 阻止复选框上的 touch 事件冒泡
+		const handleCheckboxTouchStart = useCallback(
+			(e: React.TouchEvent) => {
+				e.stopPropagation();
+			},
+			[],
+		);
+
+		const handleCheckboxMouseDown = useCallback(
+			(e: React.MouseEvent) => {
+				e.stopPropagation();
+			},
+			[],
 		);
 
 		// 拖拽处理
@@ -137,7 +160,11 @@ export const FileItem = memo<FileItemProps>(
 						ref={checkboxRef}
 						className={styles.checkbox}
 						onClick={handleCheckboxClick}
-						onTouchStart={handleCheckboxClick}
+						onMouseDown={handleCheckboxMouseDown}
+						onTouchStart={(e) => {
+							handleCheckboxTouchStart(e);
+							handleCheckboxClick(e);
+						}}
 						role="checkbox"
 						aria-checked={isSelected}
 						data-checkbox="true"
@@ -160,7 +187,7 @@ export const FileItem = memo<FileItemProps>(
 				{!isGrid && (
 					<>
 						<span className={styles.listSize}>
-							{item.isDirectory ? "" : formatFileSize(item.size)}
+							{item.isDirectory ? "-" : formatFileSize(item.size)}
 						</span>
 						<span className={styles.listModified}>
 							{formatDate(item.modified)}

@@ -3,6 +3,7 @@
  * 创建和配置Express应用程序
  */
 
+import { createServer, type Server } from "node:http";
 import type { ApiResponse } from "@shared/types/api.types";
 import compression from "compression";
 import cors from "cors";
@@ -13,9 +14,7 @@ import express, {
 	type Response,
 } from "express";
 import helmet from "helmet";
-import { createServer, type Server } from "http";
 import morgan from "morgan";
-import { join } from "path";
 import { Config } from "../config";
 import { ApiError, ErrorFactory } from "./errors/api.error";
 import { Logger, LogLevel } from "./utils/logger";

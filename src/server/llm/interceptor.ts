@@ -3,9 +3,9 @@
  * 拦截LLM API调用并记录日志
  */
 
-import http from "http";
-import https from "https";
-import { URL } from "url";
+import http from "node:http";
+import https from "node:https";
+import { URL } from "node:url";
 
 import { Logger, LogLevel } from "../lib/utils/logger";
 import type { LlmLogManager } from "./log-manager";
@@ -54,7 +54,7 @@ function sanitizeHeaders(headers: any): Record<string, string> {
 						: String(value);
 			}
 		}
-	} catch (error) {
+	} catch (_error) {
 		// 忽略头解析错误
 	}
 
@@ -111,7 +111,7 @@ export function setupGlobalFetchInterceptor(
 		let parsedUrl: URL;
 		try {
 			parsedUrl = new URL(url);
-		} catch (e) {
+		} catch (_e) {
 			// Not a full URL, might be a relative URL
 			return originalFetch(input, init);
 		}

@@ -73,7 +73,7 @@ export function BatchActionBar() {
 						<span>{isDeleting ? "Deleting..." : "Delete"}</span>
 					</button>
 					<button
-						className={styles.actionBtn}
+						className={`${styles.actionBtn} ${styles.cancelBtn}`}
 						onClick={handleCancel}
 						disabled={isDeleting}
 						title="Cancel selection"

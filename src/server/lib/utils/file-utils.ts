@@ -2,9 +2,9 @@
  * 文件系统工具函数
  */
 
-import { existsSync, readdirSync, statSync } from "fs";
-import { homedir } from "os";
-import * as path from "path";
+import { readdirSync, statSync } from "node:fs";
+import { homedir } from "node:os";
+import * as path from "node:path";
 
 /**
  * 扩展路径（处理~和相对路径）

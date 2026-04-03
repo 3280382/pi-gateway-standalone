@@ -40,23 +40,24 @@
 	gap: 8px;
 }
 
+/* 统一按钮样式 */
 .actionBtn {
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	padding: 8px 14px;
-	background: var(--bg-tertiary);
-	border: 1px solid var(--border-color);
+	padding: 8px 16px;
 	border-radius: var(--radius-sm);
-	color: var(--text-primary);
 	font-size: var(--font-sm);
+	font-weight: 500;
 	cursor: pointer;
 	transition: all 0.2s ease;
+	min-width: 80px;
+	height: 36px;
+	justify-content: center;
 }
 
 .actionBtn:hover:not(:disabled) {
-	background: var(--bg-hover);
-	border-color: var(--border-accent);
+	opacity: 0.9;
 }
 
 .actionBtn:disabled {
@@ -64,15 +65,27 @@
 	cursor: not-allowed;
 }
 
+/* Delete 按钮 - 红色主题 */
 .deleteBtn {
-	color: var(--accent-red);
-	border-color: var(--accent-red);
-	background: var(--accent-bg-red);
+	color: white;
+	border: none;
+	background: var(--accent-red);
 }
 
 .deleteBtn:hover:not(:disabled) {
-	background: var(--accent-red);
-	color: white;
+	background: #ff6b6b;
+}
+
+/* Cancel 按钮 - 与 Delete 统一大小 */
+.cancelBtn {
+	color: var(--text-primary);
+	border: 1px solid var(--border-color);
+	background: var(--bg-tertiary);
+}
+
+.cancelBtn:hover:not(:disabled) {
+	background: var(--bg-hover);
+	border-color: var(--border-accent);
 }
 
 /* Modal Styles */
@@ -185,39 +198,42 @@
 	border-top: 1px solid var(--border-color);
 }
 
-.cancelBtn {
+/* Modal 中的按钮样式 */
+.modalActions .cancelBtn,
+.modalActions .confirmDeleteBtn {
+	display: flex;
+	align-items: center;
+	gap: 6px;
 	padding: 8px 16px;
-	background: var(--bg-tertiary);
-	border: 1px solid var(--border-color);
 	border-radius: var(--radius-sm);
-	color: var(--text-primary);
 	font-size: var(--font-sm);
+	font-weight: 500;
 	cursor: pointer;
 	transition: all 0.2s;
+	min-width: 80px;
+	height: 36px;
+	justify-content: center;
 }
 
-.cancelBtn:hover:not(:disabled) {
+.modalActions .cancelBtn {
+	background: var(--bg-tertiary);
+	border: 1px solid var(--border-color);
+	color: var(--text-primary);
+}
+
+.modalActions .cancelBtn:hover:not(:disabled) {
 	background: var(--bg-hover);
 }
 
-.cancelBtn:disabled {
+.modalActions .cancelBtn:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;
 }
 
 .confirmDeleteBtn {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	padding: 8px 16px;
 	background: var(--accent-red);
 	border: none;
-	border-radius: var(--radius-sm);
 	color: white;
-	font-size: var(--font-sm);
-	font-weight: 500;
-	cursor: pointer;
-	transition: all 0.2s;
 }
 
 .confirmDeleteBtn:hover:not(:disabled) {

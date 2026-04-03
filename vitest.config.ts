@@ -27,7 +27,8 @@ export default defineConfig({
 			"**/test/integration/**/*.test.ts",
 			"**/*.test.tsx",
 			"**/stores/*.test.ts",
-		], // 包含单元测试、集成测试和React组件测试
+			"src/server/**/*.test.ts",
+		], // 包含单元测试、集成测试、React组件测试和Server测试
 	},
 	resolve: {
 		alias: {

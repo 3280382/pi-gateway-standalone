@@ -98,7 +98,7 @@ export class Validator {
 	 * 验证数字
 	 */
 	static isNumber(value: any): boolean | string {
-		if (typeof value !== "number" || isNaN(value)) {
+		if (typeof value !== "number" || Number.isNaN(value)) {
 			return "必须是有效数字";
 		}
 		return true;
@@ -245,7 +245,7 @@ export class Validator {
 	 */
 	static isDateString(value: string): boolean | string {
 		const date = new Date(value);
-		if (isNaN(date.getTime())) {
+		if (Number.isNaN(date.getTime())) {
 			return "日期格式不正确";
 		}
 		return true;

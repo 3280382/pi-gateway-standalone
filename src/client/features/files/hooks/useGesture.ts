@@ -19,7 +19,7 @@ import {
 } from "@/lib/gestures";
 
 export interface UseGestureOptions {
-	onTap?: () => void;
+	onTap?: (e?: React.MouseEvent | React.TouchEvent) => void;
 	onDoubleTap?: () => void;
 	onLongPress?: () => void;
 	onSwipe?: (direction: "left" | "right" | "up" | "down") => void;
@@ -214,7 +214,7 @@ export function useGesture(options: UseGestureOptions = {}) {
 				} else {
 					// 单击
 					lastTapTimeRef.current = Date.now();
-					onTap?.();
+					onTap?.(e);
 				}
 			}
 			// 检测为滑动
@@ -273,7 +273,7 @@ export function useGesture(options: UseGestureOptions = {}) {
 					lastTapTimeRef.current = 0;
 				} else {
 					lastTapTimeRef.current = now;
-					onTap?.();
+					onTap?.(e);
 				}
 			}
 		},

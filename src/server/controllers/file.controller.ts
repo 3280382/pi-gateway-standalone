@@ -3,9 +3,9 @@
  * 处理文件系统API请求
  */
 
+import { homedir } from "node:os";
+import * as path from "node:path";
 import type { Request, Response } from "express";
-import { homedir } from "os";
-import * as path from "path";
 import {
 	expandPath,
 	getMimeType,
@@ -32,7 +32,7 @@ export async function browseDirectory(req: Request, res: Response) {
 
 	try {
 		const startTime = Date.now();
-		const { readdir, stat } = await import("fs/promises");
+		const { readdir, stat } = await import("node:fs/promises");
 		const entries = await readdir(targetPath, { withFileTypes: true });
 
 		logger.info(`[browseDirectory] 读取目录成功: ${entries.length} 个条目`);
@@ -120,7 +120,7 @@ export async function getDirectoryTree(req: Request, res: Response) {
 	}
 
 	try {
-		const { stat, readdir } = await import("fs/promises");
+		const { stat, readdir } = await import("node:fs/promises");
 		const stats = await stat(targetPath);
 
 		if (!stats.isDirectory()) {
@@ -207,7 +207,7 @@ export async function getFileContent(req: Request, res: Response) {
 	}
 
 	try {
-		const { stat, readFile } = await import("fs/promises");
+		const { stat, readFile } = await import("node:fs/promises");
 		const stats = await stat(targetPath);
 
 		if (stats.isDirectory()) {
@@ -261,7 +261,7 @@ export async function getRawFile(req: Request, res: Response) {
 	}
 
 	try {
-		const { stat, readFile } = await import("fs/promises");
+		const { stat, readFile } = await import("node:fs/promises");
 		const stats = await stat(targetPath);
 
 		if (stats.isDirectory()) {
@@ -308,7 +308,7 @@ export async function writeFileContent(req: Request, res: Response) {
 	}
 
 	try {
-		const { writeFile, mkdir } = await import("fs/promises");
+		const { writeFile, mkdir } = await import("node:fs/promises");
 		const { dirname } = path;
 
 		// 确保目录存在
@@ -383,7 +383,7 @@ export async function batchDeleteFiles(req: Request, res: Response) {
 	let totalSize = 0;
 
 	try {
-		const { unlink, stat, rmdir } = await import("fs/promises");
+		const { unlink, stat, rmdir } = await import("node:fs/promises");
 
 		// 第一阶段：验证所有路径
 		const validatedPaths = [];
@@ -403,7 +403,7 @@ export async function batchDeleteFiles(req: Request, res: Response) {
 			const isProtected = PROTECTED_PATHS.some(
 				(protectedPath) =>
 					targetPath === protectedPath ||
-					targetPath.startsWith(protectedPath + "/"),
+					targetPath.startsWith(`${protectedPath}/`),
 			);
 			if (isProtected) {
 				errors.push({
@@ -529,7 +529,7 @@ export async function batchMoveFiles(req: Request, res: Response) {
 	const errors = [];
 
 	try {
-		const { rename, stat, mkdir } = await import("fs/promises");
+		const { rename, stat, mkdir } = await import("node:fs/promises");
 
 		// 确保目标目录存在
 		try {
@@ -632,7 +632,7 @@ export async function executeCommand(req: Request, res: Response) {
 	}
 
 	try {
-		const { spawn } = await import("child_process");
+		const { spawn } = await import("node:child_process");
 
 		// 解析命令
 		const [cmd, ...args] = command

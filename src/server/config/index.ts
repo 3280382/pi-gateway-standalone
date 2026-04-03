@@ -3,8 +3,8 @@
  * 集中管理应用程序配置
  */
 
-import path from "path";
-import { fileURLToPath } from "url";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { Environment } from "../../shared/types/common.types";
 
 const __filename = fileURLToPath(import.meta.url);

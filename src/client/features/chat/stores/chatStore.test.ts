@@ -14,8 +14,8 @@ describe("ChatStore", () => {
 			store.reset();
 		} else {
 			// 如果reset方法不存在，手动重置状态
-			store.messages = [];
-			store.inputText = "";
+			store.setMessages([]);
+			store.setInputText("");
 			store.isStreaming = false;
 			store.streamingContent = "";
 			store.streamingThinking = "";
@@ -56,7 +56,7 @@ describe("ChatStore", () => {
 		expect(useChatStore.getState().inputText).toBe("");
 	});
 
-	it("should start and stop streaming", () => {
+	it("should start and finish streaming", () => {
 		const store = useChatStore.getState();
 
 		store.startStreaming();
@@ -64,19 +64,22 @@ describe("ChatStore", () => {
 		expect(useChatStore.getState().isStreaming).toBe(true);
 		expect(useChatStore.getState().currentStreamingMessage).not.toBeNull();
 
-		store.finalizeStreamingMessage();
+		store.finishStreaming();
 
 		expect(useChatStore.getState().isStreaming).toBe(false);
 		expect(useChatStore.getState().currentStreamingMessage).toBeNull();
 		expect(useChatStore.getState().messages).toHaveLength(1);
 	});
 
-	it("should append streaming content", () => {
+	it("should append streaming content", async () => {
 		const store = useChatStore.getState();
 
 		store.startStreaming();
 		store.appendStreamingContent("Hello");
 		store.appendStreamingContent(" World");
+
+		// RAF updates are async, wait for them
+		await new Promise(resolve => setTimeout(resolve, 100));
 
 		expect(useChatStore.getState().streamingContent).toBe("Hello World");
 	});
@@ -118,5 +121,83 @@ describe("ChatStore", () => {
 		store.clearMessages();
 
 		expect(useChatStore.getState().messages).toHaveLength(0);
+	});
+
+	it("should handle batch content updates", () => {
+		const store = useChatStore.getState();
+
+		store.startStreaming();
+		store.batchUpdateContent({ content: "Hello" });
+		store.batchUpdateContent({ thinking: "Thinking..." });
+
+		expect(useChatStore.getState().streamingContent).toBe("Hello");
+		expect(useChatStore.getState().streamingThinking).toBe("Thinking...");
+	});
+
+	it("should handle tool execution", () => {
+		const store = useChatStore.getState();
+
+		store.startStreaming();
+		store.setActiveTool({
+			id: "tool-1",
+			name: "read_file",
+			args: { path: "/test.txt" },
+			status: "running",
+			startTime: new Date(),
+		});
+
+		expect(useChatStore.getState().activeTools.has("tool-1")).toBe(true);
+
+		store.updateToolOutput("tool-1", "File content here");
+
+		const tool = useChatStore.getState().activeTools.get("tool-1");
+		expect(tool?.output).toBe("File content here");
+		expect(tool?.status).toBe("success");
+	});
+
+	it("should handle search functionality", () => {
+		const store = useChatStore.getState();
+
+		store.setSearchQuery("test query");
+		expect(useChatStore.getState().searchQuery).toBe("test query");
+
+		store.setSearchFilters({ user: false });
+		expect(useChatStore.getState().searchFilters.user).toBe(false);
+		expect(useChatStore.getState().searchFilters.assistant).toBe(true);
+
+		store.setSearching(true);
+		expect(useChatStore.getState().isSearching).toBe(true);
+	});
+
+	it("should handle session management", () => {
+		const store = useChatStore.getState();
+
+		store.setSessionId("session-123");
+		expect(useChatStore.getState().sessionId).toBe("session-123");
+
+		store.setCurrentModel("deepseek-chat");
+		expect(useChatStore.getState().currentModel).toBe("deepseek-chat");
+	});
+
+	it("should reset to initial state", () => {
+		const store = useChatStore.getState();
+
+		store.addMessage({
+			id: "1",
+			role: "user",
+			content: [{ type: "text", text: "Hello" }],
+			timestamp: new Date(),
+		});
+		store.setInputText("Test");
+		store.startStreaming();
+		store.setSearchQuery("query");
+
+		store.reset();
+
+		expect(useChatStore.getState().messages).toHaveLength(0);
+		expect(useChatStore.getState().inputText).toBe("");
+		expect(useChatStore.getState().isStreaming).toBe(false);
+		expect(useChatStore.getState().searchQuery).toBe("");
+		expect(useChatStore.getState().currentStreamingMessage).toBeNull();
 	});
 });

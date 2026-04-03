@@ -1,0 +1,2239 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - main [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - button "System Prompt" [ref=e9] [cursor=pointer]:
+            - img [ref=e10]
+          - button "kimi" [ref=e14] [cursor=pointer]:
+            - img [ref=e15]
+            - generic [ref=e17]: kimi
+            - img [ref=e18]
+          - button "○ None" [ref=e21] [cursor=pointer]:
+            - img [ref=e22]
+            - generic [ref=e24]: ○ None
+            - img [ref=e25]
+          - 'generic "connected (PID: 31816)" [ref=e27]':
+            - generic [ref=e29]: "31816"
+        - generic [ref=e30]:
+          - button "/root" [ref=e31] [cursor=pointer]:
+            - img [ref=e32]
+            - generic [ref=e34]: /root
+          - generic [ref=e36]:
+            - img [ref=e37]
+            - textbox "Search messages..." [ref=e40]
+            - button "4" [ref=e41] [cursor=pointer]:
+              - img [ref=e42]
+              - generic [ref=e44]: "4"
+      - generic [ref=e45]:
+        - complementary [ref=e46]:
+          - complementary [ref=e47]:
+            - generic [ref=e48]:
+              - generic [ref=e49]: π
+              - generic [ref=e50]: Pi Gateway
+            - generic [ref=e51]:
+              - generic [ref=e52]:
+                - generic [ref=e54]: Recent Workspaces
+                - generic [ref=e55]: No recent workspaces
+              - generic [ref=e56]:
+                - generic [ref=e57]:
+                  - generic [ref=e58]: Sessions
+                  - button "New Session" [ref=e60] [cursor=pointer]:
+                    - img [ref=e61]
+                - generic [ref=e62]:
+                  - button "Hi 4/2/2026 • 46 msgs" [ref=e63] [cursor=pointer]:
+                    - img [ref=e65]
+                    - generic [ref=e67]:
+                      - generic [ref=e68]: Hi
+                      - generic [ref=e69]: 4/2/2026 • 46 msgs
+                  - button "Hi 4/2/2026 • 14 msgs" [ref=e70] [cursor=pointer]:
+                    - img [ref=e72]
+                    - generic [ref=e74]:
+                      - generic [ref=e75]: Hi
+                      - generic [ref=e76]: 4/2/2026 • 14 msgs
+                  - button "Say exactly 'pong' 4/2/2026 • 14 msgs" [ref=e77] [cursor=pointer]:
+                    - img [ref=e79]
+                    - generic [ref=e81]:
+                      - generic [ref=e82]: Say exactly 'pong'
+                      - generic [ref=e83]: 4/2/2026 • 14 msgs
+                  - button "Hi 4/2/2026 • 144 msgs" [ref=e84] [cursor=pointer]:
+                    - img [ref=e86]
+                    - generic [ref=e88]:
+                      - generic [ref=e89]: Hi
+                      - generic [ref=e90]: 4/2/2026 • 144 msgs
+                  - button "Hi 4/1/2026 • 6 msgs" [ref=e91] [cursor=pointer]:
+                    - img [ref=e93]
+                    - generic [ref=e95]:
+                      - generic [ref=e96]: Hi
+                      - generic [ref=e97]: 4/1/2026 • 6 msgs
+                  - button "Say exactly 'pong' 4/1/2026 • 14 msgs" [ref=e98] [cursor=pointer]:
+                    - img [ref=e100]
+                    - generic [ref=e102]:
+                      - generic [ref=e103]: Say exactly 'pong'
+                      - generic [ref=e104]: 4/1/2026 • 14 msgs
+                  - button "Create a file test.txt with content 3/31/2026 • 96 msgs" [ref=e105] [cursor=pointer]:
+                    - img [ref=e107]
+                    - generic [ref=e109]:
+                      - generic [ref=e110]: Create a file test.txt with content
+                      - generic [ref=e111]: 3/31/2026 • 96 msgs
+                  - button "Hi 3/31/2026 • 103 msgs" [ref=e112] [cursor=pointer]:
+                    - img [ref=e114]
+                    - generic [ref=e116]:
+                      - generic [ref=e117]: Hi
+                      - generic [ref=e118]: 3/31/2026 • 103 msgs
+                  - button "Say exactly 'pong' 3/28/2026 • 2 msgs" [ref=e119] [cursor=pointer]:
+                    - img [ref=e121]
+                    - generic [ref=e123]:
+                      - generic [ref=e124]: Say exactly 'pong'
+                      - generic [ref=e125]: 3/28/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/26/2026 • 2 msgs" [ref=e126] [cursor=pointer]:
+                    - img [ref=e128]
+                    - generic [ref=e130]:
+                      - generic [ref=e131]: Say exactly 'pong'
+                      - generic [ref=e132]: 3/26/2026 • 2 msgs
+                  - button "Hi 3/26/2026 • 2 msgs" [ref=e133] [cursor=pointer]:
+                    - img [ref=e135]
+                    - generic [ref=e137]:
+                      - generic [ref=e138]: Hi
+                      - generic [ref=e139]: 3/26/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/26/2026 • 2 msgs" [ref=e140] [cursor=pointer]:
+                    - img [ref=e142]
+                    - generic [ref=e144]:
+                      - generic [ref=e145]: Say exactly 'pong'
+                      - generic [ref=e146]: 3/26/2026 • 2 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/26/2026 • 6 msgs" [ref=e147] [cursor=pointer]:
+                    - img [ref=e149]
+                    - generic [ref=e151]:
+                      - generic [ref=e152]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e153]: 3/26/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/26/2026 • 4 msgs" [ref=e154] [cursor=pointer]:
+                    - img [ref=e156]
+                    - generic [ref=e158]:
+                      - generic [ref=e159]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e160]: 3/26/2026 • 4 msgs
+                  - button "Say exactly 'pong' 3/26/2026 • 2 msgs" [ref=e161] [cursor=pointer]:
+                    - img [ref=e163]
+                    - generic [ref=e165]:
+                      - generic [ref=e166]: Say exactly 'pong'
+                      - generic [ref=e167]: 3/26/2026 • 2 msgs
+                  - button "Hi 3/26/2026 • 3 msgs" [ref=e168] [cursor=pointer]:
+                    - img [ref=e170]
+                    - generic [ref=e172]:
+                      - generic [ref=e173]: Hi
+                      - generic [ref=e174]: 3/26/2026 • 3 msgs
+                  - button "Say exactly 'pong' 3/26/2026 • 2 msgs" [ref=e175] [cursor=pointer]:
+                    - img [ref=e177]
+                    - generic [ref=e179]:
+                      - generic [ref=e180]: Say exactly 'pong'
+                      - generic [ref=e181]: 3/26/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/26/2026 • 2 msgs" [ref=e182] [cursor=pointer]:
+                    - img [ref=e184]
+                    - generic [ref=e186]:
+                      - generic [ref=e187]: Say exactly 'pong'
+                      - generic [ref=e188]: 3/26/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/26/2026 • 4 msgs" [ref=e189] [cursor=pointer]:
+                    - img [ref=e191]
+                    - generic [ref=e193]:
+                      - generic [ref=e194]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e195]: 3/26/2026 • 4 msgs
+                  - button "Create a file test.txt with content 3/26/2026 • 3 msgs" [ref=e196] [cursor=pointer]:
+                    - img [ref=e198]
+                    - generic [ref=e200]:
+                      - generic [ref=e201]: Create a file test.txt with content
+                      - generic [ref=e202]: 3/26/2026 • 3 msgs
+                  - button "创建一个包含100行的文件。 3/26/2026 • 5 msgs" [ref=e203] [cursor=pointer]:
+                    - img [ref=e205]
+                    - generic [ref=e207]:
+                      - generic [ref=e208]: 创建一个包含100行的文件。
+                      - generic [ref=e209]: 3/26/2026 • 5 msgs
+                  - button "写一个文件，每行是行数，100行。 3/26/2026 • 6 msgs" [ref=e210] [cursor=pointer]:
+                    - img [ref=e212]
+                    - generic [ref=e214]:
+                      - generic [ref=e215]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e216]: 3/26/2026 • 6 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/26/2026 • 5 msgs" [ref=e217] [cursor=pointer]:
+                    - img [ref=e219]
+                    - generic [ref=e221]:
+                      - generic [ref=e222]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e223]: 3/26/2026 • 5 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/26/2026 • 6 msgs" [ref=e224] [cursor=pointer]:
+                    - img [ref=e226]
+                    - generic [ref=e228]:
+                      - generic [ref=e229]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e230]: 3/26/2026 • 6 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/26/2026 • 4 msgs" [ref=e231] [cursor=pointer]:
+                    - img [ref=e233]
+                    - generic [ref=e235]:
+                      - generic [ref=e236]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e237]: 3/26/2026 • 4 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/26/2026 • 4 msgs" [ref=e238] [cursor=pointer]:
+                    - img [ref=e240]
+                    - generic [ref=e242]:
+                      - generic [ref=e243]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e244]: 3/26/2026 • 4 msgs
+                  - button "Hi 3/26/2026 • 2 msgs" [ref=e245] [cursor=pointer]:
+                    - img [ref=e247]
+                    - generic [ref=e249]:
+                      - generic [ref=e250]: Hi
+                      - generic [ref=e251]: 3/26/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/26/2026 • 2 msgs" [ref=e252] [cursor=pointer]:
+                    - img [ref=e254]
+                    - generic [ref=e256]:
+                      - generic [ref=e257]: Say exactly 'pong'
+                      - generic [ref=e258]: 3/26/2026 • 2 msgs
+                  - button "Test message for toggle 3/26/2026 • 2 msgs" [ref=e259] [cursor=pointer]:
+                    - img [ref=e261]
+                    - generic [ref=e263]:
+                      - generic [ref=e264]: Test message for toggle
+                      - generic [ref=e265]: 3/26/2026 • 2 msgs
+                  - button "Test message for toggle 3/26/2026 • 2 msgs" [ref=e266] [cursor=pointer]:
+                    - img [ref=e268]
+                    - generic [ref=e270]:
+                      - generic [ref=e271]: Test message for toggle
+                      - generic [ref=e272]: 3/26/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/26/2026 • 4 msgs" [ref=e273] [cursor=pointer]:
+                    - img [ref=e275]
+                    - generic [ref=e277]:
+                      - generic [ref=e278]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e279]: 3/26/2026 • 4 msgs
+                  - button "Write a 10 line poem to poem.txt 3/26/2026 • 2 msgs" [ref=e280] [cursor=pointer]:
+                    - img [ref=e282]
+                    - generic [ref=e284]:
+                      - generic [ref=e285]: Write a 10 line poem to poem.txt
+                      - generic [ref=e286]: 3/26/2026 • 2 msgs
+                  - button "Create a file test.txt with content 3/26/2026 • 3 msgs" [ref=e287] [cursor=pointer]:
+                    - img [ref=e289]
+                    - generic [ref=e291]:
+                      - generic [ref=e292]: Create a file test.txt with content
+                      - generic [ref=e293]: 3/26/2026 • 3 msgs
+                  - button "创建一个包含100行的文件。 3/26/2026 • 10 msgs" [ref=e294] [cursor=pointer]:
+                    - img [ref=e296]
+                    - generic [ref=e298]:
+                      - generic [ref=e299]: 创建一个包含100行的文件。
+                      - generic [ref=e300]: 3/26/2026 • 10 msgs
+                  - button "写一个文件，每行是行数，100行。 3/26/2026 • 4 msgs" [ref=e301] [cursor=pointer]:
+                    - img [ref=e303]
+                    - generic [ref=e305]:
+                      - generic [ref=e306]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e307]: 3/26/2026 • 4 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/26/2026 • 5 msgs" [ref=e308] [cursor=pointer]:
+                    - img [ref=e310]
+                    - generic [ref=e312]:
+                      - generic [ref=e313]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e314]: 3/26/2026 • 5 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/26/2026 • 4 msgs" [ref=e315] [cursor=pointer]:
+                    - img [ref=e317]
+                    - generic [ref=e319]:
+                      - generic [ref=e320]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e321]: 3/26/2026 • 4 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/26/2026 • 6 msgs" [ref=e322] [cursor=pointer]:
+                    - img [ref=e324]
+                    - generic [ref=e326]:
+                      - generic [ref=e327]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e328]: 3/26/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/26/2026 • 4 msgs" [ref=e329] [cursor=pointer]:
+                    - img [ref=e331]
+                    - generic [ref=e333]:
+                      - generic [ref=e334]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e335]: 3/26/2026 • 4 msgs
+                  - button "Hi 3/26/2026 • 2 msgs" [ref=e336] [cursor=pointer]:
+                    - img [ref=e338]
+                    - generic [ref=e340]:
+                      - generic [ref=e341]: Hi
+                      - generic [ref=e342]: 3/26/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/26/2026 • 2 msgs" [ref=e343] [cursor=pointer]:
+                    - img [ref=e345]
+                    - generic [ref=e347]:
+                      - generic [ref=e348]: Say exactly 'pong'
+                      - generic [ref=e349]: 3/26/2026 • 2 msgs
+                  - button "Test message for toggle 3/26/2026 • 10 msgs" [ref=e350] [cursor=pointer]:
+                    - img [ref=e352]
+                    - generic [ref=e354]:
+                      - generic [ref=e355]: Test message for toggle
+                      - generic [ref=e356]: 3/26/2026 • 10 msgs
+                  - button "Hi 3/26/2026 • 2 msgs" [ref=e357] [cursor=pointer]:
+                    - img [ref=e359]
+                    - generic [ref=e361]:
+                      - generic [ref=e362]: Hi
+                      - generic [ref=e363]: 3/26/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/26/2026 • 2 msgs" [ref=e364] [cursor=pointer]:
+                    - img [ref=e366]
+                    - generic [ref=e368]:
+                      - generic [ref=e369]: Say exactly 'pong'
+                      - generic [ref=e370]: 3/26/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/26/2026 • 4 msgs" [ref=e371] [cursor=pointer]:
+                    - img [ref=e373]
+                    - generic [ref=e375]:
+                      - generic [ref=e376]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e377]: 3/26/2026 • 4 msgs
+                  - button "Write a 10 line poem to poem.txt 3/26/2026 • 2 msgs" [ref=e378] [cursor=pointer]:
+                    - img [ref=e380]
+                    - generic [ref=e382]:
+                      - generic [ref=e383]: Write a 10 line poem to poem.txt
+                      - generic [ref=e384]: 3/26/2026 • 2 msgs
+                  - button "Create a file test.txt with content 3/26/2026 • 4 msgs" [ref=e385] [cursor=pointer]:
+                    - img [ref=e387]
+                    - generic [ref=e389]:
+                      - generic [ref=e390]: Create a file test.txt with content
+                      - generic [ref=e391]: 3/26/2026 • 4 msgs
+                  - button "创建一个包含100行的文件。 3/26/2026 • 12 msgs" [ref=e392] [cursor=pointer]:
+                    - img [ref=e394]
+                    - generic [ref=e396]:
+                      - generic [ref=e397]: 创建一个包含100行的文件。
+                      - generic [ref=e398]: 3/26/2026 • 12 msgs
+                  - button "写一个文件，每行是行数，100行。 3/26/2026 • 4 msgs" [ref=e399] [cursor=pointer]:
+                    - img [ref=e401]
+                    - generic [ref=e403]:
+                      - generic [ref=e404]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e405]: 3/26/2026 • 4 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/26/2026 • 5 msgs" [ref=e406] [cursor=pointer]:
+                    - img [ref=e408]
+                    - generic [ref=e410]:
+                      - generic [ref=e411]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e412]: 3/26/2026 • 5 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/26/2026 • 6 msgs" [ref=e413] [cursor=pointer]:
+                    - img [ref=e415]
+                    - generic [ref=e417]:
+                      - generic [ref=e418]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e419]: 3/26/2026 • 6 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/26/2026 • 6 msgs" [ref=e420] [cursor=pointer]:
+                    - img [ref=e422]
+                    - generic [ref=e424]:
+                      - generic [ref=e425]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e426]: 3/26/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/26/2026 • 4 msgs" [ref=e427] [cursor=pointer]:
+                    - img [ref=e429]
+                    - generic [ref=e431]:
+                      - generic [ref=e432]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e433]: 3/26/2026 • 4 msgs
+                  - button "Hi 3/26/2026 • 5 msgs" [ref=e434] [cursor=pointer]:
+                    - img [ref=e436]
+                    - generic [ref=e438]:
+                      - generic [ref=e439]: Hi
+                      - generic [ref=e440]: 3/26/2026 • 5 msgs
+                  - button "Say exactly 'pong' 3/26/2026 • 2 msgs" [ref=e441] [cursor=pointer]:
+                    - img [ref=e443]
+                    - generic [ref=e445]:
+                      - generic [ref=e446]: Say exactly 'pong'
+                      - generic [ref=e447]: 3/26/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/26/2026 • 4 msgs" [ref=e448] [cursor=pointer]:
+                    - img [ref=e450]
+                    - generic [ref=e452]:
+                      - generic [ref=e453]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e454]: 3/26/2026 • 4 msgs
+                  - button "Write a 10 line poem to poem.txt 3/26/2026 • 2 msgs" [ref=e455] [cursor=pointer]:
+                    - img [ref=e457]
+                    - generic [ref=e459]:
+                      - generic [ref=e460]: Write a 10 line poem to poem.txt
+                      - generic [ref=e461]: 3/26/2026 • 2 msgs
+                  - button "Create a file test.txt with content 3/26/2026 • 4 msgs" [ref=e462] [cursor=pointer]:
+                    - img [ref=e464]
+                    - generic [ref=e466]:
+                      - generic [ref=e467]: Create a file test.txt with content
+                      - generic [ref=e468]: 3/26/2026 • 4 msgs
+                  - button "创建一个包含100行的文件。 3/26/2026 • 4 msgs" [ref=e469] [cursor=pointer]:
+                    - img [ref=e471]
+                    - generic [ref=e473]:
+                      - generic [ref=e474]: 创建一个包含100行的文件。
+                      - generic [ref=e475]: 3/26/2026 • 4 msgs
+                  - button "写一个文件，每行是行数，100行。 3/26/2026 • 6 msgs" [ref=e476] [cursor=pointer]:
+                    - img [ref=e478]
+                    - generic [ref=e480]:
+                      - generic [ref=e481]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e482]: 3/26/2026 • 6 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/26/2026 • 5 msgs" [ref=e483] [cursor=pointer]:
+                    - img [ref=e485]
+                    - generic [ref=e487]:
+                      - generic [ref=e488]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e489]: 3/26/2026 • 5 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/26/2026 • 4 msgs" [ref=e490] [cursor=pointer]:
+                    - img [ref=e492]
+                    - generic [ref=e494]:
+                      - generic [ref=e495]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e496]: 3/26/2026 • 4 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/26/2026 • 6 msgs" [ref=e497] [cursor=pointer]:
+                    - img [ref=e499]
+                    - generic [ref=e501]:
+                      - generic [ref=e502]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e503]: 3/26/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/26/2026 • 6 msgs" [ref=e504] [cursor=pointer]:
+                    - img [ref=e506]
+                    - generic [ref=e508]:
+                      - generic [ref=e509]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e510]: 3/26/2026 • 6 msgs
+                  - button "Hi 3/26/2026 • 5 msgs" [ref=e511] [cursor=pointer]:
+                    - img [ref=e513]
+                    - generic [ref=e515]:
+                      - generic [ref=e516]: Hi
+                      - generic [ref=e517]: 3/26/2026 • 5 msgs
+                  - button "Say exactly 'pong' 3/26/2026 • 2 msgs" [ref=e518] [cursor=pointer]:
+                    - img [ref=e520]
+                    - generic [ref=e522]:
+                      - generic [ref=e523]: Say exactly 'pong'
+                      - generic [ref=e524]: 3/26/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/26/2026 • 4 msgs" [ref=e525] [cursor=pointer]:
+                    - img [ref=e527]
+                    - generic [ref=e529]:
+                      - generic [ref=e530]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e531]: 3/26/2026 • 4 msgs
+                  - button "Create a file test.txt with content 3/26/2026 • 4 msgs" [ref=e532] [cursor=pointer]:
+                    - img [ref=e534]
+                    - generic [ref=e536]:
+                      - generic [ref=e537]: Create a file test.txt with content
+                      - generic [ref=e538]: 3/26/2026 • 4 msgs
+                  - button "创建一个包含100行的文件。 3/26/2026 • 6 msgs" [ref=e539] [cursor=pointer]:
+                    - img [ref=e541]
+                    - generic [ref=e543]:
+                      - generic [ref=e544]: 创建一个包含100行的文件。
+                      - generic [ref=e545]: 3/26/2026 • 6 msgs
+                  - button "写一个文件，每行是行数，100行。 3/26/2026 • 6 msgs" [ref=e546] [cursor=pointer]:
+                    - img [ref=e548]
+                    - generic [ref=e550]:
+                      - generic [ref=e551]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e552]: 3/26/2026 • 6 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/26/2026 • 5 msgs" [ref=e553] [cursor=pointer]:
+                    - img [ref=e555]
+                    - generic [ref=e557]:
+                      - generic [ref=e558]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e559]: 3/26/2026 • 5 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/26/2026 • 6 msgs" [ref=e560] [cursor=pointer]:
+                    - img [ref=e562]
+                    - generic [ref=e564]:
+                      - generic [ref=e565]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e566]: 3/26/2026 • 6 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/26/2026 • 6 msgs" [ref=e567] [cursor=pointer]:
+                    - img [ref=e569]
+                    - generic [ref=e571]:
+                      - generic [ref=e572]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e573]: 3/26/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/26/2026 • 4 msgs" [ref=e574] [cursor=pointer]:
+                    - img [ref=e576]
+                    - generic [ref=e578]:
+                      - generic [ref=e579]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e580]: 3/26/2026 • 4 msgs
+                  - button "Hi 3/26/2026 • 2 msgs" [ref=e581] [cursor=pointer]:
+                    - img [ref=e583]
+                    - generic [ref=e585]:
+                      - generic [ref=e586]: Hi
+                      - generic [ref=e587]: 3/26/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/26/2026 • 2 msgs" [ref=e588] [cursor=pointer]:
+                    - img [ref=e590]
+                    - generic [ref=e592]:
+                      - generic [ref=e593]: Say exactly 'pong'
+                      - generic [ref=e594]: 3/26/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e595] [cursor=pointer]:
+                    - img [ref=e597]
+                    - generic [ref=e599]:
+                      - generic [ref=e600]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e601]: 3/25/2026 • 4 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e602] [cursor=pointer]:
+                    - img [ref=e604]
+                    - generic [ref=e606]:
+                      - generic [ref=e607]: Test message for toggle
+                      - generic [ref=e608]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e609] [cursor=pointer]:
+                    - img [ref=e611]
+                    - generic [ref=e613]:
+                      - generic [ref=e614]: Hi
+                      - generic [ref=e615]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e616] [cursor=pointer]:
+                    - img [ref=e618]
+                    - generic [ref=e620]:
+                      - generic [ref=e621]: Say exactly 'pong'
+                      - generic [ref=e622]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e623] [cursor=pointer]:
+                    - img [ref=e625]
+                    - generic [ref=e627]:
+                      - generic [ref=e628]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e629]: 3/25/2026 • 4 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e630] [cursor=pointer]:
+                    - img [ref=e632]
+                    - generic [ref=e634]:
+                      - generic [ref=e635]: Test message for toggle
+                      - generic [ref=e636]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e637] [cursor=pointer]:
+                    - img [ref=e639]
+                    - generic [ref=e641]:
+                      - generic [ref=e642]: Hi
+                      - generic [ref=e643]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e644] [cursor=pointer]:
+                    - img [ref=e646]
+                    - generic [ref=e648]:
+                      - generic [ref=e649]: Say exactly 'pong'
+                      - generic [ref=e650]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e651] [cursor=pointer]:
+                    - img [ref=e653]
+                    - generic [ref=e655]:
+                      - generic [ref=e656]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e657]: 3/25/2026 • 4 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e658] [cursor=pointer]:
+                    - img [ref=e660]
+                    - generic [ref=e662]:
+                      - generic [ref=e663]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e664]: 3/25/2026 • 4 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e665] [cursor=pointer]:
+                    - img [ref=e667]
+                    - generic [ref=e669]:
+                      - generic [ref=e670]: Hi
+                      - generic [ref=e671]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e672] [cursor=pointer]:
+                    - img [ref=e674]
+                    - generic [ref=e676]:
+                      - generic [ref=e677]: Say exactly 'pong'
+                      - generic [ref=e678]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e679] [cursor=pointer]:
+                    - img [ref=e681]
+                    - generic [ref=e683]:
+                      - generic [ref=e684]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e685]: 3/25/2026 • 4 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e686] [cursor=pointer]:
+                    - img [ref=e688]
+                    - generic [ref=e690]:
+                      - generic [ref=e691]: Hi
+                      - generic [ref=e692]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e693] [cursor=pointer]:
+                    - img [ref=e695]
+                    - generic [ref=e697]:
+                      - generic [ref=e698]: Say exactly 'pong'
+                      - generic [ref=e699]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e700] [cursor=pointer]:
+                    - img [ref=e702]
+                    - generic [ref=e704]:
+                      - generic [ref=e705]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e706]: 3/25/2026 • 4 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e707] [cursor=pointer]:
+                    - img [ref=e709]
+                    - generic [ref=e711]:
+                      - generic [ref=e712]: Test message for toggle
+                      - generic [ref=e713]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e714] [cursor=pointer]:
+                    - img [ref=e716]
+                    - generic [ref=e718]:
+                      - generic [ref=e719]: Hi
+                      - generic [ref=e720]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e721] [cursor=pointer]:
+                    - img [ref=e723]
+                    - generic [ref=e725]:
+                      - generic [ref=e726]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e727]: 3/25/2026 • 4 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e728] [cursor=pointer]:
+                    - img [ref=e730]
+                    - generic [ref=e732]:
+                      - generic [ref=e733]: Test message for toggle
+                      - generic [ref=e734]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e735] [cursor=pointer]:
+                    - img [ref=e737]
+                    - generic [ref=e739]:
+                      - generic [ref=e740]: Hi
+                      - generic [ref=e741]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e742] [cursor=pointer]:
+                    - img [ref=e744]
+                    - generic [ref=e746]:
+                      - generic [ref=e747]: Say exactly 'pong'
+                      - generic [ref=e748]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e749] [cursor=pointer]:
+                    - img [ref=e751]
+                    - generic [ref=e753]:
+                      - generic [ref=e754]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e755]: 3/25/2026 • 4 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e756] [cursor=pointer]:
+                    - img [ref=e758]
+                    - generic [ref=e760]:
+                      - generic [ref=e761]: Hi
+                      - generic [ref=e762]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e763] [cursor=pointer]:
+                    - img [ref=e765]
+                    - generic [ref=e767]:
+                      - generic [ref=e768]: Say exactly 'pong'
+                      - generic [ref=e769]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e770] [cursor=pointer]:
+                    - img [ref=e772]
+                    - generic [ref=e774]:
+                      - generic [ref=e775]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e776]: 3/25/2026 • 4 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e777] [cursor=pointer]:
+                    - img [ref=e779]
+                    - generic [ref=e781]:
+                      - generic [ref=e782]: Hi
+                      - generic [ref=e783]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e784] [cursor=pointer]:
+                    - img [ref=e786]
+                    - generic [ref=e788]:
+                      - generic [ref=e789]: Say exactly 'pong'
+                      - generic [ref=e790]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e791] [cursor=pointer]:
+                    - img [ref=e793]
+                    - generic [ref=e795]:
+                      - generic [ref=e796]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e797]: 3/25/2026 • 4 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e798] [cursor=pointer]:
+                    - img [ref=e800]
+                    - generic [ref=e802]:
+                      - generic [ref=e803]: Hi
+                      - generic [ref=e804]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e805] [cursor=pointer]:
+                    - img [ref=e807]
+                    - generic [ref=e809]:
+                      - generic [ref=e810]: Say exactly 'pong'
+                      - generic [ref=e811]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e812] [cursor=pointer]:
+                    - img [ref=e814]
+                    - generic [ref=e816]:
+                      - generic [ref=e817]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e818]: 3/25/2026 • 4 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e819] [cursor=pointer]:
+                    - img [ref=e821]
+                    - generic [ref=e823]:
+                      - generic [ref=e824]: Test message for toggle
+                      - generic [ref=e825]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e826] [cursor=pointer]:
+                    - img [ref=e828]
+                    - generic [ref=e830]:
+                      - generic [ref=e831]: Say exactly 'pong'
+                      - generic [ref=e832]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e833] [cursor=pointer]:
+                    - img [ref=e835]
+                    - generic [ref=e837]:
+                      - generic [ref=e838]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e839]: 3/25/2026 • 4 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e840] [cursor=pointer]:
+                    - img [ref=e842]
+                    - generic [ref=e844]:
+                      - generic [ref=e845]: Test message for toggle
+                      - generic [ref=e846]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e847] [cursor=pointer]:
+                    - img [ref=e849]
+                    - generic [ref=e851]:
+                      - generic [ref=e852]: Say exactly 'pong'
+                      - generic [ref=e853]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e854] [cursor=pointer]:
+                    - img [ref=e856]
+                    - generic [ref=e858]:
+                      - generic [ref=e859]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e860]: 3/25/2026 • 4 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e861] [cursor=pointer]:
+                    - img [ref=e863]
+                    - generic [ref=e865]:
+                      - generic [ref=e866]: Test message for toggle
+                      - generic [ref=e867]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e868] [cursor=pointer]:
+                    - img [ref=e870]
+                    - generic [ref=e872]:
+                      - generic [ref=e873]: Hi
+                      - generic [ref=e874]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e875] [cursor=pointer]:
+                    - img [ref=e877]
+                    - generic [ref=e879]:
+                      - generic [ref=e880]: Say exactly 'pong'
+                      - generic [ref=e881]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e882] [cursor=pointer]:
+                    - img [ref=e884]
+                    - generic [ref=e886]:
+                      - generic [ref=e887]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e888]: 3/25/2026 • 4 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e889] [cursor=pointer]:
+                    - img [ref=e891]
+                    - generic [ref=e893]:
+                      - generic [ref=e894]: Test message for toggle
+                      - generic [ref=e895]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e896] [cursor=pointer]:
+                    - img [ref=e898]
+                    - generic [ref=e900]:
+                      - generic [ref=e901]: Hi
+                      - generic [ref=e902]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e903] [cursor=pointer]:
+                    - img [ref=e905]
+                    - generic [ref=e907]:
+                      - generic [ref=e908]: Say exactly 'pong'
+                      - generic [ref=e909]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e910] [cursor=pointer]:
+                    - img [ref=e912]
+                    - generic [ref=e914]:
+                      - generic [ref=e915]: Test message for toggle
+                      - generic [ref=e916]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e917] [cursor=pointer]:
+                    - img [ref=e919]
+                    - generic [ref=e921]:
+                      - generic [ref=e922]: Hi
+                      - generic [ref=e923]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e924] [cursor=pointer]:
+                    - img [ref=e926]
+                    - generic [ref=e928]:
+                      - generic [ref=e929]: Say exactly 'pong'
+                      - generic [ref=e930]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e931] [cursor=pointer]:
+                    - img [ref=e933]
+                    - generic [ref=e935]:
+                      - generic [ref=e936]: Test message for toggle
+                      - generic [ref=e937]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e938] [cursor=pointer]:
+                    - img [ref=e940]
+                    - generic [ref=e942]:
+                      - generic [ref=e943]: Hi
+                      - generic [ref=e944]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e945] [cursor=pointer]:
+                    - img [ref=e947]
+                    - generic [ref=e949]:
+                      - generic [ref=e950]: Say exactly 'pong'
+                      - generic [ref=e951]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e952] [cursor=pointer]:
+                    - img [ref=e954]
+                    - generic [ref=e956]:
+                      - generic [ref=e957]: Test message for toggle
+                      - generic [ref=e958]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e959] [cursor=pointer]:
+                    - img [ref=e961]
+                    - generic [ref=e963]:
+                      - generic [ref=e964]: Hi
+                      - generic [ref=e965]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e966] [cursor=pointer]:
+                    - img [ref=e968]
+                    - generic [ref=e970]:
+                      - generic [ref=e971]: Say exactly 'pong'
+                      - generic [ref=e972]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e973] [cursor=pointer]:
+                    - img [ref=e975]
+                    - generic [ref=e977]:
+                      - generic [ref=e978]: Test message for toggle
+                      - generic [ref=e979]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e980] [cursor=pointer]:
+                    - img [ref=e982]
+                    - generic [ref=e984]:
+                      - generic [ref=e985]: Hi
+                      - generic [ref=e986]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e987] [cursor=pointer]:
+                    - img [ref=e989]
+                    - generic [ref=e991]:
+                      - generic [ref=e992]: Say exactly 'pong'
+                      - generic [ref=e993]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e994] [cursor=pointer]:
+                    - img [ref=e996]
+                    - generic [ref=e998]:
+                      - generic [ref=e999]: Test message for toggle
+                      - generic [ref=e1000]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e1001] [cursor=pointer]:
+                    - img [ref=e1003]
+                    - generic [ref=e1005]:
+                      - generic [ref=e1006]: Hi
+                      - generic [ref=e1007]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1008] [cursor=pointer]:
+                    - img [ref=e1010]
+                    - generic [ref=e1012]:
+                      - generic [ref=e1013]: Say exactly 'pong'
+                      - generic [ref=e1014]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1015] [cursor=pointer]:
+                    - img [ref=e1017]
+                    - generic [ref=e1019]:
+                      - generic [ref=e1020]: Test message for toggle
+                      - generic [ref=e1021]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e1022] [cursor=pointer]:
+                    - img [ref=e1024]
+                    - generic [ref=e1026]:
+                      - generic [ref=e1027]: Hi
+                      - generic [ref=e1028]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1029] [cursor=pointer]:
+                    - img [ref=e1031]
+                    - generic [ref=e1033]:
+                      - generic [ref=e1034]: Say exactly 'pong'
+                      - generic [ref=e1035]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1036] [cursor=pointer]:
+                    - img [ref=e1038]
+                    - generic [ref=e1040]:
+                      - generic [ref=e1041]: Test message for toggle
+                      - generic [ref=e1042]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e1043] [cursor=pointer]:
+                    - img [ref=e1045]
+                    - generic [ref=e1047]:
+                      - generic [ref=e1048]: Hi
+                      - generic [ref=e1049]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1050] [cursor=pointer]:
+                    - img [ref=e1052]
+                    - generic [ref=e1054]:
+                      - generic [ref=e1055]: Say exactly 'pong'
+                      - generic [ref=e1056]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1057] [cursor=pointer]:
+                    - img [ref=e1059]
+                    - generic [ref=e1061]:
+                      - generic [ref=e1062]: Test message for toggle
+                      - generic [ref=e1063]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e1064] [cursor=pointer]:
+                    - img [ref=e1066]
+                    - generic [ref=e1068]:
+                      - generic [ref=e1069]: Hi
+                      - generic [ref=e1070]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1071] [cursor=pointer]:
+                    - img [ref=e1073]
+                    - generic [ref=e1075]:
+                      - generic [ref=e1076]: Say exactly 'pong'
+                      - generic [ref=e1077]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e1078] [cursor=pointer]:
+                    - img [ref=e1080]
+                    - generic [ref=e1082]:
+                      - generic [ref=e1083]: Hi
+                      - generic [ref=e1084]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1085] [cursor=pointer]:
+                    - img [ref=e1087]
+                    - generic [ref=e1089]:
+                      - generic [ref=e1090]: Say exactly 'pong'
+                      - generic [ref=e1091]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1092] [cursor=pointer]:
+                    - img [ref=e1094]
+                    - generic [ref=e1096]:
+                      - generic [ref=e1097]: Test message for toggle
+                      - generic [ref=e1098]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e1099] [cursor=pointer]:
+                    - img [ref=e1101]
+                    - generic [ref=e1103]:
+                      - generic [ref=e1104]: Hi
+                      - generic [ref=e1105]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1106] [cursor=pointer]:
+                    - img [ref=e1108]
+                    - generic [ref=e1110]:
+                      - generic [ref=e1111]: Say exactly 'pong'
+                      - generic [ref=e1112]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1113] [cursor=pointer]:
+                    - img [ref=e1115]
+                    - generic [ref=e1117]:
+                      - generic [ref=e1118]: Test message for toggle
+                      - generic [ref=e1119]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e1120] [cursor=pointer]:
+                    - img [ref=e1122]
+                    - generic [ref=e1124]:
+                      - generic [ref=e1125]: Hi
+                      - generic [ref=e1126]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1127] [cursor=pointer]:
+                    - img [ref=e1129]
+                    - generic [ref=e1131]:
+                      - generic [ref=e1132]: Say exactly 'pong'
+                      - generic [ref=e1133]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1134] [cursor=pointer]:
+                    - img [ref=e1136]
+                    - generic [ref=e1138]:
+                      - generic [ref=e1139]: Test message for toggle
+                      - generic [ref=e1140]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e1141] [cursor=pointer]:
+                    - img [ref=e1143]
+                    - generic [ref=e1145]:
+                      - generic [ref=e1146]: Hi
+                      - generic [ref=e1147]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1148] [cursor=pointer]:
+                    - img [ref=e1150]
+                    - generic [ref=e1152]:
+                      - generic [ref=e1153]: Say exactly 'pong'
+                      - generic [ref=e1154]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 6 msgs" [ref=e1155] [cursor=pointer]:
+                    - img [ref=e1157]
+                    - generic [ref=e1159]:
+                      - generic [ref=e1160]: Hi
+                      - generic [ref=e1161]: 3/25/2026 • 6 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1162] [cursor=pointer]:
+                    - img [ref=e1164]
+                    - generic [ref=e1166]:
+                      - generic [ref=e1167]: Say exactly 'pong'
+                      - generic [ref=e1168]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1169] [cursor=pointer]:
+                    - img [ref=e1171]
+                    - generic [ref=e1173]:
+                      - generic [ref=e1174]: Test message for toggle
+                      - generic [ref=e1175]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e1176] [cursor=pointer]:
+                    - img [ref=e1178]
+                    - generic [ref=e1180]:
+                      - generic [ref=e1181]: Hi
+                      - generic [ref=e1182]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1183] [cursor=pointer]:
+                    - img [ref=e1185]
+                    - generic [ref=e1187]:
+                      - generic [ref=e1188]: Say exactly 'pong'
+                      - generic [ref=e1189]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1190] [cursor=pointer]:
+                    - img [ref=e1192]
+                    - generic [ref=e1194]:
+                      - generic [ref=e1195]: Test message for toggle
+                      - generic [ref=e1196]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1197] [cursor=pointer]:
+                    - img [ref=e1199]
+                    - generic [ref=e1201]:
+                      - generic [ref=e1202]: Say exactly 'pong'
+                      - generic [ref=e1203]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1204] [cursor=pointer]:
+                    - img [ref=e1206]
+                    - generic [ref=e1208]:
+                      - generic [ref=e1209]: Test message for toggle
+                      - generic [ref=e1210]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1211] [cursor=pointer]:
+                    - img [ref=e1213]
+                    - generic [ref=e1215]:
+                      - generic [ref=e1216]: Test message for toggle
+                      - generic [ref=e1217]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1218] [cursor=pointer]:
+                    - img [ref=e1220]
+                    - generic [ref=e1222]:
+                      - generic [ref=e1223]: Test message for toggle
+                      - generic [ref=e1224]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1225] [cursor=pointer]:
+                    - img [ref=e1227]
+                    - generic [ref=e1229]:
+                      - generic [ref=e1230]: Test message for toggle
+                      - generic [ref=e1231]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1232] [cursor=pointer]:
+                    - img [ref=e1234]
+                    - generic [ref=e1236]:
+                      - generic [ref=e1237]: Test message for toggle
+                      - generic [ref=e1238]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1239] [cursor=pointer]:
+                    - img [ref=e1241]
+                    - generic [ref=e1243]:
+                      - generic [ref=e1244]: Test message for toggle
+                      - generic [ref=e1245]: 3/25/2026 • 2 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e1246] [cursor=pointer]:
+                    - img [ref=e1248]
+                    - generic [ref=e1250]:
+                      - generic [ref=e1251]: Hi
+                      - generic [ref=e1252]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1253] [cursor=pointer]:
+                    - img [ref=e1255]
+                    - generic [ref=e1257]:
+                      - generic [ref=e1258]: Say exactly 'pong'
+                      - generic [ref=e1259]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1260] [cursor=pointer]:
+                    - img [ref=e1262]
+                    - generic [ref=e1264]:
+                      - generic [ref=e1265]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1266]: 3/25/2026 • 4 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 2 msgs" [ref=e1267] [cursor=pointer]:
+                    - img [ref=e1269]
+                    - generic [ref=e1271]:
+                      - generic [ref=e1272]: Write a 10 line poem to poem.txt
+                      - generic [ref=e1273]: 3/25/2026 • 2 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 4 msgs" [ref=e1274] [cursor=pointer]:
+                    - img [ref=e1276]
+                    - generic [ref=e1278]:
+                      - generic [ref=e1279]: Create a file test.txt with content
+                      - generic [ref=e1280]: 3/25/2026 • 4 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 6 msgs" [ref=e1281] [cursor=pointer]:
+                    - img [ref=e1283]
+                    - generic [ref=e1285]:
+                      - generic [ref=e1286]: 创建一个包含100行的文件。
+                      - generic [ref=e1287]: 3/25/2026 • 6 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 4 msgs" [ref=e1288] [cursor=pointer]:
+                    - img [ref=e1290]
+                    - generic [ref=e1292]:
+                      - generic [ref=e1293]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e1294]: 3/25/2026 • 4 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/25/2026 • 5 msgs" [ref=e1295] [cursor=pointer]:
+                    - img [ref=e1297]
+                    - generic [ref=e1299]:
+                      - generic [ref=e1300]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e1301]: 3/25/2026 • 5 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/25/2026 • 6 msgs" [ref=e1302] [cursor=pointer]:
+                    - img [ref=e1304]
+                    - generic [ref=e1306]:
+                      - generic [ref=e1307]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e1308]: 3/25/2026 • 6 msgs
+                  - button "Hi 3/25/2026 • 5 msgs" [ref=e1309] [cursor=pointer]:
+                    - img [ref=e1311]
+                    - generic [ref=e1313]:
+                      - generic [ref=e1314]: Hi
+                      - generic [ref=e1315]: 3/25/2026 • 5 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/25/2026 • 6 msgs" [ref=e1316] [cursor=pointer]:
+                    - img [ref=e1318]
+                    - generic [ref=e1320]:
+                      - generic [ref=e1321]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e1322]: 3/25/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/25/2026 • 4 msgs" [ref=e1323] [cursor=pointer]:
+                    - img [ref=e1325]
+                    - generic [ref=e1327]:
+                      - generic [ref=e1328]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e1329]: 3/25/2026 • 4 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1330] [cursor=pointer]:
+                    - img [ref=e1332]
+                    - generic [ref=e1334]:
+                      - generic [ref=e1335]: Say exactly 'pong'
+                      - generic [ref=e1336]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1337] [cursor=pointer]:
+                    - img [ref=e1339]
+                    - generic [ref=e1341]:
+                      - generic [ref=e1342]: Test message for toggle
+                      - generic [ref=e1343]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1344] [cursor=pointer]:
+                    - img [ref=e1346]
+                    - generic [ref=e1348]:
+                      - generic [ref=e1349]: Test message for toggle
+                      - generic [ref=e1350]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1351] [cursor=pointer]:
+                    - img [ref=e1353]
+                    - generic [ref=e1355]:
+                      - generic [ref=e1356]: Test message for toggle
+                      - generic [ref=e1357]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1358] [cursor=pointer]:
+                    - img [ref=e1360]
+                    - generic [ref=e1362]:
+                      - generic [ref=e1363]: Test message for toggle
+                      - generic [ref=e1364]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1365] [cursor=pointer]:
+                    - img [ref=e1367]
+                    - generic [ref=e1369]:
+                      - generic [ref=e1370]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1371]: 3/25/2026 • 4 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 2 msgs" [ref=e1372] [cursor=pointer]:
+                    - img [ref=e1374]
+                    - generic [ref=e1376]:
+                      - generic [ref=e1377]: Write a 10 line poem to poem.txt
+                      - generic [ref=e1378]: 3/25/2026 • 2 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 4 msgs" [ref=e1379] [cursor=pointer]:
+                    - img [ref=e1381]
+                    - generic [ref=e1383]:
+                      - generic [ref=e1384]: Create a file test.txt with content
+                      - generic [ref=e1385]: 3/25/2026 • 4 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 10 msgs" [ref=e1386] [cursor=pointer]:
+                    - img [ref=e1388]
+                    - generic [ref=e1390]:
+                      - generic [ref=e1391]: 创建一个包含100行的文件。
+                      - generic [ref=e1392]: 3/25/2026 • 10 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1393] [cursor=pointer]:
+                    - img [ref=e1395]
+                    - generic [ref=e1397]:
+                      - generic [ref=e1398]: Test message for toggle
+                      - generic [ref=e1399]: 3/25/2026 • 2 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/25/2026 • 5 msgs" [ref=e1400] [cursor=pointer]:
+                    - img [ref=e1402]
+                    - generic [ref=e1404]:
+                      - generic [ref=e1405]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e1406]: 3/25/2026 • 5 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 6 msgs" [ref=e1407] [cursor=pointer]:
+                    - img [ref=e1409]
+                    - generic [ref=e1411]:
+                      - generic [ref=e1412]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e1413]: 3/25/2026 • 6 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/25/2026 • 6 msgs" [ref=e1414] [cursor=pointer]:
+                    - img [ref=e1416]
+                    - generic [ref=e1418]:
+                      - generic [ref=e1419]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e1420]: 3/25/2026 • 6 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/25/2026 • 6 msgs" [ref=e1421] [cursor=pointer]:
+                    - img [ref=e1423]
+                    - generic [ref=e1425]:
+                      - generic [ref=e1426]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e1427]: 3/25/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/25/2026 • 4 msgs" [ref=e1428] [cursor=pointer]:
+                    - img [ref=e1430]
+                    - generic [ref=e1432]:
+                      - generic [ref=e1433]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e1434]: 3/25/2026 • 4 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e1435] [cursor=pointer]:
+                    - img [ref=e1437]
+                    - generic [ref=e1439]:
+                      - generic [ref=e1440]: Hi
+                      - generic [ref=e1441]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1442] [cursor=pointer]:
+                    - img [ref=e1444]
+                    - generic [ref=e1446]:
+                      - generic [ref=e1447]: Say exactly 'pong'
+                      - generic [ref=e1448]: 3/25/2026 • 2 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 2 msgs" [ref=e1449] [cursor=pointer]:
+                    - img [ref=e1451]
+                    - generic [ref=e1453]:
+                      - generic [ref=e1454]: Write a 10 line poem to poem.txt
+                      - generic [ref=e1455]: 3/25/2026 • 2 msgs
+                  - button "Test message for toggle 3/25/2026 • 2 msgs" [ref=e1456] [cursor=pointer]:
+                    - img [ref=e1458]
+                    - generic [ref=e1460]:
+                      - generic [ref=e1461]: Test message for toggle
+                      - generic [ref=e1462]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1463] [cursor=pointer]:
+                    - img [ref=e1465]
+                    - generic [ref=e1467]:
+                      - generic [ref=e1468]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1469]: 3/25/2026 • 4 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 4 msgs" [ref=e1470] [cursor=pointer]:
+                    - img [ref=e1472]
+                    - generic [ref=e1474]:
+                      - generic [ref=e1475]: Create a file test.txt with content
+                      - generic [ref=e1476]: 3/25/2026 • 4 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 6 msgs" [ref=e1477] [cursor=pointer]:
+                    - img [ref=e1479]
+                    - generic [ref=e1481]:
+                      - generic [ref=e1482]: 创建一个包含100行的文件。
+                      - generic [ref=e1483]: 3/25/2026 • 6 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/25/2026 • 5 msgs" [ref=e1484] [cursor=pointer]:
+                    - img [ref=e1486]
+                    - generic [ref=e1488]:
+                      - generic [ref=e1489]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e1490]: 3/25/2026 • 5 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 4 msgs" [ref=e1491] [cursor=pointer]:
+                    - img [ref=e1493]
+                    - generic [ref=e1495]:
+                      - generic [ref=e1496]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e1497]: 3/25/2026 • 4 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e1498] [cursor=pointer]:
+                    - img [ref=e1500]
+                    - generic [ref=e1502]:
+                      - generic [ref=e1503]: Hi
+                      - generic [ref=e1504]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/25/2026 • 6 msgs" [ref=e1505] [cursor=pointer]:
+                    - img [ref=e1507]
+                    - generic [ref=e1509]:
+                      - generic [ref=e1510]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e1511]: 3/25/2026 • 6 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/25/2026 • 6 msgs" [ref=e1512] [cursor=pointer]:
+                    - img [ref=e1514]
+                    - generic [ref=e1516]:
+                      - generic [ref=e1517]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e1518]: 3/25/2026 • 6 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1519] [cursor=pointer]:
+                    - img [ref=e1521]
+                    - generic [ref=e1523]:
+                      - generic [ref=e1524]: Say exactly 'pong'
+                      - generic [ref=e1525]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/25/2026 • 4 msgs" [ref=e1526] [cursor=pointer]:
+                    - img [ref=e1528]
+                    - generic [ref=e1530]:
+                      - generic [ref=e1531]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e1532]: 3/25/2026 • 4 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 5 msgs" [ref=e1533] [cursor=pointer]:
+                    - img [ref=e1535]
+                    - generic [ref=e1537]:
+                      - generic [ref=e1538]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1539]: 3/25/2026 • 5 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 10 msgs" [ref=e1540] [cursor=pointer]:
+                    - img [ref=e1542]
+                    - generic [ref=e1544]:
+                      - generic [ref=e1545]: 创建一个包含100行的文件。
+                      - generic [ref=e1546]: 3/25/2026 • 10 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 4 msgs" [ref=e1547] [cursor=pointer]:
+                    - img [ref=e1549]
+                    - generic [ref=e1551]:
+                      - generic [ref=e1552]: Create a file test.txt with content
+                      - generic [ref=e1553]: 3/25/2026 • 4 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 6 msgs" [ref=e1554] [cursor=pointer]:
+                    - img [ref=e1556]
+                    - generic [ref=e1558]:
+                      - generic [ref=e1559]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e1560]: 3/25/2026 • 6 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/25/2026 • 5 msgs" [ref=e1561] [cursor=pointer]:
+                    - img [ref=e1563]
+                    - generic [ref=e1565]:
+                      - generic [ref=e1566]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e1567]: 3/25/2026 • 5 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e1568] [cursor=pointer]:
+                    - img [ref=e1570]
+                    - generic [ref=e1572]:
+                      - generic [ref=e1573]: Hi
+                      - generic [ref=e1574]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/25/2026 • 4 msgs" [ref=e1575] [cursor=pointer]:
+                    - img [ref=e1577]
+                    - generic [ref=e1579]:
+                      - generic [ref=e1580]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e1581]: 3/25/2026 • 4 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/25/2026 • 6 msgs" [ref=e1582] [cursor=pointer]:
+                    - img [ref=e1584]
+                    - generic [ref=e1586]:
+                      - generic [ref=e1587]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e1588]: 3/25/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/25/2026 • 4 msgs" [ref=e1589] [cursor=pointer]:
+                    - img [ref=e1591]
+                    - generic [ref=e1593]:
+                      - generic [ref=e1594]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e1595]: 3/25/2026 • 4 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1596] [cursor=pointer]:
+                    - img [ref=e1598]
+                    - generic [ref=e1600]:
+                      - generic [ref=e1601]: Say exactly 'pong'
+                      - generic [ref=e1602]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1603] [cursor=pointer]:
+                    - img [ref=e1605]
+                    - generic [ref=e1607]:
+                      - generic [ref=e1608]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1609]: 3/25/2026 • 4 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 3 msgs" [ref=e1610] [cursor=pointer]:
+                    - img [ref=e1612]
+                    - generic [ref=e1614]:
+                      - generic [ref=e1615]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1616]: 3/25/2026 • 3 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1617] [cursor=pointer]:
+                    - img [ref=e1619]
+                    - generic [ref=e1621]:
+                      - generic [ref=e1622]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1623]: 3/25/2026 • 4 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 6 msgs" [ref=e1624] [cursor=pointer]:
+                    - img [ref=e1626]
+                    - generic [ref=e1628]:
+                      - generic [ref=e1629]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1630]: 3/25/2026 • 6 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1631] [cursor=pointer]:
+                    - img [ref=e1633]
+                    - generic [ref=e1635]:
+                      - generic [ref=e1636]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1637]: 3/25/2026 • 4 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1638] [cursor=pointer]:
+                    - img [ref=e1640]
+                    - generic [ref=e1642]:
+                      - generic [ref=e1643]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1644]: 3/25/2026 • 4 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1645] [cursor=pointer]:
+                    - img [ref=e1647]
+                    - generic [ref=e1649]:
+                      - generic [ref=e1650]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1651]: 3/25/2026 • 4 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/25/2026 • 2 msgs" [ref=e1652] [cursor=pointer]:
+                    - img [ref=e1654]
+                    - generic [ref=e1656]:
+                      - generic [ref=e1657]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e1658]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1659] [cursor=pointer]:
+                    - img [ref=e1661]
+                    - generic [ref=e1663]:
+                      - generic [ref=e1664]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1665]: 3/25/2026 • 4 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/25/2026 • 6 msgs" [ref=e1666] [cursor=pointer]:
+                    - img [ref=e1668]
+                    - generic [ref=e1670]:
+                      - generic [ref=e1671]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e1672]: 3/25/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/25/2026 • 2 msgs" [ref=e1673] [cursor=pointer]:
+                    - img [ref=e1675]
+                    - generic [ref=e1677]:
+                      - generic [ref=e1678]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e1679]: 3/25/2026 • 2 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 10 msgs" [ref=e1680] [cursor=pointer]:
+                    - img [ref=e1682]
+                    - generic [ref=e1684]:
+                      - generic [ref=e1685]: 创建一个包含100行的文件。
+                      - generic [ref=e1686]: 3/25/2026 • 10 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/25/2026 • 5 msgs" [ref=e1687] [cursor=pointer]:
+                    - img [ref=e1689]
+                    - generic [ref=e1691]:
+                      - generic [ref=e1692]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e1693]: 3/25/2026 • 5 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 2 msgs" [ref=e1694] [cursor=pointer]:
+                    - img [ref=e1696]
+                    - generic [ref=e1698]:
+                      - generic [ref=e1699]: Write a 10 line poem to poem.txt
+                      - generic [ref=e1700]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/25/2026 • 6 msgs" [ref=e1701] [cursor=pointer]:
+                    - img [ref=e1703]
+                    - generic [ref=e1705]:
+                      - generic [ref=e1706]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e1707]: 3/25/2026 • 6 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 6 msgs" [ref=e1708] [cursor=pointer]:
+                    - img [ref=e1710]
+                    - generic [ref=e1712]:
+                      - generic [ref=e1713]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e1714]: 3/25/2026 • 6 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1715] [cursor=pointer]:
+                    - img [ref=e1717]
+                    - generic [ref=e1719]:
+                      - generic [ref=e1720]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1721]: 3/25/2026 • 4 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 4 msgs" [ref=e1722] [cursor=pointer]:
+                    - img [ref=e1724]
+                    - generic [ref=e1726]:
+                      - generic [ref=e1727]: Create a file test.txt with content
+                      - generic [ref=e1728]: 3/25/2026 • 4 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1729] [cursor=pointer]:
+                    - img [ref=e1731]
+                    - generic [ref=e1733]:
+                      - generic [ref=e1734]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1735]: 3/25/2026 • 4 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 6 msgs" [ref=e1736] [cursor=pointer]:
+                    - img [ref=e1738]
+                    - generic [ref=e1740]:
+                      - generic [ref=e1741]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e1742]: 3/25/2026 • 6 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 11 msgs" [ref=e1743] [cursor=pointer]:
+                    - img [ref=e1745]
+                    - generic [ref=e1747]:
+                      - generic [ref=e1748]: 创建一个包含100行的文件。
+                      - generic [ref=e1749]: 3/25/2026 • 11 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1750] [cursor=pointer]:
+                    - img [ref=e1752]
+                    - generic [ref=e1754]:
+                      - generic [ref=e1755]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1756]: 3/25/2026 • 4 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 10 msgs" [ref=e1757] [cursor=pointer]:
+                    - img [ref=e1759]
+                    - generic [ref=e1761]:
+                      - generic [ref=e1762]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1763]: 3/25/2026 • 10 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1764] [cursor=pointer]:
+                    - img [ref=e1766]
+                    - generic [ref=e1768]:
+                      - generic [ref=e1769]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1770]: 3/25/2026 • 4 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/25/2026 • 5 msgs" [ref=e1771] [cursor=pointer]:
+                    - img [ref=e1773]
+                    - generic [ref=e1775]:
+                      - generic [ref=e1776]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e1777]: 3/25/2026 • 5 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 4 msgs" [ref=e1778] [cursor=pointer]:
+                    - img [ref=e1780]
+                    - generic [ref=e1782]:
+                      - generic [ref=e1783]: Create a file test.txt with content
+                      - generic [ref=e1784]: 3/25/2026 • 4 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/25/2026 • 6 msgs" [ref=e1785] [cursor=pointer]:
+                    - img [ref=e1787]
+                    - generic [ref=e1789]:
+                      - generic [ref=e1790]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e1791]: 3/25/2026 • 6 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 3 msgs" [ref=e1792] [cursor=pointer]:
+                    - img [ref=e1794]
+                    - generic [ref=e1796]:
+                      - generic [ref=e1797]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e1798]: 3/25/2026 • 3 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e1799] [cursor=pointer]:
+                    - img [ref=e1801]
+                    - generic [ref=e1803]:
+                      - generic [ref=e1804]: Hi
+                      - generic [ref=e1805]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/25/2026 • 4 msgs" [ref=e1806] [cursor=pointer]:
+                    - img [ref=e1808]
+                    - generic [ref=e1810]:
+                      - generic [ref=e1811]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e1812]: 3/25/2026 • 4 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/25/2026 • 4 msgs" [ref=e1813] [cursor=pointer]:
+                    - img [ref=e1815]
+                    - generic [ref=e1817]:
+                      - generic [ref=e1818]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e1819]: 3/25/2026 • 4 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1820] [cursor=pointer]:
+                    - img [ref=e1822]
+                    - generic [ref=e1824]:
+                      - generic [ref=e1825]: Say exactly 'pong'
+                      - generic [ref=e1826]: 3/25/2026 • 2 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/25/2026 • 6 msgs" [ref=e1827] [cursor=pointer]:
+                    - img [ref=e1829]
+                    - generic [ref=e1831]:
+                      - generic [ref=e1832]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e1833]: 3/25/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/25/2026 • 4 msgs" [ref=e1834] [cursor=pointer]:
+                    - img [ref=e1836]
+                    - generic [ref=e1838]:
+                      - generic [ref=e1839]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e1840]: 3/25/2026 • 4 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/25/2026 • 6 msgs" [ref=e1841] [cursor=pointer]:
+                    - img [ref=e1843]
+                    - generic [ref=e1845]:
+                      - generic [ref=e1846]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e1847]: 3/25/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/25/2026 • 4 msgs" [ref=e1848] [cursor=pointer]:
+                    - img [ref=e1850]
+                    - generic [ref=e1852]:
+                      - generic [ref=e1853]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e1854]: 3/25/2026 • 4 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/25/2026 • 5 msgs" [ref=e1855] [cursor=pointer]:
+                    - img [ref=e1857]
+                    - generic [ref=e1859]:
+                      - generic [ref=e1860]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e1861]: 3/25/2026 • 5 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 3 msgs" [ref=e1862] [cursor=pointer]:
+                    - img [ref=e1864]
+                    - generic [ref=e1866]:
+                      - generic [ref=e1867]: 创建一个包含100行的文件。
+                      - generic [ref=e1868]: 3/25/2026 • 3 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 3 msgs" [ref=e1869] [cursor=pointer]:
+                    - img [ref=e1871]
+                    - generic [ref=e1873]:
+                      - generic [ref=e1874]: Write a 10 line poem to poem.txt
+                      - generic [ref=e1875]: 3/25/2026 • 3 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 5 msgs" [ref=e1876] [cursor=pointer]:
+                    - img [ref=e1878]
+                    - generic [ref=e1880]:
+                      - generic [ref=e1881]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e1882]: 3/25/2026 • 5 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/25/2026 • 3 msgs" [ref=e1883] [cursor=pointer]:
+                    - img [ref=e1885]
+                    - generic [ref=e1887]:
+                      - generic [ref=e1888]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e1889]: 3/25/2026 • 3 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 3 msgs" [ref=e1890] [cursor=pointer]:
+                    - img [ref=e1892]
+                    - generic [ref=e1894]:
+                      - generic [ref=e1895]: Create a file test.txt with content
+                      - generic [ref=e1896]: 3/25/2026 • 3 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1897] [cursor=pointer]:
+                    - img [ref=e1899]
+                    - generic [ref=e1901]:
+                      - generic [ref=e1902]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1903]: 3/25/2026 • 4 msgs
+                  - button "创建一个文件 test_status.txt，写一行文字 3/25/2026 • 4 msgs" [ref=e1904] [cursor=pointer]:
+                    - img [ref=e1906]
+                    - generic [ref=e1908]:
+                      - generic [ref=e1909]: 创建一个文件 test_status.txt，写一行文字
+                      - generic [ref=e1910]: 3/25/2026 • 4 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/25/2026 • 2 msgs" [ref=e1911] [cursor=pointer]:
+                    - img [ref=e1913]
+                    - generic [ref=e1915]:
+                      - generic [ref=e1916]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e1917]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/25/2026 • 3 msgs" [ref=e1918] [cursor=pointer]:
+                    - img [ref=e1920]
+                    - generic [ref=e1922]:
+                      - generic [ref=e1923]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e1924]: 3/25/2026 • 3 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 2 msgs" [ref=e1925] [cursor=pointer]:
+                    - img [ref=e1927]
+                    - generic [ref=e1929]:
+                      - generic [ref=e1930]: Write a 10 line poem to poem.txt
+                      - generic [ref=e1931]: 3/25/2026 • 2 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/25/2026 • 5 msgs" [ref=e1932] [cursor=pointer]:
+                    - img [ref=e1934]
+                    - generic [ref=e1936]:
+                      - generic [ref=e1937]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e1938]: 3/25/2026 • 5 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 4 msgs" [ref=e1939] [cursor=pointer]:
+                    - img [ref=e1941]
+                    - generic [ref=e1943]:
+                      - generic [ref=e1944]: 创建一个包含100行的文件。
+                      - generic [ref=e1945]: 3/25/2026 • 4 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 4 msgs" [ref=e1946] [cursor=pointer]:
+                    - img [ref=e1948]
+                    - generic [ref=e1950]:
+                      - generic [ref=e1951]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e1952]: 3/25/2026 • 4 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/25/2026 • 6 msgs" [ref=e1953] [cursor=pointer]:
+                    - img [ref=e1955]
+                    - generic [ref=e1957]:
+                      - generic [ref=e1958]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e1959]: 3/25/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/25/2026 • 4 msgs" [ref=e1960] [cursor=pointer]:
+                    - img [ref=e1962]
+                    - generic [ref=e1964]:
+                      - generic [ref=e1965]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e1966]: 3/25/2026 • 4 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e1967] [cursor=pointer]:
+                    - img [ref=e1969]
+                    - generic [ref=e1971]:
+                      - generic [ref=e1972]: Say exactly 'pong'
+                      - generic [ref=e1973]: 3/25/2026 • 2 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 14 msgs" [ref=e1974] [cursor=pointer]:
+                    - img [ref=e1976]
+                    - generic [ref=e1978]:
+                      - generic [ref=e1979]: 创建一个包含100行的文件。
+                      - generic [ref=e1980]: 3/25/2026 • 14 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/25/2026 • 6 msgs" [ref=e1981] [cursor=pointer]:
+                    - img [ref=e1983]
+                    - generic [ref=e1985]:
+                      - generic [ref=e1986]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e1987]: 3/25/2026 • 6 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 4 msgs" [ref=e1988] [cursor=pointer]:
+                    - img [ref=e1990]
+                    - generic [ref=e1992]:
+                      - generic [ref=e1993]: 创建一个包含100行的文件。
+                      - generic [ref=e1994]: 3/25/2026 • 4 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 2 msgs" [ref=e1995] [cursor=pointer]:
+                    - img [ref=e1997]
+                    - generic [ref=e1999]:
+                      - generic [ref=e2000]: Write a 10 line poem to poem.txt
+                      - generic [ref=e2001]: 3/25/2026 • 2 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/25/2026 • 5 msgs" [ref=e2002] [cursor=pointer]:
+                    - img [ref=e2004]
+                    - generic [ref=e2006]:
+                      - generic [ref=e2007]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e2008]: 3/25/2026 • 5 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/25/2026 • 6 msgs" [ref=e2009] [cursor=pointer]:
+                    - img [ref=e2011]
+                    - generic [ref=e2013]:
+                      - generic [ref=e2014]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e2015]: 3/25/2026 • 6 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 6 msgs" [ref=e2016] [cursor=pointer]:
+                    - img [ref=e2018]
+                    - generic [ref=e2020]:
+                      - generic [ref=e2021]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e2022]: 3/25/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/25/2026 • 5 msgs" [ref=e2023] [cursor=pointer]:
+                    - img [ref=e2025]
+                    - generic [ref=e2027]:
+                      - generic [ref=e2028]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e2029]: 3/25/2026 • 5 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 4 msgs" [ref=e2030] [cursor=pointer]:
+                    - img [ref=e2032]
+                    - generic [ref=e2034]:
+                      - generic [ref=e2035]: Create a file test.txt with content
+                      - generic [ref=e2036]: 3/25/2026 • 4 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/25/2026 • 6 msgs" [ref=e2037] [cursor=pointer]:
+                    - img [ref=e2039]
+                    - generic [ref=e2041]:
+                      - generic [ref=e2042]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e2043]: 3/25/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/25/2026 • 4 msgs" [ref=e2044] [cursor=pointer]:
+                    - img [ref=e2046]
+                    - generic [ref=e2048]:
+                      - generic [ref=e2049]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e2050]: 3/25/2026 • 4 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 4 msgs" [ref=e2051] [cursor=pointer]:
+                    - img [ref=e2053]
+                    - generic [ref=e2055]:
+                      - generic [ref=e2056]: 创建一个包含100行的文件。
+                      - generic [ref=e2057]: 3/25/2026 • 4 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/25/2026 • 5 msgs" [ref=e2058] [cursor=pointer]:
+                    - img [ref=e2060]
+                    - generic [ref=e2062]:
+                      - generic [ref=e2063]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e2064]: 3/25/2026 • 5 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 4 msgs" [ref=e2065] [cursor=pointer]:
+                    - img [ref=e2067]
+                    - generic [ref=e2069]:
+                      - generic [ref=e2070]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e2071]: 3/25/2026 • 4 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 2 msgs" [ref=e2072] [cursor=pointer]:
+                    - img [ref=e2074]
+                    - generic [ref=e2076]:
+                      - generic [ref=e2077]: Write a 10 line poem to poem.txt
+                      - generic [ref=e2078]: 3/25/2026 • 2 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/25/2026 • 6 msgs" [ref=e2079] [cursor=pointer]:
+                    - img [ref=e2081]
+                    - generic [ref=e2083]:
+                      - generic [ref=e2084]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e2085]: 3/25/2026 • 6 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/25/2026 • 6 msgs" [ref=e2086] [cursor=pointer]:
+                    - img [ref=e2088]
+                    - generic [ref=e2090]:
+                      - generic [ref=e2091]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e2092]: 3/25/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/25/2026 • 6 msgs" [ref=e2093] [cursor=pointer]:
+                    - img [ref=e2095]
+                    - generic [ref=e2097]:
+                      - generic [ref=e2098]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e2099]: 3/25/2026 • 6 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 4 msgs" [ref=e2100] [cursor=pointer]:
+                    - img [ref=e2102]
+                    - generic [ref=e2104]:
+                      - generic [ref=e2105]: Create a file test.txt with content
+                      - generic [ref=e2106]: 3/25/2026 • 4 msgs
+                  - button "创建三个文件：file1.txt写'hello'，file2.txt写 3/25/2026 • 6 msgs" [ref=e2107] [cursor=pointer]:
+                    - img [ref=e2109]
+                    - generic [ref=e2111]:
+                      - generic [ref=e2112]: 创建三个文件：file1.txt写'hello'，file2.txt写
+                      - generic [ref=e2113]: 3/25/2026 • 6 msgs
+                  - button "创建一个文件 test_e2e.txt，包含20行数字 3/25/2026 • 4 msgs" [ref=e2114] [cursor=pointer]:
+                    - img [ref=e2116]
+                    - generic [ref=e2118]:
+                      - generic [ref=e2119]: 创建一个文件 test_e2e.txt，包含20行数字
+                      - generic [ref=e2120]: 3/25/2026 • 4 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 4 msgs" [ref=e2121] [cursor=pointer]:
+                    - img [ref=e2123]
+                    - generic [ref=e2125]:
+                      - generic [ref=e2126]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e2127]: 3/25/2026 • 4 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 32 msgs" [ref=e2128] [cursor=pointer]:
+                    - img [ref=e2130]
+                    - generic [ref=e2132]:
+                      - generic [ref=e2133]: 创建一个包含100行的文件。
+                      - generic [ref=e2134]: 3/25/2026 • 32 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 4 msgs" [ref=e2135] [cursor=pointer]:
+                    - img [ref=e2137]
+                    - generic [ref=e2139]:
+                      - generic [ref=e2140]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e2141]: 3/25/2026 • 4 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/25/2026 • 5 msgs" [ref=e2142] [cursor=pointer]:
+                    - img [ref=e2144]
+                    - generic [ref=e2146]:
+                      - generic [ref=e2147]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e2148]: 3/25/2026 • 5 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/25/2026 • 4 msgs" [ref=e2149] [cursor=pointer]:
+                    - img [ref=e2151]
+                    - generic [ref=e2153]:
+                      - generic [ref=e2154]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e2155]: 3/25/2026 • 4 msgs
+                  - button "先创建一个文件 file1.txt 写 'hello'，然后再创建一个 3/25/2026 • 8 msgs" [ref=e2156] [cursor=pointer]:
+                    - img [ref=e2158]
+                    - generic [ref=e2160]:
+                      - generic [ref=e2161]: 先创建一个文件 file1.txt 写 'hello'，然后再创建一个
+                      - generic [ref=e2162]: 3/25/2026 • 8 msgs
+                  - button "创建一个文件 test_output.txt，内容包含1到50的数字， 3/25/2026 • 4 msgs" [ref=e2163] [cursor=pointer]:
+                    - img [ref=e2165]
+                    - generic [ref=e2167]:
+                      - generic [ref=e2168]: 创建一个文件 test_output.txt，内容包含1到50的数字，
+                      - generic [ref=e2169]: 3/25/2026 • 4 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 4 msgs" [ref=e2170] [cursor=pointer]:
+                    - img [ref=e2172]
+                    - generic [ref=e2174]:
+                      - generic [ref=e2175]: 创建一个包含100行的文件。
+                      - generic [ref=e2176]: 3/25/2026 • 4 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 6 msgs" [ref=e2177] [cursor=pointer]:
+                    - img [ref=e2179]
+                    - generic [ref=e2181]:
+                      - generic [ref=e2182]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e2183]: 3/25/2026 • 6 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 2 msgs" [ref=e2184] [cursor=pointer]:
+                    - img [ref=e2186]
+                    - generic [ref=e2188]:
+                      - generic [ref=e2189]: Write a 10 line poem to poem.txt
+                      - generic [ref=e2190]: 3/25/2026 • 2 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 3 msgs" [ref=e2191] [cursor=pointer]:
+                    - img [ref=e2193]
+                    - generic [ref=e2195]:
+                      - generic [ref=e2196]: Create a file test.txt with content
+                      - generic [ref=e2197]: 3/25/2026 • 3 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 8 msgs" [ref=e2198] [cursor=pointer]:
+                    - img [ref=e2200]
+                    - generic [ref=e2202]:
+                      - generic [ref=e2203]: 创建一个包含100行的文件。
+                      - generic [ref=e2204]: 3/25/2026 • 8 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 4 msgs" [ref=e2205] [cursor=pointer]:
+                    - img [ref=e2207]
+                    - generic [ref=e2209]:
+                      - generic [ref=e2210]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e2211]: 3/25/2026 • 4 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 3 msgs" [ref=e2212] [cursor=pointer]:
+                    - img [ref=e2214]
+                    - generic [ref=e2216]:
+                      - generic [ref=e2217]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e2218]: 3/25/2026 • 3 msgs
+                  - button "创建一个包含100行的文件。 3/25/2026 • 12 msgs" [ref=e2219] [cursor=pointer]:
+                    - img [ref=e2221]
+                    - generic [ref=e2223]:
+                      - generic [ref=e2224]: 创建一个包含100行的文件。
+                      - generic [ref=e2225]: 3/25/2026 • 12 msgs
+                  - button "hi 3/25/2026 • 49 msgs" [ref=e2226] [cursor=pointer]:
+                    - img [ref=e2228]
+                    - generic [ref=e2230]:
+                      - generic [ref=e2231]: hi
+                      - generic [ref=e2232]: 3/25/2026 • 49 msgs
+                  - button "写一个文件，每行是行数，100行。 3/25/2026 • 6 msgs" [ref=e2233] [cursor=pointer]:
+                    - img [ref=e2235]
+                    - generic [ref=e2237]:
+                      - generic [ref=e2238]: 写一个文件，每行是行数，100行。
+                      - generic [ref=e2239]: 3/25/2026 • 6 msgs
+                  - button "kk 3/25/2026 • 4 msgs" [ref=e2240] [cursor=pointer]:
+                    - img [ref=e2242]
+                    - generic [ref=e2244]:
+                      - generic [ref=e2245]: kk
+                      - generic [ref=e2246]: 3/25/2026 • 4 msgs
+                  - button "hi 3/25/2026 • 2 msgs" [ref=e2247] [cursor=pointer]:
+                    - img [ref=e2249]
+                    - generic [ref=e2251]:
+                      - generic [ref=e2252]: hi
+                      - generic [ref=e2253]: 3/25/2026 • 2 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 20 msgs" [ref=e2254] [cursor=pointer]:
+                    - img [ref=e2256]
+                    - generic [ref=e2258]:
+                      - generic [ref=e2259]: Create a file test.txt with content
+                      - generic [ref=e2260]: 3/25/2026 • 20 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 3 msgs" [ref=e2261] [cursor=pointer]:
+                    - img [ref=e2263]
+                    - generic [ref=e2265]:
+                      - generic [ref=e2266]: Write a 10 line poem to poem.txt
+                      - generic [ref=e2267]: 3/25/2026 • 3 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 4 msgs" [ref=e2268] [cursor=pointer]:
+                    - img [ref=e2270]
+                    - generic [ref=e2272]:
+                      - generic [ref=e2273]: Create a file test.txt with content
+                      - generic [ref=e2274]: 3/25/2026 • 4 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 3 msgs" [ref=e2275] [cursor=pointer]:
+                    - img [ref=e2277]
+                    - generic [ref=e2279]:
+                      - generic [ref=e2280]: Write a 10 line poem to poem.txt
+                      - generic [ref=e2281]: 3/25/2026 • 3 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 3 msgs" [ref=e2282] [cursor=pointer]:
+                    - img [ref=e2284]
+                    - generic [ref=e2286]:
+                      - generic [ref=e2287]: Write a 10 line poem to poem.txt
+                      - generic [ref=e2288]: 3/25/2026 • 3 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 4 msgs" [ref=e2289] [cursor=pointer]:
+                    - img [ref=e2291]
+                    - generic [ref=e2293]:
+                      - generic [ref=e2294]: Create a file test.txt with content
+                      - generic [ref=e2295]: 3/25/2026 • 4 msgs
+                  - button "go 3/25/2026 • 217 msgs" [ref=e2296] [cursor=pointer]:
+                    - img [ref=e2298]
+                    - generic [ref=e2300]:
+                      - generic [ref=e2301]: go
+                      - generic [ref=e2302]: 3/25/2026 • 217 msgs
+                  - button "Hi 3/25/2026 • 2 msgs" [ref=e2303] [cursor=pointer]:
+                    - img [ref=e2305]
+                    - generic [ref=e2307]:
+                      - generic [ref=e2308]: Hi
+                      - generic [ref=e2309]: 3/25/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/25/2026 • 2 msgs" [ref=e2310] [cursor=pointer]:
+                    - img [ref=e2312]
+                    - generic [ref=e2314]:
+                      - generic [ref=e2315]: Say exactly 'pong'
+                      - generic [ref=e2316]: 3/25/2026 • 2 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 2 msgs" [ref=e2317] [cursor=pointer]:
+                    - img [ref=e2319]
+                    - generic [ref=e2321]:
+                      - generic [ref=e2322]: Write a 10 line poem to poem.txt
+                      - generic [ref=e2323]: 3/25/2026 • 2 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 4 msgs" [ref=e2324] [cursor=pointer]:
+                    - img [ref=e2326]
+                    - generic [ref=e2328]:
+                      - generic [ref=e2329]: Create a file test.txt with content
+                      - generic [ref=e2330]: 3/25/2026 • 4 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 2 msgs" [ref=e2331] [cursor=pointer]:
+                    - img [ref=e2333]
+                    - generic [ref=e2335]:
+                      - generic [ref=e2336]: Write a 10 line poem to poem.txt
+                      - generic [ref=e2337]: 3/25/2026 • 2 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 4 msgs" [ref=e2338] [cursor=pointer]:
+                    - img [ref=e2340]
+                    - generic [ref=e2342]:
+                      - generic [ref=e2343]: Create a file test.txt with content
+                      - generic [ref=e2344]: 3/25/2026 • 4 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 2 msgs" [ref=e2345] [cursor=pointer]:
+                    - img [ref=e2347]
+                    - generic [ref=e2349]:
+                      - generic [ref=e2350]: Write a 10 line poem to poem.txt
+                      - generic [ref=e2351]: 3/25/2026 • 2 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 4 msgs" [ref=e2352] [cursor=pointer]:
+                    - img [ref=e2354]
+                    - generic [ref=e2356]:
+                      - generic [ref=e2357]: Create a file test.txt with content
+                      - generic [ref=e2358]: 3/25/2026 • 4 msgs
+                  - button "Write a 10 line poem to poem.txt 3/25/2026 • 3 msgs" [ref=e2359] [cursor=pointer]:
+                    - img [ref=e2361]
+                    - generic [ref=e2363]:
+                      - generic [ref=e2364]: Write a 10 line poem to poem.txt
+                      - generic [ref=e2365]: 3/25/2026 • 3 msgs
+                  - button "Create a file test.txt with content 3/25/2026 • 6 msgs" [ref=e2366] [cursor=pointer]:
+                    - img [ref=e2368]
+                    - generic [ref=e2370]:
+                      - generic [ref=e2371]: Create a file test.txt with content
+                      - generic [ref=e2372]: 3/25/2026 • 6 msgs
+                  - button "Hi 3/24/2026 • 2 msgs" [ref=e2373] [cursor=pointer]:
+                    - img [ref=e2375]
+                    - generic [ref=e2377]:
+                      - generic [ref=e2378]: Hi
+                      - generic [ref=e2379]: 3/24/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/24/2026 • 2 msgs" [ref=e2380] [cursor=pointer]:
+                    - img [ref=e2382]
+                    - generic [ref=e2384]:
+                      - generic [ref=e2385]: Say exactly 'pong'
+                      - generic [ref=e2386]: 3/24/2026 • 2 msgs
+                  - button "Hi 3/24/2026 • 2 msgs" [ref=e2387] [cursor=pointer]:
+                    - img [ref=e2389]
+                    - generic [ref=e2391]:
+                      - generic [ref=e2392]: Hi
+                      - generic [ref=e2393]: 3/24/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/24/2026 • 2 msgs" [ref=e2394] [cursor=pointer]:
+                    - img [ref=e2396]
+                    - generic [ref=e2398]:
+                      - generic [ref=e2399]: Say exactly 'pong'
+                      - generic [ref=e2400]: 3/24/2026 • 2 msgs
+                  - button "Hi 3/24/2026 • 2 msgs" [ref=e2401] [cursor=pointer]:
+                    - img [ref=e2403]
+                    - generic [ref=e2405]:
+                      - generic [ref=e2406]: Hi
+                      - generic [ref=e2407]: 3/24/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/24/2026 • 2 msgs" [ref=e2408] [cursor=pointer]:
+                    - img [ref=e2410]
+                    - generic [ref=e2412]:
+                      - generic [ref=e2413]: Say exactly 'pong'
+                      - generic [ref=e2414]: 3/24/2026 • 2 msgs
+                  - button "Hi 3/24/2026 • 2 msgs" [ref=e2415] [cursor=pointer]:
+                    - img [ref=e2417]
+                    - generic [ref=e2419]:
+                      - generic [ref=e2420]: Hi
+                      - generic [ref=e2421]: 3/24/2026 • 2 msgs
+                  - button "Say exactly 'pong' 3/24/2026 • 2 msgs" [ref=e2422] [cursor=pointer]:
+                    - img [ref=e2424]
+                    - generic [ref=e2426]:
+                      - generic [ref=e2427]: Say exactly 'pong'
+                      - generic [ref=e2428]: 3/24/2026 • 2 msgs
+                  - button "Test message for toggle 3/24/2026 • 2 msgs" [ref=e2429] [cursor=pointer]:
+                    - img [ref=e2431]
+                    - generic [ref=e2433]:
+                      - generic [ref=e2434]: Test message for toggle
+                      - generic [ref=e2435]: 3/24/2026 • 2 msgs
+                  - button "Hi 3/24/2026 • 2 msgs" [ref=e2436] [cursor=pointer]:
+                    - img [ref=e2438]
+                    - generic [ref=e2440]:
+                      - generic [ref=e2441]: Hi
+                      - generic [ref=e2442]: 3/24/2026 • 2 msgs
+                  - button "Say exactly \"pong\" and nothing else 3/24/2026 • 2 msgs" [ref=e2443] [cursor=pointer]:
+                    - img [ref=e2445]
+                    - generic [ref=e2447]:
+                      - generic [ref=e2448]: Say exactly "pong" and nothing else
+                      - generic [ref=e2449]: 3/24/2026 • 2 msgs
+                  - button "Say exactly \"pong\" and nothing else 3/24/2026 • 2 msgs" [ref=e2450] [cursor=pointer]:
+                    - img [ref=e2452]
+                    - generic [ref=e2454]:
+                      - generic [ref=e2455]: Say exactly "pong" and nothing else
+                      - generic [ref=e2456]: 3/24/2026 • 2 msgs
+                  - button "Say exactly \"pong\" and nothing else 3/24/2026 • 2 msgs" [ref=e2457] [cursor=pointer]:
+                    - img [ref=e2459]
+                    - generic [ref=e2461]:
+                      - generic [ref=e2462]: Say exactly "pong" and nothing else
+                      - generic [ref=e2463]: 3/24/2026 • 2 msgs
+                  - button "Say exactly \"pong\" and nothing else 3/24/2026 • 2 msgs" [ref=e2464] [cursor=pointer]:
+                    - img [ref=e2466]
+                    - generic [ref=e2468]:
+                      - generic [ref=e2469]: Say exactly "pong" and nothing else
+                      - generic [ref=e2470]: 3/24/2026 • 2 msgs
+                  - button "Say exactly \"pong\" and nothing else 3/24/2026 • 2 msgs" [ref=e2471] [cursor=pointer]:
+                    - img [ref=e2473]
+                    - generic [ref=e2475]:
+                      - generic [ref=e2476]: Say exactly "pong" and nothing else
+                      - generic [ref=e2477]: 3/24/2026 • 2 msgs
+                  - button "继续 3/24/2026 • 2 msgs" [ref=e2478] [cursor=pointer]:
+                    - img [ref=e2480]
+                    - generic [ref=e2482]:
+                      - generic [ref=e2483]: 继续
+                      - generic [ref=e2484]: 3/24/2026 • 2 msgs
+                  - button "帮我做一个纯网页的单机版的，在浏览器就可以玩了。3d贪吃蛇游戏，它就好 3/24/2026 • 4 msgs" [ref=e2485] [cursor=pointer]:
+                    - img [ref=e2487]
+                    - generic [ref=e2489]:
+                      - generic [ref=e2490]: 帮我做一个纯网页的单机版的，在浏览器就可以玩了。3d贪吃蛇游戏，它就好
+                      - generic [ref=e2491]: 3/24/2026 • 4 msgs
+                  - button "root/project_3d_visualization.html 3/24/2026 • 6 msgs" [ref=e2492] [cursor=pointer]:
+                    - img [ref=e2494]
+                    - generic [ref=e2496]:
+                      - generic [ref=e2497]: root/project_3d_visualization.html
+                      - generic [ref=e2498]: 3/24/2026 • 6 msgs
+                  - button "怎么回事啊？ 3/24/2026 • 12 msgs" [ref=e2499] [cursor=pointer]:
+                    - img [ref=e2501]
+                    - generic [ref=e2503]:
+                      - generic [ref=e2504]: 怎么回事啊？
+                      - generic [ref=e2505]: 3/24/2026 • 12 msgs
+                  - button "把所有文字框全部都去掉，只留下球体，而且球体要更加多。看起来更加逼真， 3/24/2026 • 29 msgs" [ref=e2506] [cursor=pointer]:
+                    - img [ref=e2508]
+                    - generic [ref=e2510]:
+                      - generic [ref=e2511]: 把所有文字框全部都去掉，只留下球体，而且球体要更加多。看起来更加逼真，
+                      - generic [ref=e2512]: 3/24/2026 • 29 msgs
+                  - button "hi 3/24/2026 • 5 msgs" [ref=e2513] [cursor=pointer]:
+                    - img [ref=e2515]
+                    - generic [ref=e2517]:
+                      - generic [ref=e2518]: hi
+                      - generic [ref=e2519]: 3/24/2026 • 5 msgs
+                  - button "root/project_3d_visualization.html 3/24/2026 • 4 msgs" [ref=e2520] [cursor=pointer]:
+                    - img [ref=e2522]
+                    - generic [ref=e2524]:
+                      - generic [ref=e2525]: root/project_3d_visualization.html
+                      - generic [ref=e2526]: 3/24/2026 • 4 msgs
+                  - button "Test message for toggle 3/24/2026 • 2 msgs" [ref=e2527] [cursor=pointer]:
+                    - img [ref=e2529]
+                    - generic [ref=e2531]:
+                      - generic [ref=e2532]: Test message for toggle
+                      - generic [ref=e2533]: 3/24/2026 • 2 msgs
+                  - button "Test message for toggle 3/24/2026 • 192 msgs" [ref=e2534] [cursor=pointer]:
+                    - img [ref=e2536]
+                    - generic [ref=e2538]:
+                      - generic [ref=e2539]: Test message for toggle
+                      - generic [ref=e2540]: 3/24/2026 • 192 msgs
+                  - button "tfw 3/23/2026 • 24 msgs" [ref=e2541] [cursor=pointer]:
+                    - img [ref=e2543]
+                    - generic [ref=e2545]:
+                      - generic [ref=e2546]: tfw
+                      - generic [ref=e2547]: 3/23/2026 • 24 msgs
+                  - button "Displayed the System prompt from c 3/22/2026 • 28 msgs" [ref=e2548] [cursor=pointer]:
+                    - img [ref=e2550]
+                    - generic [ref=e2552]:
+                      - generic [ref=e2553]: Displayed the System prompt from c
+                      - generic [ref=e2554]: 3/22/2026 • 28 msgs
+                  - button "搞事情 3/22/2026 • 5 msgs" [ref=e2555] [cursor=pointer]:
+                    - img [ref=e2557]
+                    - generic [ref=e2559]:
+                      - generic [ref=e2560]: 搞事情
+                      - generic [ref=e2561]: 3/22/2026 • 5 msgs
+                  - button "Gucci 3/21/2026 • 2 msgs" [ref=e2562] [cursor=pointer]:
+                    - img [ref=e2564]
+                    - generic [ref=e2566]:
+                      - generic [ref=e2567]: Gucci
+                      - generic [ref=e2568]: 3/21/2026 • 2 msgs
+                  - button "gfc 3/21/2026 • 4 msgs" [ref=e2569] [cursor=pointer]:
+                    - img [ref=e2571]
+                    - generic [ref=e2573]:
+                      - generic [ref=e2574]: gfc
+                      - generic [ref=e2575]: 3/21/2026 • 4 msgs
+                  - button "ls 3/21/2026 • 4 msgs" [ref=e2576] [cursor=pointer]:
+                    - img [ref=e2578]
+                    - generic [ref=e2580]:
+                      - generic [ref=e2581]: ls
+                      - generic [ref=e2582]: 3/21/2026 • 4 msgs
+                  - button "Show. context. 3/21/2026 • 33 msgs" [ref=e2583] [cursor=pointer]:
+                    - img [ref=e2585]
+                    - generic [ref=e2587]:
+                      - generic [ref=e2588]: Show. context.
+                      - generic [ref=e2589]: 3/21/2026 • 33 msgs
+                  - button "ls all 3/21/2026 • 4 msgs" [ref=e2590] [cursor=pointer]:
+                    - img [ref=e2592]
+                    - generic [ref=e2594]:
+                      - generic [ref=e2595]: ls all
+                      - generic [ref=e2596]: 3/21/2026 • 4 msgs
+                  - button "Why you do you kill me? Look at the 3/21/2026 • 22 msgs" [ref=e2597] [cursor=pointer]:
+                    - img [ref=e2599]
+                    - generic [ref=e2601]:
+                      - generic [ref=e2602]: Why you do you kill me? Look at the
+                      - generic [ref=e2603]: 3/21/2026 • 22 msgs
+                  - button "hi 3/21/2026 • 16 msgs" [ref=e2604] [cursor=pointer]:
+                    - img [ref=e2606]
+                    - generic [ref=e2608]:
+                      - generic [ref=e2609]: hi
+                      - generic [ref=e2610]: 3/21/2026 • 16 msgs
+                  - button "hi 3/21/2026 • 48 msgs" [ref=e2611] [cursor=pointer]:
+                    - img [ref=e2613]
+                    - generic [ref=e2615]:
+                      - generic [ref=e2616]: hi
+                      - generic [ref=e2617]: 3/21/2026 • 48 msgs
+                  - button "how many people in this country 3/20/2026 • 68 msgs" [ref=e2618] [cursor=pointer]:
+                    - img [ref=e2620]
+                    - generic [ref=e2622]:
+                      - generic [ref=e2623]: how many people in this country
+                      - generic [ref=e2624]: 3/20/2026 • 68 msgs
+                  - button "this year 3/20/2026 • 23 msgs" [ref=e2625] [cursor=pointer]:
+                    - img [ref=e2627]
+                    - generic [ref=e2629]:
+                      - generic [ref=e2630]: this year
+                      - generic [ref=e2631]: 3/20/2026 • 23 msgs
+                  - button "Justin 3/20/2026 • 4 msgs" [ref=e2632] [cursor=pointer]:
+                    - img [ref=e2634]
+                    - generic [ref=e2636]:
+                      - generic [ref=e2637]: Justin
+                      - generic [ref=e2638]: 3/20/2026 • 4 msgs
+                  - button "Message 0 - This is a longer messag 3/20/2026 • 60 msgs" [ref=e2639] [cursor=pointer]:
+                    - img [ref=e2641]
+                    - generic [ref=e2643]:
+                      - generic [ref=e2644]: Message 0 - This is a longer messag
+                      - generic [ref=e2645]: 3/20/2026 • 60 msgs
+                  - button "ls 3/20/2026 • 68 msgs" [ref=e2646] [cursor=pointer]:
+                    - img [ref=e2648]
+                    - generic [ref=e2650]:
+                      - generic [ref=e2651]: ls
+                      - generic [ref=e2652]: 3/20/2026 • 68 msgs
+                  - button "i goggle the mail 3/20/2026 • 6 msgs" [ref=e2653] [cursor=pointer]:
+                    - img [ref=e2655]
+                    - generic [ref=e2657]:
+                      - generic [ref=e2658]: i goggle the mail
+                      - generic [ref=e2659]: 3/20/2026 • 6 msgs
+                  - button "ddds 3/20/2026 • 6 msgs" [ref=e2660] [cursor=pointer]:
+                    - img [ref=e2662]
+                    - generic [ref=e2664]:
+                      - generic [ref=e2665]: ddds
+                      - generic [ref=e2666]: 3/20/2026 • 6 msgs
+                  - button "fddd 3/20/2026 • 4 msgs" [ref=e2667] [cursor=pointer]:
+                    - img [ref=e2669]
+                    - generic [ref=e2671]:
+                      - generic [ref=e2672]: fddd
+                      - generic [ref=e2673]: 3/20/2026 • 4 msgs
+                  - button "hi 3/20/2026 • 6 msgs" [ref=e2674] [cursor=pointer]:
+                    - img [ref=e2676]
+                    - generic [ref=e2678]:
+                      - generic [ref=e2679]: hi
+                      - generic [ref=e2680]: 3/20/2026 • 6 msgs
+                  - button "Message 0 - This is a longer messag 3/20/2026 • 3 msgs" [ref=e2681] [cursor=pointer]:
+                    - img [ref=e2683]
+                    - generic [ref=e2685]:
+                      - generic [ref=e2686]: Message 0 - This is a longer messag
+                      - generic [ref=e2687]: 3/20/2026 • 3 msgs
+                  - button "Test message number 0 with some con 3/20/2026 • 3 msgs" [ref=e2688] [cursor=pointer]:
+                    - img [ref=e2690]
+                    - generic [ref=e2692]:
+                      - generic [ref=e2693]: Test message number 0 with some con
+                      - generic [ref=e2694]: 3/20/2026 • 3 msgs
+                  - button "hi 3/20/2026 • 8 msgs" [ref=e2695] [cursor=pointer]:
+                    - img [ref=e2697]
+                    - generic [ref=e2699]:
+                      - generic [ref=e2700]: hi
+                      - generic [ref=e2701]: 3/20/2026 • 8 msgs
+                  - button "write a python script to summary al 3/20/2026 • 11 msgs" [ref=e2702] [cursor=pointer]:
+                    - img [ref=e2704]
+                    - generic [ref=e2706]:
+                      - generic [ref=e2707]: write a python script to summary al
+                      - generic [ref=e2708]: 3/20/2026 • 11 msgs
+                  - button "hi 3/20/2026 • 17 msgs" [ref=e2709] [cursor=pointer]:
+                    - img [ref=e2711]
+                    - generic [ref=e2713]:
+                      - generic [ref=e2714]: hi
+                      - generic [ref=e2715]: 3/20/2026 • 17 msgs
+                  - button "Message 0 - This is a longer messag 3/20/2026 • 5 msgs" [ref=e2716] [cursor=pointer]:
+                    - img [ref=e2718]
+                    - generic [ref=e2720]:
+                      - generic [ref=e2721]: Message 0 - This is a longer messag
+                      - generic [ref=e2722]: 3/20/2026 • 5 msgs
+                  - button "Test message number 0 with some con 3/20/2026 • 3 msgs" [ref=e2723] [cursor=pointer]:
+                    - img [ref=e2725]
+                    - generic [ref=e2727]:
+                      - generic [ref=e2728]: Test message number 0 with some con
+                      - generic [ref=e2729]: 3/20/2026 • 3 msgs
+                  - button "Test message number 0 with some con 3/20/2026 • 5 msgs" [ref=e2730] [cursor=pointer]:
+                    - img [ref=e2732]
+                    - generic [ref=e2734]:
+                      - generic [ref=e2735]: Test message number 0 with some con
+                      - generic [ref=e2736]: 3/20/2026 • 5 msgs
+                  - button "Test message number 0 with some con 3/20/2026 • 5 msgs" [ref=e2737] [cursor=pointer]:
+                    - img [ref=e2739]
+                    - generic [ref=e2741]:
+                      - generic [ref=e2742]: Test message number 0 with some con
+                      - generic [ref=e2743]: 3/20/2026 • 5 msgs
+                  - button "Message 0 - This is a longer messag 3/20/2026 • 3 msgs" [ref=e2744] [cursor=pointer]:
+                    - img [ref=e2746]
+                    - generic [ref=e2748]:
+                      - generic [ref=e2749]: Message 0 - This is a longer messag
+                      - generic [ref=e2750]: 3/20/2026 • 3 msgs
+                  - button "Test message number 0 with some con 3/20/2026 • 5 msgs" [ref=e2751] [cursor=pointer]:
+                    - img [ref=e2753]
+                    - generic [ref=e2755]:
+                      - generic [ref=e2756]: Test message number 0 with some con
+                      - generic [ref=e2757]: 3/20/2026 • 5 msgs
+                  - button "Message 0 - This is a longer messag 3/20/2026 • 3 msgs" [ref=e2758] [cursor=pointer]:
+                    - img [ref=e2760]
+                    - generic [ref=e2762]:
+                      - generic [ref=e2763]: Message 0 - This is a longer messag
+                      - generic [ref=e2764]: 3/20/2026 • 3 msgs
+                  - button "Test message number 0 with some con 3/20/2026 • 3 msgs" [ref=e2765] [cursor=pointer]:
+                    - img [ref=e2767]
+                    - generic [ref=e2769]:
+                      - generic [ref=e2770]: Test message number 0 with some con
+                      - generic [ref=e2771]: 3/20/2026 • 3 msgs
+                  - button "Message 0 - This is a longer messag 3/20/2026 • 3 msgs" [ref=e2772] [cursor=pointer]:
+                    - img [ref=e2774]
+                    - generic [ref=e2776]:
+                      - generic [ref=e2777]: Message 0 - This is a longer messag
+                      - generic [ref=e2778]: 3/20/2026 • 3 msgs
+                  - button "Test message number 0 with some con 3/20/2026 • 5 msgs" [ref=e2779] [cursor=pointer]:
+                    - img [ref=e2781]
+                    - generic [ref=e2783]:
+                      - generic [ref=e2784]: Test message number 0 with some con
+                      - generic [ref=e2785]: 3/20/2026 • 5 msgs
+                  - button "Message 0 - This is a longer messag 3/20/2026 • 5 msgs" [ref=e2786] [cursor=pointer]:
+                    - img [ref=e2788]
+                    - generic [ref=e2790]:
+                      - generic [ref=e2791]: Message 0 - This is a longer messag
+                      - generic [ref=e2792]: 3/20/2026 • 5 msgs
+                  - button "Test message number 0 with some con 3/20/2026 • 3 msgs" [ref=e2793] [cursor=pointer]:
+                    - img [ref=e2795]
+                    - generic [ref=e2797]:
+                      - generic [ref=e2798]: Test message number 0 with some con
+                      - generic [ref=e2799]: 3/20/2026 • 3 msgs
+                  - button "Message 0 - This is a longer messag 3/20/2026 • 5 msgs" [ref=e2800] [cursor=pointer]:
+                    - img [ref=e2802]
+                    - generic [ref=e2804]:
+                      - generic [ref=e2805]: Message 0 - This is a longer messag
+                      - generic [ref=e2806]: 3/20/2026 • 5 msgs
+                  - button "Message 0 - adding more content to 3/20/2026 • 3 msgs" [ref=e2807] [cursor=pointer]:
+                    - img [ref=e2809]
+                    - generic [ref=e2811]:
+                      - generic [ref=e2812]: Message 0 - adding more content to
+                      - generic [ref=e2813]: 3/20/2026 • 3 msgs
+                  - button "Test message number 0 with some con 3/20/2026 • 5 msgs" [ref=e2814] [cursor=pointer]:
+                    - img [ref=e2816]
+                    - generic [ref=e2818]:
+                      - generic [ref=e2819]: Test message number 0 with some con
+                      - generic [ref=e2820]: 3/20/2026 • 5 msgs
+                  - button "Message 0 - adding more content to 3/20/2026 • 3 msgs" [ref=e2821] [cursor=pointer]:
+                    - img [ref=e2823]
+                    - generic [ref=e2825]:
+                      - generic [ref=e2826]: Message 0 - adding more content to
+                      - generic [ref=e2827]: 3/20/2026 • 3 msgs
+                  - button "Test message number 0 with some con 3/20/2026 • 3 msgs" [ref=e2828] [cursor=pointer]:
+                    - img [ref=e2830]
+                    - generic [ref=e2832]:
+                      - generic [ref=e2833]: Test message number 0 with some con
+                      - generic [ref=e2834]: 3/20/2026 • 3 msgs
+                  - button "Message 0 - adding more content to 3/20/2026 • 3 msgs" [ref=e2835] [cursor=pointer]:
+                    - img [ref=e2837]
+                    - generic [ref=e2839]:
+                      - generic [ref=e2840]: Message 0 - adding more content to
+                      - generic [ref=e2841]: 3/20/2026 • 3 msgs
+                  - button "Test message number 0 with some con 3/20/2026 • 3 msgs" [ref=e2842] [cursor=pointer]:
+                    - img [ref=e2844]
+                    - generic [ref=e2846]:
+                      - generic [ref=e2847]: Test message number 0 with some con
+                      - generic [ref=e2848]: 3/20/2026 • 3 msgs
+                  - button "Test message number 0 with some con 3/20/2026 • 3 msgs" [ref=e2849] [cursor=pointer]:
+                    - img [ref=e2851]
+                    - generic [ref=e2853]:
+                      - generic [ref=e2854]: Test message number 0 with some con
+                      - generic [ref=e2855]: 3/20/2026 • 3 msgs
+                  - button "Message 0 - adding more content to 3/20/2026 • 3 msgs" [ref=e2856] [cursor=pointer]:
+                    - img [ref=e2858]
+                    - generic [ref=e2860]:
+                      - generic [ref=e2861]: Message 0 - adding more content to
+                      - generic [ref=e2862]: 3/20/2026 • 3 msgs
+                  - button "Test message number 0 with some con 3/20/2026 • 3 msgs" [ref=e2863] [cursor=pointer]:
+                    - img [ref=e2865]
+                    - generic [ref=e2867]:
+                      - generic [ref=e2868]: Test message number 0 with some con
+                      - generic [ref=e2869]: 3/20/2026 • 3 msgs
+                  - button "hh 3/20/2026 • 14 msgs" [ref=e2870] [cursor=pointer]:
+                    - img [ref=e2872]
+                    - generic [ref=e2874]:
+                      - generic [ref=e2875]: hh
+                      - generic [ref=e2876]: 3/20/2026 • 14 msgs
+                  - button "hi 3/20/2026 • 2 msgs" [ref=e2877] [cursor=pointer]:
+                    - img [ref=e2879]
+                    - generic [ref=e2881]:
+                      - generic [ref=e2882]: hi
+                      - generic [ref=e2883]: 3/20/2026 • 2 msgs
+                  - button "hi 3/20/2026 • 8 msgs" [ref=e2884] [cursor=pointer]:
+                    - img [ref=e2886]
+                    - generic [ref=e2888]:
+                      - generic [ref=e2889]: hi
+                      - generic [ref=e2890]: 3/20/2026 • 8 msgs
+                  - button "Test message 0 with some content to 3/20/2026 • 3 msgs" [ref=e2891] [cursor=pointer]:
+                    - img [ref=e2893]
+                    - generic [ref=e2895]:
+                      - generic [ref=e2896]: Test message 0 with some content to
+                      - generic [ref=e2897]: 3/20/2026 • 3 msgs
+                  - button "hi 3/20/2026 • 8 msgs" [ref=e2898] [cursor=pointer]:
+                    - img [ref=e2900]
+                    - generic [ref=e2902]:
+                      - generic [ref=e2903]: hi
+                      - generic [ref=e2904]: 3/20/2026 • 8 msgs
+                  - button "Search all the project information 3/20/2026 • 28 msgs" [ref=e2905] [cursor=pointer]:
+                    - img [ref=e2907]
+                    - generic [ref=e2909]:
+                      - generic [ref=e2910]: Search all the project information
+                      - generic [ref=e2911]: 3/20/2026 • 28 msgs
+                  - button "Test message 0 with some content to 3/20/2026 • 3 msgs" [ref=e2912] [cursor=pointer]:
+                    - img [ref=e2914]
+                    - generic [ref=e2916]:
+                      - generic [ref=e2917]: Test message 0 with some content to
+                      - generic [ref=e2918]: 3/20/2026 • 3 msgs
+                  - button "differ 3/20/2026 • 13 msgs" [ref=e2919] [cursor=pointer]:
+                    - img [ref=e2921]
+                    - generic [ref=e2923]:
+                      - generic [ref=e2924]: differ
+                      - generic [ref=e2925]: 3/20/2026 • 13 msgs
+                  - button "hi 3/20/2026 • 6 msgs" [ref=e2926] [cursor=pointer]:
+                    - img [ref=e2928]
+                    - generic [ref=e2930]:
+                      - generic [ref=e2931]: hi
+                      - generic [ref=e2932]: 3/20/2026 • 6 msgs
+                  - button "hi 3/20/2026 • 10 msgs" [ref=e2933] [cursor=pointer]:
+                    - img [ref=e2935]
+                    - generic [ref=e2937]:
+                      - generic [ref=e2938]: hi
+                      - generic [ref=e2939]: 3/20/2026 • 10 msgs
+                  - button "triu 3/20/2026 • 6 msgs" [ref=e2940] [cursor=pointer]:
+                    - img [ref=e2942]
+                    - generic [ref=e2944]:
+                      - generic [ref=e2945]: triu
+                      - generic [ref=e2946]: 3/20/2026 • 6 msgs
+                  - button "G8 3/20/2026 • 2 msgs" [ref=e2947] [cursor=pointer]:
+                    - img [ref=e2949]
+                    - generic [ref=e2951]:
+                      - generic [ref=e2952]: G8
+                      - generic [ref=e2953]: 3/20/2026 • 2 msgs
+                  - button "放假几天能到货款吗 3/20/2026 • 2 msgs" [ref=e2954] [cursor=pointer]:
+                    - img [ref=e2956]
+                    - generic [ref=e2958]:
+                      - generic [ref=e2959]: 放假几天能到货款吗
+                      - generic [ref=e2960]: 3/20/2026 • 2 msgs
+                  - button "hi 3/20/2026 • 12 msgs" [ref=e2961] [cursor=pointer]:
+                    - img [ref=e2963]
+                    - generic [ref=e2965]:
+                      - generic [ref=e2966]: hi
+                      - generic [ref=e2967]: 3/20/2026 • 12 msgs
+                  - button "去玩儿 3/20/2026 • 66 msgs" [ref=e2968] [cursor=pointer]:
+                    - img [ref=e2970]
+                    - generic [ref=e2972]:
+                      - generic [ref=e2973]: 去玩儿
+                      - generic [ref=e2974]: 3/20/2026 • 66 msgs
+                  - button "hi 3/20/2026 • 257 msgs" [ref=e2975] [cursor=pointer]:
+                    - img [ref=e2977]
+                    - generic [ref=e2979]:
+                      - generic [ref=e2980]: hi
+                      - generic [ref=e2981]: 3/20/2026 • 257 msgs
+                  - button "hi 3/20/2026 • 2 msgs" [ref=e2982] [cursor=pointer]:
+                    - img [ref=e2984]
+                    - generic [ref=e2986]:
+                      - generic [ref=e2987]: hi
+                      - generic [ref=e2988]: 3/20/2026 • 2 msgs
+                  - button "yyhvvcgg 3/20/2026 • 20 msgs" [ref=e2989] [cursor=pointer]:
+                    - img [ref=e2991]
+                    - generic [ref=e2993]:
+                      - generic [ref=e2994]: yyhvvcgg
+                      - generic [ref=e2995]: 3/20/2026 • 20 msgs
+                  - button "hi 3/20/2026 • 8 msgs" [ref=e2996] [cursor=pointer]:
+                    - img [ref=e2998]
+                    - generic [ref=e3000]:
+                      - generic [ref=e3001]: hi
+                      - generic [ref=e3002]: 3/20/2026 • 8 msgs
+                  - button "hi 3/20/2026 • 4 msgs" [ref=e3003] [cursor=pointer]:
+                    - img [ref=e3005]
+                    - generic [ref=e3007]:
+                      - generic [ref=e3008]: hi
+                      - generic [ref=e3009]: 3/20/2026 • 4 msgs
+                  - button "hi 3/20/2026 • 40 msgs" [ref=e3010] [cursor=pointer]:
+                    - img [ref=e3012]
+                    - generic [ref=e3014]:
+                      - generic [ref=e3015]: hi
+                      - generic [ref=e3016]: 3/20/2026 • 40 msgs
+                  - button "hi 3/19/2026 • 165 msgs" [ref=e3017] [cursor=pointer]:
+                    - img [ref=e3019]
+                    - generic [ref=e3021]:
+                      - generic [ref=e3022]: hi
+                      - generic [ref=e3023]: 3/19/2026 • 165 msgs
+                  - button "/changelog 3/18/2026 • 6 msgs" [ref=e3024] [cursor=pointer]:
+                    - img [ref=e3026]
+                    - generic [ref=e3028]:
+                      - generic [ref=e3029]: /changelog
+                      - generic [ref=e3030]: 3/18/2026 • 6 msgs
+              - generic [ref=e3031]:
+                - generic [ref=e3033]: Settings
+                - generic [ref=e3034]:
+                  - generic [ref=e3035]: Theme
+                  - generic [ref=e3036]:
+                    - button "Dark" [ref=e3037] [cursor=pointer]:
+                      - img [ref=e3038]
+                    - button "Light" [ref=e3040] [cursor=pointer]:
+                      - img [ref=e3041]
+                - generic [ref=e3045]:
+                  - generic [ref=e3046]: Font
+                  - generic [ref=e3047]:
+                    - button "A" [ref=e3048] [cursor=pointer]:
+                      - generic [ref=e3049]: A
+                    - button "A" [ref=e3050] [cursor=pointer]:
+                      - generic [ref=e3051]: A
+                    - button "A" [ref=e3052] [cursor=pointer]:
+                      - generic [ref=e3053]: A
+                    - button "A" [ref=e3054] [cursor=pointer]:
+                      - generic [ref=e3055]: A
+                - generic [ref=e3056]:
+                  - generic [ref=e3057]: LLM Log
+                  - generic [ref=e3058]:
+                    - button "On" [ref=e3059] [cursor=pointer]:
+                      - img [ref=e3060]
+                      - generic [ref=e3063]: "On"
+                    - button "View LLM Logs" [ref=e3064] [cursor=pointer]:
+                      - img [ref=e3065]
+                - generic [ref=e3068]:
+                  - generic [ref=e3069]: Refresh
+                  - combobox [ref=e3070] [cursor=pointer]:
+                    - option "1s"
+                    - option "5s" [selected]
+                    - option "10s"
+                    - option "30s"
+                    - option "1m"
+        - main [ref=e3071]:
+          - generic [ref=e3072]:
+            - generic [ref=e3074]:
+              - generic [ref=e3075]: π
+              - heading "Welcome to Pi Gateway" [level=1] [ref=e3076]
+              - paragraph [ref=e3077]: Start a conversation below
+            - generic [ref=e3079]:
+              - generic [ref=e3080]:
+                - textbox "Message... Ctrl+Enter to send" [ref=e3081]
+                - generic [ref=e3082]:
+                  - button "Send (Ctrl+Enter)" [ref=e3083] [cursor=pointer]:
+                    - img [ref=e3084]
+                  - button "New Session" [ref=e3086] [cursor=pointer]:
+                    - img [ref=e3087]
+              - generic [ref=e3088]:
+                - button "@" [ref=e3089] [cursor=pointer]:
+                  - generic [ref=e3090]: "@"
+                - button / [ref=e3091] [cursor=pointer]:
+                  - generic [ref=e3092]: /
+                - button "!" [ref=e3093] [cursor=pointer]:
+                  - generic [ref=e3094]: "!"
+                - button "Upload image/file" [ref=e3095] [cursor=pointer]:
+                  - img [ref=e3096]
+  - navigation [ref=e3100]:
+    - generic [ref=e3101]:
+      - button "Hide Sidebar" [ref=e3102] [cursor=pointer]:
+        - img [ref=e3103]
+      - button "Show Panel" [ref=e3105] [cursor=pointer]:
+        - img [ref=e3106]
+    - generic [ref=e3108]:
+      - button "Chat" [ref=e3109] [cursor=pointer]:
+        - img [ref=e3110]
+        - generic [ref=e3112]: Chat
+      - button "Files" [ref=e3113] [cursor=pointer]:
+        - img [ref=e3114]
+        - generic [ref=e3116]: Files
+```
