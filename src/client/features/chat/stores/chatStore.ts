@@ -183,7 +183,11 @@ function buildContentArray(state: State): ContentPart[] {
 
 // RAF 批处理系统用于优化流式更新性能
 let rafId: number | null = null;
-let pendingContentUpdates: { content?: string; thinking?: string } = {};
+let pendingContentUpdates: { 
+	content?: string; 
+	thinking?: string; 
+	toolCalls?: Map<string, { id: string; name: string; args: string }>;
+} = {};
 
 function scheduleRafUpdate(
 	getState: () => State,
@@ -207,12 +211,14 @@ function scheduleRafUpdate(
 			state.streamingContent + (pendingContentUpdates.content || "");
 		const newThinking =
 			state.streamingThinking + (pendingContentUpdates.thinking || "");
+		const newToolCalls = pendingContentUpdates.toolCalls || state.streamingToolCalls;
 
 		// 只更新一次状态
 		const currentContentArray = buildContentArray({
 			...state,
 			streamingContent: newContent,
 			streamingThinking: newThinking,
+			streamingToolCalls: newToolCalls,
 		});
 
 		// 获取之前已保存的内容
@@ -237,6 +243,7 @@ function scheduleRafUpdate(
 			(s) => ({
 				streamingContent: newContent,
 				streamingThinking: newThinking,
+				streamingToolCalls: newToolCalls,
 				currentStreamingMessage: s.currentStreamingMessage
 					? {
 							...s.currentStreamingMessage,
@@ -461,6 +468,13 @@ export const useChatStore = create<
 					streamingToolCalls: newToolCalls,
 				});
 
+				// 获取之前已保存的内容，保留 turn_marker 之前的轮次
+				const existingContent = state.currentStreamingMessage.content || [];
+				const lastTurnMarkerIndex = existingContent.map((c: any) => c.type).lastIndexOf('turn_marker');
+				const preservedContent = lastTurnMarkerIndex >= 0 
+					? existingContent.slice(0, lastTurnMarkerIndex + 1) 
+					: [];
+
 				set(
 					{
 						streamingContent: newContent,
@@ -468,7 +482,7 @@ export const useChatStore = create<
 						streamingToolCalls: newToolCalls,
 						currentStreamingMessage: {
 							...state.currentStreamingMessage,
-							content: contentArray,
+							content: [...preservedContent, ...contentArray],
 						},
 					},
 					false,
@@ -491,10 +505,17 @@ export const useChatStore = create<
 							streamingThinking: state.streamingThinking + finalThinkingToApply,
 						});
 
-						// 合并之前轮次的内容（如果有）和当前轮次内容
-						const existingContent =
-							state.currentStreamingMessage?.content || [];
-						const finalContent = [...existingContent, ...currentContent];
+						// 找到最后一个 turn_marker 的位置
+						const existingContent = state.currentStreamingMessage?.content || [];
+						const lastTurnMarkerIndex = existingContent.map((c: any) => c.type).lastIndexOf('turn_marker');
+						
+						let finalContent: any[];
+						if (lastTurnMarkerIndex >= 0) {
+							const previousRounds = existingContent.slice(0, lastTurnMarkerIndex + 1);
+							finalContent = [...previousRounds, ...currentContent];
+						} else {
+							finalContent = currentContent;
+						}
 
 						const finalMessage = state.currentStreamingMessage
 							? {
@@ -782,7 +803,19 @@ export const useChatStore = create<
 			},
 
 			appendToolCallDelta: (id: string, name: string, delta: string) => {
-				get().batchUpdateContent({ toolCall: { id, name, delta } });
+				// 使用 RAF 批处理，与 content/thinking 保持一致
+				const state = get();
+				const newToolCalls = new Map(state.streamingToolCalls);
+				const existing = newToolCalls.get(id);
+				if (existing) {
+					newToolCalls.set(id, { ...existing, args: existing.args + delta });
+				} else {
+					newToolCalls.set(id, { id, name, args: delta });
+				}
+				
+				// 累积到 pending 状态，让 RAF 统一更新
+				pendingContentUpdates.toolCalls = newToolCalls;
+				scheduleRafUpdate(get, set);
 			},
 
 			// Message collapse toggle
