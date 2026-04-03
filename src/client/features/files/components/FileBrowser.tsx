@@ -6,7 +6,7 @@ import { browseDirectory } from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
 import { fileBrowserDebug, withLogging } from "@/lib/debug";
-import { BatchActionBar } from "./BatchActionBar";
+
 import { FileActionBar } from "./FileActionBar";
 import styles from "./FileBrowser.module.css";
 import { FileBrowserErrorBoundary } from "./FileBrowserErrorBoundary";
@@ -181,11 +181,6 @@ export function FileBrowser({
 			<div className={styles.container}>
 				{/* 主内容区 */}
 				<div className={styles.main}>
-					{/* 批量操作栏 - 多选模式 */}
-					<FileBrowserErrorBoundary componentName="Batch Action Bar">
-						<BatchActionBar />
-					</FileBrowserErrorBoundary>
-
 					{/* 选中文件操作栏 */}
 					<FileBrowserErrorBoundary componentName="File Action Bar">
 						<FileActionBar

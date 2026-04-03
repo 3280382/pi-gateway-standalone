@@ -87,13 +87,13 @@ interface ContentPartWithOrder extends ContentPart {
 function buildContentArray(state: State): ContentPart[] {
 	const content: ContentPartWithOrder[] = [];
 
-	// 使用基础时间戳确保相对顺序：thinking < text < tools
+	// 使用基础时间戳确保相对顺序：thinking < tools < text
 	// thinking 使用 0-99999 范围
-	// text 使用 100000-199999 范围
-	// tools 使用 200000+ 范围（基于实际时间戳）
+	// tools 使用 100000-199999 范围
+	// text 使用 200000+ 范围（确保 AI 输出在最后）
 	const BASE_THINKING = 0;
-	const BASE_TEXT = 100000;
-	const BASE_TOOL = 200000;
+	const BASE_TOOL = 100000;
+	const BASE_TEXT = 200000;
 
 	// 1. 思考内容 - 支持多轮思考，按原始顺序排列
 	if (state.streamingThinkings.length > 0) {
@@ -221,16 +221,15 @@ function scheduleRafUpdate(
 		// 找到最后一个 turn_marker 的位置
 		// turn_marker 之前的所有内容是之前轮次的（已固定）
 		// turn_marker 之后的内容是当前轮次的（需要被 currentContentArray 替换）
-		const lastTurnMarkerIndex = existingContent
-			.map((c: any) => c.type)
-			.lastIndexOf("turn_marker");
-
+		const lastTurnMarkerIndex = existingContent.map((c: any) => c.type).lastIndexOf('turn_marker');
+		
 		let preservedContent: any[];
 		if (lastTurnMarkerIndex >= 0) {
-			// 保留 turn_marker 及之前的所有内容（之前轮次）
+			// 保留 turn_marker 及之前的所有内容（之前轮次已固定）
 			preservedContent = existingContent.slice(0, lastTurnMarkerIndex + 1);
 		} else {
-			// 没有 turn_marker，说明是第一轮，不保留任何内容
+			// 没有 turn_marker，说明是第一轮
+			// 使用 currentContentArray 即可，因为它包含了所有累积的内容
 			preservedContent = [];
 		}
 
@@ -400,7 +399,7 @@ export const useChatStore = create<
 						const previousRounds =
 							lastTurnMarkerIndex >= 0
 								? existingContent.slice(0, lastTurnMarkerIndex + 1)
-								: [];
+								: []; // 第一轮不需要保留 existingContent，currentContent 已经包含了所有内容
 
 						return {
 							currentStreamingMessage: {
@@ -482,7 +481,7 @@ export const useChatStore = create<
 				const finalContentToApply = pendingContentUpdates.content || "";
 				const finalThinkingToApply = pendingContentUpdates.thinking || "";
 				pendingContentUpdates = {};
-
+				
 				set(
 					(state) => {
 						// 构建当前轮次的新内容（包含未完成的 RAF 更新）
@@ -531,13 +530,13 @@ export const useChatStore = create<
 				const finalThinkingToApply = pendingContentUpdates.thinking || "";
 				// 清空待处理更新，防止重复应用
 				pendingContentUpdates = {};
-
+				
 				set(
 					(state) => {
 						// 获取之前轮次的内容（从 currentStreamingMessage.content）
 						const existingContent =
 							state.currentStreamingMessage?.content || [];
-
+						
 						// 构建当前轮次的新内容（包含未完成的 RAF 更新）
 						const currentContent = buildContentArray({
 							...state,
@@ -546,20 +545,16 @@ export const useChatStore = create<
 						});
 
 						// 找到最后一个 turn_marker 的位置
-						const lastTurnMarkerIndex = existingContent
-							.map((c: any) => c.type)
-							.lastIndexOf("turn_marker");
-
+						const lastTurnMarkerIndex = existingContent.map((c: any) => c.type).lastIndexOf('turn_marker');
+						
 						let finalContent: any[];
 						if (lastTurnMarkerIndex >= 0) {
-							// 有多轮：保留 turn_marker 之前的内容 + 当前轮次内容
-							const previousRounds = existingContent.slice(
-								0,
-								lastTurnMarkerIndex + 1,
-							);
+							// 有多轮：保留 turn_marker 之前的内容（之前轮次已固定）+ 当前轮次内容
+							// 注意：turn_marker 之后的内容不应该保留，因为它们来自已被清空的流式状态
+							const previousRounds = existingContent.slice(0, lastTurnMarkerIndex + 1);
 							finalContent = [...previousRounds, ...currentContent];
 						} else {
-							// 只有一轮：直接使用 currentContent（existingContent 和 currentContent 内容相同）
+							// 只有一轮：直接使用当前轮次内容（existingContent 中的内容已经在 currentContent 中）
 							finalContent = currentContent;
 						}
 
@@ -843,15 +838,6 @@ export const useChatStore = create<
 					});
 
 					if (!response.ok) {
-						// 404 表示新会话文件还未创建，这是正常情况
-						if (response.status === 404) {
-							console.log(
-								"[ChatStore] Session file not found (new session):",
-								sessionPath,
-							);
-							set({ messages: [] }, false, "loadSession/new");
-							return 0;
-						}
 						console.error(
 							"[ChatStore] Failed to load session:",
 							response.statusText,

@@ -164,7 +164,7 @@ export function LlmLogPanel({
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.key === "Escape" && isFullscreen) {
-				setShowFullscreen(false);
+				setIsFullscreen(false);
 			}
 		};
 		document.addEventListener("keydown", handleKeyDown);
@@ -178,11 +178,11 @@ export function LlmLogPanel({
 
 	const handleLogClick = (log: LogEntry) => {
 		setSelectedLog(log);
-		setShowFullscreen(true);
+		setIsFullscreen(true);
 	};
 
 	const handleCloseFullscreen = () => {
-		setShowFullscreen(false);
+		setIsFullscreen(false);
 		setTimeout(() => setSelectedLog(null), 200);
 	};
 

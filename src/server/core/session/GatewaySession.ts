@@ -557,27 +557,42 @@ export class GatewaySession {
 		modelId: string,
 		thinkingLevel?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh",
 	) {
-		if (!this.session) return;
+		console.log(`[Gateway] setModel called: provider=${provider}, modelId=${modelId}`);
+		
+		if (!this.session) {
+			console.error("[Gateway] setModel failed: session is null");
+			this.send({ type: "error", error: "会话未初始化" });
+			return;
+		}
 
 		const model = this.modelRegistry.find(provider, modelId);
+		console.log(`[Gateway] modelRegistry.find result:`, model);
+		
 		if (!model) {
+			console.error(`[Gateway] Model not found: ${provider}/${modelId}`);
 			this.send({ type: "error", error: `模型 ${provider}/${modelId} 未找到` });
 			return;
 		}
 
 		try {
+			console.log(`[Gateway] Calling session.setModel with:`, model);
 			await this.session.setModel(model);
+			console.log(`[Gateway] session.setModel succeeded`);
+			
 			if (thinkingLevel) {
 				await this.session.setThinkingLevel(thinkingLevel);
 			}
 
+			console.log(`[Gateway] Sending model_set response`);
 			this.send({
 				type: "model_set",
 				model: model.id,
 				provider: model.provider,
 				thinkingLevel: this.session.thinkingLevel,
 			});
+			console.log(`[Gateway] model_set response sent`);
 		} catch (error) {
+			console.error(`[Gateway] setModel error:`, error);
 			this.send({
 				type: "error",
 				error: error instanceof Error ? error.message : "设置模型失败",
@@ -592,14 +607,22 @@ export class GatewaySession {
 	async setThinkingLevel(
 		thinkingLevel: "off" | "minimal" | "low" | "medium" | "high" | "xhigh",
 	) {
-		if (!this.session) return;
+		console.log(`[Gateway] setThinkingLevel called: ${thinkingLevel}`);
+		if (!this.session) {
+			console.error("[Gateway] setThinkingLevel failed: session is null");
+			this.send({ type: "error", error: "会话未初始化" });
+			return;
+		}
 		try {
+			console.log(`[Gateway] Calling session.setThinkingLevel with: ${thinkingLevel}`);
 			this.session.setThinkingLevel(thinkingLevel);
+			console.log(`[Gateway] Sending thinking_set response`);
 			this.send({
 				type: "thinking_set",
-				thinkingLevel,
+				data: { thinkingLevel },
 			});
 		} catch (error) {
+			console.error(`[Gateway] setThinkingLevel error:`, error);
 			this.send({
 				type: "error",
 				error: error instanceof Error ? error.message : "设置思考级别失败",

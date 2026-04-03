@@ -124,6 +124,9 @@ interface FileActions {
 	deleteSelectedItems: () => Promise<void>;
 	moveSelectedItems: (targetPath: string) => Promise<void>;
 
+	// 文件创建
+	createNewFile: (fileName: string) => Promise<void>;
+
 	// 拖拽
 	setDraggedItem: (item: FileItem | null) => void;
 	setIsDragging: (isDragging: boolean) => void;
@@ -346,6 +349,48 @@ export const useFileStore = create<FileState & FileActions>()(
 				} catch (error) {
 					console.error("Batch move error:", error);
 					set({ error: "Failed to move selected files" });
+					throw error;
+				}
+			},
+
+			// 创建新文件
+			createNewFile: async (fileName) => {
+				const { currentPath } = get();
+				const filePath = `${currentPath}/${fileName}`.replace(/\/+/g, "/");
+
+				try {
+					const response = await fetch("/api/files/write", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ path: filePath, content: "" }),
+					});
+					if (!response.ok) throw new Error("Failed to create file");
+
+					// 刷新当前目录
+					const data = await fetch("/api/browse", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ path: currentPath }),
+					}).then((r) => r.json());
+
+					const itemsToSet = [
+						...(data.parentPath !== data.currentPath
+							? [
+									{
+										name: "..",
+										path: data.parentPath,
+										isDirectory: true,
+										modified: "",
+									},
+								]
+							: []),
+						...data.items,
+					];
+
+					set({ items: itemsToSet });
+				} catch (error) {
+					console.error("Create file error:", error);
+					set({ error: "Failed to create file" });
 					throw error;
 				}
 			},

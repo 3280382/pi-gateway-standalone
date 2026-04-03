@@ -31,6 +31,7 @@ export type WebSocketEvent =
 	| "initialized"
 	| "dir_changed"
 	| "session_created"
+	| "session_info"
 	| "session_loaded"
 	| "sessions_list"
 	| "model_set"
@@ -491,8 +492,14 @@ export class WebSocketService extends BaseService {
 			case "dir_changed":
 				this.emit("dir_changed", message);
 				break;
+			case "session_created":
+				this.emit("session_created", message);
+				break;
 			case "session_loaded":
 				this.emit("session_loaded", message);
+				break;
+			case "session_info":
+				this.emit("session_info", message);
 				break;
 			case "sessions_list":
 				this.emit("sessions_list", message);

@@ -81,8 +81,9 @@ export function ChatPanel() {
 		shouldScrollRef.current = true;
 	}, []);
 
-	const handleNewSession = useCallback(() => {
-		chatController.clearMessages();
+	const handleNewSession = useCallback(async () => {
+		// 通知服务器创建新会话，然后清空本地消息
+		await chatController.createSession("New Session");
 	}, []);
 
 	return (

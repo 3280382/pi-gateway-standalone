@@ -1,17 +1,8 @@
 /**
- * FileItem - Refactored file item component
- *
- * Architecture:
- * - UI Layer: Pure rendering
- * - Logic Layer: Delegated to hooks (useGesture, useDragDrop)
- * - Utils: Pure functions from lib/
- *
- * Before: 356 lines with mixed concerns
- * After: ~150 lines, focused on UI only
+ * FileItem - 文件项组件（使用原生 DOM 点击事件）
  */
 import type React from "react";
 import { memo, useCallback, useRef, useState } from "react";
-import { useGesture } from "@/features/files/hooks/useGesture";
 import { getFileIcon } from "@/features/files/services/api/fileApi";
 import type { FileItem as FileItemType } from "@/features/files/stores/fileStore";
 import { formatDate, formatFileSize } from "@/lib/formatters";
@@ -54,35 +45,58 @@ export const FileItem = memo<FileItemProps>(
 		viewMode,
 	}) => {
 		const [showRipple, setShowRipple] = useState(false);
+		const [isPressed, setIsPressed] = useState(false);
+		const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 		const checkboxRef = useRef<HTMLDivElement>(null);
 
 		const icon = getFileIcon(item.extension, item.isDirectory);
 		const isGrid = viewMode === "grid";
 
-		// 使用 useGesture hook 处理所有手势
-		const { state: gestureState, handlers } = useGesture({
-			onTap: useCallback(
-				(e?: React.MouseEvent | React.TouchEvent) => {
-					// 如果点击的是复选框，不触发 tap
-					if (
-						e &&
-						(e.target as HTMLElement).closest('[data-checkbox="true"]')
-					) {
-						return;
-					}
-					setShowRipple(true);
-					setTimeout(() => setShowRipple(false), 300);
-					onTap(item);
-				},
-				[item, onTap],
-			),
-			onDoubleTap: useCallback(() => {
-				onDoubleTap(item);
-			}, [item, onDoubleTap]),
-			onLongPress: useCallback(() => {
+		// 处理点击（使用原生 DOM 点击事件）
+		const handleClick = useCallback(
+			(e: React.MouseEvent) => {
+				// 如果点击的是复选框，不触发 tap
+				if (
+					e.target instanceof HTMLElement &&
+					e.target.closest('[data-checkbox="true"]')
+				) {
+					return;
+				}
+				setShowRipple(true);
+				setTimeout(() => setShowRipple(false), 300);
+				onTap(item);
+			},
+			[item, onTap],
+		);
+
+		// 处理双击
+		const handleDoubleClick = useCallback(() => {
+			onDoubleTap(item);
+		}, [item, onDoubleTap]);
+
+		// 处理长按（使用鼠标/触摸事件）
+		const handleMouseDown = useCallback(() => {
+			setIsPressed(true);
+			longPressTimerRef.current = setTimeout(() => {
 				onLongPress(item);
-			}, [item, onLongPress]),
-		});
+			}, 500);
+		}, [item, onLongPress]);
+
+		const handleMouseUp = useCallback(() => {
+			setIsPressed(false);
+			if (longPressTimerRef.current) {
+				clearTimeout(longPressTimerRef.current);
+				longPressTimerRef.current = null;
+			}
+		}, []);
+
+		const handleMouseLeave = useCallback(() => {
+			setIsPressed(false);
+			if (longPressTimerRef.current) {
+				clearTimeout(longPressTimerRef.current);
+				longPressTimerRef.current = null;
+			}
+		}, []);
 
 		// 复选框点击处理 - 阻止事件冒泡以避免触发父元素的点击/轻触
 		const handleCheckboxClick = useCallback(
@@ -136,13 +150,17 @@ export const FileItem = memo<FileItemProps>(
 			isSelected ? styles.selected : "",
 			isDropTarget ? styles.dropTarget : "",
 			isDragging ? styles.dragging : "",
-			gestureState.isPressed ? styles.pressed : "",
+			isPressed ? styles.pressed : "",
 		].join(" ");
 
 		return (
 			<div
 				className={itemClassName}
-				{...handlers}
+				onClick={handleClick}
+				onDoubleClick={handleDoubleClick}
+				onMouseDown={handleMouseDown}
+				onMouseUp={handleMouseUp}
+				onMouseLeave={handleMouseLeave}
 				draggable={!item.isDirectory || isMultiSelectMode}
 				onDragStart={handleDragStart}
 				onDragOver={handleDragOver}

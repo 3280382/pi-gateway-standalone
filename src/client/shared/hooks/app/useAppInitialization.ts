@@ -166,7 +166,6 @@ export function useAppInitialization(): InitResult {
 		if (sidebarStore.workingDir?.path !== initData.workingDir) {
 			sidebarStore.setWorkingDir(initData.workingDir);
 		}
-		sidebarStore.selectSession(initData.sessionId);
 
 		// 保存 session 信息 - 以服务端返回的 session 为准
 		chatStore.setSessionId(initData.sessionId);

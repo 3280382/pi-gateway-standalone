@@ -1,18 +1,9 @@
 /**
- * MessageItem - 扁平化重构版 (优化版)
+ * MessageItem - Neo Glassmorphism Edition
  */
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import type { Message, MessageContent } from "@/features/chat/types/chat";
 import styles from "./MessageItem.module.css";
-
-// 声明全局 Prism
-declare global {
-	interface Window {
-		Prism: {
-			highlightElement: (element: Element) => void;
-		};
-	}
-}
 
 interface MessageItemProps {
 	message: Message;
@@ -25,485 +16,282 @@ interface MessageItemProps {
 	onRegenerate?: () => void;
 }
 
+// Helper to safely convert any value to string
+function safeString(val: unknown): string {
+	if (val === null || val === undefined) return "";
+	if (typeof val === "string") return val;
+	if (typeof val === "object") {
+		// If it has a content property, use that
+		if (val && "content" in val && typeof (val as Record<string, unknown>).content === "string") {
+			return (val as Record<string, string>).content;
+		}
+		return JSON.stringify(val, null, 2);
+	}
+	return String(val);
+}
+
 export const MessageItem = memo(
 	function MessageItem({
 		message,
 		showThinking,
 		showTools = true,
-		onToggleCollapse,
-		onToggleThinking,
-		onToggleTools,
-		onDelete,
 	}: MessageItemProps) {
 		const isUser = message.role === "user";
-		const isCollapsed = message.isMessageCollapsed ?? false;
-		const [showActions, setShowActions] = useState(false);
 
 		const blocks = useMemo(() => {
 			return message.content.map((c, idx) => ({ ...c, originalIndex: idx }));
 		}, [message.content]);
 
-		const fullText = useMemo(() => {
-			return blocks
+		if (isUser) {
+			const text = blocks
 				.filter((c) => c.type === "text")
 				.map((c) => c.text)
 				.join("");
-		}, [blocks]);
-
-		const handleCopy = () => {
-			const text = message.content
-				.map((c) => {
-					if (c.type === "text") return c.text || "";
-					if (c.type === "thinking") return c.thinking || "";
-					if (c.type === "tool" || c.type === "tool_use") {
-						return `[${c.toolName}] ${c.output || c.partialArgs || ""}`;
-					}
-					return "";
-				})
-				.filter(Boolean)
-				.join("\n\n");
-			navigator.clipboard.writeText(text);
-		};
+			return (
+				<div className={styles.userMessage}>
+					<div className={styles.userBubble}>{text}</div>
+				</div>
+			);
+		}
 
 		return (
-			<div
-				className={`${styles.message} ${isUser ? styles.user : styles.assistant}`}
-				onMouseEnter={() => setShowActions(true)}
-				onMouseLeave={() => setShowActions(false)}
-			>
-				<div
-					className={styles.actions}
-					style={{ opacity: showActions ? 1 : 0 }}
-				>
-					<button
-						className={styles.actionBtn}
-						onClick={handleCopy}
-						title="复制"
-					>
-						📋
-					</button>
-					{onDelete && (
-						<button
-							className={styles.actionBtn}
-							onClick={onDelete}
-							title="删除"
-						>
-							🗑
-						</button>
-					)}
-				</div>
-
-				{!isCollapsed && (
-					<>
-						{isUser ? (
-							<span
-								className={styles.userText}
-								dangerouslySetInnerHTML={{ __html: formatMarkdown(fullText) }}
-							/>
-						) : (
-							blocks.map((block, idx) => {
-								switch (block.type) {
-									case "thinking":
-										return showThinking ? (
-											<ThinkingContent
-												key={`thinking-${idx}`}
-												content={block}
-												isCollapsed={message.isThinkingCollapsed}
-												onToggle={onToggleThinking}
-												isStreaming={message.isStreaming}
-											/>
-										) : null;
-									case "tool":
-										return showTools ? (
-											<ToolContent
-												key={`tool-${block.toolCallId || idx}`}
-												content={block}
-												isCollapsed={message.isToolsCollapsed}
-												onToggle={onToggleTools}
-												isStreaming={message.isStreaming}
-											/>
-										) : null;
-									case "tool_use":
-										return showTools ? (
-											<ToolUseContent
-												key={`tool-use-${block.toolCallId || idx}`}
-												content={block}
-											/>
-										) : null;
-									case "text":
-										return block.text ? (
-											<TextContent
-												key={`text-${idx}`}
-												content={block.text}
-												isStreaming={message.isStreaming}
-											/>
-										) : null;
-									default:
-										return null;
-								}
-							})
-						)}
-					</>
-				)}
+			<div className={styles.aiContainer}>
+				{blocks.map((block, idx) => (
+					<GlassCard
+						key={`${block.type}-${idx}`}
+						block={block}
+						isStreaming={message.isStreaming}
+						showThinking={showThinking}
+						showTools={showTools}
+					/>
+				))}
 			</div>
 		);
 	},
 	(prevProps, nextProps) => {
-		// 自定义比较函数：只在关键属性变化时重新渲染
 		return (
 			prevProps.message.id === nextProps.message.id &&
 			prevProps.message.isStreaming === nextProps.message.isStreaming &&
 			prevProps.showThinking === nextProps.showThinking &&
 			prevProps.showTools === nextProps.showTools &&
-			prevProps.message.isMessageCollapsed ===
-				nextProps.message.isMessageCollapsed &&
-			prevProps.message.isThinkingCollapsed ===
-				nextProps.message.isThinkingCollapsed &&
-			prevProps.message.isToolsCollapsed ===
-				nextProps.message.isToolsCollapsed &&
-			// 只在流式结束时比较内容长度，避免每字符都触发
-			(!prevProps.message.isStreaming ||
-				JSON.stringify(prevProps.message.content) ===
-					JSON.stringify(nextProps.message.content))
+			JSON.stringify(prevProps.message.content) ===
+				JSON.stringify(nextProps.message.content)
 		);
 	},
 );
 
-// Thinking 块
-interface ThinkingContentProps {
-	content: MessageContent;
-	isCollapsed?: boolean;
-	onToggle?: () => void;
-	isStreaming?: boolean;
+interface GlassCardProps {
+	block: MessageContent & { originalIndex?: number };
+	isStreaming: boolean;
+	showThinking: boolean;
+	showTools: boolean;
 }
 
-function ThinkingContent({
-	content,
-	isCollapsed,
-	onToggle,
+function GlassCard({
+	block,
 	isStreaming,
-}: ThinkingContentProps) {
-	const shouldShow = isStreaming ? true : isCollapsed === false;
-	const firstLine = content.thinking?.split("\n")[0] || "";
+	showThinking,
+	showTools,
+}: GlassCardProps) {
+	const [isExpanded, setIsExpanded] = useState(isStreaming);
+	const [showCopy, setShowCopy] = useState(false);
 
-	if (!shouldShow) {
-		return (
-			<div className={styles.thinkingCollapsed} onClick={onToggle}>
-				<span className={styles.collapsedText}>{firstLine}</span>
-			</div>
-		);
-	}
-
-	return (
-		<pre className={styles.thinkingBody} onClick={onToggle}>
-			{content.thinking || (
-				<span style={{ opacity: 0.5 }}>(empty thinking content)</span>
-			)}
-		</pre>
-	);
-}
-
-// Tool 块
-interface ToolContentProps {
-	content: MessageContent;
-	isCollapsed?: boolean;
-	onToggle?: () => void;
-	isStreaming?: boolean;
-}
-
-function ToolContent({
-	content,
-	isCollapsed,
-	onToggle,
-	isStreaming,
-}: ToolContentProps) {
-	const isExpanded = isStreaming ? true : isCollapsed !== true;
-	const status = content.error
-		? "error"
-		: content.output
-			? "success"
-			: "pending";
-
-	const toolArgs = useMemo(() => {
-		if (content.args && Object.keys(content.args).length > 0) {
-			const streamingArgs = (content.args as Record<string, unknown>)
-				._streamingArgs;
-			if (streamingArgs && typeof streamingArgs === "string") {
-				try {
-					return JSON.parse(streamingArgs);
-				} catch {
-					const matches = streamingArgs.match(/(\w+)=([^\s,]+)/g);
-					if (matches) {
-						const parsed: Record<string, string> = {};
-						matches.forEach((match) => {
-							const [key, value] = match.split("=");
-							if (key && value) {
-								parsed[key] = value.replace(/^["']|["']$/g, "");
-							}
-						});
-						return Object.keys(parsed).length > 0
-							? parsed
-							: { _raw: streamingArgs };
-					}
-					return { _raw: streamingArgs };
-				}
-			}
-			const { _streamingArgs, ...restArgs } = content.args as Record<
-				string,
-				unknown
-			>;
-			return Object.keys(restArgs).length > 0 ? restArgs : {};
+	useMemo(() => {
+		if (!isStreaming && block.type !== "text") {
+			setIsExpanded(false);
 		}
-		return {};
-	}, [content.args]);
+	}, [isStreaming, block.type]);
 
-	const previewLine = useMemo(() => {
-		const toolName = content.toolName || "tool";
-		const argsStr = formatArgsAsCommand(toolName, toolArgs);
-		const fullCmd = argsStr || toolName;
-		return fullCmd.split("\n")[0].substring(0, 60);
-	}, [content.toolName, toolArgs]);
-
-	const handleClick = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		onToggle?.();
+	const copyToClipboard = (text: string) => {
+		navigator.clipboard.writeText(text);
 	};
 
-	if (!isExpanded) {
-		return (
-			<div
-				className={`${styles.toolContainer} ${styles[status]} ${styles.collapsed}`}
-				onClick={handleClick}
-				title={previewLine}
-			>
-				<span className={styles.collapsedIcon}>
-					{status === "success" ? "✓" : status === "error" ? "✗" : "◐"}
-				</span>
-				<span className={styles.collapsedText}>{content.toolName}</span>
-				<span className={styles.collapsedPreview}>{previewLine}</span>
-			</div>
-		);
-	}
-
-	return (
-		<div
-			className={`${styles.toolContainer} ${styles[status]}`}
-			onClick={handleClick}
-		>
-			{Object.keys(toolArgs).length > 0 && (
-				<div className={styles.commandLine}>
-					<span className={styles.commandPrompt}>$</span>
-					<span className={styles.commandText}>
-						{formatArgsAsCommand(content.toolName || "tool", toolArgs)}
-					</span>
+	switch (block.type) {
+		case "thinking":
+			if (!showThinking) return null;
+			const thinkingText = safeString(block.thinking);
+			return (
+				<div
+					className={`${styles.card} ${styles.thinking}`}
+					onMouseEnter={() => setShowCopy(true)}
+					onMouseLeave={() => setShowCopy(false)}
+				>
+					<div className={styles.cardHeader}>
+						<span className={styles.dot} style={{ background: "#fbbf24" }} />
+						<span className={styles.label}>Thinking</span>
+						<div className={styles.actions}>
+							{showCopy && (
+								<button
+									className={styles.btn}
+									onClick={() => copyToClipboard(thinkingText)}
+								>
+									📋
+								</button>
+								)}
+							<button
+								className={styles.btn}
+								onClick={() => setIsExpanded(!isExpanded)}
+							>
+								{isExpanded ? "▼" : "▶"}
+							</button>
+						</div>
+					</div>
+					{isExpanded && (
+						<div className={styles.content}>
+							<code>{thinkingText}</code>
+						</div>
+					)}
 				</div>
-			)}
-			{content.output && (
-				<pre className={styles.toolOutputPre}>
-					{safeStringify(content.output)}
-				</pre>
-			)}
-			{content.error && (
-				<pre className={`${styles.toolOutputPre} ${styles.errorText}`}>
-					{safeStringify(content.error)}
-				</pre>
-			)}
-		</div>
-	);
-}
+			);
 
-// Tool Use 块
-function ToolUseContent({ content }: { content: MessageContent }) {
-	return (
-		<div className={`${styles.toolContainer} ${styles.building}`}>
-			<div className={styles.commandLine}>
-				<span className={`${styles.toolStatus} ${styles.pulse}`}>◐</span>
-				<span className={styles.commandText}>
-					{content.toolName || "tool"}
-					{content.partialArgs ? `: ${content.partialArgs}` : ""}
-				</span>
-			</div>
-		</div>
-	);
-}
+		case "tool_use":
+			if (!showTools) return null;
+			const toolArgs = block.partialArgs || JSON.stringify(block.args, null, 2);
+			return (
+				<div
+					className={`${styles.card} ${styles.tool}`}
+					onMouseEnter={() => setShowCopy(true)}
+					onMouseLeave={() => setShowCopy(false)}
+				>
+					<div className={styles.cardHeader}>
+						<span className={styles.dot} style={{ background: "#34d399" }} />
+						<span className={styles.label}>{block.toolName}</span>
+						<span className={styles.chip}>running</span>
+						<div className={styles.actions}>
+							{showCopy && (
+								<button
+									className={styles.btn}
+									onClick={() => copyToClipboard(toolArgs)}
+								>
+									📋
+								</button>
+								)}
+							<button
+								className={styles.btn}
+								onClick={() => setIsExpanded(!isExpanded)}
+							>
+								{isExpanded ? "▼" : "▶"}
+							</button>
+						</div>
+					</div>
+					{isExpanded && (
+						<div className={styles.content}>
+							<code>{toolArgs}</code>
+						</div>
+					)}
+				</div>
+			);
 
-// Text 块
-function TextContent({
-	content,
-	isStreaming,
-}: {
-	content: string;
-	isStreaming?: boolean;
-}) {
-	const parts = useMemo(() => parseContentWithCode(content), [content]);
+		case "tool":
+			if (!showTools) return null;
+			const status = block.error ? "error" : block.output ? "success" : "pending";
+			const statusColor = block.error ? "#ef4444" : block.output ? "#10b981" : "#6b7280";
+			const toolContent = safeString(block.output || block.error || "Processing...");
+			return (
+				<div
+					className={`${styles.card} ${styles.tool}`}
+					onMouseEnter={() => setShowCopy(true)}
+					onMouseLeave={() => setShowCopy(false)}
+				>
+					<div className={styles.cardHeader}>
+						<span className={styles.dot} style={{ background: statusColor }} />
+						<span className={styles.label}>{block.toolName}</span>
+						<span className={styles.chip}>{status}</span>
+						<div className={styles.actions}>
+							{showCopy && (
+								<button
+									className={styles.btn}
+									onClick={() => copyToClipboard(toolContent)}
+								>
+									📋
+								</button>
+								)}
+							<button
+								className={styles.btn}
+								onClick={() => setIsExpanded(!isExpanded)}
+							>
+								{isExpanded ? "▼" : "▶"}
+							</button>
+						</div>
+					</div>
+					{isExpanded && (
+						<div className={styles.content}>
+							<code>{toolContent}</code>
+						</div>
+					)}
+				</div>
+			);
 
-	if (parts.length === 1 && parts[0].type === "text") {
-		return (
-			<span
-				className={styles.markdownText}
-				dangerouslySetInnerHTML={{ __html: formatMarkdown(parts[0].content) }}
-			/>
-		);
+		case "text":
+			if (!block.text) return null;
+			return (
+				<div
+					className={`${styles.card} ${styles.output}`}
+					onMouseEnter={() => setShowCopy(true)}
+					onMouseLeave={() => setShowCopy(false)}
+				>
+					<div className={styles.cardHeader}>
+						<span className={styles.dot} style={{ background: "#22d3ee" }} />
+						<span className={styles.label}>Assistant</span>
+						<div className={styles.actions}>
+							{showCopy && (
+								<button
+									className={styles.btn}
+									onClick={() => copyToClipboard(block.text || "")}
+								>
+									📋
+								</button>
+								)}
+						</div>
+					</div>
+					<div className={styles.content}>
+						<TextContent text={block.text} />
+					</div>
+				</div>
+			);
+
+		default:
+			return null;
 	}
+}
 
+// Safe text rendering component
+function TextContent({ text }: { text: string }) {
+	const lines = text.split('\n');
 	return (
 		<>
-			{parts.map((part, idx) =>
-				part.type === "code" ? (
-					<CodeBlock
-						key={idx}
-						code={part.content}
-						language={part.language}
-						isStreaming={isStreaming}
-					/>
-				) : (
-					<span
-						key={idx}
-						className={styles.markdownText}
-						dangerouslySetInnerHTML={{
-							__html: formatMarkdown(part.content),
-						}}
-					/>
-				),
-			)}
+			{lines.map((line, idx) => {
+				// Handle code blocks
+				if (line.startsWith('```')) {
+					return <div key={idx} className={styles.codeBlockStart}>{line}</div>;
+				}
+				// Handle inline code
+				const parts = line.split(/(`[^`]+`)/g);
+				return (
+					<div key={idx} className={styles.line}>
+						{parts.map((part, pidx) => {
+							if (part.startsWith('`') && part.endsWith('`')) {
+								return <code key={pidx} className={styles.inlineCode}>{part.slice(1, -1)}</code>;
+							}
+							// Handle bold
+							const boldParts = part.split(/(\*\*[^*]+\*\*)/g);
+							return boldParts.map((bp, bidx) => {
+								if (bp.startsWith('**') && bp.endsWith('**')) {
+									return <strong key={`${pidx}-${bidx}`}>{bp.slice(2, -2)}</strong>;
+								}
+								// Handle italic
+								const italicParts = bp.split(/(\*[^*]+\*)/g);
+								return italicParts.map((ip, iidx) => {
+									if (ip.startsWith('*') && ip.endsWith('*') && !ip.startsWith('**')) {
+										return <em key={`${pidx}-${bidx}-${iidx}`}>{ip.slice(1, -1)}</em>;
+									}
+									return <span key={`${pidx}-${bidx}-${iidx}`}>{ip}</span>;
+								});
+							});
+						})}
+					</div>
+				);
+			})}
 		</>
 	);
-}
-
-// 代码块 - 使用 Prism.js (优化：只在非流式时高亮)
-function CodeBlock({
-	code,
-	language,
-	isStreaming,
-}: {
-	code: string;
-	language?: string;
-	isStreaming?: boolean;
-}) {
-	const [copied, setCopied] = useState(false);
-	const codeRef = useRef<HTMLElement>(null);
-
-	const handleCopy = () => {
-		navigator.clipboard.writeText(code);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
-	};
-
-	// 使用 Prism.js 高亮 - 只在非流式时执行，避免流式过程中频繁重绘
-	useEffect(() => {
-		if (codeRef.current && window.Prism && !isStreaming) {
-			window.Prism.highlightElement(codeRef.current);
-		}
-	}, [code, language, isStreaming]);
-
-	// 确定语言类名
-	const langClass = language ? `language-${language}` : "language-text";
-
-	return (
-		<div className={styles.codeContainer}>
-			<div className={styles.codeHeader}>
-				<span className={styles.codeLang}>{language || "text"}</span>
-				<button className={styles.codeCopyBtn} onClick={handleCopy}>
-					{copied ? "✓" : "📋"}
-				</button>
-			</div>
-			<pre className={`${styles.codePre} ${langClass}`}>
-				<code ref={codeRef} className={langClass}>
-					{code}
-				</code>
-			</pre>
-		</div>
-	);
-}
-
-// 工具函数
-interface ContentPart {
-	type: "text" | "code";
-	content: string;
-	language?: string;
-}
-
-function parseContentWithCode(content: string): ContentPart[] {
-	if (!content) return [];
-
-	const parts: ContentPart[] = [];
-	const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
-	let lastIndex = 0;
-	let match: RegExpExecArray | null;
-
-	while ((match = codeBlockRegex.exec(content)) !== null) {
-		if (match.index > lastIndex) {
-			parts.push({
-				type: "text",
-				content: content.slice(lastIndex, match.index),
-			});
-		}
-		parts.push({
-			type: "code",
-			language: match[1] || "text",
-			content: match[2].trim(),
-		});
-		lastIndex = match.index + match[0].length;
-	}
-
-	if (lastIndex < content.length) {
-		parts.push({ type: "text", content: content.slice(lastIndex) });
-	}
-
-	return parts.length > 0 ? parts : [{ type: "text", content }];
-}
-
-function formatMarkdown(content: string): string {
-	if (!content) return "";
-	return content
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-		.replace(/__([^_]+)__/g, "<strong>$1</strong>")
-		.replace(/\*([^*]+)\*/g, "<em>$1</em>")
-		.replace(/_([^_]+)_/g, "<em>$1</em>")
-		.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
-		.replace(
-			/\[([^\]]+)\]\(([^)]+)\)/g,
-			'<a href="$2" target="_blank" rel="noopener">$1</a>',
-		);
-}
-
-function safeStringify(obj: unknown): string {
-	if (obj === null || obj === undefined) return "";
-	if (typeof obj === "string") return obj;
-	try {
-		return JSON.stringify(obj, null, 2);
-	} catch {
-		return String(obj);
-	}
-}
-
-function formatArgsAsCommand(
-	toolName: string,
-	args: Record<string, unknown>,
-): string {
-	if (!args || Object.keys(args).length === 0) return toolName;
-
-	if (args._raw && typeof args._raw === "string") {
-		return `${toolName} ${args._raw}`;
-	}
-
-	const argStr = Object.entries(args)
-		.filter(([key]) => !key.startsWith("_"))
-		.map(([key, value]) => {
-			const val = String(value);
-			if (
-				val.includes(" ") ||
-				val.includes('"') ||
-				val.includes("\n") ||
-				val.includes("\t")
-			) {
-				return `${key}="${val.replace(/"/g, '\\"')}"`;
-			}
-			return `${key}=${val}`;
-		})
-		.join(" ");
-	return argStr ? `${toolName} ${argStr}` : toolName;
 }

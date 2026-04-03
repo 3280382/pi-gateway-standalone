@@ -14,6 +14,7 @@ export class ChatController {
 	private store = useChatStore;
 	private listenersSetup = false;
 
+
 	/**
 	 * 发送消息（支持图片）
 	 */
@@ -479,9 +480,7 @@ export class ChatController {
 		// 思考增量 - 使用 RAF 批处理优化
 		websocketService.on("thinking_delta", (data) => {
 			if (data?.thinking || data?.delta) {
-				this.store
-					.getState()
-					.appendStreamingThinking(data.thinking || data.delta);
+				this.store.getState().appendStreamingThinking(data.thinking || data.delta);
 			}
 		});
 
@@ -489,13 +488,11 @@ export class ChatController {
 		websocketService.on("toolcall_delta", (data) => {
 			try {
 				if (data?.toolCallId && data?.toolName) {
-					this.store
-						.getState()
-						.appendToolCallDelta(
-							data.toolCallId,
-							data.toolName,
-							data.delta || "",
-						);
+					this.store.getState().appendToolCallDelta(
+						data.toolCallId,
+						data.toolName,
+						data.delta || "",
+					);
 				}
 			} catch (error) {
 				console.error(

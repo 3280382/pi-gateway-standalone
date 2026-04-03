@@ -177,16 +177,42 @@ export function useSidebarController(): SidebarController {
 					const timeout = setTimeout(() => reject(new Error("Timeout")), 5000);
 					const unsub = websocketService.on("dir_changed", async (data) => {
 						clearTimeout(timeout);
+						
+						// 清空旧的 sessions 和选中状态
+						store.setSessions([]);
+						store.selectSession(null);
+						
 						store.setWorkingDir(data.cwd);
 						const { useSessionStore } = await import(
 							"@/shared/stores/sessionStore"
 						);
 						useSessionStore.getState().setCurrentDir(data.cwd);
+						
 						// 保存新的session ID（切换目录后会创建新session）
 						if (data.sessionId) {
 							useSessionStore.getState().setCurrentSession(data.sessionId);
+							store.selectSession(data.sessionId);
 						}
+						
 						store.addRecentWorkspace(data.cwd);
+						
+						// 重新加载新目录的 sessions
+						const sessionsData = await fetchApi<SessionsResponse>(
+							`/sessions?cwd=${encodeURIComponent(data.cwd)}`,
+						);
+						const sessions: Session[] = (sessionsData.sessions || []).map((s) => ({
+							id: s.path,
+							path: s.path,
+							name:
+								s.firstMessage?.slice(0, 35) ||
+								s.path.split("/").pop() ||
+								"Untitled",
+							messageCount: s.messageCount || 0,
+							lastModified: new Date(s.modified),
+							firstMessage: s.firstMessage,
+						}));
+						store.setSessions(sessions);
+						
 						unsub();
 						resolve();
 					});

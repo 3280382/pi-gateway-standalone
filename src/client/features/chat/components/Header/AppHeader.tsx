@@ -279,7 +279,7 @@ export function AppHeader({
 			console.log("[AppHeader] Switching model:", model);
 			try {
 				// Use chatController to set model (sends to server and waits for confirmation)
-				await chatController.setModel(model.provider, model.id);
+				await chatController.setCurrentModel({ id: model.id, provider: model.provider });
 				console.log("[AppHeader] Model set successfully");
 			} catch (error) {
 				console.error("[AppHeader] Failed to set model:", error);

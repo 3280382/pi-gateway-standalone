@@ -5,6 +5,7 @@
 
 import { useCallback } from "react";
 import { useLayout } from "@/app/LayoutContext";
+import { FileBottomMenu } from "@/features/files/components/FileBottomMenu";
 import { XTermPanel } from "@/features/files/components/panels/TerminalPanel";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { FileBrowser } from "./components/FileBrowser";
@@ -85,6 +86,9 @@ export function FilesLayout({
 					{renderBottomPanel()}
 				</main>
 			</div>
+
+			{/* FileBottomMenu - 文件功能底部菜单 */}
+			<FileBottomMenu />
 		</div>
 	);
 }

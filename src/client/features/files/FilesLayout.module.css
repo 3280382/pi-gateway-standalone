@@ -31,4 +31,5 @@
 	overflow: hidden;
 	background: var(--bg-primary);
 	position: relative;
+	padding-bottom: 36px; /* 为 FileBottomMenu 留出空间 */
 }
