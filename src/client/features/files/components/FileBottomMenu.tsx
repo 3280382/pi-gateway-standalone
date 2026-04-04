@@ -4,6 +4,7 @@
  */
 import React, { useState, useCallback, useEffect } from "react";
 import { useFileStore } from "@/features/files/stores/fileStore";
+import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
 import { getFileTree, type TreeResponse, type TreeNode } from "@/features/files/services/api/fileApi";
 import styles from "./FileBottomMenu.module.css";
 
@@ -24,6 +25,8 @@ export function FileBottomMenu() {
 		currentPath,
 		createNewFile,
 	} = useFileStore();
+
+	const { openViewer } = useFileViewerStore();
 
 	// 新建文件
 	const handleNewClick = useCallback(() => {
@@ -86,6 +89,18 @@ export function FileBottomMenu() {
 			setTreeLoading(false);
 		}
 	}, [currentPath]);
+
+	// 处理树中文件点击 - 关闭树弹窗并在主界面打开文件
+	const handleTreeFileClick = useCallback((filePath: string, fileName: string) => {
+		// 构造完整路径
+		const fullPath = currentPath ? `${currentPath}/${filePath}` : filePath;
+		console.log("[TreeView] Opening file:", fullPath);
+		// 关闭树状视图
+		setShowTreeModal(false);
+		setTreeData(null);
+		// 在主界面打开文件查看器
+		openViewer(fullPath, fileName, "view");
+	}, [currentPath, openViewer]);
 
 	const handleCloseTree = useCallback(() => {
 		setShowTreeModal(false);
@@ -200,7 +215,7 @@ export function FileBottomMenu() {
 							{treeLoading ? (
 								<div className={styles.treeLoading}>Loading...</div>
 							) : treeData ? (
-								<TreeView items={treeData.items} />
+								<TreeView items={treeData.items} onFileClick={handleTreeFileClick} />
 							) : (
 								<div className={styles.treeEmpty}>Failed to load directory tree</div>
 							)}
@@ -213,7 +228,13 @@ export function FileBottomMenu() {
 }
 
 // 树状视图组件
-function TreeView({ items }: { items: TreeResponse["items"] }) {
+function TreeView({ 
+	items, 
+	onFileClick 
+}: { 
+	items: TreeResponse["items"];
+	onFileClick: (path: string, name: string) => void;
+}) {
 	if (!items || items.length === 0) {
 		return <div className={styles.treeEmpty}>Empty directory</div>;
 	}
@@ -223,7 +244,7 @@ function TreeView({ items }: { items: TreeResponse["items"] }) {
 	
 	return (
 		<div className={styles.treeView}>
-			<TreeNode node={tree} level={0} />
+			<TreeNode node={tree} level={0} onFileClick={onFileClick} />
 		</div>
 	);
 }
@@ -290,7 +311,15 @@ function sortTree(node: TreeNodeData) {
 	node.children.forEach(sortTree);
 }
 
-function TreeNode({ node, level }: { node: TreeNodeData; level: number }) {
+function TreeNode({ 
+	node, 
+	level, 
+	onFileClick 
+}: { 
+	node: TreeNodeData; 
+	level: number;
+	onFileClick: (path: string, name: string) => void;
+}) {
 	const [expanded, setExpanded] = useState(true); // 默认全部展开
 	const hasChildren = node.children.length > 0;
 	const isMaxLevel = level >= MAX_TREE_LEVEL;
@@ -300,7 +329,7 @@ function TreeNode({ node, level }: { node: TreeNodeData; level: number }) {
 		return (
 			<>
 				{node.children.map((child) => (
-					<TreeNode key={child.path} node={child} level={level + 1} />
+					<TreeNode key={child.path} node={child} level={level + 1} onFileClick={onFileClick} />
 				))}
 			</>
 		);
@@ -326,12 +355,26 @@ function TreeNode({ node, level }: { node: TreeNodeData; level: number }) {
 		);
 	}
 	
+	// 处理点击事件：目录折叠/展开，文件打开
+	const handleClick = () => {
+		if (node.isDirectory) {
+			// 目录：切换展开/折叠
+			if (hasChildren) {
+				setExpanded(!expanded);
+			}
+		} else {
+			// 文件：打开查看器
+			onFileClick(node.path, node.name);
+		}
+	};
+	
 	return (
 		<div className={styles.treeNode}>
 			<div
-				className={styles.treeNodeHeader}
+				className={`${styles.treeNodeHeader} ${!node.isDirectory ? styles.treeFileClickable : ''}`}
 				style={{ paddingLeft: `${level * 12}px` }}
-				onClick={() => hasChildren && setExpanded(!expanded)}
+				onClick={handleClick}
+				title={node.isDirectory ? 'Click to expand/collapse' : 'Click to open file'}
 			>
 				{hasChildren ? (
 					<span className={styles.treeExpandIcon}>{expanded ? "▼" : "▶"}</span>
@@ -346,7 +389,7 @@ function TreeNode({ node, level }: { node: TreeNodeData; level: number }) {
 			{expanded && hasChildren && (
 				<div className={styles.treeChildren}>
 					{node.children.map((child) => (
-						<TreeNode key={child.path} node={child} level={level + 1} />
+						<TreeNode key={child.path} node={child} level={level + 1} onFileClick={onFileClick} />
 					))}
 				</div>
 			)}

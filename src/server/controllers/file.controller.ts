@@ -131,7 +131,7 @@ export async function getDirectoryTree(req: Request, res: Response) {
 		const buildTree = async (
 			dirPath: string,
 			depth: number,
-			maxDepth: number = 3,
+			maxDepth: number = 10, // 最大支持10层目录
 		): Promise<any> => {
 			if (depth >= maxDepth) {
 				return {
