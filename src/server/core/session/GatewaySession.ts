@@ -299,23 +299,26 @@ export class GatewaySession {
 		if (!this.session) return;
 
 		this.unsubscribeFn = this.session.subscribe((event: AgentSessionEvent) => {
+			const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
 			switch (event.type) {
 				case "message_update": {
 					const msgEvent = event.assistantMessageEvent;
 					if (msgEvent.type === "text_delta") {
+						console.log(`[${timestamp}] [SEND] content_delta`);
 						this.send({
-							type: "content_delta", // 改为content_delta以匹配前端
-							text: msgEvent.delta, // 改为text字段以匹配前端
+							type: "content_delta",
+							text: msgEvent.delta,
 						});
 					} else if (msgEvent.type === "thinking_delta") {
+						console.log(`[${timestamp}] [SEND] thinking_delta`);
 						this.send({
 							type: "thinking_delta",
-							thinking: msgEvent.delta, // 改为thinking字段以匹配前端
+							thinking: msgEvent.delta,
 						});
 					} else if (msgEvent.type === "toolcall_delta") {
-						// 转发工具调用增量以逐步构建工具参数
 						const toolCall = msgEvent.partial.content?.[msgEvent.contentIndex];
 						if (toolCall?.type === "toolCall") {
+							console.log(`[${timestamp}] [SEND] toolcall_delta: ${toolCall.name}`);
 							this.send({
 								type: "toolcall_delta",
 								toolCallId: toolCall.id,
@@ -328,6 +331,7 @@ export class GatewaySession {
 					break;
 				}
 				case "tool_execution_start": {
+					console.log(`[${timestamp}] [SEND] tool_start: ${event.toolName}`);
 					this.send({
 						type: "tool_start",
 						toolName: event.toolName,
@@ -337,6 +341,7 @@ export class GatewaySession {
 					break;
 				}
 				case "tool_execution_update": {
+					console.log(`[${timestamp}] [SEND] tool_update: ${event.toolCallId}`);
 					this.send({
 						type: "tool_update",
 						toolCallId: event.toolCallId,
@@ -347,27 +352,21 @@ export class GatewaySession {
 					break;
 				}
 				case "tool_execution_end": {
-					// 检查是否是写文件操作，如果是则读取文件内容并包含在工具结果中
+					console.log(`[${timestamp}] [SEND] tool_end: ${event.toolCallId}`);
 					const toolResult = event.result;
 					const toolName = event.toolName;
-
-					// 检查是否为写文件相关工具
 					const isWriteOperation =
 						toolName &&
 						(writeFileTools.includes(toolName) ||
 							toolName.toLowerCase().includes("write") ||
 							toolName.toLowerCase().includes("create"));
-
 					if (isWriteOperation && !event.isError) {
-						// 尝试从args中获取文件路径
 						const args = (
 							event as unknown as { args?: Record<string, unknown> }
 						).args;
 						const filePath =
 							args?.path || args?.file_path || args?.filepath || args?.filePath;
-
 						if (typeof filePath === "string") {
-							// 异步读取文件内容并随工具结果一起发送
 							this.sendToolEndWithFileContent(
 								event.toolCallId,
 								toolResult,
@@ -393,28 +392,34 @@ export class GatewaySession {
 					break;
 				}
 				case "message_start": {
+					console.log(`[${timestamp}] [SEND] message_start`);
 					this.send({ type: "message_start" });
 					break;
 				}
 				case "message_end": {
+					console.log(`[${timestamp}] [SEND] message_end`);
 					this.send({ type: "message_end" });
 					break;
 				}
 				case "agent_start": {
+					console.log(`[${timestamp}] [SEND] agent_start`);
 					this.isStreaming = true;
 					this.send({ type: "agent_start" });
 					break;
 				}
 				case "agent_end": {
+					console.log(`[${timestamp}] [SEND] agent_end`);
 					this.isStreaming = false;
 					this.send({ type: "agent_end" });
 					break;
 				}
 				case "turn_start": {
+					console.log(`[${timestamp}] [SEND] turn_start`);
 					this.send({ type: "turn_start" });
 					break;
 				}
 				case "turn_end": {
+					console.log(`[${timestamp}] [SEND] turn_end`);
 					this.send({
 						type: "turn_end",
 						message: event.message,
@@ -423,19 +428,23 @@ export class GatewaySession {
 					break;
 				}
 				case "auto_compaction_start": {
+					console.log(`[${timestamp}] [SEND] compaction_start`);
 					this.send({ type: "compaction_start" });
 					break;
 				}
 				case "auto_compaction_end": {
+					console.log(`[${timestamp}] [SEND] compaction_end`);
 					this.isStreaming = false;
 					this.send({ type: "compaction_end" });
 					break;
 				}
 				case "auto_retry_start": {
+					console.log(`[${timestamp}] [SEND] retry_start`);
 					this.send({ type: "retry_start" });
 					break;
 				}
 				case "auto_retry_end": {
+					console.log(`[${timestamp}] [SEND] retry_end`);
 					this.send({ type: "retry_end" });
 					break;
 				}

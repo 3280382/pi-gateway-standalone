@@ -472,6 +472,8 @@ export class ChatController {
 
 		// 内容增量 - 使用 RAF 批处理优化
 		websocketService.on("content_delta", (data) => {
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] content_delta`);
 			if (data?.text || data?.delta) {
 				this.store.getState().appendStreamingContent(data.text || data.delta);
 			}
@@ -479,6 +481,8 @@ export class ChatController {
 
 		// 思考增量 - 使用 RAF 批处理优化
 		websocketService.on("thinking_delta", (data) => {
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] thinking_delta`);
 			if (data?.thinking || data?.delta) {
 				this.store.getState().appendStreamingThinking(data.thinking || data.delta);
 			}
@@ -486,6 +490,8 @@ export class ChatController {
 
 		// 工具调用增量 - 流式显示工具调用构建过程
 		websocketService.on("toolcall_delta", (data) => {
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] toolcall_delta: ${data?.toolName || 'unknown'}`);
 			try {
 				if (data?.toolCallId && data?.toolName) {
 					this.store.getState().appendToolCallDelta(
@@ -504,27 +510,16 @@ export class ChatController {
 
 		// 工具开始
 		websocketService.on("tool_start", (data) => {
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] tool_start: ${data?.toolName || 'unknown'}`);
 			try {
-				console.log("[ChatController] tool_start event received:", data);
-				console.log("[ChatController] tool_start data type:", typeof data);
-
-				// 确保data有必要的属性
 				if (!data || typeof data !== "object") {
 					console.error("[ChatController] Invalid tool_start data:", data);
 					return;
 				}
-
-				// 检查data是否有必要的属性
 				const toolCallId = data.toolCallId || `tool-${Date.now()}`;
 				const toolName = data.toolName || "unknown";
 				const args = data.args || {};
-
-				console.log("[ChatController] Creating tool:", {
-					toolCallId,
-					toolName,
-					args,
-				});
-
 				const tool: ToolExecution = {
 					id: toolCallId,
 					name: toolName,
@@ -532,7 +527,6 @@ export class ChatController {
 					status: "executing",
 					startTime: new Date(),
 				};
-
 				this.store.getState().setActiveTool(tool);
 			} catch (error) {
 				console.error(
@@ -546,9 +540,9 @@ export class ChatController {
 
 		// 工具更新
 		websocketService.on("tool_update", (data) => {
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] tool_update: ${data?.toolCallId}`);
 			try {
-				console.log("[ChatController] tool_update event received:", data);
-				// 后端发送的是chunk字段，不是output
 				const output = data.chunk || "";
 				this.store
 					.getState()
@@ -560,9 +554,9 @@ export class ChatController {
 
 		// 工具结束
 		websocketService.on("tool_end", (data) => {
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] tool_end: ${data?.toolCallId}`);
 			try {
-				console.log("[ChatController] tool_end event received:", data);
-				// 后端发送的是result和isError字段，不是output和error
 				const output = data.result || "";
 				const error = data.isError ? "工具执行失败" : undefined;
 				this.store.getState().updateToolOutput(data.toolCallId, output, error);
@@ -573,44 +567,54 @@ export class ChatController {
 
 		// 代理结束
 		websocketService.on("agent_end", () => {
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] agent_end`);
 			this.finalizeStreamingMessage();
 		});
 
 		// 消息开始/结束
 		websocketService.on("message_start", () => {
-			console.log("[ChatController] Message started");
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] message_start`);
 		});
 
 		websocketService.on("message_end", () => {
-			console.log("[ChatController] Message ended");
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] message_end`);
 		});
 
 		// 轮次开始/结束
 		websocketService.on("turn_start", () => {
-			console.log("[ChatController] Turn started, calling startNewTurn");
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] turn_start`);
 			this.store.getState().startNewTurn();
 		});
 
 		websocketService.on("turn_end", (data) => {
-			console.log("[ChatController] Turn ended:", data);
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] turn_end`);
 		});
 
 		// 压缩开始/结束
 		websocketService.on("compaction_start", () => {
-			console.log("[ChatController] Compaction started");
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] compaction_start`);
 		});
 
 		websocketService.on("compaction_end", () => {
-			console.log("[ChatController] Compaction ended");
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] compaction_end`);
 		});
 
 		// 重试开始/结束
 		websocketService.on("retry_start", () => {
-			console.log("[ChatController] Retry started");
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] retry_start`);
 		});
 
 		websocketService.on("retry_end", () => {
-			console.log("[ChatController] Retry ended");
+			const ts = new Date().toISOString().split('T')[1].split('.')[0];
+			console.log(`[${ts}] [RECV] retry_end`);
 		});
 
 		// 连接状态变化
