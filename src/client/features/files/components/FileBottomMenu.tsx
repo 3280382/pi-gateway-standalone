@@ -283,7 +283,7 @@ function sortTree(node: TreeNodeData) {
 }
 
 function TreeNode({ node, level }: { node: TreeNodeData; level: number }) {
-	const [expanded, setExpanded] = useState(level < 2);
+	const [expanded, setExpanded] = useState(true); // 默认全部展开
 	const hasChildren = node.children.length > 0;
 	
 	if (level === 0) {
@@ -301,7 +301,7 @@ function TreeNode({ node, level }: { node: TreeNodeData; level: number }) {
 		<div className={styles.treeNode}>
 			<div
 				className={styles.treeNodeHeader}
-				style={{ paddingLeft: `${level * 16}px` }}
+				style={{ paddingLeft: `${level * 12}px` }}
 				onClick={() => hasChildren && setExpanded(!expanded)}
 			>
 				{hasChildren ? (

@@ -245,7 +245,7 @@
 .treeContent {
 	flex: 1;
 	overflow: auto;
-	padding: 20px;
+	padding: 8px 12px;
 }
 
 .treeLoading,
@@ -258,11 +258,11 @@
 	color: #8b949e;
 }
 
-/* 树状视图 */
+/* 树状视图 - 紧凑样式 */
 .treeView {
 	font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
-	font-size: 13px;
-	line-height: 1.6;
+	font-size: 11px;
+	line-height: 1.4;
 }
 
 .treeNode {
@@ -272,11 +272,12 @@
 .treeNodeHeader {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	padding: 4px 8px;
-	border-radius: 4px;
+	gap: 2px;
+	padding: 1px 4px;
+	border-radius: 3px;
 	cursor: pointer;
 	transition: background 0.1s;
+	height: 18px;
 }
 
 .treeNodeHeader:hover {
@@ -285,16 +286,16 @@
 
 .treeExpandIcon,
 .treeExpandIconPlaceholder {
-	width: 14px;
+	width: 12px;
 	flex-shrink: 0;
-	font-size: 10px;
+	font-size: 8px;
 	color: #6e7681;
 	text-align: center;
 }
 
 .treeIcon {
 	flex-shrink: 0;
-	font-size: 14px;
+	font-size: 11px;
 }
 
 .treeDirName {
@@ -307,5 +308,5 @@
 }
 
 .treeChildren {
-	/* Indent handled by paddingLeft in inline style */
+	/* Indent handled by paddingLeft in inline style - reduced from 16px to 12px per level */
 }
