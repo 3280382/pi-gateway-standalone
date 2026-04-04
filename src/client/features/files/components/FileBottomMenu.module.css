@@ -307,6 +307,12 @@
 	color: #c9d1d9;
 }
 
+.treeTruncated {
+	color: #6e7681;
+	font-style: italic;
+	font-size: 10px;
+}
+
 .treeChildren {
 	/* Indent handled by paddingLeft in inline style - reduced from 16px to 12px per level */
 }

@@ -228,11 +228,14 @@ function TreeView({ items }: { items: TreeResponse["items"] }) {
 	);
 }
 
+const MAX_TREE_LEVEL = 10; // 最大支持10层目录
+
 interface TreeNodeData {
 	name: string;
 	path: string;
 	isDirectory: boolean;
 	children: TreeNodeData[];
+	isTruncated?: boolean; // 是否被截断（超过10层）
 }
 
 function buildTree(items: TreeNode[]): TreeNodeData {
@@ -245,12 +248,16 @@ function buildTree(items: TreeNode[]): TreeNodeData {
 		const parts = item.path.split("/").filter(Boolean);
 		if (parts.length === 0) continue;
 		
+		// 跳过超过10层的项目
+		if (parts.length > MAX_TREE_LEVEL) continue;
+		
 		// Build path hierarchy
 		let current = root;
 		for (let i = 0; i < parts.length; i++) {
 			const part = parts[i];
 			const currentPath = parts.slice(0, i + 1).join("/");
 			const isLast = i === parts.length - 1;
+			const currentLevel = i + 1; // 当前层级（1-based）
 			
 			let node = itemMap.get(currentPath);
 			if (!node) {
@@ -259,6 +266,7 @@ function buildTree(items: TreeNode[]): TreeNodeData {
 					path: currentPath,
 					isDirectory: isLast ? item.isDirectory : true,
 					children: [],
+					isTruncated: currentLevel >= MAX_TREE_LEVEL && !isLast,
 				};
 				itemMap.set(currentPath, node);
 				current.children.push(node);
@@ -285,6 +293,7 @@ function sortTree(node: TreeNodeData) {
 function TreeNode({ node, level }: { node: TreeNodeData; level: number }) {
 	const [expanded, setExpanded] = useState(true); // 默认全部展开
 	const hasChildren = node.children.length > 0;
+	const isMaxLevel = level >= MAX_TREE_LEVEL;
 	
 	if (level === 0) {
 		// Root node - just render children
@@ -294,6 +303,26 @@ function TreeNode({ node, level }: { node: TreeNodeData; level: number }) {
 					<TreeNode key={child.path} node={child} level={level + 1} />
 				))}
 			</>
+		);
+	}
+	
+	// 如果达到最大层级且有子项，显示截断提示
+	if (isMaxLevel && hasChildren) {
+		return (
+			<div className={styles.treeNode}>
+				<div
+					className={styles.treeNodeHeader}
+					style={{ paddingLeft: `${level * 12}px` }}
+				>
+					<span className={styles.treeExpandIconPlaceholder} />
+					<span className={styles.treeIcon}>📁</span>
+					<span className={styles.treeDirName}>{node.name}</span>
+				</div>
+				<div className={styles.treeNodeHeader} style={{ paddingLeft: `${(level + 1) * 12}px` }}>
+					<span className={styles.treeExpandIconPlaceholder} />
+					<span className={styles.treeTruncated}>... (max depth reached)</span>
+				</div>
+			</div>
 		);
 	}
 	
