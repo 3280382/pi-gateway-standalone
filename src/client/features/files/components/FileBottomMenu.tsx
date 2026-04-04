@@ -90,15 +90,12 @@ export function FileBottomMenu() {
 		}
 	}, [currentPath]);
 
-	// 处理树中文件点击 - 关闭树弹窗并在主界面打开文件
+	// 处理树中文件点击 - 在主界面打开文件查看器（保持树状弹窗打开）
 	const handleTreeFileClick = useCallback((filePath: string, fileName: string) => {
 		// 构造完整路径
 		const fullPath = currentPath ? `${currentPath}/${filePath}` : filePath;
 		console.log("[TreeView] Opening file:", fullPath);
-		// 关闭树状视图
-		setShowTreeModal(false);
-		setTreeData(null);
-		// 在主界面打开文件查看器
+		// 在主界面打开文件查看器（树状弹窗保持打开）
 		openViewer(fullPath, fileName, "view");
 	}, [currentPath, openViewer]);
 
