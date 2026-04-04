@@ -277,6 +277,8 @@ export function AppHeader({
 		const model = models.find((m) => m.id === modelId);
 		if (model) {
 			console.log("[AppHeader] Switching model:", model);
+			console.log("[AppHeader] model.id type:", typeof model.id, "value:", model.id);
+			console.log("[AppHeader] model.provider type:", typeof model.provider, "value:", model.provider);
 			try {
 				// Use chatController to set model (sends to server and waits for confirmation)
 				await chatController.setCurrentModel({ id: model.id, provider: model.provider });

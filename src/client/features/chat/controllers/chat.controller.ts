@@ -306,12 +306,9 @@ export class ChatController {
 	/**
 	 * 设置当前模型
 	 */
-	async setCurrentModel(modelId: string): Promise<void> {
+	async setCurrentModel(model: { id: string; provider: string }): Promise<void> {
+		console.log("[ChatController] setCurrentModel called:", model);
 		try {
-			// 查找模型提供者（这里需要从模型列表中获取）
-			// 暂时使用默认提供者
-			const provider = "deepseek"; // 默认提供者
-
 			// 使用WebSocket设置模型
 			return new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(() => {
@@ -320,12 +317,12 @@ export class ChatController {
 
 				const unsubscribe = websocketService.on("model_set", (data) => {
 					clearTimeout(timeout);
-					this.store.getState().setCurrentModel(modelId);
+					this.store.getState().setCurrentModel(model.id);
 					unsubscribe();
 					resolve();
 				});
 
-				websocketService.setModel(provider, modelId);
+				websocketService.setModel(model.provider, model.id);
 			});
 		} catch (error) {
 			this.handleError("setCurrentModel", error);
