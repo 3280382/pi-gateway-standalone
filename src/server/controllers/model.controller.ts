@@ -19,14 +19,17 @@ export async function getModels(_req: Request, res: Response) {
 		const available = await modelRegistry.getAvailable();
 
 		logger.info(`获取模型列表，数量: ${available.length}`);
-		res.json({
-			models: available.map((m) => ({
-				id: m.id,
-				provider: m.provider,
-				name: m.name ?? m.id,
-				description: "",
-			})),
-		});
+		// Debug: log first model to check id type
+		if (available.length > 0) {
+			logger.info(`First model: id=${JSON.stringify(available[0].id)}, typeof id=${typeof available[0].id}`);
+		}
+		const models = available.map((m) => ({
+			id: typeof m.id === 'object' ? (m.id as any).id || String(m.id) : m.id,
+			provider: m.provider,
+			name: m.name ?? (typeof m.id === 'object' ? String(m.id) : m.id),
+			description: "",
+		}));
+		res.json({ models });
 	} catch (error) {
 		logger.error(
 			`获取模型列表错误: ${error instanceof Error ? error.message : String(error)}`,

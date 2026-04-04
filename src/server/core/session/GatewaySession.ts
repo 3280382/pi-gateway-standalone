@@ -706,14 +706,16 @@ export class GatewaySession {
 	async listModels() {
 		try {
 			const available = await this.modelRegistry.getAvailable();
+			// Handle case where m.id might be an object
+			const models = available.map((m) => ({
+				id: typeof m.id === 'object' ? (m as any).id?.id || String(m.id) : m.id,
+				provider: m.provider,
+				name: m.name ?? (typeof m.id === 'object' ? String(m.id) : m.id),
+				description: "",
+			}));
 			this.send({
 				type: "models_list",
-				models: available.map((m) => ({
-					id: m.id,
-					provider: m.provider,
-					name: m.name ?? m.id,
-					description: "", // 模型类型没有描述
-				})),
+				models,
 			});
 		} catch (error) {
 			this.send({
