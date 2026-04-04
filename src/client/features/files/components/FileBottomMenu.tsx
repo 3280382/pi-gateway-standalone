@@ -4,7 +4,7 @@
  */
 import React, { useState, useCallback, useEffect } from "react";
 import { useFileStore } from "@/features/files/stores/fileStore";
-import { getFileTree, type TreeResponse } from "@/features/files/services/api/fileApi";
+import { getFileTree, type TreeResponse, type TreeNode } from "@/features/files/services/api/fileApi";
 import styles from "./FileBottomMenu.module.css";
 
 export function FileBottomMenu() {
@@ -75,10 +75,13 @@ export function FileBottomMenu() {
 		setShowTreeModal(true);
 		setTreeLoading(true);
 		try {
+			console.log("[TreeView] Loading tree for path:", currentPath);
 			const data = await getFileTree(currentPath);
+			console.log("[TreeView] Loaded items count:", data.items.length);
+			console.log("[TreeView] First 5 items:", data.items.slice(0, 5));
 			setTreeData(data);
 		} catch (error) {
-			console.error("Failed to load file tree:", error);
+			console.error("[TreeView] Failed to load file tree:", error);
 		} finally {
 			setTreeLoading(false);
 		}
@@ -232,29 +235,35 @@ interface TreeNodeData {
 	children: TreeNodeData[];
 }
 
-function buildTree(items: TreeResponse["items"]): TreeNodeData {
+function buildTree(items: TreeNode[]): TreeNodeData {
 	const root: TreeNodeData = { name: ".", path: "", isDirectory: true, children: [] };
+	
+	// Group items by their parent directory
+	const itemMap = new Map<string, TreeNodeData>();
 	
 	for (const item of items) {
 		const parts = item.path.split("/").filter(Boolean);
-		let current = root;
+		if (parts.length === 0) continue;
 		
+		// Build path hierarchy
+		let current = root;
 		for (let i = 0; i < parts.length; i++) {
 			const part = parts[i];
+			const currentPath = parts.slice(0, i + 1).join("/");
 			const isLast = i === parts.length - 1;
-			const fullPath = parts.slice(0, i + 1).join("/");
 			
-			let child = current.children.find((c) => c.name === part);
-			if (!child) {
-				child = {
+			let node = itemMap.get(currentPath);
+			if (!node) {
+				node = {
 					name: part,
-					path: fullPath,
+					path: currentPath,
 					isDirectory: isLast ? item.isDirectory : true,
 					children: [],
 				};
-				current.children.push(child);
+				itemMap.set(currentPath, node);
+				current.children.push(node);
 			}
-			current = child;
+			current = node;
 		}
 	}
 	

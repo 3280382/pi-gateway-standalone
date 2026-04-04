@@ -17,13 +17,17 @@ export interface FileContentResponse {
 	modified: string;
 }
 
+export interface TreeNode {
+	name: string;
+	path: string;
+	isDirectory: boolean;
+	children?: TreeNode[];
+	truncated?: boolean;
+}
+
 export interface TreeResponse {
 	path: string;
-	items: Array<{
-		name: string;
-		path: string;
-		isDirectory: boolean;
-	}>;
+	items: TreeNode[];
 }
 
 // 浏览目录
@@ -51,7 +55,36 @@ export async function getFileTree(path: string): Promise<TreeResponse> {
 		throw new Error(`Failed to load file tree: ${response.statusText}`);
 	}
 
-	return response.json();
+	const data = await response.json();
+	
+	// API returns nested tree structure with children, flatten it for UI
+	const items: TreeNode[] = [];
+	const rootPath = data.path || '';
+	
+	function flatten(node: TreeNode, depth: number = 0) {
+		// Skip the root node itself, only include children
+		if (depth > 0) {
+			// Get relative path from root
+			const relativePath = node.path.replace(rootPath, '').replace(/^\//, '');
+			items.push({
+				name: node.name,
+				path: relativePath || node.name,
+				isDirectory: node.isDirectory,
+			});
+		}
+		if (node.children && !node.truncated) {
+			for (const child of node.children) {
+				flatten(child, depth + 1);
+			}
+		}
+	}
+	
+	// data is the root node
+	if (data) {
+		flatten(data, 0);
+	}
+	
+	return { path: data.path || path, items };
 }
 
 // 读取文件内容
