@@ -71,7 +71,7 @@ async function registerModelRoutes(app: Application): Promise<void> {
 
 async function registerSessionRoutes(app: Application): Promise<void> {
 	const { getSessions, getSystemPrompt, loadSession } = await import(
-		"../features/session/controllers/session.controller"
+		"../features/chat/session-controllers/session.controller"
 	);
 
 	app.get("/api/sessions", getSessions);

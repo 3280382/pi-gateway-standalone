@@ -4,7 +4,7 @@
  */
 
 import { SessionManager } from "@mariozechner/pi-coding-agent";
-import { getLocalSessionsDir } from "../../chat/agent-session/utils";
+import { getLocalSessionsDir } from "../agent-session/utils";
 import { Logger, LogLevel } from "../../../lib/utils/logger";
 import type { WSContext } from "../../../shared/websocket/ws-router";
 

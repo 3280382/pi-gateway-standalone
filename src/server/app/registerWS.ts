@@ -6,7 +6,7 @@
  */
 
 // 注册 Session Feature 处理器
-import "../features/session/ws/index";
+import "../features/chat/session-ws/index";
 
 // 注册 Chat Feature 处理器
 import "../features/chat/ws/index";
