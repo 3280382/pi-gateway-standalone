@@ -21,7 +21,7 @@ import {
 } from "@mariozechner/pi-coding-agent";
 import type { LlmLogManager } from "@server/llm/log-manager";
 import { WebSocket } from "ws";
-import { AGENT_DIR, getLocalSessionsDir } from "../../session/utils";
+import { AGENT_DIR, getLocalSessionsDir } from "./utils";
 
 /**
  * 服务器消息接口
