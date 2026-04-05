@@ -8,9 +8,9 @@ import {
 	SessionManager,
 } from "@mariozechner/pi-coding-agent";
 import type { Request, Response } from "express";
-import { expandPath } from "../lib/utils/file-utils";
-import { Logger, LogLevel } from "../lib/utils/logger";
-import { AGENT_DIR, getLocalSessionsDir } from "../core/session/utils";
+import { expandPath } from "../../../lib/utils/file-utils";
+import { Logger, LogLevel } from "../../../lib/utils/logger";
+import { AGENT_DIR, getLocalSessionsDir } from "../../../core/session/utils";
 
 const logger = new Logger({ level: LogLevel.INFO });
 

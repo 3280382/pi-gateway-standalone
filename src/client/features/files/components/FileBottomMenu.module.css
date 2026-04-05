@@ -218,6 +218,41 @@
 	color: #58a6ff;
 }
 
+.treeHeaderActions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.treeCopyBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border: none;
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.05);
+	color: #8b949e;
+	cursor: pointer;
+	transition: all 0.15s;
+}
+
+.treeCopyBtn:hover:not(:disabled) {
+	background: rgba(88, 166, 255, 0.15);
+	color: #58a6ff;
+}
+
+.treeCopyBtn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.treeCopyBtn svg {
+	width: 16px;
+	height: 16px;
+}
+
 .treeCloseBtn {
 	display: flex;
 	align-items: center;

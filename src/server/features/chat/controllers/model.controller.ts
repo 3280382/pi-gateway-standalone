@@ -5,7 +5,7 @@
 
 import { AuthStorage, ModelRegistry } from "@mariozechner/pi-coding-agent";
 import type { Request, Response } from "express";
-import { Logger, LogLevel } from "../lib/utils/logger";
+import { Logger, LogLevel } from "../../../lib/utils/logger";
 
 const logger = new Logger({ level: LogLevel.INFO });
 

@@ -55,7 +55,7 @@ async function registerSystemRoutes(
 // ============================================================================
 
 async function registerModelRoutes(app: Application): Promise<void> {
-	const { getModels } = await import("../controllers/model.controller");
+	const { getModels } = await import("../features/chat/controllers/model.controller");
 
 	app.get("/api/models", getModels);
 	app.post("/api/models", async (req, res) => {
@@ -71,7 +71,7 @@ async function registerModelRoutes(app: Application): Promise<void> {
 
 async function registerSessionRoutes(app: Application): Promise<void> {
 	const { getSessions, getSystemPrompt, loadSession } = await import(
-		"../controllers/session.controller"
+		"../features/session/controllers/session.controller"
 	);
 
 	app.get("/api/sessions", getSessions);
@@ -93,7 +93,7 @@ async function registerFileRoutes(app: Application): Promise<void> {
 		getFileContent,
 		getRawFile,
 		writeFileContent,
-	} = await import("../controllers/file.controller");
+	} = await import("../features/files/controllers/file.controller");
 
 	app.post("/api/browse", browseDirectory);
 	app.get("/api/files/tree", getDirectoryTree);

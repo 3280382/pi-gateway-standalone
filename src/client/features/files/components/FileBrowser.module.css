@@ -630,6 +630,12 @@
 	font-size: var(--font-xs);
 }
 
+.sidebarActions {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
 .clearCacheBtn {
 	background: none;
 	border: none;
@@ -638,12 +644,33 @@
 	font-size: var(--font-xs);
 	padding: 2px;
 	border-radius: 2px;
-	margin-left: auto;
 }
 
 .clearCacheBtn:hover {
 	background: var(--bg-hover);
 	color: var(--text-primary);
+}
+
+.copyTreeBtn {
+	background: none;
+	border: none;
+	color: var(--text-muted);
+	cursor: pointer;
+	padding: 4px;
+	border-radius: 3px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.copyTreeBtn:hover:not(:disabled) {
+	background: var(--bg-hover);
+	color: var(--text-primary);
+}
+
+.copyTreeBtn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
 }
 
 /* ====== 选中文件操作栏 ====== */

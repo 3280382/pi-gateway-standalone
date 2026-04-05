@@ -12,8 +12,8 @@ import {
 	isBinaryFile,
 	isHighlightable,
 	isPathAllowed,
-} from "../lib/utils/file-utils";
-import { Logger, LogLevel } from "../lib/utils/logger";
+} from "../../../lib/utils/file-utils";
+import { Logger, LogLevel } from "../../../lib/utils/logger";
 
 const logger = new Logger({ level: LogLevel.INFO });
 
