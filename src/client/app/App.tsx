@@ -7,11 +7,12 @@
  */
 
 import { LayoutProvider, useLayout } from "@/app/LayoutContext";
+import { ErrorBoundary } from "@/app/ErrorBoundary";
 import { ErrorScreen } from "@/app/pages/ErrorScreen";
 import { LoadingScreen } from "@/app/pages/LoadingScreen";
 import { ChatPage } from "@/features/chat/page";
 import { FilesPage } from "@/features/files/page";
-import { useAppInitialization } from "@/hooks";
+import { useAppInitialization } from "@/features/chat/hooks/useAppInitialization";
 import { Footer } from "./Footer";
 import "@/styles/global.css";
 import styles from "./App.module.css";
@@ -63,8 +64,10 @@ function AppContent() {
  */
 export default function App() {
 	return (
-		<LayoutProvider>
-			<AppContent />
-		</LayoutProvider>
+		<ErrorBoundary>
+			<LayoutProvider>
+				<AppContent />
+			</LayoutProvider>
+		</ErrorBoundary>
 	);
 }

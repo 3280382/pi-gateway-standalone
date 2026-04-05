@@ -43,6 +43,7 @@ export const MessageItem = memo(
 		const isUser = message.role === "user";
 
 		const blocks = useMemo(() => {
+			if (!message.content || !Array.isArray(message.content)) return [];
 			return message.content.map((c, idx) => ({ ...c, originalIndex: idx }));
 		}, [message.content]);
 
@@ -78,8 +79,8 @@ export const MessageItem = memo(
 			prevProps.message.isStreaming === nextProps.message.isStreaming &&
 			prevProps.showThinking === nextProps.showThinking &&
 			prevProps.showTools === nextProps.showTools &&
-			JSON.stringify(prevProps.message.content) ===
-				JSON.stringify(nextProps.message.content)
+			JSON.stringify(prevProps.message.content || []) ===
+				JSON.stringify(nextProps.message.content || [])
 		);
 	},
 );
@@ -274,7 +275,8 @@ function GlassCard({
 
 // Safe text rendering component
 function TextContent({ text }: { text: string }) {
-	const lines = text.split("\n");
+	const safeText = text || "";
+	const lines = safeText.split("\n");
 	return (
 		<>
 			{lines.map((line, idx) => {

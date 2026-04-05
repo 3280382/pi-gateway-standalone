@@ -1,9 +1,11 @@
 /**
  * SidebarPanel - Main Sidebar Container
+ * 
+ * 重构后：
+ * - session 加载由 sessionManager 统一处理
+ * - SidebarPanel 只负责 UI 渲染
  */
 
-import { useEffect, useRef } from "react";
-import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { RecentWorkspaces } from "../RecentWorkspaces/RecentWorkspaces";
 import { Sessions } from "../Sessions/Sessions";
@@ -21,32 +23,8 @@ export function SidebarPanel({
 	onSwitchView,
 	currentView = "chat",
 }: SidebarPanelProps) {
-	const workingDir = useSidebarStore((state) => state.workingDir);
 	const error = useSidebarStore((state) => state.error);
-	const controller = useSidebarController();
-	const sessionsLoadedRef = useRef<string | null>(null);
-
-	// Initial data loading
-	useEffect(() => {
-		// 不再自动加载workingDir，由App.tsx负责初始化以保持持久化状态
-		// controller.loadWorkingDir();
-		controller.loadRecentWorkspaces();
-	}, []);
-
-	// Load sessions when working directory changes
-	useEffect(() => {
-		console.log(
-			"[SidebarPanel] workingDir changed:",
-			workingDir?.path,
-			"loaded:",
-			sessionsLoadedRef.current,
-		);
-		if (workingDir?.path && sessionsLoadedRef.current !== workingDir.path) {
-			sessionsLoadedRef.current = workingDir.path;
-			console.log("[SidebarPanel] Loading sessions for:", workingDir.path);
-			controller.loadSessions(workingDir.path);
-		}
-	}, [workingDir?.path]);
+	const clearError = useSidebarStore((state) => state.clearError);
 
 	return (
 		<aside
@@ -57,7 +35,7 @@ export function SidebarPanel({
 				{error && (
 					<div className={styles.error}>
 						<span>{error}</span>
-						<button onClick={controller.clearError}>×</button>
+						<button onClick={clearError}>×</button>
 					</div>
 				)}
 				<RecentWorkspaces />

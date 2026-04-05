@@ -13,7 +13,7 @@ import { Sessions } from "./Sessions";
 const mockSelectSession = vi.fn();
 const mockCreateNewSession = vi.fn();
 
-vi.mock("@/stores/sidebarStore", () => ({
+vi.mock("@/features/chat/stores/sidebarStore", () => ({
 	useSidebarStore: (selector: any) => {
 		const state = {
 			sessions: [

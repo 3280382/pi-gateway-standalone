@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { browseDirectory } from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { fileSidebarDebug } from "@/lib/debug";
-import styles from "./FileBrowser.module.css";
+import styles from "../FileBrowser/FileBrowser.module.css";
 
 interface FileSidebarProps {
 	visible: boolean;

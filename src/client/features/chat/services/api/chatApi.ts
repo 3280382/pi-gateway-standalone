@@ -10,7 +10,20 @@ import type {
 	ToolExecution,
 } from "@/features/chat/types/chat";
 import { websocketService } from "@/services/websocket.service";
-import { useSessionStore } from "@/stores/sessionStore";
+import { useSessionStore } from "@/features/chat/stores/sessionStore";
+import {
+	abortChatGeneration,
+	sendChatMessage,
+	steerChat,
+	createNewChatSession,
+	switchChatSession,
+	listChatSessions,
+	setChatModel,
+	listChatModels,
+	executeChatCommand,
+	setChatLlmLogEnabled,
+	initChatWorkingDirectory,
+} from "@/features/chat/services/chatWebSocket";
 
 // ============================================================================
 // Message ID Generator
@@ -105,7 +118,7 @@ export function useChatController(): EnhancedChatController {
 			chatStore.startStreaming();
 
 			// 通过WebSocket发送消息
-			const success = websocketService.send("prompt", { text, images });
+			const success = sendChatMessage(text, undefined, undefined, images);
 
 			if (!success) {
 				chatStore.abortStreaming();
@@ -114,13 +127,13 @@ export function useChatController(): EnhancedChatController {
 		},
 
 		abortGeneration: () => {
-			websocketService.send("abort", {});
+			abortChatGeneration();
 			chatStore.abortStreaming();
 		},
 
 		steer: (text: string) => {
 			if (!text.trim()) return;
-			websocketService.steer(text);
+			steerChat(text);
 		},
 
 		// 输入控制
@@ -186,7 +199,7 @@ export function useChatController(): EnhancedChatController {
 					resolve();
 				});
 
-				websocketService.send("new_session");
+				createNewChatSession();
 			});
 		},
 
@@ -214,7 +227,7 @@ export function useChatController(): EnhancedChatController {
 					}
 				});
 
-				websocketService.send("load_session", { sessionPath });
+				switchChatSession(sessionPath);
 			});
 		},
 
@@ -230,7 +243,7 @@ export function useChatController(): EnhancedChatController {
 					resolve(data);
 				});
 
-				websocketService.listSessions(cwd);
+				listChatSessions(cwd);
 			});
 		},
 
@@ -252,7 +265,7 @@ export function useChatController(): EnhancedChatController {
 					resolve();
 				});
 
-				websocketService.setModel(provider, modelId, thinkingLevel);
+				setChatModel(provider, modelId, thinkingLevel);
 			});
 		},
 
@@ -268,7 +281,7 @@ export function useChatController(): EnhancedChatController {
 					resolve(data);
 				});
 
-				websocketService.listModels();
+				listChatModels();
 			});
 		},
 
@@ -285,7 +298,7 @@ export function useChatController(): EnhancedChatController {
 					resolve(data);
 				});
 
-				websocketService.executeCommand(command);
+				executeChatCommand(command);
 			});
 		},
 
@@ -302,7 +315,7 @@ export function useChatController(): EnhancedChatController {
 					resolve();
 				});
 
-				websocketService.setLlmLogEnabled(enabled);
+				setChatLlmLogEnabled(enabled);
 			});
 		},
 
@@ -321,7 +334,7 @@ export function useChatController(): EnhancedChatController {
 					resolve();
 				});
 
-				websocketService.send("change_dir", { path });
+				initChatWorkingDirectory(path);
 			});
 		},
 	};

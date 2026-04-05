@@ -33,21 +33,14 @@ export interface WorkspaceInfo {
 }
 
 export interface SidebarState {
-	// Data
+	// 运行时状态（不持久化）
 	workingDir: WorkingDirectory | null;
-	recentWorkspaces: (string | WorkspaceInfo)[];
 	sessions: Session[];
-
-	// Settings
-	theme: Theme;
-	fontSize: FontSize;
-
-	// UI State
 	isLoading: boolean;
 	error: string | null;
 	selectedSessionId: string | null;
 
-	// 按工作目录保存最后选中的 session
+	// 持久化状态（唯一存储）
 	lastSessionByDir: Record<string, string>;
 }
 
@@ -58,17 +51,12 @@ export interface SidebarState {
 export interface SidebarController {
 	// Data Loading
 	loadWorkingDir: () => Promise<void>;
-	loadRecentWorkspaces: () => Promise<void>;
 	loadSessions: (cwd: string) => Promise<void>;
 
 	// Actions
 	changeWorkingDir: (path: string) => Promise<void>;
 	selectSession: (id: string) => void;
 	createNewSession: () => Promise<void>;
-
-	// Settings
-	setTheme: (theme: Theme) => void;
-	setFontSize: (size: FontSize) => void;
 
 	// Error Handling
 	clearError: () => void;

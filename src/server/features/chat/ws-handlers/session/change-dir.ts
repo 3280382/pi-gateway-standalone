@@ -20,6 +20,7 @@ export async function handleChangeDir(
 	const { path: newPath } = payload;
 
 	logger.info(`[WebSocket] 收到 change_dir 消息: path=${newPath}`);
+	logger.info(`[WebSocket] payload 完整内容: ${JSON.stringify(payload)}`);
 
 	try {
 		// 重新初始化会话到新目录

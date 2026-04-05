@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from "react";
 import { useModalStore } from "@/features/chat/stores/modalStore";
-import { useSessionStore } from "@/stores/sessionStore";
+import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import styles from "./Modals.module.css";
 
 interface SystemPromptData {

@@ -269,7 +269,13 @@ export class PiAgentSession {
 			JSON.stringify(resourceFiles, null, 2),
 		);
 
-		console.log(`[Gateway] 返回的 sessionFile:`, session.sessionFile);
+		// 调试：检查路径是否一致
+		const expectedDir = getLocalSessionsDir(workingDir);
+		console.log(`[Gateway] 期望的 sessions 目录: ${expectedDir}`);
+		console.log(`[Gateway] 实际的 sessionFile: ${session.sessionFile}`);
+		if (session.sessionFile && !session.sessionFile.startsWith(expectedDir)) {
+			console.warn(`[Gateway] 路径不匹配! 期望前缀: ${expectedDir}, 实际: ${session.sessionFile}`);
+		}
 		console.log(
 			`[Gateway] sessionFile 存在:`,
 			session.sessionFile ? existsSync(session.sessionFile) : false,

@@ -52,19 +52,21 @@ export function MessageList({
 
 	return (
 		<div className={styles.container}>
-			{allMessages.map((message) => (
-				<MessageItem
-					key={message.id}
-					message={message}
-					showThinking={showThinking}
-					showTools={showTools}
-					onToggleCollapse={() => onToggleMessageCollapse(message.id)}
-					onToggleThinking={() => onToggleThinkingCollapse(message.id)}
-					onToggleTools={() => onToggleToolsCollapse?.(message.id)}
-					onDelete={() => onDeleteMessage?.(message.id)}
-					onRegenerate={() => onRegenerateMessage?.(message.id)}
-				/>
-			))}
+			{allMessages
+				.filter((message) => message && message.id)
+				.map((message) => (
+					<MessageItem
+						key={message.id}
+						message={message}
+						showThinking={showThinking}
+						showTools={showTools}
+						onToggleCollapse={() => onToggleMessageCollapse(message.id)}
+						onToggleThinking={() => onToggleThinkingCollapse(message.id)}
+						onToggleTools={() => onToggleToolsCollapse?.(message.id)}
+						onDelete={() => onDeleteMessage?.(message.id)}
+						onRegenerate={() => onRegenerateMessage?.(message.id)}
+					/>
+				))}
 		</div>
 	);
 }

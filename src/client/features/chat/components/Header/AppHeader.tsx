@@ -19,8 +19,9 @@ import {
 } from "@/features/chat/stores/chatStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { useWorkspaceStore } from "@/features/files/stores";
 import { websocketService } from "@/services/websocket.service";
-import { useSessionStore } from "@/stores/sessionStore";
+import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import styles from "./AppHeader.module.css";
 
 // DirectoryPicker component for selecting working directory
@@ -168,12 +169,9 @@ export function AppHeader({
 		setThinkingLevel,
 		setCurrentModel,
 		serverPid,
-		currentDir,
 		isConnected,
 	} = useSessionStore();
-
-	// 从 store 获取数据
-	const workingDir = currentDir;
+	const { currentDir: workingDir } = useWorkspaceStore();
 	const connectionStatus = isConnected ? "connected" : "disconnected";
 	const pid = serverPid;
 	const { isStreaming } = useChatStore();

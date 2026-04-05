@@ -9,7 +9,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TopBar } from "./TopBar";
 
 // Mock sidebar store
-vi.mock("@/stores/sidebarStore", () => ({
+vi.mock("@/features/chat/stores/sidebarStore", () => ({
 	useSidebarStore: vi.fn((selector) => {
 		const state = {
 			searchQuery: "",
@@ -25,7 +25,7 @@ vi.mock("@/stores/sidebarStore", () => ({
 }));
 
 // Mock session store
-vi.mock("@/stores/sessionStore", () => ({
+vi.mock("@/features/chat/stores/sessionStore", () => ({
 	useSessionStore: vi.fn((selector) => {
 		const state = {
 			currentModel: null,
@@ -39,7 +39,7 @@ vi.mock("@/stores/sessionStore", () => ({
 }));
 
 // Mock chat store
-vi.mock("@/stores/chatStore", () => ({
+vi.mock("@/features/chat/stores/chatStore", () => ({
 	useChatStore: vi.fn((selector) => {
 		const state = {
 			isStreaming: false,

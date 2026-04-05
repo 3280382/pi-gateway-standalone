@@ -6,7 +6,7 @@ import { executeFile } from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
 import { fileActionBarDebug } from "@/lib/debug";
-import styles from "./FileBrowser.module.css";
+import styles from "../FileBrowser/FileBrowser.module.css";
 
 interface FileActionBarProps {
 	onExecute?: (output: string) => void;

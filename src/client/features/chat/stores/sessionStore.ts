@@ -1,9 +1,32 @@
 /**
- * Session Store - 会话状态管理
+ * Session Store - Chat Feature 会话状态管理
+ * 管理聊天会话、模型设置、连接状态
  */
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
+
+// 从旧 store 迁移数据（兼容处理）
+function migrateFromOldStore(): Partial<ChatSessionState> {
+	try {
+		const oldData = localStorage.getItem("session-store");
+		if (oldData) {
+			const parsed = JSON.parse(oldData);
+			return {
+				currentSessionId: parsed.state?.currentSessionId || null,
+				currentModel: parsed.state?.currentModel || null,
+				thinkingLevel: parsed.state?.thinkingLevel || "off",
+				theme: parsed.state?.theme || "dark",
+				fontSize: parsed.state?.fontSize || "tiny",
+			};
+		}
+	} catch {
+		// 忽略解析错误
+	}
+	return {};
+}
+
+const migratedState = migrateFromOldStore();
 
 export type ThinkingLevel =
 	| "off"
@@ -67,20 +90,18 @@ export interface ResourceFiles {
 	};
 }
 
-export interface SessionState {
+export interface ChatSessionState {
 	// 当前会话
 	currentSessionId: string | null;
 	sessions: Session[];
 
-	// 设置
+	// 模型设置
 	currentModel: string | null;
 	thinkingLevel: ThinkingLevel;
+
+	// UI设置
 	theme: Theme;
 	fontSize: FontSize;
-
-	// 工作区
-	currentDir: string;
-	recentWorkspaces: string[];
 
 	// 服务器状态
 	serverPid: number | null;
@@ -90,25 +111,21 @@ export interface SessionState {
 	resourceFiles: ResourceFiles | null;
 }
 
-interface SessionActions {
+interface ChatSessionActions {
 	// 会话
 	setCurrentSession: (id: string | null) => void;
 	setSessions: (sessions: Session[]) => void;
 	addSession: (session: Session) => void;
 	removeSession: (id: string) => void;
 
-	// 设置
+	// 模型设置
 	setCurrentModel: (model: string | null) => void;
 	setThinkingLevel: (level: ThinkingLevel) => void;
+
+	// UI设置
 	setTheme: (theme: Theme) => void;
 	setFontSize: (size: FontSize) => void;
 	toggleTheme: () => void;
-
-	// 工作区
-	setCurrentDir: (dir: string) => void;
-	addRecentWorkspace: (dir: string) => void;
-	removeRecentWorkspace: (dir: string) => void;
-	clearRecentWorkspaces: () => void;
 
 	// 服务器状态
 	setServerPid: (pid: number | null) => void;
@@ -118,19 +135,17 @@ interface SessionActions {
 	setResourceFiles: (files: ResourceFiles | null) => void;
 }
 
-export const useSessionStore = create<SessionState & SessionActions>()(
+export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
 	devtools(
 		persist(
 			(set) => ({
-				// 初始状态
-				currentSessionId: null,
+				// 初始状态（优先使用迁移的数据）
+				currentSessionId: migratedState.currentSessionId || null,
 				sessions: [],
-				currentModel: null,
-				thinkingLevel: "off",
-				theme: "dark",
-				fontSize: "tiny",
-				currentDir: "/root",
-				recentWorkspaces: [],
+				currentModel: migratedState.currentModel || null,
+				thinkingLevel: migratedState.thinkingLevel || "off",
+				theme: migratedState.theme || "dark",
+				fontSize: migratedState.fontSize || "tiny",
 				serverPid: null,
 				isConnected: false,
 				resourceFiles: null,
@@ -147,28 +162,17 @@ export const useSessionStore = create<SessionState & SessionActions>()(
 						sessions: state.sessions.filter((s) => s.id !== id),
 					})),
 
-				// 设置
+				// 模型设置
 				setCurrentModel: (model) => set({ currentModel: model }),
 				setThinkingLevel: (level) => set({ thinkingLevel: level }),
+
+				// UI设置
 				setTheme: (theme) => set({ theme }),
 				setFontSize: (size) => set({ fontSize: size }),
 				toggleTheme: () =>
 					set((state) => ({
 						theme: state.theme === "dark" ? "light" : "dark",
 					})),
-
-				// 工作区
-				setCurrentDir: (dir) => set({ currentDir: dir }),
-				addRecentWorkspace: (dir) =>
-					set((state) => {
-						const filtered = state.recentWorkspaces.filter((w) => w !== dir);
-						return { recentWorkspaces: [dir, ...filtered].slice(0, 5) };
-					}),
-				removeRecentWorkspace: (dir) =>
-					set((state) => ({
-						recentWorkspaces: state.recentWorkspaces.filter((w) => w !== dir),
-					})),
-				clearRecentWorkspaces: () => set({ recentWorkspaces: [] }),
 
 				// 服务器状态
 				setServerPid: (pid) => set({ serverPid: pid }),
@@ -181,15 +185,13 @@ export const useSessionStore = create<SessionState & SessionActions>()(
 				name: "session-store",
 				partialize: (state) => ({
 					currentSessionId: state.currentSessionId,
-					currentDir: state.currentDir,
 					currentModel: state.currentModel,
 					thinkingLevel: state.thinkingLevel,
 					theme: state.theme,
 					fontSize: state.fontSize,
-					recentWorkspaces: state.recentWorkspaces,
 				}),
 			},
 		),
-		{ name: "SessionStore" },
+		{ name: "ChatSessionStore" },
 	),
 );

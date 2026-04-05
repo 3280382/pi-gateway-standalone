@@ -7,13 +7,13 @@ import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
 import { fileBrowserDebug, withLogging } from "@/lib/debug";
 
-import { FileActionBar } from "./FileActionBar";
+import { FileActionBar } from "../Header/FileActionBar";
 import styles from "./FileBrowser.module.css";
 import { FileBrowserErrorBoundary } from "./FileBrowserErrorBoundary";
 import { FileGrid } from "./FileGrid";
 import { FileList } from "./FileList";
 
-import { FileViewer } from "./FileViewer";
+import { FileViewer } from "../Viewer/FileViewer";
 
 interface FileBrowserProps {
 	externalSidebarVisible?: boolean;

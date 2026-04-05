@@ -19,3 +19,4 @@ export {
 export { useLlmLogStore } from "./llmLogStore";
 export { useModalStore } from "./modalStore";
 export { useSidebarStore } from "./sidebarStore";
+export { useSessionStore } from "./sessionStore";

@@ -9,7 +9,7 @@ export {
 	setupWebSocketListeners,
 	useChatController,
 } from "@/features/chat/services/api/chatApi";
-export { useChatStore } from "@/features/chat/stores";
+export { useChatStore, useSessionStore } from "@/features/chat/stores";
 export type {
 	ChatState,
 	ChatWebSocketMessage,
@@ -19,18 +19,16 @@ export type {
 
 // Files Feature
 export { fileApi, useFileController } from "@/features/files/services/api/fileApi";
+export { useWorkspaceStore } from "@/features/files/stores";
 
 // Hooks
-export { useAppInitialization } from "@/hooks/useAppInitialization";
+export { useAppInitialization } from "@/features/chat/hooks/useAppInitialization";
 export { useChatMessages } from "@/features/chat/hooks/useChatMessages";
 
 // Services
 export { ServiceError, websocketService } from "@/services/websocket.service";
 export { fetchApi } from "@/services/client";
 
-// Stores
-export { useSessionStore } from "@/stores";
-
 // UI
-export { IconButton } from "@/lib/ui/IconButton/IconButton";
+export { IconButton } from "@/components/IconButton/IconButton";
 export { SectionHeader } from "@/features/chat/components/SectionHeader/SectionHeader";

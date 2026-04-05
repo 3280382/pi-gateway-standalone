@@ -1,30 +1,30 @@
 /**
  * RecentWorkspaces Section
- * 使用 Zustand persist 存储（自动保存到 localStorage）
+ * 从 workspaceStore 读取数据（唯一数据源）
  */
 
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import { IconButton } from "@/lib/ui/IconButton/IconButton";
+import { useWorkspaceStore } from "@/features/files/stores";
+import { IconButton } from "@/components/IconButton/IconButton";
 import { SectionHeader } from "@/features/chat/components/SectionHeader/SectionHeader";
 import styles from "./RecentWorkspaces.module.css";
 
 export function RecentWorkspaces() {
-	const recentWorkspaces = useSidebarStore((state) => state.recentWorkspaces);
+	const recentWorkspaces = useWorkspaceStore((state) => state.recentWorkspaces);
+	const clearRecentWorkspaces = useWorkspaceStore(
+		(state) => state.clearRecentWorkspaces,
+	);
+
 	const workingDir = useSidebarStore((state) => state.workingDir);
 	const isLoading = useSidebarStore((state) => state.isLoading);
 	const controller = useSidebarController();
-	const setRecentWorkspaces = useSidebarStore(
-		(state) => state.setRecentWorkspaces,
-	);
 
 	// 获取当前工作目录路径用于高亮
 	const currentPath = workingDir?.path || "";
 
-	// 调试信息
-
 	const handleClear = () => {
-		setRecentWorkspaces([]);
+		clearRecentWorkspaces();
 	};
 
 	const handleSelect = (path: string) => {
@@ -61,13 +61,9 @@ export function RecentWorkspaces() {
 			/>
 			<div className={styles.list}>
 				{recentWorkspaces.map((workspace) => {
-					// Normalize path (handle both string and object formats)
-					const rawPath =
-						typeof workspace === "string" ? workspace : workspace?.path || "";
-					const path = rawPath.replace(/\/$/, ""); // Remove trailing slash
+					const path = workspace.replace(/\/$/, ""); // Remove trailing slash
 					const name = path.split("/").pop() || path;
-
-					const isActive = currentPath === path || currentPath === rawPath;
+					const isActive = currentPath === path || currentPath === workspace;
 
 					return (
 						<button

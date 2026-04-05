@@ -7,7 +7,7 @@ import {
 	type SortMode,
 	useFileStore,
 } from "@/features/files/stores/fileStore";
-import styles from "./FileBrowser.module.css";
+import styles from "../FileBrowser/FileBrowser.module.css";
 
 // 可执行文件扩展名
 const EXECUTABLE_EXTENSIONS = [

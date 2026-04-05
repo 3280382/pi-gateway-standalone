@@ -6,7 +6,7 @@ import { FitAddon } from "@xterm/addon-fit";
 import { Terminal } from "@xterm/xterm";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "@xterm/xterm/css/xterm.css";
-import { useSessionStore } from "@/stores/sessionStore";
+import { useWorkspaceStore } from "@/features/files/stores";
 
 interface XTermPanelProps {
 	height: number;
@@ -31,7 +31,7 @@ export default function XTermPanel({
 	const resizeStartHeight = useRef(height);
 	const commandBuffer = useRef("");
 	const abortControllerRef = useRef<AbortController | null>(null);
-	const currentDir = useSessionStore((state) => state.currentDir);
+	const currentDir = useWorkspaceStore((state) => state.currentDir);
 	const [isFullscreen, setIsFullscreen] = useState(false);
 
 	const toggleFullscreen = () => {

@@ -946,6 +946,7 @@ export const useChatStore = create<
 
 			// Load session messages from server
 			loadSession: async (sessionPath: string) => {
+				console.log("[ChatStore] loadSession called with path:", sessionPath);
 				try {
 					const response = await fetch("/api/session/load", {
 						method: "POST",
@@ -954,9 +955,12 @@ export const useChatStore = create<
 					});
 
 					if (!response.ok) {
+						const errorData = await response.json().catch(() => ({}));
 						console.error(
 							"[ChatStore] Failed to load session:",
+							response.status,
 							response.statusText,
+							errorData,
 						);
 						set({ messages: [] }, false, "loadSession/error");
 						return 0;

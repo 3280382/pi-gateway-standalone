@@ -5,12 +5,12 @@
 
 import { useCallback } from "react";
 import { useLayout } from "@/app/LayoutContext";
-import { FileBottomMenu } from "@/features/files/components/FileBottomMenu";
+import { FileBottomMenu } from "@/features/files/components/BottomMenu/FileBottomMenu";
 import { XTermPanel } from "@/features/files/components/panels/TerminalPanel";
 import { useFileStore, useTerminalStore } from "@/features/files/stores";
-import { FileBrowser } from "./components/FileBrowser";
-import { FileSidebar } from "./components/FileSidebar";
-import { FileToolbar } from "./components/FileToolbar";
+import { FileBrowser } from "./components/FileBrowser/FileBrowser";
+import { FileSidebar } from "./components/Sidebar/FileSidebar";
+import { FileToolbar } from "./components/Header/FileToolbar";
 import styles from "./FilesLayout.module.css";
 
 interface FilesLayoutProps {

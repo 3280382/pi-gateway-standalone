@@ -7,7 +7,7 @@ import { useLlmLogStore } from "@/features/chat/stores/llmLogStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { FontSize, Theme } from "@/features/chat/types/sidebar";
-import { IconButton } from "@/lib/ui/IconButton/IconButton";
+import { IconButton } from "@/components/IconButton/IconButton";
 import { SectionHeader } from "@/features/chat/components/SectionHeader/SectionHeader";
 import styles from "./Settings.module.css";
 
