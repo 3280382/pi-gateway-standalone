@@ -66,27 +66,24 @@ src/
 │   │   └── registerWS.ts       # WebSocket 处理器注册入口
 │   │
 │   ├── features/
-│   │   ├── chat/ws/            # Chat WebSocket 处理器
-│   │   │   ├── prompt.ts
-│   │   │   ├── abort.ts
-│   │   │   ├── steer.ts
-│   │   │   └── ...
-│   │   │
-│   │   ├── session/ws/         # Session WebSocket 处理器
-│   │   │   ├── init.ts
-│   │   │   ├── change-dir.ts
-│   │   │   └── ...
-│   │   │
-│   │   └── files/              # Files Feature
-│   │
-│   ├── features/
-│   │   ├── chat/
-│   │   │   ├── agent-session/    # Pi Agent Session 核心
+│   │   ├── chat/               # Chat 功能（完整自包含）
+│   │   │   ├── agent-session/  # Pi Agent Session 核心
 │   │   │   │   ├── agentSession.ts
 │   │   │   │   └── utils.ts
-│   │   │   ├── ws/               # Chat WebSocket 处理器
-│   │   │   └── controllers/      # Chat HTTP 控制器
-│   │   │   └── ...
+│   │   │   ├── session-ws/     # Session WebSocket 处理器
+│   │   │   │   ├── init.ts
+│   │   │   │   ├── change-dir.ts
+│   │   │   │   └── ...
+│   │   │   ├── session-controllers/  # Session HTTP 控制器
+│   │   │   │   └── session.controller.ts
+│   │   │   ├── ws/             # Chat WebSocket 处理器
+│   │   │   │   ├── prompt.ts
+│   │   │   │   ├── abort.ts
+│   │   │   │   └── ...
+│   │   │   └── controllers/    # Chat HTTP 控制器
+│   │   │       └── model.controller.ts
+│   │   │
+│   │   └── files/              # Files Feature
 │   │
 │   ├── shared/
 │   │   └── websocket/
