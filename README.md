@@ -79,10 +79,14 @@ src/
 │   │   │
 │   │   └── files/              # Files Feature
 │   │
-│   ├── core/
-│   │   └── session/
-│   │       ├── GatewaySession.ts   # 核心会话类
-│   │       └── utils.ts
+│   ├── features/
+│   │   ├── chat/
+│   │   │   ├── agent-session/    # Pi Agent Session 核心
+│   │   │   │   ├── agentSession.ts
+│   │   │   │   └── utils.ts
+│   │   │   ├── ws/               # Chat WebSocket 处理器
+│   │   │   └── controllers/      # Chat HTTP 控制器
+│   │   │   └── ...
 │   │
 │   ├── shared/
 │   │   └── websocket/

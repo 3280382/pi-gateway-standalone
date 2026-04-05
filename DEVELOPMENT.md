@@ -151,10 +151,10 @@ App (100vh flex column)
 **Feature Stores** (`src/client/features/*/stores/`):
 各功能域可拥有独立的局部状态管理
 
-#### 后端状态 (GatewaySession)
+#### 后端状态 (PiAgentSession)
 
 ```typescript
-class GatewaySession {
+class PiAgentSession {
   session: AgentSession | null;  // pi-coding-agent 会话
   workingDir: string;             // 当前工作目录
   ws: WebSocket;                  // WebSocket 连接
@@ -169,7 +169,7 @@ class GatewaySession {
 ```
 ┌─────────────┐     WebSocket连接      ┌──────────────┐
 │   前端      │ ─────────────────────> │   后端       │
-│ 选择目录    │                        │ GatewaySession│
+│ 选择目录    │                        │ PiAgentSession│
 └─────────────┘                        └──────┬───────┘
                                               │
                                               ▼
@@ -195,7 +195,7 @@ import { useSessionStore } from '@/stores/sessionStore';
 import type { Message } from '@shared/types/message.types';
 
 // 后端
-import { GatewaySession } from '@server/session/gateway-session';
+import { PiAgentSession } from '@server/features/chat/agent-session/agentSession';
 import type { ApiResponse } from '@shared/types/api.types';
 ```
 
