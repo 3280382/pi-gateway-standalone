@@ -39,7 +39,7 @@ import { WebSocket, WebSocketServer } from "ws";
 import { z } from "zod";
 import { registerRoutes } from "./app/registerRoutes";
 import { type WSContext, wsRouter } from "./app/registerWS";
-import { GatewaySession } from "./core/session/GatewaySession";
+import { GatewaySession } from "./features/chat/agent-session/GatewaySession";
 import { AppFactory } from "./lib/app-factory";
 
 // ============================================================================

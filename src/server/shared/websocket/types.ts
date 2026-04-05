@@ -3,7 +3,7 @@
  */
 
 import type { WebSocket } from "ws";
-import type { GatewaySession } from "../../core/session/GatewaySession";
+import type { GatewaySession } from "../../features/chat/agent-session/GatewaySession";
 
 /**
  * WebSocket 消息负载的基础类型

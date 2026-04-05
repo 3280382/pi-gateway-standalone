@@ -5,7 +5,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebSocket } from "ws";
-import type { LlmLogManager } from "../../llm/log-manager";
+import type { LlmLogManager } from "../../../llm/log-manager";
 import { GatewaySession } from "./GatewaySession";
 
 describe("GatewaySession", () => {
