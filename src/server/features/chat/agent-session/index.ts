@@ -1,6 +1,6 @@
 /**
- * Core Session Module
- * 导出 GatewaySession 核心类
+ * Agent Session Module
+ * 导出 AgentSession 核心类
  */
 
-export { GatewaySession, type ServerMessage } from "./GatewaySession";
+export { AgentSession, type ServerMessage } from "./agentSession";

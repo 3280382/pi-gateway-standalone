@@ -33,7 +33,7 @@ export async function handleLoadSession(
 	}
 
 	try {
-		// 使用 GatewaySession 的 loadSession 方法
+		// 使用 AgentSession 的 loadSession 方法
 		await ctx.session.loadSession(sessionPath);
 		// loadSession 内部已经发送了响应
 		logger.info(`[WebSocket] load_session 成功`);

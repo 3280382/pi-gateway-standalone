@@ -3,7 +3,7 @@
  */
 
 import type { WebSocket } from "ws";
-import type { GatewaySession } from "../../features/chat/agent-session/GatewaySession";
+import type { AgentSession } from "../../features/chat/agent-session/agentSession";
 
 /**
  * WebSocket 消息负载的基础类型
@@ -22,7 +22,7 @@ export interface WSContext {
 	/** WebSocket 连接 */
 	ws: WebSocket;
 	/** Gateway 会话 */
-	session: GatewaySession;
+	session: AgentSession;
 	/** 连接 ID */
 	connectionId: string;
 	/** 连接时间 */

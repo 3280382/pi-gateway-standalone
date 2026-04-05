@@ -6,12 +6,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebSocket } from "ws";
 import type { LlmLogManager } from "../../../llm/log-manager";
-import { GatewaySession } from "./GatewaySession";
+import { AgentSession } from "./agentSession";
 
-describe("GatewaySession", () => {
+describe("AgentSession", () => {
 	let mockWs: Partial<WebSocket>;
 	let mockLlmLogManager: Partial<LlmLogManager>;
-	let session: GatewaySession;
+	let session: AgentSession;
 
 	beforeEach(() => {
 		mockWs = {
@@ -24,7 +24,7 @@ describe("GatewaySession", () => {
 			setEnabled: vi.fn(),
 			dispose: vi.fn(),
 		};
-		session = new GatewaySession(
+		session = new AgentSession(
 			mockWs as WebSocket,
 			mockLlmLogManager as LlmLogManager,
 		);

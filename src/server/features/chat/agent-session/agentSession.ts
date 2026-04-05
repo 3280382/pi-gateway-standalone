@@ -1,5 +1,5 @@
 /**
- * Gateway会话类
+ * AgentSession 类
  * 管理WebSocket连接、pi-coding-agent会话和消息传递
  */
 
@@ -9,7 +9,7 @@ import { dirname, join } from "node:path";
 import type { AgentMessage } from "@mariozechner/pi-agent-core";
 import type { ImageContent } from "@mariozechner/pi-ai";
 import {
-	type AgentSession,
+	type AgentSession as PiAgentSession,
 	type AgentSessionEvent,
 	AuthStorage,
 	createAgentSession,
@@ -45,12 +45,12 @@ const writeFileTools = [
 ];
 
 /**
- * Gateway会话类
+ * AgentSession 类
  * 封装了pi-coding-agent会话的完整生命周期管理
  */
-export class GatewaySession {
+export class AgentSession {
 	/** 代理会话 */
-	session: AgentSession | null = null;
+	session: PiAgentSession | null = null;
 
 	/** WebSocket连接 */
 	ws: WebSocket;
@@ -80,7 +80,7 @@ export class GatewaySession {
 	readonly llmLogManager: LlmLogManager;
 
 	/**
-	 * 创建新的Gateway会话
+	 * 创建新的AgentSession
 	 * @param ws WebSocket连接
 	 * @param llmLogManager LLM日志管理器
 	 */
@@ -467,7 +467,7 @@ export class GatewaySession {
 		}>,
 	) {
 		console.log(
-			`[GatewaySession.prompt] 开始处理, session存在: ${!!this.session}, isStreaming: ${this.isStreaming}`,
+			`[AgentSession.prompt] 开始处理, session存在: ${!!this.session}, isStreaming: ${this.isStreaming}`,
 		);
 		if (!this.session) {
 			this.send({ type: "error", error: "会话未初始化" });
@@ -485,7 +485,7 @@ export class GatewaySession {
 			);
 
 			console.log(
-				`[GatewaySession.prompt] 调用session.prompt, text长度: ${text.length}`,
+				`[AgentSession.prompt] 调用session.prompt, text长度: ${text.length}`,
 			);
 			if (this.isStreaming) {
 				await this.session.prompt(text, {
@@ -495,9 +495,9 @@ export class GatewaySession {
 			} else {
 				await this.session.prompt(text, { images: convertedImages });
 			}
-			console.log("[GatewaySession.prompt] session.prompt完成");
+			console.log("[AgentSession.prompt] session.prompt完成");
 		} catch (error) {
-			console.error("[GatewaySession.prompt] 错误:", error);
+			console.error("[AgentSession.prompt] 错误:", error);
 			this.send({
 				type: "error",
 				error: error instanceof Error ? error.message : "未知错误",

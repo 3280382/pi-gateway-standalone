@@ -39,7 +39,7 @@ import { WebSocket, WebSocketServer } from "ws";
 import { z } from "zod";
 import { registerRoutes } from "./app/registerRoutes";
 import { type WSContext, wsRouter } from "./app/registerWS";
-import { GatewaySession } from "./features/chat/agent-session/GatewaySession";
+import { AgentSession } from "./features/chat/agent-session/agentSession";
 import { AppFactory } from "./lib/app-factory";
 
 // ============================================================================
@@ -104,8 +104,8 @@ wss.on("connection", (ws) => {
 	const connectionId = `conn_${++connectionCounter}_${Date.now()}`;
 	logger.info(`[WebSocket] 新连接建立: ${connectionId}`);
 
-	// 创建 GatewaySession 实例
-	const gatewaySession = new GatewaySession(ws, llmLogManager);
+	// 创建 AgentSession 实例
+	const agentSession = new AgentSession(ws, llmLogManager);
 
 	// 创建 WebSocket 上下文
 	const ctx: WSContext = {
@@ -182,13 +182,13 @@ wss.on("connection", (ws) => {
 	// 连接关闭处理
 	ws.on("close", () => {
 		logger.info(`[WebSocket] 连接关闭: ${connectionId}`);
-		gatewaySession.dispose();
+		agentSession.dispose();
 	});
 
 	// 错误处理
 	ws.on("error", (error) => {
 		logger.error(`[WebSocket] 连接错误: ${connectionId}`, {}, error);
-		gatewaySession.dispose();
+		agentSession.dispose();
 	});
 });
 
@@ -275,4 +275,4 @@ if (isMainModule) {
 // 导出（用于测试）
 // ============================================================================
 
-export { app, GatewaySession, llmLogManager, server, wss };
+export { app, AgentSession, llmLogManager, server, wss };

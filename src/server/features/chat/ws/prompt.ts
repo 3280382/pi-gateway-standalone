@@ -43,7 +43,7 @@ export async function handlePrompt(
 	}
 
 	// 调用 session 的 prompt 方法
-	// GatewaySession.prompt 接受 (text, images?) 参数
+	// AgentSession.prompt 接受 (text, images?) 参数
 	if (ctx.session.isStreaming) {
 		// 流式模式需要特殊处理
 		await ctx.session.prompt(text, images);
