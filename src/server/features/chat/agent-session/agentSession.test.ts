@@ -5,8 +5,8 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebSocket } from "ws";
-import type { LlmLogManager } from "../../../llm/log-manager";
-import { PiAgentSession } from "./agentSession";
+import type { LlmLogManager } from "../llm/log-manager";
+import { PiAgentSession } from "./piAgentSession";
 
 describe("PiAgentSession", () => {
 	let mockWs: Partial<WebSocket>;

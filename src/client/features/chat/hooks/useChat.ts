@@ -1,19 +1,19 @@
 /**
  * useChat - Chat Hook for Managing Chat State and Operations
- * 
+ *
  * 【职责说明】
  * 只处理消息发送和基础操作，不处理 WebSocket 事件接收。
- * 
+ *
  * 【为什么不分 WebSocket 事件处理？】
  * 1. WebSocket 事件是全局的，不应依赖组件生命周期
  * 2. 如果放在 Hook 中，组件卸载会导致事件处理中断
  * 3. 全局处理器在应用初始化时设置，确保不丢消息
- * 
+ *
  * 【架构关系】
  * - 发送消息: useChat → websocketService.send()
  * - 接收消息: WebSocket → setupWebSocketListeners() → chatStore
  * - 状态读取: useChat → chatStore (React 响应式)
- * 
+ *
  * 【参考】
  * setupWebSocketListeners() 在 chatApi.ts，应用初始化时调用
  */
@@ -21,7 +21,7 @@
 import { useCallback } from "react";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import type { Message, ToolExecution } from "@/features/chat/types/chat";
-import { websocketService } from "@/shared/services/websocket.service";
+import { websocketService } from "@/services/websocket.service";
 
 // ============================================================================
 // Types

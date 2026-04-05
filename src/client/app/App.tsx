@@ -11,7 +11,7 @@ import { ErrorScreen } from "@/app/pages/ErrorScreen";
 import { LoadingScreen } from "@/app/pages/LoadingScreen";
 import { ChatPage } from "@/features/chat/page";
 import { FilesPage } from "@/features/files/page";
-import { useAppInitialization, useTerminalCommands } from "@/shared/hooks/app";
+import { useAppInitialization } from "@/hooks";
 import { Footer } from "./Footer";
 import "@/styles/global.css";
 import styles from "./App.module.css";
@@ -24,14 +24,6 @@ function AppContent() {
 
 	// 应用初始化状态
 	const { isLoading, error, retry } = useAppInitialization();
-
-	// 终端命令管理（Files feature 需要）
-	const {
-		terminalOutput,
-		terminalCommand,
-		setTerminalCommand,
-		executeBashCommand,
-	} = useTerminalCommands();
 
 	// 错误状态
 	if (error) {
@@ -54,10 +46,6 @@ function AppContent() {
 					/>
 				) : (
 					<FilesPage
-						terminalOutput={terminalOutput}
-						terminalCommand={terminalCommand}
-						onBashCommand={executeBashCommand}
-						onOpenBottomPanel={setTerminalCommand}
 						closeBottomPanel={closeBottomPanel}
 						setBottomPanelHeight={setBottomPanelHeight}
 					/>

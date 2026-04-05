@@ -9,8 +9,8 @@ import type {
 	Message,
 	ToolExecution,
 } from "@/features/chat/types/chat";
-import { websocketService } from "@/shared/services/websocket.service";
-import { useSessionStore } from "@/shared/stores/sessionStore";
+import { websocketService } from "@/services/websocket.service";
+import { useSessionStore } from "@/stores/sessionStore";
 
 // ============================================================================
 // Message ID Generator
@@ -335,24 +335,24 @@ let handlersSetup = false;
 
 /**
  * 设置全局WebSocket流式处理器
- * 
+ *
  * 【架构设计说明】
  * 这是全局事件处理器，在应用初始化时调用一次（见 useAppInitialization.ts）。
- * 
+ *
  * 【为什么 Service 直接操作 Store？】
  * 1. WebSocket 事件是"被动接收"，不是用户操作，不经过 UI 层
  * 2. 全局订阅必须在组件挂载前完成，避免初始消息丢失
  * 3. 放在 Hook 中会导致：组件卸载时事件处理中断、多个组件重复订阅
  * 4. 这是 WebSocket 类服务的特殊处理模式，非通用做法
- * 
+ *
  * 【正常数据流 vs WebSocket 事件流】
  * 正常数据流: UI → Hook → Service → Store
  * WebSocket事件: Service → (全局处理器) → Store → UI
- * 
+ *
  * 【约定】
  * 只有 setupWebSocketListeners 可以直接操作 Store。
  * 其他 Service 代码必须通过 Hook 或 Controller 间接操作 Store。
- * 
+ *
  * @example
  * // App 初始化时调用一次
  * setupWebSocketListeners();

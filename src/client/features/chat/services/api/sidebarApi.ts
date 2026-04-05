@@ -12,8 +12,8 @@ import type {
 	Theme,
 	WorkingDirResponse,
 } from "@/features/chat/types/sidebar";
-import { fetchApi } from "@/shared/services/api/client";
-import { websocketService } from "@/shared/services/websocket.service";
+import { fetchApi } from "@/services/client";
+import { websocketService } from "@/services/websocket.service";
 
 // ============================================================================
 // Helper Functions
@@ -51,7 +51,7 @@ async function handleDirChanged(
 	store.setWorkingDir(data.cwd);
 
 	// 同步更新 sessionStore
-	const { useSessionStore } = await import("@/shared/stores/sessionStore");
+	const { useSessionStore } = await import("@/stores/sessionStore");
 	useSessionStore.getState().setCurrentDir(data.cwd);
 
 	// 保存新的 session ID
@@ -162,7 +162,7 @@ const storeActions = {
 						store.selectSession(data.sessionId);
 						// 保存新 session ID 到 sessionStore 用于持久化
 						const { useSessionStore } = await import(
-							"@/shared/stores/sessionStore"
+							"@/stores/sessionStore"
 						);
 						useSessionStore.getState().setCurrentSession(data.sessionId);
 						unsubscribe();

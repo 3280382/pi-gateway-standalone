@@ -3,7 +3,10 @@
  */
 
 // Re-export from global stores
-export { initializeFilePath, useFileStore } from "@/features/files/stores/fileStore";
+export {
+	initializeFilePath,
+	useFileStore,
+} from "@/features/files/stores/fileStore";
 export { BatchActionBar } from "./components/BatchActionBar";
 // Components
 export { FileBrowser } from "./components/FileBrowser";

@@ -3,34 +3,34 @@
  * 导出所有模块供外部使用
  */
 
-export { useChat } from "@/features/chat/hooks";
 // Chat Feature
+export { useChat } from "@/features/chat/hooks";
 export {
 	setupWebSocketListeners,
 	useChatController,
 } from "@/features/chat/services/api/chatApi";
-// Stores
 export { useChatStore } from "@/features/chat/stores";
-// Types
 export type {
 	ChatState,
 	ChatWebSocketMessage,
 	Message,
 	ToolExecution,
 } from "@/features/chat/types";
-export { fileController, sessionController } from "@/shared/controllers";
-// Hooks
-export {
-	useAppInitialization,
-	useChatMessages,
-	useTerminalCommands,
-} from "@/shared/hooks";
-// Services
-export { ServiceError } from "@/shared/services";
-export { fileService } from "@/shared/services/file.service";
-export { sessionService } from "@/shared/services/session.service";
-export { websocketService } from "@/shared/services/websocket.service";
-export { useSessionStore } from "@/shared/stores";
 
-// Shared UI
-export { Button, IconButton, Input, Select } from "@/shared/ui";
+// Files Feature
+export { fileApi, useFileController } from "@/features/files/services/api/fileApi";
+
+// Hooks
+export { useAppInitialization } from "@/hooks/useAppInitialization";
+export { useChatMessages } from "@/features/chat/hooks/useChatMessages";
+
+// Services
+export { ServiceError, websocketService } from "@/services/websocket.service";
+export { fetchApi } from "@/services/client";
+
+// Stores
+export { useSessionStore } from "@/stores";
+
+// UI
+export { IconButton } from "@/lib/ui/IconButton/IconButton";
+export { SectionHeader } from "@/features/chat/components/SectionHeader/SectionHeader";

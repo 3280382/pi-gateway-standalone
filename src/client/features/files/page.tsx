@@ -3,14 +3,13 @@
  */
 
 import { useEffect, useState } from "react";
-import { initializeFilePath, useFileStore } from "@/features/files/stores/fileStore";
+import {
+	initializeFilePath,
+	useFileStore,
+} from "@/features/files/stores/fileStore";
 import { FilesLayout } from "./layout";
 
 interface FilesPageProps {
-	terminalOutput: string;
-	terminalCommand: string;
-	onBashCommand: (command: string) => void;
-	onOpenBottomPanel: (command: string) => void;
 	closeBottomPanel: () => void;
 	setBottomPanelHeight: (height: number) => void;
 }
@@ -33,13 +32,15 @@ export function FilesPage(props: FilesPageProps) {
 	// 初始化完成前显示加载状态
 	if (isInitializing) {
 		return (
-			<div style={{ 
-				flex: 1, 
-				display: "flex", 
-				alignItems: "center", 
-				justifyContent: "center",
-				color: "var(--text-secondary)"
-			}}>
+			<div
+				style={{
+					flex: 1,
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "center",
+					color: "var(--text-secondary)",
+				}}
+			>
 				Loading...
 			</div>
 		);

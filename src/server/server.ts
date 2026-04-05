@@ -15,9 +15,9 @@
 // ============================================================================
 
 import { Config } from "./config";
+import { setupLlmInterceptors } from "./features/chat/llm";
+import { LlmLogManager } from "./features/chat/llm/log-manager";
 import { Logger, LogLevel } from "./lib/utils/logger";
-import { setupLlmInterceptors } from "./llm";
-import { LlmLogManager } from "./llm/log-manager";
 
 // 全局 LLM 日志管理器
 const llmLogManager = new LlmLogManager({
@@ -37,9 +37,15 @@ setupLlmInterceptors(llmLogManager, {
 
 import { WebSocket, WebSocketServer } from "ws";
 import { z } from "zod";
-import { registerRoutes } from "./app/registerRoutes";
-import { type WSContext, wsRouter } from "./app/registerWS";
-import { PiAgentSession } from "./features/chat/agent-session/agentSession";
+import { registerRoutes } from "./app/routes";
+
+// ============================================================================
+// 注册 WebSocket 处理器（必须在 wsRouter 使用之前导入以触发自动注册）
+// ============================================================================
+import "./features/chat/ws-handlers/session/index";
+import "./features/chat/ws-handlers/message/index";
+import { type WSContext, wsRouter } from "./features/chat/ws-router";
+import { PiAgentSession } from "./features/chat/agent-session/piAgentSession";
 import { AppFactory } from "./lib/app-factory";
 
 // ============================================================================
@@ -275,4 +281,4 @@ if (isMainModule) {
 // 导出（用于测试）
 // ============================================================================
 
-export { app, PiAgentSession, llmLogManager, server, wss };
+export { app, llmLogManager, PiAgentSession, server, wss };

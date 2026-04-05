@@ -2,7 +2,7 @@
  * ChatPage - 聊天页面
  */
 
-import { useChatMessages } from "@/shared/hooks/app";
+import { useChatMessages } from "./hooks";
 import { ChatLayout } from "./layout";
 
 interface ChatPageProps {

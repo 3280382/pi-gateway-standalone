@@ -3,4 +3,4 @@
  * 导出 PiAgentSession 核心类
  */
 
-export { PiAgentSession, type ServerMessage } from "./agentSession";
+export { PiAgentSession, type ServerMessage } from "./piAgentSession";

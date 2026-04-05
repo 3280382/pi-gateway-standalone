@@ -16,7 +16,7 @@ import express, {
 import helmet from "helmet";
 import morgan from "morgan";
 import { Config } from "../config";
-import { ApiError, ErrorFactory } from "./errors/api.error";
+import { ApiError, ErrorFactory } from "./errors";
 import { Logger, LogLevel } from "./utils/logger";
 
 export interface AppOptions {

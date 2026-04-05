@@ -182,9 +182,9 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
 			const isLast = index === nodes.length - 1;
 			const connector = isLast ? "└── " : "├── ";
 			const childPrefix = isLast ? "    " : "│   ";
-			
+
 			result += `${prefix}${connector}${node.name}\n`;
-			
+
 			if (node.expanded && node.children.length > 0) {
 				result += treeToText(node.children, prefix + childPrefix);
 			}
@@ -195,7 +195,7 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
 	// 复制目录树到剪贴板
 	const handleCopyTree = useCallback(async () => {
 		if (tree.length === 0) return;
-		
+
 		try {
 			const treeText = treeToText(tree);
 			await navigator.clipboard.writeText(treeText);
@@ -269,9 +269,16 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
 						title="Copy directory tree"
 						disabled={tree.length === 0 || loading}
 					>
-						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-							<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-							<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+						<svg
+							width="14"
+							height="14"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+						>
+							<rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+							<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
 						</svg>
 					</button>
 					<button

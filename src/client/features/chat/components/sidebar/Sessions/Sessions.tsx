@@ -8,10 +8,10 @@ import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
-import { websocketService } from "@/shared/services/websocket.service";
-import { useSessionStore } from "@/shared/stores/sessionStore";
-import { IconButton } from "@/shared/ui/IconButton/IconButton";
-import { SectionHeader } from "@/shared/ui/SectionHeader/SectionHeader";
+import { websocketService } from "@/services/websocket.service";
+import { useSessionStore } from "@/stores/sessionStore";
+import { IconButton } from "@/lib/ui/IconButton/IconButton";
+import { SectionHeader } from "@/features/chat/components/SectionHeader/SectionHeader";
 import styles from "./Sessions.module.css";
 
 export function Sessions() {

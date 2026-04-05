@@ -217,401 +217,408 @@ export const useFileStore = create<FileState & FileActions>()(
 				draggedItem: null,
 				isDragging: false,
 
-			// 缓存操作
-			getCachedPath: (path: string) => {
-				const state = get();
-				const cached = state.pathCache.get(path);
-				if (!cached) return null;
-				if (Date.now() - cached.timestamp > state.CACHE_TTL) {
-					const newCache = new Map(state.pathCache);
-					newCache.delete(path);
-					set({ pathCache: newCache });
-					return null;
-				}
-				return cached.items;
-			},
-
-			setCachedPath: (path: string, items: FileItem[]) => {
-				const state = get();
-				const newCache = new Map(state.pathCache);
-				newCache.set(path, { items, timestamp: Date.now() });
-				if (newCache.size > 50) {
-					const firstKey = newCache.keys().next().value;
-					newCache.delete(firstKey);
-				}
-				set({ pathCache: newCache });
-			},
-
-			// 导航
-			setCurrentPath: (path) => set({ currentPath: path }),
-
-			navigateUp: () => {
-				const current = get().currentPath;
-				if (current === "/" || current === "") return;
-				const parent = current.split("/").slice(0, -1).join("/") || "/";
-				if (parent !== current) {
-					set({ currentPath: parent });
-				}
-			},
-
-			navigateHome: () => {
-				set({ currentPath: "/root" });
-			},
-
-			// 文件列表
-			setItems: (items) => set({ items }),
-
-			toggleSelection: (path) =>
-				set((state) => {
-					const exists = state.selectedItems.includes(path);
-					return {
-						selectedItems: exists
-							? state.selectedItems.filter((p) => p !== path)
-							: [...state.selectedItems, path],
-					};
-				}),
-
-			clearSelection: () => set({ selectedItems: [] }),
-
-			selectForAction: (path, name) =>
-				set({
-					selectedActionFile: path,
-					selectedActionFileName: name,
-				}),
-
-			// 视图设置
-			setViewMode: (mode) => set({ viewMode: mode }),
-
-			toggleViewMode: () =>
-				set((state) => ({
-					viewMode: state.viewMode === "grid" ? "list" : "grid",
-				})),
-
-			setSortMode: (mode) => set({ sortMode: mode }),
-			setFilterType: (type) => set({ filterType: type }),
-			setFilterText: (text) => set({ filterText: text }),
-
-			// UI
-			setLoading: (loading) => set({ isLoading: loading }),
-			setError: (error) => set({ error }),
-			toggleSidebar: () =>
-				set((state) => ({ sidebarVisible: !state.sidebarVisible })),
-
-			// 多选模式
-			setMultiSelectMode: (enabled) => set({ isMultiSelectMode: enabled }),
-
-			toggleMultiSelectMode: () =>
-				set((state) => ({
-					isMultiSelectMode: !state.isMultiSelectMode,
-					selectedItems: !state.isMultiSelectMode ? [] : state.selectedItems,
-				})),
-
-			selectItem: (path) =>
-				set((state) => ({
-					selectedItems: state.selectedItems.includes(path)
-						? state.selectedItems
-						: [...state.selectedItems, path],
-				})),
-
-			deselectItem: (path) =>
-				set((state) => ({
-					selectedItems: state.selectedItems.filter((p) => p !== path),
-				})),
-
-			isSelected: (path) => {
-				return get().selectedItems.includes(path);
-			},
-
-			// 批量操作
-			deleteSelectedItems: async () => {
-				const { selectedItems, currentPath } = get();
-				if (selectedItems.length === 0) return;
-
-				try {
-					const response = await fetch("/api/files/batch-delete", {
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({ paths: selectedItems }),
-					});
-					if (!response.ok) throw new Error("Failed to delete files");
-
-					// 刷新当前目录
+				// 缓存操作
+				getCachedPath: (path: string) => {
 					const state = get();
-					const data = await fetch("/api/browse", {
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({ path: currentPath }),
-					}).then((r) => r.json());
+					const cached = state.pathCache.get(path);
+					if (!cached) return null;
+					if (Date.now() - cached.timestamp > state.CACHE_TTL) {
+						const newCache = new Map(state.pathCache);
+						newCache.delete(path);
+						set({ pathCache: newCache });
+						return null;
+					}
+					return cached.items;
+				},
 
-					const itemsToSet = [
-						...(data.parentPath !== data.currentPath
-							? [
-									{
-										name: "..",
-										path: data.parentPath,
-										isDirectory: true,
-										modified: "",
-									},
-								]
-							: []),
-						...data.items,
-					];
+				setCachedPath: (path: string, items: FileItem[]) => {
+					const state = get();
+					const newCache = new Map(state.pathCache);
+					newCache.set(path, { items, timestamp: Date.now() });
+					if (newCache.size > 50) {
+						const firstKey = newCache.keys().next().value;
+						newCache.delete(firstKey);
+					}
+					set({ pathCache: newCache });
+				},
 
+				// 导航
+				setCurrentPath: (path) => set({ currentPath: path }),
+
+				navigateUp: () => {
+					const current = get().currentPath;
+					if (current === "/" || current === "") return;
+					const parent = current.split("/").slice(0, -1).join("/") || "/";
+					if (parent !== current) {
+						set({ currentPath: parent });
+					}
+				},
+
+				navigateHome: () => {
+					set({ currentPath: "/root" });
+				},
+
+				// 文件列表
+				setItems: (items) => set({ items }),
+
+				toggleSelection: (path) =>
+					set((state) => {
+						const exists = state.selectedItems.includes(path);
+						return {
+							selectedItems: exists
+								? state.selectedItems.filter((p) => p !== path)
+								: [...state.selectedItems, path],
+						};
+					}),
+
+				clearSelection: () => set({ selectedItems: [] }),
+
+				selectForAction: (path, name) =>
 					set({
-						items: itemsToSet,
-						selectedItems: [],
-						isMultiSelectMode: false,
-					});
-				} catch (error) {
-					console.error("Batch delete error:", error);
-					set({ error: "Failed to delete selected files" });
-					throw error;
-				}
-			},
+						selectedActionFile: path,
+						selectedActionFileName: name,
+					}),
 
-			moveSelectedItems: async (targetPath) => {
-				const { selectedItems } = get();
-				if (selectedItems.length === 0) return;
+				// 视图设置
+				setViewMode: (mode) => set({ viewMode: mode }),
 
-				try {
-					const response = await fetch("/api/files/batch-move", {
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({ paths: selectedItems, targetPath }),
-					});
-					if (!response.ok) throw new Error("Failed to move files");
+				toggleViewMode: () =>
+					set((state) => ({
+						viewMode: state.viewMode === "grid" ? "list" : "grid",
+					})),
 
-					// 刷新当前目录
+				setSortMode: (mode) => set({ sortMode: mode }),
+				setFilterType: (type) => set({ filterType: type }),
+				setFilterText: (text) => set({ filterText: text }),
+
+				// UI
+				setLoading: (loading) => set({ isLoading: loading }),
+				setError: (error) => set({ error }),
+				toggleSidebar: () =>
+					set((state) => ({ sidebarVisible: !state.sidebarVisible })),
+
+				// 多选模式
+				setMultiSelectMode: (enabled) => set({ isMultiSelectMode: enabled }),
+
+				toggleMultiSelectMode: () =>
+					set((state) => ({
+						isMultiSelectMode: !state.isMultiSelectMode,
+						selectedItems: !state.isMultiSelectMode ? [] : state.selectedItems,
+					})),
+
+				selectItem: (path) =>
+					set((state) => ({
+						selectedItems: state.selectedItems.includes(path)
+							? state.selectedItems
+							: [...state.selectedItems, path],
+					})),
+
+				deselectItem: (path) =>
+					set((state) => ({
+						selectedItems: state.selectedItems.filter((p) => p !== path),
+					})),
+
+				isSelected: (path) => {
+					return get().selectedItems.includes(path);
+				},
+
+				// 批量操作
+				deleteSelectedItems: async () => {
+					const { selectedItems, currentPath } = get();
+					if (selectedItems.length === 0) return;
+
+					try {
+						const response = await fetch("/api/files/batch-delete", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({ paths: selectedItems }),
+						});
+						if (!response.ok) throw new Error("Failed to delete files");
+
+						// 刷新当前目录
+						const state = get();
+						const data = await fetch("/api/browse", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({ path: currentPath }),
+						}).then((r) => r.json());
+
+						const itemsToSet = [
+							...(data.parentPath !== data.currentPath
+								? [
+										{
+											name: "..",
+											path: data.parentPath,
+											isDirectory: true,
+											modified: "",
+										},
+									]
+								: []),
+							...data.items,
+						];
+
+						set({
+							items: itemsToSet,
+							selectedItems: [],
+							isMultiSelectMode: false,
+						});
+					} catch (error) {
+						console.error("Batch delete error:", error);
+						set({ error: "Failed to delete selected files" });
+						throw error;
+					}
+				},
+
+				moveSelectedItems: async (targetPath) => {
+					const { selectedItems } = get();
+					if (selectedItems.length === 0) return;
+
+					try {
+						const response = await fetch("/api/files/batch-move", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({ paths: selectedItems, targetPath }),
+						});
+						if (!response.ok) throw new Error("Failed to move files");
+
+						// 刷新当前目录
+						const { currentPath } = get();
+						const data = await fetch("/api/browse", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({ path: currentPath }),
+						}).then((r) => r.json());
+
+						const itemsToSet = [
+							...(data.parentPath !== data.currentPath
+								? [
+										{
+											name: "..",
+											path: data.parentPath,
+											isDirectory: true,
+											modified: "",
+										},
+									]
+								: []),
+							...data.items,
+						];
+
+						set({
+							items: itemsToSet,
+							selectedItems: [],
+							isMultiSelectMode: false,
+						});
+					} catch (error) {
+						console.error("Batch move error:", error);
+						set({ error: "Failed to move selected files" });
+						throw error;
+					}
+				},
+
+				// 创建新文件
+				createNewFile: async (fileName) => {
 					const { currentPath } = get();
-					const data = await fetch("/api/browse", {
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({ path: currentPath }),
-					}).then((r) => r.json());
+					const filePath = `${currentPath}/${fileName}`.replace(/\/+/g, "/");
 
-					const itemsToSet = [
-						...(data.parentPath !== data.currentPath
-							? [
-									{
-										name: "..",
-										path: data.parentPath,
-										isDirectory: true,
-										modified: "",
-									},
-								]
-							: []),
-						...data.items,
-					];
+					try {
+						const response = await fetch("/api/files/write", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({ path: filePath, content: "" }),
+						});
+						if (!response.ok) throw new Error("Failed to create file");
 
-					set({
-						items: itemsToSet,
-						selectedItems: [],
-						isMultiSelectMode: false,
-					});
-				} catch (error) {
-					console.error("Batch move error:", error);
-					set({ error: "Failed to move selected files" });
-					throw error;
-				}
-			},
+						// 刷新当前目录
+						const data = await fetch("/api/browse", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({ path: currentPath }),
+						}).then((r) => r.json());
 
-			// 创建新文件
-			createNewFile: async (fileName) => {
-				const { currentPath } = get();
-				const filePath = `${currentPath}/${fileName}`.replace(/\/+/g, "/");
+						const itemsToSet = [
+							...(data.parentPath !== data.currentPath
+								? [
+										{
+											name: "..",
+											path: data.parentPath,
+											isDirectory: true,
+											modified: "",
+										},
+									]
+								: []),
+							...data.items,
+						];
 
-				try {
-					const response = await fetch("/api/files/write", {
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({ path: filePath, content: "" }),
-					});
-					if (!response.ok) throw new Error("Failed to create file");
+						set({ items: itemsToSet });
+					} catch (error) {
+						console.error("Create file error:", error);
+						set({ error: "Failed to create file" });
+						throw error;
+					}
+				},
 
-					// 刷新当前目录
-					const data = await fetch("/api/browse", {
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({ path: currentPath }),
-					}).then((r) => r.json());
+				// 拖拽
+				setDraggedItem: (item) => set({ draggedItem: item }),
+				setIsDragging: (isDragging) => set({ isDragging }),
 
-					const itemsToSet = [
-						...(data.parentPath !== data.currentPath
-							? [
-									{
-										name: "..",
-										path: data.parentPath,
-										isDirectory: true,
-										modified: "",
-									},
-								]
-							: []),
-						...data.items,
-					];
+				// 获取过滤和排序后的列表
+				getFilteredAndSortedItems: () => {
+					const state = get();
+					let items = [...state.items];
 
-					set({ items: itemsToSet });
-				} catch (error) {
-					console.error("Create file error:", error);
-					set({ error: "Failed to create file" });
-					throw error;
-				}
-			},
+					// 过滤
+					if (state.filterText) {
+						const text = state.filterText.toLowerCase();
+						items = items.filter((item) =>
+							item.name.toLowerCase().includes(text),
+						);
+					}
 
-			// 拖拽
-			setDraggedItem: (item) => set({ draggedItem: item }),
-			setIsDragging: (isDragging) => set({ isDragging }),
+					if (state.filterType !== "all") {
+						items = items.filter((item) => {
+							const ext = item.extension?.toLowerCase() || "";
+							switch (state.filterType) {
+								case "dir":
+									return item.isDirectory;
+								case "text":
+									return ["txt", "log", "csv"].includes(ext);
+								case "html":
+									return [
+										"html",
+										"htm",
+										"css",
+										"scss",
+										"sass",
+										"less",
+									].includes(ext);
+								case "js":
+									return ["js", "ts", "jsx", "tsx", "mjs", "cjs"].includes(ext);
+								case "py":
+									return ["py", "pyw", "ipynb"].includes(ext);
+								case "sh":
+									return ["sh", "bash", "zsh", "fish"].includes(ext);
+								case "java":
+									return ["java", "class", "jar"].includes(ext);
+								case "json":
+									return ["json", "yaml", "yml", "xml"].includes(ext);
+								case "md":
+									return ["md", "mdx", "markdown"].includes(ext);
+								case "image":
+									return [
+										"png",
+										"jpg",
+										"jpeg",
+										"gif",
+										"svg",
+										"webp",
+										"ico",
+										"bmp",
+									].includes(ext);
+								case "code":
+									return [
+										"js",
+										"ts",
+										"jsx",
+										"tsx",
+										"py",
+										"java",
+										"cpp",
+										"c",
+										"h",
+										"go",
+										"rs",
+										"php",
+										"rb",
+										"swift",
+										"kt",
+									].includes(ext);
+								case "media":
+									return [
+										"png",
+										"jpg",
+										"jpeg",
+										"gif",
+										"svg",
+										"mp4",
+										"mp3",
+										"webp",
+										"mov",
+										"avi",
+									].includes(ext);
+								case "doc":
+									return ["md", "txt", "doc", "docx", "pdf", "rtf"].includes(
+										ext,
+									);
+								default:
+									return true;
+							}
+						});
+					}
 
-			// 获取过滤和排序后的列表
-			getFilteredAndSortedItems: () => {
-				const state = get();
-				let items = [...state.items];
+					// 排序
+					items.sort((a, b) => {
+						// ".." 始终排在第一位
+						if (a.name === "..") return -1;
+						if (b.name === "..") return 1;
 
-				// 过滤
-				if (state.filterText) {
-					const text = state.filterText.toLowerCase();
-					items = items.filter((item) =>
-						item.name.toLowerCase().includes(text),
-					);
-				}
+						// 目录始终在文件前面（除了..已经处理过了）
+						if (a.isDirectory && !b.isDirectory) return -1;
+						if (!a.isDirectory && b.isDirectory) return 1;
 
-				if (state.filterType !== "all") {
-					items = items.filter((item) => {
-						const ext = item.extension?.toLowerCase() || "";
-						switch (state.filterType) {
-							case "dir":
-								return item.isDirectory;
-							case "text":
-								return ["txt", "log", "csv"].includes(ext);
-							case "html":
-								return ["html", "htm", "css", "scss", "sass", "less"].includes(
-									ext,
-								);
-							case "js":
-								return ["js", "ts", "jsx", "tsx", "mjs", "cjs"].includes(ext);
-							case "py":
-								return ["py", "pyw", "ipynb"].includes(ext);
-							case "sh":
-								return ["sh", "bash", "zsh", "fish"].includes(ext);
-							case "java":
-								return ["java", "class", "jar"].includes(ext);
-							case "json":
-								return ["json", "yaml", "yml", "xml"].includes(ext);
-							case "md":
-								return ["md", "mdx", "markdown"].includes(ext);
-							case "image":
-								return [
-									"png",
-									"jpg",
-									"jpeg",
-									"gif",
-									"svg",
-									"webp",
-									"ico",
-									"bmp",
-								].includes(ext);
-							case "code":
-								return [
-									"js",
-									"ts",
-									"jsx",
-									"tsx",
-									"py",
-									"java",
-									"cpp",
-									"c",
-									"h",
-									"go",
-									"rs",
-									"php",
-									"rb",
-									"swift",
-									"kt",
-								].includes(ext);
-							case "media":
-								return [
-									"png",
-									"jpg",
-									"jpeg",
-									"gif",
-									"svg",
-									"mp4",
-									"mp3",
-									"webp",
-									"mov",
-									"avi",
-								].includes(ext);
-							case "doc":
-								return ["md", "txt", "doc", "docx", "pdf", "rtf"].includes(ext);
+						switch (state.sortMode) {
+							case "name-asc":
+								return a.name.localeCompare(b.name);
+							case "name-desc":
+								return b.name.localeCompare(a.name);
+							case "time-desc":
+								return (b.modified || "").localeCompare(a.modified || "");
+							case "time-asc":
+								return (a.modified || "").localeCompare(b.modified || "");
+							case "size-desc":
+								return (b.size || 0) - (a.size || 0);
+							case "size-asc":
+								return (a.size || 0) - (b.size || 0);
+							case "type":
+								return (a.extension || "").localeCompare(b.extension || "");
 							default:
-								return true;
+								return 0;
 						}
 					});
-				}
 
-				// 排序
-				items.sort((a, b) => {
-					// ".." 始终排在第一位
-					if (a.name === "..") return -1;
-					if (b.name === "..") return 1;
+					return items;
+				},
 
-					// 目录始终在文件前面（除了..已经处理过了）
-					if (a.isDirectory && !b.isDirectory) return -1;
-					if (!a.isDirectory && b.isDirectory) return 1;
-
-					switch (state.sortMode) {
-						case "name-asc":
-							return a.name.localeCompare(b.name);
-						case "name-desc":
-							return b.name.localeCompare(a.name);
-						case "time-desc":
-							return (b.modified || "").localeCompare(a.modified || "");
-						case "time-asc":
-							return (a.modified || "").localeCompare(b.modified || "");
-						case "size-desc":
-							return (b.size || 0) - (a.size || 0);
-						case "size-asc":
-							return (a.size || 0) - (b.size || 0);
-						case "type":
-							return (a.extension || "").localeCompare(b.extension || "");
-						default:
-							return 0;
+				// 执行文件（shell脚本等）
+				executeFile: async (
+					path: string,
+					onOutput?: (output: string) => void,
+				) => {
+					// 通过 API 发送执行命令，结果会显示在终端面板
+					try {
+						const response = await fetch("/api/execute", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({ path }),
+						});
+						if (!response.ok) {
+							throw new Error("Failed to execute file");
+						}
+						const output = await response.text();
+						if (onOutput) {
+							onOutput(output);
+						}
+						return output;
+					} catch (error) {
+						console.error("Execute file error:", error);
+						const errorMessage =
+							error instanceof Error ? error.message : "Failed to execute file";
+						set({ error: errorMessage });
+						if (onOutput) {
+							onOutput(`Error: ${errorMessage}`);
+						}
+						throw error;
 					}
-				});
-
-				return items;
-			},
-
-			// 执行文件（shell脚本等）
-			executeFile: async (
-				path: string,
-				onOutput?: (output: string) => void,
-			) => {
-				// 通过 API 发送执行命令，结果会显示在终端面板
-				try {
-					const response = await fetch("/api/execute", {
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({ path }),
-					});
-					if (!response.ok) {
-						throw new Error("Failed to execute file");
-					}
-					const output = await response.text();
-					if (onOutput) {
-						onOutput(output);
-					}
-					return output;
-				} catch (error) {
-					console.error("Execute file error:", error);
-					const errorMessage =
-						error instanceof Error ? error.message : "Failed to execute file";
-					set({ error: errorMessage });
-					if (onOutput) {
-						onOutput(`Error: ${errorMessage}`);
-					}
-					throw error;
-				}
-			},
+				},
 			}),
 			{
 				name: "file-storage",

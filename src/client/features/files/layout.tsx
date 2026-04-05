@@ -7,32 +7,25 @@ import { useCallback } from "react";
 import { useLayout } from "@/app/LayoutContext";
 import { FileBottomMenu } from "@/features/files/components/FileBottomMenu";
 import { XTermPanel } from "@/features/files/components/panels/TerminalPanel";
-import { useFileStore } from "@/features/files/stores/fileStore";
+import { useFileStore, useTerminalStore } from "@/features/files/stores";
 import { FileBrowser } from "./components/FileBrowser";
 import { FileSidebar } from "./components/FileSidebar";
 import { FileToolbar } from "./components/FileToolbar";
 import styles from "./FilesLayout.module.css";
 
 interface FilesLayoutProps {
-	terminalOutput: string;
-	terminalCommand: string;
-	onBashCommand: (command: string) => void;
-	onOpenBottomPanel: (command: string) => void;
 	closeBottomPanel: () => void;
 	setBottomPanelHeight: (height: number) => void;
 }
 
 export function FilesLayout({
-	terminalOutput,
-	terminalCommand,
-	onBashCommand,
-	onOpenBottomPanel,
 	closeBottomPanel,
 	setBottomPanelHeight,
 }: FilesLayoutProps) {
 	const { isSidebarVisible, isBottomPanelOpen, bottomPanelHeight } =
 		useLayout();
 	const { currentPath, loadDirectory, setCurrentPath } = useFileStore();
+	const { output, command, setCommand } = useTerminalStore();
 
 	const renderBottomPanel = useCallback(() => {
 		if (!isBottomPanelOpen) return null;
@@ -42,19 +35,22 @@ export function FilesLayout({
 				height={bottomPanelHeight}
 				onClose={closeBottomPanel}
 				onHeightChange={setBottomPanelHeight}
-				output={terminalOutput}
-				initialCommand={terminalCommand}
-				onExecuteCommand={onBashCommand}
+				output={output}
+				initialCommand={command}
+				onExecuteCommand={(cmd) => {
+					// XTermPanel 内部会执行命令，这里只更新状态
+					setCommand(cmd);
+				}}
 			/>
 		);
 	}, [
 		isBottomPanelOpen,
 		bottomPanelHeight,
-		terminalOutput,
-		terminalCommand,
+		output,
+		command,
 		closeBottomPanel,
 		setBottomPanelHeight,
-		onBashCommand,
+		setCommand,
 	]);
 
 	return (
@@ -81,7 +77,7 @@ export function FilesLayout({
 						onExecuteOutput={(output) =>
 							console.log("[Files] Execute output:", output)
 						}
-						onOpenBottomPanel={onOpenBottomPanel}
+						onOpenBottomPanel={setCommand}
 					/>
 					{renderBottomPanel()}
 				</main>

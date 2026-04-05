@@ -19,8 +19,8 @@ import {
 } from "@/features/chat/stores/chatStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import { websocketService } from "@/shared/services/websocket.service";
-import { useSessionStore } from "@/shared/stores/sessionStore";
+import { websocketService } from "@/services/websocket.service";
+import { useSessionStore } from "@/stores/sessionStore";
 import styles from "./AppHeader.module.css";
 
 // DirectoryPicker component for selecting working directory
