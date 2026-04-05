@@ -8,17 +8,19 @@
 // Feature stores (re-export for backward compatibility)
 export {
 	filterMessages,
+	selectCurrentSearchIndex,
 	selectCurrentStreamingMessage,
 	selectInputText,
+	selectIsSearching,
 	selectIsStreaming,
 	selectMessages,
 	selectSearchFilters,
 	selectSearchQuery,
+	selectSearchResults,
 	selectShowThinking,
 	useChatStore,
 	useLlmLogStore,
 	useModalStore,
-	useSearchStore,
 	useSidebarStore,
 } from "@/features/chat/stores";
 export { useFileStore, useFileViewerStore } from "@/features/files/stores";

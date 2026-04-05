@@ -20,13 +20,6 @@ export interface Session {
 	firstMessage?: string;
 }
 
-export interface SearchFilters {
-	user: boolean;
-	assistant: boolean;
-	thinking: boolean;
-	tools: boolean;
-}
-
 export type Theme = "dark" | "light";
 export type FontSize = "tiny" | "small" | "medium" | "large";
 
@@ -44,10 +37,6 @@ export interface SidebarState {
 	workingDir: WorkingDirectory | null;
 	recentWorkspaces: (string | WorkspaceInfo)[];
 	sessions: Session[];
-
-	// Search
-	searchQuery: string;
-	searchFilters: SearchFilters;
 
 	// Settings
 	theme: Theme;
@@ -76,10 +65,6 @@ export interface SidebarController {
 	changeWorkingDir: (path: string) => Promise<void>;
 	selectSession: (id: string) => void;
 	createNewSession: () => Promise<void>;
-
-	// Search
-	setSearchQuery: (query: string) => void;
-	setSearchFilters: (filters: Partial<SearchFilters>) => void;
 
 	// Settings
 	setTheme: (theme: Theme) => void;

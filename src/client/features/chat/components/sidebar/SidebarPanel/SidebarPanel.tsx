@@ -35,10 +35,15 @@ export function SidebarPanel({
 
 	// Load sessions when working directory changes
 	useEffect(() => {
-		console.log('[SidebarPanel] workingDir changed:', workingDir?.path, 'loaded:', sessionsLoadedRef.current);
+		console.log(
+			"[SidebarPanel] workingDir changed:",
+			workingDir?.path,
+			"loaded:",
+			sessionsLoadedRef.current,
+		);
 		if (workingDir?.path && sessionsLoadedRef.current !== workingDir.path) {
 			sessionsLoadedRef.current = workingDir.path;
-			console.log('[SidebarPanel] Loading sessions for:', workingDir.path);
+			console.log("[SidebarPanel] Loading sessions for:", workingDir.path);
 			controller.loadSessions(workingDir.path);
 		}
 	}, [workingDir?.path]);

@@ -340,7 +340,12 @@ export class WebSocketService extends BaseService {
 	 * 设置模型（对应后端的set_model类型）
 	 */
 	setModel(provider: string, modelId: string, thinkingLevel?: string): boolean {
-		console.log("[WebSocket] setModel called:", { provider, modelId, typeofProvider: typeof provider, typeofModelId: typeof modelId });
+		console.log("[WebSocket] setModel called:", {
+			provider,
+			modelId,
+			typeofProvider: typeof provider,
+			typeofModelId: typeof modelId,
+		});
 		return this.send("set_model", { provider, modelId, thinkingLevel });
 	}
 
@@ -488,6 +493,7 @@ export class WebSocketService extends BaseService {
 				this.emit("system_notification", data);
 				break;
 			case "initialized":
+				console.log("[WebSocket] Emitting initialized event:", message);
 				this.emit("initialized", message);
 				break;
 			case "dir_changed":

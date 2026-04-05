@@ -8,4 +8,12 @@ export { InputArea } from "./InputArea";
 export { MessageItem } from "./MessageItem";
 export { MessageList } from "./MessageList";
 export { LlmLogPanel } from "./panels/LlmLogPanel";
-export { TerminalPanel, XTermPanel } from "./panels/TerminalPanel";
+
+// Sidebar 组件
+export {
+	RecentWorkspaces,
+	Sessions,
+	Settings,
+	SidebarPanel,
+	WorkingDirectory,
+} from "./sidebar";

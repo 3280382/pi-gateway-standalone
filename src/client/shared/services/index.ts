@@ -7,11 +7,12 @@
 
 // Feature services (re-export for backward compatibility)
 export {
-	chatApi,
+	createChatController,
+	setupWebSocketListeners,
 	useChatController,
 } from "@/features/chat/services/api/chatApi";
 export {
-	sidebarApi,
+	createSidebarController,
 	useSidebarController,
 } from "@/features/chat/services/api/sidebarApi";
 export { systemPromptApi } from "@/features/chat/services/api/systemPromptApi";

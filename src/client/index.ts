@@ -3,10 +3,12 @@
  * 导出所有模块供外部使用
  */
 
-// Controllers
-export { chatController } from "@/features/chat/controllers";
 export { useChat } from "@/features/chat/hooks";
-export { chatService } from "@/features/chat/services/chat.service";
+// Chat Feature
+export {
+	setupWebSocketListeners,
+	useChatController,
+} from "@/features/chat/services/api/chatApi";
 // Stores
 export { useChatStore } from "@/features/chat/stores";
 // Types

@@ -299,7 +299,7 @@ export class GatewaySession {
 		if (!this.session) return;
 
 		this.unsubscribeFn = this.session.subscribe((event: AgentSessionEvent) => {
-			const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+			const timestamp = new Date().toISOString().split("T")[1].split(".")[0];
 			switch (event.type) {
 				case "message_update": {
 					const msgEvent = event.assistantMessageEvent;
@@ -318,7 +318,9 @@ export class GatewaySession {
 					} else if (msgEvent.type === "toolcall_delta") {
 						const toolCall = msgEvent.partial.content?.[msgEvent.contentIndex];
 						if (toolCall?.type === "toolCall") {
-							console.log(`[${timestamp}] [SEND] toolcall_delta: ${toolCall.name}`);
+							console.log(
+								`[${timestamp}] [SEND] toolcall_delta: ${toolCall.name}`,
+							);
 							this.send({
 								type: "toolcall_delta",
 								toolCallId: toolCall.id,
@@ -566,8 +568,10 @@ export class GatewaySession {
 		modelId: string,
 		thinkingLevel?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh",
 	) {
-		console.log(`[Gateway] setModel called: provider=${provider}, modelId=${modelId}`);
-		
+		console.log(
+			`[Gateway] setModel called: provider=${provider}, modelId=${modelId}`,
+		);
+
 		if (!this.session) {
 			console.error("[Gateway] setModel failed: session is null");
 			this.send({ type: "error", error: "会话未初始化" });
@@ -576,7 +580,7 @@ export class GatewaySession {
 
 		const model = this.modelRegistry.find(provider, modelId);
 		console.log(`[Gateway] modelRegistry.find result:`, model);
-		
+
 		if (!model) {
 			console.error(`[Gateway] Model not found: ${provider}/${modelId}`);
 			this.send({ type: "error", error: `模型 ${provider}/${modelId} 未找到` });
@@ -587,7 +591,7 @@ export class GatewaySession {
 			console.log(`[Gateway] Calling session.setModel with:`, model);
 			await this.session.setModel(model);
 			console.log(`[Gateway] session.setModel succeeded`);
-			
+
 			if (thinkingLevel) {
 				await this.session.setThinkingLevel(thinkingLevel);
 			}
@@ -623,7 +627,9 @@ export class GatewaySession {
 			return;
 		}
 		try {
-			console.log(`[Gateway] Calling session.setThinkingLevel with: ${thinkingLevel}`);
+			console.log(
+				`[Gateway] Calling session.setThinkingLevel with: ${thinkingLevel}`,
+			);
 			this.session.setThinkingLevel(thinkingLevel);
 			console.log(`[Gateway] Sending thinking_set response`);
 			this.send({
@@ -708,9 +714,9 @@ export class GatewaySession {
 			const available = await this.modelRegistry.getAvailable();
 			// Handle case where m.id might be an object
 			const models = available.map((m) => ({
-				id: typeof m.id === 'object' ? (m as any).id?.id || String(m.id) : m.id,
+				id: typeof m.id === "object" ? (m as any).id?.id || String(m.id) : m.id,
 				provider: m.provider,
-				name: m.name ?? (typeof m.id === 'object' ? String(m.id) : m.id),
+				name: m.name ?? (typeof m.id === "object" ? String(m.id) : m.id),
 				description: "",
 			}));
 			this.send({

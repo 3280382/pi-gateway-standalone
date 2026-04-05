@@ -3,6 +3,5 @@
  */
 
 // API clients
-export { chatApi, useChatController } from "./api/chatApi";
-export { sidebarApi, useSidebarController } from "./api/sidebarApi";
-export { systemPromptApi } from "./api/systemPromptApi";
+export { setupWebSocketListeners, useChatController } from "./api/chatApi";
+export { useSidebarController } from "./api/sidebarApi";

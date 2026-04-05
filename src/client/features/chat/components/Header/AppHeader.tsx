@@ -6,8 +6,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SystemPromptModal } from "@/features/chat/components/modals/SystemPromptModal";
-import { chatController } from "@/features/chat/controllers";
+import { useChatController } from "@/features/chat/services/api/chatApi";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
+import {
+	getSystemPrompt,
+	type SystemPromptResponse,
+} from "@/features/chat/services/api/systemPromptApi";
 import {
 	selectSearchFilters,
 	selectSearchQuery,
@@ -15,10 +19,6 @@ import {
 } from "@/features/chat/stores/chatStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import {
-	getSystemPrompt,
-	type SystemPromptResponse,
-} from "@/shared/services/api/systemPromptApi";
 import { websocketService } from "@/shared/services/websocket.service";
 import { useSessionStore } from "@/shared/stores/sessionStore";
 import styles from "./AppHeader.module.css";
@@ -217,6 +217,9 @@ export function AppHeader({
 	const currentThinking =
 		THINKING_LEVELS.find((t) => t.id === thinkingLevel) || THINKING_LEVELS[2];
 
+	// Use chat controller hook
+	const chatController = useChatController();
+
 	// Handle working directory selection
 	const handleDirSelect = async (selectedPath: string) => {
 		console.log(
@@ -277,11 +280,24 @@ export function AppHeader({
 		const model = models.find((m) => m.id === modelId);
 		if (model) {
 			console.log("[AppHeader] Switching model:", model);
-			console.log("[AppHeader] model.id type:", typeof model.id, "value:", model.id);
-			console.log("[AppHeader] model.provider type:", typeof model.provider, "value:", model.provider);
+			console.log(
+				"[AppHeader] model.id type:",
+				typeof model.id,
+				"value:",
+				model.id,
+			);
+			console.log(
+				"[AppHeader] model.provider type:",
+				typeof model.provider,
+				"value:",
+				model.provider,
+			);
 			try {
 				// Use chatController to set model (sends to server and waits for confirmation)
-				await chatController.setCurrentModel({ id: model.id, provider: model.provider });
+				await chatController.setCurrentModel({
+					id: model.id,
+					provider: model.provider,
+				});
 				console.log("[AppHeader] Model set successfully");
 			} catch (error) {
 				console.error("[AppHeader] Failed to set model:", error);

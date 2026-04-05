@@ -6,7 +6,6 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import type {
 	FontSize,
-	SearchFilters,
 	Session,
 	SidebarState,
 	Theme,
@@ -20,13 +19,6 @@ const createInitialState = (): Omit<SidebarState, keyof SidebarActions> => ({
 	workingDir: null,
 	recentWorkspaces: [],
 	sessions: [],
-	searchQuery: "",
-	searchFilters: {
-		user: true,
-		assistant: true,
-		thinking: true,
-		tools: true,
-	},
 	theme: "dark",
 	fontSize: "medium",
 	isLoading: false,
@@ -47,10 +39,6 @@ interface SidebarActions {
 	addRecentWorkspace: (path: string) => void;
 	removeRecentWorkspace: (path: string) => void;
 	setSessions: (sessions: Session[]) => void;
-
-	// Search Actions
-	setSearchQuery: (query: string) => void;
-	setSearchFilters: (filters: Partial<SearchFilters>) => void;
 
 	// Settings Actions
 	setTheme: (theme: Theme) => void;
@@ -109,21 +97,6 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 					set({ sessions }, false, "setSessions");
 				},
 
-				// Search Actions
-				setSearchQuery: (query: string) => {
-					set({ searchQuery: query }, false, "setSearchQuery");
-				},
-
-				setSearchFilters: (filters: Partial<SearchFilters>) => {
-					set(
-						(state) => ({
-							searchFilters: { ...state.searchFilters, ...filters },
-						}),
-						false,
-						"setSearchFilters",
-					);
-				},
-
 				// Settings Actions
 				setTheme: (theme: Theme) => {
 					set({ theme }, false, "setTheme");
@@ -175,9 +148,7 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 				version: 1,
 				partialize: (state) => ({
 					theme: state.theme,
-					searchQuery: state.searchQuery,
 					fontSize: state.fontSize,
-					searchFilters: state.searchFilters,
 					recentWorkspaces: state.recentWorkspaces,
 					lastSessionByDir: state.lastSessionByDir,
 				}),
@@ -197,8 +168,6 @@ export const selectRecentWorkspaces = (state: SidebarState) =>
 export const selectSessions = (state: SidebarState) => state.sessions;
 export const selectSelectedSessionId = (state: SidebarState) =>
 	state.selectedSessionId;
-export const selectSearchQuery = (state: SidebarState) => state.searchQuery;
-export const selectSearchFilters = (state: SidebarState) => state.searchFilters;
 export const selectTheme = (state: SidebarState) => state.theme;
 export const selectFontSize = (state: SidebarState) => state.fontSize;
 export const selectIsLoading = (state: SidebarState) => state.isLoading;

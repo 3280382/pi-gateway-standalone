@@ -2,10 +2,14 @@
  * FileBottomMenu - 文件功能底部菜单
  * 位于 APP Footer 上方，提供新建、删除、树状视图等功能
  */
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+	getFileTree,
+	type TreeNode,
+	type TreeResponse,
+} from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
-import { getFileTree, type TreeResponse, type TreeNode } from "@/features/files/services/api/fileApi";
 import styles from "./FileBottomMenu.module.css";
 
 export function FileBottomMenu() {
@@ -67,7 +71,12 @@ export function FileBottomMenu() {
 		if (isMultiSelectMode) {
 			toggleMultiSelectMode();
 		}
-	}, [deleteSelectedItems, clearSelection, isMultiSelectMode, toggleMultiSelectMode]);
+	}, [
+		deleteSelectedItems,
+		clearSelection,
+		isMultiSelectMode,
+		toggleMultiSelectMode,
+	]);
 
 	const handleCancelDelete = useCallback(() => {
 		setShowDeleteModal(false);
@@ -91,13 +100,16 @@ export function FileBottomMenu() {
 	}, [currentPath]);
 
 	// 处理树中文件点击 - 在主界面打开文件查看器（保持树状弹窗打开）
-	const handleTreeFileClick = useCallback((filePath: string, fileName: string) => {
-		// 构造完整路径
-		const fullPath = currentPath ? `${currentPath}/${filePath}` : filePath;
-		console.log("[TreeView] Opening file:", fullPath);
-		// 在主界面打开文件查看器（树状弹窗保持打开）
-		openViewer(fullPath, fileName, "view");
-	}, [currentPath, openViewer]);
+	const handleTreeFileClick = useCallback(
+		(filePath: string, fileName: string) => {
+			// 构造完整路径
+			const fullPath = currentPath ? `${currentPath}/${filePath}` : filePath;
+			console.log("[TreeView] Opening file:", fullPath);
+			// 在主界面打开文件查看器（树状弹窗保持打开）
+			openViewer(fullPath, fileName, "view");
+		},
+		[currentPath, openViewer],
+	);
 
 	const handleCloseTree = useCallback(() => {
 		setShowTreeModal(false);
@@ -117,24 +129,30 @@ export function FileBottomMenu() {
 	return (
 		<>
 			<div className={styles.menu}>
-			<button className={`${styles.btn} ${styles.newBtn}`} onClick={handleNewClick} title="New File">
-				<NewIcon />
-			</button>
-			<button
-				className={`${styles.btn} ${styles.treeBtn}`}
-				onClick={handleTreeClick}
-				title="Tree View"
-			>
-				<TreeIcon />
-			</button>
-			<button
-				className={`${styles.btn} ${styles.deleteBtn}`}
-				onClick={handleDeleteClick}
-				disabled={isMultiSelectMode && selectedItems.length === 0}
-				title={isMultiSelectMode ? `Delete (${selectedItems.length})` : "Delete"}
-			>
-				<DeleteIcon />
-			</button>
+				<button
+					className={`${styles.btn} ${styles.newBtn}`}
+					onClick={handleNewClick}
+					title="New File"
+				>
+					<NewIcon />
+				</button>
+				<button
+					className={`${styles.btn} ${styles.treeBtn}`}
+					onClick={handleTreeClick}
+					title="Tree View"
+				>
+					<TreeIcon />
+				</button>
+				<button
+					className={`${styles.btn} ${styles.deleteBtn}`}
+					onClick={handleDeleteClick}
+					disabled={isMultiSelectMode && selectedItems.length === 0}
+					title={
+						isMultiSelectMode ? `Delete (${selectedItems.length})` : "Delete"
+					}
+				>
+					<DeleteIcon />
+				</button>
 			</div>
 
 			{/* 新建文件对话框 */}
@@ -157,10 +175,16 @@ export function FileBottomMenu() {
 							/>
 						</div>
 						<div className={styles.modalActions}>
-							<button className={`${styles.modalBtn} ${styles.cancelBtn}`} onClick={handleCancelNew}>
+							<button
+								className={`${styles.modalBtn} ${styles.cancelBtn}`}
+								onClick={handleCancelNew}
+							>
 								Cancel
 							</button>
-							<button className={`${styles.modalBtn} ${styles.confirmBtn}`} onClick={handleConfirmNew}>
+							<button
+								className={`${styles.modalBtn} ${styles.confirmBtn}`}
+								onClick={handleConfirmNew}
+							>
 								OK
 							</button>
 						</div>
@@ -171,7 +195,10 @@ export function FileBottomMenu() {
 			{/* 删除确认对话框 */}
 			{showDeleteModal && (
 				<div className={styles.modalOverlay} onClick={handleCancelDelete}>
-					<div className={styles.deleteModal} onClick={(e) => e.stopPropagation()}>
+					<div
+						className={styles.deleteModal}
+						onClick={(e) => e.stopPropagation()}
+					>
 						<div className={styles.deleteModalTitle}>
 							<WarningIcon />
 							Confirm Delete
@@ -180,7 +207,10 @@ export function FileBottomMenu() {
 							Delete {selectedItems.length} item(s)?
 						</div>
 						<div className={styles.modalActions}>
-							<button className={`${styles.modalBtn} ${styles.cancelBtn}`} onClick={handleCancelDelete}>
+							<button
+								className={`${styles.modalBtn} ${styles.cancelBtn}`}
+								onClick={handleCancelDelete}
+							>
 								Cancel
 							</button>
 							<button
@@ -198,13 +228,20 @@ export function FileBottomMenu() {
 			{/* 树状视图全屏弹窗 */}
 			{showTreeModal && (
 				<div className={styles.treeFullscreenOverlay} onClick={handleCloseTree}>
-					<div className={styles.treeFullscreenContainer} onClick={(e) => e.stopPropagation()}>
+					<div
+						className={styles.treeFullscreenContainer}
+						onClick={(e) => e.stopPropagation()}
+					>
 						<div className={styles.treeHeader}>
 							<h3 className={styles.treeTitle}>
 								<TreeIcon />
 								Directory Tree: {treeData?.path || currentPath}
 							</h3>
-							<button className={styles.treeCloseBtn} onClick={handleCloseTree} title="Close (ESC)">
+							<button
+								className={styles.treeCloseBtn}
+								onClick={handleCloseTree}
+								title="Close (ESC)"
+							>
 								<CloseIcon />
 							</button>
 						</div>
@@ -212,9 +249,14 @@ export function FileBottomMenu() {
 							{treeLoading ? (
 								<div className={styles.treeLoading}>Loading...</div>
 							) : treeData ? (
-								<TreeView items={treeData.items} onFileClick={handleTreeFileClick} />
+								<TreeView
+									items={treeData.items}
+									onFileClick={handleTreeFileClick}
+								/>
 							) : (
-								<div className={styles.treeEmpty}>Failed to load directory tree</div>
+								<div className={styles.treeEmpty}>
+									Failed to load directory tree
+								</div>
 							)}
 						</div>
 					</div>
@@ -225,10 +267,10 @@ export function FileBottomMenu() {
 }
 
 // 树状视图组件
-function TreeView({ 
-	items, 
-	onFileClick 
-}: { 
+function TreeView({
+	items,
+	onFileClick,
+}: {
 	items: TreeResponse["items"];
 	onFileClick: (path: string, name: string) => void;
 }) {
@@ -238,7 +280,7 @@ function TreeView({
 
 	// 构建树结构
 	const tree = buildTree(items);
-	
+
 	return (
 		<div className={styles.treeView}>
 			<TreeNode node={tree} level={0} onFileClick={onFileClick} />
@@ -257,18 +299,23 @@ interface TreeNodeData {
 }
 
 function buildTree(items: TreeNode[]): TreeNodeData {
-	const root: TreeNodeData = { name: ".", path: "", isDirectory: true, children: [] };
-	
+	const root: TreeNodeData = {
+		name: ".",
+		path: "",
+		isDirectory: true,
+		children: [],
+	};
+
 	// Group items by their parent directory
 	const itemMap = new Map<string, TreeNodeData>();
-	
+
 	for (const item of items) {
 		const parts = item.path.split("/").filter(Boolean);
 		if (parts.length === 0) continue;
-		
+
 		// 跳过超过10层的项目
 		if (parts.length > MAX_TREE_LEVEL) continue;
-		
+
 		// Build path hierarchy
 		let current = root;
 		for (let i = 0; i < parts.length; i++) {
@@ -276,7 +323,7 @@ function buildTree(items: TreeNode[]): TreeNodeData {
 			const currentPath = parts.slice(0, i + 1).join("/");
 			const isLast = i === parts.length - 1;
 			const currentLevel = i + 1; // 当前层级（1-based）
-			
+
 			let node = itemMap.get(currentPath);
 			if (!node) {
 				node = {
@@ -292,10 +339,10 @@ function buildTree(items: TreeNode[]): TreeNodeData {
 			current = node;
 		}
 	}
-	
+
 	// Sort: directories first, then alphabetically
 	sortTree(root);
-	
+
 	return root;
 }
 
@@ -308,30 +355,35 @@ function sortTree(node: TreeNodeData) {
 	node.children.forEach(sortTree);
 }
 
-function TreeNode({ 
-	node, 
-	level, 
-	onFileClick 
-}: { 
-	node: TreeNodeData; 
+function TreeNode({
+	node,
+	level,
+	onFileClick,
+}: {
+	node: TreeNodeData;
 	level: number;
 	onFileClick: (path: string, name: string) => void;
 }) {
 	const [expanded, setExpanded] = useState(true); // 默认全部展开
 	const hasChildren = node.children.length > 0;
 	const isMaxLevel = level >= MAX_TREE_LEVEL;
-	
+
 	if (level === 0) {
 		// Root node - just render children
 		return (
 			<>
 				{node.children.map((child) => (
-					<TreeNode key={child.path} node={child} level={level + 1} onFileClick={onFileClick} />
+					<TreeNode
+						key={child.path}
+						node={child}
+						level={level + 1}
+						onFileClick={onFileClick}
+					/>
 				))}
 			</>
 		);
 	}
-	
+
 	// 如果达到最大层级且有子项，显示截断提示
 	if (isMaxLevel && hasChildren) {
 		return (
@@ -344,14 +396,17 @@ function TreeNode({
 					<span className={styles.treeIcon}>📁</span>
 					<span className={styles.treeDirName}>{node.name}</span>
 				</div>
-				<div className={styles.treeNodeHeader} style={{ paddingLeft: `${(level + 1) * 12}px` }}>
+				<div
+					className={styles.treeNodeHeader}
+					style={{ paddingLeft: `${(level + 1) * 12}px` }}
+				>
 					<span className={styles.treeExpandIconPlaceholder} />
 					<span className={styles.treeTruncated}>... (max depth reached)</span>
 				</div>
 			</div>
 		);
 	}
-	
+
 	// 处理点击事件：目录折叠/展开，文件打开
 	const handleClick = () => {
 		if (node.isDirectory) {
@@ -364,29 +419,42 @@ function TreeNode({
 			onFileClick(node.path, node.name);
 		}
 	};
-	
+
 	return (
 		<div className={styles.treeNode}>
 			<div
-				className={`${styles.treeNodeHeader} ${!node.isDirectory ? styles.treeFileClickable : ''}`}
+				className={`${styles.treeNodeHeader} ${!node.isDirectory ? styles.treeFileClickable : ""}`}
 				style={{ paddingLeft: `${level * 12}px` }}
 				onClick={handleClick}
-				title={node.isDirectory ? 'Click to expand/collapse' : 'Click to open file'}
+				title={
+					node.isDirectory ? "Click to expand/collapse" : "Click to open file"
+				}
 			>
 				{hasChildren ? (
 					<span className={styles.treeExpandIcon}>{expanded ? "▼" : "▶"}</span>
 				) : (
 					<span className={styles.treeExpandIconPlaceholder} />
 				)}
-				<span className={styles.treeIcon}>{node.isDirectory ? "📁" : getFileIcon(node.name)}</span>
-				<span className={node.isDirectory ? styles.treeDirName : styles.treeFileName}>
+				<span className={styles.treeIcon}>
+					{node.isDirectory ? "📁" : getFileIcon(node.name)}
+				</span>
+				<span
+					className={
+						node.isDirectory ? styles.treeDirName : styles.treeFileName
+					}
+				>
 					{node.name}
 				</span>
 			</div>
 			{expanded && hasChildren && (
 				<div className={styles.treeChildren}>
 					{node.children.map((child) => (
-						<TreeNode key={child.path} node={child} level={level + 1} onFileClick={onFileClick} />
+						<TreeNode
+							key={child.path}
+							node={child}
+							level={level + 1}
+							onFileClick={onFileClick}
+						/>
 					))}
 				</div>
 			)}
@@ -445,7 +513,14 @@ function DeleteIcon() {
 
 function WarningIcon() {
 	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="20" height="20">
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+			width="20"
+			height="20"
+		>
 			<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
 			<line x1="12" y1="9" x2="12" y2="13" />
 			<line x1="12" y1="17" x2="12.01" y2="17" />

@@ -7,11 +7,11 @@ import { useEffect, useRef } from "react";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import type { Session } from "@/features/chat/types/sidebar";
 import { websocketService } from "@/shared/services/websocket.service";
 import { useSessionStore } from "@/shared/stores/sessionStore";
 import { IconButton } from "@/shared/ui/IconButton/IconButton";
 import { SectionHeader } from "@/shared/ui/SectionHeader/SectionHeader";
-import type { Session } from "../../../../types/sidebar";
 import styles from "./Sessions.module.css";
 
 export function Sessions() {

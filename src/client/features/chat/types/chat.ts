@@ -60,7 +60,7 @@ export interface ToolExecution {
 }
 
 // ============================================================================
-// Search Filter Types
+// Search Types
 // ============================================================================
 
 export interface ChatSearchFilters {
@@ -72,6 +72,12 @@ export interface ChatSearchFilters {
 		from?: Date;
 		to?: Date;
 	};
+}
+
+export interface SearchResult {
+	messageId: string;
+	indices: number[];
+	preview: string;
 }
 
 // ============================================================================
@@ -122,10 +128,16 @@ export interface ChatState {
 	// Search
 	searchQuery: string;
 	searchFilters: ChatSearchFilters;
-	searchResults: string[]; // Message IDs that match search
+	searchResults: SearchResult[];
 	isSearching: boolean;
+	currentSearchIndex: number;
 	setSearchQuery: (query: string) => void;
 	setSearchFilters: (filters: Partial<ChatSearchFilters>) => void;
+	setSearchResults: (results: SearchResult[]) => void;
+	setSearching: (searching: boolean) => void;
+	nextSearchResult: () => void;
+	prevSearchResult: () => void;
+	clearSearch: () => void;
 
 	// Model/Session
 	currentModel: string | null;

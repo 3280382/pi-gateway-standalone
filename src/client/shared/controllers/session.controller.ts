@@ -383,8 +383,7 @@ export class SessionController {
 			this.currentWorkspace = null;
 			this.recentWorkspaces = [];
 
-			// 重置其他控制器
-			// chatController.reset(); // 假设有reset方法
+			// 重置文件控制器
 			fileController.clearCache();
 		} catch (error) {
 			this.handleError("resetAppState", error);

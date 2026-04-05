@@ -23,7 +23,11 @@ export async function handleSetModel(
 ): Promise<void> {
 	const { provider, modelId, thinkingLevel } = payload;
 
-	console.log(`[WebSocket] 收到 set_model 消息:`, { provider, modelId, thinkingLevel });
+	console.log(`[WebSocket] 收到 set_model 消息:`, {
+		provider,
+		modelId,
+		thinkingLevel,
+	});
 	logger.info(
 		`[WebSocket] 收到 set_model 消息: provider=${provider}, modelId=${modelId}`,
 	);

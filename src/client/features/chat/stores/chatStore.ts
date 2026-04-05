@@ -9,6 +9,7 @@ import type {
 	ChatSearchFilters,
 	ChatState,
 	Message,
+	SearchResult,
 	ToolExecution,
 } from "@/features/chat/types/chat";
 
@@ -57,8 +58,9 @@ const createInitialState = () => ({
 		thinking: true,
 		tools: true,
 	},
-	searchResults: [] as string[],
+	searchResults: [] as SearchResult[],
 	isSearching: false,
+	currentSearchIndex: -1,
 	currentModel: null as string | null,
 	sessionId: null as string | null,
 });
@@ -183,9 +185,9 @@ function buildContentArray(state: State): ContentPart[] {
 
 // RAF 批处理系统用于优化流式更新性能
 let rafId: number | null = null;
-let pendingContentUpdates: { 
-	content?: string; 
-	thinking?: string; 
+let pendingContentUpdates: {
+	content?: string;
+	thinking?: string;
 	toolCalls?: Map<string, { id: string; name: string; args: string }>;
 } = {};
 
@@ -211,7 +213,8 @@ function scheduleRafUpdate(
 			state.streamingContent + (pendingContentUpdates.content || "");
 		const newThinking =
 			state.streamingThinking + (pendingContentUpdates.thinking || "");
-		const newToolCalls = pendingContentUpdates.toolCalls || state.streamingToolCalls;
+		const newToolCalls =
+			pendingContentUpdates.toolCalls || state.streamingToolCalls;
 
 		// 只更新一次状态
 		const currentContentArray = buildContentArray({
@@ -227,8 +230,10 @@ function scheduleRafUpdate(
 		// 找到最后一个 turn_marker 的位置
 		// turn_marker 之前的所有内容是之前轮次的（已固定）
 		// turn_marker 之后的内容是当前轮次的（需要被 currentContentArray 替换）
-		const lastTurnMarkerIndex = existingContent.map((c: any) => c.type).lastIndexOf('turn_marker');
-		
+		const lastTurnMarkerIndex = existingContent
+			.map((c: any) => c.type)
+			.lastIndexOf("turn_marker");
+
 		let preservedContent: any[];
 		if (lastTurnMarkerIndex >= 0) {
 			// 保留 turn_marker 及之前的所有内容（之前轮次已固定）
@@ -298,7 +303,7 @@ export const useChatStore = create<
 		// Search
 		setSearchQuery: (query: string) => void;
 		setSearchFilters: (filters: Partial<ChatSearchFilters>) => void;
-		setSearchResults: (results: string[]) => void;
+		setSearchResults: (results: SearchResult[]) => void;
 		setSearching: (searching: boolean) => void;
 
 		// Session
@@ -470,10 +475,13 @@ export const useChatStore = create<
 
 				// 获取之前已保存的内容，保留 turn_marker 之前的轮次
 				const existingContent = state.currentStreamingMessage.content || [];
-				const lastTurnMarkerIndex = existingContent.map((c: any) => c.type).lastIndexOf('turn_marker');
-				const preservedContent = lastTurnMarkerIndex >= 0 
-					? existingContent.slice(0, lastTurnMarkerIndex + 1) 
-					: [];
+				const lastTurnMarkerIndex = existingContent
+					.map((c: any) => c.type)
+					.lastIndexOf("turn_marker");
+				const preservedContent =
+					lastTurnMarkerIndex >= 0
+						? existingContent.slice(0, lastTurnMarkerIndex + 1)
+						: [];
 
 				set(
 					{
@@ -495,7 +503,7 @@ export const useChatStore = create<
 				const finalContentToApply = pendingContentUpdates.content || "";
 				const finalThinkingToApply = pendingContentUpdates.thinking || "";
 				pendingContentUpdates = {};
-				
+
 				set(
 					(state) => {
 						// 构建当前轮次的新内容（包含未完成的 RAF 更新）
@@ -506,12 +514,18 @@ export const useChatStore = create<
 						});
 
 						// 找到最后一个 turn_marker 的位置
-						const existingContent = state.currentStreamingMessage?.content || [];
-						const lastTurnMarkerIndex = existingContent.map((c: any) => c.type).lastIndexOf('turn_marker');
-						
+						const existingContent =
+							state.currentStreamingMessage?.content || [];
+						const lastTurnMarkerIndex = existingContent
+							.map((c: any) => c.type)
+							.lastIndexOf("turn_marker");
+
 						let finalContent: any[];
 						if (lastTurnMarkerIndex >= 0) {
-							const previousRounds = existingContent.slice(0, lastTurnMarkerIndex + 1);
+							const previousRounds = existingContent.slice(
+								0,
+								lastTurnMarkerIndex + 1,
+							);
 							finalContent = [...previousRounds, ...currentContent];
 						} else {
 							finalContent = currentContent;
@@ -551,13 +565,13 @@ export const useChatStore = create<
 				const finalThinkingToApply = pendingContentUpdates.thinking || "";
 				// 清空待处理更新，防止重复应用
 				pendingContentUpdates = {};
-				
+
 				set(
 					(state) => {
 						// 获取之前轮次的内容（从 currentStreamingMessage.content）
 						const existingContent =
 							state.currentStreamingMessage?.content || [];
-						
+
 						// 构建当前轮次的新内容（包含未完成的 RAF 更新）
 						const currentContent = buildContentArray({
 							...state,
@@ -566,13 +580,18 @@ export const useChatStore = create<
 						});
 
 						// 找到最后一个 turn_marker 的位置
-						const lastTurnMarkerIndex = existingContent.map((c: any) => c.type).lastIndexOf('turn_marker');
-						
+						const lastTurnMarkerIndex = existingContent
+							.map((c: any) => c.type)
+							.lastIndexOf("turn_marker");
+
 						let finalContent: any[];
 						if (lastTurnMarkerIndex >= 0) {
 							// 有多轮：保留 turn_marker 之前的内容（之前轮次已固定）+ 当前轮次内容
 							// 注意：turn_marker 之后的内容不应该保留，因为它们来自已被清空的流式状态
-							const previousRounds = existingContent.slice(0, lastTurnMarkerIndex + 1);
+							const previousRounds = existingContent.slice(
+								0,
+								lastTurnMarkerIndex + 1,
+							);
 							finalContent = [...previousRounds, ...currentContent];
 						} else {
 							// 只有一轮：直接使用当前轮次内容（existingContent 中的内容已经在 currentContent 中）
@@ -767,12 +786,58 @@ export const useChatStore = create<
 				);
 			},
 
-			setSearchResults: (results: string[]) => {
-				set({ searchResults: results }, false, "setSearchResults");
+			setSearchResults: (results: SearchResult[]) => {
+				set(
+					{
+						searchResults: results,
+						currentSearchIndex: results.length > 0 ? 0 : -1,
+					},
+					false,
+					"setSearchResults",
+				);
 			},
 
 			setSearching: (searching: boolean) => {
 				set({ isSearching: searching }, false, "setSearching");
+			},
+
+			nextSearchResult: () => {
+				const { searchResults, currentSearchIndex } = get();
+				if (searchResults.length === 0) return;
+				set(
+					{
+						currentSearchIndex: (currentSearchIndex + 1) % searchResults.length,
+					},
+					false,
+					"nextSearchResult",
+				);
+			},
+
+			prevSearchResult: () => {
+				const { searchResults, currentSearchIndex } = get();
+				if (searchResults.length === 0) return;
+				set(
+					{
+						currentSearchIndex:
+							(currentSearchIndex - 1 + searchResults.length) %
+							searchResults.length,
+					},
+					false,
+					"prevSearchResult",
+				);
+			},
+
+			clearSearch: () => {
+				set(
+					{
+						searchQuery: "",
+						searchResults: [],
+						currentSearchIndex: -1,
+						isSearching: false,
+					},
+					false,
+					"clearSearch",
+				);
 			},
 
 			// Session
@@ -812,7 +877,7 @@ export const useChatStore = create<
 				} else {
 					newToolCalls.set(id, { id, name, args: delta });
 				}
-				
+
 				// 累积到 pending 状态，让 RAF 统一更新
 				pendingContentUpdates.toolCalls = newToolCalls;
 				scheduleRafUpdate(get, set);
@@ -1158,6 +1223,15 @@ export const selectSearchQuery = (
 export const selectSearchFilters = (
 	state: ReturnType<typeof useChatStore.getState>,
 ) => state.searchFilters;
+export const selectSearchResults = (
+	state: ReturnType<typeof useChatStore.getState>,
+) => state.searchResults;
+export const selectCurrentSearchIndex = (
+	state: ReturnType<typeof useChatStore.getState>,
+) => state.currentSearchIndex;
+export const selectIsSearching = (
+	state: ReturnType<typeof useChatStore.getState>,
+) => state.isSearching;
 
 // ============================================================================
 // Message Filtering Helper

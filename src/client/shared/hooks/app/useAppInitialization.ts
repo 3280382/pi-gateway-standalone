@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { chatController } from "@/features/chat/controllers";
+import { setupWebSocketListeners } from "@/features/chat/services/api/chatApi";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { fileController, sessionController } from "@/shared/controllers";
@@ -45,21 +45,21 @@ export function useAppInitialization(): InitResult {
 					wsConnected = websocketService.isConnected;
 					console.log("[AppInit] WebSocket connected");
 
-					// 设置 chat controller 的 WebSocket 监听器
-					chatController.setupWebSocketListeners();
+					// 设置全局 WebSocket 流式监听器
+					setupWebSocketListeners();
 				} catch (wsErr) {
 					console.warn(
 						"[AppInit] WebSocket not available, continuing without it",
 					);
 				}
 
-				// 仅在 WebSocket 连接成功时初始化会话（1秒超时，非阻塞）
+				// 仅在 WebSocket 连接成功时初始化会话（5秒超时，非阻塞）
 				console.log("[AppInit] 准备初始化会话:", {
 					persistedDir,
 					persistedSessionId,
 				});
 				if (wsConnected && persistedDir) {
-					initializeSession(persistedDir, persistedSessionId).catch((err) => {
+					initializeSession(persistedDir, persistedSessionId, 5000).catch((err) => {
 						console.warn("[AppInit] Session init failed:", err);
 					});
 				}
@@ -124,18 +124,39 @@ export function useAppInitialization(): InitResult {
 	const initializeSession = async (
 		currentDir: string,
 		persistedSessionId: string | null,
+		timeoutMs = 5000,
 	) => {
 		try {
-			const initData = await websocketService.initWorkingDirectory(
+			console.log(`[AppInit] Calling initWorkingDirectory with timeout ${timeoutMs}ms`);
+			const message = await websocketService.initWorkingDirectory(
 				currentDir,
 				persistedSessionId || undefined,
+				timeoutMs,
 			);
+			console.log("[AppInit] initWorkingDirectory response:", message);
 
-			if (!initData) return;
+			// 后端直接发送属性，没有嵌套的 data 字段
+			// 从 message 对象中提取所需字段
+			const initData = {
+				workingDir: message?.workingDir || message?.cwd || currentDir,
+				sessionId: message?.sessionId || message?.session?.id || persistedSessionId,
+				pid: message?.pid || message?.processId || 0,
+				model: message?.model,
+				thinkingLevel: message?.thinkingLevel,
+				resourceFiles: message?.resourceFiles || message?.files,
+				sessionFile: message?.sessionFile || message?.session?.file,
+			};
+
+			// 验证必要字段
+			if (!initData.workingDir || !initData.sessionId) {
+				console.warn("[AppInit] initWorkingDirectory returned incomplete data:", message);
+				return;
+			}
 
 			console.log("[AppInit] Session initialized:", {
 				workingDir: initData.workingDir,
 				sessionId: initData.sessionId,
+				pid: initData.pid,
 			});
 
 			// 同步服务器返回的状态到本地存储
@@ -154,54 +175,62 @@ export function useAppInitialization(): InitResult {
 		resourceFiles?: string[];
 		sessionFile?: string;
 	}) => {
-		const sessionStore = useSessionStore.getState();
-		const sidebarStore = useSidebarStore.getState();
-		const chatStore = useChatStore.getState();
+		try {
+			const sessionStore = useSessionStore.getState();
+			const sidebarStore = useSidebarStore.getState();
+			const chatStore = useChatStore.getState();
 
-		// 同步到各 store（仅在变化时更新，避免重复触发）
-		if (sessionStore.currentDir !== initData.workingDir) {
-			sessionStore.setCurrentDir(initData.workingDir);
-		}
-		fileController.setCurrentPath(initData.workingDir);
-		if (sidebarStore.workingDir?.path !== initData.workingDir) {
-			sidebarStore.setWorkingDir(initData.workingDir);
-		}
-
-		// 保存 session 信息 - 以服务端返回的 session 为准
-		chatStore.setSessionId(initData.sessionId);
-		sessionStore.setCurrentSession(initData.sessionId); // 更新浏览器保存的 sessionId
-		sidebarStore.selectSession(initData.sessionId); // 同步更新 sidebar 的选中状态
-		sessionStore.setServerPid(initData.pid);
-		sessionStore.setIsConnected(true);
-
-		// 保存配置
-		if (initData.model) {
-			chatStore.setCurrentModel(initData.model);
-			sessionStore.setCurrentModel(initData.model);
-		}
-		if (initData.thinkingLevel) {
-			sessionStore.setThinkingLevel(initData.thinkingLevel);
-		}
-		if (initData.resourceFiles) {
-			sessionStore.setResourceFiles(initData.resourceFiles);
-		}
-
-		// 加载历史消息 - 直接使用服务端返回的 sessionFile
-		// 服务端 initWorkingDirectory 返回的 session 是服务器认定的当前 session
-		// 浏览器保存的 sessionId 会被服务端返回的覆盖
-		if (initData.sessionFile) {
-			console.log("[AppInit] Loading session from:", initData.sessionFile);
-			const result = await chatStore.loadSession(initData.sessionFile);
-			if (result === 0) {
-				console.log(
-					"[AppInit] Session file empty (new session):",
-					initData.sessionFile,
-				);
-			} else {
-				console.log("[AppInit] Loaded", result, "messages");
+			// 同步到各 store（仅在变化时更新，避免重复触发）
+			if (initData.workingDir && sessionStore.currentDir !== initData.workingDir) {
+				sessionStore.setCurrentDir(initData.workingDir);
 			}
-		} else {
-			console.warn("[AppInit] No session file returned from server");
+			if (initData.workingDir) {
+				fileController.setCurrentPath(initData.workingDir);
+			}
+			if (initData.workingDir && sidebarStore.workingDir?.path !== initData.workingDir) {
+				sidebarStore.setWorkingDir(initData.workingDir);
+			}
+
+			// 保存 session 信息 - 以服务端返回的 session 为准
+			if (initData.sessionId) {
+				chatStore.setSessionId(initData.sessionId);
+				sessionStore.setCurrentSession(initData.sessionId);
+				sidebarStore.selectSession(initData.sessionId);
+			}
+			if (initData.pid) {
+				sessionStore.setServerPid(initData.pid);
+			}
+			sessionStore.setIsConnected(true);
+
+			// 保存配置
+			if (initData.model) {
+				chatStore.setCurrentModel(initData.model);
+				sessionStore.setCurrentModel(initData.model);
+			}
+			if (initData.thinkingLevel) {
+				sessionStore.setThinkingLevel(initData.thinkingLevel);
+			}
+			if (initData.resourceFiles) {
+				sessionStore.setResourceFiles(initData.resourceFiles);
+			}
+
+			// 加载历史消息
+			if (initData.sessionFile) {
+				console.log("[AppInit] Loading session from:", initData.sessionFile);
+				const result = await chatStore.loadSession(initData.sessionFile);
+				if (result === 0) {
+					console.log(
+						"[AppInit] Session file empty (new session):",
+						initData.sessionFile,
+					);
+				} else {
+					console.log("[AppInit] Loaded", result, "messages");
+				}
+			} else {
+				console.warn("[AppInit] No session file returned from server");
+			}
+		} catch (error) {
+			console.error("[AppInit] syncSessionState error:", error);
 		}
 	};
 

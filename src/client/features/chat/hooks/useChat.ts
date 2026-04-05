@@ -255,11 +255,8 @@ export function useChat(): UseChatReturn {
 			wsLog.info("Agent started", data);
 		});
 
-		// Agent end handler - 禁用，由 chatController 统一处理
-		// registerHandler("agent_end", (_data: AgentEndMessage) => {
-		// 	finalizeRef.current?.();
-		// 	clearHandlers();
-		// });
+		// Agent end handler - 由全局WebSocket监听器处理
+		// 不在这里注册，避免重复处理
 
 		// Message start/end handlers
 		registerHandler("message_start", () => {
@@ -367,8 +364,8 @@ export function useChat(): UseChatReturn {
 		store.clearInput();
 		store.startStreaming();
 
-		// Setup streaming handlers - 禁用，由 chatController 统一处理
-		// setupStreamingHandlers();
+		// 流式处理器由全局WebSocket监听器处理
+		// 不在此处设置，避免重复处理
 
 		// Send via WebSocket
 		if (isBash) {

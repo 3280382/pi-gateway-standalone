@@ -7,7 +7,7 @@ import { useCallback } from "react";
 import { useLayout } from "@/app/LayoutContext";
 import { AppHeader } from "@/features/chat/components/Header";
 import { LlmLogPanel } from "@/features/chat/components/panels/LlmLogPanel";
-import { SidebarPanel } from "@/features/chat/sidebar/components/SidebarPanel/SidebarPanel";
+import { SidebarPanel } from "@/features/chat/components/sidebar/SidebarPanel/SidebarPanel";
 import styles from "./ChatLayout.module.css";
 import { ChatPanel } from "./components/ChatPanel";
 

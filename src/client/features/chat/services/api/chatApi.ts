@@ -53,9 +53,8 @@ export function useChatController(): EnhancedChatController {
 	const chatStore = useChatStore();
 	const sessionStore = useSessionStore();
 
-	// 注意：全局流式处理器现在由 chat.controller.ts 的 ChatController 设置
-	// 这里不再重复设置，避免消息重复处理
-	// setupStreamingHandlers(chatStore);
+	// 注意：全局流式处理器由 setupWebSocketListeners() 统一设置
+	// 在应用初始化时调用一次，这里不再重复设置，避免消息重复处理
 
 	return {
 		// 基础聊天功能（支持图片）
@@ -329,23 +328,29 @@ export function useChatController(): EnhancedChatController {
 }
 
 // ============================================================================
-// Streaming Handlers Setup - 已废弃，使用全局控制器
+// Streaming Handlers Setup - 全局WebSocket监听器设置
 // ============================================================================
 
 let handlersSetup = false;
 
-function setupStreamingHandlers(
-	store: ReturnType<typeof useChatStore.getState>,
-) {
+/**
+ * 设置全局WebSocket流式处理器
+ * 由应用初始化时调用一次，处理所有WebSocket事件
+ */
+export function setupWebSocketListeners(): void {
 	// 防止重复设置
 	if (handlersSetup) return;
 	handlersSetup = true;
+
+	const store = useChatStore.getState();
 
 	// 只设置一次全局监听器
 	// Content delta handler - handles streaming text
 	websocketService.on(
 		"content_delta",
 		(data: { text?: string; delta?: string }) => {
+			const ts = new Date().toISOString().split("T")[1].split(".")[0];
+			console.log(`[${ts}] [RECV] content_delta`);
 			const content = data?.text || data?.delta;
 			if (content) {
 				store.appendStreamingContent(content);
@@ -357,6 +362,8 @@ function setupStreamingHandlers(
 	websocketService.on(
 		"thinking_delta",
 		(data: { thinking?: string; delta?: string }) => {
+			const ts = new Date().toISOString().split("T")[1].split(".")[0];
+			console.log(`[${ts}] [RECV] thinking_delta`);
 			const content = data?.thinking || data?.delta;
 			if (content) {
 				store.appendStreamingThinking(content);
@@ -366,11 +373,22 @@ function setupStreamingHandlers(
 
 	// Tool call delta handler
 	websocketService.on("toolcall_delta", (data: any) => {
-		if (data?.toolCallId && data?.toolName) {
-			store.appendToolCallDelta(
-				data.toolCallId,
-				data.toolName,
-				data.delta || "",
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(
+			`[${ts}] [RECV] toolcall_delta: ${data?.toolName || "unknown"}`,
+		);
+		try {
+			if (data?.toolCallId && data?.toolName) {
+				store.appendToolCallDelta(
+					data.toolCallId,
+					data.toolName,
+					data.delta || "",
+				);
+			}
+		} catch (error) {
+			console.error(
+				"[setupWebSocketListeners] Error in toolcall_delta handler:",
+				error,
 			);
 		}
 	});
@@ -379,14 +397,35 @@ function setupStreamingHandlers(
 	websocketService.on(
 		"tool_start",
 		(data: { toolCallId?: string; toolName: string; args?: any }) => {
-			const tool: ToolExecution = {
-				id: data.toolCallId || generateToolId(),
-				name: data.toolName,
-				args: data.args || {},
-				status: "executing",
-				startTime: new Date(),
-			};
-			store.setActiveTool(tool);
+			const ts = new Date().toISOString().split("T")[1].split(".")[0];
+			console.log(`[${ts}] [RECV] tool_start: ${data?.toolName || "unknown"}`);
+			try {
+				if (!data || typeof data !== "object") {
+					console.error(
+						"[setupWebSocketListeners] Invalid tool_start data:",
+						data,
+					);
+					return;
+				}
+				const toolCallId = data.toolCallId || generateToolId();
+				const toolName = data.toolName || "unknown";
+				const args = data.args || {};
+				const tool: ToolExecution = {
+					id: toolCallId,
+					name: toolName,
+					args: args,
+					status: "executing",
+					startTime: new Date(),
+				};
+				store.setActiveTool(tool);
+			} catch (error) {
+				console.error(
+					"[setupWebSocketListeners] Error in tool_start handler:",
+					error,
+					"data:",
+					data,
+				);
+			}
 		},
 	);
 
@@ -394,9 +433,18 @@ function setupStreamingHandlers(
 	websocketService.on(
 		"tool_update",
 		(data: { toolCallId: string; chunk?: string; output?: string }) => {
-			const content = data.chunk || data.output;
-			if (content) {
-				store.updateToolOutput(data.toolCallId, content);
+			const ts = new Date().toISOString().split("T")[1].split(".")[0];
+			console.log(`[${ts}] [RECV] tool_update: ${data?.toolCallId}`);
+			try {
+				const content = data.chunk || data.output;
+				if (content) {
+					store.updateToolOutput(data.toolCallId, content, undefined);
+				}
+			} catch (error) {
+				console.error(
+					"[setupWebSocketListeners] Error in tool_update handler:",
+					error,
+				);
 			}
 		},
 	);
@@ -410,32 +458,88 @@ function setupStreamingHandlers(
 			isError?: boolean;
 			error?: string;
 		}) => {
-			if (data.isError || data.error) {
-				store.updateToolOutput(
-					data.toolCallId,
-					data.result || "",
-					data.error || "工具执行失败",
+			const ts = new Date().toISOString().split("T")[1].split(".")[0];
+			console.log(`[${ts}] [RECV] tool_end: ${data?.toolCallId}`);
+			try {
+				const output = data.result || "";
+				const error = data.isError ? "工具执行失败" : undefined;
+				store.updateToolOutput(data.toolCallId, output, error);
+			} catch (error) {
+				console.error(
+					"[setupWebSocketListeners] Error in tool_end handler:",
+					error,
 				);
-			} else {
-				store.updateToolOutput(data.toolCallId, data.result || "");
 			}
 		},
 	);
 
-	// Turn start handler - 开始新的思考轮次
+	// Agent end handler
+	websocketService.on("agent_end", () => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] agent_end`);
+		store.finishStreaming();
+	});
+
+	// Message start/end handlers
+	websocketService.on("message_start", () => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] message_start`);
+	});
+
+	websocketService.on("message_end", () => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] message_end`);
+	});
+
+	// Turn start/end handlers
 	websocketService.on("turn_start", () => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] turn_start`);
 		store.startNewTurn();
 	});
 
-	// Agent end handler - 禁用，由 chatController 统一处理
-	// websocketService.on("agent_end", () => {
-	// 	store.finishStreaming();
-	// });
+	websocketService.on("turn_end", () => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] turn_end`);
+	});
 
-	// Error handler - 禁用，由 chatController 统一处理
-	// websocketService.on("error", () => {
-	// 	store.abortStreaming();
-	// });
+	// Compaction start/end handlers
+	websocketService.on("compaction_start", () => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] compaction_start`);
+	});
+
+	websocketService.on("compaction_end", () => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] compaction_end`);
+	});
+
+	// Retry start/end handlers
+	websocketService.on("retry_start", () => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] retry_start`);
+	});
+
+	websocketService.on("retry_end", () => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] retry_end`);
+	});
+
+	// Connection status handlers
+	websocketService.on("connected", () => {
+		console.log("[setupWebSocketListeners] WebSocket connected");
+	});
+
+	websocketService.on("disconnected", () => {
+		console.log("[setupWebSocketListeners] WebSocket disconnected");
+		// 如果正在流式生成，中止
+		if (store.isStreaming) {
+			store.abortStreaming();
+		}
+	});
+
+	// Agent end handler - 已在 setupWebSocketListeners 中处理
+	// Error handler - 由全局WebSocket服务统一处理
 }
 
 // ============================================================================

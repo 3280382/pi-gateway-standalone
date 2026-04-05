@@ -56,16 +56,16 @@ export async function getFileTree(path: string): Promise<TreeResponse> {
 	}
 
 	const data = await response.json();
-	
+
 	// API returns nested tree structure with children, flatten it for UI
 	const items: TreeNode[] = [];
-	const rootPath = data.path || '';
-	
+	const rootPath = data.path || "";
+
 	function flatten(node: TreeNode, depth: number = 0) {
 		// Skip the root node itself, only include children
 		if (depth > 0) {
 			// Get relative path from root
-			const relativePath = node.path.replace(rootPath, '').replace(/^\//, '');
+			const relativePath = node.path.replace(rootPath, "").replace(/^\//, "");
 			items.push({
 				name: node.name,
 				path: relativePath || node.name,
@@ -78,12 +78,12 @@ export async function getFileTree(path: string): Promise<TreeResponse> {
 			}
 		}
 	}
-	
+
 	// data is the root node
 	if (data) {
 		flatten(data, 0);
 	}
-	
+
 	return { path: data.path || path, items };
 }
 

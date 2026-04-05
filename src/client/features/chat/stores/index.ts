@@ -4,16 +4,18 @@
 
 export {
 	filterMessages,
+	selectCurrentSearchIndex,
 	selectCurrentStreamingMessage,
 	selectInputText,
+	selectIsSearching,
 	selectIsStreaming,
 	selectMessages,
 	selectSearchFilters,
 	selectSearchQuery,
+	selectSearchResults,
 	selectShowThinking,
 	useChatStore,
 } from "./chatStore";
 export { useLlmLogStore } from "./llmLogStore";
 export { useModalStore } from "./modalStore";
-export { useSearchStore } from "./searchStore";
 export { useSidebarStore } from "./sidebarStore";

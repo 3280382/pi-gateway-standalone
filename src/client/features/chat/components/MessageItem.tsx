@@ -22,7 +22,11 @@ function safeString(val: unknown): string {
 	if (typeof val === "string") return val;
 	if (typeof val === "object") {
 		// If it has a content property, use that
-		if (val && "content" in val && typeof (val as Record<string, unknown>).content === "string") {
+		if (
+			val &&
+			"content" in val &&
+			typeof (val as Record<string, unknown>).content === "string"
+		) {
 			return (val as Record<string, string>).content;
 		}
 		return JSON.stringify(val, null, 2);
@@ -107,7 +111,7 @@ function GlassCard({
 	};
 
 	switch (block.type) {
-		case "thinking":
+		case "thinking": {
 			if (!showThinking) return null;
 			const thinkingText = safeString(block.thinking);
 			return (
@@ -127,7 +131,7 @@ function GlassCard({
 								>
 									📋
 								</button>
-								)}
+							)}
 							<button
 								className={styles.btn}
 								onClick={() => setIsExpanded(!isExpanded)}
@@ -143,8 +147,9 @@ function GlassCard({
 					)}
 				</div>
 			);
+		}
 
-		case "tool_use":
+		case "tool_use": {
 			if (!showTools) return null;
 			const toolArgs = block.partialArgs || JSON.stringify(block.args, null, 2);
 			return (
@@ -165,7 +170,7 @@ function GlassCard({
 								>
 									📋
 								</button>
-								)}
+							)}
 							<button
 								className={styles.btn}
 								onClick={() => setIsExpanded(!isExpanded)}
@@ -181,12 +186,23 @@ function GlassCard({
 					)}
 				</div>
 			);
+		}
 
-		case "tool":
+		case "tool": {
 			if (!showTools) return null;
-			const status = block.error ? "error" : block.output ? "success" : "pending";
-			const statusColor = block.error ? "#ef4444" : block.output ? "#10b981" : "#6b7280";
-			const toolContent = safeString(block.output || block.error || "Processing...");
+			const status = block.error
+				? "error"
+				: block.output
+					? "success"
+					: "pending";
+			const statusColor = block.error
+				? "#ef4444"
+				: block.output
+					? "#10b981"
+					: "#6b7280";
+			const toolContent = safeString(
+				block.output || block.error || "Processing...",
+			);
 			return (
 				<div
 					className={`${styles.card} ${styles.tool}`}
@@ -205,7 +221,7 @@ function GlassCard({
 								>
 									📋
 								</button>
-								)}
+							)}
 							<button
 								className={styles.btn}
 								onClick={() => setIsExpanded(!isExpanded)}
@@ -221,6 +237,7 @@ function GlassCard({
 					)}
 				</div>
 			);
+		}
 
 		case "text":
 			if (!block.text) return null;
@@ -241,7 +258,7 @@ function GlassCard({
 								>
 									📋
 								</button>
-								)}
+							)}
 						</div>
 					</div>
 					<div className={styles.content}>
@@ -257,33 +274,49 @@ function GlassCard({
 
 // Safe text rendering component
 function TextContent({ text }: { text: string }) {
-	const lines = text.split('\n');
+	const lines = text.split("\n");
 	return (
 		<>
 			{lines.map((line, idx) => {
 				// Handle code blocks
-				if (line.startsWith('```')) {
-					return <div key={idx} className={styles.codeBlockStart}>{line}</div>;
+				if (line.startsWith("```")) {
+					return (
+						<div key={idx} className={styles.codeBlockStart}>
+							{line}
+						</div>
+					);
 				}
 				// Handle inline code
 				const parts = line.split(/(`[^`]+`)/g);
 				return (
 					<div key={idx} className={styles.line}>
 						{parts.map((part, pidx) => {
-							if (part.startsWith('`') && part.endsWith('`')) {
-								return <code key={pidx} className={styles.inlineCode}>{part.slice(1, -1)}</code>;
+							if (part.startsWith("`") && part.endsWith("`")) {
+								return (
+									<code key={pidx} className={styles.inlineCode}>
+										{part.slice(1, -1)}
+									</code>
+								);
 							}
 							// Handle bold
 							const boldParts = part.split(/(\*\*[^*]+\*\*)/g);
 							return boldParts.map((bp, bidx) => {
-								if (bp.startsWith('**') && bp.endsWith('**')) {
-									return <strong key={`${pidx}-${bidx}`}>{bp.slice(2, -2)}</strong>;
+								if (bp.startsWith("**") && bp.endsWith("**")) {
+									return (
+										<strong key={`${pidx}-${bidx}`}>{bp.slice(2, -2)}</strong>
+									);
 								}
 								// Handle italic
 								const italicParts = bp.split(/(\*[^*]+\*)/g);
 								return italicParts.map((ip, iidx) => {
-									if (ip.startsWith('*') && ip.endsWith('*') && !ip.startsWith('**')) {
-										return <em key={`${pidx}-${bidx}-${iidx}`}>{ip.slice(1, -1)}</em>;
+									if (
+										ip.startsWith("*") &&
+										ip.endsWith("*") &&
+										!ip.startsWith("**")
+									) {
+										return (
+											<em key={`${pidx}-${bidx}-${iidx}`}>{ip.slice(1, -1)}</em>
+										);
 									}
 									return <span key={`${pidx}-${bidx}-${iidx}`}>{ip}</span>;
 								});

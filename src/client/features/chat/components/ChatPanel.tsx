@@ -3,7 +3,7 @@
  */
 
 import { useCallback, useEffect, useRef } from "react";
-import { chatController } from "@/features/chat/controllers";
+import { useChatController } from "@/features/chat/services/api/chatApi";
 import {
 	selectCurrentStreamingMessage,
 	selectInputText,
@@ -23,6 +23,9 @@ export function ChatPanel() {
 	const isStreaming = useChatStore(selectIsStreaming);
 	const showThinking = useChatStore(selectShowThinking);
 	const showTools = useChatStore((state) => state.showTools);
+
+	// Use the hook instead of controller singleton
+	const chatController = useChatController();
 
 	const messagesRef = useRef<HTMLDivElement>(null);
 	const shouldScrollRef = useRef(true);
