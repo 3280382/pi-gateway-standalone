@@ -8,7 +8,7 @@ export { registerRoutes } from "./app/registerRoutes";
 // 配置和工具
 export { Config } from "./config";
 // 核心模块
-export { AgentSession, type ServerMessage } from "./features/chat/agent-session";
+export { PiAgentSession, type ServerMessage } from "./features/chat/agent-session";
 export { AppFactory } from "./lib/app-factory";
 
 // LLM 相关

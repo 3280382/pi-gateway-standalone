@@ -1,6 +1,6 @@
 /**
- * Agent Session Module
- * 导出 AgentSession 核心类
+ * Pi Agent Session Module
+ * 导出 PiAgentSession 核心类
  */
 
-export { AgentSession, type ServerMessage } from "./agentSession";
+export { PiAgentSession, type ServerMessage } from "./agentSession";

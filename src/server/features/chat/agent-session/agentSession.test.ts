@@ -1,17 +1,17 @@
 /**
- * GatewaySession Unit Tests
+ * PiAgentSession Unit Tests
  * Tests for the core session management functionality
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebSocket } from "ws";
 import type { LlmLogManager } from "../../../llm/log-manager";
-import { AgentSession } from "./agentSession";
+import { PiAgentSession } from "./agentSession";
 
-describe("AgentSession", () => {
+describe("PiAgentSession", () => {
 	let mockWs: Partial<WebSocket>;
 	let mockLlmLogManager: Partial<LlmLogManager>;
-	let session: AgentSession;
+	let session: PiAgentSession;
 
 	beforeEach(() => {
 		mockWs = {
@@ -24,7 +24,7 @@ describe("AgentSession", () => {
 			setEnabled: vi.fn(),
 			dispose: vi.fn(),
 		};
-		session = new AgentSession(
+		session = new PiAgentSession(
 			mockWs as WebSocket,
 			mockLlmLogManager as LlmLogManager,
 		);

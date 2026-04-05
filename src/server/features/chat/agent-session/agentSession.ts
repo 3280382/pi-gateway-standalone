@@ -1,5 +1,5 @@
 /**
- * AgentSession 类
+ * PiAgentSession 类
  * 管理WebSocket连接、pi-coding-agent会话和消息传递
  */
 
@@ -9,7 +9,7 @@ import { dirname, join } from "node:path";
 import type { AgentMessage } from "@mariozechner/pi-agent-core";
 import type { ImageContent } from "@mariozechner/pi-ai";
 import {
-	type AgentSession as PiAgentSession,
+	type AgentSession,
 	type AgentSessionEvent,
 	AuthStorage,
 	createAgentSession,
@@ -45,12 +45,12 @@ const writeFileTools = [
 ];
 
 /**
- * AgentSession 类
+ * PiAgentSession 类
  * 封装了pi-coding-agent会话的完整生命周期管理
  */
-export class AgentSession {
+export class PiAgentSession {
 	/** 代理会话 */
-	session: PiAgentSession | null = null;
+	session: AgentSession | null = null;
 
 	/** WebSocket连接 */
 	ws: WebSocket;
@@ -80,7 +80,7 @@ export class AgentSession {
 	readonly llmLogManager: LlmLogManager;
 
 	/**
-	 * 创建新的AgentSession
+	 * 创建新的PiAgentSession
 	 * @param ws WebSocket连接
 	 * @param llmLogManager LLM日志管理器
 	 */
@@ -467,7 +467,7 @@ export class AgentSession {
 		}>,
 	) {
 		console.log(
-			`[AgentSession.prompt] 开始处理, session存在: ${!!this.session}, isStreaming: ${this.isStreaming}`,
+			`[PiAgentSession.prompt] 开始处理, session存在: ${!!this.session}, isStreaming: ${this.isStreaming}`,
 		);
 		if (!this.session) {
 			this.send({ type: "error", error: "会话未初始化" });
@@ -485,7 +485,7 @@ export class AgentSession {
 			);
 
 			console.log(
-				`[AgentSession.prompt] 调用session.prompt, text长度: ${text.length}`,
+				`[PiAgentSession.prompt] 调用session.prompt, text长度: ${text.length}`,
 			);
 			if (this.isStreaming) {
 				await this.session.prompt(text, {
@@ -495,9 +495,9 @@ export class AgentSession {
 			} else {
 				await this.session.prompt(text, { images: convertedImages });
 			}
-			console.log("[AgentSession.prompt] session.prompt完成");
+			console.log("[PiAgentSession.prompt] session.prompt完成");
 		} catch (error) {
-			console.error("[AgentSession.prompt] 错误:", error);
+			console.error("[PiAgentSession.prompt] 错误:", error);
 			this.send({
 				type: "error",
 				error: error instanceof Error ? error.message : "未知错误",

@@ -39,7 +39,7 @@ import { WebSocket, WebSocketServer } from "ws";
 import { z } from "zod";
 import { registerRoutes } from "./app/registerRoutes";
 import { type WSContext, wsRouter } from "./app/registerWS";
-import { AgentSession } from "./features/chat/agent-session/agentSession";
+import { PiAgentSession } from "./features/chat/agent-session/agentSession";
 import { AppFactory } from "./lib/app-factory";
 
 // ============================================================================
@@ -104,13 +104,13 @@ wss.on("connection", (ws) => {
 	const connectionId = `conn_${++connectionCounter}_${Date.now()}`;
 	logger.info(`[WebSocket] 新连接建立: ${connectionId}`);
 
-	// 创建 AgentSession 实例
-	const agentSession = new AgentSession(ws, llmLogManager);
+	// 创建 PiAgentSession 实例
+	const piAgentSession = new PiAgentSession(ws, llmLogManager);
 
 	// 创建 WebSocket 上下文
 	const ctx: WSContext = {
 		ws,
-		session: gatewaySession,
+		session: piAgentSession,
 		connectionId,
 		connectedAt: new Date(),
 	};
@@ -182,13 +182,13 @@ wss.on("connection", (ws) => {
 	// 连接关闭处理
 	ws.on("close", () => {
 		logger.info(`[WebSocket] 连接关闭: ${connectionId}`);
-		agentSession.dispose();
+		piAgentSession.dispose();
 	});
 
 	// 错误处理
 	ws.on("error", (error) => {
 		logger.error(`[WebSocket] 连接错误: ${connectionId}`, {}, error);
-		agentSession.dispose();
+		piAgentSession.dispose();
 	});
 });
 
@@ -275,4 +275,4 @@ if (isMainModule) {
 // 导出（用于测试）
 // ============================================================================
 
-export { app, AgentSession, llmLogManager, server, wss };
+export { app, PiAgentSession, llmLogManager, server, wss };
