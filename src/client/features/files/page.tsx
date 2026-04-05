@@ -2,9 +2,8 @@
  * FilesPage - 文件页面
  */
 
-import { useEffect } from "react";
-import { useFileStore } from "@/features/files/stores/fileStore";
-import { useSessionStore } from "@/shared/stores/sessionStore";
+import { useEffect, useState } from "react";
+import { initializeFilePath, useFileStore } from "@/features/files/stores/fileStore";
 import { FilesLayout } from "./layout";
 
 interface FilesPageProps {
@@ -17,14 +16,34 @@ interface FilesPageProps {
 }
 
 export function FilesPage(props: FilesPageProps) {
-	const { currentDir } = useSessionStore();
-	const { currentPath, setCurrentPath } = useFileStore();
+	const { setCurrentPath } = useFileStore();
+	const [isInitializing, setIsInitializing] = useState(true);
 
 	useEffect(() => {
-		if (currentDir && currentPath === "/root") {
-			setCurrentPath(currentDir);
-		}
-	}, []);
+		// 初始化文件浏览器路径
+		const initPath = async () => {
+			const path = await initializeFilePath();
+			setCurrentPath(path);
+			setIsInitializing(false);
+		};
+
+		initPath();
+	}, [setCurrentPath]);
+
+	// 初始化完成前显示加载状态
+	if (isInitializing) {
+		return (
+			<div style={{ 
+				flex: 1, 
+				display: "flex", 
+				alignItems: "center", 
+				justifyContent: "center",
+				color: "var(--text-secondary)"
+			}}>
+				Loading...
+			</div>
+		);
+	}
 
 	return <FilesLayout {...props} />;
 }

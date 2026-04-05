@@ -7,7 +7,6 @@
 
 // Feature services (re-export for backward compatibility)
 export {
-	createChatController,
 	setupWebSocketListeners,
 	useChatController,
 } from "@/features/chat/services/api/chatApi";

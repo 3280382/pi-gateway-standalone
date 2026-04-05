@@ -111,6 +111,27 @@
 	justify-content: center;
 }
 
+.btnCopyPath {
+	padding: 2px;
+	border: none;
+	border-radius: 3px;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: all 0.15s;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	margin-left: 4px;
+}
+
+.btnCopyPath:hover {
+	background: var(--bg-tertiary);
+	color: var(--text-primary);
+}
+
 .body {
 	flex: 1;
 	overflow: hidden;

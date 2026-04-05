@@ -1,6 +1,24 @@
 /**
  * Chat Store - Zustand State Management with Performance Optimizations
  * 使用批量更新和RAF调度优化流式消息性能
+ *
+ * 【架构设计说明】
+ * 本 Store 是 Chat Feature 的核心状态管理中心。
+ *
+ * 【数据流】
+ * 1. 用户发送消息: UI → useChat/useChatController → websocketService.send()
+ * 2. 接收AI响应: WebSocket → setupWebSocketListeners() → chatStore (本文件)
+ * 3. 组件更新: chatStore → React re-render → UI
+ *
+ * 【特殊设计】
+ * - WebSocket 事件处理在 setupWebSocketListeners() (chatApi.ts)
+ * - 该处理器直接调用本 Store 的方法更新状态，这是 WebSocket 服务的特例
+ * - 详情见 chatApi.ts 中的架构注释
+ *
+ * 【性能优化】
+ * - 使用 RAF (requestAnimationFrame) 批量处理流式消息
+ * - 使用 Zustand selectors 避免不必要的重渲染
+ * - 工具调用使用 Map 存储，支持快速查找
  */
 
 import { create } from "zustand";

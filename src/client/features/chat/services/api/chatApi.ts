@@ -335,7 +335,27 @@ let handlersSetup = false;
 
 /**
  * 设置全局WebSocket流式处理器
- * 由应用初始化时调用一次，处理所有WebSocket事件
+ * 
+ * 【架构设计说明】
+ * 这是全局事件处理器，在应用初始化时调用一次（见 useAppInitialization.ts）。
+ * 
+ * 【为什么 Service 直接操作 Store？】
+ * 1. WebSocket 事件是"被动接收"，不是用户操作，不经过 UI 层
+ * 2. 全局订阅必须在组件挂载前完成，避免初始消息丢失
+ * 3. 放在 Hook 中会导致：组件卸载时事件处理中断、多个组件重复订阅
+ * 4. 这是 WebSocket 类服务的特殊处理模式，非通用做法
+ * 
+ * 【正常数据流 vs WebSocket 事件流】
+ * 正常数据流: UI → Hook → Service → Store
+ * WebSocket事件: Service → (全局处理器) → Store → UI
+ * 
+ * 【约定】
+ * 只有 setupWebSocketListeners 可以直接操作 Store。
+ * 其他 Service 代码必须通过 Hook 或 Controller 间接操作 Store。
+ * 
+ * @example
+ * // App 初始化时调用一次
+ * setupWebSocketListeners();
  */
 export function setupWebSocketListeners(): void {
 	// 防止重复设置
@@ -543,76 +563,8 @@ export function setupWebSocketListeners(): void {
 }
 
 // ============================================================================
-// Non-hook API for non-React contexts
+// Legacy API exports (for backward compatibility)
 // ============================================================================
 
-export function createChatController(): ChatController {
-	const store = useChatStore.getState();
-
-	return {
-		sendMessage: async (text: string) => {
-			if (!text.trim()) return;
-
-			const userMessage: Message = {
-				id: generateMessageId(),
-				role: "user",
-				content: [{ type: "text", text }],
-				timestamp: new Date(),
-			};
-
-			store.addMessage(userMessage);
-			store.clearInput();
-			store.startStreaming();
-
-			websocketService.send("prompt", { text });
-		},
-
-		abortGeneration: () => {
-			websocketService.send("abort", {});
-			store.abortStreaming();
-		},
-
-		setInputText: (text: string) => store.setInputText(text),
-		clearInput: () => store.clearInput(),
-		toggleMessageCollapse: (id: string) => store.toggleMessageCollapse(id),
-		toggleThinkingCollapse: (id: string) => store.toggleThinkingCollapse(id),
-		toggleToolsCollapse: (id: string) => store.toggleToolsCollapse(id),
-		deleteMessage: (id: string) => store.deleteMessage(id),
-		clearMessages: () => store.clearMessages(),
-		regenerateMessage: (id: string) => store.regenerateMessage(id),
-		setShowThinking: (show: boolean) => store.setShowThinking(show),
-		setShowTools: (show: boolean) => store.setShowTools(show),
-		expandToolOutput: () => {},
-		collapseToolOutput: () => {},
-	};
-}
-
-// ============================================================================
-// Legacy WebSocket Client for backward compatibility
-// ============================================================================
-
-export const wsClient = {
-	send: (message: { type: string; text?: string }) => {
-		if (message.type === "prompt") {
-			websocketService.send("prompt", { text: message.text });
-		} else if (message.type === "abort") {
-			websocketService.send("abort", {});
-		}
-	},
-	on: (event: string, handler: (data: any) => void) => {
-		// Map legacy event names to new event names
-		const eventMap: Record<string, string> = {
-			content: "content_delta",
-			thinking: "thinking_delta",
-			toolcall_delta: "toolcall_delta",
-			tool_start: "tool_start",
-			tool_update: "tool_update",
-			tool_end: "tool_end",
-			agent_start: "agent_start",
-			agent_end: "agent_end",
-			error: "error",
-		};
-		const mappedEvent = eventMap[event] || event;
-		return websocketService.on(mappedEvent as any, handler);
-	},
-};
+// wsClient 已废弃，请直接使用 websocketService
+// createChatController 已废弃，请使用 useChatController hook

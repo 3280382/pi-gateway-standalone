@@ -3,7 +3,7 @@
  */
 
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
 
 export type ViewMode = "grid" | "list";
 export type SortMode =
@@ -132,28 +132,90 @@ interface FileActions {
 	setIsDragging: (isDragging: boolean) => void;
 }
 
+// 从 localStorage 恢复的路径（如果存在）
+const getPersistedPath = (): string | null => {
+	try {
+		const stored = localStorage.getItem("file-storage");
+		if (stored) {
+			const data = JSON.parse(stored);
+			return data.state?.currentPath || null;
+		}
+	} catch {
+		// 忽略解析错误
+	}
+	return null;
+};
+
+// 检查路径是否存在
+const checkPathExists = async (path: string): Promise<boolean> => {
+	try {
+		const response = await fetch("/api/browse", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ path }),
+		});
+		return response.ok;
+	} catch {
+		return false;
+	}
+};
+
+// 初始化文件浏览器路径
+export const initializeFilePath = async (): Promise<string> => {
+	const persistedPath = getPersistedPath();
+
+	// 如果有持久化的路径，检查是否还存在
+	if (persistedPath) {
+		const exists = await checkPathExists(persistedPath);
+		if (exists) {
+			console.log("[FileStore] Using persisted path:", persistedPath);
+			return persistedPath;
+		}
+		console.log("[FileStore] Persisted path no longer exists:", persistedPath);
+	}
+
+	// 使用服务器当前目录
+	try {
+		const response = await fetch("/api/working-dir");
+		if (response.ok) {
+			const data = await response.json();
+			if (data.cwd) {
+				console.log("[FileStore] Using server working dir:", data.cwd);
+				return data.cwd;
+			}
+		}
+	} catch (error) {
+		console.error("[FileStore] Failed to get server working dir:", error);
+	}
+
+	// 默认路径
+	console.log("[FileStore] Using default path: /root");
+	return "/root";
+};
+
 export const useFileStore = create<FileState & FileActions>()(
 	devtools(
-		(set, get) => ({
-			// 初始状态
-			currentPath: "/root",
-			parentPath: "/",
-			items: [],
-			selectedItems: [],
-			pathCache: new Map(),
-			CACHE_TTL: 5 * 60 * 1000, // 5分钟缓存
-			viewMode: "grid",
-			sortMode: "time-desc",
-			filterType: "all",
-			filterText: "",
-			isLoading: false,
-			error: null,
-			sidebarVisible: false,
-			selectedActionFile: null,
-			selectedActionFileName: null,
-			isMultiSelectMode: false,
-			draggedItem: null,
-			isDragging: false,
+		persist(
+			(set, get) => ({
+				// 初始状态（会被 persist 恢复的值覆盖）
+				currentPath: "/root",
+				parentPath: "/",
+				items: [],
+				selectedItems: [],
+				pathCache: new Map(),
+				CACHE_TTL: 5 * 60 * 1000, // 5分钟缓存
+				viewMode: "grid",
+				sortMode: "time-desc",
+				filterType: "all",
+				filterText: "",
+				isLoading: false,
+				error: null,
+				sidebarVisible: false,
+				selectedActionFile: null,
+				selectedActionFileName: null,
+				isMultiSelectMode: false,
+				draggedItem: null,
+				isDragging: false,
 
 			// 缓存操作
 			getCachedPath: (path: string) => {
@@ -550,7 +612,16 @@ export const useFileStore = create<FileState & FileActions>()(
 					throw error;
 				}
 			},
-		}),
+			}),
+			{
+				name: "file-storage",
+				version: 1,
+				partialize: (state) => ({
+					// 只持久化 currentPath
+					currentPath: state.currentPath,
+				}),
+			},
+		),
 		{ name: "FileStore" },
 	),
 );
