@@ -1,11 +1,13 @@
 /**
- * FileList - Optimized list view with gesture handling
+ * FileList - List view for file browser
  *
- * 职责：UI 渲染
- * - 使用 useFileItemActions 处理交互逻辑
+ * 职责：纯 UI 渲染
+ * - 无业务逻辑
+ * - 通过 useFileItemActions 获取所有交互处理器
  */
+
 import type React from "react";
-import { memo, useCallback } from "react";
+import { memo } from "react";
 import type { FileItem as FileItemType } from "@/features/files/stores/fileStore";
 import { useFileItemActions } from "@/features/files/hooks";
 import { FileItem } from "./FileItem";
@@ -16,50 +18,13 @@ interface FileListProps {
 }
 
 export const FileList = memo<FileListProps>(({ items }) => {
-	// 使用业务逻辑 hook
 	const {
 		selectedItems,
 		isMultiSelectMode,
 		draggingItem,
 		dropTarget,
-		handleTap,
-		handleDoubleTap,
-		handleLongPress,
-		handleDragStart,
-		handleDragEnd,
-		handleDragOver,
-		handleDragLeave,
-		handleDrop,
-		toggleSelection,
+		getItemHandlers,
 	} = useFileItemActions();
-
-	// Drag handlers - bridge between DOM events and hook methods
-	const onDragStart = useCallback(
-		(e: React.DragEvent, item: FileItemType) => {
-			handleDragStart(item);
-			e.dataTransfer.effectAllowed = "move";
-			e.dataTransfer.setData("text/plain", item.path);
-		},
-		[handleDragStart],
-	);
-
-	const onDragOver = useCallback(
-		(e: React.DragEvent, item: FileItemType) => {
-			if (!item.isDirectory) return;
-			e.preventDefault();
-			e.dataTransfer.dropEffect = "move";
-			handleDragOver(item);
-		},
-		[handleDragOver],
-	);
-
-	const onDrop = useCallback(
-		async (e: React.DragEvent, targetItem: FileItemType) => {
-			e.preventDefault();
-			await handleDrop(targetItem);
-		},
-		[handleDrop],
-	);
 
 	if (items.length === 0) return null;
 
@@ -72,26 +37,21 @@ export const FileList = memo<FileListProps>(({ items }) => {
 				<span className={styles.headerSize}>Size</span>
 				<span className={styles.headerModified}>Modified</span>
 			</div>
-			{items.map((item) => (
-				<FileItem
-					key={item.path}
-					item={item}
-					isSelected={selectedItems.includes(item.path)}
-					isMultiSelectMode={isMultiSelectMode}
-					isDropTarget={dropTarget === item.path}
-					isDragging={draggingItem === item.path}
-					onTap={handleTap}
-					onDoubleTap={handleDoubleTap}
-					onLongPress={handleLongPress}
-					onDragStart={onDragStart}
-					onDragOver={onDragOver}
-					onDragLeave={handleDragLeave}
-					onDrop={onDrop}
-					onDragEnd={handleDragEnd}
-					onToggleSelect={toggleSelection}
-					viewMode="list"
-				/>
-			))}
+			{items.map((item) => {
+				const handlers = getItemHandlers(item);
+				return (
+					<FileItem
+						key={item.path}
+						item={item}
+						isSelected={selectedItems.includes(item.path)}
+						isMultiSelectMode={isMultiSelectMode}
+						isDropTarget={dropTarget === item.path}
+						isDragging={draggingItem === item.path}
+						{...handlers}
+						viewMode="list"
+					/>
+				);
+			})}
 		</div>
 	);
 });

@@ -1,28 +1,32 @@
 /**
- * FileItem - 文件项组件（使用原生 DOM 点击事件）
+ * FileItem - 文件项组件
+ *
+ * 职责：纯 UI 渲染
+ * - 无交互逻辑，只接收绑定好的处理器
  */
+
 import type React from "react";
-import { memo, useCallback, useRef, useState } from "react";
+import { memo } from "react";
 import { getFileIcon } from "@/features/files/services/api/fileApi";
 import type { FileItem as FileItemType } from "@/features/files/stores/fileStore";
 import { formatDate, formatFileSize } from "@/lib/formatters";
 import styles from "./FileItem.module.css";
 
-interface FileItemProps {
+export interface FileItemProps {
 	item: FileItemType;
 	isSelected: boolean;
 	isMultiSelectMode: boolean;
 	isDropTarget: boolean;
 	isDragging: boolean;
-	onTap: (item: FileItemType) => void;
-	onDoubleTap: (item: FileItemType) => void;
-	onLongPress: (item: FileItemType) => void;
-	onDragStart: (e: React.DragEvent, item: FileItemType) => void;
-	onDragOver: (e: React.DragEvent, item: FileItemType) => void;
+	onTap: () => void;
+	onDoubleTap: () => void;
+	onLongPress: () => void;
+	onDragStart: (e: React.DragEvent) => void;
+	onDragOver: (e: React.DragEvent) => void;
 	onDragLeave: () => void;
-	onDrop: (e: React.DragEvent, item: FileItemType) => void;
+	onDrop: (e: React.DragEvent) => void;
 	onDragEnd: () => void;
-	onToggleSelect: (path: string) => void;
+	onToggleSelect: () => void;
 	viewMode: "grid" | "list";
 }
 
@@ -44,104 +48,8 @@ export const FileItem = memo<FileItemProps>(
 		onToggleSelect,
 		viewMode,
 	}) => {
-		const [showRipple, setShowRipple] = useState(false);
-		const [isPressed, setIsPressed] = useState(false);
-		const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
-		const checkboxRef = useRef<HTMLDivElement>(null);
-
 		const icon = getFileIcon(item.extension, item.isDirectory);
 		const isGrid = viewMode === "grid";
-
-		// 处理点击（使用原生 DOM 点击事件）
-		const handleClick = useCallback(
-			(e: React.MouseEvent) => {
-				// 如果点击的是复选框，不触发 tap
-				if (
-					e.target instanceof HTMLElement &&
-					e.target.closest('[data-checkbox="true"]')
-				) {
-					return;
-				}
-				setShowRipple(true);
-				setTimeout(() => setShowRipple(false), 300);
-				onTap(item);
-			},
-			[item, onTap],
-		);
-
-		// 处理双击
-		const handleDoubleClick = useCallback(() => {
-			onDoubleTap(item);
-		}, [item, onDoubleTap]);
-
-		// 处理长按（使用鼠标/触摸事件）
-		const handleMouseDown = useCallback(() => {
-			setIsPressed(true);
-			longPressTimerRef.current = setTimeout(() => {
-				onLongPress(item);
-			}, 500);
-		}, [item, onLongPress]);
-
-		const handleMouseUp = useCallback(() => {
-			setIsPressed(false);
-			if (longPressTimerRef.current) {
-				clearTimeout(longPressTimerRef.current);
-				longPressTimerRef.current = null;
-			}
-		}, []);
-
-		const handleMouseLeave = useCallback(() => {
-			setIsPressed(false);
-			if (longPressTimerRef.current) {
-				clearTimeout(longPressTimerRef.current);
-				longPressTimerRef.current = null;
-			}
-		}, []);
-
-		// 复选框点击处理 - 阻止事件冒泡以避免触发父元素的点击/轻触
-		const handleCheckboxClick = useCallback(
-			(e: React.MouseEvent | React.TouchEvent) => {
-				e.preventDefault();
-				e.stopPropagation();
-				// 阻止 touch 事件的默认行为
-				if ("touches" in e) {
-					e.nativeEvent.stopImmediatePropagation?.();
-				}
-				onToggleSelect(item.path);
-			},
-			[item.path, onToggleSelect],
-		);
-
-		// 阻止复选框上的 touch 事件冒泡
-		const handleCheckboxTouchStart = useCallback((e: React.TouchEvent) => {
-			e.stopPropagation();
-		}, []);
-
-		const handleCheckboxMouseDown = useCallback((e: React.MouseEvent) => {
-			e.stopPropagation();
-		}, []);
-
-		// 拖拽处理
-		const handleDragStart = useCallback(
-			(e: React.DragEvent) => {
-				onDragStart(e, item);
-			},
-			[item, onDragStart],
-		);
-
-		const handleDragOver = useCallback(
-			(e: React.DragEvent) => {
-				onDragOver(e, item);
-			},
-			[item, onDragOver],
-		);
-
-		const handleDrop = useCallback(
-			(e: React.DragEvent) => {
-				onDrop(e, item);
-			},
-			[item, onDrop],
-		);
 
 		// 组合样式
 		const itemClassName = [
@@ -150,38 +58,31 @@ export const FileItem = memo<FileItemProps>(
 			isSelected ? styles.selected : "",
 			isDropTarget ? styles.dropTarget : "",
 			isDragging ? styles.dragging : "",
-			isPressed ? styles.pressed : "",
-		].join(" ");
+		]
+			.filter(Boolean)
+			.join(" ");
 
 		return (
 			<div
 				className={itemClassName}
-				onClick={handleClick}
-				onDoubleClick={handleDoubleClick}
-				onMouseDown={handleMouseDown}
-				onMouseUp={handleMouseUp}
-				onMouseLeave={handleMouseLeave}
+				onClick={onTap}
+				onDoubleClick={onDoubleTap}
+				onMouseDown={onLongPress}
 				draggable={!item.isDirectory || isMultiSelectMode}
-				onDragStart={handleDragStart}
-				onDragOver={handleDragOver}
+				onDragStart={onDragStart}
+				onDragOver={onDragOver}
 				onDragLeave={onDragLeave}
-				onDrop={handleDrop}
+				onDrop={onDrop}
 				onDragEnd={onDragEnd}
 				data-path={item.path}
 			>
-				{/* Ripple effect */}
-				{showRipple && <span className={styles.ripple} />}
-
 				{/* Checkbox for multi-select */}
 				{isMultiSelectMode && (
 					<div
-						ref={checkboxRef}
 						className={styles.checkbox}
-						onClick={handleCheckboxClick}
-						onMouseDown={handleCheckboxMouseDown}
-						onTouchStart={(e) => {
-							handleCheckboxTouchStart(e);
-							handleCheckboxClick(e);
+						onClick={(e) => {
+							e.stopPropagation();
+							onToggleSelect();
 						}}
 						role="checkbox"
 						aria-checked={isSelected}

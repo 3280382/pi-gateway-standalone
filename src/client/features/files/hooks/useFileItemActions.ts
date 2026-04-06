@@ -1,13 +1,20 @@
 /**
  * useFileItemActions - 文件项操作逻辑 Hook
  *
- * 职责：管理文件项的交互操作（点击、选择、拖拽等）
+ * 职责：管理文件项的交互操作（点击、选择、拖拽、手势等）
+ * - 所有交互逻辑封装在此
+ * - 组件只负责渲染和绑定事件处理器
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { FileItem } from "@/features/files/stores/fileStore";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
+
+interface PinchState {
+	startDistance: number;
+	isPinching: boolean;
+}
 
 export interface UseFileItemActionsResult {
 	// 状态
@@ -15,21 +22,29 @@ export interface UseFileItemActionsResult {
 	selectedItems: string[];
 	draggingItem: string | null;
 	dropTarget: string | null;
+	showPinchHint: boolean;
 
-	// 操作方法
-	handleTap: (item: FileItem) => void;
-	handleDoubleTap: (item: FileItem) => void;
-	handleLongPress: (item: FileItem) => void;
-	handleSelectForAction: (item: FileItem) => void;
+	// 文件项事件处理器（直接绑定到 FileItem）
+	getItemHandlers: (item: FileItem) => {
+		onTap: () => void;
+		onDoubleTap: () => void;
+		onLongPress: () => void;
+		onDragStart: (e: React.DragEvent) => void;
+		onDragOver: (e: React.DragEvent) => void;
+		onDragLeave: () => void;
+		onDrop: (e: React.DragEvent) => void;
+		onDragEnd: () => void;
+		onToggleSelect: () => void;
+	};
 
-	// 拖拽
-	handleDragStart: (item: FileItem) => void;
-	handleDragEnd: () => void;
-	handleDragOver: (item: FileItem) => void;
-	handleDragLeave: () => void;
-	handleDrop: (targetItem: FileItem) => Promise<void>;
+	// 容器手势处理器（绑定到 grid/list 容器）
+	getContainerHandlers: () => {
+		onTouchStart: (e: React.TouchEvent) => void;
+		onTouchMove: (e: React.TouchEvent) => void;
+		onTouchEnd: () => void;
+	};
 
-	// 多选
+	// 选择操作
 	toggleSelection: (path: string) => void;
 	isSelected: (path: string) => boolean;
 }
@@ -53,8 +68,14 @@ export function useFileItemActions(): UseFileItemActionsResult {
 	// 本地状态
 	const [dropTarget, setDropTarget] = useState<string | null>(null);
 	const [draggingItem, setDraggingItem] = useState<string | null>(null);
+	const [showPinchHint, setShowPinchHint] = useState(false);
 
-	// 处理单击/点击
+	// Pinch 手势状态
+	const pinchState = useRef<PinchState | null>(null);
+	const pinchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+	// ===== 文件项操作 =====
+
 	const handleTap = useCallback(
 		(item: FileItem) => {
 			if (isMultiSelectMode) {
@@ -65,14 +86,12 @@ export function useFileItemActions(): UseFileItemActionsResult {
 			if (item.isDirectory) {
 				setCurrentPath(item.path);
 			} else {
-				// 单击打开文件
 				openViewer(item.path, item.name, "view");
 			}
 		},
 		[isMultiSelectMode, storeToggleSelection, setCurrentPath, openViewer],
 	);
 
-	// 处理双击
 	const handleDoubleTap = useCallback(
 		(item: FileItem) => {
 			if (isMultiSelectMode) return;
@@ -83,7 +102,6 @@ export function useFileItemActions(): UseFileItemActionsResult {
 		[isMultiSelectMode, setCurrentPath],
 	);
 
-	// 处理长按（进入多选模式）
 	const handleLongPress = useCallback(
 		(item: FileItem) => {
 			if (!isMultiSelectMode) {
@@ -94,7 +112,6 @@ export function useFileItemActions(): UseFileItemActionsResult {
 		[isMultiSelectMode, setMultiSelectMode, storeToggleSelection],
 	);
 
-	// 选中用于操作（查看/编辑）
 	const handleSelectForAction = useCallback(
 		(item: FileItem) => {
 			selectForAction(item.path, item.name);
@@ -102,42 +119,36 @@ export function useFileItemActions(): UseFileItemActionsResult {
 		[selectForAction],
 	);
 
-	// 拖拽开始
+	// ===== 拖拽操作 =====
+
 	const handleDragStart = useCallback(
-		(item: FileItem) => {
+		(item: FileItem) => (e: React.DragEvent) => {
 			setDraggedItem(item);
 			setIsDragging(true);
 			setDraggingItem(item.path);
+			e.dataTransfer.effectAllowed = "move";
+			e.dataTransfer.setData("text/plain", item.path);
 		},
 		[setDraggedItem, setIsDragging],
 	);
 
-	// 拖拽结束
-	const handleDragEnd = useCallback(() => {
-		setDraggedItem(null);
-		setIsDragging(false);
-		setDraggingItem(null);
-		setDropTarget(null);
-	}, [setDraggedItem, setIsDragging]);
-
-	// 拖拽经过
 	const handleDragOver = useCallback(
-		(item: FileItem) => {
-			if (item.isDirectory) {
-				setDropTarget(item.path);
-			}
+		(item: FileItem) => (e: React.DragEvent) => {
+			if (!item.isDirectory) return;
+			e.preventDefault();
+			e.dataTransfer.dropEffect = "move";
+			setDropTarget(item.path);
 		},
 		[],
 	);
 
-	// 拖拽离开
 	const handleDragLeave = useCallback(() => {
 		setDropTarget(null);
 	}, []);
 
-	// 放置
 	const handleDrop = useCallback(
-		async (targetItem: FileItem) => {
+		(targetItem: FileItem) => async (e: React.DragEvent) => {
+			e.preventDefault();
 			if (!targetItem.isDirectory) return;
 
 			setDropTarget(null);
@@ -152,7 +163,63 @@ export function useFileItemActions(): UseFileItemActionsResult {
 		[storeMoveSelectedItems],
 	);
 
-	// 切换选择（用于多选）
+	const handleDragEnd = useCallback(() => {
+		setDraggedItem(null);
+		setIsDragging(false);
+		setDraggingItem(null);
+		setDropTarget(null);
+	}, [setDraggedItem, setIsDragging]);
+
+	// ===== 手势操作 =====
+
+	const handleTouchStart = useCallback((e: React.TouchEvent) => {
+		if (e.touches.length === 2) {
+			const t1 = e.touches[0];
+			const t2 = e.touches[1];
+			const distance = Math.sqrt(
+				(t2.clientX - t1.clientX) ** 2 + (t2.clientY - t1.clientY) ** 2,
+			);
+			pinchState.current = {
+				startDistance: distance,
+				isPinching: true,
+			};
+		}
+	}, []);
+
+	const handleTouchMove = useCallback(
+		(e: React.TouchEvent) => {
+			if (!pinchState.current?.isPinching || e.touches.length !== 2) return;
+
+			const t1 = e.touches[0];
+			const t2 = e.touches[1];
+			const currentDistance = Math.sqrt(
+				(t2.clientX - t1.clientX) ** 2 + (t2.clientY - t1.clientY) ** 2,
+			);
+
+			const scale = currentDistance / pinchState.current.startDistance;
+
+			// Pinch in (scale < 0.7) triggers multi-select
+			if (scale < 0.7 && !isMultiSelectMode) {
+				setMultiSelectMode(true);
+				setShowPinchHint(true);
+
+				if (pinchTimeoutRef.current) {
+					clearTimeout(pinchTimeoutRef.current);
+				}
+				pinchTimeoutRef.current = setTimeout(() => {
+					setShowPinchHint(false);
+				}, 2000);
+			}
+		},
+		[isMultiSelectMode, setMultiSelectMode],
+	);
+
+	const handleTouchEnd = useCallback(() => {
+		pinchState.current = null;
+	}, []);
+
+	// ===== 选择操作 =====
+
 	const toggleSelection = useCallback(
 		(path: string) => {
 			storeToggleSelection(path);
@@ -160,12 +227,45 @@ export function useFileItemActions(): UseFileItemActionsResult {
 		[storeToggleSelection],
 	);
 
-	// 判断是否选中
 	const isSelected = useCallback(
-		(path: string) => {
-			return storeIsSelected(path);
-		},
+		(path: string) => storeIsSelected(path),
 		[storeIsSelected],
+	);
+
+	// ===== 返回绑定的处理器 =====
+
+	const getItemHandlers = useCallback(
+		(item: FileItem) => ({
+			onTap: () => handleTap(item),
+			onDoubleTap: () => handleDoubleTap(item),
+			onLongPress: () => handleLongPress(item),
+			onDragStart: handleDragStart(item),
+			onDragOver: handleDragOver(item),
+			onDragLeave: handleDragLeave,
+			onDrop: handleDrop(item),
+			onDragEnd: handleDragEnd,
+			onToggleSelect: () => toggleSelection(item.path),
+		}),
+		[
+			handleTap,
+			handleDoubleTap,
+			handleLongPress,
+			handleDragStart,
+			handleDragOver,
+			handleDragLeave,
+			handleDrop,
+			handleDragEnd,
+			toggleSelection,
+		],
+	);
+
+	const getContainerHandlers = useCallback(
+		() => ({
+			onTouchStart: handleTouchStart,
+			onTouchMove: handleTouchMove,
+			onTouchEnd: handleTouchEnd,
+		}),
+		[handleTouchStart, handleTouchMove, handleTouchEnd],
 	);
 
 	return {
@@ -173,15 +273,9 @@ export function useFileItemActions(): UseFileItemActionsResult {
 		selectedItems,
 		draggingItem,
 		dropTarget,
-		handleTap,
-		handleDoubleTap,
-		handleLongPress,
-		handleSelectForAction,
-		handleDragStart,
-		handleDragEnd,
-		handleDragOver,
-		handleDragLeave,
-		handleDrop,
+		showPinchHint,
+		getItemHandlers,
+		getContainerHandlers,
 		toggleSelection,
 		isSelected,
 	};
