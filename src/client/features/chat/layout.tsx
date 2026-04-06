@@ -11,17 +11,14 @@ import { SidebarPanel } from "@/features/chat/components/sidebar/SidebarPanel/Si
 import styles from "./ChatLayout.module.css";
 import { ChatPanel } from "./components/ChatPanel";
 
-interface ChatLayoutProps {
-	closeBottomPanel: () => void;
-	setBottomPanelHeight: (height: number) => void;
-}
-
-export function ChatLayout({
-	closeBottomPanel,
-	setBottomPanelHeight,
-}: ChatLayoutProps) {
-	const { isSidebarVisible, isBottomPanelOpen, bottomPanelHeight } =
-		useLayout();
+export function ChatLayout() {
+	const {
+		isSidebarVisible,
+		isBottomPanelOpen,
+		bottomPanelHeight,
+		closeBottomPanel,
+		setBottomPanelHeight,
+	} = useLayout();
 
 	const renderBottomPanel = useCallback(() => {
 		if (!isBottomPanelOpen) return null;

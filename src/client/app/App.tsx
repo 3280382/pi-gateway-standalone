@@ -21,7 +21,7 @@ import styles from "./App.module.css";
  * AppContent - 应用内容组件
  */
 function AppContent() {
-	const { currentView, closeBottomPanel, setBottomPanelHeight } = useLayout();
+	const { currentView } = useLayout();
 
 	// 应用初始化状态
 	const { isLoading, error, retry } = useAppInitialization();
@@ -40,14 +40,7 @@ function AppContent() {
 		<div className={styles.app}>
 			{/* PageContainer: 每个 feature 自己控制 Sidebar/Header/Content/Panel */}
 			<main className={styles.pageContainer}>
-				{currentView === "chat" ? (
-					<ChatPage
-						closeBottomPanel={closeBottomPanel}
-						setBottomPanelHeight={setBottomPanelHeight}
-					/>
-				) : (
-					<FilesPage />
-				)}
+				{currentView === "chat" ? <ChatPage /> : <FilesPage />}
 			</main>
 
 			{/* Footer: 唯一全局控件 */}
