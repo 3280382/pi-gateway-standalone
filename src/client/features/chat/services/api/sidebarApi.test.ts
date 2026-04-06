@@ -43,7 +43,6 @@ const createMockStore = () => ({
 	setWorkingDir: vi.fn(),
 	setRecentWorkspaces: vi.fn(),
 	addRecentWorkspace: vi.fn(),
-	removeRecentWorkspace: vi.fn(),
 	setSessions: vi.fn(),
 	setSearchQuery: vi.fn(),
 	setSearchFilters: vi.fn(),
