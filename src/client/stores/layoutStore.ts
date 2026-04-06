@@ -64,6 +64,8 @@ export const useLayoutStore = create<LayoutState>()(
 			partialize: (state) => ({
 				currentView: state.currentView,
 				isSidebarVisible: state.isSidebarVisible,
+				isBottomPanelOpen: state.isBottomPanelOpen,
+				bottomPanelType: state.bottomPanelType,
 				bottomPanelHeight: state.bottomPanelHeight,
 			}),
 		},

@@ -91,6 +91,9 @@ export const useFileStore = create<FileState & FileActions>()(
 				version: 1,
 				partialize: (state) => ({
 					currentPath: state.currentPath,
+					viewMode: state.viewMode,
+					sortMode: state.sortMode,
+					filterType: state.filterType,
 				}),
 			},
 		),
