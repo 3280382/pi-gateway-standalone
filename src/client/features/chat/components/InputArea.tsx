@@ -1,11 +1,13 @@
 /**
  * InputArea - Modern minimal design with session control
+ *
+ * 重构后：
+ * - 所有业务逻辑移至 useInputArea hook
+ * - 本组件只负责 UI 渲染
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SLASH_COMMANDS } from "@/features/chat/types/slashCommands";
-import { browseDirectory } from "@/features/files/services/api/fileApi";
-import { useFileStore } from "@/features/files/stores/fileStore";
+import { useRef } from "react";
+import { useInputArea } from "@/features/chat/hooks/useInputArea";
 import styles from "./InputArea.module.css";
 
 interface InputAreaProps {
@@ -16,24 +18,11 @@ interface InputAreaProps {
 	onAbort: () => void;
 	onBashCommand?: (command: string) => void;
 	onSlashCommand?: (command: string, args: string) => void;
-	onSendWithImages?: (text: string, images: ImageUpload[]) => void;
+	onSendWithImages?: (text: string, images: Array<{
+		type: "image";
+		source: { type: "base64"; mediaType: string; data: string };
+	}>) => void;
 	onNewSession?: () => void;
-}
-
-export interface ImageUpload {
-	id: string;
-	file: File;
-	preview: string;
-	base64: string;
-	mimeType: string;
-	ocrText?: string;
-	isProcessingOCR: boolean;
-}
-
-interface FileItem {
-	name: string;
-	path: string;
-	isDirectory: boolean;
 }
 
 export function InputArea({
@@ -47,375 +36,30 @@ export function InputArea({
 	onSendWithImages,
 	onNewSession,
 }: InputAreaProps) {
-	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const [showCommands, setShowCommands] = useState(false);
-	const [commandFilter, setCommandFilter] = useState("");
-	const [selectedIndex, setSelectedIndex] = useState(0);
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-	// @mention file selection
-	const [showFilePicker, setShowFilePicker] = useState(false);
-	const [fileFilter, setFileFilter] = useState("");
-	const [fileList, setFileList] = useState<FileItem[]>([]);
-	const [isLoadingFiles, setIsLoadingFiles] = useState(false);
-	const [selectedFileIndex, setSelectedFileIndex] = useState(0);
-	const { currentPath } = useFileStore();
+	// 使用 useInputArea hook 处理所有业务逻辑
+	const inputArea = useInputArea({
+		value,
+		isStreaming,
+		onChange,
+		onSend,
+		onAbort,
+		onBashCommand,
+		onSlashCommand,
+		onSendWithImages,
+	});
 
-	// Image uploads
-	const [images, setImages] = useState<ImageUpload[]>([]);
-	const [showImagePreview, setShowImagePreview] = useState(true);
-
-	// Auto-resize textarea
-	useEffect(() => {
+	// 自动调整 textarea 高度
+	const autoResizeTextarea = () => {
 		const textarea = textareaRef.current;
 		if (textarea) {
 			textarea.style.height = "auto";
 			const newHeight = Math.max(textarea.scrollHeight, 64);
 			textarea.style.height = `${Math.min(newHeight, 200)}px`;
 		}
-	}, [value]);
-
-	// Check for slash commands
-	useEffect(() => {
-		if (value.startsWith("/") && !value.includes(" ")) {
-			const filter = value.slice(1).toLowerCase();
-			setCommandFilter(filter);
-			setShowCommands(true);
-			setSelectedIndex(0);
-		} else {
-			setShowCommands(false);
-		}
-	}, [value]);
-
-	// Check for @mention trigger
-	useEffect(() => {
-		const lastAtIndex = value.lastIndexOf("@");
-		if (lastAtIndex !== -1) {
-			const afterAt = value.slice(lastAtIndex + 1);
-			// Show picker when @ is at word boundary (start of input, after space, or after newline)
-			if (!afterAt.includes(" ")) {
-				setFileFilter(afterAt.toLowerCase());
-				setShowFilePicker(true);
-				setSelectedFileIndex(0);
-				loadFileList();
-			} else {
-				setShowFilePicker(false);
-			}
-		} else {
-			setShowFilePicker(false);
-		}
-	}, [value]);
-
-	const loadFileList = async (): Promise<void> => {
-		setIsLoadingFiles(true);
-		try {
-			const data = await browseDirectory(currentPath);
-			const items = [
-				...(data.parentPath !== data.currentPath
-					? [{ name: "..", path: data.parentPath, isDirectory: true }]
-					: []),
-				...data.items,
-			];
-			setFileList(items);
-		} catch (err) {
-			console.error("Failed to load files:", err);
-			setFileList([]);
-		} finally {
-			setIsLoadingFiles(false);
-		}
 	};
-
-	const isBashMode = useMemo(() => {
-		return value.trimStart().startsWith("!");
-	}, [value]);
-
-	const filteredCommands = useMemo(() => {
-		if (!commandFilter) return SLASH_COMMANDS;
-		return SLASH_COMMANDS.filter(
-			(cmd) =>
-				cmd.name.toLowerCase().includes(commandFilter) ||
-				cmd.description.toLowerCase().includes(commandFilter),
-		);
-	}, [commandFilter]);
-
-	const filteredFiles = useMemo(() => {
-		if (!fileFilter) return fileList;
-		return fileList.filter(
-			(f) =>
-				f.name.toLowerCase().includes(fileFilter) ||
-				f.path.toLowerCase().includes(fileFilter),
-		);
-	}, [fileFilter, fileList]);
-
-	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (showFilePicker && filteredFiles.length > 0) {
-			if (e.key === "ArrowDown") {
-				e.preventDefault();
-				setSelectedFileIndex((prev) => (prev + 1) % filteredFiles.length);
-				return;
-			}
-			if (e.key === "ArrowUp") {
-				e.preventDefault();
-				setSelectedFileIndex((prev) =>
-					prev <= 0 ? filteredFiles.length - 1 : prev - 1,
-				);
-				return;
-			}
-			if (e.key === "Enter" && !e.shiftKey) {
-				e.preventDefault();
-				if (filteredFiles[selectedFileIndex]) {
-					selectFile(filteredFiles[selectedFileIndex]);
-				}
-				return;
-			}
-			if (e.key === "Escape") {
-				setShowFilePicker(false);
-				return;
-			}
-		}
-
-		if (showCommands && filteredCommands.length > 0) {
-			if (e.key === "ArrowDown") {
-				e.preventDefault();
-				setSelectedIndex((prev) => (prev + 1) % filteredCommands.length);
-				return;
-			}
-			if (e.key === "ArrowUp") {
-				e.preventDefault();
-				setSelectedIndex((prev) =>
-					prev <= 0 ? filteredCommands.length - 1 : prev - 1,
-				);
-				return;
-			}
-			if (e.key === "Enter" && !e.shiftKey) {
-				e.preventDefault();
-				if (filteredCommands[selectedIndex]) {
-					selectCommand(filteredCommands[selectedIndex]);
-				}
-				return;
-			}
-			if (e.key === "Escape") {
-				setShowCommands(false);
-				return;
-			}
-		}
-
-		if (
-			e.key === "Enter" &&
-			(e.ctrlKey || e.metaKey) &&
-			!showCommands &&
-			!showFilePicker
-		) {
-			e.preventDefault();
-			handleSend();
-			return;
-		}
-
-		if (
-			e.key === "Enter" &&
-			!e.shiftKey &&
-			!e.ctrlKey &&
-			!e.metaKey &&
-			!showCommands &&
-			!showFilePicker &&
-			!isBashMode
-		) {
-			return;
-		}
-	};
-
-	const handleSend = useCallback(() => {
-		if (isStreaming) {
-			onAbort();
-			return;
-		}
-
-		const trimmedValue = value.trim();
-		if (!trimmedValue && images.length === 0) return;
-
-		if (isBashMode) {
-			const command = trimmedValue.slice(1);
-			if (onBashCommand) {
-				onBashCommand(command);
-			}
-			onChange("");
-			return;
-		}
-
-		if (trimmedValue.startsWith("/")) {
-			const parts = trimmedValue.slice(1).split(" ");
-			const cmd = parts[0];
-			const args = parts.slice(1).join(" ");
-
-			if (onSlashCommand) {
-				onSlashCommand(cmd, args);
-			}
-			onChange("");
-			return;
-		}
-
-		if (images.length > 0 && onSendWithImages) {
-			onSendWithImages(trimmedValue, images);
-			onChange("");
-			setImages([]);
-			return;
-		}
-
-		onSend();
-	}, [
-		value,
-		images,
-		isStreaming,
-		isBashMode,
-		onSend,
-		onAbort,
-		onBashCommand,
-		onSlashCommand,
-		onSendWithImages,
-		onChange,
-	]);
-
-	const selectCommand = useCallback(
-		(command: (typeof SLASH_COMMANDS)[0]) => {
-			const commandText = `${command.name} `;
-			onChange(commandText);
-			setShowCommands(false);
-			textareaRef.current?.focus();
-		},
-		[onChange],
-	);
-
-	const selectFile = useCallback(
-		(file: FileItem) => {
-			const lastAtIndex = value.lastIndexOf("@");
-			const beforeAt = value.slice(0, lastAtIndex);
-			const afterAt = value.slice(lastAtIndex + 1 + fileFilter.length);
-			const filePath = file.isDirectory ? `${file.path}/` : file.path;
-			onChange(`${beforeAt}${filePath}${afterAt}`);
-			setShowFilePicker(false);
-			textareaRef.current?.focus();
-		},
-		[value, fileFilter, onChange],
-	);
-
-	const handleFileUpload = () => {
-		fileInputRef.current?.click();
-	};
-
-	const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		const files = e.target.files;
-		if (!files) return;
-
-		for (const file of Array.from(files)) {
-			const reader = new FileReader();
-			reader.onload = async (event) => {
-				const base64 = event.target?.result as string;
-				const imageId = `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-				const newImage: ImageUpload = {
-					id: imageId,
-					file,
-					preview: base64,
-					base64: base64.split(",")[1],
-					mimeType: file.type,
-					isProcessingOCR: file.type.startsWith("image/"),
-				};
-
-				setImages((prev) => [...prev, newImage]);
-
-				if (file.type.startsWith("image/")) {
-					try {
-						const ocrText = await performOCR(base64, file.type);
-						setImages((prev) =>
-							prev.map((img) =>
-								img.id === imageId
-									? { ...img, ocrText, isProcessingOCR: false }
-									: img,
-							),
-						);
-					} catch (err) {
-						setImages((prev) =>
-							prev.map((img) =>
-								img.id === imageId ? { ...img, isProcessingOCR: false } : img,
-							),
-						);
-					}
-				}
-			};
-			reader.readAsDataURL(file);
-		}
-
-		e.target.value = "";
-	};
-
-	const performOCR = async (
-		base64Image: string,
-		mimeType: string,
-	): Promise<string> => {
-		try {
-			const response = await fetch("/api/ocr", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ image: base64Image, mimeType }),
-			});
-			if (response.ok) {
-				const data = await response.json();
-				return data.text || "";
-			}
-		} catch (err) {}
-		return "";
-	};
-
-	const removeImage = (id: string) => {
-		setImages((prev) => prev.filter((img) => img.id !== id));
-	};
-
-	const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-		onChange(e.target.value);
-	};
-
-	const insertAtCursor = (
-		text: string,
-		triggerAction?: "file" | "command" | "bash",
-	) => {
-		const textarea = textareaRef.current;
-		if (!textarea) {
-			onChange(value + text);
-			return;
-		}
-
-		// Ensure textarea is focused first
-		textarea.focus();
-
-		const start = textarea.selectionStart;
-		const end = textarea.selectionEnd;
-		const newValue = value.substring(0, start) + text + value.substring(end);
-		onChange(newValue);
-
-		// Set cursor position after the inserted text
-		const newCursorPos = start + text.length;
-		textarea.setSelectionRange(newCursorPos, newCursorPos);
-
-		// Trigger corresponding action
-		if (triggerAction === "file") {
-			// Load files and show picker immediately
-			loadFileList().then(() => {
-				setFileFilter("");
-				setShowFilePicker(true);
-				setSelectedFileIndex(0);
-			});
-		} else if (triggerAction === "command") {
-			setCommandFilter("");
-			setShowCommands(true);
-			setSelectedIndex(0);
-		}
-	};
-
-	const placeholder = isStreaming
-		? "Generating..."
-		: isBashMode
-			? "Enter bash command (Ctrl+Enter to execute)..."
-			: "Message... Ctrl+Enter to send";
 
 	return (
 		<div className={styles.container}>
@@ -425,20 +69,24 @@ export function InputArea({
 				multiple
 				accept="image/*,.txt,.md,.json,.js,.ts,.py,.sh,.java,.cpp,.c,.h,.go,.rs,.php,.rb,.swift,.kt,.html,.css,.scss,.yaml,.yml,.xml"
 				className={styles.hiddenInput}
-				onChange={handleFileSelect}
+				onChange={(e) => {
+					inputArea.imageUpload.addImages(e.target.files);
+					e.target.value = "";
+				}}
 			/>
 
-			{showCommands && (
+			{/* Slash Commands Menu */}
+			{inputArea.slashCommands.isOpen && (
 				<div className={styles.commandMenu}>
-					{filteredCommands.length > 0 ? (
-						filteredCommands.map((cmd, index) => (
+					{inputArea.slashCommands.filteredCommands.length > 0 ? (
+						inputArea.slashCommands.filteredCommands.map((cmd, index) => (
 							<button
 								key={cmd.name}
 								className={`${styles.commandItem} ${
-									index === selectedIndex ? styles.selected : ""
+									index === inputArea.slashCommands.selectedIndex ? styles.selected : ""
 								}`}
-								onClick={() => selectCommand(cmd)}
-								onMouseEnter={() => setSelectedIndex(index)}
+								onClick={() => inputArea.slashCommands.selectCurrent()}
+								onMouseEnter={() => inputArea.slashCommands.setSelectedIndex(index)}
 							>
 								<span className={styles.commandIcon}>{cmd.icon}</span>
 								<span className={styles.commandName}>{cmd.name}</span>
@@ -450,23 +98,24 @@ export function InputArea({
 				</div>
 			)}
 
-			{showFilePicker && (
+			{/* File Picker */}
+			{inputArea.filePicker.isOpen && (
 				<div className={styles.filePicker}>
 					<div className={styles.filePickerHeader}>
 						<FileIcon />
 						<span>Select file or directory</span>
 					</div>
-					{isLoadingFiles ? (
+					{inputArea.filePicker.isLoading ? (
 						<div className={styles.loadingItem}>Loading files...</div>
-					) : filteredFiles.length > 0 ? (
-						filteredFiles.map((file, index) => (
+					) : inputArea.filePicker.filteredFiles.length > 0 ? (
+						inputArea.filePicker.filteredFiles.map((file, index) => (
 							<button
 								key={file.path}
 								className={`${styles.fileItem} ${
-									index === selectedFileIndex ? styles.selected : ""
+									index === inputArea.filePicker.selectedIndex ? styles.selected : ""
 								}`}
-								onClick={() => selectFile(file)}
-								onMouseEnter={() => setSelectedFileIndex(index)}
+								onClick={() => inputArea.filePicker.selectCurrent()}
+								onMouseEnter={() => inputArea.filePicker.setSelectedIndex(index)}
 							>
 								<span className={styles.fileIcon}>
 									{file.isDirectory ? <FolderIcon /> : <DocIcon />}
@@ -481,9 +130,10 @@ export function InputArea({
 				</div>
 			)}
 
-			{images.length > 0 && showImagePreview && (
+			{/* Image Preview Bar */}
+			{inputArea.imageUpload.images.length > 0 && inputArea.imageUpload.showPreview && (
 				<div className={styles.imagePreviewBar}>
-					{images.map((img) => (
+					{inputArea.imageUpload.images.map((img) => (
 						<div key={img.id} className={styles.imagePreviewItem}>
 							<img src={img.preview} alt="Upload" />
 							{img.isProcessingOCR && (
@@ -492,7 +142,7 @@ export function InputArea({
 							{img.ocrText && <div className={styles.ocrBadge}>T</div>}
 							<button
 								className={styles.removeImageBtn}
-								onClick={() => removeImage(img.id)}
+								onClick={() => inputArea.imageUpload.removeImage(img.id)}
 							>
 								<CloseIcon />
 							</button>
@@ -500,34 +150,43 @@ export function InputArea({
 					))}
 					<button
 						className={styles.togglePreviewBtn}
-						onClick={() => setShowImagePreview(false)}
+						onClick={() => inputArea.imageUpload.togglePreview()}
 					>
 						Hide
 					</button>
 				</div>
 			)}
-			{images.length > 0 && !showImagePreview && (
+			{inputArea.imageUpload.images.length > 0 && !inputArea.imageUpload.showPreview && (
 				<div className={styles.imageCountBar}>
-					<span>{images.length} image(s)</span>
-					<button onClick={() => setShowImagePreview(true)}>Show</button>
+					<span>{inputArea.imageUpload.images.length} image(s)</span>
+					<button onClick={() => inputArea.imageUpload.togglePreview()}>Show</button>
 				</div>
 			)}
 
+			{/* Input Row */}
 			<div className={styles.inputRow}>
 				<textarea
 					ref={textareaRef}
-					className={`${styles.textarea} ${isBashMode ? styles.bashMode : ""}`}
-					placeholder={placeholder}
+					className={`${styles.textarea} ${inputArea.isBashMode ? styles.bashMode : ""}`}
+					placeholder={inputArea.placeholder}
 					value={value}
-					onChange={handleChange}
-					onKeyDown={handleKeyDown}
+					onChange={(e) => {
+						inputArea.handleChange(e);
+						// 使用 setTimeout 确保在状态更新后调整高度
+						setTimeout(autoResizeTextarea, 0);
+					}}
+					onKeyDown={(e) => {
+						inputArea.handleKeyDown(e);
+						// 使用 setTimeout 确保在状态更新后调整高度
+						setTimeout(autoResizeTextarea, 0);
+					}}
 					rows={2}
 					disabled={isStreaming}
 				/>
 				<div className={styles.buttonColumn}>
 					<button
 						className={`${styles.sendButton} ${isStreaming ? styles.stopButton : ""}`}
-						onClick={handleSend}
+						onClick={inputArea.handleSend}
 						title={isStreaming ? "Stop" : "Send (Ctrl+Enter)"}
 					>
 						{isStreaming ? <StopIcon /> : <SendIcon />}
@@ -545,21 +204,11 @@ export function InputArea({
 				</div>
 			</div>
 
+			{/* Toolbar */}
 			<div className={styles.toolbar}>
 				<button
 					className={styles.toolbarBtn}
-					onClick={async () => {
-						// Add @ at the end
-						const newValue = value + "@";
-						onChange(newValue);
-						// Load files first
-						await loadFileList();
-						// Then show picker
-						setFileFilter("");
-						setShowFilePicker(true);
-						setSelectedFileIndex(0);
-						textareaRef.current?.focus();
-					}}
+					onClick={() => inputArea.filePicker.open()}
 					title="Mention file (@)"
 					disabled={isStreaming}
 				>
@@ -567,15 +216,7 @@ export function InputArea({
 				</button>
 				<button
 					className={styles.toolbarBtn}
-					onClick={() => {
-						// Add / at the end and trigger command menu immediately
-						const newValue = value + "/";
-						onChange(newValue);
-						setCommandFilter("");
-						setShowCommands(true);
-						setSelectedIndex(0);
-						textareaRef.current?.focus();
-					}}
+					onClick={() => inputArea.slashCommands.open()}
 					title="Slash command (/)"
 					disabled={isStreaming}
 				>
@@ -583,7 +224,7 @@ export function InputArea({
 				</button>
 				<button
 					className={styles.toolbarBtn}
-					onClick={() => insertAtCursor("!")}
+					onClick={() => inputArea.insertTextAtCursor("!", "bash")}
 					title="Bash command (!)"
 					disabled={isStreaming}
 				>
@@ -591,7 +232,7 @@ export function InputArea({
 				</button>
 				<button
 					className={styles.toolbarBtn}
-					onClick={handleFileUpload}
+					onClick={() => fileInputRef.current?.click()}
 					title="Upload image/file"
 					disabled={isStreaming}
 				>
@@ -602,6 +243,7 @@ export function InputArea({
 	);
 }
 
+// Icons
 function SendIcon() {
 	return (
 		<svg viewBox="0 0 24 24" fill="currentColor">

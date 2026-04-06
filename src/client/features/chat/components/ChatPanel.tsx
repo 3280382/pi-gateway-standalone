@@ -22,7 +22,6 @@ export function ChatPanel() {
 	const inputText = useChatStore(selectInputText);
 	const isStreaming = useChatStore(selectIsStreaming);
 	const showThinking = useChatStore(selectShowThinking);
-	const showTools = useChatStore((state) => state.showTools);
 
 	// Use the hook instead of controller singleton
 	const chatController = useChatController();
@@ -86,8 +85,8 @@ export function ChatPanel() {
 
 	const handleNewSession = useCallback(async () => {
 		// 通知服务器创建新会话，然后清空本地消息
-		await chatController.createSession("New Session");
-	}, []);
+		await chatController.createNewSession();
+	}, [chatController]);
 
 	return (
 		<div className={styles.panel}>
