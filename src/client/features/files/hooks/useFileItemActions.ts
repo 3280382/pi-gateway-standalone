@@ -51,16 +51,6 @@ export interface UseFileItemActionsResult {
 }
 
 export function useFileItemActions(): UseFileItemActionsResult {
-	console.log("[useFileItemActions] Hook called");
-	
-	let store;
-	try {
-		store = useFileStore();
-	} catch (err) {
-		console.error("[useFileItemActions] Failed to get useFileStore:", err);
-		throw err;
-	}
-	
 	const {
 		selectedItems,
 		isMultiSelectMode,
@@ -71,17 +61,9 @@ export function useFileItemActions(): UseFileItemActionsResult {
 		setDraggedItem,
 		setIsDragging,
 		isSelected: storeIsSelected,
-	} = store;
+	} = useFileStore();
 
-	let viewerStore;
-	try {
-		viewerStore = useFileViewerStore();
-	} catch (err) {
-		console.error("[useFileItemActions] Failed to get useFileViewerStore:", err);
-		throw err;
-	}
-	
-	const { openViewer } = viewerStore;
+	const { openViewer } = useFileViewerStore();
 
 	// 本地状态
 	const [dropTarget, setDropTarget] = useState<string | null>(null);

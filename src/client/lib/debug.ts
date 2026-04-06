@@ -15,7 +15,7 @@ export enum DebugLevel {
 
 // 当前调试级别（可以从环境变量或配置中读取）
 const CURRENT_LEVEL: DebugLevel =
-	process.env.NODE_ENV === "production" ? DebugLevel.ERROR : DebugLevel.VERBOSE; // 开发环境中显示所有日志
+	process.env.NODE_ENV === "production" ? DebugLevel.ERROR : DebugLevel.INFO; // 开发环境只显示 INFO 及以上
 
 // 调试上下文
 interface DebugContext {

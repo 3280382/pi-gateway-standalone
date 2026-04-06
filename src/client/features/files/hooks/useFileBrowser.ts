@@ -34,6 +34,7 @@ export function useFileBrowser(): UseFileBrowserResult {
 
 	const [isInitializing, setIsInitializing] = useState(true);
 	const lastLoadedPathRef = useRef<string>("");
+	const isLoadingRef = useRef(false);
 
 	/**
 	 * 初始化文件浏览器路径
@@ -41,18 +42,27 @@ export function useFileBrowser(): UseFileBrowserResult {
 	useEffect(() => {
 		const init = async () => {
 			const path = await initializeFilePath();
-			setCurrentPath(path);
+			// 只在路径真正变化时才更新
+			if (path !== currentPath) {
+				setCurrentPath(path);
+			}
 			setIsInitializing(false);
 		};
 		init();
-	}, [setCurrentPath]);
+	}, [setCurrentPath, currentPath]);
 
 	/**
 	 * 加载目录内容
 	 */
 	const loadDirectory = useCallback(
 		async (path: string) => {
-			fileBrowserDebug.info("开始加载目录", { path });
+			// 防止重复加载（已在加载中或已加载相同路径）
+			if (isLoadingRef.current || path === lastLoadedPathRef.current) {
+				return;
+			}
+
+			isLoadingRef.current = true;
+			fileBrowserDebug.debug("开始加载目录", { path });
 			setLoading(true);
 			setError(null);
 
@@ -60,32 +70,27 @@ export function useFileBrowser(): UseFileBrowserResult {
 				fileBrowserDebug.debug("调用 loadDirectoryContent", { path });
 				const data = await loadDirectoryContent(path);
 
-				fileBrowserDebug.info("目录加载成功", {
+				fileBrowserDebug.debug("目录加载成功", {
 					currentPath: data.currentPath,
 					itemCount: data.items.length,
-					hasParent: data.parentPath !== data.currentPath,
 				});
+
+				// 先标记已加载，避免状态更新触发重渲染后重复加载
+				lastLoadedPathRef.current = path;
 
 				setItems(data.items);
 				setCurrentPath(data.currentPath);
 				setParentPath(data.parentPath);
-
-				lastLoadedPathRef.current = path;
-
-				fileBrowserDebug.info("目录加载完成", {
-					currentPath: data.currentPath,
-					totalItems: data.items.length,
-				});
 			} catch (err) {
 				const friendlyMessage = getFriendlyErrorMessage(err, path);
 				fileBrowserDebug.error("目录加载失败", {
 					path,
 					error: friendlyMessage,
-					errorObject: err,
 				});
 				setError(friendlyMessage);
 			} finally {
 				setLoading(false);
+				isLoadingRef.current = false;
 			}
 		},
 		[setItems, setCurrentPath, setParentPath, setLoading, setError],
@@ -95,6 +100,8 @@ export function useFileBrowser(): UseFileBrowserResult {
 	 * 刷新当前目录
 	 */
 	const refresh = useCallback(async () => {
+		// 清除已加载标记，强制重新加载
+		lastLoadedPathRef.current = "";
 		await loadDirectory(currentPath);
 	}, [currentPath, loadDirectory]);
 
@@ -102,13 +109,18 @@ export function useFileBrowser(): UseFileBrowserResult {
 	 * 路径变化时自动加载
 	 */
 	useEffect(() => {
+		// 只在初始化完成后，且路径真正变化时才加载
+		if (isInitializing) {
+			return;
+		}
+
 		if (currentPath === lastLoadedPathRef.current) {
 			return;
 		}
 
-		fileBrowserDebug.info("路径变化，自动加载", { currentPath });
+		fileBrowserDebug.debug("路径变化，自动加载", { currentPath });
 		loadDirectory(currentPath);
-	}, [currentPath, loadDirectory]);
+	}, [currentPath, loadDirectory, isInitializing]);
 
 	return {
 		isInitializing,
