@@ -42,14 +42,12 @@ export function useFileBrowser(): UseFileBrowserResult {
 	useEffect(() => {
 		const init = async () => {
 			const path = await initializeFilePath();
-			// 只在路径真正变化时才更新
-			if (path !== currentPath) {
-				setCurrentPath(path);
-			}
+			setCurrentPath(path);
 			setIsInitializing(false);
 		};
 		init();
-	}, [setCurrentPath, currentPath]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []); // 只在挂载时运行一次
 
 	/**
 	 * 加载目录内容
