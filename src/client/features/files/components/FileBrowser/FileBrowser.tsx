@@ -23,43 +23,29 @@ import { FileList } from "./FileList";
 import { FileViewer } from "../Viewer/FileViewer";
 
 interface FileBrowserProps {
-	externalSidebarVisible?: boolean;
-	onToggleSidebar?: () => void;
 	onExecuteOutput?: (output: string) => void;
 	onOpenBottomPanel?: (output: string) => void;
 }
 
 export function FileBrowser({
-	externalSidebarVisible,
-	onToggleSidebar,
 	onExecuteOutput,
 	onOpenBottomPanel,
 }: FileBrowserProps) {
 	// 获取状态
 	const {
-		currentPath,
 		viewMode,
 		isLoading,
 		error,
-		sidebarVisible: storeSidebarVisible,
 		items,
 	} = useFileStore();
 
 	const fileViewerStore = useFileViewerStore();
 
 	// 使用业务逻辑 hooks
-	const { loadDirectory, refresh } = useFileBrowser();
+	const { refresh } = useFileBrowser();
 	const { filteredItems } = useFileFiltering();
 
-	// 使用外部或内部侧边栏状态
-	const sidebarVisible =
-		externalSidebarVisible !== undefined
-			? externalSidebarVisible
-			: storeSidebarVisible;
-
-	// 调试日志
-	fileBrowserDebug.info("FileBrowser 渲染", {
-		currentPath,
+	fileBrowserDebug.debug("FileBrowser 渲染", {
 		isLoading,
 		error,
 		itemsCount: items.length,

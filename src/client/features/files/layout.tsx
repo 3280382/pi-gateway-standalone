@@ -96,8 +96,6 @@ export function FilesLayout({
 				{/* Content */}
 				<main className={styles.content}>
 					<FileBrowser
-						externalSidebarVisible={isSidebarVisible}
-						onToggleSidebar={() => {}}
 						onExecuteOutput={(output) =>
 							console.log("[Files] Execute output:", output)
 						}
