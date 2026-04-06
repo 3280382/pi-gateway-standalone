@@ -4,12 +4,11 @@
  * Row 2: Working Directory + Search & Filter
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SystemPromptModal } from "@/features/chat/components/modals/SystemPromptModal";
 import { useChatController } from "@/features/chat/services/api/chatApi";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import {
-	getSystemPrompt,
 	type SystemPromptResponse,
 } from "@/features/chat/services/api/systemPromptApi";
 import {
@@ -18,7 +17,6 @@ import {
 	useChatStore,
 } from "@/features/chat/stores/chatStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
-import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useWorkspaceStore } from "@/features/files/stores";
 import { websocketService } from "@/services/websocket.service";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
@@ -167,7 +165,7 @@ export function AppHeader({
 		currentModel,
 		thinkingLevel,
 		setThinkingLevel,
-		setCurrentModel,
+		
 		serverPid,
 		isConnected,
 	} = useSessionStore();

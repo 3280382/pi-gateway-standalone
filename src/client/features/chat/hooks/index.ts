@@ -15,3 +15,13 @@ export { useInputArea } from "@/features/chat/hooks/useInputArea";
 export { useFilePicker } from "@/features/chat/hooks/useFilePicker";
 export { useImageUpload } from "@/features/chat/hooks/useImageUpload";
 export { useSlashCommands } from "@/features/chat/hooks/useSlashCommands";
+
+// AppHeader 相关 Hooks
+export { useDirectoryPicker } from "@/features/chat/hooks/useDirectoryPicker";
+export { useModelSelector } from "@/features/chat/hooks/useModelSelector";
+export {
+	useThinkingSelector,
+	THINKING_LEVELS,
+} from "@/features/chat/hooks/useThinkingSelector";
+export { useSearchFilters } from "@/features/chat/hooks/useSearchFilters";
+export type { SearchFilters } from "@/features/chat/hooks/useSearchFilters";
