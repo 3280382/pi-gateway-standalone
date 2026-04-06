@@ -1,6 +1,6 @@
 /**
- * Layout Store - 全局布局状态管理
- * 统一管理视图切换、侧边栏、底部面板等布局状态
+ * App Store - 应用级别状态管理
+ * 统一管理视图切换、侧边栏、底部面板等全局状态
  */
 
 import { create } from "zustand";
@@ -9,7 +9,7 @@ import { persist } from "zustand/middleware";
 export type ViewType = "chat" | "files";
 export type BottomPanelType = "terminal" | "preview" | null;
 
-interface LayoutState {
+interface AppState {
 	// 视图状态
 	currentView: ViewType;
 	setCurrentView: (view: ViewType) => void;
@@ -29,7 +29,7 @@ interface LayoutState {
 	toggleBottomPanel: (type: BottomPanelType) => void;
 }
 
-export const useLayoutStore = create<LayoutState>()(
+export const useAppStore = create<AppState>()(
 	persist(
 		(set, get) => ({
 			// 初始状态

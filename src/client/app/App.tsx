@@ -12,7 +12,7 @@ import { LoadingScreen } from "./LoadingScreen";
 import { ChatPage } from "@/features/chat/page";
 import { FilesPage } from "@/features/files/page";
 import { useAppInitialization } from "@/features/chat/hooks/useAppInitialization";
-import { useLayoutStore } from "@/stores/layoutStore";
+import { useAppStore } from "@/stores/appStore";
 import { Footer } from "./Footer";
 import "@/styles/global.css";
 import styles from "./App.module.css";
@@ -21,7 +21,7 @@ import styles from "./App.module.css";
  * AppContent - 应用内容组件
  */
 function AppContent() {
-	const { currentView } = useLayoutStore();
+	const { currentView } = useAppStore();
 
 	// 应用初始化状态
 	const { isLoading, error, retry } = useAppInitialization();
