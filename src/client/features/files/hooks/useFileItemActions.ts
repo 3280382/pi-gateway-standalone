@@ -51,6 +51,16 @@ export interface UseFileItemActionsResult {
 }
 
 export function useFileItemActions(): UseFileItemActionsResult {
+	console.log("[useFileItemActions] Hook called");
+	
+	let store;
+	try {
+		store = useFileStore();
+	} catch (err) {
+		console.error("[useFileItemActions] Failed to get useFileStore:", err);
+		throw err;
+	}
+	
 	const {
 		selectedItems,
 		isMultiSelectMode,
@@ -61,9 +71,17 @@ export function useFileItemActions(): UseFileItemActionsResult {
 		setDraggedItem,
 		setIsDragging,
 		isSelected: storeIsSelected,
-	} = useFileStore();
+	} = store;
 
-	const { openViewer } = useFileViewerStore();
+	let viewerStore;
+	try {
+		viewerStore = useFileViewerStore();
+	} catch (err) {
+		console.error("[useFileItemActions] Failed to get useFileViewerStore:", err);
+		throw err;
+	}
+	
+	const { openViewer } = viewerStore;
 
 	// 本地状态
 	const [dropTarget, setDropTarget] = useState<string | null>(null);
@@ -78,15 +96,22 @@ export function useFileItemActions(): UseFileItemActionsResult {
 
 	const handleTap = useCallback(
 		(item: FileItem) => {
-			if (isMultiSelectMode) {
-				storeToggleSelection(item.path);
-				return;
-			}
+			console.log("[useFileItemActions] handleTap:", item.name);
+			try {
+				if (isMultiSelectMode) {
+					storeToggleSelection(item.path);
+					return;
+				}
 
-			if (item.isDirectory) {
-				setCurrentPath(item.path);
-			} else {
-				openViewer(item.path, item.name, "view");
+				if (item.isDirectory) {
+					console.log("[useFileItemActions] Navigating to:", item.path);
+					setCurrentPath(item.path);
+				} else {
+					console.log("[useFileItemActions] Opening viewer:", item.path);
+					openViewer(item.path, item.name, "view");
+				}
+			} catch (err) {
+				console.error("[useFileItemActions] handleTap error:", err);
 			}
 		},
 		[isMultiSelectMode, storeToggleSelection, setCurrentPath, openViewer],
