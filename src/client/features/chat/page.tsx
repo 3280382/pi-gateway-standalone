@@ -9,3 +9,5 @@ export function ChatPage() {
 	useChatMessages();
 	return <ChatLayout />;
 }
+
+export default ChatPage;

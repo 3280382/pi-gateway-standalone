@@ -89,3 +89,5 @@ export function FilesPage() {
 		</div>
 	);
 }
+
+export default FilesPage;
