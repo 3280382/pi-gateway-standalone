@@ -15,7 +15,7 @@ export { FileBrowserErrorBoundary } from "./FileBrowser/FileBrowserErrorBoundary
 export { FileGrid } from "./FileBrowser/FileGrid";
 export { FileList } from "./FileBrowser/FileList";
 export { FileItem } from "./FileBrowser/FileItem";
-export { fileBrowserStore } from "./FileBrowser/fileBrowserStore";
+
 
 // Viewer
 export { FileViewer } from "./Viewer/FileViewer";
@@ -30,5 +30,4 @@ export { BatchActionBar } from "./modals/BatchActionBar";
 export { TerminalPanel } from "./panels/TerminalPanel";
 export { XTermPanel } from "./panels/TerminalPanel/XTermPanel";
 
-// Hooks
-export { useGesture } from "./hooks/useGesture";
+

@@ -12,5 +12,4 @@ export { useFileNavigation } from "./useFileNavigation";
 export { useFileOperations } from "./useFileOperations";
 export { useFileTree } from "./useFileTree";
 export { useFileViewer } from "./useFileViewer";
-export { useGesture } from "./useGesture";
 export { useXTerm } from "./useXTerm";
