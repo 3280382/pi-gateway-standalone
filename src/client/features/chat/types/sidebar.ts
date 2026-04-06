@@ -33,6 +33,13 @@ export interface WorkspaceInfo {
 }
 
 export interface SidebarState {
+	// UI 状态
+	isVisible: boolean;
+
+	// LLM Log Panel 状态
+	isBottomPanelOpen: boolean;
+	bottomPanelHeight: number;
+
 	// 运行时状态（不持久化）
 	workingDir: WorkingDirectory | null;
 	sessions: Session[];

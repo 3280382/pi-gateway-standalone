@@ -7,26 +7,24 @@
  */
 
 import { useCallback } from "react";
-import { useAppStore } from "@/stores/appStore";
 import { FileBottomMenu } from "@/features/files/components/BottomMenu/FileBottomMenu";
 import { XTermPanel } from "@/features/files/components/panels/TerminalPanel";
 import { useFileStore, useTerminalStore } from "@/features/files/stores";
 import { useFileBrowser, useFileNavigation } from "@/features/files/hooks";
-import { FileBrowser } from "./components/FileBrowser/FileBrowser";
-import { FileSidebar } from "./components/Sidebar/FileSidebar";
-import { FileToolbar } from "./components/Header/FileToolbar";
-import styles from "./FilesLayout.module.css";
+import { FileBrowser } from "@/features/files/components/FileBrowser/FileBrowser";
+import { FileSidebar } from "@/features/files/components/Sidebar/FileSidebar";
+import { FileToolbar } from "@/features/files/components/Header/FileToolbar";
+import styles from "@/features/files/FilesLayout.module.css";
 
 export function FilesPage() {
 	const {
+		currentPath,
 		isSidebarVisible,
 		isBottomPanelOpen,
 		bottomPanelHeight,
 		closeBottomPanel,
 		setBottomPanelHeight,
-	} = useAppStore();
-
-	const { currentPath } = useFileStore();
+	} = useFileStore();
 	const { refresh } = useFileBrowser();
 	const { navigateTo } = useFileNavigation();
 	const { output, command, setCommand } = useTerminalStore();

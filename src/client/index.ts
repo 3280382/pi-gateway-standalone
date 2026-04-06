@@ -22,7 +22,7 @@ export { fileApi, useFileController } from "@/features/files/services/api/fileAp
 export { useWorkspaceStore } from "@/features/files/stores";
 
 // Hooks
-export { useAppInitialization } from "@/features/chat/hooks/useAppInitialization";
+export { useAppInitialization } from "@/hooks/useAppInitialization";
 export { useChatMessages } from "@/features/chat/hooks/useChatMessages";
 
 // Services

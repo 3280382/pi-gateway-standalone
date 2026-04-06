@@ -1,5 +1,5 @@
 /**
- * Footer Styles - 全局底部导航
+ * Footer Styles - 简洁布局
  */
 
 .footer {
@@ -14,10 +14,9 @@
 	padding: 0 12px;
 	flex-shrink: 0;
 	z-index: 100;
-	overflow: visible; /* 允许弹出菜单显示 */
 }
 
-/* Left group - 固定在左侧 */
+/* 左侧组 */
 .leftGroup {
 	display: flex;
 	align-items: center;
@@ -26,7 +25,7 @@
 	width: 80px;
 }
 
-/* Center group - 居中 */
+/* 中间组 - 绝对居中 */
 .centerGroup {
 	position: absolute;
 	left: 50%;
@@ -36,9 +35,8 @@
 	gap: 8px;
 }
 
-/* Right group - 工具菜单 */
+/* 右侧组 */
 .rightGroup {
-	position: relative;
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;
@@ -47,7 +45,7 @@
 	margin-left: auto;
 }
 
-/* 按钮样式 */
+/* 通用按钮样式 */
 .button {
 	display: flex;
 	align-items: center;
@@ -73,95 +71,13 @@
 	background: var(--accent-bg-blue);
 }
 
-/* 图标按钮（仅图标无文字） */
-.button svg:first-child:last-child {
-	width: 20px;
-	height: 20px;
-}
-
 .button svg {
 	width: 18px;
 	height: 18px;
 }
 
-/* 工具按钮 */
-.toolButton {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 32px;
-	height: 32px;
-	padding: 0;
-	background: transparent;
-	border: none;
-	border-radius: var(--radius-md);
-	color: var(--text-secondary);
-	cursor: pointer;
-	transition: all 0.2s ease;
-}
-
-.toolButton:hover {
-	background: var(--bg-hover);
-	color: var(--text-primary);
-}
-
-.toolButton.active {
-	color: var(--accent-primary);
-	background: var(--accent-bg-blue);
-}
-
-.toolButton svg {
-	width: 18px;
-	height: 18px;
-}
-
-/* 弹出菜单 */
-.popupMenu {
-	position: absolute;
-	bottom: 100%;
-	right: 0;
-	margin-bottom: 8px;
-	background: var(--bg-secondary);
-	border: 1px solid var(--border-color);
-	border-radius: var(--radius-md);
-	padding: 4px;
-	min-width: 140px;
-	box-shadow: var(--shadow-lg);
-	z-index: 1000;
-	/* 防止溢出导致滚动条 */
-	max-height: calc(100vh - 60px);
-	overflow-y: auto;
-}
-
-/* 菜单项 */
-.menuItem {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	width: 100%;
-	padding: 8px 12px;
-	background: transparent;
-	border: none;
-	border-radius: var(--radius-sm);
-	color: var(--text-secondary);
-	cursor: pointer;
-	transition: all 0.2s ease;
-	font-size: 13px;
-	text-align: left;
-}
-
-.menuItem:hover {
-	background: var(--bg-hover);
-	color: var(--text-primary);
-}
-
-.menuItem.active {
-	color: var(--accent-primary);
-	background: var(--accent-bg-blue);
-}
-
-.menuItem svg {
-	width: 16px;
-	height: 16px;
-	flex-shrink: 0;
+/* 仅图标按钮 */
+.button svg:first-child:last-child {
+	width: 20px;
+	height: 20px;
 }

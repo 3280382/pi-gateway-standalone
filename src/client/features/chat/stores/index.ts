@@ -15,8 +15,8 @@ export {
 	selectSearchResults,
 	selectShowThinking,
 	useChatStore,
-} from "./chatStore";
-export { useLlmLogStore } from "./llmLogStore";
-export { useModalStore } from "./modalStore";
-export { useSidebarStore } from "./sidebarStore";
-export { useSessionStore } from "./sessionStore";
+} from "@/features/chat/stores/chatStore";
+export { useLlmLogStore } from "@/features/chat/stores/llmLogStore";
+export { useModalStore } from "@/features/chat/stores/modalStore";
+export { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+export { useSessionStore } from "@/features/chat/stores/sessionStore";

@@ -8,25 +8,19 @@ import { persist } from "zustand/middleware";
 
 export type ViewType = "chat" | "files";
 export type BottomPanelType = "terminal" | "preview" | null;
+export type Theme = "dark" | "light";
+export type FontSize = "tiny" | "small" | "medium" | "large";
 
 interface AppState {
 	// 视图状态
 	currentView: ViewType;
 	setCurrentView: (view: ViewType) => void;
 
-	// 侧边栏状态
-	isSidebarVisible: boolean;
-	setIsSidebarVisible: (visible: boolean) => void;
-	toggleSidebar: () => void;
-
-	// 底部面板状态
-	isBottomPanelOpen: boolean;
-	bottomPanelType: BottomPanelType;
-	bottomPanelHeight: number;
-	openBottomPanel: (type: BottomPanelType) => void;
-	closeBottomPanel: () => void;
-	setBottomPanelHeight: (height: number) => void;
-	toggleBottomPanel: (type: BottomPanelType) => void;
+	// 全局设置
+	theme: Theme;
+	setTheme: (theme: Theme) => void;
+	fontSize: FontSize;
+	setFontSize: (size: FontSize) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -34,39 +28,22 @@ export const useAppStore = create<AppState>()(
 		(set, get) => ({
 			// 初始状态
 			currentView: "chat",
-			isSidebarVisible: typeof window !== "undefined" ? window.innerWidth >= 768 : false,
-			isBottomPanelOpen: false,
-			bottomPanelType: null,
-			bottomPanelHeight: 300,
 
 			// 视图操作
 			setCurrentView: (view) => set({ currentView: view }),
 
-			// 侧边栏操作
-			setIsSidebarVisible: (visible) => set({ isSidebarVisible: visible }),
-			toggleSidebar: () => set((state) => ({ isSidebarVisible: !state.isSidebarVisible })),
-
-			// 底部面板操作
-			openBottomPanel: (type) => set({ bottomPanelType: type, isBottomPanelOpen: true }),
-			closeBottomPanel: () => set({ isBottomPanelOpen: false, bottomPanelType: null }),
-			setBottomPanelHeight: (height) => set({ bottomPanelHeight: height }),
-			toggleBottomPanel: (type) => {
-				const { bottomPanelType, isBottomPanelOpen, openBottomPanel, closeBottomPanel } = get();
-				if (bottomPanelType === type && isBottomPanelOpen) {
-					closeBottomPanel();
-				} else {
-					openBottomPanel(type);
-				}
-			},
+			// 全局设置
+			theme: "dark",
+			setTheme: (theme) => set({ theme }),
+			fontSize: "medium",
+			setFontSize: (size) => set({ fontSize: size }),
 		}),
 		{
-			name: "layout-storage",
+			name: "app-storage",
 			partialize: (state) => ({
 				currentView: state.currentView,
-				isSidebarVisible: state.isSidebarVisible,
-				isBottomPanelOpen: state.isBottomPanelOpen,
-				bottomPanelType: state.bottomPanelType,
-				bottomPanelHeight: state.bottomPanelHeight,
+				theme: state.theme,
+				fontSize: state.fontSize,
 			}),
 		},
 	),

@@ -8,7 +8,7 @@ import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useWorkspaceStore } from "@/features/files/stores";
 import { IconButton } from "@/components/IconButton/IconButton";
 import { SectionHeader } from "@/features/chat/components/SectionHeader/SectionHeader";
-import styles from "./RecentWorkspaces.module.css";
+import styles from "@/features/chat/components/sidebar/RecentWorkspaces/RecentWorkspaces.module.css";
 
 export function RecentWorkspaces() {
 	const recentWorkspaces = useWorkspaceStore((state) => state.recentWorkspaces);

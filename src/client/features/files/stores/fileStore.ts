@@ -42,6 +42,12 @@ export const useFileStore = create<FileState & FileActions>()(
 				draggedItem: null,
 				isDragging: false,
 
+				// 布局状态
+				isSidebarVisible: typeof window !== "undefined" ? window.innerWidth >= 768 : true,
+				isBottomPanelOpen: false,
+				bottomPanelType: null,
+				bottomPanelHeight: 300,
+
 				// 基本设置方法
 				setCurrentPath: (path) => set({ currentPath: path }),
 				setParentPath: (path) => set({ parentPath: path }),
@@ -85,6 +91,31 @@ export const useFileStore = create<FileState & FileActions>()(
 					})),
 
 				isSelected: (path) => get().selectedItems.includes(path),
+
+				// 布局操作
+				setSidebarVisible: (visible: boolean) =>
+					set({ isSidebarVisible: visible }),
+
+				toggleSidebar: () =>
+					set((state) => ({ isSidebarVisible: !state.isSidebarVisible })),
+
+				openBottomPanel: (type) =>
+					set({ bottomPanelType: type, isBottomPanelOpen: true }),
+
+				closeBottomPanel: () =>
+					set({ isBottomPanelOpen: false, bottomPanelType: null }),
+
+				toggleBottomPanel: (type) => {
+					const { bottomPanelType, isBottomPanelOpen } = get();
+					if (bottomPanelType === type && isBottomPanelOpen) {
+						set({ isBottomPanelOpen: false, bottomPanelType: null });
+					} else {
+						set({ bottomPanelType: type, isBottomPanelOpen: true });
+					}
+				},
+
+				setBottomPanelHeight: (height: number) =>
+					set({ bottomPanelHeight: height }),
 			}),
 			{
 				name: "file-storage",
@@ -94,6 +125,8 @@ export const useFileStore = create<FileState & FileActions>()(
 					viewMode: state.viewMode,
 					sortMode: state.sortMode,
 					filterType: state.filterType,
+					isSidebarVisible: state.isSidebarVisible,
+					bottomPanelHeight: state.bottomPanelHeight,
 				}),
 			},
 		),

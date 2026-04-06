@@ -8,7 +8,7 @@
 
 import React from "react";
 import { useFileBottomMenu } from "@/features/files/hooks";
-import styles from "./FileBottomMenu.module.css";
+import styles from "@/features/files/components/BottomMenu/FileBottomMenu.module.css";
 
 export function FileBottomMenu() {
 	const {

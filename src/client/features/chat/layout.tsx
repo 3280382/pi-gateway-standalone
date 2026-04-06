@@ -4,21 +4,20 @@
  */
 
 import { useCallback } from "react";
-import { useAppStore } from "@/stores/appStore";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { AppHeader } from "@/features/chat/components/Header";
 import { LlmLogPanel } from "@/features/chat/components/panels/LlmLogPanel";
 import { SidebarPanel } from "@/features/chat/components/sidebar/SidebarPanel/SidebarPanel";
-import styles from "./ChatLayout.module.css";
-import { ChatPanel } from "./components/ChatPanel";
+import { ChatPanel } from "@/features/chat/components/ChatPanel";
+import styles from "@/features/chat/ChatLayout.module.css";
 
 export function ChatLayout() {
-	const {
-		isSidebarVisible,
-		isBottomPanelOpen,
-		bottomPanelHeight,
-		closeBottomPanel,
-		setBottomPanelHeight,
-	} = useAppStore();
+	const isSidebarVisible = useSidebarStore((state) => state.isVisible);
+	// Chat 的 bottom panel 状态暂时放在 sidebarStore，后续可分离
+	const isBottomPanelOpen = useSidebarStore((state) => state.isBottomPanelOpen ?? false);
+	const bottomPanelHeight = useSidebarStore((state) => state.bottomPanelHeight ?? 300);
+	const closeBottomPanel = useSidebarStore((state) => state.closeBottomPanel ?? (() => {}));
+	const setBottomPanelHeight = useSidebarStore((state) => state.setBottomPanelHeight ?? (() => {}));
 
 	const renderBottomPanel = useCallback(() => {
 		if (!isBottomPanelOpen) return null;
@@ -50,7 +49,7 @@ export function ChatLayout() {
 				<aside
 					className={`${styles.sidebar} ${isSidebarVisible ? styles.sidebarVisible : styles.sidebarHidden}`}
 				>
-					<SidebarPanel isVisible={isSidebarVisible} currentView="chat" />
+					<SidebarPanel currentView="chat" />
 				</aside>
 
 				{/* Content */}

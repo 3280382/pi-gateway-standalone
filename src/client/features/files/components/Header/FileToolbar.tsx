@@ -8,7 +8,7 @@ import {
 	useFileStore,
 } from "@/features/files/stores/fileStore";
 import { useFileNavigation } from "@/features/files/hooks";
-import styles from "../FileBrowser/FileBrowser.module.css";
+import styles from "@/features/files/components/FileBrowser/FileBrowser.module.css";
 
 // 可执行文件扩展名
 const EXECUTABLE_EXTENSIONS = [

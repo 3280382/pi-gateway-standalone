@@ -7,22 +7,21 @@
  */
 
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import { RecentWorkspaces } from "../RecentWorkspaces/RecentWorkspaces";
-import { Sessions } from "../Sessions/Sessions";
-import { Settings } from "../Settings/Settings";
-import styles from "./SidebarPanel.module.css";
+import { RecentWorkspaces } from "@/features/chat/components/sidebar/RecentWorkspaces/RecentWorkspaces";
+import { Sessions } from "@/features/chat/components/sidebar/Sessions/Sessions";
+import { ChatSettings } from "@/features/chat/components/sidebar/ChatSettings/ChatSettings";
+import styles from "@/features/chat/components/sidebar/SidebarPanel/SidebarPanel.module.css";
 
 interface SidebarPanelProps {
-	isVisible: boolean;
 	onSwitchView?: (view: "chat" | "files") => void;
 	currentView?: "chat" | "files";
 }
 
 export function SidebarPanel({
-	isVisible,
 	onSwitchView,
 	currentView = "chat",
 }: SidebarPanelProps) {
+	const isVisible = useSidebarStore((state) => state.isVisible);
 	const error = useSidebarStore((state) => state.error);
 	const clearError = useSidebarStore((state) => state.clearError);
 
@@ -40,7 +39,7 @@ export function SidebarPanel({
 				)}
 				<RecentWorkspaces />
 				{currentView === "chat" && <Sessions />}
-				<Settings />
+				{currentView === "chat" && <ChatSettings />}
 			</div>
 		</aside>
 	);

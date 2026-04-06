@@ -11,7 +11,7 @@ import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
 import { IconButton } from "@/components/IconButton/IconButton";
 import { SectionHeader } from "@/features/chat/components/SectionHeader/SectionHeader";
-import styles from "./Sessions.module.css";
+import styles from "@/features/chat/components/sidebar/Sessions/Sessions.module.css";
 
 export function Sessions() {
 	const sessions = useSidebarStore((state) => state.sessions);

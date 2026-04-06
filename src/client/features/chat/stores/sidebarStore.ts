@@ -16,6 +16,9 @@ import type { Session, SidebarState } from "@/features/chat/types/sidebar";
 // ============================================================================
 
 const createInitialState = (): Omit<SidebarState, keyof SidebarActions> => ({
+	isVisible: typeof window !== "undefined" ? window.innerWidth >= 768 : true,
+	isBottomPanelOpen: false,
+	bottomPanelHeight: 300,
 	workingDir: null,
 	sessions: [],
 	isLoading: false,
@@ -30,6 +33,15 @@ const createInitialState = (): Omit<SidebarState, keyof SidebarActions> => ({
 // ============================================================================
 
 interface SidebarActions {
+	// Visibility Actions
+	setIsVisible: (visible: boolean) => void;
+	toggleVisibility: () => void;
+
+	// Bottom Panel Actions
+	setBottomPanelOpen: (open: boolean) => void;
+	closeBottomPanel: () => void;
+	setBottomPanelHeight: (height: number) => void;
+
 	// Data Actions
 	setWorkingDir: (path: string) => void;
 	setSessions: (sessions: Session[]) => void;
@@ -57,6 +69,28 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 		persist(
 			(set, get) => ({
 				...createInitialState(),
+
+				// Visibility Actions
+				setIsVisible: (visible: boolean) => {
+					set({ isVisible: visible }, false, "setIsVisible");
+				},
+
+				toggleVisibility: () => {
+					set((state) => ({ isVisible: !state.isVisible }), false, "toggleVisibility");
+				},
+
+				// Bottom Panel Actions
+				setBottomPanelOpen: (open: boolean) => {
+					set({ isBottomPanelOpen: open }, false, "setBottomPanelOpen");
+				},
+
+				closeBottomPanel: () => {
+					set({ isBottomPanelOpen: false }, false, "closeBottomPanel");
+				},
+
+				setBottomPanelHeight: (height: number) => {
+					set({ bottomPanelHeight: height }, false, "setBottomPanelHeight");
+				},
 
 				// Data Actions
 				setWorkingDir: (path: string) => {

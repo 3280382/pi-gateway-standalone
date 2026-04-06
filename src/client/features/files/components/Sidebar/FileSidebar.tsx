@@ -5,7 +5,7 @@ import type React from "react";
 import { useCallback } from "react";
 import { useFileTree } from "@/features/files/hooks";
 import { fileSidebarDebug } from "@/lib/debug";
-import styles from "../FileBrowser/FileBrowser.module.css";
+import styles from "@/features/files/components/Sidebar/FileSidebar.module.css";
 
 interface FileSidebarProps {
 	visible: boolean;
@@ -86,7 +86,7 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
 						</span>
 
 						{/* 目录图标 */}
-						<span className={styles.treeNodeFolder}>📁</span>
+						<span className={styles.treeNodeFolder}>📂</span>
 
 						{/* 目录名称 */}
 						<span className={styles.treeNodeName}>{node.name}</span>
@@ -111,14 +111,13 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
 		[handleNodeClick],
 	);
 
-	if (!visible) {
-		return null;
-	}
-
 	return (
-		<aside className={styles.sidebar}>
+		<aside className={`${styles.sidebar} ${visible ? styles.sidebarVisible : ""}`}>
 			<div className={styles.sidebarHeader}>
-				<span className={styles.sidebarTitle}>📁 Folders</span>
+				<span className={styles.sidebarTitle}>
+					<span className={styles.sidebarTitleIcon}>📁</span>
+					Folders
+				</span>
 			</div>
 			<div className={styles.sidebarContent}>
 				{loading ? (

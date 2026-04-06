@@ -15,12 +15,12 @@ import {
 } from "@/features/files/hooks";
 import { fileBrowserDebug } from "@/lib/debug";
 
-import { FileActionBar } from "../Header/FileActionBar";
-import styles from "./FileBrowser.module.css";
-import { FileBrowserErrorBoundary } from "./FileBrowserErrorBoundary";
-import { FileGrid } from "./FileGrid";
-import { FileList } from "./FileList";
-import { FileViewer } from "../Viewer/FileViewer";
+import { FileActionBar } from "@/features/files/components/Header/FileActionBar";
+import styles from "@/features/files/components/FileBrowser/FileBrowser.module.css";
+import { FileBrowserErrorBoundary } from "@/features/files/components/FileBrowser/FileBrowserErrorBoundary";
+import { FileGrid } from "@/features/files/components/FileBrowser/FileGrid";
+import { FileList } from "@/features/files/components/FileBrowser/FileList";
+import { FileViewer } from "@/features/files/components/Viewer/FileViewer";
 
 interface FileBrowserProps {
 	onExecuteOutput?: (output: string) => void;

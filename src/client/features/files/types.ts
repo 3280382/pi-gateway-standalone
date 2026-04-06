@@ -50,10 +50,17 @@ export type FilterType =
 	| "custom";
 
 // ============================================================================
+// Layout Types
+// ============================================================================
+
+export type BottomPanelType = "terminal" | "preview" | null;
+
+// ============================================================================
 // Store State Types
 // ============================================================================
 
 export interface FileState {
+	// 文件浏览状态
 	currentPath: string;
 	parentPath: string;
 	items: FileItem[];
@@ -70,9 +77,16 @@ export interface FileState {
 	isMultiSelectMode: boolean;
 	draggedItem: FileItem | null;
 	isDragging: boolean;
+
+	// 布局状态
+	isSidebarVisible: boolean;
+	isBottomPanelOpen: boolean;
+	bottomPanelType: BottomPanelType;
+	bottomPanelHeight: number;
 }
 
 export interface FileActions {
+	// 文件操作
 	setCurrentPath: (path: string) => void;
 	setParentPath: (path: string) => void;
 	setItems: (items: FileItem[]) => void;
@@ -93,4 +107,12 @@ export interface FileActions {
 	toggleViewMode: () => void;
 	toggleMultiSelectMode: () => void;
 	isSelected: (path: string) => boolean;
+
+	// 布局操作
+	setSidebarVisible: (visible: boolean) => void;
+	toggleSidebar: () => void;
+	openBottomPanel: (type: BottomPanelType) => void;
+	closeBottomPanel: () => void;
+	toggleBottomPanel: (type: BottomPanelType) => void;
+	setBottomPanelHeight: (height: number) => void;
 }

@@ -2,6 +2,6 @@
  * Chat Feature Hooks
  */
 
-export { useAppInitialization } from "./useAppInitialization";
-export { useChat } from "./useChat";
-export { useChatMessages } from "./useChatMessages";
+export { useChat } from "@/features/chat/hooks/useChat";
+export { useChatInit } from "@/features/chat/hooks/useChatInit";
+export { useChatMessages } from "@/features/chat/hooks/useChatMessages";
