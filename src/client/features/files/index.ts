@@ -31,6 +31,5 @@ export { FileBottomMenu } from "./components/BottomMenu/FileBottomMenu";
 // Components - Modals
 export { BatchActionBar } from "./components/modals/BatchActionBar";
 
-// Layout & Page
-export { FilesLayout } from "./layout";
+// Page
 export { FilesPage } from "./page";
