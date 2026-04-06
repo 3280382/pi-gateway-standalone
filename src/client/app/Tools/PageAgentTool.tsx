@@ -40,10 +40,11 @@ export function PageAgentTool() {
 	}, [isLoaded, isVisible]);
 
 	return (
-		<IconMenuItem
-			icon="robot"
+		<IconButton
+			name="robot"
 			label="Page Agent"
-			checked={isVisible}
+			variant="ghost"
+			suffix={isVisible ? "✓" : undefined}
 			onClick={toggle}
 			title={isVisible ? "Hide Page Agent" : "Show Page Agent"}
 		/>

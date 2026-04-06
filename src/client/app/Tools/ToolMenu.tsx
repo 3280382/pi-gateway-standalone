@@ -46,11 +46,10 @@ export function ToolMenu() {
             <DebugTool />
             <PageAgentTool />
             <div className={styles.divider} />
-            <IconMenuItem
-              icon="settings"
-              label="Settings"
-              onClick={openSettings}
-            />
+            <button className={styles.item} onClick={openSettings}>
+              <span className={styles.menuIcon}>⚙️</span>
+              <span>Settings</span>
+            </button>
           </div>
         )}
       </div>

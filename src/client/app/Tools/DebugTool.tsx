@@ -42,10 +42,11 @@ export function DebugTool() {
 	}, [isLoaded, isVisible]);
 
 	return (
-		<IconMenuItem
-			icon="bug"
+		<IconButton
+			name="bug"
 			label="Debug"
-			checked={isVisible}
+			variant="ghost"
+			suffix={isVisible ? "✓" : undefined}
 			onClick={toggle}
 			title={isVisible ? "Hide Debug" : "Show Debug"}
 		/>
