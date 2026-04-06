@@ -9,7 +9,7 @@
 import { sessionManager } from "@/features/chat/services/sessionManager";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
-import { IconButton } from "@/components/IconButton/IconButton";
+import { IconButton } from "@/components/Icon/Icon";
 import { SectionHeader } from "@/features/chat/components/SectionHeader/SectionHeader";
 import styles from "@/features/chat/components/sidebar/Sessions/Sessions.module.css";
 

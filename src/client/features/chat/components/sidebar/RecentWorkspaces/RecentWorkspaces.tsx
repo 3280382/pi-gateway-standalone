@@ -6,7 +6,7 @@
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useWorkspaceStore } from "@/features/files/stores";
-import { IconButton } from "@/components/IconButton/IconButton";
+import { IconButton } from "@/components/Icon/Icon";
 import { SectionHeader } from "@/features/chat/components/SectionHeader/SectionHeader";
 import styles from "@/features/chat/components/sidebar/RecentWorkspaces/RecentWorkspaces.module.css";
 

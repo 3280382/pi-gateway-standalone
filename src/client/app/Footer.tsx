@@ -49,7 +49,7 @@ export function Footer() {
     <nav className={styles.footer}>
       {/* 左侧：侧边栏和面板切换 */}
       <div className={styles.leftGroup}>
-        <IconToggleButton
+        <IconToggle
           activeIcon="leftArrow"
           inactiveIcon="rightArrow"
           isActive={isSidebarVisible}
@@ -57,7 +57,7 @@ export function Footer() {
           title={isSidebarVisible ? "Hide Sidebar" : "Show Sidebar"}
           variant="toggle"
         />
-        <IconToggleButton
+        <IconToggle
           activeIcon="downArrow"
           inactiveIcon="upArrow"
           isActive={isPanelOpen}
