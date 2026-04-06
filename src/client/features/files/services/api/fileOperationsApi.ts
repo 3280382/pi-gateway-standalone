@@ -123,38 +123,6 @@ export async function executeFileByPath(
 }
 
 /**
- * 检查路径是否存在
- */
-export async function checkPathExists(path: string): Promise<boolean> {
-	try {
-		const response = await fetch("/api/browse", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ path }),
-		});
-		return response.ok;
-	} catch {
-		return false;
-	}
-}
-
-/**
- * 获取服务器当前工作目录
- */
-export async function getServerWorkingDir(): Promise<string | null> {
-	try {
-		const response = await fetch("/api/working-dir");
-		if (response.ok) {
-			const data = await response.json();
-			return data.cwd || null;
-		}
-	} catch (error) {
-		console.error("[FileOperationsApi] Failed to get server working dir:", error);
-	}
-	return null;
-}
-
-/**
  * 获取友好的错误消息
  */
 export function getFriendlyErrorMessage(error: unknown, path: string): string {

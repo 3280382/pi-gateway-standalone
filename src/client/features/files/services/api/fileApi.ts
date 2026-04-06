@@ -222,3 +222,31 @@ export function getFileExtension(filename: string): string {
 	if (parts[0] === "" && parts.length <= 2) return "";
 	return parts[parts.length - 1].toLowerCase();
 }
+
+// 检查路径是否存在
+export async function checkPathExists(path: string): Promise<boolean> {
+	try {
+		const response = await fetch("/api/browse", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ path }),
+		});
+		return response.ok;
+	} catch {
+		return false;
+	}
+}
+
+// 获取服务器当前工作目录
+export async function getServerWorkingDir(): Promise<string> {
+	try {
+		const response = await fetch("/api/working-dir");
+		if (response.ok) {
+			const data = await response.json();
+			if (data.cwd) return data.cwd;
+		}
+	} catch (error) {
+		console.error("[API] Failed to get server working dir:", error);
+	}
+	return "/root";
+}

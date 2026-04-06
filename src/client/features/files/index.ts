@@ -6,7 +6,7 @@
 export { useFileStore } from "@/features/files/stores/fileStore";
 
 // Services
-export { initializeFilePath } from "@/features/files/services/initialization.service";
+export { initializeFilePath } from "@/features/files/services/initialization";
 
 // Components - Header
 export { FileToolbar } from "./components/Header/FileToolbar";
