@@ -6,7 +6,6 @@
 import {
 	createContext,
 	type ReactNode,
-	useCallback,
 	useContext,
 	useState,
 } from "react";
@@ -21,9 +20,8 @@ interface LayoutContextValue {
 
 	// 侧边栏状态
 	isSidebarVisible: boolean;
+	setIsSidebarVisible: (visible: boolean) => void;
 	toggleSidebar: () => void;
-	openSidebar: () => void;
-	closeSidebar: () => void;
 
 	// 底部面板状态
 	isBottomPanelOpen: boolean;
@@ -33,10 +31,6 @@ interface LayoutContextValue {
 	closeBottomPanel: () => void;
 	setBottomPanelHeight: (height: number) => void;
 	toggleBottomPanel: (type: BottomPanelType) => void;
-
-	// 输入框显示（文件浏览器不需要）
-	showInputArea: boolean;
-	setShowInputArea: (show: boolean) => void;
 }
 
 const LayoutContext = createContext<LayoutContextValue | null>(null);
@@ -45,12 +39,12 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
 	// 视图状态
 	const [currentView, setCurrentView] = useState<ViewType>("chat");
 
-	// 侧边栏状态 - 默认隐藏，防止闪现问题
+	// 侧边栏状态
 	const [isSidebarVisible, setIsSidebarVisible] = useState(() => {
 		if (typeof window !== "undefined") {
 			return window.innerWidth >= 768;
 		}
-		return false; // 默认隐藏，防止服务端/客户端不匹配导致闪现
+		return false;
 	});
 
 	// 底部面板状态
@@ -58,56 +52,32 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
 	const [bottomPanelType, setBottomPanelType] = useState<BottomPanelType>(null);
 	const [bottomPanelHeight, setBottomPanelHeight] = useState(300);
 
-	// 输入框显示
-	const [showInputArea, setShowInputArea] = useState(true);
+	const toggleSidebar = () => setIsSidebarVisible((v) => !v);
 
-	// 侧边栏操作
-	const toggleSidebar = useCallback(() => {
-		setIsSidebarVisible((prev) => !prev);
-	}, []);
-
-	const openSidebar = useCallback(() => {
-		setIsSidebarVisible(true);
-	}, []);
-
-	const closeSidebar = useCallback(() => {
-		setIsSidebarVisible(false);
-	}, []);
-
-	// 底部面板操作
-	const openBottomPanel = useCallback((type: BottomPanelType) => {
+	const openBottomPanel = (type: BottomPanelType) => {
 		setBottomPanelType(type);
 		setIsBottomPanelOpen(true);
-	}, []);
+	};
 
-	const closeBottomPanel = useCallback(() => {
+	const closeBottomPanel = () => {
 		setIsBottomPanelOpen(false);
 		setBottomPanelType(null);
-	}, []);
+	};
 
-	const toggleBottomPanel = useCallback(
-		(type: BottomPanelType) => {
-			if (type === null) {
-				setIsBottomPanelOpen(false);
-				setBottomPanelType(null);
-			} else if (bottomPanelType === type && isBottomPanelOpen) {
-				setIsBottomPanelOpen(false);
-				setBottomPanelType(null);
-			} else {
-				setBottomPanelType(type);
-				setIsBottomPanelOpen(true);
-			}
-		},
-		[bottomPanelType, isBottomPanelOpen],
-	);
+	const toggleBottomPanel = (type: BottomPanelType) => {
+		if (bottomPanelType === type && isBottomPanelOpen) {
+			closeBottomPanel();
+		} else {
+			openBottomPanel(type);
+		}
+	};
 
 	const value: LayoutContextValue = {
 		currentView,
 		setCurrentView,
 		isSidebarVisible,
+		setIsSidebarVisible,
 		toggleSidebar,
-		openSidebar,
-		closeSidebar,
 		isBottomPanelOpen,
 		bottomPanelType,
 		bottomPanelHeight,
@@ -115,8 +85,6 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
 		closeBottomPanel,
 		setBottomPanelHeight,
 		toggleBottomPanel,
-		showInputArea,
-		setShowInputArea,
 	};
 
 	return (
