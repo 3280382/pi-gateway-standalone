@@ -46,10 +46,7 @@ function AppContent() {
 						setBottomPanelHeight={setBottomPanelHeight}
 					/>
 				) : (
-					<FilesPage
-						closeBottomPanel={closeBottomPanel}
-						setBottomPanelHeight={setBottomPanelHeight}
-					/>
+					<FilesPage />
 				)}
 			</main>
 

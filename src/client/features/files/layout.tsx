@@ -14,19 +14,15 @@ import { FileSidebar } from "./components/Sidebar/FileSidebar";
 import { FileToolbar } from "./components/Header/FileToolbar";
 import styles from "./FilesLayout.module.css";
 
-interface FilesLayoutProps {
-	isInitializing: boolean;
-	closeBottomPanel: () => void;
-	setBottomPanelHeight: (height: number) => void;
-}
-
-export function FilesLayout({
-	isInitializing,
-	closeBottomPanel,
-	setBottomPanelHeight,
-}: FilesLayoutProps) {
-	const { isSidebarVisible, isBottomPanelOpen, bottomPanelHeight } =
-		useLayout();
+export function FilesLayout() {
+	const { 
+		isSidebarVisible, 
+		isBottomPanelOpen, 
+		bottomPanelHeight,
+		closeBottomPanel,
+		setBottomPanelHeight 
+	} = useLayout();
+	
 	const { currentPath } = useFileStore();
 	const { refresh } = useFileBrowser();
 	const { navigateTo } = useFileNavigation();
@@ -43,7 +39,6 @@ export function FilesLayout({
 				output={output}
 				initialCommand={command}
 				onExecuteCommand={(cmd) => {
-					// XTermPanel 内部会执行命令，这里只更新状态
 					setCommand(cmd);
 				}}
 			/>
@@ -57,25 +52,6 @@ export function FilesLayout({
 		setBottomPanelHeight,
 		setCommand,
 	]);
-
-	// 初始化中显示加载状态
-	if (isInitializing) {
-		return (
-			<div className={styles.layout}>
-				<div
-					style={{
-						flex: 1,
-						display: "flex",
-						alignItems: "center",
-						justifyContent: "center",
-						color: "var(--text-secondary)",
-					}}
-				>
-					Loading...
-				</div>
-			</div>
-		);
-	}
 
 	return (
 		<div className={styles.layout}>
