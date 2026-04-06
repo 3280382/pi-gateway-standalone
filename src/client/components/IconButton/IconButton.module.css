@@ -1,28 +1,145 @@
+/**
+ * IconButton Styles
+ */
+
 .button {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 28px;
-	height: 28px;
-	padding: 0;
-	background: transparent;
-	border: none;
-	border-radius: var(--radius-sm);
-	color: var(--text-muted);
-	cursor: pointer;
-	transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md, 6px);
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
 }
 
-.button:hover {
-	background: var(--bg-tertiary);
-	color: var(--text-primary);
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.button:active {
-	transform: scale(0.95);
+/* 图标样式 */
+.icon {
+  flex-shrink: 0;
 }
 
-.button svg {
-	width: 14px;
-	height: 14px;
+/* 文字样式 */
+.label {
+  white-space: nowrap;
+}
+
+/* 后缀内容 */
+.suffix {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.check {
+  color: var(--accent-primary);
+}
+
+/* ========== 变体 ========== */
+
+/* default */
+.default:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* primary */
+.primary {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--accent-primary-hover, var(--accent-primary));
+  opacity: 0.9;
+}
+
+/* ghost */
+.ghost {
+  padding: 6px 10px;
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* danger */
+.danger {
+  color: var(--accent-red);
+}
+
+.danger:hover:not(:disabled) {
+  background: var(--accent-red-bg, rgba(248, 81, 73, 0.1));
+}
+
+/* toggle */
+.toggle {
+  padding: 6px;
+}
+
+.toggle:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.toggle.active {
+  color: var(--accent-primary);
+  background: var(--accent-bg-blue);
+}
+
+/* ========== 尺寸 ========== */
+
+.sm {
+  padding: 4px 8px;
+  font-size: 12px;
+  gap: 4px;
+}
+
+.sm .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.md {
+  padding: 6px 12px;
+  font-size: 14px;
+  gap: 6px;
+}
+
+.md .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.lg {
+  padding: 8px 16px;
+  font-size: 16px;
+  gap: 8px;
+}
+
+.lg .icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* 纯图标按钮（无文字） */
+.button:not(:has(.label)) {
+  padding: 6px;
+}
+
+.button.sm:not(:has(.label)) {
+  padding: 4px;
+}
+
+.button.lg:not(:has(.label)) {
+  padding: 8px;
 }

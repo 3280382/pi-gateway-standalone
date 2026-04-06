@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useState } from "react";
-import styles from "@/app/Tools/Tool.module.css";
+import { IconMenuItem } from "@/components/IconButton/IconButton";
 
 export function PageAgentTool() {
 	const [isLoaded, setIsLoaded] = useState(false);
@@ -40,35 +40,12 @@ export function PageAgentTool() {
 	}, [isLoaded, isVisible]);
 
 	return (
-		<button
-			className={`${styles.item} ${isVisible ? styles.active : ""}`}
+		<IconMenuItem
+			icon="robot"
+			label="Page Agent"
+			checked={isVisible}
 			onClick={toggle}
 			title={isVisible ? "Hide Page Agent" : "Show Page Agent"}
-		>
-			<RobotIcon />
-			<span>Page Agent</span>
-			{isVisible && <CheckIcon />}
-		</button>
-	);
-}
-
-function RobotIcon() {
-	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-			<path d="M12 8V4H8" />
-			<rect width="16" height="12" x="4" y="8" rx="2" />
-			<path d="M2 14h2" />
-			<path d="M20 14h2" />
-			<path d="M15 13v2" />
-			<path d="M9 13v2" />
-		</svg>
-	);
-}
-
-function CheckIcon() {
-	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} style={{ width: 14, height: 14 }}>
-			<polyline points="20 6 9 17 4 12" />
-		</svg>
+		/>
 	);
 }
