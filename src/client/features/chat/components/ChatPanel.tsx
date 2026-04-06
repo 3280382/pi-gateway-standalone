@@ -1,8 +1,12 @@
 /**
  * ChatPanel - Main Chat Container
+ *
+ * 重构后：
+ * - 所有业务逻辑移至 useChatPanel hook
+ * - 本组件只负责布局和样式
  */
 
-import { useCallback, useEffect, useRef } from "react";
+import { useChatPanel } from "@/features/chat/hooks/useChatPanel";
 import { useChatController } from "@/features/chat/services/api/chatApi";
 import {
 	selectCurrentStreamingMessage,
@@ -17,83 +21,23 @@ import { InputArea } from "./InputArea";
 import { MessageList } from "./MessageList";
 
 export function ChatPanel() {
+	// 从 store 获取状态
 	const messages = useChatStore(selectMessages);
 	const currentStreamingMessage = useChatStore(selectCurrentStreamingMessage);
 	const inputText = useChatStore(selectInputText);
 	const isStreaming = useChatStore(selectIsStreaming);
 	const showThinking = useChatStore(selectShowThinking);
 
-	// Use the hook instead of controller singleton
+	// 使用 hook 处理业务逻辑
+	const chatPanel = useChatPanel();
 	const chatController = useChatController();
-
-	const messagesRef = useRef<HTMLDivElement>(null);
-	const shouldScrollRef = useRef(true);
-
-	// Auto-scroll to bottom when messages change or streaming
-	useEffect(() => {
-		if (messagesRef.current && shouldScrollRef.current) {
-			messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-		}
-	}, [messages, currentStreamingMessage]);
-
-	// Handle scroll to detect if user has manually scrolled up
-	const handleScroll = useCallback(() => {
-		if (messagesRef.current) {
-			const { scrollTop, scrollHeight, clientHeight } = messagesRef.current;
-			const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
-			shouldScrollRef.current = isAtBottom;
-		}
-	}, []);
-
-	const handleSend = useCallback(async () => {
-		if (inputText.trim()) {
-			try {
-				await chatController.sendMessage(inputText);
-			} catch (err) {
-				console.error("[ChatPanel] sendMessage failed:", err);
-			}
-			// Reset scroll flag on new message
-			shouldScrollRef.current = true;
-		}
-	}, [inputText]);
-
-	const handleBashCommand = useCallback((command: string) => {
-		chatController.setInputText(`/bash ${command}`);
-		setTimeout(() => chatController.sendMessage(`/bash ${command}`), 0);
-		shouldScrollRef.current = true;
-	}, []);
-
-	const handleSlashCommand = useCallback((command: string, args: string) => {
-		switch (command) {
-			case "clear":
-				chatController.clearMessages();
-				break;
-			case "new":
-				chatController.clearMessages();
-				break;
-			case "bash":
-				if (args) chatController.sendMessage(`/bash ${args}`);
-				break;
-			case "read":
-				if (args) chatController.sendMessage(`/read ${args}`);
-				break;
-			default:
-				chatController.sendMessage(`/${command} ${args}`.trim());
-		}
-		shouldScrollRef.current = true;
-	}, []);
-
-	const handleNewSession = useCallback(async () => {
-		// 通知服务器创建新会话，然后清空本地消息
-		await chatController.createNewSession();
-	}, [chatController]);
 
 	return (
 		<div className={styles.panel}>
 			<div
-				ref={messagesRef}
+				ref={chatPanel.messagesRef}
 				className={styles.messages}
-				onScroll={handleScroll}
+				onScroll={chatPanel.handleScroll}
 			>
 				<MessageList
 					messages={messages}
@@ -112,11 +56,11 @@ export function ChatPanel() {
 					value={inputText}
 					isStreaming={isStreaming}
 					onChange={chatController.setInputText}
-					onSend={handleSend}
+					onSend={chatPanel.handleSend}
 					onAbort={chatController.abortGeneration}
-					onBashCommand={handleBashCommand}
-					onSlashCommand={handleSlashCommand}
-					onNewSession={handleNewSession}
+					onBashCommand={chatPanel.handleBashCommand}
+					onSlashCommand={chatPanel.handleSlashCommand}
+					onNewSession={chatPanel.handleNewSession}
 				/>
 			</div>
 		</div>
