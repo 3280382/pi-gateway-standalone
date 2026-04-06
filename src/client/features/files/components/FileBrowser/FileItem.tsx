@@ -2,11 +2,12 @@
  * FileItem - 文件项组件
  *
  * 职责：纯 UI 渲染
- * - 无交互逻辑，只接收绑定好的处理器
+ * - 无业务逻辑，只接收绑定好的处理器
+ * - 长按触发多选模式（500ms延迟）
  */
 
 import type React from "react";
-import { memo } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import { getFileIcon } from "@/features/files/services/api/fileApi";
 import type { FileItem as FileItemType } from "@/features/files/stores/fileStore";
 import { formatDate, formatFileSize } from "@/lib/formatters";
@@ -30,6 +31,8 @@ export interface FileItemProps {
 	viewMode: "grid" | "list";
 }
 
+const LONG_PRESS_DURATION = 500; // 500ms 长按触发
+
 export const FileItem = memo<FileItemProps>(
 	({
 		item,
@@ -50,6 +53,9 @@ export const FileItem = memo<FileItemProps>(
 	}) => {
 		const icon = getFileIcon(item.extension, item.isDirectory);
 		const isGrid = viewMode === "grid";
+		
+		const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+		const [isPressed, setIsPressed] = useState(false);
 
 		// 组合样式
 		const itemClassName = [
@@ -58,16 +64,57 @@ export const FileItem = memo<FileItemProps>(
 			isSelected ? styles.selected : "",
 			isDropTarget ? styles.dropTarget : "",
 			isDragging ? styles.dragging : "",
+			isPressed ? styles.pressed : "",
 		]
 			.filter(Boolean)
 			.join(" ");
+		
+		// 处理鼠标按下 - 开始长按计时
+		const handleMouseDown = useCallback(() => {
+			setIsPressed(true);
+			longPressTimerRef.current = setTimeout(() => {
+				onLongPress();
+			}, LONG_PRESS_DURATION);
+		}, [onLongPress]);
+		
+		// 处理鼠标松开 - 取消长按计时
+		const handleMouseUp = useCallback(() => {
+			setIsPressed(false);
+			if (longPressTimerRef.current) {
+				clearTimeout(longPressTimerRef.current);
+				longPressTimerRef.current = null;
+			}
+		}, []);
+		
+		// 处理鼠标离开 - 取消长按计时
+		const handleMouseLeave = useCallback(() => {
+			setIsPressed(false);
+			if (longPressTimerRef.current) {
+				clearTimeout(longPressTimerRef.current);
+				longPressTimerRef.current = null;
+			}
+		}, []);
+		
+		// 处理点击
+		const handleClick = useCallback((e: React.MouseEvent) => {
+			// 如果点击的是复选框，不触发 tap
+			if (
+				e.target instanceof HTMLElement &&
+				e.target.closest('[data-checkbox="true"]')
+			) {
+				return;
+			}
+			onTap();
+		}, [onTap]);
 
 		return (
 			<div
 				className={itemClassName}
-				onClick={onTap}
+				onClick={handleClick}
 				onDoubleClick={onDoubleTap}
-				onMouseDown={onLongPress}
+				onMouseDown={handleMouseDown}
+				onMouseUp={handleMouseUp}
+				onMouseLeave={handleMouseLeave}
 				draggable={!item.isDirectory || isMultiSelectMode}
 				onDragStart={onDragStart}
 				onDragOver={onDragOver}
