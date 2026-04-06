@@ -6,7 +6,7 @@
 import { useAppStore } from "@/stores/appStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useFileStore } from "@/features/files/stores";
-import { IconButton, IconToggleButton } from "@/components/IconButton/IconButton";
+import { IconButton, IconToggle } from "@/components/Icon/Icon";
 import { ToolMenu } from "@/app/Tools";
 import styles from "@/app/Footer.module.css";
 

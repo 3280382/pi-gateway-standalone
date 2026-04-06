@@ -1,13 +1,15 @@
 /**
- * Icon - 全局图标组件
+ * Icon - 统一图标组件
  * 
  * 职责：
+ * - 纯展示时：渲染 SVG 图标
+ * - 有 onClick 时：自动变成按钮
+ * - 支持文字组合
  * - 统一管理所有 SVG 图标
- * - 支持 size、color、className 等属性
- * - 所有图标使用统一的视觉风格
  */
 
-import type { CSSProperties, ReactNode } from "react";
+import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from "react";
+import styles from "./Icon.module.css";
 
 export type IconName = 
   // 导航
@@ -15,18 +17,36 @@ export type IconName =
   // 视图
   | "chat" | "files" | "settings" | "tools"
   // 操作
-  | "bug" | "robot" | "check" | "close"
+  | "bug" | "robot" | "check" | "close" | "plus" | "trash" | "edit" | "refresh"
   // 文件
   | "folder" | "file" | "grid" | "list"
   // 其他
-  | "moon" | "sun" | "log" | "view";
+  | "moon" | "sun" | "log" | "view" | "search" | "more";
 
-interface IconProps {
+export interface IconProps {
+  /** 图标名称 */
   name: IconName;
+  /** 图标尺寸 */
   size?: "xs" | "sm" | "md" | "lg" | "xl" | number;
+  /** 颜色 */
   color?: string;
+  /** 自定义类名 */
   className?: string;
+  /** 自定义样式 */
   style?: CSSProperties;
+}
+
+export interface IconButtonProps extends IconProps, Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "name"> {
+  /** 按钮文字（可选） */
+  label?: string;
+  /** 图标位置 */
+  iconPosition?: "left" | "right";
+  /** 按钮变体 */
+  variant?: "default" | "primary" | "ghost" | "danger" | "toggle";
+  /** 是否激活（用于 toggle 变体） */
+  isActive?: boolean;
+  /** 后缀内容（如 check 标记） */
+  suffix?: ReactNode;
 }
 
 const sizeMap = {
@@ -37,6 +57,9 @@ const sizeMap = {
   xl: 20,
 };
 
+/**
+ * Icon - 纯图标展示
+ */
 export function Icon({ 
   name, 
   size = "md", 
@@ -53,8 +76,8 @@ export function Icon({
     ...style,
   };
 
-  const icon = icons[name];
-  if (!icon) {
+  const iconContent = icons[name];
+  if (!iconContent) {
     console.warn(`Icon "${name}" not found`);
     return null;
   }
@@ -67,11 +90,98 @@ export function Icon({
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
+      className={`${styles.icon} ${className}`}
       style={iconStyle}
     >
-      {icon}
+      {iconContent}
     </svg>
+  );
+}
+
+/**
+ * IconButton - 带按钮功能的图标
+ * 自动根据是否有 onClick 决定渲染方式
+ */
+export function IconButton({
+  name,
+  label,
+  iconPosition = "left",
+  variant = "default",
+  size = "md",
+  isActive = false,
+  suffix,
+  className = "",
+  disabled,
+  title,
+  onClick,
+  ...props
+}: IconButtonProps) {
+  // 如果没有 onClick，当作纯图标渲染
+  if (!onClick) {
+    return <Icon name={name} size={size} className={className} />;
+  }
+
+  const buttonClass = [
+    styles.button,
+    styles[variant],
+    isActive && styles.active,
+    disabled && styles.disabled,
+    !label && styles.iconOnly,
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const iconSize = size === "sm" ? "sm" : size === "lg" ? "lg" : "md";
+
+  return (
+    <button
+      className={buttonClass}
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      {...props}
+    >
+      {iconPosition === "left" && (
+        <Icon name={name} size={iconSize} />
+      )}
+
+      {label && <span className={styles.label}>{label}</span>}
+
+      {iconPosition === "right" && (
+        <Icon name={name} size={iconSize} />
+      )}
+
+      {suffix && <span className={styles.suffix}>{suffix}</span>}
+    </button>
+  );
+}
+
+/**
+ * IconToggle - 带切换状态的图标按钮
+ */
+interface IconToggleProps extends Omit<IconButtonProps, "name" | "isActive"> {
+  /** 激活状态图标 */
+  activeIcon: IconName;
+  /** 非激活状态图标 */
+  inactiveIcon: IconName;
+  /** 当前是否激活 */
+  isActive: boolean;
+}
+
+export function IconToggle({
+  activeIcon,
+  inactiveIcon,
+  isActive,
+  ...props
+}: IconToggleProps) {
+  return (
+    <IconButton
+      name={isActive ? activeIcon : inactiveIcon}
+      variant="toggle"
+      isActive={isActive}
+      {...props}
+    />
   );
 }
 
@@ -152,6 +262,31 @@ const icons: Record<IconName, ReactNode> = {
       <line x1="6" y1="6" x2="18" y2="18" />
     </>
   ),
+  plus: (
+    <>
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </>
+  ),
+  trash: (
+    <>
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    </>
+  ),
+  edit: (
+    <>
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </>
+  ),
+  refresh: (
+    <>
+      <polyline points="23 4 23 10 17 10" />
+      <polyline points="1 20 1 14 7 14" />
+      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+    </>
+  ),
   
   // 文件
   folder: <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />,
@@ -204,6 +339,19 @@ const icons: Record<IconName, ReactNode> = {
     <>
       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
       <circle cx="12" cy="12" r="3" />
+    </>
+  ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </>
+  ),
+  more: (
+    <>
+      <circle cx="12" cy="12" r="1" />
+      <circle cx="19" cy="12" r="1" />
+      <circle cx="5" cy="12" r="1" />
     </>
   ),
 };

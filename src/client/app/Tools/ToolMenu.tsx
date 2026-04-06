@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { IconButton, IconMenuItem } from "@/components/IconButton/IconButton";
+import { IconButton } from "@/components/Icon/Icon";
 import { DebugTool } from "@/app/Tools/DebugTool";
 import { PageAgentTool } from "@/app/Tools/PageAgentTool";
 import { SettingsModal } from "@/app/SettingsModal";

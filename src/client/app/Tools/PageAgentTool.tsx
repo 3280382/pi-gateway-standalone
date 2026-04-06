@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useState } from "react";
-import { IconMenuItem } from "@/components/IconButton/IconButton";
+import { IconButton } from "@/components/Icon/Icon";
 
 export function PageAgentTool() {
 	const [isLoaded, setIsLoaded] = useState(false);

@@ -1,7 +1,14 @@
 /**
- * IconButton Styles
+ * Icon Styles
  */
 
+/* 基础图标 */
+.icon {
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* 按钮基础 */
 .button {
   display: inline-flex;
   align-items: center;
@@ -23,9 +30,9 @@
   cursor: not-allowed;
 }
 
-/* 图标样式 */
-.icon {
-  flex-shrink: 0;
+/* 纯图标按钮 */
+.iconOnly {
+  padding: 6px;
 }
 
 /* 文字样式 */
@@ -38,10 +45,6 @@
   margin-left: auto;
   display: flex;
   align-items: center;
-}
-
-.check {
-  color: var(--accent-primary);
 }
 
 /* ========== 变体 ========== */
@@ -59,7 +62,6 @@
 }
 
 .primary:hover:not(:disabled) {
-  background: var(--accent-primary-hover, var(--accent-primary));
   opacity: 0.9;
 }
 
@@ -79,7 +81,7 @@
 }
 
 .danger:hover:not(:disabled) {
-  background: var(--accent-red-bg, rgba(248, 81, 73, 0.1));
+  background: rgba(248, 81, 73, 0.1);
 }
 
 /* toggle */
@@ -94,52 +96,4 @@
 .toggle.active {
   color: var(--accent-primary);
   background: var(--accent-bg-blue);
-}
-
-/* ========== 尺寸 ========== */
-
-.sm {
-  padding: 4px 8px;
-  font-size: 12px;
-  gap: 4px;
-}
-
-.sm .icon {
-  width: 14px;
-  height: 14px;
-}
-
-.md {
-  padding: 6px 12px;
-  font-size: 14px;
-  gap: 6px;
-}
-
-.md .icon {
-  width: 16px;
-  height: 16px;
-}
-
-.lg {
-  padding: 8px 16px;
-  font-size: 16px;
-  gap: 8px;
-}
-
-.lg .icon {
-  width: 18px;
-  height: 18px;
-}
-
-/* 纯图标按钮（无文字） */
-.button:not(:has(.label)) {
-  padding: 6px;
-}
-
-.button.sm:not(:has(.label)) {
-  padding: 4px;
-}
-
-.button.lg:not(:has(.label)) {
-  padding: 8px;
 }
