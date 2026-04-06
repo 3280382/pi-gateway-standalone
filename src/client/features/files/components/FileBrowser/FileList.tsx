@@ -1,11 +1,13 @@
 /**
  * FileList - Optimized list view with gesture handling
+ *
+ * 职责：UI 渲染
+ * - 使用 useFileItemActions 处理交互逻辑
  */
 import type React from "react";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback } from "react";
 import type { FileItem as FileItemType } from "@/features/files/stores/fileStore";
-import { useFileStore } from "@/features/files/stores/fileStore";
-import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
+import { useFileItemActions } from "@/features/files/hooks";
 import { FileItem } from "./FileItem";
 import styles from "./FileList.module.css";
 
@@ -14,134 +16,50 @@ interface FileListProps {
 }
 
 export const FileList = memo<FileListProps>(({ items }) => {
+	// 使用业务逻辑 hook
 	const {
 		selectedItems,
 		isMultiSelectMode,
-		setCurrentPath,
-		selectForAction,
+		draggingItem,
+		dropTarget,
+		handleTap,
+		handleDoubleTap,
+		handleLongPress,
+		handleDragStart,
+		handleDragEnd,
+		handleDragOver,
+		handleDragLeave,
+		handleDrop,
 		toggleSelection,
-		setMultiSelectMode,
-		setDraggedItem,
-		setIsDragging,
-		moveSelectedItems,
-	} = useFileStore();
+	} = useFileItemActions();
 
-	const { openViewer } = useFileViewerStore();
-	const [dropTarget, setDropTarget] = useState<string | null>(null);
-	const [draggingItem, setDraggingItem] = useState<string | null>(null);
-
-	// Handle tap
-	const handleTap = useCallback(
-		(item: FileItemType) => {
-			if (isMultiSelectMode) {
-				toggleSelection(item.path);
-				return;
-			}
-
-			if (item.isDirectory) {
-				setCurrentPath(item.path);
-			} else {
-				openViewer(item.path, item.name, "view");
-			}
-		},
-		[isMultiSelectMode, toggleSelection, setCurrentPath, openViewer],
-	);
-
-	// Handle double tap
-	const handleDoubleTap = useCallback(
-		(item: FileItemType) => {
-			if (isMultiSelectMode) return;
-			if (item.isDirectory) {
-				setCurrentPath(item.path);
-			}
-		},
-		[isMultiSelectMode, setCurrentPath],
-	);
-
-	// Handle long press
-	const handleLongPress = useCallback(
-		(item: FileItemType) => {
-			if (!isMultiSelectMode) {
-				setMultiSelectMode(true);
-			}
-			toggleSelection(item.path);
-			setDraggedItem(item);
-			setIsDragging(true);
-			setDraggingItem(item.path);
-		},
-		[
-			isMultiSelectMode,
-			setMultiSelectMode,
-			toggleSelection,
-			setDraggedItem,
-			setIsDragging,
-		],
-	);
-
-	// Drag and drop handlers
-	const handleDragStart = useCallback(
+	// Drag handlers - bridge between DOM events and hook methods
+	const onDragStart = useCallback(
 		(e: React.DragEvent, item: FileItemType) => {
-			setDraggedItem(item);
-			setIsDragging(true);
-			setDraggingItem(item.path);
-
-			if (!isMultiSelectMode && selectedItems.length === 0) {
-				selectForAction(item.path, item.name);
-			}
-
+			handleDragStart(item);
 			e.dataTransfer.effectAllowed = "move";
 			e.dataTransfer.setData("text/plain", item.path);
 		},
-		[
-			setDraggedItem,
-			setIsDragging,
-			isMultiSelectMode,
-			selectedItems.length,
-			selectForAction,
-		],
+		[handleDragStart],
 	);
 
-	const handleDragOver = useCallback(
+	const onDragOver = useCallback(
 		(e: React.DragEvent, item: FileItemType) => {
 			if (!item.isDirectory) return;
 			e.preventDefault();
 			e.dataTransfer.dropEffect = "move";
-			setDropTarget(item.path);
+			handleDragOver(item);
 		},
-		[],
+		[handleDragOver],
 	);
 
-	const handleDragLeave = useCallback(() => {
-		setDropTarget(null);
-	}, []);
-
-	const handleDrop = useCallback(
+	const onDrop = useCallback(
 		async (e: React.DragEvent, targetItem: FileItemType) => {
 			e.preventDefault();
-			setDropTarget(null);
-			setIsDragging(false);
-			setDraggingItem(null);
-
-			if (!targetItem.isDirectory) return;
-
-			const draggedPath = e.dataTransfer.getData("text/plain");
-			if (draggedPath === targetItem.path) return;
-
-			try {
-				await moveSelectedItems(targetItem.path);
-			} catch (error) {
-				console.error("Move failed:", error);
-			}
+			await handleDrop(targetItem);
 		},
-		[moveSelectedItems, setIsDragging],
+		[handleDrop],
 	);
-
-	const handleDragEnd = useCallback(() => {
-		setDraggedItem(null);
-		setIsDragging(false);
-		setDraggingItem(null);
-		setDropTarget(null);
-	}, [setDraggedItem, setIsDragging]);
 
 	if (items.length === 0) return null;
 
@@ -165,10 +83,10 @@ export const FileList = memo<FileListProps>(({ items }) => {
 					onTap={handleTap}
 					onDoubleTap={handleDoubleTap}
 					onLongPress={handleLongPress}
-					onDragStart={handleDragStart}
-					onDragOver={handleDragOver}
+					onDragStart={onDragStart}
+					onDragOver={onDragOver}
 					onDragLeave={handleDragLeave}
-					onDrop={handleDrop}
+					onDrop={onDrop}
 					onDragEnd={handleDragEnd}
 					onToggleSelect={toggleSelection}
 					viewMode="list"

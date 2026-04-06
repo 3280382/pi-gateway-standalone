@@ -1,19 +1,19 @@
 /**
  * FileViewer - 文件查看器模态框
+ *
+ * 职责：纯 UI 渲染
+ * - 不包含业务逻辑
+ * - 通过 useFileViewer hook 获取所有逻辑
  */
-import React, { useCallback, useEffect, useRef } from "react";
-import {
-	executeFile,
-	getRawFileUrl,
-	readFile,
-	writeFile,
-} from "@/features/files/services/api/fileApi";
+
+import React, { useEffect, useRef } from "react";
+import { useFileViewer } from "@/features/files/hooks";
 import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
 import { fileViewerDebug } from "@/lib/debug";
 import styles from "./FileViewer.module.css";
 
-// Prism will be loaded dynamically
 export function FileViewer() {
+	// 从 store 获取状态
 	const {
 		isOpen,
 		filePath,
@@ -27,171 +27,27 @@ export function FileViewer() {
 		terminalOutput,
 		isExecuting,
 		closeViewer,
-		setContent,
-		setLoading,
-		setError,
 		setMode,
 		setEditedContent,
-		setSaving,
-		appendTerminalOutput,
 		clearTerminal,
-		setExecuting,
 	} = useFileViewerStore();
+
+	// 从 hook 获取业务逻辑
+	const { fileTypes, saveFile, copyPath, getLanguage, stopExecution } =
+		useFileViewer();
+
 	const terminalRef = useRef<HTMLDivElement>(null);
-	const abortRef = useRef<AbortController | null>(null);
-	const ext = fileName.split(".").pop()?.toLowerCase() || "";
 
-	// 支持的文件格式
-	const isImage = [
-		"png",
-		"jpg",
-		"jpeg",
-		"gif",
-		"svg",
-		"webp",
-		"ico",
-		"bmp",
-		"tiff",
-		"tif",
-	].includes(ext);
-	const isHtml = ext === "html" || ext === "htm";
-	const isMarkdown = ext === "md" || ext === "markdown";
-	const isCode = [
-		"js",
-		"ts",
-		"jsx",
-		"tsx",
-		"py",
-		"java",
-		"c",
-		"cpp",
-		"h",
-		"hpp",
-		"cs",
-		"go",
-		"rs",
-		"php",
-		"rb",
-		"pl",
-		"sh",
-		"bash",
-		"zsh",
-		"ps1",
-		"bat",
-		"cmd",
-	].includes(ext);
-	const isJson = ext === "json";
-	const isXml = ext === "xml" || ext === "xsl" || ext === "xslt";
-	const isYaml = ext === "yaml" || ext === "yml";
-	const isCss =
-		ext === "css" || ext === "scss" || ext === "sass" || ext === "less";
-	const isSql = ext === "sql";
-	const isExecutable = [
-		"sh",
-		"py",
-		"js",
-		"ts",
-		"bash",
-		"zsh",
-		"pl",
-		"rb",
-		"php",
-		"go",
-		"java",
-		"c",
-		"cpp",
-		"rs",
-	].includes(ext);
-	const isEditable =
-		!isImage &&
-		!["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(ext);
-	// 加载文件内容
-	useEffect(() => {
-		if (!isOpen || !filePath) return;
-		if (mode === "execute") return; // 执行模式不加载内容
-
-		fileViewerDebug.info("开始加载文件", { filePath, mode });
-
-		let isCancelled = false;
-
-		const load = async () => {
-			// 先重置状态
-			setLoading(true);
-			setError(null);
-
-			try {
-				const data = await readFile(filePath);
-				if (!isCancelled) {
-					fileViewerDebug.info("文件加载成功", {
-						filePath,
-						contentLength: data.content?.length,
-					});
-					setContent(data.content);
-				}
-			} catch (err) {
-				if (!isCancelled) {
-					fileViewerDebug.error("文件加载失败", {
-						filePath,
-						error: err instanceof Error ? err.message : String(err),
-					});
-					setError(err instanceof Error ? err.message : "Failed to load file");
-				}
-			}
-		};
-
-		load();
-
-		return () => {
-			isCancelled = true;
-		};
-	}, [isOpen, filePath, mode]);
-	// 执行文件
-	useEffect(() => {
-		if (!isOpen || mode !== "execute" || !filePath) return;
-		const execute = async () => {
-			clearTerminal();
-			setExecuting(true);
-			abortRef.current = new AbortController();
-			try {
-				const stream = await executeFile(filePath);
-				const reader = stream.getReader();
-				const decoder = new TextDecoder();
-				while (true) {
-					const { done, value } = await reader.read();
-					if (done) break;
-					const text = decoder.decode(value, { stream: true });
-					appendTerminalOutput(text);
-				}
-			} catch (err) {
-				appendTerminalOutput(
-					`\nError: ${err instanceof Error ? err.message : "Execution failed"}`,
-				);
-			} finally {
-				setExecuting(false);
-			}
-		};
-		execute();
-		return () => {
-			abortRef.current?.abort();
-		};
-	}, [
-		isOpen,
-		mode,
-		filePath,
-		clearTerminal,
-		setExecuting,
-		appendTerminalOutput,
-	]);
 	// 自动滚动终端
 	useEffect(() => {
 		if (terminalRef.current) {
 			terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
 		}
 	}, [terminalOutput]);
-	// 语法高亮 - 使用全局Prism
+
+	// 语法高亮
 	useEffect(() => {
-		if (mode === "view" && content && !isImage && !isHtml) {
-			// 使用setTimeout确保DOM已更新
+		if (mode === "view" && content && !fileTypes.isImage && !fileTypes.isHtml) {
 			const timer = setTimeout(() => {
 				if ((window as any).Prism) {
 					const codeElement = document.querySelector("[data-prism-code]");
@@ -202,85 +58,8 @@ export function FileViewer() {
 			}, 10);
 			return () => clearTimeout(timer);
 		}
-	}, [content, mode, isImage, isHtml]);
-	const handleSave = async () => {
-		setSaving(true);
-		try {
-			await writeFile(filePath, editedContent);
-			setContent(editedContent);
-			setMode("view");
-		} catch (err) {
-			setError(err instanceof Error ? err.message : "Failed to save file");
-		} finally {
-			setSaving(false);
-		}
-	};
-	const handleCopyPath = async () => {
-		try {
-			await navigator.clipboard.writeText(filePath);
-			fileViewerDebug.info("路径已复制", { filePath });
-		} catch (err) {
-			fileViewerDebug.error("复制路径失败", { error: err });
-		}
-	};
-	const getLanguage = () => {
-		const langMap: Record<string, string> = {
-			// 编程语言
-			js: "javascript",
-			ts: "typescript",
-			jsx: "jsx",
-			tsx: "tsx",
-			py: "python",
-			java: "java",
-			c: "c",
-			cpp: "cpp",
-			h: "c",
-			hpp: "cpp",
-			cs: "csharp",
-			go: "go",
-			rs: "rust",
-			php: "php",
-			rb: "ruby",
-			pl: "perl",
-			swift: "swift",
-			kt: "kotlin",
-			scala: "scala",
-			lua: "lua",
-			r: "r",
+	}, [content, mode, fileTypes.isImage, fileTypes.isHtml]);
 
-			// 脚本语言
-			sh: "bash",
-			bash: "bash",
-			zsh: "bash",
-			ps1: "powershell",
-			bat: "batch",
-			cmd: "batch",
-
-			// 标记语言
-			html: "html",
-			htm: "html",
-			xml: "xml",
-			xsl: "xml",
-			xslt: "xml",
-			md: "markdown",
-			markdown: "markdown",
-
-			// 数据格式
-			json: "json",
-			yaml: "yaml",
-			yml: "yaml",
-
-			// 样式表
-			css: "css",
-			scss: "scss",
-			sass: "sass",
-			less: "less",
-
-			// 数据库
-			sql: "sql",
-		};
-		return langMap[ext] || "text";
-	};
 	if (!isOpen) {
 		fileViewerDebug.debug("FileViewer未渲染 - isOpen=false");
 		return null;
@@ -293,8 +72,9 @@ export function FileViewer() {
 		isLoading,
 		hasError: !!error,
 		contentLength: content?.length,
-		contentPreview: content?.substring(0, 100),
 	});
+
+	const language = getLanguage();
 
 	return (
 		<div className={styles.modal}>
@@ -306,24 +86,14 @@ export function FileViewer() {
 						<span className={styles.type}>{mode.toUpperCase()}</span>
 						<button
 							className={styles.btnCopyPath}
-							onClick={handleCopyPath}
+							onClick={copyPath}
 							title="Copy absolute path"
 						>
-							<svg
-								width="14"
-								height="14"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="2"
-							>
-								<rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-								<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-							</svg>
+							<CopyIcon />
 						</button>
 					</div>
 					<div className={styles.actions}>
-						{mode === "view" && isExecutable && (
+						{mode === "view" && fileTypes.isExecutable && (
 							<button
 								className={styles.btnExecute}
 								onClick={() => setMode("execute")}
@@ -331,7 +101,7 @@ export function FileViewer() {
 								▶ Execute
 							</button>
 						)}
-						{mode === "view" && isEditable && (
+						{mode === "view" && fileTypes.isEditable && (
 							<button
 								className={styles.btnEdit}
 								onClick={() => setMode("edit")}
@@ -344,47 +114,49 @@ export function FileViewer() {
 						</button>
 					</div>
 				</div>
+
 				{/* 内容区 */}
 				<div className={styles.body}>
 					{isLoading ? (
 						<div className={styles.loading}>Loading...</div>
-					) : error ? (
+						) : error ? (
 						<div className={styles.error}>{error}</div>
-					) : mode === "edit" ? (
+						) : mode === "edit" ? (
 						<textarea
 							className={styles.editor}
 							value={editedContent}
 							onChange={(e) => setEditedContent(e.target.value)}
 							spellCheck={false}
 						/>
-					) : mode === "execute" ? (
+						) : mode === "execute" ? (
 						<div className={styles.terminal} ref={terminalRef}>
 							<pre>{terminalOutput}</pre>
 							{isExecuting && <span className={styles.cursor}>▊</span>}
 						</div>
-					) : isImage ? (
+						) : fileTypes.isImage ? (
 						<img
-							src={getRawFileUrl(filePath)}
+							src={fileTypes.getRawFileUrl(filePath)}
 							alt={fileName}
 							className={styles.image}
 						/>
-					) : isHtml ? (
+						) : fileTypes.isHtml ? (
 						<iframe
-							src={getRawFileUrl(filePath)}
+							src={fileTypes.getRawFileUrl(filePath)}
 							title={fileName}
 							className={styles.iframe}
 							sandbox="allow-scripts allow-same-origin allow-forms"
 						/>
-					) : (
-						<pre className={`${styles.code} language-${getLanguage()}`}>
-							<code data-prism-code className={`language-${getLanguage()}`}>
+						) : (
+						<pre className={`${styles.code} language-${language}`}>
+							<code data-prism-code className={`language-${language}`}>
 								{typeof content === "string"
 									? content
 									: JSON.stringify(content, null, 2)}
 							</code>
 						</pre>
-					)}
+						)}
 				</div>
+
 				{/* 底部操作 */}
 				{mode === "edit" && (
 					<div className={styles.footer}>
@@ -396,13 +168,14 @@ export function FileViewer() {
 						</button>
 						<button
 							className={styles.btnPrimary}
-							onClick={handleSave}
+							onClick={saveFile}
 							disabled={isSaving}
 						>
 							{isSaving ? "Saving..." : "Save"}
 						</button>
 					</div>
-				)}
+					)}
+
 				{mode === "execute" && (
 					<div className={styles.footer}>
 						<button className={styles.btnSecondary} onClick={clearTerminal}>
@@ -410,14 +183,31 @@ export function FileViewer() {
 						</button>
 						<button
 							className={styles.btnDanger}
-							onClick={() => abortRef.current?.abort()}
+							onClick={stopExecution}
 							disabled={!isExecuting}
 						>
 							Stop
 						</button>
 					</div>
-				)}
+					)}
 			</div>
 		</div>
-	);
+		);
+}
+
+// Icon 组件
+function CopyIcon() {
+	return (
+		<svg
+			width="14"
+			height="14"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="2"
+		>
+			<rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+			<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+		</svg>
+		);
 }

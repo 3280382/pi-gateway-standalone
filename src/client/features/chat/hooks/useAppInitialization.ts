@@ -50,7 +50,7 @@ export function useAppInitialization(): InitResult {
 				// 1. WebSocket 连接（带超时，快速失败）
 				let wsConnected = false;
 				try {
-					await websocketService.connect(undefined, 2000);
+					await websocketService.connect(undefined, 10000);
 					wsConnected = websocketService.isConnected;
 					console.log("[AppInit] WebSocket connected");
 					setupWebSocketListeners();
@@ -80,11 +80,11 @@ export function useAppInitialization(): InitResult {
 			}
 		};
 
-		// 使用 Promise.race 确保最多等待 5 秒
+		// 使用 Promise.race 确保最多等待 15 秒
 		globalInitPromise = Promise.race([
 			initTask(),
 			new Promise<void>((_, reject) =>
-				setTimeout(() => reject(new Error("Init timeout")), 5000)
+				setTimeout(() => reject(new Error("Init timeout")), 15000)
 			),
 		]).catch((err) => {
 			console.warn("[AppInit] 初始化超时或错误:", err);

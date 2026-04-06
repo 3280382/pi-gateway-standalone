@@ -7,6 +7,7 @@ import {
 	type SortMode,
 	useFileStore,
 } from "@/features/files/stores/fileStore";
+import { useFileNavigation } from "@/features/files/hooks";
 import styles from "../FileBrowser/FileBrowser.module.css";
 
 // 可执行文件扩展名
@@ -55,6 +56,7 @@ interface FileToolbarProps {
 	onExecuteOutput?: (output: string) => void;
 	onOpenBottomPanel?: (output: string) => void;
 }
+
 export function FileToolbar({
 	currentPath,
 	onRefresh,
@@ -67,17 +69,15 @@ export function FileToolbar({
 		sortMode,
 		filterType,
 		filterText,
-		selectedActionFile,
 		selectedActionFileName,
 		toggleViewMode,
 		setSortMode,
 		setFilterType,
 		setFilterText,
-		navigateUp,
-		navigateHome,
 		toggleSidebar: storeToggleSidebar,
-		executeFile,
 	} = useFileStore();
+
+	const { navigateUp, navigateHome, canNavigateUp } = useFileNavigation();
 
 	// 过滤下拉框状态
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -138,8 +138,9 @@ export function FileToolbar({
 	const isExecutable = selectedActionFileName
 		? EXECUTABLE_EXTENSIONS.some((ext) =>
 				selectedActionFileName.toLowerCase().endsWith("." + ext),
-			) || !selectedActionFileName.includes(".") // 无扩展名的文件也可能是可执行脚本
+			) || !selectedActionFileName.includes(".")
 		: false;
+
 	return (
 		<div className={styles.toolbarWrapper}>
 			{/* 第一行：导航 + 路径 + 执行 */}
@@ -173,6 +174,21 @@ export function FileToolbar({
 					>
 						<polyline points="23 4 23 10 17 10" />
 						<path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+					</svg>
+				</button>
+				<button
+					className={styles.toolbarBtn}
+					onClick={navigateUp}
+					disabled={!canNavigateUp}
+					title="Go Up"
+				>
+					<svg
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth={2}
+					>
+						<path d="M12 19V5M5 12l7-7 7 7" />
 					</svg>
 				</button>
 				{/* 路径栏 */}

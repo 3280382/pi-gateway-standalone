@@ -7,9 +7,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type {
 	BrowseResponse,
 	FileExecuteResponse,
-	FileItem,
 	FileReadResponse,
-} from "../../features/files/components/types";
+} from "./fileApi";
+import type { FileItem } from "@/features/files/stores/fileStore";
 
 // Mock fetch
 global.fetch = vi.fn();

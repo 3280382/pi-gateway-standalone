@@ -17,6 +17,17 @@ export interface FileContentResponse {
 	modified: string;
 }
 
+export interface FileReadResponse {
+	path: string;
+	content: string;
+}
+
+export interface FileExecuteResponse {
+	stdout: string;
+	stderr: string;
+	exitCode: number;
+}
+
 export interface TreeNode {
 	name: string;
 	path: string;

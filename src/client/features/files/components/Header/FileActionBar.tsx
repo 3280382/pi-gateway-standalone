@@ -1,111 +1,87 @@
 import React from "react";
-import { executeFile } from "@/features/files/services/api/fileApi";
 /**
  * FileActionBar - 选中文件操作栏
  */
 import { useFileStore } from "@/features/files/stores/fileStore";
-import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
-import { fileActionBarDebug } from "@/lib/debug";
+import { useFileViewer } from "@/features/files/hooks";
 import styles from "../FileBrowser/FileBrowser.module.css";
+
+// 可执行文件扩展名列表
+const EXECUTABLE_EXTENSIONS = [
+	"sh",
+	"bash",
+	"zsh",
+	"py",
+	"js",
+	"ts",
+	"pl",
+	"rb",
+	"php",
+	"go",
+	"java",
+	"c",
+	"cpp",
+	"rs",
+];
+
+// 不可编辑的文件扩展名列表
+const NON_EDITABLE_EXTENSIONS = [
+	"png",
+	"jpg",
+	"jpeg",
+	"gif",
+	"webp",
+	"ico",
+	"pdf",
+];
 
 interface FileActionBarProps {
 	onExecute?: (output: string) => void;
 	onOpenBottomPanel?: (output: string) => void;
 }
+
 export function FileActionBar({
 	onExecute,
 	onOpenBottomPanel,
 }: FileActionBarProps) {
 	const { selectedActionFile, selectedActionFileName } = useFileStore();
-	const { openViewer } = useFileViewerStore();
+	const { viewFile, editFile, executeFileStream } = useFileViewer();
+
 	if (!selectedActionFile) {
 		return null;
 	}
+
 	const ext = selectedActionFile.split(".").pop()?.toLowerCase() || "";
-	// 可执行文件扩展名列表
-	const EXECUTABLE_EXTENSIONS = [
-		"sh",
-		"bash",
-		"zsh",
-		"py",
-		"js",
-		"ts",
-		"pl",
-		"rb",
-		"php",
-		"go",
-		"java",
-		"c",
-		"cpp",
-		"rs",
-	];
+
+	// 判断文件是否可执行
 	const isExecutable =
 		EXECUTABLE_EXTENSIONS.some((ext) =>
 			selectedActionFileName?.toLowerCase().endsWith("." + ext),
-		) || !selectedActionFileName?.includes("."); // 无扩展名的文件也可能是可执行脚本
-	const isEditable = ![
-		"png",
-		"jpg",
-		"jpeg",
-		"gif",
-		"webp",
-		"ico",
-		"pdf",
-	].includes(ext);
+		) || !selectedActionFileName?.includes(".");
+
+	// 判断文件是否可编辑
+	const isEditable = !NON_EDITABLE_EXTENSIONS.includes(ext);
+
+	// 处理查看
 	const handleView = () => {
-		fileActionBarDebug.info("点击View按钮", {
-			path: selectedActionFile,
-			name: selectedActionFileName,
-		});
-		openViewer(selectedActionFile, selectedActionFileName || "", "view");
-		fileActionBarDebug.info("openViewer调用完成");
+		viewFile(selectedActionFile, selectedActionFileName || "");
 	};
+
+	// 处理编辑
 	const handleEdit = () => {
-		fileActionBarDebug.info("点击Edit按钮", {
-			path: selectedActionFile,
-			name: selectedActionFileName,
-		});
-		openViewer(selectedActionFile, selectedActionFileName || "", "edit");
-		fileActionBarDebug.info("openViewer调用完成");
+		editFile(selectedActionFile, selectedActionFileName || "");
 	};
+
+	// 处理执行
 	const handleExecute = async () => {
-		if (onExecute) {
-			onExecute(`$ Executing: ${selectedActionFileName}`);
-		}
-		if (onOpenBottomPanel) {
-			onOpenBottomPanel(`$ Executing: ${selectedActionFileName}\n`);
-		}
-
-		try {
-			const stream = await executeFile(selectedActionFile);
-			const reader = stream.getReader();
-			const decoder = new TextDecoder();
-
-			while (true) {
-				const { done, value } = await reader.read();
-				if (done) break;
-				const text = decoder.decode(value, { stream: true });
-				if (onExecute) {
-					onExecute(text);
-				}
-				if (onOpenBottomPanel) {
-					onOpenBottomPanel(text);
-				}
-			}
-
-			if (onOpenBottomPanel) {
-				onOpenBottomPanel(`\n[Execution completed]\n`);
-			}
-		} catch (error) {
-			const errorMsg = `Error: ${error instanceof Error ? error.message : "Execution failed"}`;
-			if (onExecute) {
-				onExecute(errorMsg);
-			}
-			if (onOpenBottomPanel) {
-				onOpenBottomPanel(`\n${errorMsg}\n`);
-			}
-		}
+		await executeFileStream(
+			selectedActionFile,
+			selectedActionFileName || "",
+			onExecute,
+			onOpenBottomPanel,
+		);
 	};
+
 	return (
 		<div className={styles.actionBar}>
 			<span className={styles.selectedName}>{selectedActionFileName}</span>

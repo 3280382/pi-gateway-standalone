@@ -3,10 +3,10 @@
  */
 
 // Stores
-export {
-	initializeFilePath,
-	useFileStore,
-} from "@/features/files/stores/fileStore";
+export { useFileStore } from "@/features/files/stores/fileStore";
+
+// Services
+export { initializeFilePath } from "@/features/files/services/initialization.service";
 
 // Components - Header
 export { FileToolbar } from "./components/Header/FileToolbar";

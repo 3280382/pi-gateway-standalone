@@ -1,9 +1,13 @@
 /**
  * BatchActionBar - 批量操作栏
  * 在多选模式下显示在顶部
+ *
+ * 职责：UI 渲染
+ * - 使用 useFileOperations 处理删除逻辑
  */
 import React, { useState } from "react";
 import { useFileStore } from "@/features/files/stores/fileStore";
+import { useFileOperations } from "@/features/files/hooks";
 import styles from "./BatchActionBar.module.css";
 
 export function BatchActionBar() {
@@ -13,8 +17,9 @@ export function BatchActionBar() {
 		isMultiSelectMode,
 		toggleMultiSelectMode,
 		clearSelection,
-		deleteSelectedItems,
 	} = useFileStore();
+
+	const { deleteSelected } = useFileOperations();
 
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [showConfirm, setShowConfirm] = useState(false);
@@ -41,7 +46,7 @@ export function BatchActionBar() {
 	const handleConfirmDelete = async () => {
 		setIsDeleting(true);
 		try {
-			await deleteSelectedItems();
+			await deleteSelected();
 			setShowConfirm(false);
 		} catch (error) {
 			console.error("Delete failed:", error);

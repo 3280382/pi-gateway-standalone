@@ -1,12 +1,12 @@
 /**
  * FilesPage - 文件页面
+ *
+ * 职责：页面入口，组合 Hooks 和 Layout
+ * - 不包含业务逻辑
+ * - 只负责初始化和渲染 Layout
  */
 
-import { useEffect, useState } from "react";
-import {
-	initializeFilePath,
-	useFileStore,
-} from "@/features/files/stores/fileStore";
+import { useFileBrowser } from "@/features/files/hooks";
 import { FilesLayout } from "./layout";
 
 interface FilesPageProps {
@@ -15,36 +15,7 @@ interface FilesPageProps {
 }
 
 export function FilesPage(props: FilesPageProps) {
-	const { setCurrentPath } = useFileStore();
-	const [isInitializing, setIsInitializing] = useState(true);
+	const { isInitializing } = useFileBrowser();
 
-	useEffect(() => {
-		// 初始化文件浏览器路径
-		const initPath = async () => {
-			const path = await initializeFilePath();
-			setCurrentPath(path);
-			setIsInitializing(false);
-		};
-
-		initPath();
-	}, [setCurrentPath]);
-
-	// 初始化完成前显示加载状态
-	if (isInitializing) {
-		return (
-			<div
-				style={{
-					flex: 1,
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					color: "var(--text-secondary)",
-				}}
-			>
-				Loading...
-			</div>
-		);
-	}
-
-	return <FilesLayout {...props} />;
+	return <FilesLayout isInitializing={isInitializing} {...props} />;
 }

@@ -1,12 +1,15 @@
 /**
  * XTermPanel - Real xterm.js terminal for file operations
+ *
+ * 职责：纯 UI 渲染
+ * - 不包含业务逻辑
+ * - 通过 useXTerm hook 获取所有逻辑
  */
 
-import { FitAddon } from "@xterm/addon-fit";
-import { Terminal } from "@xterm/xterm";
-import { useCallback, useEffect, useRef, useState } from "react";
-import "@xterm/xterm/css/xterm.css";
+import { useCallback, useEffect, useRef } from "react";
 import { useWorkspaceStore } from "@/features/files/stores";
+import { useXTerm } from "@/features/files/hooks";
+import "@xterm/xterm/css/xterm.css";
 
 interface XTermPanelProps {
 	height: number;
@@ -23,193 +26,18 @@ export default function XTermPanel({
 	onExecuteCommand,
 	initialCommand,
 }: XTermPanelProps) {
-	const terminalRef = useRef<HTMLDivElement>(null);
-	const terminalInstance = useRef<Terminal | null>(null);
-	const fitAddon = useRef<FitAddon | null>(null);
+	const currentDir = useWorkspaceStore((state) => state.currentDir);
+	const { terminalRef, isFullscreen, toggleFullscreen } = useXTerm({
+		currentDir,
+		onExecuteCommand,
+		initialCommand,
+	});
+
+	// Resize handlers
 	const isResizing = useRef(false);
 	const resizeStartY = useRef(0);
 	const resizeStartHeight = useRef(height);
-	const commandBuffer = useRef("");
-	const abortControllerRef = useRef<AbortController | null>(null);
-	const currentDir = useWorkspaceStore((state) => state.currentDir);
-	const [isFullscreen, setIsFullscreen] = useState(false);
 
-	const toggleFullscreen = () => {
-		setIsFullscreen(!isFullscreen);
-	};
-
-	// Initialize terminal
-	useEffect(() => {
-		if (!terminalRef.current || terminalInstance.current) return;
-
-		const container = terminalRef.current;
-
-		// Ensure container has size
-		if (container.clientHeight === 0 || container.clientWidth === 0) {
-			console.warn("[XTermPanel] Container has no size, delaying init");
-			const checkSize = setInterval(() => {
-				if (container.clientHeight > 0 && container.clientWidth > 0) {
-					clearInterval(checkSize);
-					window.dispatchEvent(new Event("resize"));
-				}
-			}, 50);
-			setTimeout(() => clearInterval(checkSize), 2000);
-			return;
-		}
-
-		const term = new Terminal({
-			cursorBlink: true,
-			fontSize: 13,
-			fontFamily:
-				'"JetBrains Mono", "Fira Code", "Consolas", "Monaco", monospace',
-			lineHeight: 1.3,
-			theme: {
-				background: "#0d1117",
-				foreground: "#e6edf3",
-				cursor: "#e6edf3",
-				selectionBackground: "#264f78",
-			},
-			scrollback: 10000,
-			allowProposedApi: true,
-		});
-
-		const fit = new FitAddon();
-		term.loadAddon(fit);
-
-		term.open(container);
-
-		requestAnimationFrame(() => {
-			fit.fit();
-			console.log(
-				"[XTermPanel] Terminal initialized:",
-				term.cols,
-				"x",
-				term.rows,
-			);
-		});
-
-		// Execute command on server
-		const executeCommand = async (command: string) => {
-			try {
-				if (abortControllerRef.current) {
-					abortControllerRef.current.abort();
-				}
-				abortControllerRef.current = new AbortController();
-
-				const response = await fetch("/api/execute", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ command, cwd: currentDir, streaming: true }),
-					signal: abortControllerRef.current.signal,
-				});
-
-				if (!response.ok) {
-					const error = await response.text();
-					term.writeln(`\x1b[31mError: ${error}\x1b[0m`);
-					return;
-				}
-
-				const reader = response.body?.getReader();
-				if (!reader) {
-					term.writeln("\x1b[31mError: No response body\x1b[0m");
-					return;
-				}
-
-				const decoder = new TextDecoder();
-				let buffer = "";
-
-				while (true) {
-					const { done, value } = await reader.read();
-					if (done) break;
-
-					buffer += decoder.decode(value, { stream: true });
-					const lines = buffer.split("\n");
-					buffer = lines.pop() || "";
-
-					for (const line of lines) {
-						term.writeln(line);
-					}
-				}
-
-				if (buffer) {
-					term.write(buffer);
-				}
-			} catch (error) {
-				if (error instanceof DOMException && error.name === "AbortError") {
-					term.writeln("\x1b[33m[Cancelled]\x1b[0m");
-				} else {
-					term.writeln(`\x1b[31mError: ${error}\x1b[0m`);
-				}
-			}
-		};
-
-		// Handle input
-		term.onData((data) => {
-			const code = data.charCodeAt(0);
-
-			if (code === 13) {
-				// Enter
-				term.writeln("");
-				if (commandBuffer.current.trim()) {
-					const cmd = commandBuffer.current;
-					if (onExecuteCommand) onExecuteCommand(cmd);
-					executeCommand(cmd).then(() => prompt(term));
-				} else {
-					prompt(term);
-				}
-				commandBuffer.current = "";
-			} else if (code === 127) {
-				// Backspace
-				if (commandBuffer.current.length > 0) {
-					commandBuffer.current = commandBuffer.current.slice(0, -1);
-					term.write("\b \b");
-				}
-			} else if (code === 3) {
-				// Ctrl+C
-				term.writeln("^C");
-				commandBuffer.current = "";
-				prompt(term);
-			} else if (code === 12) {
-				// Ctrl+L
-				term.clear();
-				prompt(term);
-			} else if (code >= 32 && code < 127) {
-				commandBuffer.current += data;
-				term.write(data);
-			}
-		});
-
-		terminalInstance.current = term;
-		fitAddon.current = fit;
-		prompt(term);
-
-		if (initialCommand) {
-			term.writeln(`$ ${initialCommand}`);
-			if (onExecuteCommand) onExecuteCommand(initialCommand);
-			executeCommand(initialCommand).then(() => prompt(term));
-		}
-
-		const handleResize = () => fit.fit();
-		window.addEventListener("resize", handleResize);
-
-		return () => {
-			window.removeEventListener("resize", handleResize);
-			if (abortControllerRef.current) abortControllerRef.current.abort();
-			term.dispose();
-			terminalInstance.current = null;
-		};
-	}, [onExecuteCommand, initialCommand, currentDir]);
-
-	// Update height
-	useEffect(() => {
-		if (terminalInstance.current && fitAddon.current) {
-			setTimeout(() => fitAddon.current?.fit(), 0);
-		}
-	}, [height]);
-
-	const prompt = (term: Terminal) => term.write("\x1b[36m$\x1b[0m ");
-
-	// Resize handlers
 	const handleResizeStart = useCallback(
 		(e: React.MouseEvent) => {
 			isResizing.current = true;
@@ -360,6 +188,7 @@ const actionBtnStyle: React.CSSProperties = {
 	cursor: "pointer",
 };
 
+// Icons
 function TerminalIcon() {
 	return (
 		<svg

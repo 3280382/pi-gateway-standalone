@@ -8,23 +8,28 @@ import { useLayout } from "@/app/LayoutContext";
 import { FileBottomMenu } from "@/features/files/components/BottomMenu/FileBottomMenu";
 import { XTermPanel } from "@/features/files/components/panels/TerminalPanel";
 import { useFileStore, useTerminalStore } from "@/features/files/stores";
+import { useFileBrowser, useFileNavigation } from "@/features/files/hooks";
 import { FileBrowser } from "./components/FileBrowser/FileBrowser";
 import { FileSidebar } from "./components/Sidebar/FileSidebar";
 import { FileToolbar } from "./components/Header/FileToolbar";
 import styles from "./FilesLayout.module.css";
 
 interface FilesLayoutProps {
+	isInitializing: boolean;
 	closeBottomPanel: () => void;
 	setBottomPanelHeight: (height: number) => void;
 }
 
 export function FilesLayout({
+	isInitializing,
 	closeBottomPanel,
 	setBottomPanelHeight,
 }: FilesLayoutProps) {
 	const { isSidebarVisible, isBottomPanelOpen, bottomPanelHeight } =
 		useLayout();
-	const { currentPath, loadDirectory, setCurrentPath } = useFileStore();
+	const { currentPath } = useFileStore();
+	const { refresh } = useFileBrowser();
+	const { navigateTo } = useFileNavigation();
 	const { output, command, setCommand } = useTerminalStore();
 
 	const renderBottomPanel = useCallback(() => {
@@ -53,21 +58,40 @@ export function FilesLayout({
 		setCommand,
 	]);
 
+	// 初始化中显示加载状态
+	if (isInitializing) {
+		return (
+			<div className={styles.layout}>
+				<div
+					style={{
+						flex: 1,
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						color: "var(--text-secondary)",
+					}}
+				>
+					Loading...
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className={styles.layout}>
 			{/* FileToolbar - 文件浏览器专用顶部工具栏 */}
 			<header className={styles.header}>
 				<FileToolbar
 					currentPath={currentPath}
-					onRefresh={() => loadDirectory(currentPath)}
-					onNavigate={setCurrentPath}
+					onRefresh={refresh}
+					onNavigate={navigateTo}
 				/>
 			</header>
 
 			{/* Body: FileSidebar + Content */}
 			<div className={styles.body}>
 				{/* FileSidebar - 异步加载的目录树 */}
-				<FileSidebar visible={isSidebarVisible} onNavigate={setCurrentPath} />
+				<FileSidebar visible={isSidebarVisible} onNavigate={navigateTo} />
 
 				{/* Content */}
 				<main className={styles.content}>
