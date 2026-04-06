@@ -12,13 +12,13 @@ import { devtools, persist } from "zustand/middleware";
 import type { FileState, FileActions } from "@/features/files/types";
 
 export type {
-	SortMode,
-	FilterType,
+	FileItem,
+	ViewMode,
 	FileState,
 	FileActions,
+	SortMode,
+	FilterType,
 } from "@/features/files/types";
-
-export type { FileItem, ViewMode } from "@shared/types/file.types";
 
 export const useFileStore = create<FileState & FileActions>()(
 	devtools(
