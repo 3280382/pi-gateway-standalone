@@ -10,6 +10,7 @@ import { useCallback, useRef, useState } from "react";
 import type { FileItem } from "@/features/files/stores/fileStore";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
+import { batchMoveFiles } from "@/features/files/services/api/fileOperationsApi";
 
 interface PinchState {
 	startDistance: number;
@@ -54,12 +55,11 @@ export function useFileItemActions(): UseFileItemActionsResult {
 		selectedItems,
 		isMultiSelectMode,
 		setCurrentPath,
-		selectForAction,
+		setSelectedActionFile,
 		toggleSelection: storeToggleSelection,
-		setMultiSelectMode,
+		setIsMultiSelectMode,
 		setDraggedItem,
 		setIsDragging,
-		moveSelectedItems: storeMoveSelectedItems,
 		isSelected: storeIsSelected,
 	} = useFileStore();
 
@@ -105,18 +105,18 @@ export function useFileItemActions(): UseFileItemActionsResult {
 	const handleLongPress = useCallback(
 		(item: FileItem) => {
 			if (!isMultiSelectMode) {
-				setMultiSelectMode(true);
+				setIsMultiSelectMode(true);
 			}
 			storeToggleSelection(item.path);
 		},
-		[isMultiSelectMode, setMultiSelectMode, storeToggleSelection],
+		[isMultiSelectMode, setIsMultiSelectMode, storeToggleSelection],
 	);
 
 	const handleSelectForAction = useCallback(
 		(item: FileItem) => {
-			selectForAction(item.path, item.name);
+			setSelectedActionFile(item.path, item.name);
 		},
-		[selectForAction],
+		[setSelectedActionFile],
 	);
 
 	// ===== 拖拽操作 =====
@@ -155,12 +155,12 @@ export function useFileItemActions(): UseFileItemActionsResult {
 			setDraggingItem(null);
 
 			try {
-				await storeMoveSelectedItems(targetItem.path);
+				await batchMoveFiles(selectedItems, targetItem.path);
 			} catch (error) {
 				console.error("Move failed:", error);
 			}
 		},
-		[storeMoveSelectedItems],
+		[selectedItems],
 	);
 
 	const handleDragEnd = useCallback(() => {
@@ -200,7 +200,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
 
 			// Pinch in (scale < 0.7) triggers multi-select
 			if (scale < 0.7 && !isMultiSelectMode) {
-				setMultiSelectMode(true);
+				setIsMultiSelectMode(true);
 				setShowPinchHint(true);
 
 				if (pinchTimeoutRef.current) {
@@ -211,7 +211,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
 				}, 2000);
 			}
 		},
-		[isMultiSelectMode, setMultiSelectMode],
+		[isMultiSelectMode, setIsMultiSelectMode],
 	);
 
 	const handleTouchEnd = useCallback(() => {

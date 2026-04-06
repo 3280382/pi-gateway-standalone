@@ -13,7 +13,7 @@ import {
 	loadDirectoryContent,
 	getFriendlyErrorMessage,
 } from "@/features/files/services/api/fileOperationsApi";
-import { initializeFilePath } from "@/features/files/services/initialization.service";
+import { initializeFilePath } from "@/features/files/services/initialization";
 import { fileBrowserDebug } from "@/lib/debug";
 
 export interface UseFileBrowserResult {
