@@ -9,7 +9,7 @@ import { SystemPromptModal } from "@/features/chat/components/modals/SystemPromp
 import { useChatController } from "@/features/chat/services/api/chatApi";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import {
-	type SystemPromptResponse,
+	
 } from "@/features/chat/services/api/systemPromptApi";
 import {
 	selectSearchFilters,
@@ -290,10 +290,7 @@ export function AppHeader({
 			);
 			try {
 				// Use chatController to set model (sends to server and waits for confirmation)
-				await chatController.setCurrentModel({
-					id: model.id,
-					provider: model.provider,
-				});
+				await chatController.setModel(model.provider, model.id);
 				console.log("[AppHeader] Model set successfully");
 			} catch (error) {
 				console.error("[AppHeader] Failed to set model:", error);
@@ -354,7 +351,6 @@ export function AppHeader({
 	if (currentView === "files") {
 		return (
 			<FileToolbarAppHeader
-				workingDir={workingDir}
 				connectionStatus={connectionStatus}
 				pid={pid}
 			/>
@@ -761,13 +757,11 @@ const FILE_SORT_OPTIONS: { value: SortMode; icon: string; label: string }[] = [
 ];
 
 interface FileToolbarAppHeaderProps {
-	workingDir: string;
 	connectionStatus: "connected" | "disconnected" | "connecting";
 	pid: number | null;
 }
 
 function FileToolbarAppHeader({
-	workingDir,
 	connectionStatus,
 	pid,
 }: FileToolbarAppHeaderProps) {
@@ -800,7 +794,7 @@ function FileToolbarAppHeader({
 			<div className={styles.topRow}>
 				<button
 					className={styles.iconBtn}
-					onClick={() => fileStore.navigateHome()}
+					onClick={() => fileStore.setCurrentPath("/root")}
 					title="Home"
 				>
 					<svg
