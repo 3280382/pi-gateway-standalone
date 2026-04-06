@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLayout } from "@/app/LayoutContext";
+import { useLayoutStore } from "@/stores/layoutStore";
 import styles from "./Footer.module.css";
 
 export function Footer() {
@@ -15,7 +15,7 @@ export function Footer() {
 		toggleSidebar,
 		isBottomPanelOpen,
 		toggleBottomPanel,
-	} = useLayout();
+	} = useLayoutStore();
 
 	// 菜单状态
 	const [isMenuOpen, setIsMenuOpen] = useState(false);

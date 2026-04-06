@@ -6,13 +6,13 @@
  * - PageContainer: 每个 feature 自己控制 Sidebar/Header/Content/Panel
  */
 
-import { LayoutProvider, useLayout } from "@/app/LayoutContext";
 import { ErrorBoundary } from "@/app/ErrorBoundary";
 import { ErrorScreen } from "@/app/pages/ErrorScreen";
 import { LoadingScreen } from "@/app/pages/LoadingScreen";
 import { ChatPage } from "@/features/chat/page";
 import { FilesPage } from "@/features/files/page";
 import { useAppInitialization } from "@/features/chat/hooks/useAppInitialization";
+import { useLayoutStore } from "@/stores/layoutStore";
 import { Footer } from "./Footer";
 import "@/styles/global.css";
 import styles from "./App.module.css";
@@ -21,7 +21,7 @@ import styles from "./App.module.css";
  * AppContent - 应用内容组件
  */
 function AppContent() {
-	const { currentView } = useLayout();
+	const { currentView } = useLayoutStore();
 
 	// 应用初始化状态
 	const { isLoading, error, retry } = useAppInitialization();
@@ -55,9 +55,7 @@ function AppContent() {
 export default function App() {
 	return (
 		<ErrorBoundary>
-			<LayoutProvider>
-				<AppContent />
-			</LayoutProvider>
+			<AppContent />
 		</ErrorBoundary>
 	);
 }

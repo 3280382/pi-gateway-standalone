@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from "react";
-import { useLayout } from "@/app/LayoutContext";
+import { useLayoutStore } from "@/stores/layoutStore";
 import { AppHeader } from "@/features/chat/components/Header";
 import { LlmLogPanel } from "@/features/chat/components/panels/LlmLogPanel";
 import { SidebarPanel } from "@/features/chat/components/sidebar/SidebarPanel/SidebarPanel";
@@ -18,7 +18,7 @@ export function ChatLayout() {
 		bottomPanelHeight,
 		closeBottomPanel,
 		setBottomPanelHeight,
-	} = useLayout();
+	} = useLayoutStore();
 
 	const renderBottomPanel = useCallback(() => {
 		if (!isBottomPanelOpen) return null;

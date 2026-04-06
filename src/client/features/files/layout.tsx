@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from "react";
-import { useLayout } from "@/app/LayoutContext";
+import { useLayoutStore } from "@/stores/layoutStore";
 import { FileBottomMenu } from "@/features/files/components/BottomMenu/FileBottomMenu";
 import { XTermPanel } from "@/features/files/components/panels/TerminalPanel";
 import { useFileStore, useTerminalStore } from "@/features/files/stores";
@@ -21,7 +21,7 @@ export function FilesLayout() {
 		bottomPanelHeight,
 		closeBottomPanel,
 		setBottomPanelHeight 
-	} = useLayout();
+	} = useLayoutStore();
 	
 	const { currentPath } = useFileStore();
 	const { refresh } = useFileBrowser();
