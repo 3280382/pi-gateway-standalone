@@ -3,7 +3,7 @@
  *
  * 特性：
  * - 全屏显示（宽高 100%）
- * - 制表符层级缩进（清晰的视觉层级）
+ * - ASCII 树状格式显示层级（类似 tree 命令）
  * - 紧凑布局（无空隙，小字体）
  * - 过滤功能（隐藏文件、特定目录、搜索）
  * - 不同文件类型不同图标
@@ -53,140 +53,36 @@ function getFileIcon(name: string, isDirectory: boolean): string {
 	
 	const ext = name.split(".").pop()?.toLowerCase() || "";
 	
-	// 代码文件
 	const codeExts: Record<string, string> = {
-		js: "📜",
-		ts: "📘",
-		jsx: "⚛️",
-		tsx: "⚛️",
-		py: "🐍",
-		java: "☕",
-		go: "🔵",
-		rs: "🦀",
-		c: "🔧",
-		cpp: "🔧",
-		h: "📋",
-		hpp: "📋",
-		cs: "🔷",
-		php: "🐘",
-		rb: "💎",
-		swift: "🐦",
-		kotlin: "🅺",
-		scala: "🔴",
-		rust: "🦀",
-		lua: "🌙",
-		sh: "🐚",
-		bash: "🐚",
-		zsh: "🐚",
-		ps1: "💻",
-		bat: "🖥️",
-		cmd: "🖥️",
+		js: "📜", ts: "📘", jsx: "⚛️", tsx: "⚛️", py: "🐍", java: "☕",
+		go: "🔵", rs: "🦀", c: "🔧", cpp: "🔧", h: "📋", hpp: "📋",
+		cs: "🔷", php: "🐘", rb: "💎", swift: "🐦", kotlin: "🅺",
+		scala: "🔴", lua: "🌙", sh: "🐚", bash: "🐚", zsh: "🐚",
+		ps1: "💻", bat: "🖥️", cmd: "🖥️",
 	};
 	
-	// 标记语言/配置
 	const markupExts: Record<string, string> = {
-		html: "🌐",
-		htm: "🌐",
-		xml: "📰",
-		json: "📋",
-		yaml: "📋",
-		yml: "📋",
-		toml: "⚙️",
-		ini: "⚙️",
-		cfg: "⚙️",
-		conf: "⚙️",
-		md: "📝",
-		markdown: "📝",
+		html: "🌐", htm: "🌐", xml: "📰", json: "📋", yaml: "📋",
+		yml: "📋", toml: "⚙️", ini: "⚙️", cfg: "⚙️", conf: "⚙️",
+		md: "📝", markdown: "📝",
 	};
 	
-	// 样式文件
 	const styleExts: Record<string, string> = {
-		css: "🎨",
-		scss: "🎨",
-		sass: "🎨",
-		less: "🎨",
-		styl: "🎨",
+		css: "🎨", scss: "🎨", sass: "🎨", less: "🎨", styl: "🎨",
 	};
 	
-	// 图片文件
 	const imageExts: Record<string, string> = {
-		png: "🖼️",
-		jpg: "🖼️",
-		jpeg: "🖼️",
-		gif: "🖼️",
-		svg: "🎨",
-		webp: "🖼️",
-		ico: "🎯",
-		bmp: "🖼️",
-		tiff: "🖼️",
+		png: "🖼️", jpg: "🖼️", jpeg: "🖼️", gif: "🖼️", svg: "🎨",
+		webp: "🖼️", ico: "🎯", bmp: "🖼️", tiff: "🖼️",
 	};
 	
-	// 文档文件
 	const docExts: Record<string, string> = {
-		txt: "📄",
-		doc: "📘",
-		docx: "📘",
-		pdf: "📕",
-		xls: "📊",
-		xlsx: "📊",
-		ppt: "📽️",
-		pptx: "📽️",
-		rtf: "📄",
+		txt: "📄", doc: "📘", docx: "📘", pdf: "📕", xls: "📊",
+		xlsx: "📊", ppt: "📽️", pptx: "📽️", rtf: "📄",
 	};
 	
-	// 数据文件
-	const dataExts: Record<string, string> = {
-		sql: "🗃️",
-		csv: "📊",
-		tsv: "📊",
-	};
-	
-	// 压缩文件
 	const archiveExts: Record<string, string> = {
-		zip: "📦",
-		rar: "📦",
-		"7z": "📦",
-		tar: "📦",
-		gz: "📦",
-		bz2: "📦",
-		xz: "📦",
-	};
-	
-	// 可执行文件
-	const execExts: Record<string, string> = {
-		exe: "⚙️",
-		msi: "⚙️",
-		dmg: "🍎",
-		app: "🍎",
-		deb: "📦",
-		rpm: "📦",
-		snap: "📦",
-		flatpak: "📦",
-	};
-	
-	// 字体文件
-	const fontExts: Record<string, string> = {
-		ttf: "🔤",
-		otf: "🔤",
-		woff: "🔤",
-		woff2: "🔤",
-		eot: "🔤",
-	};
-	
-	// 媒体文件
-	const mediaExts: Record<string, string> = {
-		mp3: "🎵",
-		wav: "🎵",
-		ogg: "🎵",
-		flac: "🎵",
-		aac: "🎵",
-		mp4: "🎬",
-		avi: "🎬",
-		mkv: "🎬",
-		mov: "🎬",
-		wmv: "🎬",
-		flv: "🎬",
-		webm: "🎬",
+		zip: "📦", rar: "📦", "7z": "📦", tar: "📦", gz: "📦", bz2: "📦", xz: "📦",
 	};
 	
 	if (codeExts[ext]) return codeExts[ext];
@@ -194,27 +90,24 @@ function getFileIcon(name: string, isDirectory: boolean): string {
 	if (styleExts[ext]) return styleExts[ext];
 	if (imageExts[ext]) return imageExts[ext];
 	if (docExts[ext]) return docExts[ext];
-	if (dataExts[ext]) return dataExts[ext];
 	if (archiveExts[ext]) return archiveExts[ext];
-	if (execExts[ext]) return execExts[ext];
-	if (fontExts[ext]) return fontExts[ext];
-	if (mediaExts[ext]) return mediaExts[ext];
 	
-	return "📄"; // 默认文件图标
+	return "📄";
 }
 
-// 生成树状文本
-function generateTreeText(items: TreeNode[], level = 0, prefix = ""): string {
+// 生成树状文本（用于复制）
+function generateTreeText(items: TreeNode[], prefix = ""): string {
 	let result = "";
 	items.forEach((item, index) => {
 		const isLast = index === items.length - 1;
 		const connector = isLast ? "└── " : "├── ";
 		const childPrefix = isLast ? "    " : "│   ";
+		const icon = getFileIcon(item.name, item.isDirectory);
 		
-		result += prefix + connector + item.name + "\n";
+		result += prefix + connector + icon + " " + item.name + "\n";
 		
 		if (item.children && item.children.length > 0) {
-			result += generateTreeText(item.children, level + 1, prefix + childPrefix);
+			result += generateTreeText(item.children, prefix + childPrefix);
 		}
 	});
 	return result;
@@ -230,14 +123,34 @@ export function TreeViewModal({
 	const [filterMode, setFilterMode] = useState<FilterMode>("normal");
 	const [searchText, setSearchText] = useState("");
 	const [copySuccess, setCopySuccess] = useState(false);
+	// 控制哪些路径是展开的 - 默认展开前6层
+	const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
+
+	// 初始化展开前6层的节点
+	React.useEffect(() => {
+		if (!treeData) return;
+		
+		const pathsToExpand = new Set<string>();
+		
+		function collectPathsToExpand(items: TreeNode[], level: number) {
+			if (level >= 6) return;
+			items.forEach(item => {
+				if (item.isDirectory && item.children) {
+					pathsToExpand.add(item.path);
+					collectPathsToExpand(item.children, level + 1);
+				}
+			});
+		}
+		
+		collectPathsToExpand(treeData.items, 0);
+		setExpandedPaths(pathsToExpand);
+	}, [treeData]);
 
 	// 过滤节点
 	const filterNode = useCallback((node: TreeNode): TreeNode | null => {
-		// 搜索模式
 		if (filterMode === "search" && searchText) {
 			const matches = node.name.toLowerCase().includes(searchText.toLowerCase());
 			if (matches) return node;
-			// 如果子节点匹配，保留当前节点
 			if (node.children) {
 				const filteredChildren = node.children
 					.map(filterNode)
@@ -249,15 +162,11 @@ export function TreeViewModal({
 			return null;
 		}
 
-		// 正常模式（不显示隐藏文件和排除目录）
 		if (filterMode === "normal") {
-			// 隐藏文件（以 . 开头）
 			if (node.name.startsWith(".")) return null;
-			// 排除的目录
 			if (DEFAULT_EXCLUDES.includes(node.name)) return null;
 		}
 
-		// 递归过滤子节点
 		if (node.children) {
 			const filteredChildren = node.children
 				.map(filterNode)
@@ -268,7 +177,6 @@ export function TreeViewModal({
 		return node;
 	}, [filterMode, searchText]);
 
-	// 过滤后的数据
 	const filteredData = useMemo(() => {
 		if (!treeData) return null;
 		const filteredItems = treeData.items
@@ -277,7 +185,18 @@ export function TreeViewModal({
 		return { ...treeData, items: filteredItems };
 	}, [treeData, filterNode]);
 
-	// 复制树状文本
+	const handleToggleExpand = useCallback((path: string) => {
+		setExpandedPaths(prev => {
+			const newSet = new Set(prev);
+			if (newSet.has(path)) {
+				newSet.delete(path);
+			} else {
+				newSet.add(path);
+			}
+			return newSet;
+		});
+	}, []);
+
 	const handleCopyTree = useCallback(async () => {
 		if (!filteredData) return;
 		const treeText = filteredData.path + "\n" + generateTreeText(filteredData.items);
@@ -295,7 +214,7 @@ export function TreeViewModal({
 	return (
 		<div className={styles.overlay} onClick={onClose}>
 			<div className={styles.container} onClick={(e) => e.stopPropagation()}>
-				{/* 头部工具栏 - 两行布局 */}
+				{/* 头部 */}
 				<div className={styles.header}>
 					{/* 第1行：路径和关闭按钮 */}
 					<div className={styles.headerRow}>
@@ -303,22 +222,12 @@ export function TreeViewModal({
 							<TreeIcon />
 							<span className={styles.path}>{treeData?.path || "."}</span>
 						</div>
-						<div className={styles.headerActions}>
-							<button 
-								className={`${styles.copyBtn} ${copySuccess ? styles.copySuccess : ""}`}
-								onClick={handleCopyTree}
-								title="复制树状文本"
-								disabled={!filteredData || filteredData.items.length === 0}
-							>
-								{copySuccess ? "✓ 已复制" : "📋 复制"}
-							</button>
-							<button className={styles.closeBtn} onClick={onClose} title="Close (ESC)">
-								<CloseIcon />
-							</button>
-						</div>
+						<button className={styles.closeBtn} onClick={onClose} title="Close (ESC)">
+							<CloseIcon />
+						</button>
 					</div>
 					
-					{/* 第2行：过滤控制 */}
+					{/* 第2行：过滤控制和复制按钮 */}
 					<div className={styles.headerRow}>
 						<div className={styles.filterControls}>
 							<select
@@ -346,16 +255,26 @@ export function TreeViewModal({
 								/>
 							)}
 						</div>
+						<button 
+							className={`${styles.copyBtn} ${copySuccess ? styles.copySuccess : ""}`}
+							onClick={handleCopyTree}
+							title="复制树状文本"
+							disabled={!filteredData || filteredData.items.length === 0}
+						>
+							{copySuccess ? "✓ 已复制" : "📋 复制"}
+						</button>
 					</div>
 				</div>
 
-				{/* 内容区 */}
+				{/* 内容区 - ASCII 树 */}
 				<div className={styles.content}>
 					{treeLoading ? (
 						<div className={styles.loading}>Loading...</div>
 					) : filteredData ? (
-						<TreeNodeList
+						<AsciiTree
 							items={filteredData.items}
+							expandedPaths={expandedPaths}
+							onToggleExpand={handleToggleExpand}
 							onFileClick={onFileClick}
 							filterMode={filterMode}
 							searchText={searchText}
@@ -369,25 +288,41 @@ export function TreeViewModal({
 	);
 }
 
-// Tree Node List Component
-interface TreeNodeListProps {
+// ASCII 树组件
+interface AsciiTreeProps {
 	items: TreeNode[];
+	expandedPaths: Set<string>;
+	onToggleExpand: (path: string) => void;
 	onFileClick: (path: string, name: string) => void;
-	level?: number;
 	filterMode: FilterMode;
 	searchText: string;
+	prefix?: string;
+	isLast?: boolean;
 }
 
-function TreeNodeList({ items, onFileClick, level = 0, filterMode, searchText }: TreeNodeListProps) {
+function AsciiTree({ 
+	items, 
+	expandedPaths, 
+	onToggleExpand, 
+	onFileClick,
+	filterMode,
+	searchText,
+	prefix = "",
+	isLast = false 
+}: AsciiTreeProps) {
 	if (!items || items.length === 0) return null;
 
 	return (
-		<div className={styles.nodeList}>
-			{items.map((item) => (
-				<TreeNodeItem
+		<div className={styles.treeList}>
+			{items.map((item, index) => (
+				<TreeLine
 					key={item.path}
 					item={item}
-					level={level}
+					index={index}
+					total={items.length}
+					prefix={prefix}
+					expandedPaths={expandedPaths}
+					onToggleExpand={onToggleExpand}
 					onFileClick={onFileClick}
 					filterMode={filterMode}
 					searchText={searchText}
@@ -397,86 +332,88 @@ function TreeNodeList({ items, onFileClick, level = 0, filterMode, searchText }:
 	);
 }
 
-// Tree Node Item Component
-interface TreeNodeItemProps {
+// 单行树节点
+interface TreeLineProps {
 	item: TreeNode;
-	level: number;
+	index: number;
+	total: number;
+	prefix: string;
+	expandedPaths: Set<string>;
+	onToggleExpand: (path: string) => void;
 	onFileClick: (path: string, name: string) => void;
 	filterMode: FilterMode;
 	searchText: string;
 }
 
-function TreeNodeItem({ item, level, onFileClick, filterMode, searchText }: TreeNodeItemProps) {
-	// 前6层默认展开
-	const [expanded, setExpanded] = useState(level < 6);
+function TreeLine({ 
+	item, 
+	index, 
+	total, 
+	prefix,
+	expandedPaths,
+	onToggleExpand,
+	onFileClick,
+	filterMode,
+	searchText
+}: TreeLineProps) {
+	const isLast = index === total - 1;
+	const connector = isLast ? "└── " : "├── ";
 	const hasChildren = item.children && item.children.length > 0;
+	const isExpanded = expandedPaths.has(item.path);
+	const icon = getFileIcon(item.name, item.isDirectory);
 
 	const handleClick = () => {
 		if (item.isDirectory && hasChildren) {
-			setExpanded(!expanded);
+			onToggleExpand(item.path);
 		} else if (!item.isDirectory) {
 			onFileClick(item.path, item.name);
 		}
 	};
 
-	// 高亮匹配文本
 	const highlightMatch = (text: string) => {
 		if (filterMode !== "search" || !searchText) return text;
 		const parts = text.split(new RegExp(`(${searchText})`, "gi"));
 		return parts.map((part, i) =>
 			part.toLowerCase() === searchText.toLowerCase() ? (
 				<span key={i} className={styles.highlight}>{part}</span>
-			) : (
-				part
-			)
+			) : part
 		);
 	};
 
-	const icon = getFileIcon(item.name, item.isDirectory);
-	// 制表符缩进：每级2个空格
-	const indent = "\u00A0\u00A0".repeat(level);
+	const childPrefix = prefix + (isLast ? "    " : "│   ");
 
 	return (
-		<div className={styles.node}>
-			<div
-				className={styles.nodeHeader}
-				onClick={handleClick}
-			>
-				<span className={styles.indent}>{indent}</span>
-				{hasChildren ? (
-					<span className={styles.expandIcon}>{expanded ? "▼" : "▶"}</span>
-				) : (
-					<span className={styles.expandIconPlaceholder} />
+		<>
+			<div className={styles.treeLine} onClick={handleClick}>
+				<span className={styles.prefix}>{prefix}</span>
+				<span className={styles.connector}>{connector}</span>
+				{hasChildren && (
+					<span className={styles.expandIcon}>{isExpanded ? "▼" : "▶"}</span>
 				)}
 				<span className={styles.icon}>{icon}</span>
 				<span className={item.isDirectory ? styles.dirName : styles.fileName}>
 					{highlightMatch(item.name)}
 				</span>
 			</div>
-			{expanded && hasChildren && (
-				<TreeNodeList
+			{isExpanded && hasChildren && (
+				<AsciiTree
 					items={item.children!}
-					level={level + 1}
+					expandedPaths={expandedPaths}
+					onToggleExpand={onToggleExpand}
 					onFileClick={onFileClick}
 					filterMode={filterMode}
 					searchText={searchText}
+					prefix={childPrefix}
 				/>
 			)}
-		</div>
+		</>
 	);
 }
 
 // Icons
 function TreeIcon() {
 	return (
-		<svg
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth={2}
-			width="14"
-			height="14"
-		>
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="14" height="14">
 			<path d="M12 3v18M12 8l-4-4M12 8l4-4M8 12H4m16 0h-4M8 16H4m16 0h-4M8 20H4m16 0h-4" />
 		</svg>
 	);
