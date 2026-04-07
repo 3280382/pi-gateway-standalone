@@ -224,6 +224,9 @@ export function FileViewer() {
 	});
 
 	const language = getLanguage();
+	// Prism.js 查看模式语言映射（tsx -> typescript）
+	const prismLanguage = language === "tsx" ? "typescript" : 
+	                       language === "jsx" ? "javascript" : language;
 
 	return (
 		<div className={styles.modal}>
@@ -300,8 +303,8 @@ export function FileViewer() {
 							sandbox="allow-scripts allow-same-origin allow-forms"
 						/>
 					) : (
-						<pre className={`${styles.code} language-${language}`}>
-							<code data-prism-code className={`language-${language}`}>
+						<pre className={`${styles.code} language-${prismLanguage}`}>
+							<code data-prism-code className={`language-${prismLanguage}`}>
 								{typeof content === "string"
 									? content
 									: JSON.stringify(content, null, 2)}

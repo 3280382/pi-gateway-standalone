@@ -187,8 +187,12 @@ const goLanguage = StreamLanguage.define({
 
 // 语言扩展映射表
 const languageMap: Record<string, () => any> = {
+  // JavaScript/TypeScript - 包括 JSX/TSX
   javascript: () => javascript({ jsx: true }),
   typescript: () => javascript({ jsx: true, typescript: true }),
+  // JSX/TSX 映射到相应的 parser
+  jsx: () => javascript({ jsx: true }),
+  tsx: () => javascript({ jsx: true, typescript: true }),
   json: () => json(),
   html: () => html(),
   css: () => css(),

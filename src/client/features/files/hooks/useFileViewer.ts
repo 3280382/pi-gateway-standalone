@@ -41,9 +41,11 @@ const FILE_TYPES = {
 	nonEditable: ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"],
 };
 
-// 语言映射
+// 语言映射 - 用于 Prism.js (查看模式) 和 CodeMirror (编辑模式)
 const LANG_MAP: Record<string, string> = {
+	// JavaScript/TypeScript - Prism 和 CodeMirror 都使用这些标识
 	js: "javascript", ts: "typescript", jsx: "jsx", tsx: "tsx",
+	// 其他语言
 	py: "python", java: "java", c: "c", cpp: "cpp", h: "c", hpp: "cpp",
 	cs: "csharp", go: "go", rs: "rust", php: "php", rb: "ruby",
 	pl: "perl", swift: "swift", kt: "kotlin", scala: "scala", lua: "lua", r: "r",
@@ -53,6 +55,12 @@ const LANG_MAP: Record<string, string> = {
 	json: "json", yaml: "yaml", yml: "yaml",
 	css: "css", scss: "scss", sass: "sass", less: "less",
 	sql: "sql",
+};
+
+// Prism.js 语言映射 - 用于查看模式（某些语言需要映射到 Prism 支持的名字）
+const PRISM_LANG_MAP: Record<string, string> = {
+	tsx: "typescript", // Prism 使用 typescript 来高亮 TSX
+	jsx: "javascript", // Prism 使用 javascript 来高亮 JSX
 };
 
 export interface FileTypeInfo {
