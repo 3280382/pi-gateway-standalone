@@ -1,7 +1,7 @@
 /**
- * MessageItem - Neo Glassmorphism Edition
+ * MessageItem - Compact Edition
  */
-import { memo, useMemo, useState } from "react";
+import { memo, useMemo, useState, useCallback } from "react";
 import type { Message, MessageContent } from "@/features/chat/types/chat";
 import styles from "./MessageItem.module.css";
 
@@ -16,17 +16,11 @@ interface MessageItemProps {
 	onRegenerate?: () => void;
 }
 
-// Helper to safely convert any value to string
 function safeString(val: unknown): string {
 	if (val === null || val === undefined) return "";
 	if (typeof val === "string") return val;
 	if (typeof val === "object") {
-		// If it has a content property, use that
-		if (
-			val &&
-			"content" in val &&
-			typeof (val as Record<string, unknown>).content === "string"
-		) {
+		if (val && "content" in val && typeof (val as Record<string, unknown>).content === "string") {
 			return (val as Record<string, string>).content;
 		}
 		return JSON.stringify(val, null, 2);
@@ -35,11 +29,7 @@ function safeString(val: unknown): string {
 }
 
 export const MessageItem = memo(
-	function MessageItem({
-		message,
-		showThinking,
-		showTools = true,
-	}: MessageItemProps) {
+	function MessageItem({ message, showThinking, showTools = true }: MessageItemProps) {
 		const isUser = message.role === "user";
 
 		const blocks = useMemo(() => {
@@ -92,12 +82,7 @@ interface GlassCardProps {
 	showTools: boolean;
 }
 
-function GlassCard({
-	block,
-	isStreaming,
-	showThinking,
-	showTools,
-}: GlassCardProps) {
+function GlassCard({ block, isStreaming, showThinking, showTools }: GlassCardProps) {
 	const [isExpanded, setIsExpanded] = useState(isStreaming);
 	const [showCopy, setShowCopy] = useState(false);
 
@@ -107,9 +92,15 @@ function GlassCard({
 		}
 	}, [isStreaming, block.type]);
 
-	const copyToClipboard = (text: string) => {
+	const toggleExpand = useCallback(() => {
+		if (block.type !== "text") {
+			setIsExpanded(!isExpanded);
+		}
+	}, [block.type, isExpanded]);
+
+	const copyToClipboard = useCallback((text: string) => {
 		navigator.clipboard.writeText(text);
-	};
+	}, []);
 
 	switch (block.type) {
 		case "thinking": {
@@ -118,31 +109,30 @@ function GlassCard({
 			return (
 				<div
 					className={`${styles.card} ${styles.thinking}`}
+					onClick={toggleExpand}
 					onMouseEnter={() => setShowCopy(true)}
 					onMouseLeave={() => setShowCopy(false)}
 				>
 					<div className={styles.cardHeader}>
-						<span className={styles.dot} style={{ background: "#fbbf24" }} />
+						<span className={styles.dot} />
 						<span className={styles.label}>Thinking</span>
 						<div className={styles.actions}>
 							{showCopy && (
 								<button
-									className={styles.btn}
-									onClick={() => copyToClipboard(thinkingText)}
+									className={styles.btnCopy}
+									onClick={(e) => {
+										e.stopPropagation();
+										copyToClipboard(thinkingText);
+									}}
 								>
 									📋
 								</button>
 							)}
-							<button
-								className={styles.btn}
-								onClick={() => setIsExpanded(!isExpanded)}
-							>
-								{isExpanded ? "-" : "+"}
-							</button>
+							<span className={styles.toggleIcon}>{isExpanded ? "▼" : "▶"}</span>
 						</div>
 					</div>
 					{isExpanded && (
-						<div className={styles.content}>
+						<div className={styles.content} onClick={(e) => e.stopPropagation()}>
 							<code>{thinkingText}</code>
 						</div>
 					)}
@@ -155,33 +145,32 @@ function GlassCard({
 			const toolArgs = block.partialArgs || JSON.stringify(block.args, null, 2);
 			return (
 				<div
-					className={`${styles.card} ${styles.tool}`}
+					className={`${styles.card} ${styles.toolUse}`}
+					onClick={toggleExpand}
 					onMouseEnter={() => setShowCopy(true)}
 					onMouseLeave={() => setShowCopy(false)}
 				>
 					<div className={styles.cardHeader}>
-						<span className={styles.dot} style={{ background: "#34d399" }} />
+						<span className={styles.dot} />
 						<span className={styles.label}>{block.toolName}</span>
 						<span className={styles.chip}>running</span>
 						<div className={styles.actions}>
 							{showCopy && (
 								<button
-									className={styles.btn}
-									onClick={() => copyToClipboard(toolArgs)}
+									className={styles.btnCopy}
+									onClick={(e) => {
+										e.stopPropagation();
+										copyToClipboard(toolArgs);
+									}}
 								>
 									📋
 								</button>
 							)}
-							<button
-								className={styles.btn}
-								onClick={() => setIsExpanded(!isExpanded)}
-							>
-								{isExpanded ? "-" : "+"}
-							</button>
+							<span className={styles.toggleIcon}>{isExpanded ? "▼" : "▶"}</span>
 						</div>
 					</div>
 					{isExpanded && (
-						<div className={styles.content}>
+						<div className={styles.content} onClick={(e) => e.stopPropagation()}>
 							<code>{toolArgs}</code>
 						</div>
 					)}
@@ -191,48 +180,36 @@ function GlassCard({
 
 		case "tool": {
 			if (!showTools) return null;
-			const status = block.error
-				? "error"
-				: block.output
-					? "success"
-					: "pending";
-			const statusColor = block.error
-				? "#ef4444"
-				: block.output
-					? "#10b981"
-					: "#6b7280";
-			const toolContent = safeString(
-				block.output || block.error || "Processing...",
-			);
+			const status = block.error ? "error" : block.output ? "success" : "pending";
+			const toolContent = safeString(block.output || block.error || "Processing...");
 			return (
 				<div
-					className={`${styles.card} ${styles.tool}`}
+					className={`${styles.card} ${styles.toolResult}`}
+					onClick={toggleExpand}
 					onMouseEnter={() => setShowCopy(true)}
 					onMouseLeave={() => setShowCopy(false)}
 				>
 					<div className={styles.cardHeader}>
-						<span className={styles.dot} style={{ background: statusColor }} />
+						<span className={styles.dot} />
 						<span className={styles.label}>{block.toolName}</span>
-						<span className={styles.chip}>{status}</span>
+						<span className={`${styles.chip} ${styles[status]}`}>{status}</span>
 						<div className={styles.actions}>
 							{showCopy && (
 								<button
-									className={styles.btn}
-									onClick={() => copyToClipboard(toolContent)}
+									className={styles.btnCopy}
+									onClick={(e) => {
+										e.stopPropagation();
+										copyToClipboard(toolContent);
+									}}
 								>
 									📋
 								</button>
 							)}
-							<button
-								className={styles.btn}
-								onClick={() => setIsExpanded(!isExpanded)}
-							>
-								{isExpanded ? "-" : "+"}
-							</button>
+							<span className={styles.toggleIcon}>{isExpanded ? "▼" : "▶"}</span>
 						</div>
 					</div>
 					{isExpanded && (
-						<div className={styles.content}>
+						<div className={styles.content} onClick={(e) => e.stopPropagation()}>
 							<code>{toolContent}</code>
 						</div>
 					)}
@@ -249,13 +226,16 @@ function GlassCard({
 					onMouseLeave={() => setShowCopy(false)}
 				>
 					<div className={styles.cardHeader}>
-						<span className={styles.dot} style={{ background: "#22d3ee" }} />
+						<span className={styles.dot} />
 						<span className={styles.label}>Assistant</span>
 						<div className={styles.actions}>
 							{showCopy && (
 								<button
-									className={styles.btn}
-									onClick={() => copyToClipboard(block.text || "")}
+									className={styles.btnCopy}
+									onClick={(e) => {
+										e.stopPropagation();
+										copyToClipboard(block.text || "");
+									}}
 								>
 									📋
 								</button>
@@ -273,22 +253,15 @@ function GlassCard({
 	}
 }
 
-// Safe text rendering component
 function TextContent({ text }: { text: string }) {
 	const safeText = text || "";
 	const lines = safeText.split("\n");
 	return (
 		<>
 			{lines.map((line, idx) => {
-				// Handle code blocks
 				if (line.startsWith("```")) {
-					return (
-						<div key={idx} className={styles.codeBlockStart}>
-							{line}
-						</div>
-					);
+					return <div key={idx} className={styles.codeBlockStart}>{line}</div>;
 				}
-				// Handle inline code
 				const parts = line.split(/(`[^`]+`)/g);
 				return (
 					<div key={idx} className={styles.line}>
@@ -300,25 +273,15 @@ function TextContent({ text }: { text: string }) {
 									</code>
 								);
 							}
-							// Handle bold
 							const boldParts = part.split(/(\*\*[^*]+\*\*)/g);
 							return boldParts.map((bp, bidx) => {
 								if (bp.startsWith("**") && bp.endsWith("**")) {
-									return (
-										<strong key={`${pidx}-${bidx}`}>{bp.slice(2, -2)}</strong>
-									);
+									return <strong key={`${pidx}-${bidx}`}>{bp.slice(2, -2)}</strong>;
 								}
-								// Handle italic
 								const italicParts = bp.split(/(\*[^*]+\*)/g);
 								return italicParts.map((ip, iidx) => {
-									if (
-										ip.startsWith("*") &&
-										ip.endsWith("*") &&
-										!ip.startsWith("**")
-									) {
-										return (
-											<em key={`${pidx}-${bidx}-${iidx}`}>{ip.slice(1, -1)}</em>
-										);
+									if (ip.startsWith("*") && ip.endsWith("*") && !ip.startsWith("**")) {
+										return <em key={`${pidx}-${bidx}-${iidx}`}>{ip.slice(1, -1)}</em>;
 									}
 									return <span key={`${pidx}-${bidx}-${iidx}`}>{ip}</span>;
 								});

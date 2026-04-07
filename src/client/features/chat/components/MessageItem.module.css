@@ -1,67 +1,118 @@
 /* ============================================
-   MessageItem - Compact Edition
+   MessageItem - Compact Borderless Edition
    ============================================ */
 
-/* 用户消息 - 右对齐，柔和蓝色背景 */
+/* 用户消息 - 柔和紫蓝色 */
 .userMessage {
 	display: flex;
 	justify-content: flex-end;
-	padding: 2px 8px;
+	padding: 0 8px;
 	margin: 0;
 }
 
 .userBubble {
-	background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.12) 100%);
+	background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.12) 100%);
 	border: none;
 	border-radius: 12px 12px 2px 12px;
 	padding: 8px 12px;
-	color: #e0f2fe;
+	color: #e0e7ff;
 	font-size: 13px;
 	max-width: 85%;
 }
 
-/* AI消息容器 - 无间隙 */
+/* AI消息容器 - 零间隙 */
 .aiContainer {
 	display: flex;
 	flex-direction: column;
 	gap: 0;
-	padding: 2px 8px;
+	padding: 0 8px;
 	margin: 0;
 }
 
-/* Card 基础 - 无边框 */
+/* Card 基础 - 无边框，可点击 */
 .card {
 	border: none;
 	border-radius: 0;
-	overflow: hidden;
 	margin: 0;
+	cursor: pointer;
+	transition: background-color 0.15s;
 }
 
-/* 思考块 - 柔和琥珀色背景 */
+/* 思考块 - 温暖琥珀色 */
 .thinking {
-	background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.06) 100%);
+	background: rgba(251, 191, 36, 0.08);
 }
 
-.thinking .cardHeader {
-	background: rgba(245, 158, 11, 0.1);
+.thinking:hover {
+	background: rgba(251, 191, 36, 0.12);
 }
 
-/* 工具块 - 柔和翡翠色背景 */
-.tool {
-	background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.06) 100%);
+.thinking .dot {
+	background: #fbbf24;
 }
 
-.tool .cardHeader {
+/* 工具调用块 - 清新翡翠色 */
+.toolUse {
+	background: rgba(52, 211, 153, 0.08);
+}
+
+.toolUse:hover {
+	background: rgba(52, 211, 153, 0.12);
+}
+
+.toolUse .dot {
+	background: #34d399;
+}
+
+/* 工具结果块 - 根据状态 */
+.toolResult {
+	background: rgba(148, 163, 184, 0.06);
+}
+
+.toolResult:hover {
+	background: rgba(148, 163, 184, 0.1);
+}
+
+.toolResult .dot {
+	background: #94a3b8;
+}
+
+.toolResult.success {
+	background: rgba(16, 185, 129, 0.06);
+}
+
+.toolResult.success:hover {
 	background: rgba(16, 185, 129, 0.1);
 }
 
-/* 文本输出块 - 柔和青色背景 */
-.output {
-	background: linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, rgba(8, 145, 178, 0.06) 100%);
+.toolResult.success .dot {
+	background: #10b981;
 }
 
-.output .cardHeader {
-	background: rgba(6, 182, 212, 0.1);
+.toolResult.error {
+	background: rgba(244, 63, 94, 0.06);
+}
+
+.toolResult.error:hover {
+	background: rgba(244, 63, 94, 0.1);
+}
+
+.toolResult.error .dot {
+	background: #f43f5e;
+}
+
+/* AI输出块 - 柔和天蓝色 */
+.output {
+	background: rgba(56, 189, 248, 0.06);
+	cursor: default;
+}
+
+.output:hover {
+	background: rgba(56, 189, 248, 0.1);
+}
+
+.output .dot {
+	background: #38bdf8;
 }
 
 /* Card Header - 紧凑 */
@@ -70,13 +121,13 @@
 	align-items: center;
 	gap: 6px;
 	padding: 4px 8px;
-	border: none;
 }
 
 .dot {
 	width: 6px;
 	height: 6px;
 	border-radius: 50%;
+	flex-shrink: 0;
 }
 
 .label {
@@ -94,35 +145,60 @@
 	text-transform: uppercase;
 }
 
+.chip.success {
+	background: rgba(16, 185, 129, 0.2);
+	color: #34d399;
+}
+
+.chip.error {
+	background: rgba(244, 63, 94, 0.2);
+	color: #f43f5e;
+}
+
+.chip.pending {
+	background: rgba(148, 163, 184, 0.2);
+	color: #94a3b8;
+}
+
 .actions {
 	display: flex;
-	gap: 2px;
+	align-items: center;
+	gap: 6px;
 	margin-left: auto;
 }
 
-.btn {
-	width: 20px;
-	height: 20px;
+/* 复制按钮 */
+.btnCopy {
+	background: transparent;
 	border: none;
-	border-radius: 3px;
-	background: rgba(255, 255, 255, 0.08);
-	color: #94a3b8;
+	color: #64748b;
+	font-size: 12px;
 	cursor: pointer;
-	font-size: 10px;
+	padding: 2px 4px;
+	border-radius: 3px;
 	transition: all 0.15s;
 }
 
-.btn:hover {
-	background: rgba(255, 255, 255, 0.15);
-	color: #f1f5f9;
+.btnCopy:hover {
+	background: rgba(255, 255, 255, 0.1);
+	color: #e2e8f0;
 }
 
-/* Card Content - 紧凑 */
+/* 折叠图标 - 无背景 */
+.toggleIcon {
+	font-size: 10px;
+	color: #64748b;
+	padding: 2px;
+	user-select: none;
+}
+
+/* Card Content */
 .content {
-	padding: 6px 8px;
+	padding: 6px 8px 8px 20px;
 	font-size: 13px;
 	line-height: 1.5;
 	color: #cbd5e1;
+	cursor: text;
 }
 
 .content code {
@@ -130,6 +206,7 @@
 	font-size: 12px;
 	white-space: pre-wrap;
 	word-break: break-word;
+	color: #e2e8f0;
 }
 
 /* Text Content Styles */
