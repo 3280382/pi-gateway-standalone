@@ -144,7 +144,7 @@ function getFileIcon(name: string, isDirectory: boolean): string {
 	const archiveExts: Record<string, string> = {
 		zip: "📦",
 		rar: "📦",
-		7z: "📦",
+		"7z": "📦",
 		tar: "📦",
 		gz: "📦",
 		bz2: "📦",
