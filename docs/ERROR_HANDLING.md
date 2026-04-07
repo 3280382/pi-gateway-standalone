@@ -1,63 +1,63 @@
-# 文件浏览器错误处理指南
+# File Browser Error Handling Guide
 
-## 概述
+## Overview
 
-本文档描述了文件浏览器组件的错误处理策略和最佳实践。
+This document describes the error handling strategy and best practices for the file browser component.
 
-## 错误边界架构
+## Error Boundary Architecture
 
-### 1. 通用错误边界 (ErrorBoundary.tsx)
+### 1. Generic Error Boundary (ErrorBoundary.tsx)
 ```typescript
-// 基本用法
+// Basic usage
 <ErrorBoundary>
   <YourComponent />
 </ErrorBoundary>
 
-// 自定义fallback
+// Custom fallback
 <ErrorBoundary fallback={<CustomErrorUI />}>
   <YourComponent />
 </ErrorBoundary>
 
-// 错误回调
+// Error callback
 <ErrorBoundary onError={(error, errorInfo) => {
   console.error('Component error:', error);
-  // 发送到错误跟踪服务
+  // Send to error tracking service
 }}>
   <YourComponent />
 </ErrorBoundary>
 
-// 高阶组件
+// Higher-order component
 const WrappedComponent = withErrorBoundary(YourComponent, {
   fallback: <CustomErrorUI />,
   onError: handleError
 });
 ```
 
-### 2. 文件浏览器专用错误边界 (FileBrowserErrorBoundary.tsx)
+### 2. File Browser Specific Error Boundary (FileBrowserErrorBoundary.tsx)
 ```typescript
-// 包装特定组件
+// Wrap specific components
 <FileBrowserErrorBoundary componentName="File Sidebar">
   <FileSidebar />
 </FileBrowserErrorBoundary>
 
-// 使用预定义的包装器
+// Use predefined wrapper
 <FileViewerWithErrorBoundary>
   <FileViewer />
 </FileViewerWithErrorBoundary>
 ```
 
-## 错误类型和处理策略
+## Error Types and Handling Strategies
 
-### 1. API错误
+### 1. API Errors
 ```typescript
-// FileBrowser.tsx中的示例
+// Example in FileBrowser.tsx
 try {
   const data = await browseDirectory(path);
-  // 处理成功
+  // Handle success
 } catch (err) {
   const errorMessage = err instanceof Error ? err.message : 'Failed to load directory';
   
-  // 特定错误类型的友好消息
+  // Friendly messages for specific error types
   if (errorMessage.includes('permission')) {
     setError(`Permission denied: Cannot access "${path}". You may need to check file permissions.`);
   } else if (errorMessage.includes('ENOENT')) {
@@ -70,15 +70,15 @@ try {
 }
 ```
 
-### 2. 组件渲染错误
+### 2. Component Rendering Errors
 ```typescript
-// 由错误边界自动捕获
-// 组件崩溃时显示备用UI
+// Automatically caught by error boundary
+// Display fallback UI when component crashes
 ```
 
-### 3. 用户输入错误
+### 3. User Input Errors
 ```typescript
-// 验证用户输入
+// Validate user input
 const handleExecute = async () => {
   if (!selectedActionFile) {
     setError('No file selected for execution');
@@ -90,13 +90,13 @@ const handleExecute = async () => {
     return;
   }
   
-  // 执行文件
+  // Execute file
 };
 ```
 
-### 4. 状态错误
+### 4. State Errors
 ```typescript
-// 检查状态一致性
+// Check state consistency
 const handleSave = async () => {
   if (mode !== 'edit') {
     console.error('Attempted to save while not in edit mode');
@@ -108,19 +108,19 @@ const handleSave = async () => {
     return;
   }
   
-  // 保存文件
+  // Save file
 };
 ```
 
-## 错误处理钩子
+## Error Handling Hooks
 
-### 1. useErrorHandler (通用)
+### 1. useErrorHandler (Generic)
 ```typescript
 const { error, handleError, clearError } = useErrorHandler();
 
 useEffect(() => {
   try {
-    // 可能抛出错误的操作
+    // Operation that may throw error
     riskyOperation();
   } catch (err) {
     handleError(err instanceof Error ? err : new Error(String(err)));
@@ -132,7 +132,7 @@ if (error) {
 }
 ```
 
-### 2. useFileBrowserErrorHandler (文件浏览器专用)
+### 2. useFileBrowserErrorHandler (File Browser Specific)
 ```typescript
 const { 
   error, 
@@ -145,39 +145,39 @@ const {
 const loadFile = async (path: string) => {
   try {
     const content = await readFile(path);
-    // 处理内容
+    // Process content
   } catch (err) {
     handleError(err instanceof Error ? err : new Error(String(err)), 'loadFile');
   }
 };
 ```
 
-## 错误消息最佳实践
+## Error Message Best Practices
 
-### 1. 用户友好的消息
+### 1. User-Friendly Messages
 ```typescript
-// 不好
+// Bad
 setError('ENOENT: no such file or directory');
 
-// 好
+// Good
 setError(`File not found: "${fileName}" does not exist. Please check the file name and try again.`);
 ```
 
-### 2. 提供解决方案
+### 2. Provide Solutions
 ```typescript
-// 不好
+// Bad
 setError('Permission denied');
 
-// 好
+// Good
 setError(`Permission denied: Cannot access "${path}". 
 - Check if you have read permissions
 - Try running with administrator privileges
 - Contact your system administrator`);
 ```
 
-### 3. 技术细节可访问
+### 3. Technical Details Accessible
 ```typescript
-// 显示用户友好消息，但提供技术细节
+// Display user-friendly message, but provide technical details
 <div className="error-details">
   <p className="user-message">{userFriendlyMessage}</p>
   <details className="technical-details">
@@ -187,9 +187,9 @@ setError(`Permission denied: Cannot access "${path}".
 </div>
 ```
 
-## 错误恢复策略
+## Error Recovery Strategies
 
-### 1. 自动重试
+### 1. Automatic Retry
 ```typescript
 const retryOperation = async (operation: () => Promise<any>, maxRetries = 3) => {
   for (let i = 0; i < maxRetries; i++) {
@@ -197,13 +197,13 @@ const retryOperation = async (operation: () => Promise<any>, maxRetries = 3) => 
       return await operation();
     } catch (err) {
       if (i === maxRetries - 1) throw err;
-      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // 指数退避
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Exponential backoff
     }
   }
 };
 ```
 
-### 2. 降级功能
+### 2. Graceful Degradation
 ```typescript
 const loadWithFallback = async () => {
   try {
@@ -215,7 +215,7 @@ const loadWithFallback = async () => {
 };
 ```
 
-### 3. 用户控制的重试
+### 3. User-Controlled Retry
 ```typescript
 const ErrorDisplay = ({ error, onRetry }) => (
   <div className="error-display">
@@ -226,11 +226,11 @@ const ErrorDisplay = ({ error, onRetry }) => (
 );
 ```
 
-## 错误日志和监控
+## Error Logging and Monitoring
 
-### 1. 控制台日志
+### 1. Console Logging
 ```typescript
-// 结构化日志
+// Structured logging
 console.error('FileBrowser error:', {
   component: 'FileViewer',
   operation: 'saveFile',
@@ -241,20 +241,20 @@ console.error('FileBrowser error:', {
 });
 ```
 
-### 2. 错误跟踪服务集成
+### 2. Error Tracking Service Integration
 ```typescript
-// 示例：集成Sentry-like服务
+// Example: Sentry-like service integration
 const trackError = (error: Error, context: Record<string, any>) => {
-  // 发送到错误跟踪服务
+  // Send to error tracking service
   if (window.errorTrackingService) {
     window.errorTrackingService.captureException(error, { extra: context });
   }
   
-  // 也记录到控制台
+  // Also log to console
   console.error('Tracked error:', error, context);
 };
 
-// 在错误边界中使用
+// Use in error boundary
 componentDidCatch(error: Error, errorInfo: ErrorInfo) {
   trackError(error, {
     component: this.props.componentName,
@@ -264,9 +264,9 @@ componentDidCatch(error: Error, errorInfo: ErrorInfo) {
 }
 ```
 
-### 3. 性能监控
+### 3. Performance Monitoring
 ```typescript
-// 监控操作性能
+// Monitor operation performance
 const monitorOperation = async (operationName: string, operation: () => Promise<any>) => {
   const startTime = performance.now();
   
@@ -274,10 +274,10 @@ const monitorOperation = async (operationName: string, operation: () => Promise<
     const result = await operation();
     const duration = performance.now() - startTime;
     
-    // 记录成功操作
+    // Log successful operation
     console.debug(`Operation ${operationName} completed in ${duration}ms`);
     
-    // 如果操作太慢，记录警告
+    // Log warning if operation is too slow
     if (duration > 1000) {
       console.warn(`Operation ${operationName} took ${duration}ms (slow)`);
     }
@@ -286,7 +286,7 @@ const monitorOperation = async (operationName: string, operation: () => Promise<
   } catch (err) {
     const duration = performance.now() - startTime;
     
-    // 记录失败操作
+    // Log failed operation
     console.error(`Operation ${operationName} failed after ${duration}ms:`, err);
     
     throw err;
@@ -294,11 +294,11 @@ const monitorOperation = async (operationName: string, operation: () => Promise<
 };
 ```
 
-## 测试错误处理
+## Testing Error Handling
 
-### 1. 单元测试
+### 1. Unit Tests
 ```typescript
-// 测试错误边界
+// Test error boundary
 it('displays fallback UI when error occurs', () => {
   const ErrorThrowingComponent = () => {
     throw new Error('Test error');
@@ -313,7 +313,7 @@ it('displays fallback UI when error occurs', () => {
   expect(screen.getByText('Something went wrong')).toBeInTheDocument();
 });
 
-// 测试API错误处理
+// Test API error handling
 it('handles API errors gracefully', async () => {
   const { browseDirectory } = await import('@/services/api/fileApi');
   (browseDirectory as any).mockRejectedValue(new Error('Network error'));
@@ -326,9 +326,9 @@ it('handles API errors gracefully', async () => {
 });
 ```
 
-### 2. 集成测试
+### 2. Integration Tests
 ```typescript
-// 测试完整错误流程
+// Test complete error flow
 it('recovers from error after retry', async () => {
   let failOnce = true;
   const { browseDirectory } = await import('@/services/api/fileApi');
@@ -343,30 +343,30 @@ it('recovers from error after retry', async () => {
   
   render(<FileBrowser />);
   
-  // 应该显示错误
+  // Should display error
   await waitFor(() => {
     expect(screen.getByText(/Temporary failure/)).toBeInTheDocument();
   });
   
-  // 点击重试
+  // Click retry
   fireEvent.click(screen.getByText('Retry'));
   
-  // 应该成功加载
+  // Should load successfully
   await waitFor(() => {
     expect(screen.queryByText(/Temporary failure/)).not.toBeInTheDocument();
   });
 });
 ```
 
-## 最佳实践总结
+## Best Practices Summary
 
-1. **防御性编程**: 总是验证输入和状态
-2. **优雅降级**: 当功能失败时提供备用方案
-3. **用户友好**: 显示可操作的错误消息
-4. **详细日志**: 记录足够信息用于调试
-5. **监控告警**: 设置错误监控和告警
-6. **测试覆盖**: 测试所有错误路径
-7. **渐进增强**: 核心功能应该总是可用
-8. **快速失败**: 尽早检测和处理错误
-9. **透明沟通**: 让用户知道发生了什么
-10. **持续改进**: 从错误中学习并改进系统
+1. **Defensive Programming**: Always validate input and state
+2. **Graceful Degradation**: Provide fallback solutions when features fail
+3. **User-Friendly**: Display actionable error messages
+4. **Detailed Logging**: Log sufficient information for debugging
+5. **Monitoring Alerts**: Set up error monitoring and alerting
+6. **Test Coverage**: Test all error paths
+7. **Progressive Enhancement**: Core features should always be available
+8. **Fail Fast**: Detect and handle errors early
+9. **Transparent Communication**: Let users know what's happening
+10. **Continuous Improvement**: Learn from errors and improve the system

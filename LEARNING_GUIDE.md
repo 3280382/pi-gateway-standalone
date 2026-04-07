@@ -1,135 +1,135 @@
-# Pi Gateway - 系统设计与学习指南
+# Pi Gateway - System Design and Learning Guide
 
-> 本文档面向需要深入理解系统架构的开发者，特别是 React 性能优化和复杂状态管理方面。
+> This document is for developers who need to deeply understand the system architecture, especially React performance optimization and complex state management.
 
-## 📚 目录
+## 📚 Table of Contents
 
-1. [系统整体架构](#系统整体架构)
-2. [前端架构详解](#前端架构详解)
-3. [后端架构详解](#后端架构详解)
-4. [React 性能优化实践](#react-性能优化实践)
-5. [技术难点分析](#技术难点分析)
-6. [开发流程与规范](#开发流程与规范)
+1. [System Overall Architecture](#system-overall-architecture)
+2. [Frontend Architecture Details](#frontend-architecture-details)
+3. [Backend Architecture Details](#backend-architecture-details)
+4. [React Performance Optimization Practices](#react-performance-optimization-practices)
+5. [Technical Difficulties Analysis](#technical-difficulties-analysis)
+6. [Development Process and Standards](#development-process-and-standards)
 
 ---
 
-## 系统整体架构
+## System Overall Architecture
 
-### 架构哲学
+### Architecture Philosophy
 
 ```
 UI = f(State)
 ```
 
-整个系统遵循 **函数式响应编程** 思想：
-- 状态驱动 UI
-- 单向数据流
-- 不可变数据更新
-- 声明式编程
+The entire system follows **Functional Reactive Programming** principles:
+- State-driven UI
+- Unidirectional data flow
+- Immutable data updates
+- Declarative programming
 
-### 分层架构
+### Layered Architecture
 
 ```
 ┌─────────────────────────────────────────┐
-│              表现层 (UI)                 │
+│           Presentation Layer (UI)        │
 │  React Components + CSS Modules         │
 ├─────────────────────────────────────────┤
-│              逻辑层 (Logic)              │
+│            Logic Layer                   │
 │  Hooks + Controllers                    │
 ├─────────────────────────────────────────┤
-│              状态层 (State)              │
+│            State Layer                   │
 │  Zustand Stores                         │
 ├─────────────────────────────────────────┤
-│              服务层 (Service)            │
+│           Service Layer                  │
 │  API Clients + WebSocket                │
 ├─────────────────────────────────────────┤
-│              数据层 (Data)               │
+│            Data Layer                    │
 │  REST API + WebSocket Protocol          │
 └─────────────────────────────────────────┘
 ```
 
 ---
 
-## 前端架构详解
+## Frontend Architecture Details
 
-### 1. Feature-Based 目录结构
+### 1. Feature-Based Directory Structure
 
 ```
 src/client/
-├── app/                    # 应用根层（最小化）
-│   ├── App.tsx            # 根组件，只负责布局框架
-│   ├── LayoutContext/     # 全局布局状态
-│   └── pages/             # 页面级组件
+├── app/                    # Application root layer (minimized)
+│   ├── App.tsx            # Root component, only responsible for layout framework
+│   ├── LayoutContext/     # Global layout state
+│   └── pages/             # Page-level components
 │
-├── features/              # 功能域（核心）
-│   ├── chat/              # 聊天功能（完全自包含）
-│   │   ├── components/    # UI 组件
-│   │   ├── stores/        # 状态管理
-│   │   ├── services/      # API 服务
-│   │   ├── hooks/         # 业务逻辑
-│   │   └── types/         # 类型定义
+├── features/              # Feature domains (core)
+│   ├── chat/              # Chat feature (fully self-contained)
+│   │   ├── components/    # UI components
+│   │   ├── stores/        # State management
+│   │   ├── services/      # API services
+│   │   ├── hooks/         # Business logic
+│   │   └── types/         # Type definitions
 │   │
-│   └── files/             # 文件功能
+│   └── files/             # File feature
 │
-└── shared/                # 全局共享（最小必要）
-    ├── ui/                # 原子组件
-    ├── stores/            # 全局状态
-    └── services/          # 基础服务
+└── shared/                # Global shared (minimum necessary)
+    ├── ui/                # Atomic components
+    ├── stores/            # Global state
+    └── services/          # Base services
 ```
 
-**设计原则**：
-- **高内聚**：每个 Feature 包含自己的组件、状态、服务
-- **低耦合**：Feature 间通过明确的接口通信
-- **可插拔**：新增功能只需添加新的 Feature 目录
+**Design Principles**:
+- **High Cohesion**: Each Feature contains its own components, state, and services
+- **Low Coupling**: Features communicate through clear interfaces
+- **Pluggable**: New features only need to add new Feature directories
 
-### 2. 状态管理架构
+### 2. State Management Architecture
 
-#### Zustand Store 设计模式
+#### Zustand Store Design Pattern
 
 ```typescript
-// 标准 Store 结构
+// Standard Store structure
 interface Store {
   // State
   data: DataType[];
   isLoading: boolean;
   error: Error | null;
   
-  // Actions (同步)
+  // Actions (synchronous)
   setData: (data: DataType[]) => void;
   setLoading: (loading: boolean) => void;
   
-  // Actions (异步)
+  // Actions (asynchronous)
   fetchData: () => Promise<void>;
   
-  // Computed (使用 selector)
+  // Computed (using selector)
   getFilteredData: (filter: string) => DataType[];
 }
 ```
 
-#### 性能优化关键：Selector 模式
+#### Performance Optimization Key: Selector Pattern
 
 ```typescript
-// ❌ 错误：订阅整个 Store，任何变化都触发重渲染
+// ❌ Wrong: Subscribe to entire Store, any change triggers re-render
 const store = useChatStore();
 
-// ✅ 正确：只订阅需要的字段
+// ✅ Correct: Only subscribe to needed fields
 const messages = useChatStore(s => s.messages);
 const isStreaming = useChatStore(s => s.isStreaming);
 
-// ✅ 更优：使用预定义的 selector
+// ✅ Better: Use predefined selector
 const messages = useChatStore(selectMessages);
 ```
 
-#### 批量更新避免重渲染
+#### Batch Updates to Avoid Re-renders
 
 ```typescript
-// chatStore.ts - 批处理示例
+// chatStore.ts - Batch processing example
 batchUpdateContent(updates: { 
   content?: string; 
   thinking?: string;
   toolCall?: ToolCallUpdate;
 }) {
-  // 合并所有更新，只触发一次状态变更
+  // Merge all updates, only trigger one state change
   set({
     streamingContent: newContent,
     streamingThinking: newThinking,
@@ -142,52 +142,52 @@ batchUpdateContent(updates: {
 }
 ```
 
-### 3. WebSocket 实时通信架构
+### 3. WebSocket Real-time Communication Architecture
 
-#### 事件驱动设计
+#### Event-Driven Design
 
 ```typescript
-// WebSocketService - 发布订阅模式
+// WebSocketService - Pub/Sub pattern
 class WebSocketService {
   private eventHandlers: Map<WebSocketEvent, Set<Function>>;
   
   on(event: WebSocketEvent, handler: Function): () => void {
-    // 订阅事件
+    // Subscribe to event
   }
   
   emit(event: WebSocketEvent, data: any): void {
-    // 广播事件给所有订阅者
+    // Broadcast event to all subscribers
   }
 }
 ```
 
-#### 消息流处理
+#### Message Flow Processing
 
 ```
-WebSocket 消息流
-├── message_start      # 开始新消息
-├── content_delta      # 文本内容增量
-├── thinking_delta     # 思考内容增量  
-├── toolcall_delta     # 工具调用增量
-├── tool_start         # 工具开始执行
-├── tool_update        # 工具执行更新
-├── tool_end           # 工具执行完成
-├── message_end        # 消息结束
-└── turn_end           # 完整回合结束
+WebSocket Message Flow
+├── message_start      # Start new message
+├── content_delta      # Text content increment
+├── thinking_delta     # Thinking content increment  
+├── toolcall_delta     # Tool call increment
+├── tool_start         # Tool start execution
+├── tool_update        # Tool execution update
+├── tool_end           # Tool execution complete
+├── message_end        # Message end
+└── turn_end           # Complete turn end
 ```
 
-#### 流式渲染优化
+#### Streaming Rendering Optimization
 
 ```typescript
-// 使用 RAF (RequestAnimationFrame) 批处理流式更新
+// Use RAF (RequestAnimationFrame) to batch streaming updates
 let rafId: number | null = null;
 let pendingUpdates = {};
 
 function scheduleRafUpdate() {
-  if (rafId !== null) return; // 已有待处理更新
+  if (rafId !== null) return; // Already have pending update
   
   rafId = requestAnimationFrame(() => {
-    // 在一次动画帧中应用所有累积的更新
+    // Apply all accumulated updates in one animation frame
     applyPendingUpdates();
     rafId = null;
   });
@@ -196,77 +196,77 @@ function scheduleRafUpdate() {
 
 ---
 
-## 后端架构详解
+## Backend Architecture Details
 
-### 1. Feature-Based 后端架构
+### 1. Feature-Based Backend Architecture
 
 ```
 src/server/
 ├── features/
-│   ├── chat/ws/           # Chat WebSocket 处理器
-│   ├── session/ws/        # Session WebSocket 处理器
-│   └── files/             # Files HTTP 控制器
+│   ├── chat/ws/           # Chat WebSocket handlers
+│   ├── session/ws/        # Session WebSocket handlers
+│   └── files/             # Files HTTP controllers
 │
-├── core/session/          # 核心会话管理
-├── shared/websocket/      # WebSocket 基础设施
-└── app/                   # 应用入口
+├── core/session/          # Core session management
+├── shared/websocket/      # WebSocket infrastructure
+└── app/                   # Application entry
 ```
 
-### 2. WebSocket Router 设计
+### 2. WebSocket Router Design
 
 ```typescript
-// 替代传统的 switch/case
-// 之前: 400+ 行的巨型 switch
+// Replace traditional switch/case
+// Before: 400+ line giant switch
 switch (message.type) {
   case "prompt": await handlePrompt(...); break;
   case "abort": await handleAbort(...); break;
   // ... 20+ cases
 }
 
-// 之后: 声明式路由
+// After: Declarative routing
 wsRouter.register("prompt", handlePrompt);
 wsRouter.register("abort", handleAbort);
 
-// 分发
+// Dispatch
 await wsRouter.dispatch(type, ctx, payload);
 ```
 
-### 3. 上下文模式 (Context Pattern)
+### 3. Context Pattern
 
 ```typescript
 interface WSContext {
-  ws: WebSocket;              # WebSocket 连接
-  session: GatewaySession;    # 会话实例
-  connectionId: string;       # 连接唯一标识
-  connectedAt: Date;          # 连接时间
+  ws: WebSocket;              # WebSocket connection
+  session: GatewaySession;    # Session instance
+  connectionId: string;       # Connection unique identifier
+  connectedAt: Date;          # Connection time
 }
 
-// 处理器接收上下文和负载
+// Handler receives context and payload
 async function handlePrompt(ctx: WSContext, payload: PromptPayload) {
-  // 单一职责：只处理 prompt
+  // Single responsibility: only handle prompt
 }
 ```
 
 ---
 
-## React 性能优化实践
+## React Performance Optimization Practices
 
-### 1. 渲染优化
+### 1. Render Optimization
 
-#### memo 的正确使用
+#### Correct Use of memo
 
 ```typescript
-// MessageItem.tsx - 自定义比较函数
+// MessageItem.tsx - Custom comparison function
 export const MessageItem = memo(
   function MessageItem({ message, showThinking, ...props }: Props) {
-    // 组件逻辑
+    // Component logic
   },
-  // 自定义比较：只在关键属性变化时重渲染
+  // Custom comparison: only re-render when key properties change
   (prevProps, nextProps) => {
     return (
       prevProps.message.id === nextProps.message.id &&
       prevProps.message.isStreaming === nextProps.message.isStreaming &&
-      // 流式消息只在结束时比较内容
+      // Streaming messages only compare content length when ending
       (!prevProps.message.isStreaming || 
         prevProps.message.content.length === nextProps.message.content.length)
     );
@@ -274,10 +274,10 @@ export const MessageItem = memo(
 );
 ```
 
-#### useMemo 缓存复杂计算
+#### useMemo for Complex Calculations
 
 ```typescript
-// 缓存消息块解析结果
+// Cache message block parsing results
 const blocks = useMemo(() => {
   return message.content.map((c, idx) => ({ 
     ...c, 
@@ -285,7 +285,7 @@ const blocks = useMemo(() => {
   }));
 }, [message.content]);
 
-// 缓存文本提取
+// Cache text extraction
 const fullText = useMemo(() => {
   return blocks
     .filter(c => c.type === "text")
@@ -294,34 +294,34 @@ const fullText = useMemo(() => {
 }, [blocks]);
 ```
 
-#### useCallback 缓存回调
+#### useCallback for Callback Caching
 
 ```typescript
-// 避免每次渲染创建新函数
+// Avoid creating new function on each render
 const handleCopy = useCallback(() => {
   navigator.clipboard.writeText(text);
 }, [text]);
 
-// 依赖稳定的回调
+// Depend on stable callbacks
 const handleToggle = useCallback((id: string) => {
   toggleMessage(id);
 }, [toggleMessage]);
 ```
 
-### 2. 流式内容性能优化
+### 2. Streaming Content Performance Optimization
 
-#### 问题：每字符更新导致频繁重渲染
+#### Problem: Character-by-character updates cause frequent re-renders
 
 ```
-AI 生成: "Hello world"
-传统方式: 11 次更新 → 11 次重渲染
-优化方式: 使用 RAF 批处理 → 1-2 次重渲染
+AI generates: "Hello world"
+Traditional: 11 updates → 11 re-renders
+Optimized: Use RAF batching → 1-2 re-renders
 ```
 
-#### 解决方案：RAF 批处理
+#### Solution: RAF Batching
 
 ```typescript
-// 累积更新，在下一帧统一应用
+// Accumulate updates, apply uniformly in next frame
 let pendingContent = "";
 let pendingThinking = "";
 
@@ -331,15 +331,15 @@ function appendContent(text: string) {
 }
 
 function scheduleRafUpdate() {
-  if (rafId) return; // 已有待处理
+  if (rafId) return; // Already pending
   
   rafId = requestAnimationFrame(() => {
-    // 应用所有累积的更新
+    // Apply all accumulated updates
     setState({
       streamingContent: pendingContent,
       streamingThinking: pendingThinking,
     });
-    // 清空待处理
+    // Clear pending
     pendingContent = "";
     pendingThinking = "";
     rafId = null;
@@ -347,12 +347,12 @@ function scheduleRafUpdate() {
 }
 ```
 
-### 3. 大数据列表优化
+### 3. Large Data List Optimization
 
-#### 虚拟滚动
+#### Virtual Scrolling
 
 ```typescript
-// 只渲染可视区域的内容
+// Only render content in visible area
 import { FixedSizeList } from 'react-window';
 
 <FixedSizeList
@@ -365,40 +365,40 @@ import { FixedSizeList } from 'react-window';
 </FixedSizeList>
 ```
 
-#### 分页/无限滚动
+#### Pagination/Infinite Scroll
 
 ```typescript
-// 只加载当前需要的数据
+// Only load currently needed data
 const [visibleCount, setVisibleCount] = useState(50);
 
 const visibleMessages = useMemo(() => {
   return messages.slice(0, visibleCount);
 }, [messages, visibleCount]);
 
-// 滚动到底部时加载更多
+// Load more when scrolling to bottom
 const loadMore = useCallback(() => {
   setVisibleCount(prev => prev + 50);
 }, []);
 ```
 
-### 4. 状态选择优化
+### 4. State Selection Optimization
 
-#### 细粒度订阅
+#### Fine-grained Subscription
 
 ```typescript
-// ❌ 坏：订阅整个 store
+// ❌ Bad: Subscribe to entire store
 const { messages, inputText, isStreaming } = useChatStore();
 
-// ✅ 好：只订阅需要的字段
+// ✅ Good: Only subscribe to needed fields
 const messages = useChatStore(s => s.messages);
 const inputText = useChatStore(s => s.inputText);
 const isStreaming = useChatStore(s => s.isStreaming);
 ```
 
-#### 派生状态使用 selector
+#### Derived State Using Selector
 
 ```typescript
-// 使用 selector 计算派生状态
+// Use selector to compute derived state
 const filteredMessages = useChatStore(
   useCallback(
     state => filterMessages(state.messages, filters),
@@ -409,34 +409,34 @@ const filteredMessages = useChatStore(
 
 ---
 
-## 技术难点分析
+## Technical Difficulties Analysis
 
-### 难点 1：流式消息的多轮处理
+### Difficulty 1: Multi-round Processing of Streaming Messages
 
-**问题**：AI 可能在一次回复中进行多轮思考和工具调用
+**Problem**: AI may perform multiple rounds of thinking and tool calls in one response
 
-**解决方案**：
+**Solution**:
 
 ```typescript
-// 使用 turn_marker 标记轮次边界
+// Use turn_marker to mark turn boundaries
 content.push({
   type: "turn_marker",
   turnNumber: currentTurn,
 });
 
-// 构建内容时保留之前轮次
+// Retain previous rounds when building content
 const previousRounds = existingContent.slice(0, lastTurnMarkerIndex + 1);
 const finalContent = [...previousRounds, ...currentRound];
 ```
 
-### 难点 2：消息折叠状态的同步
+### Difficulty 2: Synchronization of Message Collapse State
 
-**问题**：流式消息和已完成消息共享折叠状态
+**Problem**: Streaming messages and completed messages share collapse state
 
-**解决方案**：
+**Solution**:
 
 ```typescript
-// 同时更新 messages 和 currentStreamingMessage
+// Update both messages and currentStreamingMessage simultaneously
 set(state => {
   const updatedMessages = state.messages.map(msg =>
     msg.id === messageId
@@ -453,9 +453,9 @@ set(state => {
 });
 ```
 
-### 难点 3：WebSocket 重连与状态恢复
+### Difficulty 3: WebSocket Reconnection and State Recovery
 
-**解决方案**：
+**Solution**:
 
 ```typescript
 class WebSocketService {
@@ -475,14 +475,14 @@ class WebSocketService {
 }
 ```
 
-### 难点 4：代码高亮与流式渲染的平衡
+### Difficulty 4: Balance Between Code Highlighting and Streaming Rendering
 
-**问题**：Prism.js 高亮会修改 DOM，与 React 的虚拟 DOM 冲突
+**Problem**: Prism.js highlighting modifies DOM, conflicting with React's virtual DOM
 
-**解决方案**：
+**Solution**:
 
 ```typescript
-// 只在非流式时执行高亮
+// Only execute highlighting when not streaming
 useEffect(() => {
   if (codeRef.current && window.Prism && !isStreaming) {
     window.Prism.highlightElement(codeRef.current);
@@ -492,72 +492,72 @@ useEffect(() => {
 
 ---
 
-## 开发流程与规范
+## Development Process and Standards
 
-### 1. 组件开发流程
-
-```
-1. 定义 Props 接口（TypeScript）
-2. 编写纯渲染组件
-3. 添加样式（CSS Modules）
-4. 使用 memo 优化
-5. 编写单元测试
-6. 添加 Storybook 文档（可选）
-```
-
-### 2. Store 开发流程
+### 1. Component Development Process
 
 ```
-1. 定义 State 接口
-2. 定义 Actions 接口
-3. 实现 create 函数
-4. 添加 devtools 中间件
-5. 编写 selectors
-6. 编写单元测试
+1. Define Props interface (TypeScript)
+2. Write pure rendering component
+3. Add styles (CSS Modules)
+4. Optimize with memo
+5. Write unit tests
+6. Add Storybook documentation (optional)
 ```
 
-### 3. 代码审查清单
+### 2. Store Development Process
 
-#### 性能检查
-- [ ] 是否使用了 Selector 订阅状态？
-- [ ] 是否使用了 memo 缓存组件？
-- [ ] 是否使用了 useMemo 缓存计算？
-- [ ] 是否使用了 useCallback 缓存回调？
-- [ ] 是否存在不必要的重渲染？
+```
+1. Define State interface
+2. Define Actions interface
+3. Implement create function
+4. Add devtools middleware
+5. Write selectors
+6. Write unit tests
+```
 
-#### 代码质量
-- [ ] TypeScript 类型是否完整？
-- [ ] 组件是否小于 200 行？
-- [ ] 是否遵循单一职责原则？
-- [ ] 错误处理是否完善？
-- [ ] 是否编写了单元测试？
+### 3. Code Review Checklist
 
-### 4. 常见错误与避免
+#### Performance Check
+- [ ] Is Selector used to subscribe to state?
+- [ ] Is memo used to cache components?
+- [ ] Is useMemo used to cache calculations?
+- [ ] Is useCallback used to cache callbacks?
+- [ ] Are there unnecessary re-renders?
 
-| 错误 | 影响 | 解决方案 |
-|------|------|----------|
-| 解构整个 store | 不必要的重渲染 | 使用 selector |
-| 在 render 中创建函数/对象 | 子组件不必要重渲染 | 使用 useCallback/useMemo |
-| 使用 index 作为 key | 列表更新问题 | 使用稳定唯一 ID |
-| 直接修改 state | 状态不可预测 | 始终返回新对象 |
-| 过大的组件 | 难以维护 | 拆分为小组件 |
+#### Code Quality
+- [ ] Are TypeScript types complete?
+- [ ] Is component under 200 lines?
+- [ ] Does it follow single responsibility principle?
+- [ ] Is error handling complete?
+- [ ] Are unit tests written?
 
-### 5. 调试技巧
+### 4. Common Mistakes and Avoidance
+
+| Mistake | Impact | Solution |
+|---------|--------|----------|
+| Destructure entire store | Unnecessary re-renders | Use selector |
+| Create function/object in render | Unnecessary child re-renders | Use useCallback/useMemo |
+| Use index as key | List update issues | Use stable unique ID |
+| Directly modify state | Unpredictable state | Always return new object |
+| Component too large | Hard to maintain | Split into small components |
+
+### 5. Debugging Techniques
 
 #### React DevTools Profiler
 
 ```
-1. 打开 Profiler 标签
-2. 点击 "Record"
-3. 执行操作
-4. 停止记录
-5. 分析渲染时间
+1. Open Profiler tab
+2. Click "Record"
+3. Perform operation
+4. Stop recording
+5. Analyze render time
 ```
 
 #### Zustand DevTools
 
 ```typescript
-// 启用 Redux DevTools 集成
+// Enable Redux DevTools integration
 const useStore = create(
   devtools(
     (set, get) => ({ ... }),
@@ -566,54 +566,54 @@ const useStore = create(
 );
 ```
 
-#### 性能测量
+#### Performance Measurement
 
 ```typescript
-// 使用 Performance API
+// Use Performance API
 const start = performance.now();
-// ... 执行操作
+// ... Execute operation
 const end = performance.now();
 console.log(`Operation took ${end - start}ms`);
 ```
 
 ---
 
-## 学习路径建议
+## Learning Path Recommendations
 
-### 初级（1-2 周）
-1. 理解 Feature-Based 架构
-2. 掌握 Zustand 基础使用
-3. 学习 React memo/useMemo/useCallback
-4. 熟悉 CSS Modules
+### Beginner (1-2 weeks)
+1. Understand Feature-Based architecture
+2. Master Zustand basic usage
+3. Learn React memo/useMemo/useCallback
+4. Familiarize with CSS Modules
 
-### 中级（2-4 周）
-1. 深入理解 Selector 模式
-2. 掌握 WebSocket 通信
-3. 学习流式内容处理
-4. 理解状态管理最佳实践
+### Intermediate (2-4 weeks)
+1. Deeply understand Selector pattern
+2. Master WebSocket communication
+3. Learn streaming content processing
+4. Understand state management best practices
 
-### 高级（4+ 周）
-1. 性能优化技术
-2. 复杂状态同步问题
-3. 架构设计决策
-4. 测试策略
+### Advanced (4+ weeks)
+1. Performance optimization techniques
+2. Complex state synchronization problems
+3. Architecture design decisions
+4. Testing strategies
 
 ---
 
-## 推荐资源
+## Recommended Resources
 
-### React 性能
-- [React 官方性能优化文档](https://react.dev/learn/render-and-commit)
+### React Performance
+- [React Official Performance Optimization Docs](https://react.dev/learn/render-and-commit)
 - [Kent C. Dodds - Fix the slow render before you fix the re-render](https://kentcdodds.com/blog/fix-the-slow-render-before-you-fix-the-re-render)
 
-### 状态管理
-- [Zustand 文档](https://docs.pmnd.rs/zustand)
-- [Redux 性能最佳实践](https://redux.js.org/style-guide/#performance)
+### State Management
+- [Zustand Documentation](https://docs.pmnd.rs/zustand)
+- [Redux Performance Best Practices](https://redux.js.org/style-guide/#performance)
 
-### 架构设计
+### Architecture Design
 - [Feature-Sliced Design](https://feature-sliced.design/)
 - [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
 ---
 
-*最后更新: 2024年4月*
+*Last updated: April 2024*

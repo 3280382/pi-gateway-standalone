@@ -1,120 +1,120 @@
-# 架构重构 - 变更摘要
+# Architecture Refactor - Change Summary
 
-## 📋 概述
+## 📋 Overview
 
-### 服务端重构 (已完成)
-将原有的 **技术分层架构**（controllers/routes/services）重构为 **Feature-Based 架构**（features/chat, features/session）。
+### Server Refactor (Completed)
+Refactored from **technical layered architecture** (controllers/routes/services) to **Feature-Based architecture** (features/chat, features/session).
 
-### 客户端重构 (2025-04-06 完成)
-将 Chat Feature 的 **UI 组件** 重构为 **Hook-Based 架构**，分离业务逻辑与 UI 渲染。
+### Client Refactor (Completed 2025-04-06)
+Refactored Chat Feature **UI components** to **Hook-Based architecture**, separating business logic from UI rendering.
 
 ---
 
-## 📁 Client 重构详情
+## 📁 Client Refactor Details
 
-### 目录结构变化
+### Directory Structure Changes
 
 ```
 src/client/features/chat/
-├── components/              # UI 组件（纯渲染，无业务逻辑）
-│   ├── ChatPanel.tsx       # 现在：~65 行（原 ~150 行）
-│   ├── InputArea.tsx       # 现在：~280 行（原 ~550 行）
-│   ├── MessageList.tsx     # 保持不变
-│   ├── MessageItem.tsx     # 保持不变
+├── components/              # UI components (pure rendering, no business logic)
+│   ├── ChatPanel.tsx       # Now: ~65 lines (was ~150 lines)
+│   ├── InputArea.tsx       # Now: ~280 lines (was ~550 lines)
+│   ├── MessageList.tsx     # Unchanged
+│   ├── MessageItem.tsx     # Unchanged
 │   └── Header/
-│       ├── AppHeader.tsx   # 类型错误修复，准备接入 hooks
-│       └── DirectoryPicker.tsx  # 新提取的组件
+│       ├── AppHeader.tsx   # Type error fixes, preparing to integrate hooks
+│       └── DirectoryPicker.tsx  # Newly extracted component
 │
-├── hooks/                  # 业务逻辑 Hooks
-│   ├── useChat.ts                 # 基础聊天操作
-│   ├── useChatInit.ts             # 初始化逻辑
-│   ├── useChatMessages.ts         # 消息过滤
-│   ├── useChatPanel.ts            # [NEW] ChatPanel 业务逻辑
-│   ├── useInputArea.ts            # [NEW] InputArea 主逻辑
-│   ├── useFilePicker.ts           # [NEW] @mention 文件选择
-│   ├── useImageUpload.ts          # [NEW] 图片上传 & OCR
-│   ├── useSlashCommands.ts        # [NEW] / 命令选择
-│   ├── useDirectoryPicker.ts      # [NEW] 目录浏览器
-│   ├── useModelSelector.ts        # [NEW] 模型选择
-│   ├── useThinkingSelector.ts     # [NEW] Thinking 级别
-│   └── useSearchFilters.ts        # [NEW] 搜索过滤
+├── hooks/                  # Business logic Hooks
+│   ├── useChat.ts                 # Basic chat operations
+│   ├── useChatInit.ts             # Initialization logic
+│   ├── useChatMessages.ts         # Message filtering
+│   ├── useChatPanel.ts            # [NEW] ChatPanel business logic
+│   ├── useInputArea.ts            # [NEW] InputArea main logic
+│   ├── useFilePicker.ts           # [NEW] @mention file selection
+│   ├── useImageUpload.ts          # [NEW] Image upload & OCR
+│   ├── useSlashCommands.ts        # [NEW] / command selection
+│   ├── useDirectoryPicker.ts      # [NEW] Directory browser
+│   ├── useModelSelector.ts        # [NEW] Model selection
+│   ├── useThinkingSelector.ts     # [NEW] Thinking level
+│   └── useSearchFilters.ts        # [NEW] Search filtering
 │
-├── stores/                 # 状态管理
-├── services/               # API 服务
-└── types/                  # 类型定义
+├── stores/                 # State management
+├── services/               # API services
+└── types/                  # Type definitions
 ```
 
-### 新增 Hooks
+### New Hooks
 
-| Hook | 职责 | 对应组件 | 代码行数 |
-|------|------|----------|----------|
-| `useChatPanel` | 消息滚动、发送协调 | ChatPanel | ~90 |
-| `useInputArea` | 输入处理、发送逻辑 | InputArea | ~200 |
-| `useFilePicker` | @mention 文件选择 | InputArea | ~140 |
-| `useImageUpload` | 图片上传、OCR | InputArea | ~120 |
-| `useSlashCommands` | Slash 命令选择 | InputArea | ~110 |
-| `useDirectoryPicker` | 目录浏览器 | AppHeader | ~100 |
-| `useModelSelector` | 模型选择 | AppHeader | ~90 |
-| `useThinkingSelector` | Thinking 级别选择 | AppHeader | ~70 |
-| `useSearchFilters` | 搜索过滤 | AppHeader | ~130 |
+| Hook | Responsibility | Corresponding Component | Lines of Code |
+|------|---------------|------------------------|---------------|
+| `useChatPanel` | Message scrolling, send coordination | ChatPanel | ~90 |
+| `useInputArea` | Input handling, send logic | InputArea | ~200 |
+| `useFilePicker` | @mention file selection | InputArea | ~140 |
+| `useImageUpload` | Image upload, OCR | InputArea | ~120 |
+| `useSlashCommands` | Slash command selection | InputArea | ~110 |
+| `useDirectoryPicker` | Directory browser | AppHeader | ~100 |
+| `useModelSelector` | Model selection | AppHeader | ~90 |
+| `useThinkingSelector` | Thinking level selection | AppHeader | ~70 |
+| `useSearchFilters` | Search filtering | AppHeader | ~130 |
 
-### 代码行数变化
+### Code Line Changes
 
-| 组件/Hook | 重构前 | 重构后 | 变化 |
-|-----------|--------|--------|------|
+| Component/Hook | Before Refactor | After Refactor | Change |
+|----------------|-----------------|----------------|--------|
 | InputArea.tsx | ~550 | ~280 | -49% |
 | ChatPanel.tsx | ~150 | ~65 | -57% |
-| AppHeader.tsx | ~650 | ~630 | -3% (仅修复) |
-| 新增 Hooks | 0 | ~960 | +960 |
-| **总计** | ~1350 | ~1935 | +43% (可维护性提升) |
+| AppHeader.tsx | ~650 | ~630 | -3% (fixes only) |
+| New Hooks | 0 | ~960 | +960 |
+| **Total** | ~1350 | ~1935 | +43% (maintainability improved) |
 
-### 架构原则
+### Architecture Principles
 
 ```
-重构前：
+Before Refactor:
 Component (UI + Logic + State) → Store → Service
 
-重构后：
+After Refactor:
 Component (UI only) → Hook (Logic) → Store → Service
               │
               └→ Sub-Hooks (FilePicker, ImageUpload, etc.)
 ```
 
-### 使用示例
+### Usage Example
 
 ```typescript
-// 重构前：InputArea.tsx 内部包含所有逻辑
+// Before refactor: InputArea.tsx contains all logic internally
 function InputArea(props) {
   const [showFilePicker, setShowFilePicker] = useState(false);
   const [fileList, setFileList] = useState([]);
-  // ... 200+ 行逻辑
+  // ... 200+ lines of logic
 }
 
-// 重构后：逻辑委托给 Hook
+// After refactor: Logic delegated to Hook
 function InputArea(props) {
   const inputArea = useInputArea(props);
-  // 只负责 UI 渲染
+  // Only responsible for UI rendering
 }
 ```
 
 ---
 
-## 📁 Server 重构详情
+## 📁 Server Refactor Details
 
 ---
 
-## 📁 最终目录结构
+## 📁 Final Directory Structure
 
 ```
 src/server/
 ├── app/
-│   ├── registerRoutes.ts      # HTTP 路由注册
-│   └── registerWS.ts          # WebSocket 处理器注册入口
+│   ├── registerRoutes.ts      # HTTP route registration
+│   └── registerWS.ts          # WebSocket handler registration entry
 │
 ├── config/
-│   └── index.ts               # 配置
+│   └── index.ts               # Configuration
 │
-├── controllers/               # HTTP 控制器（待逐步迁移到 features/*/http/）
+├── controllers/               # HTTP controllers (gradually migrating to features/*/http/)
 │   ├── file.controller.ts
 │   ├── llm-log.controller.ts
 │   ├── model.controller.ts
@@ -124,13 +124,13 @@ src/server/
 │
 ├── core/
 │   └── session/
-│       ├── GatewaySession.ts  # 核心会话类
-│       ├── index.ts           # 模块导出
-│       └── utils.ts           # 会话工具函数
+│       ├── GatewaySession.ts  # Core session class
+│       ├── index.ts           # Module exports
+│       └── utils.ts           # Session utility functions
 │
 ├── features/
 │   ├── chat/
-│   │   └── ws/                # Chat WebSocket 处理器
+│   │   └── ws/                # Chat WebSocket handlers
 │   │       ├── abort.ts
 │   │       ├── command.ts
 │   │       ├── index.ts
@@ -143,7 +143,7 @@ src/server/
 │   │       └── tool-request.ts
 │   │
 │   ├── session/
-│   │   └── ws/                # Session WebSocket 处理器
+│   │   └── ws/                # Session WebSocket handlers
 │   │       ├── change-dir.ts
 │   │       ├── index.ts
 │   │       ├── init.ts
@@ -151,7 +151,7 @@ src/server/
 │   │       ├── load-session.ts
 │   │       └── new-session.ts
 │   │
-│   └── files/                 # Files Feature（待扩展 HTTP 控制器）
+│   └── files/                 # Files Feature (HTTP controllers to be expanded)
 │
 ├── lib/
 │   ├── constants/
@@ -159,65 +159,65 @@ src/server/
 │   ├── utils/
 │   └── app-factory.ts
 │
-├── llm/                       # LLM 日志和拦截器
+├── llm/                       # LLM logging and interceptor
 │
-├── session/                   # ⚠️ 兼容性目录（已废弃）
-│   ├── gateway-session.ts     # 重新导出
-│   └── utils.ts               # 重新导出
+├── session/                   # ⚠️ Compatibility directory (deprecated)
+│   ├── gateway-session.ts     # Re-export
+│   └── utils.ts               # Re-export
 │
 ├── shared/
 │   └── websocket/
-│       ├── types.ts           # WebSocket 类型定义
-│       └── ws-router.ts       # WebSocket 路由器核心
+│       ├── types.ts           # WebSocket type definitions
+│       └── ws-router.ts       # WebSocket router core
 │
-├── index.ts                   # 统一导出入口
-└── server.ts                  # 大幅简化
+├── index.ts                   # Unified export entry
+└── server.ts                  # Significantly simplified
 ```
 
 ---
 
-## 🔑 关键变更
+## 🔑 Key Changes
 
-### 1. WebSocket Router（核心改进）
+### 1. WebSocket Router (Core Improvement)
 
-**新增文件**: `src/server/shared/websocket/ws-router.ts`
+**New File**: `src/server/shared/websocket/ws-router.ts`
 
 ```typescript
-// 之前：server.ts 中的巨型 switch/case
+// Before: Giant switch/case in server.ts
 switch (message.type) {
   case "prompt": await gatewaySession.prompt(...); break;
   case "abort": await gatewaySession.abort(); break;
-  // ... 20+ 个 case
+  // ... 20+ cases
 }
 
-// 之后：使用 Router 分发
+// After: Using Router for dispatch
 await wsRouter.dispatch(type, ctx, payload);
 ```
 
-**特性**:
-- 类似 Express 的路由风格
-- 支持中间件链
-- 统一错误处理
-- 可插拔架构
+**Features**:
+- Express-like routing style
+- Supports middleware chain
+- Unified error handling
+- Pluggable architecture
 
-### 2. Feature 处理器
+### 2. Feature Handlers
 
-**之前**: 所有逻辑集中在 `server.ts` (~400+ 行 switch/case)
+**Before**: All logic concentrated in `server.ts` (~400+ line switch/case)
 
-**之后**: 每个消息类型一个文件
+**After**: One file per message type
 
 ```typescript
 // features/chat/ws/prompt.ts
 export async function handlePrompt(ctx: WSContext, payload: PromptPayload) {
-  // 只处理 prompt 逻辑
+  // Only handle prompt logic
 }
 ```
 
-### 3. 简化的 server.ts
+### 3. Simplified server.ts
 
-**之前**: ~400 行 WebSocket 消息处理逻辑
+**Before**: ~400 lines WebSocket message processing logic
 
-**之后**: ~100 行核心逻辑
+**After**: ~100 lines core logic
 
 ```typescript
 ws.on("message", async (data) => {
@@ -226,46 +226,46 @@ ws.on("message", async (data) => {
 });
 ```
 
-### 4. GatewaySession 移动到 Core
+### 4. GatewaySession Moved to Core
 
-**之前**: `src/server/session/gateway-session.ts`
+**Before**: `src/server/session/gateway-session.ts`
 
-**之后**: `src/server/core/session/GatewaySession.ts`
+**After**: `src/server/core/session/GatewaySession.ts`
 
-- 旧位置保持兼容性导出
-- 新代码应从 core/session 导入
-
----
-
-## 🗑️ 已删除的文件/目录
-
-| 文件/目录 | 原因 |
-|-----------|------|
-| `src/server/routes/index.ts` | 被 `app/registerRoutes.ts` 替代 |
-| `src/server/middleware/` | 空目录 |
-| `src/server/services/` | 空目录 |
-| `src/server/types/` | 空目录 |
-| `src/server/shared/errors/` | 空目录 |
-| `src/server/shared/utils/` | 空目录 |
-| `src/server/features/*/http/` | 暂时未使用 |
+- Old location maintains compatibility exports
+- New code should import from core/session
 
 ---
 
-## 📊 代码统计
+## 🗑️ Deleted Files/Directories
 
-| 指标 | 重构前 | 重构后 | 变化 |
-|------|--------|--------|------|
-| server.ts 行数 | ~400 | ~280 | -30% |
-| WebSocket 处理器 | 1 个文件 | 15 个文件 | 可扩展 |
-| 每个处理器职责 | N/A | 单一 | ✅ |
-| 空目录 | 6+ | 0 | ✅ |
-| 类型检查错误 | - | 0 | ✅ |
+| File/Directory | Reason |
+|----------------|--------|
+| `src/server/routes/index.ts` | Replaced by `app/registerRoutes.ts` |
+| `src/server/middleware/` | Empty directory |
+| `src/server/services/` | Empty directory |
+| `src/server/types/` | Empty directory |
+| `src/server/shared/errors/` | Empty directory |
+| `src/server/shared/utils/` | Empty directory |
+| `src/server/features/*/http/` | Temporarily unused |
 
 ---
 
-## 🔄 向后兼容
+## 📊 Code Statistics
 
-### 保持兼容的旧文件
+| Metric | Before Refactor | After Refactor | Change |
+|--------|-----------------|----------------|--------|
+| server.ts lines | ~400 | ~280 | -30% |
+| WebSocket handlers | 1 file | 15 files | Extensible |
+| Handler responsibility | N/A | Single | ✅ |
+| Empty directories | 6+ | 0 | ✅ |
+| Type check errors | - | 0 | ✅ |
+
+---
+
+## 🔄 Backward Compatibility
+
+### Maintained Compatible Old Files
 
 ```typescript
 // session/gateway-session.ts
@@ -275,22 +275,22 @@ export { GatewaySession } from "../core/session/GatewaySession";
 export { AGENT_DIR, ... } from "../core/session/utils";
 ```
 
-### 协议兼容性
+### Protocol Compatibility
 
-- ✅ 所有 WebSocket 消息类型不变
-- ✅ HTTP API 路径不变
-- ✅ 响应格式不变
+- ✅ All WebSocket message types unchanged
+- ✅ HTTP API paths unchanged
+- ✅ Response format unchanged
 
 ---
 
-## ⚠️ Client 端影响
+## ⚠️ Client-Side Impact
 
-**无需任何修改** - 重构仅涉及服务端内部架构，所有协议和 API 保持不变。
+**No modifications required** - Refactor only involves server-side internal architecture, all protocols and APIs remain unchanged.
 
-Client 端使用的消息类型与处理器对照：
+Client-side message types and handler mapping:
 
-| Client 消息类型 | 服务端处理器 | 状态 |
-|----------------|-------------|------|
+| Client Message Type | Server Handler | Status |
+|--------------------|----------------|--------|
 | `prompt` | `features/chat/ws/prompt.ts` | ✅ |
 | `abort` | `features/chat/ws/abort.ts` | ✅ |
 | `thinking_level_change` | `features/chat/ws/thinking-level.ts` | ✅ |
@@ -301,18 +301,18 @@ Client 端使用的消息类型与处理器对照：
 
 ---
 
-## 🚀 扩展指南
+## 🚀 Extension Guide
 
-### 添加新的 WebSocket 处理器
+### Adding New WebSocket Handlers
 
 ```typescript
-// 1. 在对应 feature 目录创建处理器
+// 1. Create handler in corresponding feature directory
 // features/my-feature/ws/my-handler.ts
 export async function handleMyMessage(ctx: WSContext, payload: MyPayload) {
-  // 处理逻辑
+  // Processing logic
 }
 
-// 2. 在 index.ts 注册
+// 2. Register in index.ts
 // features/my-feature/ws/index.ts
 import { wsRouter } from "../../../shared/websocket/ws-router";
 import { handleMyMessage } from "./my-handler";
@@ -322,29 +322,29 @@ export function registerMyFeatureWSHandlers() {
 }
 ```
 
-### 添加新的 Feature
+### Adding New Features
 
 ```typescript
-// 1. 创建目录结构
+// 1. Create directory structure
 // features/new-feature/ws/
 // features/new-feature/http/
 
-// 2. 创建处理器并注册
+// 2. Create and register handler
 // features/new-feature/ws/index.ts
 wsRouter.register("new_message", handler);
 
-// 3. 在 registerWS.ts 导入
+// 3. Import in registerWS.ts
 import "./features/new-feature/ws/index";
 ```
 
 ---
 
-## 📦 依赖关系
+## 📦 Dependency Relationships
 
 ```
 server.ts
-  ├── app/registerRoutes.ts (HTTP 路由)
-  ├── app/registerWS.ts (WebSocket 处理器)
+  ├── app/registerRoutes.ts (HTTP routes)
+  ├── app/registerWS.ts (WebSocket handlers)
   │     ├── features/session/ws/ (init, change_dir, etc.)
   │     └── features/chat/ws/ (prompt, abort, etc.)
   ├── core/session/GatewaySession.ts
@@ -353,14 +353,14 @@ server.ts
 
 ---
 
-## ✅ 验证检查清单
+## ✅ Verification Checklist
 
-- [x] 类型检查通过（服务器端）
-- [x] WebSocket Router 正确分发消息
-- [x] 所有处理器正确注册
-- [x] 向后兼容保持
-- [x] GatewaySession 正确导出
-- [x] 旧文件重导出兼容层
-- [x] 空目录已清理
-- [x] 冗余文件已删除
-- [x] Client 端无需修改
+- [x] Type checking passed (server-side)
+- [x] WebSocket Router correctly dispatches messages
+- [x] All handlers correctly registered
+- [x] Backward compatibility maintained
+- [x] GatewaySession correctly exported
+- [x] Old file re-export compatibility layer
+- [x] Empty directories cleaned up
+- [x] Redundant files deleted
+- [x] Client-side no modifications required

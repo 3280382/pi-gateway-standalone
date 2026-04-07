@@ -1,134 +1,134 @@
-# 强制功能验证提示模板
+# Mandatory Feature Verification Prompt Template
 
-## 使用说明
+## Usage Instructions
 
-当需要我完成功能修复或验证时，请复制以下模板并粘贴到对话中。
+When you need me to complete feature fixes or verification, please copy the following template and paste it into the conversation.
 
 ---
 
-## 标准功能验证模板
+## Standard Feature Verification Template
 
 ```
-必须按照以下顺序执行，每一步完成后明确报告结果，全部勾选后才能说"完成"：
+Must execute in the following order, explicitly report results after each step, only say "complete" after all checked:
 
-□ STEP 1 - 代码修改完成
-  修改文件: [列出所有修改的文件路径]
+□ STEP 1 - Code modification complete
+  Modified files: [List all modified file paths]
   
-□ STEP 2 - 编译构建通过
-  运行: npm run build
-  结果: [成功/失败，如有错误列出详细信息]
+□ STEP 2 - Build compilation passed
+  Run: npm run build
+  Result: [Success/Failure, if failure list detailed error info]
   
-□ STEP 3 - 类型检查通过
-  运行: npm run typecheck
-  结果: [通过/失败，如有错误列出前3个]
+□ STEP 3 - Type check passed
+  Run: npm run typecheck
+  Result: [Pass/Fail, if fail list first 3 errors]
   
-□ STEP 4 - 单元测试通过
-  运行: npm test
-  结果: [通过X个/失败Y个]
+□ STEP 4 - Unit tests passed
+  Run: npm test
+  Result: [Passed X/Failed Y]
   
-□ STEP 5 - 服务验证正常
-  运行: node scripts/tmux-controller.js status
-  结果: [前端正常/异常] [后端正常/异常]
+□ STEP 5 - Service verification normal
+  Run: node scripts/tmux-controller.js status
+  Result: [Frontend normal/abnormal] [Backend normal/abnormal]
   
-□ STEP 6 - [黄金标准] 模拟浏览器测试（强制要求）
-  **要求**: 必须创建实际的自动化测试验证功能
-  **禁止**: 仅用代码审查、API测试或curl请求冒充功能验证
+□ STEP 6 - [Gold Standard] Simulated browser testing (mandatory requirement)
+  **Requirement**: Must create actual automated test to verify functionality
+  **Prohibited**: Only code review, API testing, or curl requests as functional verification
   
-  根据功能需求创建测试，验证以下方面：
+  Create tests based on functional requirements, verify the following aspects:
   
-  □ 用户界面元素存在
-    - 测试代码: [粘贴测试代码]
-    - 验证: [元素选择器可以找到目标元素]
+  □ User interface elements exist
+    - Test code: [Paste test code]
+    - Verification: [Element selector can find target element]
   
-  □ 用户交互触发状态更新
-    - 测试代码: [粘贴测试代码]
-    - 验证: [点击/输入等操作触发状态变化]
+  □ User interaction triggers state update
+    - Test code: [Paste test code]
+    - Verification: [Click/input operations trigger state changes]
   
-  □ DOM元素正确渲染
-    - 测试代码: [粘贴测试代码]
-    - 验证: [元素可见、CSS类正确、样式应用]
+  □ DOM elements render correctly
+    - Test code: [Paste test code]
+    - Verification: [Elements visible, CSS classes correct, styles applied]
   
-  □ 网络请求正确触发
-    - 测试代码: [粘贴测试代码]
-    - 验证: [API请求发送，参数正确]
+  □ Network requests trigger correctly
+    - Test code: [Paste test code]
+    - Verification: [API requests sent, parameters correct]
   
-  □ 数据正确显示
-    - 测试代码: [粘贴测试代码]
-    - 验证: [数据加载后在UI中正确显示]
+  □ Data displays correctly
+    - Test code: [Paste test code]
+    - Verification: [Data loads and displays correctly in UI]
   
-  测试运行结果:
+  Test run results:
   ```
-  [粘贴完整的测试运行输出]
+  [Paste complete test run output]
   ```
   
-□ STEP 7 - 实际行为验证（强制要求）
-  通过日志或测试输出证明以下内容：
+□ STEP 7 - Actual behavior verification (mandatory requirement)
+  Prove the following through logs or test output:
   
-  □ 状态更新确实发生
-    证据: [日志/输出显示状态变化]
+  □ State updates actually occur
+    Evidence: [Logs/output showing state changes]
   
-  □ 组件确实重新渲染
-    证据: [日志/输出显示渲染触发]
+  □ Components actually re-render
+    Evidence: [Logs/output showing render triggers]
   
-  □ API请求确实发送
-    证据: [网络日志/后端日志显示请求]
+  □ API requests actually sent
+    Evidence: [Network logs/backend logs showing requests]
   
-  □ 数据确实加载
-    证据: [响应数据/UI更新证明]
+  □ Data actually loaded
+    Evidence: [Response data/UI updates proving functionality]
 
-⚠️ 重要声明：
-- 只说"代码修改完成"≠"功能修复完成"
-- 构建成功≠运行时正确
-- API测试正常≠功能正常
-- TypeScript编译通过≠JavaScript执行正确
+⚠️ Important Declarations:
+- "Code modification complete" ≠ "Feature fix complete"
+- Build success ≠ Runtime correct
+- API test normal ≠ Feature normal
+- TypeScript compilation pass ≠ JavaScript execution correct
 
-**在未完成STEP 6-7之前，严禁说"完成"、"修复"或"通过"。**
+**Before completing STEP 6-7, strictly prohibited from saying "complete", "fixed", or "passed".**
 ```
 
 ---
 
-## 快速验证模板（用于简单修复）
+## Quick Verification Template (for simple fixes)
 
 ```
-对于简单修复，最少需要：
+For simple fixes, minimum required:
 
-□ 代码修改完成并构建成功
-□ 服务运行正常
-□ [黄金标准] 创建并运行一个测试证明功能工作
-   - 测试代码: [粘贴代码]
-   - 运行结果: [粘贴输出]
+□ Code modification complete and build successful
+□ Service running normally
+□ [Gold Standard] Create and run a test proving feature works
+   - Test code: [Paste code]
+   - Run results: [Paste output]
 
-未完成以上三项，不得说"完成"。
+Without completing above three items, do not say "complete".
 ```
 
 ---
 
-## 为什么需要这个模板
+## Why This Template is Needed
 
-### 问题背景
-之前的修复尝试中，我（AI）经常犯以下错误：
-1. 只做代码审查就宣布"完成"
-2. 只用API测试（curl）验证功能
-3. 忽略实际的浏览器运行时行为
-4. 混淆"代码正确"和"功能正常"
+### Problem Background
+In previous fix attempts, I (AI) often made the following mistakes:
+1. Declared "complete" after only code review
+2. Only used API tests (curl) to verify functionality
+3. Ignored actual browser runtime behavior
+4. Confused "code correct" with "feature normal"
 
-### 后果
-- 用户报告功能仍然不工作
-- 反复修复同一问题
-- 浪费时间和信任
+### Consequences
+- User reports feature still not working
+- Repeated fixes for same issue
+- Wasted time and trust
 
-### 解决方案
-这个强制模板确保：
-1. 代码质量检查（构建、类型、测试）
-2. 服务验证（前后端运行正常）
-3. **黄金标准：实际的浏览器/功能测试**
+### Solution
+This mandatory template ensures:
+1. Code quality checks (build, type, test)
+2. Service verification (frontend and backend running normally)
+3. **Gold Standard: Actual browser/functional testing**
 
-只有第三步能证明功能真的工作。
+Only step 3 can prove the feature really works.
 
 ---
 
-## 参考文档
+## Reference Documentation
 
-- 完整流程: /root/pi-gateway-standalone/DEVELOPMENT.md
-- 系统规则: /root/pi-gateway-standalone/SYSTEM.md
-- 项目概述: /root/pi-gateway-standalone/README.md
+- Complete process: /root/pi-gateway-standalone/DEVELOPMENT.md
+- System rules: /root/pi-gateway-standalone/SYSTEM.md
+- Project overview: /root/pi-gateway-standalone/README.md

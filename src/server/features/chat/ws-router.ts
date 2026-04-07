@@ -1,12 +1,12 @@
 /**
- * WebSocket 消息路由器
- * 将 WebSocket 消息分发到对应的处理器
+ * WebSocket Message Router
+ * Distributes WebSocket messages to corresponding handlers
  *
- * 设计原则：
- * - 类似 Express 的路由风格
- * - 支持异步处理器
- * - 统一错误处理
- * - 可扩展，支持中间件
+ * Design Principles:
+ * - Express-like routing style
+ * - Supports async handlers
+ * - Unified error handling
+ * - Extensible, supports middleware
  */
 
 import type { WebSocket } from "ws";
@@ -16,11 +16,11 @@ import type { PiAgentSession } from "./agent-session/piAgentSession";
 const logger = new Logger({ level: LogLevel.INFO });
 
 // ============================================================================
-// 类型定义（原 types.ts）
+// Type Definitions (formerly types.ts)
 // ============================================================================
 
 /**
- * WebSocket 消息负载的基础类型
+ * Base type for WebSocket message payload
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface WSMessagePayload {
@@ -28,22 +28,22 @@ export interface WSMessagePayload {
 }
 
 /**
- * WebSocket 上下文
- * 每个 WebSocket 连接都有自己的上下文
+ * WebSocket Context
+ * Each WebSocket connection has its own context
  */
 export interface WSContext {
-	/** WebSocket 连接 */
+	/** WebSocket connection */
 	ws: WebSocket;
-	/** Gateway 会话 */
+	/** Gateway session */
 	session: PiAgentSession;
-	/** 连接 ID */
+	/** Connection ID */
 	connectionId: string;
-	/** 连接时间 */
+	/** Connection time */
 	connectedAt: Date;
 }
 
 /**
- * 消息处理器类型
+ * Message handler type
  */
 export type WSHandler = (
 	ctx: WSContext,
@@ -52,7 +52,7 @@ export type WSHandler = (
 ) => Promise<void> | void;
 
 /**
- * 中间件函数类型
+ * Middleware function type
  */
 export type WSMiddleware = (
 	ctx: WSContext,
@@ -61,7 +61,7 @@ export type WSMiddleware = (
 ) => Promise<void>;
 
 /**
- * 路由项
+ * Route item
  */
 export interface WSRoute {
 	type: string;
@@ -69,12 +69,12 @@ export interface WSRoute {
 }
 
 // ============================================================================
-// WSRouter 实现（原 ws-router.ts）
+// WSRouter Implementation (formerly ws-router.ts)
 // ============================================================================
 
 /**
- * WebSocket 路由器
- * 管理消息类型到处理器的映射
+ * WebSocket Router
+ * Manages message type to handler mapping
  */
 export class WSRouter {
 	private routes: Map<string, WSHandler> = new Map();
@@ -82,21 +82,21 @@ export class WSRouter {
 	private errorHandler?: (error: Error, ctx: WSContext, type: string) => void;
 
 	/**
-	 * 注册消息处理器
-	 * @param type 消息类型
-	 * @param handler 处理器函数
+	 * Register message handler
+	 * @param type Message type
+	 * @param handler Handler function
 	 */
 	register(type: string, handler: WSHandler): void {
 		if (this.routes.has(type)) {
-			logger.warn(`[WSRouter] 消息类型 "${type}" 已被注册，将被覆盖`);
+			logger.warn(`[WSRouter] Message type "${type}" already registered, will be overwritten`);
 		}
 		this.routes.set(type, handler);
-		logger.info(`[WSRouter] 注册处理器: ${type}`);
+		logger.info(`[WSRouter] Registered handler: ${type}`);
 	}
 
 	/**
-	 * 批量注册消息处理器
-	 * @param routes 路由数组
+	 * Batch register message handlers
+	 * @param routes Route array
 	 */
 	registerBatch(routes: WSRoute[]): void {
 		for (const { type, handler } of routes) {
@@ -105,25 +105,25 @@ export class WSRouter {
 	}
 
 	/**
-	 * 移除消息处理器
-	 * @param type 消息类型
+	 * Remove message handler
+	 * @param type Message type
 	 */
 	unregister(type: string): void {
 		this.routes.delete(type);
-		logger.info(`[WSRouter] 注销处理器: ${type}`);
+		logger.info(`[WSRouter] Unregistered handler: ${type}`);
 	}
 
 	/**
-	 * 添加中间件
-	 * @param middleware 中间件函数
+	 * Add middleware
+	 * @param middleware Middleware function
 	 */
 	use(middleware: WSMiddleware): void {
 		this.middlewares.push(middleware);
 	}
 
 	/**
-	 * 设置错误处理器
-	 * @param handler 错误处理器
+	 * Set error handler
+	 * @param handler Error handler
 	 */
 	setErrorHandler(
 		handler: (error: Error, ctx: WSContext, type: string) => void,
@@ -132,10 +132,10 @@ export class WSRouter {
 	}
 
 	/**
-	 * 分发消息到对应的处理器
-	 * @param type 消息类型
-	 * @param ctx WebSocket 上下文
-	 * @param payload 消息负载
+	 * Dispatch message to corresponding handler
+	 * @param type Message type
+	 * @param ctx WebSocket context
+	 * @param payload Message payload
 	 */
 	async dispatch(
 		type: string,
@@ -145,27 +145,27 @@ export class WSRouter {
 		const handler = this.routes.get(type);
 
 		if (!handler) {
-			logger.warn(`[WSRouter] 未找到消息类型 "${type}" 的处理器`);
+			logger.warn(`[WSRouter] No handler found for message type "${type}"`);
 			ctx.ws.send(
 				JSON.stringify({
 					type: "error",
-					error: `未知的消息类型: ${type}`,
+					error: `Unknown message type: ${type}`,
 				}),
 			);
 			return;
 		}
 
 		try {
-			// 构建中间件链
+			// Build middleware chain
 			const executeHandler = async () => {
 				await handler(ctx, payload);
 			};
 
-			// 应用中间件
+			// Apply middleware
 			await this.applyMiddlewares(ctx, payload, executeHandler);
 		} catch (error) {
 			logger.error(
-				`[WSRouter] 处理消息 "${type}" 时出错:`,
+				`[WSRouter] Error processing message "${type}":`,
 				{},
 				error instanceof Error ? error : undefined,
 			);
@@ -173,12 +173,12 @@ export class WSRouter {
 			if (this.errorHandler) {
 				this.errorHandler(error as Error, ctx, type);
 			} else {
-				// 默认错误处理
+				// Default error handling
 				ctx.ws.send(
 					JSON.stringify({
 						type: "error",
 						error:
-							error instanceof Error ? error.message : "处理消息时发生错误",
+							error instanceof Error ? error.message : "Error occurred while processing message",
 						messageType: type,
 					}),
 				);
@@ -187,7 +187,7 @@ export class WSRouter {
 	}
 
 	/**
-	 * 应用中间件链
+	 * Apply middleware chain
 	 */
 	private async applyMiddlewares(
 		ctx: WSContext,
@@ -209,15 +209,15 @@ export class WSRouter {
 	}
 
 	/**
-	 * 获取已注册的消息类型列表
+	 * Get list of registered message types
 	 */
 	getRegisteredTypes(): string[] {
 		return Array.from(this.routes.keys());
 	}
 
 	/**
-	 * 检查消息类型是否已注册
-	 * @param type 消息类型
+	 * Check if message type is registered
+	 * @param type Message type
 	 */
 	has(type: string): boolean {
 		return this.routes.has(type);
@@ -225,13 +225,13 @@ export class WSRouter {
 }
 
 /**
- * 全局 WebSocket 路由器实例
+ * Global WebSocket router instance
  */
 export const wsRouter = new WSRouter();
 
 /**
- * 消息类型验证中间件
- * 验证消息格式是否正确
+ * Message type validation middleware
+ * Validates message format is correct
  */
 export const validateMessageMiddleware: WSMiddleware = async (
 	ctx,
@@ -242,7 +242,7 @@ export const validateMessageMiddleware: WSMiddleware = async (
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: "消息负载不能为空",
+				error: "Message payload cannot be empty",
 			}),
 		);
 		return;
@@ -251,8 +251,8 @@ export const validateMessageMiddleware: WSMiddleware = async (
 };
 
 /**
- * 会话检查中间件
- * 检查会话是否已初始化
+ * Session check middleware
+ * Checks if session is initialized
  */
 export const requireSessionMiddleware: WSMiddleware = async (
 	ctx,
@@ -263,7 +263,7 @@ export const requireSessionMiddleware: WSMiddleware = async (
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: "会话未初始化，请先发送 init 消息",
+				error: "Session not initialized, please send init message first",
 			}),
 		);
 		return;
@@ -272,11 +272,11 @@ export const requireSessionMiddleware: WSMiddleware = async (
 };
 
 /**
- * 日志中间件
- * 记录消息处理日志
+ * Logging middleware
+ * Records message processing logs
  */
 export const loggingMiddleware: WSMiddleware = async (_ctx, payload, next) => {
 	const type = (payload?.type as string) || "unknown";
-	logger.debug(`[WS] 接收消息: ${type}`);
+	logger.debug(`[WS] Received message: ${type}`);
 	await next();
 };

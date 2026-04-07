@@ -1,6 +1,6 @@
 /**
- * 日志工具
- * 提供结构化的日志记录功能
+ * Logger utility
+ * Provides structured logging functionality
  */
 
 import { LogLevel } from "../../../shared/types/common.types";
@@ -76,7 +76,7 @@ export class Logger {
 		const error = new Error();
 		const stack = error.stack?.split("\n") || [];
 
-		// 查找第一个不是logger.ts的调用栈
+		// Find first call stack that's not logger.ts
 		for (let i = 3; i < stack.length; i++) {
 			const line = stack[i].trim();
 			if (!line.includes("logger.ts")) {
@@ -152,7 +152,7 @@ export class Logger {
 		this.writeLog(this.createLogEntry(LogLevel.TRACE, message, context));
 	}
 
-	// 快捷方法
+	// Shortcut methods
 	static error(
 		message: string,
 		context?: Record<string, any>,
@@ -178,5 +178,5 @@ export class Logger {
 	}
 }
 
-// 导出默认实例
+// Export default instance
 export const logger = Logger.getInstance();

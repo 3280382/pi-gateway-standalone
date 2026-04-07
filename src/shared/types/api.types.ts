@@ -1,10 +1,10 @@
 /**
- * API相关类型定义
- * 前后端共享的API请求/响应格式
+ * API-related type definitions
+ * Shared API request/response formats between frontend and backend
  */
 
 // ============================================================================
-// 通用API响应格式
+// Generic API Response Format
 // ============================================================================
 
 export interface ApiResponse<T = any> {
@@ -46,11 +46,11 @@ export interface CacheMeta {
 }
 
 // ============================================================================
-// 错误代码定义
+// Error Code Definitions
 // ============================================================================
 
 export enum ErrorCode {
-	// 通用错误
+	// Generic errors
 	INTERNAL_ERROR = "INTERNAL_ERROR",
 	VALIDATION_ERROR = "VALIDATION_ERROR",
 	NOT_FOUND = "NOT_FOUND",
@@ -60,21 +60,21 @@ export enum ErrorCode {
 	CONFLICT = "CONFLICT",
 	TIMEOUT = "TIMEOUT",
 
-	// 业务错误
+	// Business errors
 	CHAT_ERROR = "CHAT_ERROR",
 	FILE_ERROR = "FILE_ERROR",
 	SESSION_ERROR = "SESSION_ERROR",
 	LLM_ERROR = "LLM_ERROR",
 	TOOL_ERROR = "TOOL_ERROR",
 
-	// 网络错误
+	// Network errors
 	NETWORK_ERROR = "NETWORK_ERROR",
 	WEBSOCKET_ERROR = "WEBSOCKET_ERROR",
 	CONNECTION_ERROR = "CONNECTION_ERROR",
 }
 
 // ============================================================================
-// API版本和状态
+// API Version and Status
 // ============================================================================
 
 export interface ApiVersion {
@@ -102,7 +102,7 @@ export interface ServiceStatus {
 }
 
 // ============================================================================
-// 通用请求类型
+// Generic Request Types
 // ============================================================================
 
 export interface PaginationRequest {
@@ -122,7 +122,7 @@ export interface FilterRequest {
 }
 
 // ============================================================================
-// 实用类型
+// Utility Types
 // ============================================================================
 
 export type MaybePromise<T> = T | Promise<T>;

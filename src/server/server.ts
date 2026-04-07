@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 
 /**
- * Pi Gateway Server - Feature-Based 架构版本
- * 重构后的简化 server.ts，使用 WebSocket Router 进行消息分发
+ * Pi Gateway Server - Feature-Based Architecture Version
+ * Refactored simplified server.ts using WebSocket Router for message dispatch
  *
- * 架构改进：
- * - 使用 WSRouter 分发 WebSocket 消息（替代 switch/case）
- * - Feature-Based 目录结构
- * - 核心业务逻辑迁移到 features/
+ * Architecture improvements:
+ * - Use WSRouter to dispatch WebSocket messages (replaces switch/case)
+ * - Feature-Based directory structure
+ * - Core business logic migrated to features/
  */
 
 // ============================================================================
-// 第一步：在导入任何 SDK 之前设置 fetch 拦截器
+// Step 1: Setup fetch interceptors before importing any SDK
 // ============================================================================
 
 import { Config } from "./config";
@@ -19,20 +19,20 @@ import { setupLlmInterceptors } from "./features/chat/llm";
 import { LlmLogManager } from "./features/chat/llm/log-manager";
 import { Logger, LogLevel } from "./lib/utils/logger";
 
-// 全局 LLM 日志管理器
+// Global LLM log manager
 const llmLogManager = new LlmLogManager({
 	enabled: Config.getLlmLogConfig().enabled,
 	truncateLimit: Config.getLlmLogConfig().truncateLimit,
 });
 
-// 设置 LLM 拦截器（必须在导入 pi-coding-agent 之前）
+// Setup LLM interceptors (must be before importing pi-coding-agent)
 setupLlmInterceptors(llmLogManager, {
 	setupHttpInterceptor: true,
 	truncateLimit: Config.getLlmLogConfig().truncateLimit,
 });
 
 // ============================================================================
-// 第二步：导入其他模块
+// Step 2: Import other modules
 // ============================================================================
 
 import { WebSocket, WebSocketServer } from "ws";
@@ -40,7 +40,7 @@ import { z } from "zod";
 import { registerRoutes } from "./app/routes";
 
 // ============================================================================
-// 注册 WebSocket 处理器（必须在 wsRouter 使用之前导入以触发自动注册）
+// Register WebSocket handlers (must be imported before wsRouter usage to trigger auto-registration)
 // ============================================================================
 import "./features/chat/ws-handlers/session/index";
 import "./features/chat/ws-handlers/message/index";
@@ -49,31 +49,31 @@ import { PiAgentSession } from "./features/chat/agent-session/piAgentSession";
 import { AppFactory } from "./lib/app-factory";
 
 // ============================================================================
-// 服务器启动时间用于重新加载检测
+// Server start time for reload detection
 // ============================================================================
 
 const SERVER_START_TIME = Date.now();
 
 // ============================================================================
-// 全局错误处理器防止崩溃
+// Global error handlers to prevent crashes
 // ============================================================================
 
 process.on("uncaughtException", (error) => {
-	console.error("[FATAL] 未捕获异常:", error);
+	console.error("[FATAL] Uncaught exception:", error);
 });
 
 process.on("unhandledRejection", (reason, promise) => {
-	console.error("[FATAL] 未处理的 Promise 拒绝:", promise, "原因:", reason);
+	console.error("[FATAL] Unhandled promise rejection:", promise, "reason:", reason);
 });
 
 // ============================================================================
-// 日志器
+// Logger
 // ============================================================================
 
 const logger = new Logger({ level: LogLevel.INFO });
 
 // ============================================================================
-// WebSocket 消息验证 Schema
+// WebSocket message validation Schema
 // ============================================================================
 
 const _WebSocketMessageSchema = z.object({
@@ -82,7 +82,7 @@ const _WebSocketMessageSchema = z.object({
 });
 
 // ============================================================================
-// 创建 Express 应用和服务器
+// Create Express app and server
 // ============================================================================
 
 const appFactory = AppFactory.createDefault();
@@ -90,30 +90,30 @@ const app = appFactory.getApp();
 const server = appFactory.getServer();
 
 // ============================================================================
-// 注册 API 路由
+// Register API routes
 // ============================================================================
 
 await registerRoutes(app, llmLogManager, SERVER_START_TIME);
 appFactory.setupNotFoundHandler();
-logger.info("API 路由已注册，404 处理器已设置");
+logger.info("API routes registered, 404 handler set");
 
 // ============================================================================
-// 设置 WebSocket 服务器
+// Setup WebSocket server
 // ============================================================================
 
 const wss = new WebSocketServer({ server });
 
-// 连接计数器（用于生成唯一 ID）
+// Connection counter (for generating unique IDs)
 let connectionCounter = 0;
 
 wss.on("connection", (ws) => {
 	const connectionId = `conn_${++connectionCounter}_${Date.now()}`;
-	logger.info(`[WebSocket] 新连接建立: ${connectionId}`);
+	logger.info(`[WebSocket] New connection established: ${connectionId}`);
 
-	// 创建 PiAgentSession 实例
+	// Create PiAgentSession instance
 	const piAgentSession = new PiAgentSession(ws, llmLogManager);
 
-	// 创建 WebSocket 上下文
+	// Create WebSocket context
 	const ctx: WSContext = {
 		ws,
 		session: piAgentSession,
@@ -121,48 +121,48 @@ wss.on("connection", (ws) => {
 		connectedAt: new Date(),
 	};
 
-	// WebSocket 消息处理 - 使用 Router 分发
+	// WebSocket message handling - using Router dispatch
 	ws.on("message", async (data) => {
 		let rawMessage: unknown;
 
-		// 1. 解析 JSON
+		// 1. Parse JSON
 		try {
 			rawMessage = JSON.parse(data.toString());
 		} catch {
 			ws.send(
 				JSON.stringify({
 					type: "error",
-					error: "无效的 JSON 消息",
+					error: "Invalid JSON message",
 				}),
 			);
 			return;
 		}
 
-		// 2. 提取 type 和 payload
+		// 2. Extract type and payload
 		let type: string;
 		let payload: any;
 
 		if (rawMessage && typeof rawMessage === "object" && "type" in rawMessage) {
 			type = (rawMessage as any).type;
-			// 将整个对象作为 payload，但排除 type 字段
+			// Use entire object as payload, excluding type field
 			const { type: _, ...rest } = rawMessage as any;
 			payload = rest;
 		} else {
 			ws.send(
 				JSON.stringify({
 					type: "error",
-					error: "消息必须包含 type 字段",
+					error: "Message must contain type field",
 				}),
 			);
 			return;
 		}
 
-		// 3. 使用 Router 分发消息
+		// 3. Use Router to dispatch message
 		try {
 			await wsRouter.dispatch(type, ctx, payload);
 		} catch (error) {
 			logger.error(
-				`[WebSocket] 处理消息 "${type}" 时出错:`,
+				`[WebSocket] Error processing message "${type}":`,
 				{ rawMessage },
 				error instanceof Error ? error : undefined,
 			);
@@ -171,13 +171,13 @@ wss.on("connection", (ws) => {
 				ws.send(
 					JSON.stringify({
 						type: "error",
-						error: error instanceof Error ? error.message : "处理消息失败",
+						error: error instanceof Error ? error.message : "Failed to process message",
 						receivedType: type,
 					}),
 				);
 			} catch (sendError) {
 				logger.error(
-					"[WebSocket] 发送错误消息失败:",
+					"[WebSocket] Failed to send error message:",
 					{},
 					sendError instanceof Error ? sendError : undefined,
 				);
@@ -185,21 +185,21 @@ wss.on("connection", (ws) => {
 		}
 	});
 
-	// 连接关闭处理
+	// Connection close handling
 	ws.on("close", () => {
-		logger.info(`[WebSocket] 连接关闭: ${connectionId}`);
+		logger.info(`[WebSocket] Connection closed: ${connectionId}`);
 		piAgentSession.dispose();
 	});
 
-	// 错误处理
+	// Error handling
 	ws.on("error", (error) => {
-		logger.error(`[WebSocket] 连接错误: ${connectionId}`, {}, error);
+		logger.error(`[WebSocket] Connection error: ${connectionId}`, {}, error);
 		piAgentSession.dispose();
 	});
 });
 
 // ============================================================================
-// 优雅关闭处理
+// Graceful shutdown handling
 // ============================================================================
 
 function setupGracefulShutdown() {
@@ -207,32 +207,32 @@ function setupGracefulShutdown() {
 
 	shutdownSignals.forEach((signal) => {
 		process.on(signal, async () => {
-			logger.info(`收到 ${signal} 信号，正在优雅关闭...`);
+			logger.info(`Received ${signal} signal, shutting down gracefully...`);
 
-			// 关闭 WebSocket 服务器
+			// Close WebSocket server
 			if (wss) {
-				logger.info("关闭 WebSocket 服务器...");
+				logger.info("Closing WebSocket server...");
 				wss.clients.forEach((client) => {
 					if (client.readyState === WebSocket.OPEN) {
-						client.close(1001, "服务器正在关闭");
+						client.close(1001, "Server is shutting down");
 					}
 				});
 				wss.close();
 			}
 
-			// 清理 LLM 日志管理器
+			// Cleanup LLM log manager
 			llmLogManager.dispose();
 
-			// 关闭 HTTP 服务器
+			// Close HTTP server
 			if (server) {
 				server.close(() => {
-					logger.info("HTTP 服务器已关闭");
+					logger.info("HTTP server closed");
 					process.exit(0);
 				});
 
-				// 强制超时
+				// Force timeout
 				setTimeout(() => {
-					logger.error("强制关闭超时");
+					logger.error("Force shutdown timeout");
 					process.exit(1);
 				}, 10000);
 			} else {
@@ -241,13 +241,13 @@ function setupGracefulShutdown() {
 		});
 	});
 
-	logger.info("优雅关闭处理已设置");
+	logger.info("Graceful shutdown handling set up");
 }
 
 setupGracefulShutdown();
 
 // ============================================================================
-// 启动服务器（仅在直接运行时）
+// Start server (only when run directly)
 // ============================================================================
 
 const isMainModule =
@@ -264,7 +264,7 @@ if (isMainModule) {
 			console.log(`
 ╔════════════════════════════════════════════════════════╗
 ║                                                        ║
-║   Pi Gateway Server (Feature-Based 架构)              ║
+║   Pi Gateway Server (Feature-Based Architecture)       ║
 ║                                                        ║
 ║   Web UI: http://localhost:${port}                      ║
 ║                                                        ║
@@ -272,13 +272,13 @@ if (isMainModule) {
     `);
 		})
 		.catch((error) => {
-			console.error("启动服务器失败:", error);
+			console.error("Failed to start server:", error);
 			process.exit(1);
 		});
 }
 
 // ============================================================================
-// 导出（用于测试）
+// Exports (for testing)
 // ============================================================================
 
 export { app, llmLogManager, PiAgentSession, server, wss };

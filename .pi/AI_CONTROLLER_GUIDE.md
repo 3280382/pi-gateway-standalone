@@ -1,40 +1,40 @@
-# AI Tmux 控制器使用指南
+# AI Tmux Controller Usage Guide
 
-## 概述
+## Overview
 
-作为 AI，你现在运行在 **底部窗格** 中（通过 `pi` 启动），可以直接控制开发环境。
+As AI, you are now running in the **bottom pane** (started via `pi`), and can directly control the development environment.
 
-三窗格布局：
-- **上左 (0)**: 前端服务 (Vite)
-- **上右 (1)**: 后端服务 (tsx watch)  
-- **底部 (2)**: AI 交互窗格 (pi) - 你在这里
+Three-pane layout:
+- **Top Left (0)**: Frontend service (Vite)
+- **Top Right (1)**: Backend service (tsx watch)  
+- **Bottom (2)**: AI interaction pane (pi) - you are here
 
-## 快速开始
+## Quick Start
 
-底部窗格已经启动了 `pi`，你正在这里运行。可以通过 tmux 控制器控制其他两个窗格：
+The bottom pane has already started `pi`, and you are running here. You can control the other two panes via the tmux controller:
 
-## 快速开始
+## Quick Start
 
 ```javascript
 import controller from '/root/pi-gateway-standalone/scripts/tmux-controller.js';
 
-// 初始化检查
+// Initialize check
 if (!controller.init()) {
-  // 会话不存在，创建
+  // Session doesn't exist, create
   controller.createSession();
 }
 
-// 获取状态
+// Get status
 const status = await controller.getStatus();
 console.log(status);
 ```
 
-## 可用方法
+## Available Methods
 
-### 状态检查
+### Status Check
 
 ```javascript
-// 获取完整状态
+// Get full status
 const status = await controller.getStatus();
 // {
 //   session: true,
@@ -42,121 +42,121 @@ const status = await controller.getStatus();
 //   backend: { pid: '12346', healthy: true, port: 3000 }
 // }
 
-// 打印状态
+// Print status
 await controller.printStatus();
 ```
 
-### 服务控制
+### Service Control
 
 ```javascript
-// 启动服务
+// Start services
 await controller.startFrontend();
 await controller.startBackend();
 
-// 停止服务
+// Stop services
 controller.stopFrontend();
 controller.stopBackend();
 
-// 重启服务
+// Restart services
 await controller.restartFrontend();
 await controller.restartBackend();
 await controller.restartAll();
 ```
 
-### 缓存管理
+### Cache Management
 
 ```javascript
-// 清除 Vite 缓存
+// Clear Vite cache
 controller.clearCache();
 ```
 
-### 自动修复
+### Auto Repair
 
 ```javascript
-// 自动检测并修复问题
+// Auto detect and fix issues
 await controller.autoFix();
-// 这会：
-// 1. 检查会话是否存在
-// 2. 检查后端是否运行
-// 3. 检查前端是否运行
-// 4. 自动启动缺失的服务
+// This will:
+// 1. Check if session exists
+// 2. Check if backend is running
+// 3. Check if frontend is running
+// 4. Auto start missing services
 ```
 
-### 在 AI 窗格执行命令
+### Execute Commands in AI Pane
 
 ```javascript
-// 在底部窗格执行任意命令
+// Execute any command in bottom pane
 controller.runInAIPane('ls -la');
 controller.runInAIPane('npm run typecheck');
 ```
 
-## 典型工作流程
+## Typical Workflows
 
-### 检测到 Vite 错误时的处理
+### Handling Vite Errors
 
 ```javascript
-// 当 AI 检测到 "Failed to load url" 错误时：
+// When AI detects "Failed to load url" error:
 
-// 1. 清缓存
+// 1. Clear cache
 controller.clearCache();
 
-// 2. 重启前端
+// 2. Restart frontend
 await controller.restartFrontend();
 
-// 3. 验证
+// 3. Verify
 const health = await controller.checkFrontendHealth();
 if (health) {
-  console.log('修复成功');
+  console.log('Fix successful');
 } else {
-  console.log('需要进一步检查');
+  console.log('Further inspection needed');
 }
 ```
 
-### 每日开发开始
+### Daily Development Start
 
 ```javascript
-// 自动确保环境就绪
+// Auto ensure environment is ready
 await controller.autoFix();
 ```
 
-### 修改配置文件后
+### After Modifying Config Files
 
 ```javascript
-// 修改 vite.config.ts 或 index.html 后
+// After modifying vite.config.ts or index.html
 await controller.restartFrontend();
 ```
 
-## 与用户协作流程
+## Collaboration Workflow with Users
 
-虽然 AI 可以自动操作，但仍需告知用户：
+Although AI can automatically operate, you still need to inform the user:
 
 ```
-AI: "检测到前端路径错误，正在自动重启前端服务..."
-[执行 controller.restartFrontend()]
-AI: "✅ 前端已重启，请观察上左窗格确认服务正常启动，日志文件: logs/frontend_*.log"
+AI: "Frontend path error detected, automatically restarting frontend service..."
+[Execute controller.restartFrontend()]
+AI: "✅ Frontend restarted, please observe top-left pane to confirm service started normally, log file: logs/frontend_*.log"
 ```
 
-## 日志文件
+## Log Files
 
-服务输出会同时显示在tmux窗格并保存到独立的日志文件：
+Service output is displayed in tmux pane and saved to separate log files:
 
-- **前端日志**: `logs/frontend_YYYYMMDD_HHMMSS.log`
-- **后端日志**: `logs/backend_YYYYMMDD_HHMMSS.log`
-- **日志位置**: `/root/pi-gateway-standalone/logs/`
+- **Frontend Logs**: `logs/frontend_YYYYMMDD_HHMMSS.log`
+- **Backend Logs**: `logs/backend_YYYYMMDD_HHMMSS.log`
+- **Log Location**: `/root/pi-gateway-standalone/logs/`
 
-每次重启服务都会创建新的日志文件，文件名包含时间戳确保唯一性。
+Each service restart creates new log files, with timestamp in filename to ensure uniqueness.
 
-## 注意事项
+## Notes
 
-1. **用户观察**: 操作会在底部窗格显示，用户可看到命令执行
-2. **日志保留**: 所有输出同时保存到日志文件，便于追溯
-3. **并发安全**: 不要在短时间内重复执行相同命令
-4. **错误处理**: 方法会返回 boolean 表示成功/失败
-5. **日志唯一性**: 每次启动创建新的日志文件，避免与其他项目冲突
+1. **User Observation**: Operations are displayed in bottom pane, user can see command execution
+2. **Log Retention**: All output is simultaneously saved to log files for traceability
+3. **Concurrency Safety**: Don't repeatedly execute same command in short time
+4. **Error Handling**: Methods return boolean indicating success/failure
+5. **Log Uniqueness**: Each start creates new log file, avoiding conflicts with other projects
 
-## CLI 用法
+## CLI Usage
 
-也可以直接命令行使用：
+Can also be used directly from command line:
 
 ```bash
 node scripts/tmux-controller.js status

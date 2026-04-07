@@ -1,6 +1,6 @@
 /**
- * 共享类型定义入口
- * 前后端共享的核心类型定义
+ * Shared type definitions entry
+ * Core type definitions shared between frontend and backend
  */
 
 export * from "./api.types";

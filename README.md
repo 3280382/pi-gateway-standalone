@@ -1,40 +1,40 @@
 # Pi Gateway
 
-Pi Coding Agent 的 Web 网关，提供美观的 AI 聊天界面和文件管理功能。
+Web gateway for Pi Coding Agent, providing a beautiful AI chat interface and file management functionality.
 
-**技术栈**: React 19 + TypeScript + Vite (前端) | Node.js + Express + TypeScript (后端)
+**Tech Stack**: React 19 + TypeScript + Vite (Frontend) | Node.js + Express + TypeScript (Backend)
 
-## 快速开始
+## Quick Start
 
 ```bash
-# 克隆仓库
+# Clone repository
 git clone https://github.com/3280382/pi-gateway-standalone.git
 cd pi-gateway-standalone
 
-# 安装依赖
+# Install dependencies
 npm install
 
-# 启动开发服务器
+# Start development server
 bash dev-start.sh
 ```
 
-访问: http://127.0.0.1:5173 (前端) | http://127.0.0.1:3000 (后端)
+Visit: http://127.0.0.1:5173 (Frontend) | http://127.0.0.1:3000 (Backend)
 
-## 项目架构
+## Project Architecture
 
-采用**模块化单体架构 (Modular Monolith)**：
+Adopts **Modular Monolith Architecture**:
 
 ```
 src/
-├── client/                 # 前端：组件、状态管理、API 客户端
-│   ├── app/                # 🎯 应用根层
-│   │   ├── App.tsx         # 根组件
-│   │   ├── Footer.tsx      # 底部视图切换
-│   │   ├── LayoutContext/  # 全局布局状态
+├── client/                 # Frontend: components, state management, API client
+│   ├── app/                # 🎯 Application root layer
+│   │   ├── App.tsx         # Root component
+│   │   ├── Footer.tsx      # Bottom view switcher
+│   │   ├── LayoutContext/  # Global layout state
 │   │   └── pages/          # ErrorScreen, LoadingScreen
 │   │
-│   ├── features/           # 📦 功能域（完全自包含）
-│   │   ├── chat/           # 💬 聊天功能
+│   ├── features/           # 📦 Feature domains (fully self-contained)
+│   │   ├── chat/           # 💬 Chat feature
 │   │   │   ├── components/     # ChatPanel, InputArea, MessageList...
 │   │   │   ├── sidebar/        # SidebarPanel, Sessions, Settings...
 │   │   │   ├── stores/         # chatStore, sidebarStore, searchStore...
@@ -43,185 +43,185 @@ src/
 │   │   │   ├── hooks/          # useChat
 │   │   │   └── types/          # chat, sidebar
 │   │   │
-│   │   └── files/          # 📁 文件功能
+│   │   └── files/          # 📁 File feature
 │   │       ├── components/     # FileBrowser, FileGrid...
 │   │       ├── stores/         # fileStore, fileViewerStore
 │   │       ├── services/       # fileApi
 │   │       └── hooks/          # useDragDrop, useGesture
 │   │
-│   ├── shared/             # 🔧 全局共享（最少必要）
+│   ├── shared/             # 🔧 Global shared (minimum necessary)
 │   │   ├── ui/                 # Button, Input, Select...
 │   │   ├── stores/             # sessionStore
 │   │   ├── services/           # websocket.service, base.service...
 │   │   ├── controllers/        # file.controller, session.controller
 │   │   ├── hooks/              # useAppInitialization, useChatMessages...
-│   │   └── types/              # 全局类型定义
+│   │   └── types/              # Global type definitions
 │   │
-│   ├── lib/                # 工具库 (debug, logger, utils)
-│   └── hooks/index.ts      # 兼容性入口
+│   └── lib/                # Utility libraries (debug, logger, utils)
+│   └── hooks/index.ts      # Compatibility entry
 │
-├── server/                 # 🖥️ 后端代码 - Feature-Based 架构
+├── server/                 # 🖥️ Backend code - Feature-Based architecture
 │   ├── app/
-│   │   ├── registerRoutes.ts   # HTTP 路由注册
-│   │   └── registerWS.ts       # WebSocket 处理器注册入口
+│   │   ├── registerRoutes.ts   # HTTP route registration
+│   │   └── registerWS.ts       # WebSocket handler registration entry
 │   │
 │   ├── features/
-│   │   ├── chat/               # Chat 功能（完整自包含）
-│   │   │   ├── agent-session/  # Pi Agent Session 核心
+│   │   ├── chat/               # Chat feature (fully self-contained)
+│   │   │   ├── agent-session/  # Pi Agent Session core
 │   │   │   │   ├── agentSession.ts
 │   │   │   │   └── utils.ts
-│   │   │   ├── session-ws/     # Session WebSocket 处理器
+│   │   │   ├── session-ws/     # Session WebSocket handlers
 │   │   │   │   ├── init.ts
 │   │   │   │   ├── change-dir.ts
 │   │   │   │   └── ...
-│   │   │   ├── session-controllers/  # Session HTTP 控制器
+│   │   │   ├── session-controllers/  # Session HTTP controllers
 │   │   │   │   └── session.controller.ts
-│   │   │   ├── ws/             # Chat WebSocket 处理器
+│   │   │   ├── ws/             # Chat WebSocket handlers
 │   │   │   │   ├── prompt.ts
 │   │   │   │   ├── abort.ts
 │   │   │   │   └── ...
-│   │   │   └── controllers/    # Chat HTTP 控制器
+│   │   │   └── controllers/    # Chat HTTP controllers
 │   │   │       └── model.controller.ts
 │   │   │
 │   │   └── files/              # Files Feature
 │   │
 │   ├── shared/
 │   │   └── websocket/
-│   │       ├── ws-router.ts    # WebSocket 路由器
+│   │       ├── ws-router.ts    # WebSocket router
 │   │       └── types.ts
 │   │
-│   ├── controllers/        # HTTP 控制器（逐步迁移到 features）
-│   ├── lib/                # 工具库
-│   ├── llm/                # LLM 日志和拦截器
-│   ├── config/             # 配置
-│   └── server.ts           # 服务器入口
+│   ├── controllers/        # HTTP controllers (gradually migrating to features)
+│   ├── lib/                # Utility libraries
+│   ├── llm/                # LLM logging and interceptor
+│   ├── config/             # Configuration
+│   └── server.ts           # Server entry
 │
-└── shared/                 # 🔗 共享类型（前后端共用）
+└── shared/                 # 🔗 Shared types (frontend and backend)
     └── types/
         ├── api.types.ts
         ├── chat.types.ts
         ├── file.types.ts
         └── websocket.types.ts
 
-已删除的目录:
-- stores/, services/, controllers/, types/ → 合并到 features/ 或 shared/
-- core/, models/ → 已移除（前端）
-- server/routes/, server/middleware/, server/services/ → 已移除（后端）
+Deleted directories:
+- stores/, services/, controllers/, types/ → Merged into features/ or shared/
+- core/, models/ → Removed (frontend)
+- server/routes/, server/middleware/, server/services/ → Removed (backend)
 ```
 
-## 核心特性
+## Core Features
 
-### 1. 统一布局系统 (AppLayout)
-- **顶部菜单**: 模型选择、Thinking 级别、工作目录、搜索
-- **侧边栏**: 可隐藏，显示最近工作区、会话列表、设置
-- **底部菜单**: 视图切换 (Chat/Files)、侧边栏控制
-- **底部面板**: 可弹出的终端/预览面板
+### 1. Unified Layout System (AppLayout)
+- **Top Menu**: Model selection, Thinking level, Working directory, Search
+- **Sidebar**: Collapsible, displays recent workspaces, session list, settings
+- **Bottom Menu**: View switcher (Chat/Files), sidebar control
+- **Bottom Panel**: Pop-up terminal/preview panel
 
-### 2. 状态持久化
-- **localStorage**: 保存当前工作目录、会话 ID、模型选择
-- **服务端会话**: WebSocket 断开后自动保存，重连后恢复
+### 2. State Persistence
+- **localStorage**: Saves current working directory, session ID, model selection
+- **Server-side session**: Auto-saved on WebSocket disconnect, restored on reconnect
 
-### 3. 双视图模式
-- **Chat 视图**: AI 聊天、消息历史、流式响应
-- **Files 视图**: 文件浏览、编辑、执行
+### 3. Dual View Mode
+- **Chat View**: AI chat, message history, streaming responses
+- **Files View**: File browsing, editing, execution
 
-### 4. 工作目录与 Session 管理
+### 4. Working Directory & Session Management
 ```
-工作目录 (currentDir)  →  pi 进程的工作目录
-Session 文件          →  持久化的会话历史
-PID                   →  动态进程号
+Working Directory (currentDir)  →  pi process working directory
+Session File                   →  Persisted session history
+PID                            →  Dynamic process ID
 ```
-切换工作目录时：终止当前 pi → 在新目录启动新 pi → 加载对应 session
+When switching working directory: Terminate current pi → Start new pi in new directory → Load corresponding session
 
-### 5. 后端 Feature-Based 架构
+### 5. Backend Feature-Based Architecture
 
-**WebSocket 消息路由系统** (`shared/websocket/ws-router.ts`):
+**WebSocket Message Routing System** (`shared/websocket/ws-router.ts`):
 ```typescript
-// 之前: server.ts 中的巨型 switch/case
-// 之后: 使用 Router 分发
+// Before: Giant switch/case in server.ts
+// After: Using Router for dispatch
 await wsRouter.dispatch(type, ctx, payload);
 ```
 
-**处理器组织** (`features/*/ws/*.ts`):
-- 每个消息类型一个文件
-- 单一职责
-- 自动注册
+**Handler Organization** (`features/*/ws/*.ts`):
+- One file per message type
+- Single responsibility
+- Auto-registration
 
-## 文档
+## Documentation
 
-| 文档 | 说明 |
-|------|------|
-| [README.md](./README.md) | 项目概述和快速开始（本文档） |
-| [DEVELOPMENT.md](./DEVELOPMENT.md) | 开发指南、架构说明、API 参考、代码规范 |
-| [FEATURES.md](./FEATURES.md) | 功能规格书（界面布局、功能清单） |
-| [LEARNING_GUIDE.md](./LEARNING_GUIDE.md) | 系统设计与学习指南 |
-| [AGENTS.md](./AGENTS.md) | AI 助手指令和开发规则 |
-| [CHANGELOG.md](./CHANGELOG.md) | 版本变更历史 |
-| [docs/ERROR_HANDLING.md](./docs/ERROR_HANDLING.md) | 错误处理最佳实践 |
-| [REFACTOR_SUMMARY.md](./REFACTOR_SUMMARY.md) | 后端架构重构摘要 |
+| Document | Description |
+|----------|-------------|
+| [`README.md`](./README.md) | Project overview and quick start (this document) |
+| [`DEVELOPMENT.md`](./DEVELOPMENT.md) | Development guide, architecture description, API reference, coding standards |
+| [`FEATURES.md`](./FEATURES.md) | Feature specification (UI layout, feature list) |
+| [`LEARNING_GUIDE.md`](./LEARNING_GUIDE.md) | System design and learning guide |
+| [`AGENTS.md`](./AGENTS.md) | AI assistant instructions and development rules |
+| [`CHANGELOG.md`](./CHANGELOG.md) | Version history and changes |
+| [`docs/ERROR_HANDLING.md`](./docs/ERROR_HANDLING.md) | Error handling best practices |
+| [`REFACTOR_SUMMARY.md`](./REFACTOR_SUMMARY.md) | Backend architecture refactor summary |
 
-### 快速开发规范
+### Quick Development Standards
 
-- **组件**: 函数组件 + Hooks，不超过 200 行
-- **状态**: Zustand 管理，使用 Selector 订阅局部状态
-- **结构**: `app/` → `features/` → `shared/` → `pages/`
-- **命名**: 组件 PascalCase，Hooks `use` 开头，Store `*Store`
-- **性能**: 大数据用虚拟滚动，缓存用 useMemo/useCallback
-- **后端**: Feature-Based 架构，WebSocket 使用 Router 分发
+- **Components**: Function components + Hooks, max 200 lines
+- **State**: Zustand management, use Selector for subscribing to partial state
+- **Structure**: `app/` → `features/` → `shared/` → `pages/`
+- **Naming**: Components PascalCase, Hooks start with `use`, Store `*Store`
+- **Performance**: Virtual scroll for large data, use useMemo/useCallback for caching
+- **Backend**: Feature-Based architecture, WebSocket uses Router dispatch
 
-详见 [DEVELOPMENT.md](./DEVELOPMENT.md) 完整规范。
+See [DEVELOPMENT.md](./DEVELOPMENT.md) for complete standards.
 
-## 常用命令
+## Common Commands
 
 ```bash
-# 开发
-npm run dev              # 启动开发服务器
-bash scripts/start-tmux-dev.sh  # Tmux 3-pane 模式
+# Development
+npm run dev              # Start development server
+bash scripts/start-tmux-dev.sh  # Tmux 3-pane mode
 
-# 构建与检查
-npm run build            # 生产构建
-npm run check            # 代码检查 (Biome + TypeScript)
+# Build & Check
+npm run build            # Production build
+npm run check            # Code check (Biome + TypeScript)
 
-# 测试
-npm test                 # 运行所有测试
-npm run test:unit        # 单元测试
-npm run test:e2e         # E2E 测试
+# Testing
+npm test                 # Run all tests
+npm run test:unit        # Unit tests
+npm run test:e2e         # E2E tests
 
-# 服务管理
-node scripts/tmux-controller.js status    # 查看服务状态
-node scripts/tmux-controller.js restart-frontend  # 重启前端
+# Service Management
+node scripts/tmux-controller.js status    # View service status
+node scripts/tmux-controller.js restart-frontend  # Restart frontend
 ```
 
-## 环境变量
+## Environment Variables
 
 ```bash
-# 开发环境
+# Development environment
 VITE_API_URL=http://127.0.0.1:3000
 PORT=3000
 
-# 可选: 调试模式
+# Optional: Debug mode
 DEBUG=true
 ```
 
-## 浏览器支持
+## Browser Support
 
 - Chrome/Edge 90+
 - Firefox 90+
 - Safari 15+
 
-## 与 Monorepo 的关系
+## Relationship with Monorepo
 
-本项目是从 pi-mono monorepo 独立出来的 Gateway 项目。
+This project is the standalone Gateway project extracted from pi-mono monorepo.
 
-| 特性 | Standalone | Monorepo |
-|------|------------|----------|
-| 依赖管理 | npm 直接安装 | workspace 链接 |
-| 版本管理 | 独立 | 统一 |
-| 部署 | 独立部署 | 集成部署 |
+| Feature | Standalone | Monorepo |
+|---------|------------|----------|
+| Dependency management | npm direct install | workspace links |
+| Version management | Independent | Unified |
+| Deployment | Independent | Integrated |
 
-### 本地包开发调试
+### Local Package Development Debugging
 
-如需从本地 monorepo 链接包：
+To link packages from local monorepo:
 
 ```bash
 cd /path/to/pi-mono/packages/coding-agent
@@ -230,6 +230,6 @@ cd /path/to/pi-gateway-standalone
 npm link @mariozechner/pi-coding-agent
 ```
 
-## 许可证
+## License
 
 MIT

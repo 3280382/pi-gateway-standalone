@@ -1,6 +1,6 @@
 /**
- * 配置管理模块
- * 集中管理应用程序配置
+ * Configuration management module
+ * Centralized application configuration management
  */
 
 import path from "node:path";
@@ -56,7 +56,7 @@ export class Config {
 	}
 
 	/**
-	 * 获取配置实例
+	 * Get configuration instance
 	 */
 	static getInstance(): Config {
 		if (!Config.instance) {
@@ -66,14 +66,14 @@ export class Config {
 	}
 
 	/**
-	 * 获取配置
+	 * Get configuration
 	 */
 	static get(): ServerConfig {
 		return Config.getInstance().config;
 	}
 
 	/**
-	 * 加载配置
+	 * Load configuration
 	 */
 	private loadConfig(): ServerConfig {
 		const env = (process.env.NODE_ENV as Environment) || "development";
@@ -98,13 +98,13 @@ export class Config {
 			},
 			static: {
 				path: publicDir,
-				maxAge: env === "development" ? 0 : 3600000, // 1小时
+				maxAge: env === "development" ? 0 : 3600000, // 1 hour
 				etag: env !== "development",
 				lastModified: env !== "development",
 			},
 			websocket: {
-				heartbeatInterval: 30000, // 30秒
-				heartbeatTimeout: 60000, // 60秒
+				heartbeatInterval: 30000, // 30 seconds
+				heartbeatTimeout: 60000, // 60 seconds
 				maxConnections: 1000,
 			},
 			logging: {
@@ -131,84 +131,84 @@ export class Config {
 	}
 
 	/**
-	 * 检查是否是开发环境
+	 * Check if development environment
 	 */
 	static isDevelopment(): boolean {
 		return Config.get().env === "development";
 	}
 
 	/**
-	 * 检查是否是生产环境
+	 * Check if production environment
 	 */
 	static isProduction(): boolean {
 		return Config.get().env === "production";
 	}
 
 	/**
-	 * 检查是否是测试环境
+	 * Check if test environment
 	 */
 	static isTest(): boolean {
 		return Config.get().env === "test";
 	}
 
 	/**
-	 * 获取端口
+	 * Get port
 	 */
 	static getPort(): number {
 		return Config.get().port;
 	}
 
 	/**
-	 * 获取主机
+	 * Get host
 	 */
 	static getHost(): string {
 		return Config.get().host;
 	}
 
 	/**
-	 * 获取CORS配置
+	 * Get CORS configuration
 	 */
 	static getCorsConfig() {
 		return Config.get().cors;
 	}
 
 	/**
-	 * 获取静态文件配置
+	 * Get static file configuration
 	 */
 	static getStaticConfig() {
 		return Config.get().static;
 	}
 
 	/**
-	 * 获取WebSocket配置
+	 * Get WebSocket configuration
 	 */
 	static getWebSocketConfig() {
 		return Config.get().websocket;
 	}
 
 	/**
-	 * 获取日志配置
+	 * Get logging configuration
 	 */
 	static getLoggingConfig() {
 		return Config.get().logging;
 	}
 
 	/**
-	 * 获取LLM日志配置
+	 * Get LLM log configuration
 	 */
 	static getLlmLogConfig() {
 		return Config.get().llm.logging;
 	}
 
 	/**
-	 * 获取路径配置
+	 * Get paths configuration
 	 */
 	static getPaths() {
 		return Config.get().paths;
 	}
 }
 
-// 便捷导出
+// Convenience exports
 export const config = Config.get();
 export const isDevelopment = Config.isDevelopment;
 export const isProduction = Config.isProduction;

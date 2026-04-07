@@ -1,10 +1,10 @@
 /**
- * 聊天相关类型定义
- * 前后端共享的核心聊天数据结构
+ * Chat-related type definitions
+ * Core chat data structures shared between frontend and backend
  */
 
 // ============================================================================
-// 消息类型
+// Message Types
 // ============================================================================
 
 export type MessageRole = "user" | "assistant" | "system";
@@ -43,7 +43,7 @@ export interface Message {
 }
 
 // ============================================================================
-// 工具执行类型
+// Tool Execution Types
 // ============================================================================
 
 export type ToolStatus =
@@ -65,7 +65,7 @@ export interface ToolExecution {
 }
 
 // ============================================================================
-// 聊天状态类型 (前端使用)
+// Chat State Types (Frontend Use)
 // ============================================================================
 
 export interface ChatSearchFilters {
@@ -80,40 +80,40 @@ export interface ChatSearchFilters {
 }
 
 export interface ChatState {
-	// 消息
+	// Messages
 	messages: Message[];
 	currentStreamingMessage: Message | null;
 
-	// 输入
+	// Input
 	inputText: string;
 	isInputFocused: boolean;
 
-	// 流式传输
+	// Streaming
 	isStreaming: boolean;
 	streamingContent: string;
 	streamingThinking: string;
 
-	// 工具
+	// Tools
 	activeTools: Map<string, ToolExecution>;
 
-	// UI状态
+	// UI State
 	showThinking: boolean;
 	showTools: boolean;
 	scrollToBottom: boolean;
 
-	// 搜索
+	// Search
 	searchQuery: string;
 	searchFilters: ChatSearchFilters;
-	searchResults: string[]; // 匹配搜索的消息ID
+	searchResults: string[]; // Message IDs matching search
 	isSearching: boolean;
 
-	// 模型/会话
+	// Model/Session
 	currentModel: string | null;
 	sessionId: string | null;
 }
 
 // ============================================================================
-// WebSocket消息类型 (前后端共享)
+// WebSocket Message Types (Shared Between Frontend and Backend)
 // ============================================================================
 
 export interface ContentDeltaMessage {
@@ -157,8 +157,8 @@ export interface ToolEndMessage {
 	isError?: boolean;
 	output?: string;
 	error?: string;
-	fileContent?: string; // 写文件操作时的文件内容
-	filePath?: string; // 写文件操作时的文件路径
+	fileContent?: string; // File content for write file operations
+	filePath?: string; // File path for write file operations
 }
 
 export interface AgentStartMessage {
@@ -181,7 +181,7 @@ export type ChatWebSocketMessage =
 	| AgentEndMessage;
 
 // ============================================================================
-// API请求/响应类型
+// API Request/Response Types
 // ============================================================================
 
 export interface SendMessageRequest {

@@ -1,21 +1,21 @@
 /**
- * WebSocket相关类型定义
- * 前后端共享的WebSocket通信格式
+ * WebSocket-related type definitions
+ * Shared WebSocket communication formats between frontend and backend
  */
 
 // ============================================================================
-// WebSocket事件类型
+// WebSocket Event Types
 // ============================================================================
 
 export type WebSocketEvent =
-	// 连接事件
+	// Connection events
 	| "connected"
 	| "disconnected"
 	| "error"
 	| "ping"
 	| "pong"
 
-	// 聊天事件
+	// Chat events
 	| "message"
 	| "message_start"
 	| "message_delta"
@@ -24,7 +24,7 @@ export type WebSocketEvent =
 	| "thinking_delta"
 	| "thinking_end"
 
-	// 工具事件
+	// Tool events
 	| "tool_call"
 	| "tool_call_delta"
 	| "tool_start"
@@ -32,25 +32,25 @@ export type WebSocketEvent =
 	| "tool_end"
 	| "tool_result"
 
-	// 会话事件
+	// Session events
 	| "session_created"
 	| "session_updated"
 	| "session_deleted"
 	| "session_loaded"
 
-	// 系统事件
+	// System events
 	| "initialized"
 	| "auto_compaction_begin"
 	| "auto_compaction_end"
 	| "system_message"
 
-	// 文件事件
+	// File events
 	| "file_update"
 	| "file_deleted"
 	| "file_created";
 
 // ============================================================================
-// WebSocket消息格式
+// WebSocket Message Format
 // ============================================================================
 
 export interface WebSocketMessage {
@@ -63,7 +63,7 @@ export interface WebSocketMessage {
 }
 
 // ============================================================================
-// 具体事件数据定义
+// Specific Event Data Definitions
 // ============================================================================
 
 export interface ConnectedData {
@@ -164,7 +164,7 @@ export interface FileUpdateData {
 }
 
 // ============================================================================
-// 客户端发送的消息
+// Client-Sent Messages
 // ============================================================================
 
 export interface ClientMessage {
@@ -197,7 +197,7 @@ export interface SystemClientMessage {
 }
 
 // ============================================================================
-// WebSocket连接配置
+// WebSocket Connection Configuration
 // ============================================================================
 
 export interface WebSocketConfig {

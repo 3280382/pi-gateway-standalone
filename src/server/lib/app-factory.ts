@@ -1,6 +1,6 @@
 /**
- * Express应用工厂
- * 创建和配置Express应用程序
+ * Express Application Factory
+ * Creates and configures Express application
  */
 
 import { createServer, type Server } from "node:http";
@@ -74,32 +74,32 @@ export class AppFactory {
 	}
 
 	/**
-	 * 获取Express应用
+	 * Get Express app
 	 */
 	getApp(): Application {
 		return this.app;
 	}
 
 	/**
-	 * 获取HTTP服务器
+	 * Get HTTP server
 	 */
 	getServer(): Server {
 		return this.server;
 	}
 
 	/**
-	 * 配置基础应用设置
+	 * Configure base application settings
 	 */
 	private configureApp(trustProxy: boolean): void {
-		// 禁用X-Powered-By头
+		// Disable X-Powered-By header
 		this.app.disable("x-powered-by");
 
-		// 信任代理
+		// Trust proxy
 		if (trustProxy) {
 			this.app.set("trust proxy", 1);
 		}
 
-		// 开发模式缓存控制
+		// Development mode cache control
 		if (Config.isDevelopment()) {
 			this.app.use((req: Request, res: Response, next: NextFunction) => {
 				if (
@@ -118,22 +118,22 @@ export class AppFactory {
 	}
 
 	/**
-	 * 配置安全中间件
+	 * Configure security middleware
 	 */
 	private configureSecurity(): void {
-		// 基础安全头部
+		// Basic security headers
 		this.app.use(
 			helmet({
 				contentSecurityPolicy: Config.isProduction(),
-				crossOriginEmbedderPolicy: false, // 允许嵌入式资源
+				crossOriginEmbedderPolicy: false, // Allow embedded resources
 				crossOriginResourcePolicy: { policy: "cross-origin" },
 			}),
 		);
 
-		// 防止MIME类型嗅探
+		// Prevent MIME type sniffing
 		this.app.use((req: Request, res: Response, next: NextFunction) => {
 			res.setHeader("X-Content-Type-Options", "nosniff");
-			// 允许iframe嵌入原始文件API（用于HTML预览）
+			// Allow iframe embedding for raw file API (for HTML preview)
 			if (req.path === "/api/files/raw") {
 				res.setHeader("X-Frame-Options", "SAMEORIGIN");
 			} else {
@@ -145,7 +145,7 @@ export class AppFactory {
 	}
 
 	/**
-	 * 配置CORS
+	 * Configure CORS
 	 */
 	private configureCors(): void {
 		const corsConfig = Config.getCorsConfig();
@@ -161,14 +161,14 @@ export class AppFactory {
 	}
 
 	/**
-	 * 配置压缩
+	 * Configure compression
 	 */
 	private configureCompression(): void {
 		this.app.use(compression());
 	}
 
 	/**
-	 * 配置日志
+	 * Configure logging
 	 */
 	private configureLogging(): void {
 		const format = Config.isProduction() ? "combined" : "dev";
@@ -184,7 +184,7 @@ export class AppFactory {
 	}
 
 	/**
-	 * 配置静态文件服务
+	 * Configure static file serving
 	 */
 	private configureStatic(): void {
 		const staticConfig = Config.getStaticConfig();
@@ -212,26 +212,26 @@ export class AppFactory {
 	}
 
 	/**
-	 * 配置请求体解析
+	 * Configure request body parsing
 	 */
 	private configureParsing(): void {
-		// JSON解析，限制50MB
+		// JSON parsing, limit 50MB
 		this.app.use(express.json({ limit: "50mb" }));
 
-		// URL编码解析
+		// URL encoded parsing
 		this.app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 	}
 
 	/**
-	 * 配置错误处理
+	 * Configure error handling
 	 */
 	private configureErrorHandling(): void {
-		// 全局错误处理（404处理将在路由注册后添加）
+		// Global error handling (404 handling will be added after route registration)
 		this.app.use(
 			(error: any, _req: Request, res: Response, _next: NextFunction) => {
 				this.logger.error("Unhandled error", {}, error);
 
-				// 如果是ApiError，使用其状态码和消息
+				// If ApiError, use its status code and message
 				if (error instanceof ApiError) {
 					const response: ApiResponse = {
 						success: false,
@@ -245,7 +245,7 @@ export class AppFactory {
 					return res.status(error.statusCode).json(response);
 				}
 
-				// 未知错误
+				// Unknown error
 				const statusCode = error.statusCode || error.status || 500;
 				const response: ApiResponse = {
 					success: false,
@@ -264,10 +264,10 @@ export class AppFactory {
 	}
 
 	/**
-	 * 设置404处理（应在所有路由注册后调用）
+	 * Setup 404 handling (should be called after all routes are registered)
 	 */
 	setupNotFoundHandler(): void {
-		// 404处理
+		// 404 handling
 		this.app.use((_req: Request, _res: Response, next: NextFunction) => {
 			const error = ErrorFactory.notFound("Endpoint");
 			next(error);
@@ -275,21 +275,21 @@ export class AppFactory {
 	}
 
 	/**
-	 * 添加路由
+	 * Add router
 	 */
 	addRouter(prefix: string, router: express.Router): void {
 		this.app.use(prefix, router);
 	}
 
 	/**
-	 * 添加中间件
+	 * Add middleware
 	 */
 	addMiddleware(middleware: express.RequestHandler): void {
 		this.app.use(middleware);
 	}
 
 	/**
-	 * 启动服务器
+	 * Start server
 	 */
 	async start(): Promise<void> {
 		return new Promise((resolve) => {
@@ -304,7 +304,7 @@ export class AppFactory {
 	}
 
 	/**
-	 * 停止服务器
+	 * Stop server
 	 */
 	async stop(): Promise<void> {
 		return new Promise((resolve, reject) => {
@@ -321,7 +321,7 @@ export class AppFactory {
 	}
 
 	/**
-	 * 创建默认应用
+	 * Create default app
 	 */
 	static createDefault(): AppFactory {
 		return new AppFactory({

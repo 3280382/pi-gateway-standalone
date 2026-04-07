@@ -1,5 +1,5 @@
 /**
- * 基础错误定义
+ * Base error definitions
  */
 
 export class ApiError extends Error {
@@ -17,7 +17,7 @@ export class ApiError extends Error {
 
 export class NotFoundError extends ApiError {
 	constructor(resource: string, id?: string) {
-		const message = id ? `${resource} ${id} 未找到` : `${resource} 未找到`;
+		const message = id ? `${resource} ${id} not found` : `${resource} not found`;
 		super("NOT_FOUND", message, 404, { resource, id });
 	}
 }
