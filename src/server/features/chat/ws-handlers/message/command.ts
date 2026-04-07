@@ -1,6 +1,6 @@
 /**
- * Command 消息处理器
- * 处理执行系统命令的请求
+ * Command Message Handler
+ * Handles requests to execute system commands
  */
 
 import { spawn } from "node:child_process";
@@ -10,9 +10,9 @@ import type { WSContext } from "../../ws-router";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 处理 command 消息
- * @param ctx WebSocket 上下文
- * @param payload 消息负载
+ * Handle command message
+ * @param ctx WebSocket context
+ * @param payload Message payload
  */
 export async function handleCommand(
 	ctx: WSContext,
@@ -20,17 +20,17 @@ export async function handleCommand(
 ): Promise<void> {
 	const { text } = payload;
 
-	// 移除前导/
+	// Remove leading /
 	const cmd = text.slice(1).trim();
 
-	logger.info(`[WebSocket] 收到 command 消息: ${cmd}`);
+	logger.info(`[WebSocket] Received command message: ${cmd}`);
 
 	if (!cmd) {
 		ctx.ws.send(
 			JSON.stringify({
 				type: "command_result",
 				command: text,
-				output: "空命令",
+				output: "Empty command",
 				isError: true,
 			}),
 		);
@@ -67,7 +67,7 @@ export async function handleCommand(
 				JSON.stringify({
 					type: "command_result",
 					command: text,
-					output: result || "(无输出)",
+					output: result || "(no output)",
 					isError,
 				}),
 			);
@@ -84,16 +84,16 @@ export async function handleCommand(
 			);
 		});
 
-		logger.info(`[WebSocket] command 执行中: ${cmd}`);
+		logger.info(`[WebSocket] command executing: ${cmd}`);
 	} catch (error) {
 		logger.error(
-			`[WebSocket] command 错误: ${error instanceof Error ? error.message : String(error)}`,
+			`[WebSocket] command error: ${error instanceof Error ? error.message : String(error)}`,
 		);
 		ctx.ws.send(
 			JSON.stringify({
 				type: "command_result",
 				command: text,
-				output: error instanceof Error ? error.message : "未知错误",
+				output: error instanceof Error ? error.message : "Unknown error",
 				isError: true,
 			}),
 		);

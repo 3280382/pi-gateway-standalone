@@ -1,6 +1,6 @@
 /**
- * LLM日志控制器
- * 处理LLM日志相关的API请求
+ * LLM Log Controller
+ * Handles LLM log-related API requests
  */
 
 import type { Request, Response } from "express";
@@ -10,12 +10,12 @@ import type { LlmLogManager } from "../llm/log-manager";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 获取LLM日志
+ * Get LLM logs
  */
 export function createLlmLogController(llmLogManager: LlmLogManager) {
 	return {
 		/**
-		 * 获取LLM日志内容
+		 * Get LLM log content
 		 */
 		async getLlmLog(_req: Request, res: Response) {
 			try {
@@ -23,7 +23,7 @@ export function createLlmLogController(llmLogManager: LlmLogManager) {
 				const logFilePath = llmLogManager.getLogFilePath();
 
 				logger.info(
-					`获取LLM日志，条目数: ${logContent.length}, 日志文件: ${logFilePath}`,
+					`Retrieved LLM logs, entries: ${logContent.length}, log file: ${logFilePath}`,
 				);
 				res.json({
 					logContent,
@@ -32,30 +32,30 @@ export function createLlmLogController(llmLogManager: LlmLogManager) {
 				});
 			} catch (error) {
 				logger.error(
-					`获取LLM日志错误: ${error instanceof Error ? error.message : String(error)}`,
+					`Error retrieving LLM logs: ${error instanceof Error ? error.message : String(error)}`,
 				);
 				res.status(500).json({ error: String(error) });
 			}
 		},
 
 		/**
-		 * 启用/禁用LLM日志
+		 * Enable/disable LLM logging
 		 */
 		async setLlmLogEnabled(req: Request, res: Response) {
 			try {
 				const { enabled } = req.body;
 				if (typeof enabled !== "boolean") {
-					res.status(400).json({ error: "enabled参数必须是布尔值" });
+					res.status(400).json({ error: "enabled parameter must be a boolean" });
 					return;
 				}
 
 				llmLogManager.setEnabled(enabled);
 
-				logger.info(`${enabled ? "启用" : "禁用"}LLM日志`);
+				logger.info(`${enabled ? "Enabled" : "Disabled"} LLM logging`);
 				res.json({ success: true, enabled });
 			} catch (error) {
 				logger.error(
-					`设置LLM日志启用状态错误: ${error instanceof Error ? error.message : String(error)}`,
+					`Error setting LLM log enabled state: ${error instanceof Error ? error.message : String(error)}`,
 					{
 						enabled: req.body.enabled,
 					},

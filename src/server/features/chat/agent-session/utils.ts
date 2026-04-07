@@ -1,24 +1,24 @@
 /**
- * 会话工具函数
- * 核心会话模块的共享工具
+ * Session Utility Functions
+ * Shared utilities for core session module
  */
 
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-// 常量定义
+// Constants
 export const AGENT_DIR = join(homedir(), ".pi", "agent");
 
 /**
- * 编码工作目录为安全的目录名（如 pi coding agent 所做）
+ * Encode working directory as safe directory name (as pi coding agent does)
  */
 export function encodeCwd(cwd: string): string {
-	// 移除前导斜杠并用破折号替换路径分隔符
+	// Remove leading slashes and replace path separators with dashes
 	return `--${cwd.replace(/^[/\\]/, "").replace(/[/\\:]/g, "-")}--`;
 }
 
 /**
- * 获取工作目录的会话目录（pi coding agent 标准）
+ * Get working directory's session directory (pi coding agent standard)
  */
 export function getLocalSessionsDir(workingDir: string): string {
 	const encodedDir = encodeCwd(workingDir);
@@ -26,7 +26,7 @@ export function getLocalSessionsDir(workingDir: string): string {
 }
 
 /**
- * 扩展路径（处理 ~ 和相对路径）
+ * Expand path (handle ~ and relative paths)
  */
 export function expandPath(path: string): string {
 	if (path.startsWith("~")) {
@@ -39,7 +39,7 @@ export function expandPath(path: string): string {
 }
 
 /**
- * 提取会话 ID 从会话文件路径
+ * Extract session ID from session file path
  */
 export function extractSessionIdFromPath(sessionPath: string): string {
 	const fileName = sessionPath.split("/").pop() || "";
@@ -47,7 +47,7 @@ export function extractSessionIdFromPath(sessionPath: string): string {
 }
 
 /**
- * 生成安全的文件名
+ * Generate safe file name
  */
 export function safeFileName(name: string): string {
 	return name

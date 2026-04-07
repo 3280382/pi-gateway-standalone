@@ -1,6 +1,6 @@
 /**
- * OCR Controller - 图片OCR识别
- * 用于Chat输入区域的图片文字提取
+ * OCR Controller - Image OCR Recognition
+ * Used for image text extraction in Chat input area
  */
 
 import type { Request, Response } from "express";
@@ -11,7 +11,7 @@ interface OCROptions {
 }
 
 /**
- * 处理OCR请求
+ * Process OCR request
  */
 export async function performOCR(req: Request, res: Response): Promise<void> {
 	try {

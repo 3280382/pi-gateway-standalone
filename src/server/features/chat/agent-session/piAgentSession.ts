@@ -1,6 +1,6 @@
 /**
- * PiAgentSession 类
- * 管理WebSocket连接、pi-coding-agent会话和消息传递
+ * PiAgentSession Class
+ * Manages WebSocket connections, pi-coding-agent sessions, and message delivery
  */
 
 import { existsSync } from "node:fs";
@@ -24,14 +24,14 @@ import type { LlmLogManager } from "../llm/log-manager";
 import { AGENT_DIR, getLocalSessionsDir } from "./utils";
 
 /**
- * 服务器消息接口
+ * Server message interface
  */
 export interface ServerMessage extends Record<string, unknown> {
 	type: string;
 }
 
 /**
- * 写文件相关工具名称列表
+ * List of file write-related tool names
  */
 const writeFileTools = [
 	"write_file",
@@ -45,44 +45,44 @@ const writeFileTools = [
 ];
 
 /**
- * PiAgentSession 类
- * 封装了pi-coding-agent会话的完整生命周期管理
+ * PiAgentSession Class
+ * Encapsulates the complete lifecycle management of pi-coding-agent sessions
  */
 export class PiAgentSession {
-	/** 代理会话 */
+	/** Agent session */
 	session: AgentSession | null = null;
 
-	/** WebSocket连接 */
+	/** WebSocket connection */
 	ws: WebSocket;
 
-	/** 当前工作目录 */
+	/** Current working directory */
 	workingDir: string = process.cwd();
 
-	/** 认证存储 */
+	/** Authentication storage */
 	authStorage: ReturnType<typeof AuthStorage.create>;
 
-	/** 模型注册表 */
+	/** Model registry */
 	modelRegistry: ModelRegistry;
 
-	/** 设置管理器 */
+	/** Settings manager */
 	settingsManager: ReturnType<typeof SettingsManager.create>;
 
-	/** 是否正在流式传输 */
+	/** Whether streaming is in progress */
 	isStreaming: boolean = false;
 
-	/** 消息缓冲区 */
+	/** Message buffer */
 	messageBuffer: string = "";
 
-	/** 事件取消订阅函数 */
+	/** Event unsubscribe function */
 	unsubscribeFn: (() => void) | null = null;
 
-	/** LLM日志管理器引用 */
+	/** LLM log manager reference */
 	readonly llmLogManager: LlmLogManager;
 
 	/**
-	 * 创建新的PiAgentSession
-	 * @param ws WebSocket连接
-	 * @param llmLogManager LLM日志管理器
+	 * Create new PiAgentSession
+	 * @param ws WebSocket connection
+	 * @param llmLogManager LLM log manager
 	 */
 	constructor(ws: WebSocket, llmLogManager: LlmLogManager) {
 		this.ws = ws;
@@ -93,19 +93,19 @@ export class PiAgentSession {
 	}
 
 	/**
-	 * 初始化会话
-	 * @param workingDir 工作目录
-	 * @param sessionId 可选会话ID（部分UUID）
-	 * @returns 会话信息
+	 * Initialize session
+	 * @param workingDir Working directory
+	 * @param sessionId Optional session ID (partial UUID)
+	 * @returns Session information
 	 */
 	async initialize(workingDir: string, sessionId?: string) {
-		// 取消订阅旧会话事件
+		// Unsubscribe from old session events
 		if (this.unsubscribeFn) {
 			this.unsubscribeFn();
 			this.unsubscribeFn = null;
 		}
 
-		// 清理旧会话
+		// Cleanup old session
 		if (this.session) {
 			this.session.dispose();
 			this.session = null;
@@ -114,16 +114,16 @@ export class PiAgentSession {
 		this.workingDir = workingDir;
 		const localSessionsDir = getLocalSessionsDir(workingDir);
 		console.log(
-			`[Gateway] 使用workingDir初始化: ${workingDir}, localSessionsDir: ${localSessionsDir}`,
+			`[Gateway] Initializing with workingDir: ${workingDir}, localSessionsDir: ${localSessionsDir}`,
 		);
 
 		let sessionManager: ReturnType<typeof SessionManager.create> | undefined;
-		console.log(`[Gateway] 查找 sessionId: ${sessionId}`);
+		console.log(`[Gateway] Looking for sessionId: ${sessionId}`);
 
 		if (sessionId) {
-			// 尝试在本地会话目录中按部分UUID查找会话
+			// Try to find session by partial UUID in local sessions directory
 			const sessions = await SessionManager.list(workingDir, localSessionsDir);
-			console.log(`[Gateway] 找到 ${sessions.length} 个 sessions`);
+			console.log(`[Gateway] Found ${sessions.length} sessions`);
 			sessions.forEach((s, i) =>
 				console.log(`[Gateway]   [${i}] id=${s.id}, path=${s.path}`),
 			);
@@ -132,7 +132,7 @@ export class PiAgentSession {
 				(s) => s.id.startsWith(sessionId) || s.path.includes(sessionId),
 			);
 			console.log(
-				`[Gateway] 匹配结果:`,
+				`[Gateway] Matching result:`,
 				matching ? `id=${matching.id}, path=${matching.path}` : "null",
 			);
 
@@ -142,7 +142,7 @@ export class PiAgentSession {
 		}
 
 		if (!sessionManager) {
-			console.log(`[Gateway] 未找到匹配，创建新 session`);
+			console.log(`[Gateway] No match found, creating new session`);
 			sessionManager = SessionManager.create(workingDir, localSessionsDir);
 		}
 
@@ -153,18 +153,18 @@ export class PiAgentSession {
 		});
 		await loader.reload();
 
-		// 记录加载的资源用于调试
+		// Log loaded resources for debugging
 		const agentsFiles = loader.getAgentsFiles().agentsFiles;
-		console.log(`[Gateway] 加载了 ${agentsFiles.length} 个AGENTS.md文件:`);
+		console.log(`[Gateway] Loaded ${agentsFiles.length} AGENTS.md files:`);
 		for (const file of agentsFiles) {
 			console.log(`  - ${file.path}`);
 		}
 		const systemPrompt = loader.getSystemPrompt();
-		console.log(`[Gateway] 系统提示: ${systemPrompt ? "自定义" : "默认"}`);
+		console.log(`[Gateway] System prompt: ${systemPrompt ? "custom" : "default"}`);
 		const appendSystemPrompt = loader.getAppendSystemPrompt();
 		if (appendSystemPrompt.length > 0) {
 			console.log(
-				`[Gateway] 附加系统提示: ${appendSystemPrompt.length} 个文件`,
+				`[Gateway] Append system prompt: ${appendSystemPrompt.length} files`,
 			);
 		}
 
@@ -183,72 +183,72 @@ export class PiAgentSession {
 		this.setupEventHandlers();
 
 		console.log(
-			`[Gateway] 会话已创建: sessionId=${session.sessionId}, sessionFile=${session.sessionFile}`,
+			`[Gateway] Session created: sessionId=${session.sessionId}, sessionFile=${session.sessionFile}`,
 		);
 
-		// 检查 session 是否已有模型设置，如果没有则设置默认模型
+		// Check if session has model setting, if not set default model
 		if (!session.model) {
 			const defaultModel = this.modelRegistry.find("deepseek", "deepseek-chat");
 			if (defaultModel) {
 				await session.setModel(defaultModel);
-				console.log(`[Gateway] 默认模型设置为: ${defaultModel.id}`);
+				console.log(`[Gateway] Default model set to: ${defaultModel.id}`);
 			}
 		} else {
-			console.log(`[Gateway] 使用 session 保存的模型: ${session.model.id}`);
+			console.log(`[Gateway] Using session saved model: ${session.model.id}`);
 		}
 
-		// 为此会话设置LLM日志文件
+		// Set LLM log file for this session
 		console.log(
-			`[Gateway] 使用sessionFile=${session.sessionFile}, sessionId=${session.sessionId}调用setLogFile`,
+			`[Gateway] Calling setLogFile with sessionFile=${session.sessionFile}, sessionId=${session.sessionId}`,
 		);
 		this.llmLogManager.setLogFile(session.sessionFile, session.sessionId);
 		console.log(
-			`[Gateway] LLM日志: ${this.llmLogManager.getLogFilePath() || "禁用（内存会话）"}`,
+			`[Gateway] LLM log: ${this.llmLogManager.getLogFilePath() || "disabled (memory session)"}`,
 		);
 
-		// 获取技能列表
+		// Get skills list
 		const skills = loader.getSkills().skills;
 
-		// 收集所有资源文件路径
+		// Collect all resource file paths
 		const settingsPath = join(AGENT_DIR, "settings.json");
 		const resourceFiles = {
-			// 系统提示文件
+			// System prompt files
 			systemPrompt: {
 				global: join(AGENT_DIR, "SYSTEM.md"),
 				project: join(workingDir, ".pi", "SYSTEM.md"),
 				loaded: systemPrompt ? "custom" : "default",
 			},
-			// 附加系统提示文件
+			// Append system prompt files
 			appendSystemPrompt: loader.getAppendSystemPrompt().map((f: any) => ({
 				path: f.path,
 				exists: existsSync(f.path),
 			})),
-			// AGENTS.md 文件
+			// AGENTS.md files
 			agentsFiles: agentsFiles.map((f: any) => ({
 				path: f.path,
 				exists: existsSync(f.path),
 			})),
-			// 设置文件
+			// Settings file
 			settings: {
 				path: settingsPath,
 				exists: existsSync(settingsPath),
 			},
-			// 认证文件
+			// Auth file
 			auth: {
 				path: join(AGENT_DIR, "auth.json"),
 				exists: existsSync(join(AGENT_DIR, "auth.json")),
 			},
-			// 会话文件
+			// Session file
 			session: {
 				path: session.sessionFile,
 				exists: session.sessionFile ? existsSync(session.sessionFile) : false,
 			},
-			// 模型注册表
+			// Model registry
 			models: {
 				path: join(AGENT_DIR, "models.json"),
 				exists: existsSync(join(AGENT_DIR, "models.json")),
 			},
-			// 技能目录
+			// Skills directory
 			skills: {
 				global: join(AGENT_DIR, "skills"),
 				project: join(workingDir, ".pi", "skills"),
@@ -257,7 +257,7 @@ export class PiAgentSession {
 					path: s.path || "builtin",
 				})),
 			},
-			// 提示模板目录
+			// Prompt templates directory
 			prompts: {
 				global: join(AGENT_DIR, "prompts"),
 				project: join(workingDir, ".pi", "prompts"),
@@ -265,19 +265,19 @@ export class PiAgentSession {
 		};
 
 		console.log(
-			"[Gateway] 资源文件路径:",
+			"[Gateway] Resource file paths:",
 			JSON.stringify(resourceFiles, null, 2),
 		);
 
-		// 调试：检查路径是否一致
+		// Debug: check if paths are consistent
 		const expectedDir = getLocalSessionsDir(workingDir);
-		console.log(`[Gateway] 期望的 sessions 目录: ${expectedDir}`);
-		console.log(`[Gateway] 实际的 sessionFile: ${session.sessionFile}`);
+		console.log(`[Gateway] Expected sessions directory: ${expectedDir}`);
+		console.log(`[Gateway] Actual sessionFile: ${session.sessionFile}`);
 		if (session.sessionFile && !session.sessionFile.startsWith(expectedDir)) {
-			console.warn(`[Gateway] 路径不匹配! 期望前缀: ${expectedDir}, 实际: ${session.sessionFile}`);
+			console.warn(`[Gateway] Path mismatch! Expected prefix: ${expectedDir}, actual: ${session.sessionFile}`);
 		}
 		console.log(
-			`[Gateway] sessionFile 存在:`,
+			`[Gateway] sessionFile exists:`,
 			session.sessionFile ? existsSync(session.sessionFile) : false,
 		);
 
@@ -302,7 +302,7 @@ export class PiAgentSession {
 	}
 
 	/**
-	 * 设置事件处理器
+	 * Setup event handlers
 	 */
 	setupEventHandlers() {
 		if (!this.session) return;
@@ -464,9 +464,9 @@ export class PiAgentSession {
 	}
 
 	/**
-	 * 发送提示
-	 * @param text 提示文本
-	 * @param images 可选图像数组
+	 * Send prompt
+	 * @param text Prompt text
+	 * @param images Optional image array
 	 */
 	async prompt(
 		text: string,
@@ -476,15 +476,15 @@ export class PiAgentSession {
 		}>,
 	) {
 		console.log(
-			`[PiAgentSession.prompt] 开始处理, session存在: ${!!this.session}, isStreaming: ${this.isStreaming}`,
+			`[PiAgentSession.prompt] Starting processing, session exists: ${!!this.session}, isStreaming: ${this.isStreaming}`,
 		);
 		if (!this.session) {
-			this.send({ type: "error", error: "会话未初始化" });
+			this.send({ type: "error", error: "Session not initialized" });
 			return;
 		}
 
 		try {
-			// 转换图像为正确格式
+			// Convert images to correct format
 			const convertedImages: ImageContent[] | undefined = images?.map(
 				(img) => ({
 					type: "image" as const,
@@ -494,7 +494,7 @@ export class PiAgentSession {
 			);
 
 			console.log(
-				`[PiAgentSession.prompt] 调用session.prompt, text长度: ${text.length}`,
+				`[PiAgentSession.prompt] Calling session.prompt, text length: ${text.length}`,
 			);
 			if (this.isStreaming) {
 				await this.session.prompt(text, {
@@ -504,23 +504,23 @@ export class PiAgentSession {
 			} else {
 				await this.session.prompt(text, { images: convertedImages });
 			}
-			console.log("[PiAgentSession.prompt] session.prompt完成");
+			console.log("[PiAgentSession.prompt] session.prompt completed");
 		} catch (error) {
-			console.error("[PiAgentSession.prompt] 错误:", error);
+			console.error("[PiAgentSession.prompt] Error:", error);
 			this.send({
 				type: "error",
-				error: error instanceof Error ? error.message : "未知错误",
+				error: error instanceof Error ? error.message : "Unknown error",
 			});
 		}
 	}
 
 	/**
-	 * 引导（流式传输时）
-	 * @param text 引导文本
+	 * Steer (during streaming)
+	 * @param text Steer text
 	 */
 	async steer(text: string) {
 		if (!this.session) {
-			this.send({ type: "error", error: "会话未初始化" });
+			this.send({ type: "error", error: "Session not initialized" });
 			return;
 		}
 
@@ -529,25 +529,25 @@ export class PiAgentSession {
 		} catch (error) {
 			this.send({
 				type: "error",
-				error: error instanceof Error ? error.message : "未知错误",
+				error: error instanceof Error ? error.message : "Unknown error",
 			});
 		}
 	}
 
 	/**
-	 * 中止当前操作
+	 * Abort current operation
 	 */
 	async abort() {
 		if (!this.session) return;
 		try {
 			await this.session.abort();
 		} catch (error) {
-			console.error("[Gateway] 中止错误:", error);
+			console.error("[Gateway] Abort error:", error);
 		}
 	}
 
 	/**
-	 * 创建新会话
+	 * Create new session
 	 */
 	async newSession() {
 		if (!this.session) return;
@@ -561,16 +561,16 @@ export class PiAgentSession {
 		} catch (error) {
 			this.send({
 				type: "error",
-				error: error instanceof Error ? error.message : "创建新会话失败",
+				error: error instanceof Error ? error.message : "Failed to create new session",
 			});
 		}
 	}
 
 	/**
-	 * 设置模型
-	 * @param provider 提供商
-	 * @param modelId 模型ID
-	 * @param thinkingLevel 思考级别（可选）
+	 * Set model
+	 * @param provider Provider
+	 * @param modelId Model ID
+	 * @param thinkingLevel Thinking level (optional)
 	 */
 	async setModel(
 		provider: string,
@@ -583,7 +583,7 @@ export class PiAgentSession {
 
 		if (!this.session) {
 			console.error("[Gateway] setModel failed: session is null");
-			this.send({ type: "error", error: "会话未初始化" });
+			this.send({ type: "error", error: "Session not initialized" });
 			return;
 		}
 
@@ -592,7 +592,7 @@ export class PiAgentSession {
 
 		if (!model) {
 			console.error(`[Gateway] Model not found: ${provider}/${modelId}`);
-			this.send({ type: "error", error: `模型 ${provider}/${modelId} 未找到` });
+			this.send({ type: "error", error: `Model ${provider}/${modelId} not found` });
 			return;
 		}
 
@@ -617,14 +617,14 @@ export class PiAgentSession {
 			console.error(`[Gateway] setModel error:`, error);
 			this.send({
 				type: "error",
-				error: error instanceof Error ? error.message : "设置模型失败",
+				error: error instanceof Error ? error.message : "Failed to set model",
 			});
 		}
 	}
 
 	/**
-	 * 设置思考级别
-	 * @param thinkingLevel 思考级别
+	 * Set thinking level
+	 * @param thinkingLevel Thinking level
 	 */
 	async setThinkingLevel(
 		thinkingLevel: "off" | "minimal" | "low" | "medium" | "high" | "xhigh",
@@ -632,7 +632,7 @@ export class PiAgentSession {
 		console.log(`[Gateway] setThinkingLevel called: ${thinkingLevel}`);
 		if (!this.session) {
 			console.error("[Gateway] setThinkingLevel failed: session is null");
-			this.send({ type: "error", error: "会话未初始化" });
+			this.send({ type: "error", error: "Session not initialized" });
 			return;
 		}
 		try {
@@ -649,16 +649,16 @@ export class PiAgentSession {
 			console.error(`[Gateway] setThinkingLevel error:`, error);
 			this.send({
 				type: "error",
-				error: error instanceof Error ? error.message : "设置思考级别失败",
+				error: error instanceof Error ? error.message : "Failed to set thinking level",
 			});
 		}
 	}
 
 	/**
-	 * 执行工具
-	 * @param toolName 工具名称
-	 * @param args 参数
-	 * @param toolCallId 工具调用ID
+	 * Execute tool
+	 * @param toolName Tool name
+	 * @param args Arguments
+	 * @param toolCallId Tool call ID
 	 */
 	async executeTool(
 		toolName: string,
@@ -666,7 +666,7 @@ export class PiAgentSession {
 		toolCallId: string,
 	) {
 		if (!this.session) {
-			this.send({ type: "error", error: "会话未初始化" });
+			this.send({ type: "error", error: "Session not initialized" });
 			return;
 		}
 
@@ -678,13 +678,13 @@ export class PiAgentSession {
 				this.send({
 					type: "tool_end",
 					toolCallId,
-					result: `工具 "${toolName}" 未找到`,
+					result: `Tool "${toolName}" not found`,
 					isError: true,
 				});
 				return;
 			}
 
-			// 发送开始事件
+			// Send start event
 			this.send({
 				type: "tool_start",
 				toolName,
@@ -692,13 +692,13 @@ export class PiAgentSession {
 				args,
 			});
 
-			// 执行工具（toolCallId, args, signal）
+			// Execute tool (toolCallId, args, signal)
 			const result = await tool.execute(
 				toolCallId,
 				args as Record<string, string>,
 			);
 
-			// 发送结束事件
+			// Send end event
 			this.send({
 				type: "tool_end",
 				toolCallId,
@@ -709,14 +709,14 @@ export class PiAgentSession {
 			this.send({
 				type: "tool_end",
 				toolCallId,
-				result: error instanceof Error ? error.message : "未知错误",
+				result: error instanceof Error ? error.message : "Unknown error",
 				isError: true,
 			});
 		}
 	}
 
 	/**
-	 * 列出可用模型
+	 * List available models
 	 */
 	async listModels() {
 		try {
@@ -735,14 +735,14 @@ export class PiAgentSession {
 		} catch (error) {
 			this.send({
 				type: "error",
-				error: error instanceof Error ? error.message : "列出模型失败",
+				error: error instanceof Error ? error.message : "Failed to list models",
 			});
 		}
 	}
 
 	/**
-	 * 列出会话
-	 * @param cwd 工作目录
+	 * List sessions
+	 * @param cwd Working directory
 	 */
 	async listSessions(cwd: string) {
 		try {
@@ -762,29 +762,29 @@ export class PiAgentSession {
 		} catch (error) {
 			this.send({
 				type: "error",
-				error: error instanceof Error ? error.message : "列出会话失败",
+				error: error instanceof Error ? error.message : "Failed to list sessions",
 			});
 		}
 	}
 
 	/**
-	 * 加载会话
-	 * @param sessionPath 会话文件路径
+	 * Load session
+	 * @param sessionPath Session file path
 	 */
 	async loadSession(sessionPath: string) {
 		if (!this.session) return;
 		try {
-			// 从会话文件获取目标会话的cwd
+			// Get target session's cwd from session file
 			const targetSessionManager = SessionManager.open(
 				sessionPath,
 				getLocalSessionsDir(this.workingDir),
 			);
 			const targetCwd = targetSessionManager.getCwd();
 
-			// 如果cwd不同，需要重新初始化以加载正确的AGENTS.md/SYSTEM.md
+			// If cwd is different, need to reinitialize to load correct AGENTS.md/SYSTEM.md
 			if (targetCwd !== this.workingDir) {
 				console.log(
-					`[Gateway] 会话cwd不匹配: ${this.workingDir} -> ${targetCwd}, 重新初始化...`,
+					`[Gateway] Session cwd mismatch: ${this.workingDir} -> ${targetCwd}, reinitializing...`,
 				);
 				const info = await this.initialize(
 					targetCwd,
@@ -800,7 +800,7 @@ export class PiAgentSession {
 					pid: process.pid,
 				});
 			} else {
-				// 相同的cwd，使用switchSession
+				// Same cwd, use switchSession
 				const result = await this.session.switchSession(sessionPath);
 				this.send({
 					type: "session_loaded",
@@ -815,23 +815,23 @@ export class PiAgentSession {
 			this.send({
 				type: "session_loaded",
 				success: false,
-				error: error instanceof Error ? error.message : "加载会话失败",
+				error: error instanceof Error ? error.message : "Failed to load session",
 			});
 		}
 	}
 
 	/**
-	 * 执行命令
-	 * @param command 命令字符串
+	 * Execute command
+	 * @param command Command string
 	 */
 	async executeCommand(command: string) {
-		// 移除前导/
+		// Remove leading /
 		const cmd = command.slice(1).trim();
 		if (!cmd) {
 			this.send({
 				type: "command_result",
 				command,
-				output: "空命令",
+				output: "Empty command",
 				isError: true,
 			});
 			return;
@@ -866,7 +866,7 @@ export class PiAgentSession {
 				this.send({
 					type: "command_result",
 					command,
-					output: result || "(无输出)",
+					output: result || "(no output)",
 					isError,
 				});
 			});
@@ -883,15 +883,15 @@ export class PiAgentSession {
 			this.send({
 				type: "command_result",
 				command,
-				output: error instanceof Error ? error.message : "未知错误",
+				output: error instanceof Error ? error.message : "Unknown error",
 				isError: true,
 			});
 		}
 	}
 
 	/**
-	 * 获取当前模型
-	 * @returns 当前模型或null
+	 * Get current model
+	 * @returns Current model or null
 	 */
 	getCurrentModel() {
 		if (!this.session) return null;
@@ -899,8 +899,8 @@ export class PiAgentSession {
 	}
 
 	/**
-	 * 获取消息
-	 * @returns 消息数组
+	 * Get messages
+	 * @returns Message array
 	 */
 	getMessages(): AgentMessage[] {
 		if (!this.session) return [];
@@ -908,8 +908,8 @@ export class PiAgentSession {
 	}
 
 	/**
-	 * 发送消息到WebSocket客户端
-	 * @param message 消息对象
+	 * Send message to WebSocket client
+	 * @param message Message object
 	 */
 	send(message: ServerMessage) {
 		if (this.ws.readyState === WebSocket.OPEN) {
@@ -918,11 +918,11 @@ export class PiAgentSession {
 	}
 
 	/**
-	 * 读取文件内容并随工具结果一起发送（复用tool_end消息）
-	 * @param toolCallId 工具调用ID
-	 * @param toolResult 工具执行结果
-	 * @param isError 是否错误
-	 * @param filePath 文件路径
+	 * Read file content and send with tool result (reuse tool_end message)
+	 * @param toolCallId Tool call ID
+	 * @param toolResult Tool execution result
+	 * @param isError Whether error
+	 * @param filePath File path
 	 */
 	async sendToolEndWithFileContent(
 		toolCallId: string,
@@ -931,12 +931,12 @@ export class PiAgentSession {
 		filePath: string,
 	) {
 		try {
-			// 解析文件路径（支持相对路径和绝对路径）
+			// Resolve file path (support relative and absolute paths)
 			const fullPath = filePath.startsWith("/")
 				? filePath
 				: join(this.workingDir, filePath);
 
-			// 检查文件是否存在
+			// Check if file exists
 			const { existsSync } = await import("node:fs");
 			if (!existsSync(fullPath)) {
 				this.send({
@@ -948,10 +948,10 @@ export class PiAgentSession {
 				return;
 			}
 
-			// 读取文件内容
+			// Read file content
 			const content = await readFile(fullPath, "utf-8");
 
-			// 发送工具结束消息，包含文件内容
+			// Send tool end message with file content
 			this.send({
 				type: "tool_end",
 				toolCallId,
@@ -961,8 +961,8 @@ export class PiAgentSession {
 				filePath,
 			});
 		} catch (error) {
-			// 如果读取失败，只发送工具结果
-			console.error(`[Gateway] 读取文件内容失败: ${filePath}`, error);
+			// If read fails, only send tool result
+			console.error(`[Gateway] Failed to read file content: ${filePath}`, error);
 			this.send({
 				type: "tool_end",
 				toolCallId,
@@ -973,7 +973,7 @@ export class PiAgentSession {
 	}
 
 	/**
-	 * 清理资源
+	 * Cleanup resources
 	 */
 	dispose() {
 		if (this.unsubscribeFn) {

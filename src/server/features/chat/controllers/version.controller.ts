@@ -1,6 +1,6 @@
 /**
- * 版本控制器
- * 处理版本和状态API请求
+ * Version Controller
+ * Handles version and status API requests
  */
 
 import type { Request, Response } from "express";
@@ -9,12 +9,12 @@ import { Logger, LogLevel } from "../../../lib/utils/logger";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 获取服务器版本信息
+ * Get server version information
  */
 export function createVersionController(startTime: number) {
 	return {
 		/**
-		 * 获取版本信息（用于通过PID变更进行代码重新加载检测）
+		 * Get version info (used for code reload detection via PID change)
 		 */
 		getVersion(_req: Request, res: Response) {
 			const versionInfo = {
@@ -28,13 +28,13 @@ export function createVersionController(startTime: number) {
 			};
 
 			logger.debug(
-				`获取版本信息，PID: ${process.pid}, 运行时间: ${versionInfo.uptime}ms`,
+				`Retrieved version info, PID: ${process.pid}, uptime: ${versionInfo.uptime}ms`,
 			);
 			res.json(versionInfo);
 		},
 
 		/**
-		 * 健康检查
+		 * Health check
 		 */
 		healthCheck(_req: Request, res: Response) {
 			res.json({
@@ -45,7 +45,7 @@ export function createVersionController(startTime: number) {
 		},
 
 		/**
-		 * 准备就绪检查
+		 * Readiness check
 		 */
 		readinessCheck(_req: Request, res: Response) {
 			res.json({
@@ -56,7 +56,7 @@ export function createVersionController(startTime: number) {
 		},
 
 		/**
-		 * 活跃度检查
+		 * Liveness check
 		 */
 		livenessCheck(_req: Request, res: Response) {
 			res.json({
@@ -67,7 +67,7 @@ export function createVersionController(startTime: number) {
 		},
 
 		/**
-		 * 服务器状态
+		 * Server status
 		 */
 		getStatus(_req: Request, res: Response) {
 			const status = {
@@ -80,7 +80,7 @@ export function createVersionController(startTime: number) {
 				timestamp: new Date().toISOString(),
 			};
 
-			logger.debug(`获取服务器状态，PID: ${process.pid}`);
+			logger.debug(`Retrieved server status, PID: ${process.pid}`);
 			res.json(status);
 		},
 	};

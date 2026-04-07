@@ -1,6 +1,6 @@
 /**
- * Chat Feature WebSocket 处理器注册
- * 集中注册所有聊天相关的 WebSocket 消息处理器
+ * Chat Feature WebSocket Handler Registration
+ * Centralized registration of all chat-related WebSocket message handlers
  */
 
 import { wsRouter } from "../../ws-router";
@@ -15,34 +15,34 @@ import { handleThinkingLevelChange } from "./thinking-level";
 import { handleToolRequest } from "./tool-request";
 
 /**
- * 注册 Chat Feature 的所有 WebSocket 处理器
+ * Register all Chat Feature WebSocket handlers
  */
 export function registerChatWSHandlers(): void {
-	// 聊天核心功能
+	// Chat core functionality
 	wsRouter.register("prompt", handlePrompt);
 	wsRouter.register("abort", handleAbort);
 	wsRouter.register("steer", handleSteer);
 
-	// 模型相关
+	// Model related
 	wsRouter.register("set_model", handleSetModel);
 	wsRouter.register("model_change", handleModelChange);
 	wsRouter.register("list_models", handleListModels);
 	wsRouter.register("thinking_level_change", handleThinkingLevelChange);
 
-	// 工具相关
+	// Tool related
 	wsRouter.register("tool_request", handleToolRequest);
 
-	// 命令执行
+	// Command execution
 	wsRouter.register("command", handleCommand);
 
-	// LLM 日志
+	// LLM logs
 	wsRouter.register("set_llm_log", handleSetLlmLog);
 }
 
-// 自动注册（在模块加载时）
+// Auto-register (when module loads)
 registerChatWSHandlers();
 
-// 导出处理器（供单独使用）
+// Export handlers (for standalone use)
 export {
 	handleAbort,
 	handleCommand,

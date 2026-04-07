@@ -1,6 +1,6 @@
 /**
  * Pi Agent Session Module
- * 导出 PiAgentSession 核心类
+ * Exports PiAgentSession core class
  */
 
 export { PiAgentSession, type ServerMessage } from "./piAgentSession";

@@ -1,6 +1,6 @@
 /**
- * 会话控制器
- * 处理会话相关的API请求
+ * Session Controller
+ * Handles session-related API requests
  */
 
 import {
@@ -15,7 +15,7 @@ import { AGENT_DIR, getLocalSessionsDir } from "../agent-session/utils";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 获取会话列表
+ * Get session list
  */
 export async function getSessions(req: Request, res: Response) {
 	const cwd = (req.query.cwd as string) || process.cwd();
@@ -24,11 +24,11 @@ export async function getSessions(req: Request, res: Response) {
 	try {
 		const sessions = await SessionManager.list(cwd, localSessionsDir);
 
-		logger.info(`[getSessions] 加载会话: ${cwd}, 数量: ${sessions.length}`);
+		logger.info(`[getSessions] Loaded sessions: ${cwd}, count: ${sessions.length}`);
 
-		// 打印第一个 session 的 path 用于调试
+		// Print first session path for debugging
 		if (sessions.length > 0) {
-			logger.info(`[getSessions] 第一个 session path: ${sessions[0].path}`);
+			logger.info(`[getSessions] First session path: ${sessions[0].path}`);
 		}
 
 		res.json({
@@ -45,21 +45,21 @@ export async function getSessions(req: Request, res: Response) {
 		});
 	} catch (error) {
 		logger.error(
-			`[getSessions] 错误: ${error instanceof Error ? error.message : String(error)}`,
+			`[getSessions] Error: ${error instanceof Error ? error.message : String(error)}`,
 		);
 		res.json({ sessions: [] });
 	}
 }
 
 /**
- * 加载会话文件内容
+ * Load session file content
  */
 export async function loadSession(req: Request, res: Response) {
 	const { sessionPath } = req.body;
-	logger.info(`[loadSession] 收到请求: sessionPath=${sessionPath}`);
+	logger.info(`[loadSession] Received request: sessionPath=${sessionPath}`);
 
 	if (!sessionPath) {
-		res.status(400).json({ error: "sessionPath参数必填" });
+		res.status(400).json({ error: "sessionPath parameter is required" });
 		return;
 	}
 
@@ -70,7 +70,7 @@ export async function loadSession(req: Request, res: Response) {
 		try {
 			await access(sessionPath);
 		} catch {
-			logger.error(`会话文件不存在: ${sessionPath}`);
+			logger.error(`Session file does not exist: ${sessionPath}`);
 			res
 				.status(404)
 				.json({ error: "Session file not found", path: sessionPath });
@@ -90,16 +90,16 @@ export async function loadSession(req: Request, res: Response) {
 				entries.push(JSON.parse(lines[i]));
 			} catch (_parseError) {
 				logger.warn(
-					`解析会话文件第 ${i + 1} 行失败: ${lines[i].slice(0, 100)}`,
+					`Failed to parse session file line ${i + 1}: ${lines[i].slice(0, 100)}`,
 				);
 				// Skip invalid lines but continue processing
 			}
 		}
 
-		// 从会话文件路径提取会话ID
+		// Extract session ID from session file path
 		const sessionId = sessionPath.split("/").pop()?.replace(".jsonl", "") || "";
 
-		logger.info(`加载会话: ${sessionPath}, 条目数: ${entries.length}`);
+		logger.info(`Loaded session: ${sessionPath}, entries: ${entries.length}`);
 		res.json({
 			path: sessionPath,
 			sessionId: sessionId,
@@ -107,7 +107,7 @@ export async function loadSession(req: Request, res: Response) {
 		});
 	} catch (error) {
 		logger.error(
-			`加载会话错误: ${error instanceof Error ? error.message : String(error)}`,
+			`Error loading session: ${error instanceof Error ? error.message : String(error)}`,
 			{ sessionPath },
 		);
 		res.status(500).json({ error: String(error), path: sessionPath });
@@ -115,7 +115,7 @@ export async function loadSession(req: Request, res: Response) {
 }
 
 /**
- * 获取系统提示和AGENTS.md内容
+ * Get system prompt and AGENTS.md content
  */
 export async function getSystemPrompt(req: Request, res: Response) {
 	const rawCwd = (req.query.cwd as string) || process.cwd();
@@ -133,14 +133,14 @@ export async function getSystemPrompt(req: Request, res: Response) {
 		const appendSystemPrompt = loader.getAppendSystemPrompt();
 		const skills = loader.getSkills().skills;
 
-		// 构建简单默认系统提示（如果没有设置自定义提示）
+		// Build simple default system prompt (if no custom prompt is set)
 		const defaultSystemPrompt = `# Pi Coding Agent
 
-工作目录: ${targetCwd}
-技能: ${skills.length > 0 ? skills.map((s) => s.name).join(", ") : "无"}
-AGENTS.md文件: ${agentsFiles.length} 个
+Working Directory: ${targetCwd}
+Skills: ${skills.length > 0 ? skills.map((s) => s.name).join(", ") : "None"}
+AGENTS.md Files: ${agentsFiles.length}
 
-你是Pi Coding Agent，一个帮助开发者编写、调试和优化代码的AI助手。`;
+You are Pi Coding Agent, an AI assistant that helps developers write, debug, and optimize code.`;
 
 		const response = {
 			cwd: targetCwd,
@@ -160,12 +160,12 @@ AGENTS.md文件: ${agentsFiles.length} 个
 		};
 
 		logger.info(
-			`获取系统提示，目录: ${targetCwd}, AGENTS.md文件数: ${agentsFiles.length}`,
+			`Retrieved system prompt, directory: ${targetCwd}, AGENTS.md files: ${agentsFiles.length}`,
 		);
 		res.json(response);
 	} catch (error) {
 		logger.error(
-			`获取系统提示错误: ${error instanceof Error ? error.message : String(error)}`,
+			`Error retrieving system prompt: ${error instanceof Error ? error.message : String(error)}`,
 			{ targetCwd },
 		);
 		res.status(500).json({ error: String(error) });
