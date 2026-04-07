@@ -1,20 +1,20 @@
 /**
- * Chat Feature HTTP 路由注册
- * 集中注册所有聊天相关的 HTTP API 路由
+ * Chat Feature HTTP Route Registration
+ * Centralized registration of all chat-related HTTP API routes
  */
 
 import type { Application } from "express";
 import type { LlmLogManager } from "./llm/log-manager";
 
 /**
- * 注册 Chat Feature 的所有 HTTP 路由
+ * Register all Chat Feature HTTP routes
  */
 export async function registerChatHTTPRoutes(
 	app: Application,
 	llmLogManager: LlmLogManager,
 	serverStartTime: number,
 ): Promise<void> {
-	// System / 版本 / 状态 API
+	// System / Version / Status API
 	const { createVersionController } = await import(
 		"./controllers/version.controller"
 	);
@@ -26,17 +26,17 @@ export async function registerChatHTTPRoutes(
 	app.get("/api/live", versionController.livenessCheck);
 	app.get("/api/status", versionController.getStatus);
 
-	// 用户设置 API
+	// User settings API
 	app.get("/api/settings", (_req, res) => {
 		res.json({
 			theme: "dark",
 			fontSize: "small",
 			showThinking: true,
-			language: "zh-CN",
+			language: "en-US",
 		});
 	});
 
-	// LLM 日志 API
+	// LLM log API
 	const { createLlmLogController } = await import(
 		"./controllers/llm-log.controller"
 	);
@@ -44,7 +44,7 @@ export async function registerChatHTTPRoutes(
 	app.get("/api/llm-log", llmLogController.getLlmLog);
 	app.post("/api/llm-log/enabled", llmLogController.setLlmLogEnabled);
 
-	// 模型 API
+	// Model API
 	const { getModels } = await import("./controllers/model.controller");
 	app.get("/api/models", getModels);
 	app.post("/api/models", async (req, res) => {
@@ -52,7 +52,7 @@ export async function registerChatHTTPRoutes(
 		res.json({ success: true, model, provider });
 	});
 
-	// 会话 API
+	// Session API
 	const { getSessions, getSystemPrompt, loadSession } = await import(
 		"./controllers/session.controller"
 	);

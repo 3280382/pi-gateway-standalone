@@ -1,6 +1,6 @@
 /**
- * LLM日志管理器
- * 管理和持久化LLM API请求/响应日志
+ * LLM Log Manager
+ * Manages and persists LLM API request/response logs
  */
 
 import { existsSync, mkdirSync } from "node:fs";
@@ -28,38 +28,38 @@ export class LlmLogManager {
 		this.flushIntervalMs = options.flushInterval ?? 5000;
 		this.logger = new Logger({ level: LogLevel.INFO });
 
-		// 启动定期刷新
+		// Start periodic flush
 		if (this.enabled) {
 			this.startFlushInterval();
 		}
 	}
 
 	/**
-	 * 设置日志文件
+	 * Set log file
 	 */
 	setLogFile(sessionFile: string | undefined, sessionId: string): void {
-		// 刷新现有日志
+		// Flush existing logs
 		this.flush();
 
 		this.currentSessionId = sessionId;
 		if (sessionFile) {
-			// 使用与会话文件相同的目录和基本名称，但使用.log扩展名
+			// Use same directory and base name as session file, but with .log extension
 			this.logFilePath = sessionFile.replace(/\.jsonl$/, ".log");
 		} else {
 			this.logFilePath = null;
 		}
 
 		this.logger.info(
-			`LLM日志文件设置: sessionFile=${sessionFile}, logFilePath=${this.logFilePath}, enabled=${this.enabled}`,
+			`LLM log file set: sessionFile=${sessionFile}, logFilePath=${this.logFilePath}, enabled=${this.enabled}`,
 		);
 	}
 
 	/**
-	 * 记录日志条目
+	 * Log entry
 	 */
 	log(entry: Omit<LlmLogEntry, "timestamp">): void {
 		if (!this.enabled) {
-			this.logger.debug(`LLM日志记录跳过: enabled=false`);
+			this.logger.debug(`LLM log entry skipped: enabled=false`);
 			return;
 		}
 
@@ -70,17 +70,17 @@ export class LlmLogManager {
 
 		this.logBuffer.push(fullEntry);
 		this.logger.debug(
-			`LLM日志记录: type=${entry.type}, bufferSize=${this.logBuffer.length}, logFilePath=${this.logFilePath}`,
+			`LLM log entry: type=${entry.type}, bufferSize=${this.logBuffer.length}, logFilePath=${this.logFilePath}`,
 		);
 
-		// 如果缓冲区已满，立即刷新
+		// If buffer is full, flush immediately
 		if (this.logBuffer.length >= this.maxBufferSize) {
 			this.flush();
 		}
 	}
 
 	/**
-	 * 启动定期刷新间隔
+	 * Start periodic flush interval
 	 */
 	private startFlushInterval(): void {
 		if (this.flushInterval) {
@@ -90,7 +90,7 @@ export class LlmLogManager {
 		this.flushInterval = setInterval(() => {
 			this.flush().catch((error) => {
 				this.logger.error(
-					"LLM日志刷新失败",
+					"LLM log flush failed",
 					{},
 					error instanceof Error ? error : undefined,
 				);
@@ -99,16 +99,16 @@ export class LlmLogManager {
 	}
 
 	/**
-	 * 刷新缓冲区到文件
+	 * Flush buffer to file
 	 */
 	async flush(): Promise<void> {
 		this.logger.debug(
-			`LLM日志刷新: bufferLength=${this.logBuffer.length}, logFilePath=${this.logFilePath}`,
+			`LLM log flush: bufferLength=${this.logBuffer.length}, logFilePath=${this.logFilePath}`,
 		);
 
 		if (this.logBuffer.length === 0 || !this.logFilePath) {
 			this.logger.debug(
-				`LLM日志刷新跳过: bufferEmpty=${this.logBuffer.length === 0}, noLogFile=${!this.logFilePath}`,
+				`LLM log flush skipped: bufferEmpty=${this.logBuffer.length === 0}, noLogFile=${!this.logFilePath}`,
 			);
 			return;
 		}
@@ -117,34 +117,34 @@ export class LlmLogManager {
 		this.logBuffer = [];
 
 		try {
-			// 确保目录存在
+			// Ensure directory exists
 			const dir = dirname(this.logFilePath);
 			if (!existsSync(dir)) {
 				mkdirSync(dir, { recursive: true });
 			}
 
-			// 追加到日志文件
+			// Append to log file
 			const lines = `${entries.map((e) => JSON.stringify(e)).join("\n")}\n`;
 			await appendFile(this.logFilePath, lines, "utf-8");
 			this.logger.info(
-				`LLM日志刷新成功: 写入${entries.length}个条目到${this.logFilePath}`,
+				`LLM log flush successful: wrote ${entries.length} entries to ${this.logFilePath}`,
 			);
 		} catch (error) {
 			this.logger.error(
-				"LLM日志写入失败",
+				"LLM log write failed",
 				{},
 				error instanceof Error ? error : undefined,
 			);
-			// 将条目放回缓冲区
+			// Put entries back into buffer
 			this.logBuffer.unshift(...entries);
 		}
 	}
 
 	/**
-	 * 获取日志内容
+	 * Get log content
 	 */
 	async getLogContent(): Promise<LlmLogEntry[]> {
-		// 首先刷新当前缓冲区
+		// First flush current buffer
 		await this.flush();
 
 		if (!this.logFilePath || !existsSync(this.logFilePath)) {
@@ -160,7 +160,7 @@ export class LlmLogManager {
 			return lines.map((line) => JSON.parse(line));
 		} catch (error) {
 			this.logger.error(
-				"LLM日志读取失败",
+				"LLM log read failed",
 				{},
 				error instanceof Error ? error : undefined,
 			);
@@ -169,7 +169,7 @@ export class LlmLogManager {
 	}
 
 	/**
-	 * 设置启用状态
+	 * Set enabled status
 	 */
 	setEnabled(enabled: boolean): void {
 		this.enabled = enabled;
@@ -177,7 +177,7 @@ export class LlmLogManager {
 		if (enabled) {
 			this.startFlushInterval();
 		} else {
-			// 禁用时清空缓冲区
+			// Clear buffer when disabled
 			this.logBuffer = [];
 			if (this.flushInterval) {
 				clearInterval(this.flushInterval);
@@ -185,39 +185,39 @@ export class LlmLogManager {
 			}
 		}
 
-		this.logger.info(`LLM日志启用状态: ${enabled}`);
+		this.logger.info(`LLM logging enabled: ${enabled}`);
 	}
 
 	/**
-	 * 获取启用状态
+	 * Get enabled status
 	 */
 	isEnabled(): boolean {
 		return this.enabled;
 	}
 
 	/**
-	 * 获取当前会话ID
+	 * Get current session ID
 	 */
 	getCurrentSessionId(): string | null {
 		return this.currentSessionId;
 	}
 
 	/**
-	 * 获取日志文件路径
+	 * Get log file path
 	 */
 	getLogFilePath(): string | null {
 		return this.logFilePath;
 	}
 
 	/**
-	 * 获取缓冲区大小
+	 * Get buffer size
 	 */
 	getBufferSize(): number {
 		return this.logBuffer.length;
 	}
 
 	/**
-	 * 清理资源
+	 * Cleanup resources
 	 */
 	dispose(): void {
 		if (this.flushInterval) {
@@ -225,10 +225,10 @@ export class LlmLogManager {
 			this.flushInterval = null;
 		}
 
-		// 最终刷新
+		// Final flush
 		this.flush().catch((error) => {
 			this.logger.error(
-				"LLM日志最终刷新失败",
+				"LLM log final flush failed",
 				{},
 				error instanceof Error ? error : undefined,
 			);

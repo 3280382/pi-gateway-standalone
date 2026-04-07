@@ -1,5 +1,5 @@
 /**
- * LLM日志类型定义
+ * LLM Log Type Definitions
  */
 
 export interface LlmLogEntry {
