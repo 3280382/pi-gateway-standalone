@@ -100,8 +100,8 @@ function generateTreeText(items: TreeNode[], prefix = ""): string {
 	let result = "";
 	items.forEach((item, index) => {
 		const isLast = index === items.length - 1;
-		const connector = isLast ? "└── " : "├── ";
-		const childPrefix = isLast ? "    " : "│   ";
+		const connector = isLast ? "`-- " : "|-- ";
+		const childPrefix = isLast ? "    " : "|   ";
 		const icon = getFileIcon(item.name, item.isDirectory);
 		
 		result += prefix + connector + icon + " " + item.name + "\n";
@@ -355,7 +355,7 @@ function TreeLine({
 	searchText
 }: TreeLineProps) {
 	const isLast = index === total - 1;
-	const connector = isLast ? "└── " : "├── ";
+	const connector = isLast ? "`-- " : "|-- ";
 	const hasChildren = item.children && item.children.length > 0;
 	const isExpanded = expandedPaths.has(item.path);
 	const icon = getFileIcon(item.name, item.isDirectory);
