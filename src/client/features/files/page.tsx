@@ -4,9 +4,10 @@
  * 职责：文件功能完整布局
  * - 包含 FileToolbar、FileSidebar、FileBrowser、Panel、BottomMenu
  * - 所有状态通过 Hooks 内部获取
+ * - 实现 KeepAlive：首次激活才挂载，之后通过 display 控制显示隐藏
  */
 
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { FileBottomMenu } from "@/features/files/components/BottomMenu/FileBottomMenu";
 import { XTermPanel } from "@/features/files/components/panels/TerminalPanel";
 import { useFileStore, useTerminalStore } from "@/features/files/stores";
@@ -16,7 +17,23 @@ import { FileSidebar } from "@/features/files/components/Sidebar/FileSidebar";
 import { FileToolbar } from "@/features/files/components/Header/FileToolbar";
 import styles from "@/features/files/FilesLayout.module.css";
 
-export function FilesPage() {
+interface FilesPageProps {
+	active?: boolean;
+}
+
+export function FilesPage({ active = false }: FilesPageProps) {
+	const mountedRef = useRef(false);
+
+	// 首次激活时标记为已挂载
+	if (active) {
+		mountedRef.current = true;
+	}
+
+	// 从未激活过，返回 null（配合 React.lazy 实现延迟加载）
+	if (!mountedRef.current) {
+		return null;
+	}
+
 	const {
 		currentPath,
 		isSidebarVisible,
@@ -55,7 +72,10 @@ export function FilesPage() {
 	]);
 
 	return (
-		<div className={styles.layout}>
+		<div
+			className={styles.layout}
+			style={{ display: active ? "block" : "none", height: "100%" }}
+		>
 			{/* FileToolbar - 文件浏览器专用顶部工具栏 */}
 			<header className={styles.header}>
 				<FileToolbar
