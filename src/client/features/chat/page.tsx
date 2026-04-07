@@ -16,18 +16,20 @@ interface ChatPageProps {
 export function ChatPage({ active = false }: ChatPageProps) {
 	const mountedRef = useRef(false);
 
+	// 总是在顶层调用 Hooks（React Hooks 规则）
+	const { isConnecting } = useChatInit();
+	useChatMessages();
+
 	// 首次激活时标记为已挂载
 	if (active) {
 		mountedRef.current = true;
 	}
 
 	// 从未激活过，返回 null（配合 React.lazy 实现延迟加载）
+	// 注意：这个返回必须在所有 Hooks 调用之后
 	if (!mountedRef.current) {
 		return null;
 	}
-
-	const { isConnecting } = useChatInit();
-	useChatMessages();
 
 	if (isConnecting) {
 		return (

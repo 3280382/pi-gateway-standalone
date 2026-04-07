@@ -24,16 +24,7 @@ interface FilesPageProps {
 export function FilesPage({ active = false }: FilesPageProps) {
 	const mountedRef = useRef(false);
 
-	// 首次激活时标记为已挂载
-	if (active) {
-		mountedRef.current = true;
-	}
-
-	// 从未激活过，返回 null（配合 React.lazy 实现延迟加载）
-	if (!mountedRef.current) {
-		return null;
-	}
-
+	// 总是在顶层调用 Hooks（React Hooks 规则）
 	const {
 		currentPath,
 		isSidebarVisible,
@@ -46,6 +37,12 @@ export function FilesPage({ active = false }: FilesPageProps) {
 	const { navigateTo } = useFileNavigation();
 	const { output, command, setCommand } = useTerminalStore();
 
+	// 首次激活时标记为已挂载
+	if (active) {
+		mountedRef.current = true;
+	}
+
+	// useCallback 必须在条件返回之前调用（React Hooks 规则）
 	const renderBottomPanel = useCallback(() => {
 		if (!isBottomPanelOpen) return null;
 
@@ -70,11 +67,17 @@ export function FilesPage({ active = false }: FilesPageProps) {
 		setBottomPanelHeight,
 		setCommand,
 	]);
+	// 从未激活过，返回 null（配合 React.lazy 实现延迟加载）
+	// 注意：这个返回必须在所有 Hooks 调用之后
+	if (!mountedRef.current) {
+		return null;
+	}
+
 
 	return (
 		<div
 			className={styles.layout}
-			style={{ display: active ? "block" : "none", height: "100%" }}
+			style={{ display: active ? "block" : "none" }}
 		>
 			{/* FileToolbar - 文件浏览器专用顶部工具栏 */}
 			<header className={styles.header}>
