@@ -1,180 +1,217 @@
 /**
  * TreeViewModal Styles
- * 紧凑全屏树状目录浏览模态窗口
  */
 
 .overlay {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: rgba(0, 0, 0, 0.95);
-	z-index: 2000;
-	display: flex;
-	flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
 }
 
 .container {
-	width: 100%;
-	height: 100%;
-	display: flex;
-	flex-direction: column;
-	background: var(--bg-primary);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
 }
 
 /* 头部 */
 .header {
-	flex-shrink: 0;
-	background: var(--bg-secondary);
-	border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 8px 12px;
 }
 
-.row1 {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 6px 12px;
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
-.title {
-	font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
-	font-size: 13px;
-	color: var(--text-primary);
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+.row:last-child {
+  margin-bottom: 0;
+}
+
+.path {
+  flex: 1;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 13px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .closeBtn {
-	width: 28px;
-	height: 28px;
-	border: none;
-	border-radius: 4px;
-	background: transparent;
-	color: var(--text-muted);
-	cursor: pointer;
-	font-size: 16px;
-	line-height: 1;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .closeBtn:hover {
-	background: var(--accent-danger);
-	color: white;
-}
-
-.row2 {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 4px 12px;
-	border-top: 1px solid var(--border-subtle);
+  background: var(--accent-danger);
+  color: white;
 }
 
 .select {
-	padding: 3px 8px;
-	font-size: 12px;
-	border: 1px solid var(--border-color);
-	border-radius: 3px;
-	background: var(--bg-tertiary);
-	color: var(--text-primary);
-	height: 26px;
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  height: 28px;
+  cursor: pointer;
 }
 
 .searchInput {
-	flex: 1;
-	max-width: 200px;
-	padding: 3px 8px;
-	font-size: 12px;
-	border: 1px solid var(--border-color);
-	border-radius: 3px;
-	background: var(--bg-tertiary);
-	color: var(--text-primary);
-	height: 26px;
+  flex: 1;
+  max-width: 200px;
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  height: 28px;
 }
 
 .copyBtn {
-	padding: 3px 12px;
-	font-size: 12px;
-	border: 1px solid var(--border-color);
-	border-radius: 3px;
-	background: var(--bg-tertiary);
-	color: var(--text-primary);
-	cursor: pointer;
-	height: 26px;
-	margin-left: auto;
+  padding: 4px 12px;
+  font-size: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  cursor: pointer;
+  height: 28px;
+  margin-left: auto;
 }
 
 .copyBtn:hover:not(:disabled) {
-	background: var(--accent-primary);
-	color: white;
+  background: var(--accent-primary);
+  color: white;
 }
 
-.copyBtn.success {
-	background: var(--accent-success);
-	color: white;
+.copyBtn.copied {
+  background: var(--accent-success);
+  color: white;
 }
 
 .copyBtn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* 内容区 */
 .content {
-	flex: 1;
-	overflow: auto;
-	padding: 4px 0;
-	background: var(--bg-primary);
-	font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
-	font-size: 13px;
-	line-height: 1.5;
+  flex: 1;
+  overflow: auto;
+  padding: 4px 0;
+  background: var(--bg-primary);
+  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
-.loading {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 100%;
-	color: var(--text-muted);
+.loading, .empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
 }
 
-/* 树行 - 关键：white-space pre 保持空格 */
-.line {
-	padding: 1px 12px;
-	cursor: pointer;
-	white-space: pre;
-	color: var(--text-primary);
-	font-family: inherit;
+/* 树行 - 关键样式 */
+.treeLine {
+  display: block;
+  padding: 1px 12px;
+  cursor: pointer;
+  white-space: pre;
+  font-family: inherit;
+  line-height: 1.5;
 }
 
-.line:hover {
-	background: var(--bg-hover);
+.treeLine:hover {
+  background: var(--bg-hover);
+}
+
+/* 缩进 - 使用 inline-block 确保宽度 */
+.indent {
+  display: inline;
+  color: var(--text-muted);
+}
+
+/* 连接符 */
+.connector {
+  display: inline;
+  color: var(--text-muted);
+}
+
+/* 展开图标 - 固定3字符宽度 */
+.expandIcon {
+  display: inline-block;
+  width: 28px;
+  color: var(--text-muted);
+}
+
+/* 文件图标 */
+.fileIcon {
+  display: inline;
+}
+
+/* 目录名 */
+.dirName {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* 文件名 */
+.fileName {
+  color: var(--text-secondary);
 }
 
 /* 搜索高亮 */
-.line :global(mark) {
-	background: var(--accent-primary);
-	color: white;
-	padding: 0 2px;
-	border-radius: 2px;
+.highlight {
+  background: var(--accent-primary);
+  color: white;
+  padding: 0 2px;
+  border-radius: 2px;
 }
 
 /* 滚动条 */
 .content::-webkit-scrollbar {
-	width: 10px;
-	height: 10px;
+  width: 10px;
+  height: 10px;
 }
 
 .content::-webkit-scrollbar-track {
-	background: var(--bg-secondary);
+  background: var(--bg-secondary);
 }
 
 .content::-webkit-scrollbar-thumb {
-	background: var(--border-color);
-	border-radius: 5px;
+  background: var(--border-color);
+  border-radius: 5px;
 }
 
 .content::-webkit-scrollbar-thumb:hover {
-	background: var(--text-muted);
+  background: var(--text-muted);
 }
