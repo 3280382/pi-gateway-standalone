@@ -39,12 +39,23 @@ export function useChatPanel(): UseChatPanelReturn {
 	const currentStreamingMessage = useChatStore((state) => state.currentStreamingMessage);
 	const chatController = useChatController();
 
-	// 自动滚动到底部
+	// 首次加载时滚动到底部
+	useEffect(() => {
+		// 使用 setTimeout 确保 DOM 已经渲染完成
+		const timer = setTimeout(() => {
+			if (messagesRef.current) {
+				messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+			}
+		}, 100);
+		return () => clearTimeout(timer);
+	}, []);
+
+	// 消息变化时自动滚动
 	useEffect(() => {
 		if (messagesRef.current && shouldScrollToBottom) {
 			messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
 		}
-	}, [messages, currentStreamingMessage, shouldScrollToBottom]);
+	}, [messages.length, currentStreamingMessage, shouldScrollToBottom]);
 
 	// 处理滚动事件，检测用户是否手动向上滚动
 	const handleScroll = useCallback(() => {
