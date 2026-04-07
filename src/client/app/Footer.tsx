@@ -70,14 +70,14 @@ export function Footer() {
       {/* 中间：视图切换 */}
       <div className={styles.centerGroup}>
         <IconButton
-          icon="chat"
+          name="chat"
           label="Chat"
           variant={currentView === "chat" ? "primary" : "default"}
           onClick={() => setCurrentView("chat")}
           title="Chat"
         />
         <IconButton
-          icon="files"
+          name="files"
           label="Files"
           variant={currentView === "files" ? "primary" : "default"}
           onClick={() => setCurrentView("files")}

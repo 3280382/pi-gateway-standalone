@@ -35,7 +35,7 @@ export function ToolMenu() {
     <>
       <div className={styles.container} ref={menuRef}>
         <IconButton
-          icon="tools"
+          name="tools"
           variant={isOpen ? "primary" : "toggle"}
           onClick={() => setIsOpen(!isOpen)}
           title="Tools"
