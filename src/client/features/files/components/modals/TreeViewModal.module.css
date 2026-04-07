@@ -1,9 +1,8 @@
 /**
  * TreeViewModal Styles
- * 紧凑全屏树状目录浏览模态窗口 - ASCII 树格式
+ * 紧凑全屏树状目录浏览模态窗口
  */
 
-/* 全屏遮罩层 */
 .overlay {
 	position: fixed;
 	top: 0;
@@ -16,7 +15,6 @@
 	flex-direction: column;
 }
 
-/* 全屏容器 */
 .container {
 	width: 100%;
 	height: 100%;
@@ -25,57 +23,39 @@
 	background: var(--bg-primary);
 }
 
-/* 头部工具栏 */
+/* 头部 */
 .header {
-	display: flex;
-	flex-direction: column;
-	border-bottom: 1px solid var(--border-color);
-	background: var(--bg-secondary);
 	flex-shrink: 0;
+	background: var(--bg-secondary);
+	border-bottom: 1px solid var(--border-color);
 }
 
-/* 头部每一行 */
-.headerRow {
+.row1 {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 4px 8px;
-	gap: 8px;
+	padding: 6px 12px;
 }
 
-/* 路径区域 */
-.pathSection {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	flex: 1;
-	min-width: 0;
-}
-
-.path {
-	font-size: 12px;
+.title {
+	font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+	font-size: 13px;
 	color: var(--text-primary);
-	font-family: var(--font-mono);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	flex: 1;
 }
 
-/* 右上角关闭按钮 */
 .closeBtn {
-	width: 24px;
-	height: 24px;
+	width: 28px;
+	height: 28px;
 	border: none;
 	border-radius: 4px;
 	background: transparent;
 	color: var(--text-muted);
 	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: all 0.15s;
-	flex-shrink: 0;
+	font-size: 16px;
+	line-height: 1;
 }
 
 .closeBtn:hover {
@@ -83,62 +63,56 @@
 	color: white;
 }
 
-/* 第2行：过滤控制和复制按钮 */
-.filterControls {
+.row2 {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	flex: 1;
+	padding: 4px 12px;
+	border-top: 1px solid var(--border-subtle);
 }
 
 .select {
-	padding: 2px 6px;
-	font-size: 11px;
+	padding: 3px 8px;
+	font-size: 12px;
 	border: 1px solid var(--border-color);
 	border-radius: 3px;
 	background: var(--bg-tertiary);
 	color: var(--text-primary);
-	height: 22px;
-	cursor: pointer;
+	height: 26px;
 }
 
 .searchInput {
-	padding: 2px 6px;
-	font-size: 11px;
+	flex: 1;
+	max-width: 200px;
+	padding: 3px 8px;
+	font-size: 12px;
 	border: 1px solid var(--border-color);
 	border-radius: 3px;
 	background: var(--bg-tertiary);
 	color: var(--text-primary);
-	width: 140px;
-	height: 22px;
+	height: 26px;
 }
 
-.searchInput:focus {
-	outline: none;
-	border-color: var(--accent-primary);
-}
-
-/* 复制按钮 */
 .copyBtn {
-	padding: 3px 10px;
-	font-size: 11px;
+	padding: 3px 12px;
+	font-size: 12px;
 	border: 1px solid var(--border-color);
 	border-radius: 3px;
 	background: var(--bg-tertiary);
 	color: var(--text-primary);
 	cursor: pointer;
-	transition: all 0.15s;
-	height: 24px;
-	display: flex;
-	align-items: center;
-	gap: 4px;
-	flex-shrink: 0;
+	height: 26px;
+	margin-left: auto;
 }
 
 .copyBtn:hover:not(:disabled) {
 	background: var(--accent-primary);
 	color: white;
-	border-color: var(--accent-primary);
+}
+
+.copyBtn.success {
+	background: var(--accent-success);
+	color: white;
 }
 
 .copyBtn:disabled {
@@ -146,110 +120,40 @@
 	cursor: not-allowed;
 }
 
-.copySuccess {
-	background: var(--accent-success) !important;
-	border-color: var(--accent-success) !important;
-	color: white !important;
-}
-
-/* 内容区 - ASCII 树 */
+/* 内容区 */
 .content {
 	flex: 1;
 	overflow: auto;
-	padding: 4px 8px;
+	padding: 4px 0;
 	background: var(--bg-primary);
-	font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+	font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
 	font-size: 13px;
-	line-height: 1.6;
-	white-space: pre;
+	line-height: 1.5;
 }
 
-.loading,
-.empty {
+.loading {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	height: 100%;
 	color: var(--text-muted);
-	font-size: 12px;
 }
 
-.empty {
-	color: var(--accent-danger);
-}
-
-/* 树列表容器 */
-.treeList {
-	display: flex;
-	flex-direction: column;
-}
-
-/* 树列表容器 */
-.treeList {
-	display: block;
-}
-
-/* 单行 */
-.treeLine {
-	display: block;
+/* 树行 - 关键：white-space pre 保持空格 */
+.line {
+	padding: 1px 12px;
 	cursor: pointer;
 	white-space: pre;
-	border-left: 2px solid transparent;
-	font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
-}
-
-.treeLine:hover {
-	background: var(--bg-hover);
-	border-left-color: var(--accent-primary);
-}
-
-/* 缩进前缀 - 固定4字符宽度 */
-.indent {
-	display: inline;
-	color: var(--text-muted);
-	font-family: inherit;
-}
-
-/* 连接符 - 固定4字符宽度 */
-.connector {
-	display: inline;
-	color: var(--text-muted);
-	font-family: inherit;
-}
-
-/* 展开图标 - 固定3字符宽度 */
-.expandIcon {
-	display: inline;
-	color: var(--text-muted);
-	font-family: inherit;
-	font-size: 10px;
-}
-
-.expandIconPlaceholder {
-	display: inline;
-	color: transparent;
-	font-family: inherit;
-}
-
-/* 文件图标 */
-.icon {
-	display: inline;
-	font-size: 12px;
-}
-
-/* 目录名 */
-.dirName {
 	color: var(--text-primary);
-	font-weight: 500;
+	font-family: inherit;
 }
 
-/* 文件名 */
-.fileName {
-	color: var(--text-secondary);
+.line:hover {
+	background: var(--bg-hover);
 }
 
 /* 搜索高亮 */
-.highlight {
+.line :global(mark) {
 	background: var(--accent-primary);
 	color: white;
 	padding: 0 2px;
@@ -258,8 +162,8 @@
 
 /* 滚动条 */
 .content::-webkit-scrollbar {
-	width: 8px;
-	height: 8px;
+	width: 10px;
+	height: 10px;
 }
 
 .content::-webkit-scrollbar-track {
@@ -268,7 +172,7 @@
 
 .content::-webkit-scrollbar-thumb {
 	background: var(--border-color);
-	border-radius: 4px;
+	border-radius: 5px;
 }
 
 .content::-webkit-scrollbar-thumb:hover {
