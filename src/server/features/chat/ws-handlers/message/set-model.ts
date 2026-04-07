@@ -1,6 +1,6 @@
 /**
- * Set Model 消息处理器
- * 处理设置 AI 模型的请求
+ * Set Model Message Handler
+ * Handles requests to set the AI model
  */
 
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
@@ -9,9 +9,9 @@ import type { WSContext } from "../../ws-router";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 处理 set_model 消息
- * @param ctx WebSocket 上下文
- * @param payload 消息负载
+ * Handle set_model message
+ * @param ctx WebSocket context
+ * @param payload Message payload
  */
 export async function handleSetModel(
 	ctx: WSContext,
@@ -23,21 +23,21 @@ export async function handleSetModel(
 ): Promise<void> {
 	const { provider, modelId, thinkingLevel } = payload;
 
-	console.log(`[WebSocket] 收到 set_model 消息:`, {
+	console.log(`[WebSocket] Received set_model message:`, {
 		provider,
 		modelId,
 		thinkingLevel,
 	});
 	logger.info(
-		`[WebSocket] 收到 set_model 消息: provider=${provider}, modelId=${modelId}`,
+		`[WebSocket] Received set_model message: provider=${provider}, modelId=${modelId}`,
 	);
 
-	// 检查会话是否已初始化
+	// Check if session is initialized
 	if (!ctx.session.session) {
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: "会话未初始化，请先发送 init 消息",
+				error: "Session not initialized, please send init message first",
 			}),
 		);
 		return;
@@ -45,27 +45,27 @@ export async function handleSetModel(
 
 	try {
 		await ctx.session.setModel(provider, modelId, thinkingLevel);
-		// setModel 内部已经发送了响应
-		logger.info(`[WebSocket] set_model 成功`);
+		// setModel already sends response internally
+		logger.info(`[WebSocket] set_model successful`);
 	} catch (error) {
 		logger.error(
-			"[WebSocket] set_model 错误:",
+			"[WebSocket] set_model error:",
 			{},
 			error instanceof Error ? error : undefined,
 		);
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: error instanceof Error ? error.message : "设置模型失败",
+				error: error instanceof Error ? error.message : "Failed to set model",
 			}),
 		);
 	}
 }
 
 /**
- * 处理 model_change 消息（简化版，直接调用 setModel）
- * @param ctx WebSocket 上下文
- * @param payload 消息负载
+ * Handle model_change message (simplified, directly calls setModel)
+ * @param ctx WebSocket context
+ * @param payload Message payload
  */
 export async function handleModelChange(
 	ctx: WSContext,
@@ -74,6 +74,6 @@ export async function handleModelChange(
 		modelId: string;
 	},
 ): Promise<void> {
-	// 复用 set_model 逻辑
+	// Reuse set_model logic
 	await handleSetModel(ctx, payload);
 }

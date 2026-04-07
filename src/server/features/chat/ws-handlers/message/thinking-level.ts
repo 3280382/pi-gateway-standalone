@@ -1,6 +1,6 @@
 /**
- * Thinking Level 消息处理器
- * 处理设置思考级别的请求
+ * Thinking Level Message Handler
+ * Handles requests to set thinking level
  */
 
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
@@ -9,9 +9,9 @@ import type { WSContext } from "../../ws-router";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 处理 thinking_level_change 消息
- * @param ctx WebSocket 上下文
- * @param payload 消息负载
+ * Handle thinking_level_change message
+ * @param ctx WebSocket context
+ * @param payload Message payload
  */
 export async function handleThinkingLevelChange(
 	ctx: WSContext,
@@ -21,14 +21,14 @@ export async function handleThinkingLevelChange(
 ): Promise<void> {
 	const { thinkingLevel } = payload;
 
-	logger.info(`[WebSocket] 收到 thinking_level_change 消息: ${thinkingLevel}`);
+	logger.info(`[WebSocket] Received thinking_level_change message: ${thinkingLevel}`);
 
-	// 检查会话是否已初始化
+	// Check if session is initialized
 	if (!ctx.session.session) {
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: "会话未初始化，请先发送 init 消息",
+				error: "Session not initialized, please send init message first",
 			}),
 		);
 		return;
@@ -36,18 +36,18 @@ export async function handleThinkingLevelChange(
 
 	try {
 		await ctx.session.setThinkingLevel(thinkingLevel);
-		// setThinkingLevel 内部已经发送了响应
-		logger.info(`[WebSocket] thinking_level_change 成功`);
+		// setThinkingLevel already sends response internally
+		logger.info(`[WebSocket] thinking_level_change successful`);
 	} catch (error) {
 		logger.error(
-			"[WebSocket] thinking_level_change 错误:",
+			"[WebSocket] thinking_level_change error:",
 			{},
 			error instanceof Error ? error : undefined,
 		);
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: error instanceof Error ? error.message : "设置思考级别失败",
+				error: error instanceof Error ? error.message : "Failed to set thinking level",
 			}),
 		);
 	}

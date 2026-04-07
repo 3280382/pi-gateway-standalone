@@ -1,6 +1,6 @@
 /**
- * Load Session 消息处理器
- * 处理加载指定会话的请求
+ * Load Session Message Handler
+ * Handles requests to load a specified session
  */
 
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
@@ -9,9 +9,9 @@ import type { WSContext } from "../../ws-router";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 处理 load_session 消息
- * @param ctx WebSocket 上下文
- * @param payload 消息负载
+ * Handle load_session message
+ * @param ctx WebSocket context
+ * @param payload Message payload
  */
 export async function handleLoadSession(
 	ctx: WSContext,
@@ -19,27 +19,27 @@ export async function handleLoadSession(
 ): Promise<void> {
 	const { sessionPath } = payload;
 
-	logger.info(`[WebSocket] 收到 load_session 消息: sessionPath=${sessionPath}`);
+	logger.info(`[WebSocket] Received load_session message: sessionPath=${sessionPath}`);
 
-	// 检查会话是否已初始化
+	// Check if session is initialized
 	if (!ctx.session.session) {
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: "会话未初始化，请先发送 init 消息",
+				error: "Session not initialized, please send init message first",
 			}),
 		);
 		return;
 	}
 
 	try {
-		// 使用 PiAgentSession 的 loadSession 方法
+		// Use PiAgentSession's loadSession method
 		await ctx.session.loadSession(sessionPath);
-		// loadSession 内部已经发送了响应
-		logger.info(`[WebSocket] load_session 成功`);
+		// loadSession already sends response internally
+		logger.info(`[WebSocket] load_session successful`);
 	} catch (error) {
 		logger.error(
-			"[WebSocket] load_session 错误:",
+			"[WebSocket] load_session error:",
 			{},
 			error instanceof Error ? error : undefined,
 		);
@@ -47,7 +47,7 @@ export async function handleLoadSession(
 			JSON.stringify({
 				type: "session_loaded",
 				success: false,
-				error: error instanceof Error ? error.message : "加载会话失败",
+				error: error instanceof Error ? error.message : "Failed to load session",
 			}),
 		);
 	}

@@ -1,6 +1,6 @@
 /**
- * New Session 消息处理器
- * 处理创建新会话的请求
+ * New Session Message Handler
+ * Handles requests to create a new session
  */
 
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
@@ -9,22 +9,22 @@ import type { WSContext } from "../../ws-router";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 处理 new_session 消息
- * @param ctx WebSocket 上下文
- * @param _payload 消息负载（不需要额外数据）
+ * Handle new_session message
+ * @param ctx WebSocket context
+ * @param _payload Message payload (no extra data needed)
  */
 export async function handleNewSession(
 	ctx: WSContext,
 	_payload: unknown,
 ): Promise<void> {
-	logger.info("[WebSocket] 收到 new_session 消息");
+	logger.info("[WebSocket] Received new_session message");
 
-	// 检查会话是否已初始化
+	// Check if session is initialized
 	if (!ctx.session.session) {
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: "会话未初始化，请先发送 init 消息",
+				error: "Session not initialized, please send init message first",
 			}),
 		);
 		return;
@@ -42,18 +42,18 @@ export async function handleNewSession(
 		);
 
 		logger.info(
-			`[WebSocket] new_session 成功: sessionId=${ctx.session.session.sessionId}`,
+			`[WebSocket] new_session successful: sessionId=${ctx.session.session.sessionId}`,
 		);
 	} catch (error) {
 		logger.error(
-			"[WebSocket] new_session 错误:",
+			"[WebSocket] new_session error:",
 			{},
 			error instanceof Error ? error : undefined,
 		);
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: error instanceof Error ? error.message : "创建新会话失败",
+				error: error instanceof Error ? error.message : "Failed to create new session",
 			}),
 		);
 	}

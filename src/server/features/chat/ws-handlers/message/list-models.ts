@@ -1,6 +1,6 @@
 /**
- * List Models 消息处理器
- * 处理列出可用模型的请求
+ * List Models Message Handler
+ * Handles requests to list available models
  */
 
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
@@ -9,15 +9,15 @@ import type { WSContext } from "../../ws-router";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 处理 list_models 消息
- * @param ctx WebSocket 上下文
- * @param _payload 消息负载（不需要额外数据）
+ * Handle list_models message
+ * @param ctx WebSocket context
+ * @param _payload Message payload (no extra data needed)
  */
 export async function handleListModels(
 	ctx: WSContext,
 	_payload: unknown,
 ): Promise<void> {
-	logger.info("[WebSocket] 收到 list_models 消息");
+	logger.info("[WebSocket] Received list_models message");
 
 	try {
 		const available = await ctx.session.modelRegistry.getAvailable();
@@ -34,17 +34,17 @@ export async function handleListModels(
 			}),
 		);
 
-		logger.info(`[WebSocket] list_models 成功: ${available.length} 个模型`);
+		logger.info(`[WebSocket] list_models successful: ${available.length} models`);
 	} catch (error) {
 		logger.error(
-			"[WebSocket] list_models 错误:",
+			"[WebSocket] list_models error:",
 			{},
 			error instanceof Error ? error : undefined,
 		);
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: error instanceof Error ? error.message : "列出模型失败",
+				error: error instanceof Error ? error.message : "Failed to list models",
 			}),
 		);
 	}

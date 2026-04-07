@@ -1,6 +1,6 @@
 /**
- * Tool Request 消息处理器
- * 处理手动执行工具的请求
+ * Tool Request Message Handler
+ * Handles requests to manually execute tools
  */
 
 import { createCodingTools } from "@mariozechner/pi-coding-agent";
@@ -10,9 +10,9 @@ import type { WSContext } from "../../ws-router";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 处理 tool_request 消息
- * @param ctx WebSocket 上下文
- * @param payload 消息负载
+ * Handle tool_request message
+ * @param ctx WebSocket context
+ * @param payload Message payload
  */
 export async function handleToolRequest(
 	ctx: WSContext,
@@ -25,15 +25,15 @@ export async function handleToolRequest(
 	const { toolName, args, toolCallId } = payload;
 
 	logger.info(
-		`[WebSocket] 收到 tool_request 消息: toolName=${toolName}, toolCallId=${toolCallId}`,
+		`[WebSocket] Received tool_request message: toolName=${toolName}, toolCallId=${toolCallId}`,
 	);
 
-	// 检查会话是否已初始化
+	// Check if session is initialized
 	if (!ctx.session.session) {
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: "会话未初始化，请先发送 init 消息",
+				error: "Session not initialized, please send init message first",
 			}),
 		);
 		return;
@@ -48,14 +48,14 @@ export async function handleToolRequest(
 				JSON.stringify({
 					type: "tool_end",
 					toolCallId,
-					result: `工具 "${toolName}" 未找到`,
+					result: `Tool "${toolName}" not found`,
 					isError: true,
 				}),
 			);
 			return;
 		}
 
-		// 发送开始事件
+		// Send start event
 		ctx.ws.send(
 			JSON.stringify({
 				type: "tool_start",
@@ -65,13 +65,13 @@ export async function handleToolRequest(
 			}),
 		);
 
-		// 执行工具
+		// Execute tool
 		const result = await tool.execute(
 			toolCallId,
 			args as Record<string, string>,
 		);
 
-		// 发送结束事件
+		// Send end event
 		ctx.ws.send(
 			JSON.stringify({
 				type: "tool_end",
@@ -81,16 +81,16 @@ export async function handleToolRequest(
 			}),
 		);
 
-		logger.info(`[WebSocket] tool_request 成功: ${toolName}`);
+		logger.info(`[WebSocket] tool_request successful: ${toolName}`);
 	} catch (error) {
 		logger.error(
-			`[WebSocket] tool_request 错误: ${error instanceof Error ? error.message : String(error)}`,
+			`[WebSocket] tool_request error: ${error instanceof Error ? error.message : String(error)}`,
 		);
 		ctx.ws.send(
 			JSON.stringify({
 				type: "tool_end",
 				toolCallId,
-				result: error instanceof Error ? error.message : "未知错误",
+				result: error instanceof Error ? error.message : "Unknown error",
 				isError: true,
 			}),
 		);

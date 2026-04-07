@@ -1,6 +1,6 @@
 /**
- * Change Directory 消息处理器
- * 处理切换工作目录的请求
+ * Change Directory Message Handler
+ * Handles requests to switch working directory
  */
 
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
@@ -9,9 +9,9 @@ import type { WSContext } from "../../ws-router";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 处理 change_dir 消息
- * @param ctx WebSocket 上下文
- * @param payload 消息负载
+ * Handle change_dir message
+ * @param ctx WebSocket context
+ * @param payload Message payload
  */
 export async function handleChangeDir(
 	ctx: WSContext,
@@ -19,11 +19,11 @@ export async function handleChangeDir(
 ): Promise<void> {
 	const { path: newPath } = payload;
 
-	logger.info(`[WebSocket] 收到 change_dir 消息: path=${newPath}`);
-	logger.info(`[WebSocket] payload 完整内容: ${JSON.stringify(payload)}`);
+	logger.info(`[WebSocket] Received change_dir message: path=${newPath}`);
+	logger.info(`[WebSocket] payload full content: ${JSON.stringify(payload)}`);
 
 	try {
-		// 重新初始化会话到新目录
+		// Reinitialize session to new directory
 		const info = await ctx.session.initialize(newPath);
 
 		ctx.ws.send(
@@ -36,10 +36,10 @@ export async function handleChangeDir(
 			}),
 		);
 
-		logger.info(`[WebSocket] change_dir 成功: ${newPath}`);
+		logger.info(`[WebSocket] change_dir successful: ${newPath}`);
 	} catch (error) {
 		logger.error(
-			`[WebSocket] change_dir 错误: ${error instanceof Error ? error.message : String(error)}`,
+			`[WebSocket] change_dir error: ${error instanceof Error ? error.message : String(error)}`,
 		);
 		ctx.ws.send(
 			JSON.stringify({

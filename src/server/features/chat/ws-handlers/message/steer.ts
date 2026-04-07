@@ -1,6 +1,6 @@
 /**
- * Steer 消息处理器
- * 处理流式输出时的引导/干预消息
+ * Steer Message Handler
+ * Handles steering/intervention messages during streaming output
  */
 
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
@@ -9,9 +9,9 @@ import type { WSContext } from "../../ws-router";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 处理 steer 消息
- * @param ctx WebSocket 上下文
- * @param payload 消息负载
+ * Handle steer message
+ * @param ctx WebSocket context
+ * @param payload Message payload
  */
 export async function handleSteer(
 	ctx: WSContext,
@@ -19,25 +19,25 @@ export async function handleSteer(
 ): Promise<void> {
 	const { text } = payload;
 
-	logger.info(`[WebSocket] 收到 steer 消息: ${text.substring(0, 50)}...`);
+	logger.info(`[WebSocket] Received steer message: ${text.substring(0, 50)}...`);
 
-	// 检查会话是否已初始化
+	// Check if session is initialized
 	if (!ctx.session.session) {
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: "会话未初始化，请先发送 init 消息",
+				error: "Session not initialized, please send init message first",
 			}),
 		);
 		return;
 	}
 
-	// 检查是否正在流式传输
+	// Check if currently streaming
 	if (!ctx.session.isStreaming) {
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: "当前不在流式传输状态，无法 steer",
+				error: "Not currently streaming, cannot steer",
 			}),
 		);
 		return;
@@ -45,17 +45,17 @@ export async function handleSteer(
 
 	try {
 		await ctx.session.steer(text);
-		logger.info("[WebSocket] steer 处理完成");
+		logger.info("[WebSocket] steer processing completed");
 	} catch (error) {
 		logger.error(
-			"[WebSocket] steer 错误:",
+			"[WebSocket] steer error:",
 			{},
 			error instanceof Error ? error : undefined,
 		);
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: error instanceof Error ? error.message : "steer 失败",
+				error: error instanceof Error ? error.message : "steer failed",
 			}),
 		);
 	}

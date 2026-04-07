@@ -1,6 +1,6 @@
 /**
- * Set LLM Log 消息处理器
- * 处理启用/禁用 LLM 日志的请求
+ * Set LLM Log Message Handler
+ * Handles requests to enable/disable LLM logging
  */
 
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
@@ -9,9 +9,9 @@ import type { WSContext } from "../../ws-router";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 处理 set_llm_log 消息
- * @param ctx WebSocket 上下文
- * @param payload 消息负载
+ * Handle set_llm_log message
+ * @param ctx WebSocket context
+ * @param payload Message payload
  */
 export async function handleSetLlmLog(
 	ctx: WSContext,
@@ -19,12 +19,12 @@ export async function handleSetLlmLog(
 ): Promise<void> {
 	const { enabled } = payload;
 
-	logger.info(`[WebSocket] 收到 set_llm_log 消息: enabled=${enabled}`);
+	logger.info(`[WebSocket] Received set_llm_log message: enabled=${enabled}`);
 
-	// 设置 LLM 日志状态
+	// Set LLM log status
 	ctx.session.llmLogManager.setEnabled(enabled);
 
-	logger.info(`LLM日志 ${enabled ? "启用" : "禁用"}`);
+	logger.info(`LLM logging ${enabled ? "enabled" : "disabled"}`);
 
 	ctx.ws.send(
 		JSON.stringify({
