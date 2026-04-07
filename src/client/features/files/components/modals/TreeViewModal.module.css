@@ -1,0 +1,176 @@
+/**
+ * TreeViewModal Styles
+ * 全屏树状目录浏览模态窗口
+ */
+
+/* 遮罩层 */
+.overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.95);
+	z-index: 2000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+}
+
+/* 容器 */
+.container {
+	display: flex;
+	flex-direction: column;
+	width: 90vw;
+	height: 85vh;
+	max-width: 1000px;
+	max-height: 800px;
+	background: var(--bg-secondary);
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: var(--shadow-lg);
+}
+
+/* 头部 */
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--border-color);
+	background: var(--bg-tertiary);
+}
+
+.title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--text-primary);
+	margin: 0;
+}
+
+.closeBtn {
+	width: 32px;
+	height: 32px;
+	border: none;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s;
+}
+
+.closeBtn:hover {
+	background: var(--bg-hover);
+	color: var(--text-primary);
+}
+
+/* 内容区 */
+.content {
+	flex: 1;
+	overflow: auto;
+	padding: 12px;
+	background: var(--bg-primary);
+}
+
+.loading,
+.empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	color: var(--text-muted);
+	font-size: 14px;
+}
+
+.empty {
+	color: var(--accent-danger);
+}
+
+/* 树节点 */
+.node {
+	margin: 2px 0;
+}
+
+.nodeHeader {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 8px;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background 0.15s;
+	font-size: 13px;
+}
+
+.nodeHeader:hover {
+	background: var(--bg-hover);
+}
+
+.expandIcon {
+	width: 16px;
+	text-align: center;
+	color: var(--text-muted);
+	font-size: 10px;
+}
+
+.icon {
+	font-size: 14px;
+	line-height: 1;
+}
+
+.dirName {
+	font-weight: 500;
+	color: var(--text-primary);
+}
+
+.fileName {
+	color: var(--text-secondary);
+}
+
+/* 层级标识 */
+.levelBadge {
+	margin-left: auto;
+	padding: 1px 5px;
+	background: var(--bg-tertiary);
+	border: 1px solid var(--border-subtle);
+	border-radius: 3px;
+	font-size: 10px;
+	color: var(--text-muted);
+	font-family: var(--font-mono);
+}
+
+/* 层级缩进样式（可选，用于更明显的层级区分） */
+.level0 .nodeHeader { border-left: 2px solid var(--accent-primary); }
+.level1 .nodeHeader { border-left: 2px solid var(--accent-secondary); }
+.level2 .nodeHeader { border-left: 2px solid var(--accent-success); }
+.level3 .nodeHeader { border-left: 2px solid var(--accent-warning); }
+.level4 .nodeHeader { border-left: 2px solid var(--accent-danger); }
+.level5 .nodeHeader { border-left: 2px solid #8b5cf6; }
+.level6 .nodeHeader { border-left: 2px solid #ec4899; }
+
+/* 响应式 */
+@media (max-width: 768px) {
+	.container {
+		width: 95vw;
+		height: 90vh;
+		max-width: none;
+		max-height: none;
+	}
+
+	.title {
+		font-size: 14px;
+	}
+
+	.nodeHeader {
+		font-size: 12px;
+		padding: 5px 6px;
+	}
+}

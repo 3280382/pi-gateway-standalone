@@ -4,10 +4,12 @@
  * 职责：纯 UI 渲染
  * - 不包含业务逻辑
  * - 通过 useFileBottomMenu hook 获取所有逻辑
+ * - TreeView 已抽离到 modals/TreeViewModal
  */
 
 import React from "react";
 import { useFileBottomMenu } from "@/features/files/hooks";
+import { TreeViewModal } from "@/features/files/components/modals/TreeViewModal";
 import styles from "@/features/files/components/BottomMenu/FileBottomMenu.module.css";
 
 export function FileBottomMenu() {
@@ -120,132 +122,15 @@ export function FileBottomMenu() {
 				</div>
 			)}
 
-			{/* 树状视图 */}
-			{showTreeModal && (
-				<div className={styles.treeFullscreenOverlay} onClick={handleCloseTree}>
-					<div
-						className={styles.treeFullscreenContainer}
-						onClick={(e) => e.stopPropagation()}
-					>
-						<TreeView
-							treeData={treeData}
-							treeLoading={treeLoading}
-							onClose={handleCloseTree}
-							onFileClick={handleTreeFileClick}
-						/>
-					</div>
-				</div>
-			)}
+			{/* 树状视图 - 使用抽离的 TreeViewModal 组件 */}
+			<TreeViewModal
+				isOpen={showTreeModal}
+				treeData={treeData}
+				treeLoading={treeLoading}
+				onClose={handleCloseTree}
+				onFileClick={handleTreeFileClick}
+			/>
 		</>
-	);
-}
-
-// Tree View Component
-interface TreeViewProps {
-	treeData: { path: string; items: TreeNode[] } | null;
-	treeLoading: boolean;
-	onClose: () => void;
-	onFileClick: (path: string, name: string) => void;
-}
-
-interface TreeNode {
-	path: string;
-	name: string;
-	isDirectory: boolean;
-	children?: TreeNode[];
-}
-
-function TreeView({ treeData, treeLoading, onClose, onFileClick }: TreeViewProps) {
-	return (
-		<>
-			<div className={styles.treeHeader}>
-				<h3 className={styles.treeTitle}>
-					<TreeIcon />
-					Directory Tree: {treeData?.path || "."}
-				</h3>
-				<button className={styles.treeCloseBtn} onClick={onClose} title="Close (ESC)">
-					<CloseIcon />
-				</button>
-			</div>
-			<div className={styles.treeContent}>
-				{treeLoading ? (
-					<div className={styles.treeLoading}>Loading...</div>
-				) : treeData ? (
-					<TreeNodeList items={treeData.items} onFileClick={onFileClick} />
-				) : (
-					<div className={styles.treeEmpty}>Failed to load directory tree</div>
-				)}
-			</div>
-		</>
-	);
-}
-
-// Tree Node List Component
-interface TreeNodeListProps {
-	items: TreeNode[];
-	onFileClick: (path: string, name: string) => void;
-	level?: number;
-}
-
-function TreeNodeList({ items, onFileClick, level = 0 }: TreeNodeListProps) {
-	if (!items || items.length === 0) return null;
-
-	return (
-		<>
-			{items.map((item) => (
-				<TreeNodeItem
-					key={item.path}
-					item={item}
-					level={level}
-					onFileClick={onFileClick}
-				/>
-			))}
-		</>
-	);
-}
-
-// Tree Node Item Component
-interface TreeNodeItemProps {
-	item: TreeNode;
-	level: number;
-	onFileClick: (path: string, name: string) => void;
-}
-
-function TreeNodeItem({ item, level, onFileClick }: TreeNodeItemProps) {
-	const [expanded, setExpanded] = React.useState(true);
-	const hasChildren = item.children && item.children.length > 0;
-
-	const handleClick = () => {
-		if (item.isDirectory && hasChildren) {
-			setExpanded(!expanded);
-		} else if (!item.isDirectory) {
-			onFileClick(item.path, item.name);
-		}
-	};
-
-	return (
-		<div className={styles.treeNode}>
-			<div
-				className={styles.treeNodeHeader}
-				style={{ paddingLeft: `${level * 20}px` }}
-				onClick={handleClick}
-			>
-				{hasChildren && (
-					<span className={styles.treeExpandIcon}>{expanded ? "▼" : "▶"}</span>
-				)}
-				<span className={styles.treeIcon}>{item.isDirectory ? "📁" : "📄"}</span>
-				<span className={item.isDirectory ? styles.treeDirName : styles.treeFileName}>
-					{item.name}
-				</span>
-			</div>
-			{expanded && hasChildren && (
-				<TreeNodeList
-					items={item.children!}
-					level={level + 1}
-					onFileClick={onFileClick}
-				/>
-			)}
-		</div>
 	);
 }
 
