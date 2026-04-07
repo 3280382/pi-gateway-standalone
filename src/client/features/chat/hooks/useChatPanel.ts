@@ -8,7 +8,7 @@
  * - 管理新会话创建
  */
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useChatController } from "@/features/chat/services/api/chatApi";
 
@@ -17,6 +17,8 @@ export interface UseChatPanelReturn {
 	messagesRef: React.RefObject<HTMLDivElement | null>;
 
 	// 滚动相关
+	shouldScrollToBottom: boolean;
+	setShouldScrollToBottom: (value: boolean) => void;
 	handleScroll: () => void;
 
 	// 消息操作
@@ -28,49 +30,53 @@ export interface UseChatPanelReturn {
 
 export function useChatPanel(): UseChatPanelReturn {
 	const messagesRef = useRef<HTMLDivElement>(null);
-	const shouldScrollRef = useRef(true);
+	
+	// 使用 state 而不是 ref，这样可以在变化时触发重新渲染和 useEffect
+	const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
 
 	const inputText = useChatStore((state) => state.inputText);
+	const messages = useChatStore((state) => state.messages);
+	const currentStreamingMessage = useChatStore((state) => state.currentStreamingMessage);
 	const chatController = useChatController();
 
 	// 自动滚动到底部
 	useEffect(() => {
-		if (messagesRef.current && shouldScrollRef.current) {
+		if (messagesRef.current && shouldScrollToBottom) {
 			messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
 		}
-	}, [
-		// 依赖 messages 和 currentStreamingMessage，但不在 store 中订阅
-		// 这个 effect 由 ChatPanel 组件的 render 触发
-	]);
+	}, [messages, currentStreamingMessage, shouldScrollToBottom]);
 
 	// 处理滚动事件，检测用户是否手动向上滚动
 	const handleScroll = useCallback(() => {
 		if (messagesRef.current) {
 			const { scrollTop, scrollHeight, clientHeight } = messagesRef.current;
 			const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
-			shouldScrollRef.current = isAtBottom;
+			// 用户向上滚动时，暂停自动滚动
+			if (!isAtBottom && shouldScrollToBottom) {
+				setShouldScrollToBottom(false);
+			}
 		}
-	}, []);
+	}, [shouldScrollToBottom]);
 
-	// 发送消息
+	// 发送消息 - 重新启用自动滚动
 	const handleSend = useCallback(async () => {
 		if (inputText.trim()) {
+			// 先重置滚动标志，确保新消息会滚动到底部
+			setShouldScrollToBottom(true);
 			try {
 				await chatController.sendMessage(inputText);
 			} catch (err) {
 				console.error("[useChatPanel] sendMessage failed:", err);
 			}
-			// 新消息时重置滚动标志
-			shouldScrollRef.current = true;
 		}
 	}, [inputText, chatController]);
 
 	// 处理 bash 命令
 	const handleBashCommand = useCallback(
 		(command: string) => {
+			setShouldScrollToBottom(true);
 			chatController.setInputText(`/bash ${command}`);
 			setTimeout(() => chatController.sendMessage(`/bash ${command}`), 0);
-			shouldScrollRef.current = true;
 		},
 		[chatController],
 	);
@@ -78,6 +84,7 @@ export function useChatPanel(): UseChatPanelReturn {
 	// 处理 slash 命令
 	const handleSlashCommand = useCallback(
 		(command: string, args: string) => {
+			setShouldScrollToBottom(true);
 			switch (command) {
 				case "clear":
 					chatController.clearMessages();
@@ -95,18 +102,20 @@ export function useChatPanel(): UseChatPanelReturn {
 					chatController.sendMessage(`/${command} ${args}`.trim());
 					break;
 			}
-			shouldScrollRef.current = true;
 		},
 		[chatController],
 	);
 
 	// 创建新会话
 	const handleNewSession = useCallback(async () => {
+		setShouldScrollToBottom(true);
 		await chatController.createNewSession();
 	}, [chatController]);
 
 	return {
 		messagesRef,
+		shouldScrollToBottom,
+		setShouldScrollToBottom,
 		handleScroll,
 		handleSend,
 		handleBashCommand,

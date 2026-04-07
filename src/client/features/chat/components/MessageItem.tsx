@@ -128,7 +128,7 @@ function GlassCard({ block, isStreaming, showThinking, showTools }: GlassCardPro
 									📋
 								</button>
 							)}
-							<span className={styles.toggleIcon}>{isExpanded ? "▼" : "▶"}</span>
+							<span className={styles.toggleIcon}>{isExpanded ? "-" : "+"}</span>
 						</div>
 					</div>
 					{isExpanded && (
@@ -166,7 +166,7 @@ function GlassCard({ block, isStreaming, showThinking, showTools }: GlassCardPro
 									📋
 								</button>
 							)}
-							<span className={styles.toggleIcon}>{isExpanded ? "▼" : "▶"}</span>
+							<span className={styles.toggleIcon}>{isExpanded ? "-" : "+"}</span>
 						</div>
 					</div>
 					{isExpanded && (
@@ -205,7 +205,7 @@ function GlassCard({ block, isStreaming, showThinking, showTools }: GlassCardPro
 									📋
 								</button>
 							)}
-							<span className={styles.toggleIcon}>{isExpanded ? "▼" : "▶"}</span>
+							<span className={styles.toggleIcon}>{isExpanded ? "-" : "+"}</span>
 						</div>
 					</div>
 					{isExpanded && (
