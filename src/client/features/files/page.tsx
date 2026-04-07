@@ -77,7 +77,7 @@ export function FilesPage({ active = false }: FilesPageProps) {
 	return (
 		<div
 			className={styles.layout}
-			style={{ display: active ? "block" : "none" }}
+style={{ display: active ? "flex" : "none" }}
 		>
 			{/* FileToolbar - 文件浏览器专用顶部工具栏 */}
 			<header className={styles.header}>

@@ -2,12 +2,17 @@
  * ChatPage - 聊天页面
  *
  * 实现 KeepAlive：首次激活才挂载，之后通过 display 控制显示隐藏
+ * 合并了原 ChatLayout 的布局逻辑
  */
 
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import { useChatInit, useChatMessages } from "@/features/chat/hooks";
-import { ChatLayout } from "@/features/chat/layout";
-import styles from "@/features/chat/ChatPage.module.css";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { AppHeader } from "@/features/chat/components/Header";
+import { LlmLogPanel } from "@/features/chat/components/panels/LlmLogPanel";
+import { SidebarPanel } from "@/features/chat/components/sidebar/SidebarPanel/SidebarPanel";
+import { ChatPanel } from "@/features/chat/components/ChatPanel";
+import styles from "@/features/chat/ChatLayout.module.css";
 
 interface ChatPageProps {
 	active?: boolean;
@@ -20,6 +25,26 @@ export function ChatPage({ active = false }: ChatPageProps) {
 	const { isConnecting } = useChatInit();
 	useChatMessages();
 
+	// 从 sidebarStore 获取布局状态
+	const isSidebarVisible = useSidebarStore((state) => state.isVisible);
+	const isBottomPanelOpen = useSidebarStore((state) => state.isBottomPanelOpen ?? false);
+	const bottomPanelHeight = useSidebarStore((state) => state.bottomPanelHeight ?? 300);
+	const closeBottomPanel = useSidebarStore((state) => state.closeBottomPanel ?? (() => {}));
+	const setBottomPanelHeight = useSidebarStore((state) => state.setBottomPanelHeight ?? (() => {}));
+
+	// 渲染底部面板
+	const renderBottomPanel = useCallback(() => {
+		if (!isBottomPanelOpen) return null;
+
+		return (
+			<LlmLogPanel
+				height={bottomPanelHeight}
+				onClose={closeBottomPanel}
+				onHeightChange={setBottomPanelHeight}
+			/>
+		);
+	}, [isBottomPanelOpen, bottomPanelHeight, closeBottomPanel, setBottomPanelHeight]);
+
 	// 首次激活时标记为已挂载
 	if (active) {
 		mountedRef.current = true;
@@ -31,21 +56,61 @@ export function ChatPage({ active = false }: ChatPageProps) {
 		return null;
 	}
 
+	// 连接中状态
 	if (isConnecting) {
 		return (
 			<div
 				className={styles.loading}
-				style={{ display: active ? "flex" : "none" }}
+				style={{
+					display: active ? "flex" : "none",
+					alignItems: "center",
+					justifyContent: "center",
+					flexDirection: "column",
+					gap: "16px",
+					height: "100%",
+				}}
 			>
-				<div className={styles.spinner} />
-				<p>连接中...</p>
+				<div
+					className={styles.spinner}
+					style={{
+						width: "40px",
+						height: "40px",
+						border: "3px solid var(--border-color)",
+						borderTopColor: "var(--accent-primary)",
+						borderRadius: "50%",
+						animation: "spin 1s linear infinite",
+					}}
+				/>
+				<p style={{ color: "var(--text-muted)" }}>连接中...</p>
 			</div>
 		);
 	}
 
 	return (
-		<div style={{ display: active ? "block" : "none", height: "100%" }}>
-			<ChatLayout />
+		<div
+			className={styles.layout}
+			style={{ display: active ? "block" : "none", height: "100%" }}
+		>
+			{/* Header */}
+			<header className={styles.header}>
+				<AppHeader />
+			</header>
+
+			{/* Body */}
+			<div className={styles.body}>
+				{/* Sidebar - overlay 模式 */}
+				<aside
+					className={`${styles.sidebar} ${isSidebarVisible ? styles.sidebarVisible : styles.sidebarHidden}`}
+				>
+					<SidebarPanel currentView="chat" />
+				</aside>
+
+				{/* Content */}
+				<main className={styles.content}>
+					<ChatPanel />
+					{renderBottomPanel()}
+				</main>
+			</div>
 		</div>
 	);
 }
