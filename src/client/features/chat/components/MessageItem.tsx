@@ -137,7 +137,7 @@ function GlassCard({
 								className={styles.btn}
 								onClick={() => setIsExpanded(!isExpanded)}
 							>
-								{isExpanded ? "▼" : "▶"}
+								{isExpanded ? "-" : "+"}
 							</button>
 						</div>
 					</div>
@@ -176,7 +176,7 @@ function GlassCard({
 								className={styles.btn}
 								onClick={() => setIsExpanded(!isExpanded)}
 							>
-								{isExpanded ? "▼" : "▶"}
+								{isExpanded ? "-" : "+"}
 							</button>
 						</div>
 					</div>
@@ -227,7 +227,7 @@ function GlassCard({
 								className={styles.btn}
 								onClick={() => setIsExpanded(!isExpanded)}
 							>
-								{isExpanded ? "▼" : "▶"}
+								{isExpanded ? "-" : "+"}
 							</button>
 						</div>
 					</div>

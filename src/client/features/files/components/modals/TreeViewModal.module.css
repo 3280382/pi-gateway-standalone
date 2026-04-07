@@ -1,83 +1,120 @@
 /**
  * TreeViewModal Styles
- * 全屏树状目录浏览模态窗口
+ * 紧凑全屏树状目录浏览模态窗口
  */
 
-/* 遮罩层 */
+/* 全屏遮罩层 */
 .overlay {
 	position: fixed;
 	top: 0;
 	left: 0;
-	right: 0;
-	bottom: 0;
+	width: 100%;
+	height: 100%;
 	background: rgba(0, 0, 0, 0.95);
 	z-index: 2000;
 	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 20px;
+	flex-direction: column;
 }
 
-/* 容器 */
+/* 全屏容器 */
 .container {
+	width: 100%;
+	height: 100%;
 	display: flex;
 	flex-direction: column;
-	width: 90vw;
-	height: 85vh;
-	max-width: 1000px;
-	max-height: 800px;
-	background: var(--bg-secondary);
-	border: 1px solid var(--border-color);
-	border-radius: 8px;
-	overflow: hidden;
-	box-shadow: var(--shadow-lg);
+	background: var(--bg-primary);
 }
 
-/* 头部 */
+/* 头部工具栏 */
 .header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 12px 16px;
+	padding: 4px 8px;
 	border-bottom: 1px solid var(--border-color);
-	background: var(--bg-tertiary);
+	background: var(--bg-secondary);
+	min-height: 32px;
 }
 
-.title {
+.filterBar {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	font-size: 16px;
-	font-weight: 600;
-	color: var(--text-primary);
-	margin: 0;
+	gap: 8px;
+	flex: 1;
 }
 
+.path {
+	font-size: 12px;
+	color: var(--text-muted);
+	font-family: var(--font-mono);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 300px;
+}
+
+.filterControls {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-left: auto;
+}
+
+.select {
+	padding: 2px 6px;
+	font-size: 11px;
+	border: 1px solid var(--border-color);
+	border-radius: 3px;
+	background: var(--bg-tertiary);
+	color: var(--text-primary);
+	height: 22px;
+}
+
+.searchInput {
+	padding: 2px 6px;
+	font-size: 11px;
+	border: 1px solid var(--border-color);
+	border-radius: 3px;
+	background: var(--bg-tertiary);
+	color: var(--text-primary);
+	width: 120px;
+	height: 22px;
+}
+
+.searchInput:focus {
+	outline: none;
+	border-color: var(--accent-primary);
+}
+
+/* 右上角关闭按钮 */
 .closeBtn {
-	width: 32px;
-	height: 32px;
+	width: 24px;
+	height: 24px;
 	border: none;
-	border-radius: 6px;
+	border-radius: 4px;
 	background: transparent;
 	color: var(--text-muted);
 	cursor: pointer;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	transition: all 0.2s;
+	transition: all 0.15s;
+	margin-left: 8px;
 }
 
 .closeBtn:hover {
-	background: var(--bg-hover);
-	color: var(--text-primary);
+	background: var(--accent-danger);
+	color: white;
 }
 
-/* 内容区 */
+/* 内容区 - 无空隙紧凑布局 */
 .content {
 	flex: 1;
 	overflow: auto;
-	padding: 12px;
+	padding: 0;
 	background: var(--bg-primary);
+	font-size: 11px;
+	line-height: 1;
 }
 
 .loading,
@@ -87,90 +124,89 @@
 	justify-content: center;
 	height: 100%;
 	color: var(--text-muted);
-	font-size: 14px;
+	font-size: 12px;
 }
 
 .empty {
 	color: var(--accent-danger);
 }
 
-/* 树节点 */
+/* 树节点 - 紧凑无空隙 */
 .node {
-	margin: 2px 0;
+	margin: 0;
 }
 
 .nodeHeader {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	padding: 6px 8px;
-	border-radius: 4px;
+	gap: 2px;
+	padding: 1px 4px;
 	cursor: pointer;
-	transition: background 0.15s;
-	font-size: 13px;
+	transition: background 0.1s;
+	font-size: 11px;
+	line-height: 1.4;
+	white-space: nowrap;
 }
 
 .nodeHeader:hover {
 	background: var(--bg-hover);
 }
 
+/* 展开图标 */
 .expandIcon {
-	width: 16px;
+	width: 12px;
 	text-align: center;
 	color: var(--text-muted);
-	font-size: 10px;
+	font-size: 8px;
+	flex-shrink: 0;
 }
 
+.expandIconPlaceholder {
+	width: 12px;
+	flex-shrink: 0;
+}
+
+/* 文件/目录图标 */
 .icon {
-	font-size: 14px;
+	font-size: 10px;
 	line-height: 1;
+	flex-shrink: 0;
 }
 
+/* 目录名 */
 .dirName {
 	font-weight: 500;
 	color: var(--text-primary);
 }
 
+/* 文件名 */
 .fileName {
 	color: var(--text-secondary);
 }
 
-/* 层级标识 */
-.levelBadge {
-	margin-left: auto;
-	padding: 1px 5px;
-	background: var(--bg-tertiary);
-	border: 1px solid var(--border-subtle);
-	border-radius: 3px;
-	font-size: 10px;
-	color: var(--text-muted);
-	font-family: var(--font-mono);
+/* 搜索高亮 */
+.highlight {
+	background: var(--accent-primary);
+	color: white;
+	padding: 0 2px;
+	border-radius: 2px;
 }
 
-/* 层级缩进样式（可选，用于更明显的层级区分） */
-.level0 .nodeHeader { border-left: 2px solid var(--accent-primary); }
-.level1 .nodeHeader { border-left: 2px solid var(--accent-secondary); }
-.level2 .nodeHeader { border-left: 2px solid var(--accent-success); }
-.level3 .nodeHeader { border-left: 2px solid var(--accent-warning); }
-.level4 .nodeHeader { border-left: 2px solid var(--accent-danger); }
-.level5 .nodeHeader { border-left: 2px solid #8b5cf6; }
-.level6 .nodeHeader { border-left: 2px solid #ec4899; }
+/* 滚动条样式 */
+.content::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
 
-/* 响应式 */
-@media (max-width: 768px) {
-	.container {
-		width: 95vw;
-		height: 90vh;
-		max-width: none;
-		max-height: none;
-	}
+.content::-webkit-scrollbar-track {
+	background: var(--bg-secondary);
+}
 
-	.title {
-		font-size: 14px;
-	}
+.content::-webkit-scrollbar-thumb {
+	background: var(--border-color);
+	border-radius: 4px;
+}
 
-	.nodeHeader {
-		font-size: 12px;
-		padding: 5px 6px;
-	}
+.content::-webkit-scrollbar-thumb:hover {
+	background: var(--text-muted);
 }
