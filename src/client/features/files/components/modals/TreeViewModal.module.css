@@ -25,39 +25,47 @@
 	background: var(--bg-primary);
 }
 
-/* 头部工具栏 */
+/* 头部工具栏 - 两行布局 */
 .header {
+	display: flex;
+	flex-direction: column;
+	border-bottom: 1px solid var(--border-color);
+	background: var(--bg-secondary);
+}
+
+/* 头部每一行 */
+.headerRow {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	padding: 4px 8px;
-	border-bottom: 1px solid var(--border-color);
-	background: var(--bg-secondary);
-	min-height: 32px;
+	gap: 8px;
 }
 
-.filterBar {
+/* 第1行：路径区域 */
+.pathSection {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	flex: 1;
+	min-width: 0; /* 允许收缩 */
 }
 
 .path {
 	font-size: 12px;
-	color: var(--text-muted);
+	color: var(--text-primary);
 	font-family: var(--font-mono);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	max-width: 300px;
+	flex: 1;
 }
 
+/* 第2行：过滤控制 */
 .filterControls {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	margin-left: auto;
 }
 
 .select {
@@ -68,6 +76,7 @@
 	background: var(--bg-tertiary);
 	color: var(--text-primary);
 	height: 22px;
+	cursor: pointer;
 }
 
 .searchInput {
@@ -77,7 +86,7 @@
 	border-radius: 3px;
 	background: var(--bg-tertiary);
 	color: var(--text-primary);
-	width: 120px;
+	width: 140px;
 	height: 22px;
 }
 
@@ -99,7 +108,7 @@
 	align-items: center;
 	justify-content: center;
 	transition: all 0.15s;
-	margin-left: 8px;
+	flex-shrink: 0;
 }
 
 .closeBtn:hover {
@@ -139,17 +148,19 @@
 .nodeHeader {
 	display: flex;
 	align-items: center;
-	gap: 2px;
-	padding: 1px 4px;
+	gap: 4px;
+	padding: 2px 4px;
 	cursor: pointer;
 	transition: background 0.1s;
 	font-size: 11px;
 	line-height: 1.4;
 	white-space: nowrap;
+	border-left: 2px solid transparent;
 }
 
 .nodeHeader:hover {
 	background: var(--bg-hover);
+	border-left-color: var(--accent-primary);
 }
 
 /* 展开图标 */
@@ -159,6 +170,7 @@
 	color: var(--text-muted);
 	font-size: 8px;
 	flex-shrink: 0;
+	cursor: pointer;
 }
 
 .expandIconPlaceholder {
@@ -168,7 +180,7 @@
 
 /* 文件/目录图标 */
 .icon {
-	font-size: 10px;
+	font-size: 12px;
 	line-height: 1;
 	flex-shrink: 0;
 }

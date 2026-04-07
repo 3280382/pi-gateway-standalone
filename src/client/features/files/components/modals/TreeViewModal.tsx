@@ -6,6 +6,7 @@
  * - 制表符层级缩进
  * - 紧凑布局（无空隙，小字体）
  * - 过滤功能（隐藏文件、特定目录、搜索）
+ * - 不同文件类型不同图标
  */
 
 import React, { useState, useMemo, useCallback } from "react";
@@ -39,9 +40,167 @@ const DEFAULT_EXCLUDES = [
 	".nuxt",
 	"coverage",
 	".coverage",
+	".idea",
+	".vscode",
 ];
 
 type FilterMode = "normal" | "all" | "search";
+
+// 获取文件图标
+function getFileIcon(name: string, isDirectory: boolean): string {
+	if (isDirectory) return "📁";
+	
+	const ext = name.split(".").pop()?.toLowerCase() || "";
+	
+	// 代码文件
+	const codeExts: Record<string, string> = {
+		js: "📜",
+		ts: "📘",
+		jsx: "⚛️",
+		tsx: "⚛️",
+		py: "🐍",
+		java: "☕",
+		go: "🔵",
+		rs: "🦀",
+		c: "🔧",
+		cpp: "🔧",
+		h: "📋",
+		hpp: "📋",
+		cs: "🔷",
+		php: "🐘",
+		rb: "💎",
+		swift: "🐦",
+		kotlin: "🅺",
+		scala: "🔴",
+		rust: "🦀",
+		lua: "🌙",
+		sh: "🐚",
+		bash: "🐚",
+		zsh: "🐚",
+		ps1: "💻",
+		bat: "🖥️",
+		cmd: "🖥️",
+	};
+	
+	// 标记语言/配置
+	const markupExts: Record<string, string> = {
+		html: "🌐",
+		htm: "🌐",
+		xml: "📰",
+		json: "📋",
+		yaml: "📋",
+		yml: "📋",
+		toml: "⚙️",
+		ini: "⚙️",
+		cfg: "⚙️",
+		conf: "⚙️",
+		md: "📝",
+		markdown: "📝",
+	};
+	
+	// 样式文件
+	const styleExts: Record<string, string> = {
+		css: "🎨",
+		scss: "🎨",
+		sass: "🎨",
+		less: "🎨",
+		styl: "🎨",
+	};
+	
+	// 图片文件
+	const imageExts: Record<string, string> = {
+		png: "🖼️",
+		jpg: "🖼️",
+		jpeg: "🖼️",
+		gif: "🖼️",
+		svg: "🎨",
+		webp: "🖼️",
+		ico: "🎯",
+		bmp: "🖼️",
+		tiff: "🖼️",
+	};
+	
+	// 文档文件
+	const docExts: Record<string, string> = {
+		txt: "📄",
+		doc: "📘",
+		docx: "📘",
+		pdf: "📕",
+		xls: "📊",
+		xlsx: "📊",
+		ppt: "📽️",
+		pptx: "📽️",
+		rtf: "📄",
+	};
+	
+	// 数据文件
+	const dataExts: Record<string, string> = {
+		sql: "🗃️",
+		csv: "📊",
+		tsv: "📊",
+	};
+	
+	// 压缩文件
+	const archiveExts: Record<string, string> = {
+		zip: "📦",
+		rar: "📦",
+		7z: "📦",
+		tar: "📦",
+		gz: "📦",
+		bz2: "📦",
+		xz: "📦",
+	};
+	
+	// 可执行文件
+	const execExts: Record<string, string> = {
+		exe: "⚙️",
+		msi: "⚙️",
+		dmg: "🍎",
+		app: "🍎",
+		deb: "📦",
+		rpm: "📦",
+		snap: "📦",
+		flatpak: "📦",
+	};
+	
+	// 字体文件
+	const fontExts: Record<string, string> = {
+		ttf: "🔤",
+		otf: "🔤",
+		woff: "🔤",
+		woff2: "🔤",
+		eot: "🔤",
+	};
+	
+	// 媒体文件
+	const mediaExts: Record<string, string> = {
+		mp3: "🎵",
+		wav: "🎵",
+		ogg: "🎵",
+		flac: "🎵",
+		aac: "🎵",
+		mp4: "🎬",
+		avi: "🎬",
+		mkv: "🎬",
+		mov: "🎬",
+		wmv: "🎬",
+		flv: "🎬",
+		webm: "🎬",
+	};
+	
+	if (codeExts[ext]) return codeExts[ext];
+	if (markupExts[ext]) return markupExts[ext];
+	if (styleExts[ext]) return styleExts[ext];
+	if (imageExts[ext]) return imageExts[ext];
+	if (docExts[ext]) return docExts[ext];
+	if (dataExts[ext]) return dataExts[ext];
+	if (archiveExts[ext]) return archiveExts[ext];
+	if (execExts[ext]) return execExts[ext];
+	if (fontExts[ext]) return fontExts[ext];
+	if (mediaExts[ext]) return mediaExts[ext];
+	
+	return "📄"; // 默认文件图标
+}
 
 export function TreeViewModal({
 	isOpen,
@@ -104,11 +263,21 @@ export function TreeViewModal({
 	return (
 		<div className={styles.overlay} onClick={onClose}>
 			<div className={styles.container} onClick={(e) => e.stopPropagation()}>
-				{/* 头部工具栏 */}
+				{/* 头部工具栏 - 两行布局 */}
 				<div className={styles.header}>
-					<div className={styles.filterBar}>
-						<TreeIcon />
-						<span className={styles.path}>{treeData?.path || "."}</span>
+					{/* 第1行：路径和关闭按钮 */}
+					<div className={styles.headerRow}>
+						<div className={styles.pathSection}>
+							<TreeIcon />
+							<span className={styles.path}>{treeData?.path || "."}</span>
+						</div>
+						<button className={styles.closeBtn} onClick={onClose} title="Close (ESC)">
+							<CloseIcon />
+						</button>
+					</div>
+					
+					{/* 第2行：过滤控制 */}
+					<div className={styles.headerRow}>
 						<div className={styles.filterControls}>
 							<select
 								className={styles.select}
@@ -136,9 +305,6 @@ export function TreeViewModal({
 							)}
 						</div>
 					</div>
-					<button className={styles.closeBtn} onClick={onClose} title="Close (ESC)">
-						<CloseIcon />
-					</button>
 				</div>
 
 				{/* 内容区 */}
@@ -199,7 +365,8 @@ interface TreeNodeItemProps {
 }
 
 function TreeNodeItem({ item, level, onFileClick, filterMode, searchText }: TreeNodeItemProps) {
-	const [expanded, setExpanded] = useState(level < 2); // 默认展开前两层
+	// 前6层默认展开
+	const [expanded, setExpanded] = useState(level < 6);
 	const hasChildren = item.children && item.children.length > 0;
 
 	const handleClick = () => {
@@ -223,11 +390,13 @@ function TreeNodeItem({ item, level, onFileClick, filterMode, searchText }: Tree
 		);
 	};
 
+	const icon = getFileIcon(item.name, item.isDirectory);
+
 	return (
 		<div className={styles.node}>
 			<div
 				className={styles.nodeHeader}
-				style={{ paddingLeft: `${level * 16}px` }}
+				style={{ paddingLeft: `${level * 20}px` }}
 				onClick={handleClick}
 			>
 				{hasChildren ? (
@@ -235,7 +404,7 @@ function TreeNodeItem({ item, level, onFileClick, filterMode, searchText }: Tree
 				) : (
 					<span className={styles.expandIconPlaceholder} />
 				)}
-				<span className={styles.icon}>{item.isDirectory ? "📁" : "📄"}</span>
+				<span className={styles.icon}>{icon}</span>
 				<span className={item.isDirectory ? styles.dirName : styles.fileName}>
 					{highlightMatch(item.name)}
 				</span>
