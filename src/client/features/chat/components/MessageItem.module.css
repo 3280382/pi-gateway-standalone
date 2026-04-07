@@ -1,161 +1,166 @@
 /* ============================================
-   MessageItem - Neo Glassmorphism
+   MessageItem - Compact Edition
    ============================================ */
 
+/* 用户消息 - 右对齐，柔和蓝色背景 */
 .userMessage {
 	display: flex;
 	justify-content: flex-end;
-	padding: 0px 0px;
+	padding: 2px 8px;
+	margin: 0;
 }
 
 .userBubble {
-	background: rgba(88, 166, 255, 0.15);
-	border: 1px solid rgba(88, 166, 255, 0.25);
-	border-radius: 16px 16px 4px 16px;
-	padding: 10px 16px;
-	color: #e6edf3;
+	background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.12) 100%);
+	border: none;
+	border-radius: 12px 12px 2px 12px;
+	padding: 8px 12px;
+	color: #e0f2fe;
 	font-size: 13px;
 	max-width: 85%;
 }
 
+/* AI消息容器 - 无间隙 */
 .aiContainer {
 	display: flex;
 	flex-direction: column;
-	gap: 0px;
-	padding: 0px 0px;
+	gap: 0;
+	padding: 2px 8px;
+	margin: 0;
 }
 
-/* Card Base */
+/* Card 基础 - 无边框 */
 .card {
-	background: rgba(22, 27, 34, 0.8);
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 10px;
+	border: none;
+	border-radius: 0;
 	overflow: hidden;
-	transition: transform 0.2s;
+	margin: 0;
 }
 
-.card:hover {
-	transform: translateY(-1px);
-}
-
-/* Thinking Card */
+/* 思考块 - 柔和琥珀色背景 */
 .thinking {
-	border-color: rgba(251, 191, 36, 0.2);
-	box-shadow: 0 4px 20px rgba(251, 191, 36, 0.05);
+	background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.06) 100%);
 }
 
-/* Tool Card */
+.thinking .cardHeader {
+	background: rgba(245, 158, 11, 0.1);
+}
+
+/* 工具块 - 柔和翡翠色背景 */
 .tool {
-	border-color: rgba(52, 211, 153, 0.2);
-	box-shadow: 0 4px 20px rgba(52, 211, 153, 0.05);
+	background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.06) 100%);
 }
 
-/* Output Card */
+.tool .cardHeader {
+	background: rgba(16, 185, 129, 0.1);
+}
+
+/* 文本输出块 - 柔和青色背景 */
 .output {
-	border-color: rgba(34, 211, 238, 0.2);
-	box-shadow: 0 4px 24px rgba(34, 211, 238, 0.08);
+	background: linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, rgba(8, 145, 178, 0.06) 100%);
 }
 
-/* Card Header */
+.output .cardHeader {
+	background: rgba(6, 182, 212, 0.1);
+}
+
+/* Card Header - 紧凑 */
 .cardHeader {
 	display: flex;
 	align-items: center;
-	gap: 0px;
-	padding: 0px 0px;
-	background: rgba(13, 17, 23, 0.6);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+	gap: 6px;
+	padding: 4px 8px;
+	border: none;
 }
 
 .dot {
-	width: 8px;
-	height: 8px;
+	width: 6px;
+	height: 6px;
 	border-radius: 50%;
-	box-shadow: 0 0 6px currentColor;
 }
 
 .label {
-	font-size: 12px;
+	font-size: 11px;
 	font-weight: 500;
-	color: #e6edf3;
-	flex: 1;
+	color: #e2e8f0;
 }
 
 .chip {
-	font-size: 10px;
-	padding: 2px 8px;
-	border-radius: 10px;
-	background: rgba(107, 114, 128, 0.2);
-	color: #9ca3af;
+	font-size: 9px;
+	padding: 1px 6px;
+	border-radius: 8px;
+	background: rgba(255, 255, 255, 0.1);
+	color: #94a3b8;
 	text-transform: uppercase;
 }
 
 .actions {
 	display: flex;
-	gap: 4px;
+	gap: 2px;
+	margin-left: auto;
 }
 
 .btn {
-	width: 26px;
-	height: 26px;
+	width: 20px;
+	height: 20px;
 	border: none;
-	border-radius: 5px;
-	background: rgba(255, 255, 255, 0.05);
-	color: #8b949e;
+	border-radius: 3px;
+	background: rgba(255, 255, 255, 0.08);
+	color: #94a3b8;
 	cursor: pointer;
-	font-size: 11px;
+	font-size: 10px;
 	transition: all 0.15s;
 }
 
 .btn:hover {
-	background: rgba(255, 255, 255, 0.1);
-	color: #e6edf3;
+	background: rgba(255, 255, 255, 0.15);
+	color: #f1f5f9;
 }
 
-/* Card Content */
+/* Card Content - 紧凑 */
 .content {
-	padding: 0px 0px;
-	font-size: 12px;
-	line-height: 1.6;
-	color: #c9d1d9;
-	overflow: visible;
+	padding: 6px 8px;
+	font-size: 13px;
+	line-height: 1.5;
+	color: #cbd5e1;
 }
 
 .content code {
 	font-family: "JetBrains Mono", monospace;
-	font-size: 11px;
+	font-size: 12px;
 	white-space: pre-wrap;
 	word-break: break-word;
 }
 
 /* Text Content Styles */
 .line {
-	margin: 2px 0;
+	margin: 1px 0;
 }
 
 .inlineCode {
-	background: rgba(88, 166, 255, 0.12);
-	padding: 2px 5px;
+	background: rgba(99, 102, 241, 0.2);
+	padding: 1px 4px;
 	border-radius: 3px;
-	color: #58a6ff;
+	color: #a5b4fc;
 	font-family: "JetBrains Mono", monospace;
-	font-size: 11px;
+	font-size: 12px;
 }
 
 .codeBlockStart {
-	color: #8b949e;
+	color: #64748b;
 	font-family: "JetBrains Mono", monospace;
 	font-size: 11px;
-	padding: 4px 0;
-	border-bottom: 1px solid rgba(48, 54, 61, 0.5);
-	margin-bottom: 8px;
+	padding: 2px 0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+	margin-bottom: 4px;
 }
 
 strong {
-	color: #f3f4f6;
+	color: #f8fafc;
 	font-weight: 600;
 }
 
 em {
-	color: #d1d5db;
+	color: #e2e8f0;
 	font-style: italic;
 }
