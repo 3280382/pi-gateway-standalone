@@ -48,7 +48,7 @@
 	align-items: center;
 	gap: 8px;
 	flex: 1;
-	min-width: 0; /* 允许收缩 */
+	min-width: 0;
 }
 
 .path {
@@ -59,6 +59,67 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	flex: 1;
+}
+
+/* 头部操作按钮 */
+.headerActions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+/* 复制按钮 */
+.copyBtn {
+	padding: 3px 10px;
+	font-size: 11px;
+	border: 1px solid var(--border-color);
+	border-radius: 3px;
+	background: var(--bg-tertiary);
+	color: var(--text-primary);
+	cursor: pointer;
+	transition: all 0.15s;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.copyBtn:hover:not(:disabled) {
+	background: var(--accent-primary);
+	color: white;
+	border-color: var(--accent-primary);
+}
+
+.copyBtn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.copySuccess {
+	background: var(--accent-success) !important;
+	border-color: var(--accent-success) !important;
+	color: white !important;
+}
+
+/* 右上角关闭按钮 */
+.closeBtn {
+	width: 24px;
+	height: 24px;
+	border: none;
+	border-radius: 4px;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.15s;
+	flex-shrink: 0;
+}
+
+.closeBtn:hover {
+	background: var(--accent-danger);
+	color: white;
 }
 
 /* 第2行：过滤控制 */
@@ -95,27 +156,6 @@
 	border-color: var(--accent-primary);
 }
 
-/* 右上角关闭按钮 */
-.closeBtn {
-	width: 24px;
-	height: 24px;
-	border: none;
-	border-radius: 4px;
-	background: transparent;
-	color: var(--text-muted);
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: all 0.15s;
-	flex-shrink: 0;
-}
-
-.closeBtn:hover {
-	background: var(--accent-danger);
-	color: white;
-}
-
 /* 内容区 - 无空隙紧凑布局 */
 .content {
 	flex: 1;
@@ -140,6 +180,12 @@
 	color: var(--accent-danger);
 }
 
+/* 树节点列表 */
+.nodeList {
+	display: flex;
+	flex-direction: column;
+}
+
 /* 树节点 - 紧凑无空隙 */
 .node {
 	margin: 0;
@@ -148,8 +194,8 @@
 .nodeHeader {
 	display: flex;
 	align-items: center;
-	gap: 4px;
-	padding: 2px 4px;
+	gap: 2px;
+	padding: 1px 4px;
 	cursor: pointer;
 	transition: background 0.1s;
 	font-size: 11px;
@@ -161,6 +207,13 @@
 .nodeHeader:hover {
 	background: var(--bg-hover);
 	border-left-color: var(--accent-primary);
+}
+
+/* 制表符缩进 */
+.indent {
+	font-family: var(--font-mono);
+	color: var(--text-muted);
+	user-select: none;
 }
 
 /* 展开图标 */

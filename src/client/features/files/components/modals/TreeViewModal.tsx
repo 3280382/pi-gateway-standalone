@@ -3,10 +3,11 @@
  *
  * 特性：
  * - 全屏显示（宽高 100%）
- * - 制表符层级缩进
+ * - 制表符层级缩进（清晰的视觉层级）
  * - 紧凑布局（无空隙，小字体）
  * - 过滤功能（隐藏文件、特定目录、搜索）
  * - 不同文件类型不同图标
+ * - 复制树状文本功能
  */
 
 import React, { useState, useMemo, useCallback } from "react";
@@ -202,6 +203,23 @@ function getFileIcon(name: string, isDirectory: boolean): string {
 	return "📄"; // 默认文件图标
 }
 
+// 生成树状文本
+function generateTreeText(items: TreeNode[], level = 0, prefix = ""): string {
+	let result = "";
+	items.forEach((item, index) => {
+		const isLast = index === items.length - 1;
+		const connector = isLast ? "└── " : "├── ";
+		const childPrefix = isLast ? "    " : "│   ";
+		
+		result += prefix + connector + item.name + "\n";
+		
+		if (item.children && item.children.length > 0) {
+			result += generateTreeText(item.children, level + 1, prefix + childPrefix);
+		}
+	});
+	return result;
+}
+
 export function TreeViewModal({
 	isOpen,
 	treeData,
@@ -211,6 +229,7 @@ export function TreeViewModal({
 }: TreeViewModalProps) {
 	const [filterMode, setFilterMode] = useState<FilterMode>("normal");
 	const [searchText, setSearchText] = useState("");
+	const [copySuccess, setCopySuccess] = useState(false);
 
 	// 过滤节点
 	const filterNode = useCallback((node: TreeNode): TreeNode | null => {
@@ -258,6 +277,19 @@ export function TreeViewModal({
 		return { ...treeData, items: filteredItems };
 	}, [treeData, filterNode]);
 
+	// 复制树状文本
+	const handleCopyTree = useCallback(async () => {
+		if (!filteredData) return;
+		const treeText = filteredData.path + "\n" + generateTreeText(filteredData.items);
+		try {
+			await navigator.clipboard.writeText(treeText);
+			setCopySuccess(true);
+			setTimeout(() => setCopySuccess(false), 2000);
+		} catch (err) {
+			console.error("复制失败:", err);
+		}
+	}, [filteredData]);
+
 	if (!isOpen) return null;
 
 	return (
@@ -271,9 +303,19 @@ export function TreeViewModal({
 							<TreeIcon />
 							<span className={styles.path}>{treeData?.path || "."}</span>
 						</div>
-						<button className={styles.closeBtn} onClick={onClose} title="Close (ESC)">
-							<CloseIcon />
-						</button>
+						<div className={styles.headerActions}>
+							<button 
+								className={`${styles.copyBtn} ${copySuccess ? styles.copySuccess : ""}`}
+								onClick={handleCopyTree}
+								title="复制树状文本"
+								disabled={!filteredData || filteredData.items.length === 0}
+							>
+								{copySuccess ? "✓ 已复制" : "📋 复制"}
+							</button>
+							<button className={styles.closeBtn} onClick={onClose} title="Close (ESC)">
+								<CloseIcon />
+							</button>
+						</div>
 					</div>
 					
 					{/* 第2行：过滤控制 */}
@@ -340,7 +382,7 @@ function TreeNodeList({ items, onFileClick, level = 0, filterMode, searchText }:
 	if (!items || items.length === 0) return null;
 
 	return (
-		<>
+		<div className={styles.nodeList}>
 			{items.map((item) => (
 				<TreeNodeItem
 					key={item.path}
@@ -351,7 +393,7 @@ function TreeNodeList({ items, onFileClick, level = 0, filterMode, searchText }:
 					searchText={searchText}
 				/>
 			))}
-		</>
+		</div>
 	);
 }
 
@@ -391,14 +433,16 @@ function TreeNodeItem({ item, level, onFileClick, filterMode, searchText }: Tree
 	};
 
 	const icon = getFileIcon(item.name, item.isDirectory);
+	// 制表符缩进：每级2个空格
+	const indent = "\u00A0\u00A0".repeat(level);
 
 	return (
 		<div className={styles.node}>
 			<div
 				className={styles.nodeHeader}
-				style={{ paddingLeft: `${level * 20}px` }}
 				onClick={handleClick}
 			>
+				<span className={styles.indent}>{indent}</span>
 				{hasChildren ? (
 					<span className={styles.expandIcon}>{expanded ? "▼" : "▶"}</span>
 				) : (
