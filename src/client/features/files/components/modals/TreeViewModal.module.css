@@ -158,9 +158,10 @@
 	overflow: auto;
 	padding: 4px 8px;
 	background: var(--bg-primary);
-	font-family: var(--font-mono, 'JetBrains Mono', monospace);
-	font-size: 12px;
-	line-height: 1.5;
+	font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+	font-size: 13px;
+	line-height: 1.6;
+	white-space: pre;
 }
 
 .loading,
@@ -183,15 +184,18 @@
 	flex-direction: column;
 }
 
+/* 树列表容器 */
+.treeList {
+	display: block;
+}
+
 /* 单行 */
 .treeLine {
-	display: flex;
-	align-items: center;
-	gap: 0;
-	padding: 1px 0;
+	display: block;
 	cursor: pointer;
-	white-space: nowrap;
+	white-space: pre;
 	border-left: 2px solid transparent;
+	font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 
 .treeLine:hover {
@@ -199,31 +203,38 @@
 	border-left-color: var(--accent-primary);
 }
 
-/* 前缀 (│   │   ) */
-.prefix {
+/* 缩进前缀 - 固定4字符宽度 */
+.indent {
+	display: inline;
 	color: var(--text-muted);
-	user-select: none;
+	font-family: inherit;
 }
 
-/* 连接符 (├── └──) */
+/* 连接符 - 固定4字符宽度 */
 .connector {
+	display: inline;
 	color: var(--text-muted);
-	user-select: none;
+	font-family: inherit;
 }
 
-/* 展开图标 */
+/* 展开图标 - 固定3字符宽度 */
 .expandIcon {
-	width: 14px;
-	text-align: center;
+	display: inline;
 	color: var(--text-muted);
-	font-size: 8px;
-	margin-right: 2px;
+	font-family: inherit;
+	font-size: 10px;
+}
+
+.expandIconPlaceholder {
+	display: inline;
+	color: transparent;
+	font-family: inherit;
 }
 
 /* 文件图标 */
 .icon {
+	display: inline;
 	font-size: 12px;
-	margin-right: 4px;
 }
 
 /* 目录名 */

@@ -297,7 +297,6 @@ interface AsciiTreeProps {
 	filterMode: FilterMode;
 	searchText: string;
 	prefix?: string;
-	isLast?: boolean;
 }
 
 function AsciiTree({ 
@@ -307,8 +306,7 @@ function AsciiTree({
 	onFileClick,
 	filterMode,
 	searchText,
-	prefix = "",
-	isLast = false 
+	prefix = ""
 }: AsciiTreeProps) {
 	if (!items || items.length === 0) return null;
 
@@ -380,17 +378,25 @@ function TreeLine({
 		);
 	};
 
-	const childPrefix = prefix + (isLast ? "    " : "│   ");
+	// 使用固定4字符宽度确保对齐：空格或 "|   "
+	const childPrefix = prefix + (isLast ? "    " : "|   ");
 
 	return (
 		<>
 			<div className={styles.treeLine} onClick={handleClick}>
-				<span className={styles.prefix}>{prefix}</span>
+				{/* 缩进前缀 */}
+				<span className={styles.indent}>{prefix}</span>
+				{/* 连接符 */}
 				<span className={styles.connector}>{connector}</span>
-				{hasChildren && (
-					<span className={styles.expandIcon}>{isExpanded ? "▼" : "▶"}</span>
+				{/* 展开图标（仅目录） */}
+				{hasChildren ? (
+					<span className={styles.expandIcon}>{isExpanded ? "[-]" : "[+]"}</span>
+				) : (
+					<span className={styles.expandIconPlaceholder}>   </span>
 				)}
+				{/* 文件图标 */}
 				<span className={styles.icon}>{icon}</span>
+				{/* 文件名 */}
 				<span className={item.isDirectory ? styles.dirName : styles.fileName}>
 					{highlightMatch(item.name)}
 				</span>
