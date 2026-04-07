@@ -9,16 +9,73 @@
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import type { FileState, FileActions } from "@/features/files/types";
+import type { FileItem, ViewMode, SortMode, FilterType, BottomPanelType } from "@/features/files/types";
 
-export type {
-	FileItem,
-	ViewMode,
-	FileState,
-	FileActions,
-	SortMode,
-	FilterType,
-} from "@/features/files/types";
+// ============================================================================
+// Store State & Actions Types (内联定义)
+// ============================================================================
+
+export interface FileState {
+	// 文件浏览状态
+	currentPath: string;
+	parentPath: string;
+	items: FileItem[];
+	selectedItems: string[];
+	pathCache: Map<string, { items: FileItem[]; timestamp: number }>;
+	viewMode: ViewMode;
+	sortMode: SortMode;
+	filterType: FilterType;
+	filterText: string;
+	isLoading: boolean;
+	error: string | null;
+	selectedActionFile: string | null;
+	selectedActionFileName: string | null;
+	isMultiSelectMode: boolean;
+	draggedItem: FileItem | null;
+	isDragging: boolean;
+
+	// 布局状态
+	isSidebarVisible: boolean;
+	isBottomPanelOpen: boolean;
+	bottomPanelType: BottomPanelType;
+	bottomPanelHeight: number;
+}
+
+export interface FileActions {
+	// 文件操作
+	setCurrentPath: (path: string) => void;
+	setParentPath: (path: string) => void;
+	setItems: (items: FileItem[]) => void;
+	setSelectedItems: (items: string[]) => void;
+	setPathCache: (cache: Map<string, { items: FileItem[]; timestamp: number }>) => void;
+	setViewMode: (mode: ViewMode) => void;
+	setSortMode: (mode: SortMode) => void;
+	setFilterType: (type: FilterType) => void;
+	setFilterText: (text: string) => void;
+	setLoading: (loading: boolean) => void;
+	setError: (error: string | null) => void;
+	setSelectedActionFile: (path: string | null, name: string | null) => void;
+	setIsMultiSelectMode: (enabled: boolean) => void;
+	setDraggedItem: (item: FileItem | null) => void;
+	setIsDragging: (isDragging: boolean) => void;
+	toggleSelection: (path: string) => void;
+	clearSelection: () => void;
+	toggleViewMode: () => void;
+	toggleMultiSelectMode: () => void;
+	isSelected: (path: string) => boolean;
+
+	// 布局操作
+	setSidebarVisible: (visible: boolean) => void;
+	toggleSidebar: () => void;
+	openBottomPanel: (type: BottomPanelType) => void;
+	closeBottomPanel: () => void;
+	toggleBottomPanel: (type: BottomPanelType) => void;
+	setBottomPanelHeight: (height: number) => void;
+}
+
+// ============================================================================
+// Store
+// ============================================================================
 
 export const useFileStore = create<FileState & FileActions>()(
 	devtools(
@@ -133,3 +190,6 @@ export const useFileStore = create<FileState & FileActions>()(
 		{ name: "FileStore" },
 	),
 );
+
+// 基础类型重新导出，方便使用
+export type { FileItem, ViewMode, SortMode, FilterType, BottomPanelType } from "@/features/files/types";
