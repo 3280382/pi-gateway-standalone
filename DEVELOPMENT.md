@@ -223,6 +223,11 @@ src/client/
 │   │   ├── providers/      # 全局 Provider
 │   │   └── navigation/     # 导航组件
 │   ├── chat/               # 聊天功能 (InputArea, MessageList, ChatPanel)
+│   │   ├── components/     # UI 组件（纯渲染，无业务逻辑）
+│   │   ├── hooks/          # 业务逻辑 Hooks（按功能拆分）
+│   │   ├── stores/         # 状态管理 (Zustand)
+│   │   ├── services/       # API 服务
+│   │   └── types/          # 类型定义
 │   ├── files/              # 文件功能 (FileGrid, FileList, BatchActionBar)
 │   ├── header/             # 顶部菜单 (ModelSelector, DirectoryPicker, SearchBox)
 │   ├── sidebar/            # 侧边栏 (RecentWorkspaces, Sessions, Settings)
@@ -357,6 +362,83 @@ const handleToggle = useCallback((id: string) => {
 // 6. 样式
 ```
 
+### Chat Feature Hooks 架构
+
+Chat 功能采用 **Hook-Based 架构**，将业务逻辑从 UI 组件中完全分离：
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Components (UI Layer)                    │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │ ChatPanel   │  │ InputArea   │  │ AppHeader           │  │
+│  │ (布局容器)   │  │ (输入UI)    │  │ (顶部菜单)          │  │
+│  └──────┬──────┘  └──────┬──────┘  └──────────┬──────────┘  │
+└─────────┼────────────────┼────────────────────┼─────────────┘
+          │                │                    │
+          ▼                ▼                    ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      Hooks (Logic Layer)                     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │useChatPanel │  │useInputArea │  │useDirectoryPicker   │  │
+│  │useChat      │  │useFilePicker│  │useModelSelector     │  │
+│  │useChatInit  │  │useImageUpload│  │useThinkingSelector  │  │
+│  │             │  │useSlashCmds │  │useSearchFilters     │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     Services (API Layer)                     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │ chatApi.ts  │  │ sessionManager  │  │ websocket.service   │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Hooks 分类
+
+| Hook | 用途 | 对应组件 |
+|------|------|----------|
+| `useChatPanel` | 消息滚动、发送协调 | ChatPanel |
+| `useInputArea` | 输入处理、发送逻辑 | InputArea |
+| `useFilePicker` | @mention 文件选择 | InputArea |
+| `useImageUpload` | 图片上传、OCR | InputArea |
+| `useSlashCommands` | / 命令选择 | InputArea |
+| `useDirectoryPicker` | 目录浏览器 | AppHeader |
+| `useModelSelector` | 模型选择 | AppHeader |
+| `useThinkingSelector` | Thinking 级别 | AppHeader |
+| `useSearchFilters` | 搜索过滤 | AppHeader |
+| `useChat` | 基础聊天操作 | 多个组件 |
+| `useChatInit` | 初始化逻辑 | ChatPage |
+| `useChatMessages` | 消息过滤 | MessageList |
+
+#### 开发规范
+
+```typescript
+// ✅ 正确: UI 组件只负责渲染，逻辑在 Hook 中
+function InputArea(props: InputAreaProps) {
+  const inputArea = useInputArea(props);
+  return (
+    <div>
+      <textarea onChange={inputArea.handleChange} />
+      <button onClick={inputArea.handleSend}>Send</button>
+    </div>
+  );
+}
+
+// ✅ 正确: Hook 处理所有业务逻辑
+function useInputArea(options: UseInputAreaOptions) {
+  const filePicker = useFilePicker(options);
+  const imageUpload = useImageUpload();
+  
+  const handleSend = useCallback(() => {
+    // 发送逻辑...
+  }, []);
+  
+  return { handleSend, filePicker, imageUpload };
+}
+```
+
 ### 常见错误
 
 | 错误 | 正确做法 |
@@ -365,8 +447,9 @@ const handleToggle = useCallback((id: string) => {
 | `Math.random()` 作为 key | 使用稳定唯一 ID |
 | 直接修改数组/对象 | 返回新对象 `[...arr]` |
 | 在 render 中创建新函数 | 使用 useCallback |
-| 组件 > 200 行 | 拆分组件 |
+| 组件 > 200 行 | 拆分组件或提取 Hook |
 | props 穿透超过 3 层 | 使用 Context 或 Store |
+| 在组件中直接写业务逻辑 | 提取到 Hook |
 
 ## Git 工作流
 

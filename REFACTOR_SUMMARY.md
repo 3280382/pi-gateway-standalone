@@ -1,8 +1,105 @@
-# Server 架构重构 - 变更摘要
+# 架构重构 - 变更摘要
 
 ## 📋 概述
 
+### 服务端重构 (已完成)
 将原有的 **技术分层架构**（controllers/routes/services）重构为 **Feature-Based 架构**（features/chat, features/session）。
+
+### 客户端重构 (2025-04-06 完成)
+将 Chat Feature 的 **UI 组件** 重构为 **Hook-Based 架构**，分离业务逻辑与 UI 渲染。
+
+---
+
+## 📁 Client 重构详情
+
+### 目录结构变化
+
+```
+src/client/features/chat/
+├── components/              # UI 组件（纯渲染，无业务逻辑）
+│   ├── ChatPanel.tsx       # 现在：~65 行（原 ~150 行）
+│   ├── InputArea.tsx       # 现在：~280 行（原 ~550 行）
+│   ├── MessageList.tsx     # 保持不变
+│   ├── MessageItem.tsx     # 保持不变
+│   └── Header/
+│       ├── AppHeader.tsx   # 类型错误修复，准备接入 hooks
+│       └── DirectoryPicker.tsx  # 新提取的组件
+│
+├── hooks/                  # 业务逻辑 Hooks
+│   ├── useChat.ts                 # 基础聊天操作
+│   ├── useChatInit.ts             # 初始化逻辑
+│   ├── useChatMessages.ts         # 消息过滤
+│   ├── useChatPanel.ts            # [NEW] ChatPanel 业务逻辑
+│   ├── useInputArea.ts            # [NEW] InputArea 主逻辑
+│   ├── useFilePicker.ts           # [NEW] @mention 文件选择
+│   ├── useImageUpload.ts          # [NEW] 图片上传 & OCR
+│   ├── useSlashCommands.ts        # [NEW] / 命令选择
+│   ├── useDirectoryPicker.ts      # [NEW] 目录浏览器
+│   ├── useModelSelector.ts        # [NEW] 模型选择
+│   ├── useThinkingSelector.ts     # [NEW] Thinking 级别
+│   └── useSearchFilters.ts        # [NEW] 搜索过滤
+│
+├── stores/                 # 状态管理
+├── services/               # API 服务
+└── types/                  # 类型定义
+```
+
+### 新增 Hooks
+
+| Hook | 职责 | 对应组件 | 代码行数 |
+|------|------|----------|----------|
+| `useChatPanel` | 消息滚动、发送协调 | ChatPanel | ~90 |
+| `useInputArea` | 输入处理、发送逻辑 | InputArea | ~200 |
+| `useFilePicker` | @mention 文件选择 | InputArea | ~140 |
+| `useImageUpload` | 图片上传、OCR | InputArea | ~120 |
+| `useSlashCommands` | Slash 命令选择 | InputArea | ~110 |
+| `useDirectoryPicker` | 目录浏览器 | AppHeader | ~100 |
+| `useModelSelector` | 模型选择 | AppHeader | ~90 |
+| `useThinkingSelector` | Thinking 级别选择 | AppHeader | ~70 |
+| `useSearchFilters` | 搜索过滤 | AppHeader | ~130 |
+
+### 代码行数变化
+
+| 组件/Hook | 重构前 | 重构后 | 变化 |
+|-----------|--------|--------|------|
+| InputArea.tsx | ~550 | ~280 | -49% |
+| ChatPanel.tsx | ~150 | ~65 | -57% |
+| AppHeader.tsx | ~650 | ~630 | -3% (仅修复) |
+| 新增 Hooks | 0 | ~960 | +960 |
+| **总计** | ~1350 | ~1935 | +43% (可维护性提升) |
+
+### 架构原则
+
+```
+重构前：
+Component (UI + Logic + State) → Store → Service
+
+重构后：
+Component (UI only) → Hook (Logic) → Store → Service
+              │
+              └→ Sub-Hooks (FilePicker, ImageUpload, etc.)
+```
+
+### 使用示例
+
+```typescript
+// 重构前：InputArea.tsx 内部包含所有逻辑
+function InputArea(props) {
+  const [showFilePicker, setShowFilePicker] = useState(false);
+  const [fileList, setFileList] = useState([]);
+  // ... 200+ 行逻辑
+}
+
+// 重构后：逻辑委托给 Hook
+function InputArea(props) {
+  const inputArea = useInputArea(props);
+  // 只负责 UI 渲染
+}
+```
+
+---
+
+## 📁 Server 重构详情
 
 ---
 

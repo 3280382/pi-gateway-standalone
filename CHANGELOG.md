@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Client Chat Feature Hooks Architecture**: Complete refactor of chat feature with hook-based architecture
+  - New hooks: `useChatPanel`, `useInputArea`, `useFilePicker`, `useImageUpload`, `useSlashCommands`
+  - New hooks: `useDirectoryPicker`, `useModelSelector`, `useThinkingSelector`, `useSearchFilters`
+  - Extracted `DirectoryPicker` component from AppHeader
+  - Reduced component complexity: InputArea (-49% lines), ChatPanel (-57% lines)
+  - Business logic completely separated from UI components
 - **Unified AppLayout System**: Centralized layout component with consistent structure
   - Header (64px): TopBar with model selector, thinking level, working directory, search
   - Sidebar (280px): Recent workspaces, sessions, settings with collapsible design
