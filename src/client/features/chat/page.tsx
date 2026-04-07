@@ -89,7 +89,7 @@ export function ChatPage({ active = false }: ChatPageProps) {
 	return (
 		<div
 			className={styles.layout}
-			style={{ display: active ? "block" : "none", height: "100%" }}
+			style={{ display: active ? "flex" : "none" }}
 		>
 			{/* Header */}
 			<header className={styles.header}>
