@@ -540,22 +540,50 @@ export function setupWebSocketListeners(): void {
 	websocketService.on("compaction_start", () => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
 		console.log(`[${ts}] [RECV] compaction_start`);
+		// 添加系统消息到消息列表
+		store.addMessage({
+			id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+			role: "system",
+			content: [{ type: "text", text: "🗜️ 正在压缩上下文..." }],
+			timestamp: new Date(),
+		});
 	});
 
 	websocketService.on("compaction_end", () => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
 		console.log(`[${ts}] [RECV] compaction_end`);
+		// 添加系统消息到消息列表
+		store.addMessage({
+			id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+			role: "system",
+			content: [{ type: "text", text: "✅ 上下文压缩完成" }],
+			timestamp: new Date(),
+		});
 	});
 
 	// Retry start/end handlers
 	websocketService.on("retry_start", () => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
 		console.log(`[${ts}] [RECV] retry_start`);
+		// 添加系统消息到消息列表
+		store.addMessage({
+			id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+			role: "system",
+			content: [{ type: "text", text: "🔄 正在重试..." }],
+			timestamp: new Date(),
+		});
 	});
 
 	websocketService.on("retry_end", () => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
 		console.log(`[${ts}] [RECV] retry_end`);
+		// 添加系统消息到消息列表
+		store.addMessage({
+			id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+			role: "system",
+			content: [{ type: "text", text: "✅ 重试完成" }],
+			timestamp: new Date(),
+		});
 	});
 
 	// Connection status handlers

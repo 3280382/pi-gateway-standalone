@@ -174,7 +174,8 @@ export function AppHeader({
 	}, []);
 
 	const currentModelName = currentModel
-		? models.find((m) => m.id === currentModel)?.name || currentModel.split("-")[0]
+		? models.find((m) => m.id === currentModel)?.name ||
+			currentModel.split("-")[0]
 		: "Select Model";
 
 	return (
@@ -372,7 +373,14 @@ function FilterChip({
 // Icons
 function FolderIcon() {
 	return (
-		<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+		<svg
+			width="14"
+			height="14"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+		>
 			<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
 		</svg>
 	);
@@ -380,7 +388,15 @@ function FolderIcon() {
 
 function SearchIcon({ className }: { className?: string }) {
 	return (
-		<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
+		<svg
+			width="14"
+			height="14"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+			className={className}
+		>
 			<circle cx="11" cy="11" r="8" />
 			<line x1="21" y1="21" x2="16.65" y2="16.65" />
 		</svg>
@@ -389,7 +405,14 @@ function SearchIcon({ className }: { className?: string }) {
 
 function XIcon() {
 	return (
-		<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+		<svg
+			width="14"
+			height="14"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+		>
 			<line x1="18" y1="6" x2="6" y2="18" />
 			<line x1="6" y1="6" x2="18" y2="18" />
 		</svg>
@@ -398,7 +421,14 @@ function XIcon() {
 
 function FilterIcon() {
 	return (
-		<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+		<svg
+			width="14"
+			height="14"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+		>
 			<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
 		</svg>
 	);
@@ -406,7 +436,14 @@ function FilterIcon() {
 
 function CheckIcon() {
 	return (
-		<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+		<svg
+			width="14"
+			height="14"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+		>
 			<polyline points="20 6 9 17 4 12" />
 		</svg>
 	);
@@ -414,7 +451,14 @@ function CheckIcon() {
 
 function DropdownIcon() {
 	return (
-		<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+		<svg
+			width="12"
+			height="12"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+		>
 			<polyline points="6 9 12 15 18 9" />
 		</svg>
 	);
