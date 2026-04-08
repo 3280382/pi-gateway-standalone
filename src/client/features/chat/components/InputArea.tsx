@@ -6,7 +6,7 @@
  * - 本组件只负责 UI 渲染
  */
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useInputArea } from "@/features/chat/hooks/useInputArea";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import styles from "./InputArea.module.css";
@@ -64,6 +64,13 @@ export function InputArea({
 			textarea.style.height = `${Math.min(newHeight, 200)}px`;
 		}
 	};
+
+	// 当输入被清空时（发送消息后），重置 textarea 高度
+	useEffect(() => {
+		if (value === "" && textareaRef.current) {
+			textareaRef.current.style.height = "auto";
+		}
+	}, [value]);
 
 	return (
 		<div className={styles.container}>
