@@ -13,6 +13,56 @@ import { useChatController } from "@/features/chat/services/api/chatApi";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import type { Message } from "@/features/chat/types/chat";
 
+// ============================================================================
+// Message Helpers
+// ============================================================================
+
+function createUserMessage(text: string): Message {
+  return {
+    id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    role: "user",
+    content: [{ type: "text", text }],
+    timestamp: new Date(),
+  };
+}
+
+function createSystemMessage(text: string): Message {
+  return {
+    id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    role: "system",
+    content: [{ type: "text", text }],
+    timestamp: new Date(),
+  };
+}
+
+function createErrorMessage(error: unknown): Message {
+  const errorText = error instanceof Error ? error.message : String(error);
+  return createSystemMessage(`命令执行失败: ${errorText}`);
+}
+
+// ============================================================================
+// Command Execution Helper
+// ============================================================================
+
+async function executeCommandWithMessages(
+  command: string,
+  displayText: string,
+  executeFn: (cmd: string) => Promise<any>,
+): Promise<void> {
+  const chatStore = useChatStore.getState();
+
+  // 添加用户输入消息
+  chatStore.addMessage(createUserMessage(displayText));
+
+  try {
+    const result = await executeFn(command);
+    const resultText = result?.output || result?.error || "命令执行完成";
+    chatStore.addMessage(createSystemMessage(resultText));
+  } catch (err) {
+    chatStore.addMessage(createErrorMessage(err));
+  }
+}
+
 export interface UseChatPanelReturn {
 	// Refs
 	messagesRef: React.RefObject<HTMLDivElement | null>;
@@ -89,46 +139,7 @@ export function useChatPanel(): UseChatPanelReturn {
 	const handleBashCommand = useCallback(
 		(command: string) => {
 			setShouldScrollToBottom(true);
-
-			// 添加用户输入的消息
-			const chatStore = useChatStore.getState();
-			const userMessage: Message = {
-				id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-				role: "user",
-				content: [{ type: "text", text: `!${command}` }],
-				timestamp: new Date(),
-			};
-			chatStore.addMessage(userMessage);
-
-			// 执行命令
-			chatController
-				.executeCommand(command)
-				.then((result) => {
-					// 添加执行结果
-					const resultText = result.output || result.error || "命令执行完成";
-					const systemMessage: Message = {
-						id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-						role: "system",
-						content: [{ type: "text", text: resultText }],
-						timestamp: new Date(),
-					};
-					chatStore.addMessage(systemMessage);
-				})
-				.catch((err) => {
-					// 添加错误消息
-					const errorMessage: Message = {
-						id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-						role: "system",
-						content: [
-							{
-								type: "text",
-								text: `命令执行失败: ${err.message || String(err)}`,
-							},
-						],
-						timestamp: new Date(),
-					};
-					chatStore.addMessage(errorMessage);
-				});
+			executeCommandWithMessages(command, `!${command}`, chatController.executeCommand);
 		},
 		[chatController],
 	);
@@ -137,116 +148,34 @@ export function useChatPanel(): UseChatPanelReturn {
 	const handleSlashCommand = useCallback(
 		(command: string, args: string) => {
 			setShouldScrollToBottom(true);
-			switch (command) {
-				case "clear":
-					chatController.clearMessages();
-					break;
-				case "new":
-					chatController.clearMessages();
-					break;
-				case "bash":
-					if (args) {
-						setShouldScrollToBottom(true);
 
-						// 添加用户输入的消息
-						const chatStore = useChatStore.getState();
-						const userMessage: Message = {
-							id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-							role: "user",
-							content: [{ type: "text", text: `/bash ${args}` }],
-							timestamp: new Date(),
-						};
-						chatStore.addMessage(userMessage);
-
-						// 执行命令
-						chatController
-							.executeCommand(args)
-							.then((result) => {
-								// 添加执行结果
-								const resultText =
-									result.output || result.error || "命令执行完成";
-								const systemMessage: Message = {
-									id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-									role: "system",
-									content: [{ type: "text", text: resultText }],
-									timestamp: new Date(),
-								};
-								chatStore.addMessage(systemMessage);
-							})
-							.catch((err) => {
-								// 添加错误消息
-								const errorMessage: Message = {
-									id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-									role: "system",
-									content: [
-										{
-											type: "text",
-											text: `命令执行失败: ${err.message || String(err)}`,
-										},
-									],
-									timestamp: new Date(),
-								};
-								chatStore.addMessage(errorMessage);
-							});
-					}
-					break;
-				case "read":
-				case "write":
-				case "edit":
-				case "ls":
-				case "grep":
-				case "tree":
-				case "git":
-					if (args || command === "ls" || command === "tree") {
-						setShouldScrollToBottom(true);
-
-						// 添加用户输入的消息
-						const chatStore = useChatStore.getState();
-						const cmdText = args ? `/${command} ${args}` : `/${command}`;
-						const userMessage: Message = {
-							id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-							role: "user",
-							content: [{ type: "text", text: cmdText }],
-							timestamp: new Date(),
-						};
-						chatStore.addMessage(userMessage);
-
-						// 执行命令
-						chatController
-							.executeCommand(cmdText.replace(/^\//, ""))
-							.then((result) => {
-								// 添加执行结果
-								const resultText =
-									result.output || result.error || "命令执行完成";
-								const systemMessage: Message = {
-									id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-									role: "system",
-									content: [{ type: "text", text: resultText }],
-									timestamp: new Date(),
-								};
-								chatStore.addMessage(systemMessage);
-							})
-							.catch((err) => {
-								// 添加错误消息
-								const errorMessage: Message = {
-									id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-									role: "system",
-									content: [
-										{
-											type: "text",
-											text: `命令执行失败: ${err.message || String(err)}`,
-										},
-									],
-									timestamp: new Date(),
-								};
-								chatStore.addMessage(errorMessage);
-							});
-					}
-					break;
-				default:
-					chatController.sendMessage(`/${command} ${args}`.trim());
-					break;
+			// 简单命令处理
+			if (command === "clear" || command === "new") {
+				chatController.clearMessages();
+				return;
 			}
+
+			// 需要发送给 LLM 的命令
+			if (command !== "bash" && 
+				command !== "read" && 
+				command !== "write" && 
+				command !== "edit" && 
+				command !== "ls" && 
+				command !== "grep" && 
+				command !== "tree" && 
+				command !== "git") {
+				chatController.sendMessage(`/${command} ${args}`.trim());
+				return;
+			}
+
+			// 需要执行系统命令的情况
+			const isNoArgsCommand = command === "ls" || command === "tree";
+			if (!args && !isNoArgsCommand) return;
+
+			const cmdText = args ? `/${command} ${args}` : `/${command}`;
+			const executeCmd = cmdText.replace(/^\//, "");
+			
+			executeCommandWithMessages(executeCmd, cmdText, chatController.executeCommand);
 		},
 		[chatController],
 	);

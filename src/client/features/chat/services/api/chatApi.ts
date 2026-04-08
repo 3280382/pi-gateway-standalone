@@ -59,6 +59,41 @@ export interface EnhancedChatController extends ChatController {
 }
 
 // ============================================================================
+// Promise Helper
+// ============================================================================
+
+interface PromiseConfig<T> {
+	timeoutMs?: number;
+	timeoutMessage: string;
+	eventName: string;
+	onSuccess: (data: T) => void;
+	sendAction: () => void;
+}
+
+function createPromiseWithTimeout<T>({
+	timeoutMs = 5000,
+	timeoutMessage,
+	eventName,
+	onSuccess,
+	sendAction,
+}: PromiseConfig<T>): Promise<T> {
+	return new Promise((resolve, reject) => {
+		const timeout = setTimeout(() => {
+			reject(new Error(timeoutMessage));
+		}, timeoutMs);
+
+		const unsubscribe = websocketService.on(eventName, (data: T) => {
+			clearTimeout(timeout);
+			onSuccess(data);
+			unsubscribe();
+			resolve(data);
+		});
+
+		sendAction();
+	});
+}
+
+// ============================================================================
 // Controller Hook
 // ============================================================================
 
@@ -186,155 +221,92 @@ export function useChatController(): EnhancedChatController {
 
 		// 会话管理
 		createNewSession: async () => {
-			return new Promise<void>((resolve, reject) => {
-				const timeout = setTimeout(() => {
-					reject(new Error("创建新会话超时"));
-				}, 5000);
-
-				const unsubscribe = websocketService.on("session_created", (data) => {
-					clearTimeout(timeout);
+			await createPromiseWithTimeout<void>({
+				timeoutMessage: "创建新会话超时",
+				eventName: "session_created",
+				onSuccess: (data) => {
 					chatStore.clearMessages();
 					chatStore.setSessionId(data.sessionId);
-					unsubscribe();
-					resolve();
-				});
-
-				createNewChatSession();
+				},
+				sendAction: createNewChatSession,
 			});
 		},
 
 		loadSession: async (sessionPath: string) => {
-			return new Promise<void>((resolve, reject) => {
-				const timeout = setTimeout(() => {
-					reject(new Error("加载会话超时"));
-				}, 5000);
-
-				const unsubscribe = websocketService.on("session_loaded", (data) => {
-					clearTimeout(timeout);
+			const data = await createPromiseWithTimeout<any>({
+				timeoutMessage: "加载会话超时",
+				eventName: "session_loaded",
+				onSuccess: async (data) => {
 					if (data.success) {
 						chatStore.setSessionId(data.sessionId);
-						// 加载会话消息
-						chatStore
-							.loadSession(sessionPath)
-							.then(() => {
-								unsubscribe();
-								resolve();
-							})
-							.catch(reject);
+						await chatStore.loadSession(sessionPath);
 					} else {
-						unsubscribe();
-						reject(new Error(data.error || "加载会话失败"));
+						throw new Error(data.error || "加载会话失败");
 					}
-				});
-
-				switchChatSession(sessionPath);
+				},
+				sendAction: () => switchChatSession(sessionPath),
 			});
+			return data;
 		},
 
 		listSessions: async (cwd: string) => {
-			return new Promise((resolve, reject) => {
-				const timeout = setTimeout(() => {
-					reject(new Error("列出会话超时"));
-				}, 5000);
-
-				const unsubscribe = websocketService.on("sessions_list", (data) => {
-					clearTimeout(timeout);
-					unsubscribe();
-					resolve(data);
-				});
-
-				listChatSessions(cwd);
+			return createPromiseWithTimeout({
+				timeoutMessage: "列出会话超时",
+				eventName: "sessions_list",
+				onSuccess: () => {},
+				sendAction: () => listChatSessions(cwd),
 			});
 		},
 
 		// 模型管理
-		setModel: async (
-			provider: string,
-			modelId: string,
-			thinkingLevel?: string,
-		) => {
-			return new Promise<void>((resolve, reject) => {
-				const timeout = setTimeout(() => {
-					reject(new Error("设置模型超时"));
-				}, 5000);
-
-				const unsubscribe = websocketService.on("model_set", (data) => {
-					clearTimeout(timeout);
-					sessionStore.setCurrentModel(modelId);
-					unsubscribe();
-					resolve();
-				});
-
-				setChatModel(provider, modelId, thinkingLevel);
+		setModel: async (provider: string, modelId: string, thinkingLevel?: string) => {
+			await createPromiseWithTimeout<void>({
+				timeoutMessage: "设置模型超时",
+				eventName: "model_set",
+				onSuccess: () => sessionStore.setCurrentModel(modelId),
+				sendAction: () => setChatModel(provider, modelId, thinkingLevel),
 			});
 		},
 
 		listModels: async () => {
-			return new Promise((resolve, reject) => {
-				const timeout = setTimeout(() => {
-					reject(new Error("列出模型超时"));
-				}, 5000);
-
-				const unsubscribe = websocketService.on("models_list", (data) => {
-					clearTimeout(timeout);
-					unsubscribe();
-					resolve(data);
-				});
-
-				listChatModels();
+			return createPromiseWithTimeout({
+				timeoutMessage: "列出模型超时",
+				eventName: "models_list",
+				onSuccess: () => {},
+				sendAction: listChatModels,
 			});
 		},
 
 		// 系统命令
 		executeCommand: async (command: string) => {
-			return new Promise((resolve, reject) => {
-				const timeout = setTimeout(() => {
-					reject(new Error("执行命令超时"));
-				}, 5000);
-
-				const unsubscribe = websocketService.on("command_result", (data) => {
-					clearTimeout(timeout);
-					unsubscribe();
-					resolve(data);
-				});
-
-				executeChatCommand(command);
+			return createPromiseWithTimeout({
+				timeoutMessage: "执行命令超时",
+				eventName: "command_result",
+				onSuccess: () => {},
+				sendAction: () => executeChatCommand(command),
 			});
 		},
 
 		// LLM日志
 		setLlmLogEnabled: async (enabled: boolean) => {
-			return new Promise<void>((resolve, reject) => {
-				const timeout = setTimeout(() => {
-					reject(new Error("设置LLM日志超时"));
-				}, 5000);
-
-				const unsubscribe = websocketService.on("llm_log_set", (data) => {
-					clearTimeout(timeout);
-					unsubscribe();
-					resolve();
-				});
-
-				setChatLlmLogEnabled(enabled);
+			await createPromiseWithTimeout<void>({
+				timeoutMessage: "设置LLM日志超时",
+				eventName: "llm_log_set",
+				onSuccess: () => {},
+				sendAction: () => setChatLlmLogEnabled(enabled),
 			});
 		},
 
 		// 工作目录
 		changeWorkingDir: async (path: string) => {
-			return new Promise<void>((resolve, reject) => {
-				const timeout = setTimeout(() => {
-					reject(new Error("更改工作目录超时"));
-				}, 5000);
-
-				const unsubscribe = websocketService.on("dir_changed", (data) => {
-					clearTimeout(timeout);
+			await createPromiseWithTimeout<void>({
+				timeoutMessage: "更改工作目录超时",
+				eventName: "dir_changed",
+				onSuccess: (data) => {
 					sessionStore.setCurrentDir(data.cwd);
 					chatStore.setSessionId(data.sessionId);
-					unsubscribe();
-					resolve();
-				});
-
-				initChatWorkingDirectory(path);
+				},
+				sendAction: () => initChatWorkingDirectory(path),
 			});
 		},
 	};

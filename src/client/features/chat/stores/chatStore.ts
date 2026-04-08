@@ -94,102 +94,134 @@ function generateMessageId(): string {
 }
 
 // ============================================================================
-// Helper: Build content array preserving temporal order
+// Content Builder Helpers
 // ============================================================================
-
-// 用于追踪内容块的插入顺序 - 使用稳定的时间戳
-const contentOrderCounter = 0;
 
 interface ContentPartWithOrder extends ContentPart {
 	_order: number;
 }
 
-function buildContentArray(state: State): ContentPart[] {
+// 内容顺序常量 - 确保相对顺序：thinking < tools < text
+const ORDER = {
+	THINKING_BASE: 0,
+	TOOL_BASE: 100000,
+	TEXT_BASE: 200000,
+	THINKING_STEP: 1000,
+} as const;
+
+/**
+ * 构建思考内容部分
+ */
+function buildThinkingContent(
+	thinkings: Array<{ id: string; content: string }>,
+	singleThinking: string,
+): ContentPartWithOrder[] {
 	const content: ContentPartWithOrder[] = [];
 
-	// 使用基础时间戳确保相对顺序：thinking < tools < text
-	// thinking 使用 0-99999 范围
-	// tools 使用 100000-199999 范围
-	// text 使用 200000+ 范围（确保 AI 输出在最后）
-	const BASE_THINKING = 0;
-	const BASE_TOOL = 100000;
-	const BASE_TEXT = 200000;
-
-	// 1. 思考内容 - 支持多轮思考，按原始顺序排列
-	if (state.streamingThinkings.length > 0) {
-		state.streamingThinkings.forEach((thinking, index) => {
+	if (thinkings.length > 0) {
+		thinkings.forEach((thinking, index) => {
 			if (thinking.content) {
 				content.push({
 					type: "thinking",
 					thinking: thinking.content,
-					// 使用索引确保多轮思考的顺序
-					_order: BASE_THINKING + index * 1000,
+					_order: ORDER.THINKING_BASE + index * ORDER.THINKING_STEP,
 				});
 			}
 		});
-	} else if (state.streamingThinking) {
+	} else if (singleThinking) {
 		content.push({
 			type: "thinking",
-			thinking: state.streamingThinking,
-			_order: BASE_THINKING,
+			thinking: singleThinking,
+			_order: ORDER.THINKING_BASE,
 		});
 	}
 
-	// 2. 文本内容 - 放在思考之后
-	if (state.streamingContent) {
-		content.push({
+	return content;
+}
+
+/**
+ * 构建文本内容部分
+ */
+function buildTextContent(textContent: string): ContentPartWithOrder[] {
+	if (!textContent) return [];
+
+	return [
+		{
 			type: "text",
-			text: state.streamingContent,
-			_order: BASE_TEXT,
-		});
-	}
+			text: textContent,
+			_order: ORDER.TEXT_BASE,
+		},
+	];
+}
 
-	// 3. 工具内容 - 合并 tool_use 和 tool 为统一的显示
-	// 优先使用已完成的工具（有输出或错误），按开始时间排序
-	const toolEntries: Array<{ tool: any; isCompleted: boolean }> = [];
+/**
+ * 收集工具条目（已完成和流式中）
+ */
+function collectToolEntries(state: State): Array<{ tool: any; isCompleted: boolean }> {
+	const entries: Array<{ tool: any; isCompleted: boolean }> = [];
 
 	// 添加已完成的工具
 	state.activeTools.forEach((tool) => {
-		toolEntries.push({ tool, isCompleted: true });
+		entries.push({ tool, isCompleted: true });
 	});
 
 	// 添加流式中的工具（只添加没有完成版本的）
 	state.streamingToolCalls.forEach((tool) => {
 		if (!state.activeTools.get(tool.id)) {
-			toolEntries.push({ tool, isCompleted: false });
+			entries.push({ tool, isCompleted: false });
 		}
 	});
 
-	// 按开始时间排序（如果可用），确保工具顺序稳定
-	toolEntries.sort((a, b) => {
+	// 按开始时间排序
+	entries.sort((a, b) => {
 		const timeA = a.tool.startTime?.getTime() || 0;
 		const timeB = b.tool.startTime?.getTime() || 0;
 		return timeA - timeB;
 	});
 
-	// 添加到内容数组
-	toolEntries.forEach((entry, index) => {
+	return entries;
+}
+
+/**
+ * 构建工具内容部分
+ */
+function buildToolContent(toolEntries: Array<{ tool: any; isCompleted: boolean }>): ContentPartWithOrder[] {
+	return toolEntries.map((entry, index) => {
 		const { tool, isCompleted } = entry;
+		const baseOrder = ORDER.TOOL_BASE + index;
+
 		if (isCompleted) {
-			content.push({
-				type: "tool",
+			return {
+				type: "tool" as const,
 				toolCallId: tool.id,
 				toolName: tool.name,
 				args: tool.args,
 				output: tool.output,
 				error: tool.error,
-				_order: BASE_TOOL + index,
-			});
-		} else {
-			content.push({
-				type: "tool_use",
-				toolCallId: tool.id,
-				toolName: tool.name,
-				partialArgs: tool.args,
-				_order: BASE_TOOL + index,
-			});
+				_order: baseOrder,
+			};
 		}
+
+		return {
+			type: "tool_use" as const,
+			toolCallId: tool.id,
+			toolName: tool.name,
+			partialArgs: tool.args,
+			_order: baseOrder,
+		};
 	});
+}
+
+/**
+ * 构建内容数组，保持时序顺序
+ * 顺序：thinking -> tools -> text
+ */
+function buildContentArray(state: State): ContentPart[] {
+	const content: ContentPartWithOrder[] = [
+		...buildThinkingContent(state.streamingThinkings, state.streamingThinking),
+		...buildToolContent(collectToolEntries(state)),
+		...buildTextContent(state.streamingContent),
+	];
 
 	// 按顺序排序并返回（移除 _order 字段）
 	return content
@@ -201,14 +233,292 @@ function buildContentArray(state: State): ContentPart[] {
 // RAF Batch Update System
 // ============================================================================
 
-// RAF 批处理系统用于优化流式更新性能
-let rafId: number | null = null;
-let pendingContentUpdates: {
+/** 待处理的 RAF 更新 */
+interface PendingUpdates {
 	content?: string;
 	thinking?: string;
 	toolCalls?: Map<string, { id: string; name: string; args: string }>;
-} = {};
+}
 
+let rafId: number | null = null;
+let pendingContentUpdates: PendingUpdates = {};
+
+/**
+ * 获取需要保留的内容（turn_marker 之前的轮次）
+ */
+function getPreservedContent(existingContent: any[]): any[] {
+	const lastTurnMarkerIndex = existingContent
+		.map((c: any) => c.type)
+		.lastIndexOf("turn_marker");
+
+	return lastTurnMarkerIndex >= 0
+		? existingContent.slice(0, lastTurnMarkerIndex + 1)
+		: [];
+}
+
+/**
+ * 应用 RAF 批处理更新
+ */
+function applyRafUpdate(
+	state: State,
+	pending: PendingUpdates,
+): Partial<State> | null {
+	if (!state.currentStreamingMessage) return null;
+
+	const newContent = state.streamingContent + (pending.content || "");
+	const newThinking = state.streamingThinking + (pending.thinking || "");
+	const newToolCalls = pending.toolCalls || state.streamingToolCalls;
+
+	const currentContentArray = buildContentArray({
+		...state,
+		streamingContent: newContent,
+		streamingThinking: newThinking,
+		streamingToolCalls: newToolCalls,
+	});
+
+	const preservedContent = getPreservedContent(
+		state.currentStreamingMessage.content || [],
+	);
+
+	return {
+		streamingContent: newContent,
+		streamingThinking: newThinking,
+		streamingToolCalls: newToolCalls,
+		currentStreamingMessage: {
+			...state.currentStreamingMessage,
+			content: [...preservedContent, ...currentContentArray],
+		},
+	};
+}
+
+/**
+ * 构建最终消息内容
+ */
+function buildFinalMessage(
+	state: State,
+	finalContentToApply: string,
+	finalThinkingToApply: string,
+): { finalMessage: any | null; finalContent: any[] } {
+	const existingContent = state.currentStreamingMessage?.content || [];
+
+	const currentContent = buildContentArray({
+		...state,
+		streamingContent: state.streamingContent + finalContentToApply,
+		streamingThinking: state.streamingThinking + finalThinkingToApply,
+	});
+
+	const lastTurnMarkerIndex = existingContent
+		.map((c: any) => c.type)
+		.lastIndexOf("turn_marker");
+
+	const finalContent =
+		lastTurnMarkerIndex >= 0
+			? [...existingContent.slice(0, lastTurnMarkerIndex + 1), ...currentContent]
+			: currentContent;
+
+	const finalMessage = state.currentStreamingMessage
+		? {
+				...state.currentStreamingMessage,
+				content: finalContent,
+				isStreaming: false,
+				isThinkingCollapsed: true,
+				isToolsCollapsed: true,
+			}
+		: null;
+
+	return { finalMessage, finalContent };
+}
+
+/**
+ * 合并工具参数（保留流式参数）
+ */
+function mergeToolArgs(
+	tool: ToolExecution,
+	streamingArgs?: string,
+): Record<string, unknown> {
+	return streamingArgs
+		? { ...tool.args, _streamingArgs: streamingArgs }
+		: tool.args;
+}
+
+/**
+ * 应用工具激活
+ */
+function applyToolActivation(
+	state: State,
+	tool: ToolExecution,
+): Partial<State> {
+	const streamingTool = state.streamingToolCalls.get(tool.id);
+	const mergedTool = {
+		...tool,
+		args: mergeToolArgs(tool, streamingTool?.args),
+	};
+
+	const newTools = new Map(state.activeTools).set(tool.id, mergedTool);
+	const newStreamingToolCalls = new Map(state.streamingToolCalls);
+	newStreamingToolCalls.delete(tool.id);
+
+	if (!state.currentStreamingMessage) {
+		return { activeTools: newTools, streamingToolCalls: newStreamingToolCalls };
+	}
+
+	const contentArray = buildContentArray({
+		...state,
+		activeTools: newTools,
+		streamingToolCalls: newStreamingToolCalls,
+	});
+
+	return {
+		activeTools: newTools,
+		streamingToolCalls: newStreamingToolCalls,
+		currentStreamingMessage: {
+			...state.currentStreamingMessage,
+			content: contentArray,
+		},
+	};
+}
+
+/**
+ * 应用工具完成
+ */
+function applyToolCompletion(
+	state: State,
+	toolId: string,
+	output: string,
+	error?: string,
+): Partial<State> {
+	const newTools = new Map(state.activeTools);
+	const tool = newTools.get(toolId);
+
+	if (tool) {
+		newTools.set(toolId, {
+			...tool,
+			output,
+			error,
+			status: error ? "error" : "success",
+			endTime: new Date(),
+		});
+	}
+
+	if (!state.currentStreamingMessage) {
+		return { activeTools: newTools };
+	}
+
+	const contentArray = buildContentArray({
+		...state,
+		activeTools: newTools,
+		streamingToolCalls: state.streamingToolCalls,
+	});
+
+	return {
+		activeTools: newTools,
+		currentStreamingMessage: {
+			...state.currentStreamingMessage,
+			content: contentArray,
+		},
+	};
+}
+
+/**
+ * 统一处理流式结束（abort 和 finish）
+ */
+function finalizeStreaming(
+	set: (
+		fn: (state: State) => Partial<State>,
+		replace?: boolean,
+		action?: string,
+	) => void,
+	actionName: "abortStreaming" | "finishStreaming",
+) {
+	const finalContentToApply = pendingContentUpdates.content || "";
+	const finalThinkingToApply = pendingContentUpdates.thinking || "";
+	pendingContentUpdates = {};
+
+	set(
+		(state) => {
+			const { finalMessage } = buildFinalMessage(
+				state,
+				finalContentToApply,
+				finalThinkingToApply,
+			);
+
+			return {
+				isStreaming: false,
+				messages: finalMessage
+					? [...state.messages, finalMessage]
+					: state.messages,
+				currentStreamingMessage: null,
+				streamingContent: "",
+				streamingThinking: "",
+				streamingThinkings: [],
+				streamingToolCalls: new Map(),
+				activeTools: new Map(),
+			};
+		},
+		false,
+		actionName,
+	);
+}
+
+/**
+ * 应用批处理更新
+ */
+function applyBatchUpdates(
+	state: State,
+	updates: {
+		content?: string;
+		thinking?: string;
+		toolCall?: { id: string; name: string; delta: string };
+	},
+): Partial<State> {
+	let newContent = state.streamingContent;
+	let newThinking = state.streamingThinking;
+	let newToolCalls = state.streamingToolCalls;
+
+	if (updates.content) {
+		newContent += updates.content;
+	}
+
+	if (updates.thinking) {
+		newThinking += updates.thinking;
+	}
+
+	if (updates.toolCall) {
+		const { id, name, delta } = updates.toolCall;
+		newToolCalls = new Map(newToolCalls);
+		const existing = newToolCalls.get(id);
+		if (existing) {
+			newToolCalls.set(id, { ...existing, args: existing.args + delta });
+		} else {
+			newToolCalls.set(id, { id, name, args: delta });
+		}
+	}
+
+	const contentArray = buildContentArray({
+		...state,
+		streamingContent: newContent,
+		streamingThinking: newThinking,
+		streamingToolCalls: newToolCalls,
+	});
+
+	const preservedContent = getPreservedContent(
+		state.currentStreamingMessage!.content || [],
+	);
+
+	return {
+		streamingContent: newContent,
+		streamingThinking: newThinking,
+		streamingToolCalls: newToolCalls,
+		currentStreamingMessage: {
+			...state.currentStreamingMessage!,
+			content: [...preservedContent, ...contentArray],
+		},
+	};
+}
+
+/**
+ * 调度 RAF 更新
+ */
 function scheduleRafUpdate(
 	getState: () => State,
 	set: (
@@ -221,63 +531,11 @@ function scheduleRafUpdate(
 
 	rafId = requestAnimationFrame(() => {
 		const state = getState();
-		if (!state.currentStreamingMessage) {
-			pendingContentUpdates = {};
-			rafId = null;
-			return;
+		const updates = applyRafUpdate(state, pendingContentUpdates);
+
+		if (updates) {
+			set(() => updates, false, "rafBatchUpdate");
 		}
-
-		const newContent =
-			state.streamingContent + (pendingContentUpdates.content || "");
-		const newThinking =
-			state.streamingThinking + (pendingContentUpdates.thinking || "");
-		const newToolCalls =
-			pendingContentUpdates.toolCalls || state.streamingToolCalls;
-
-		// 只更新一次状态
-		const currentContentArray = buildContentArray({
-			...state,
-			streamingContent: newContent,
-			streamingThinking: newThinking,
-			streamingToolCalls: newToolCalls,
-		});
-
-		// 获取之前已保存的内容
-		const existingContent = state.currentStreamingMessage.content || [];
-
-		// 找到最后一个 turn_marker 的位置
-		// turn_marker 之前的所有内容是之前轮次的（已固定）
-		// turn_marker 之后的内容是当前轮次的（需要被 currentContentArray 替换）
-		const lastTurnMarkerIndex = existingContent
-			.map((c: any) => c.type)
-			.lastIndexOf("turn_marker");
-
-		let preservedContent: any[];
-		if (lastTurnMarkerIndex >= 0) {
-			// 保留 turn_marker 及之前的所有内容（之前轮次已固定）
-			preservedContent = existingContent.slice(0, lastTurnMarkerIndex + 1);
-		} else {
-			// 没有 turn_marker，说明是第一轮
-			// 使用 currentContentArray 即可，因为它包含了所有累积的内容
-			preservedContent = [];
-		}
-
-		set(
-			(s) => ({
-				streamingContent: newContent,
-				streamingThinking: newThinking,
-				streamingToolCalls: newToolCalls,
-				currentStreamingMessage: s.currentStreamingMessage
-					? {
-							...s.currentStreamingMessage,
-							// 之前轮次的内容 + 当前轮次的完整内容
-							content: [...preservedContent, ...currentContentArray],
-						}
-					: null,
-			}),
-			false,
-			"rafBatchUpdate",
-		);
 
 		pendingContentUpdates = {};
 		rafId = null;
@@ -459,190 +717,14 @@ export const useChatStore = create<
 				const state = get();
 				if (!state.currentStreamingMessage) return;
 
-				// 累积更新
-				let newContent = state.streamingContent;
-				let newThinking = state.streamingThinking;
-				let newToolCalls = state.streamingToolCalls;
+				const newState = applyBatchUpdates(state, updates);
 
-				if (updates.content) {
-					newContent += updates.content;
-				}
-
-				if (updates.thinking) {
-					newThinking += updates.thinking;
-				}
-
-				if (updates.toolCall) {
-					const { id, name, delta } = updates.toolCall;
-					newToolCalls = new Map(newToolCalls);
-					const existing = newToolCalls.get(id);
-					if (existing) {
-						newToolCalls.set(id, { ...existing, args: existing.args + delta });
-					} else {
-						newToolCalls.set(id, { id, name, args: delta });
-					}
-				}
-
-				// 只更新一次状态
-				const contentArray = buildContentArray({
-					...state,
-					streamingContent: newContent,
-					streamingThinking: newThinking,
-					streamingToolCalls: newToolCalls,
-				});
-
-				// 获取之前已保存的内容，保留 turn_marker 之前的轮次
-				const existingContent = state.currentStreamingMessage.content || [];
-				const lastTurnMarkerIndex = existingContent
-					.map((c: any) => c.type)
-					.lastIndexOf("turn_marker");
-				const preservedContent =
-					lastTurnMarkerIndex >= 0
-						? existingContent.slice(0, lastTurnMarkerIndex + 1)
-						: [];
-
-				set(
-					{
-						streamingContent: newContent,
-						streamingThinking: newThinking,
-						streamingToolCalls: newToolCalls,
-						currentStreamingMessage: {
-							...state.currentStreamingMessage,
-							content: [...preservedContent, ...contentArray],
-						},
-					},
-					false,
-					"batchUpdateContent",
-				);
+				set(newState, false, "batchUpdateContent");
 			},
 
-			abortStreaming: () => {
-				// 应用未完成的 RAF 更新
-				const finalContentToApply = pendingContentUpdates.content || "";
-				const finalThinkingToApply = pendingContentUpdates.thinking || "";
-				pendingContentUpdates = {};
-
-				set(
-					(state) => {
-						// 构建当前轮次的新内容（包含未完成的 RAF 更新）
-						const currentContent = buildContentArray({
-							...state,
-							streamingContent: state.streamingContent + finalContentToApply,
-							streamingThinking: state.streamingThinking + finalThinkingToApply,
-						});
-
-						// 找到最后一个 turn_marker 的位置
-						const existingContent =
-							state.currentStreamingMessage?.content || [];
-						const lastTurnMarkerIndex = existingContent
-							.map((c: any) => c.type)
-							.lastIndexOf("turn_marker");
-
-						let finalContent: any[];
-						if (lastTurnMarkerIndex >= 0) {
-							const previousRounds = existingContent.slice(
-								0,
-								lastTurnMarkerIndex + 1,
-							);
-							finalContent = [...previousRounds, ...currentContent];
-						} else {
-							finalContent = currentContent;
-						}
-
-						const finalMessage = state.currentStreamingMessage
-							? {
-									...state.currentStreamingMessage,
-									content: finalContent,
-									isStreaming: false,
-									isThinkingCollapsed: true,
-									isToolsCollapsed: true,
-								}
-							: null;
-
-						return {
-							isStreaming: false,
-							messages: finalMessage
-								? [...state.messages, finalMessage]
-								: state.messages,
-							currentStreamingMessage: null,
-							streamingContent: "",
-							streamingThinking: "",
-							streamingThinkings: [],
-							streamingToolCalls: new Map(),
-							activeTools: new Map(),
-						};
-					},
-					false,
-					"abortStreaming",
-				);
-			},
-
-			finishStreaming: () => {
-				// 先应用 RAF 批处理中未完成的更新，确保内容完整
-				const finalContentToApply = pendingContentUpdates.content || "";
-				const finalThinkingToApply = pendingContentUpdates.thinking || "";
-				// 清空待处理更新，防止重复应用
-				pendingContentUpdates = {};
-
-				set(
-					(state) => {
-						// 获取之前轮次的内容（从 currentStreamingMessage.content）
-						const existingContent =
-							state.currentStreamingMessage?.content || [];
-
-						// 构建当前轮次的新内容（包含未完成的 RAF 更新）
-						const currentContent = buildContentArray({
-							...state,
-							streamingContent: state.streamingContent + finalContentToApply,
-							streamingThinking: state.streamingThinking + finalThinkingToApply,
-						});
-
-						// 找到最后一个 turn_marker 的位置
-						const lastTurnMarkerIndex = existingContent
-							.map((c: any) => c.type)
-							.lastIndexOf("turn_marker");
-
-						let finalContent: any[];
-						if (lastTurnMarkerIndex >= 0) {
-							// 有多轮：保留 turn_marker 之前的内容（之前轮次已固定）+ 当前轮次内容
-							// 注意：turn_marker 之后的内容不应该保留，因为它们来自已被清空的流式状态
-							const previousRounds = existingContent.slice(
-								0,
-								lastTurnMarkerIndex + 1,
-							);
-							finalContent = [...previousRounds, ...currentContent];
-						} else {
-							// 只有一轮：直接使用当前轮次内容（existingContent 中的内容已经在 currentContent 中）
-							finalContent = currentContent;
-						}
-
-						const finalMessage = state.currentStreamingMessage
-							? {
-									...state.currentStreamingMessage,
-									content: finalContent,
-									isStreaming: false,
-									isThinkingCollapsed: true,
-									isToolsCollapsed: true,
-								}
-							: null;
-
-						return {
-							isStreaming: false,
-							messages: finalMessage
-								? [...state.messages, finalMessage]
-								: state.messages,
-							currentStreamingMessage: null,
-							streamingContent: "",
-							streamingThinking: "",
-							streamingThinkings: [],
-							streamingToolCalls: new Map(),
-							activeTools: new Map(),
-						};
-					},
-					false,
-					"finishStreaming",
-				);
-			},
+			// Streaming finalization helpers
+			abortStreaming: () => finalizeStreaming(set, "abortStreaming"),
+			finishStreaming: () => finalizeStreaming(set, "finishStreaming"),
 
 			// Tools visibility
 			showTools: true,
@@ -693,49 +775,7 @@ export const useChatStore = create<
 			// Tool Actions
 			setActiveTool: (tool: ToolExecution) => {
 				set(
-					(state) => {
-						// 保留 streamingToolCalls 中的参数（如果有）
-						const streamingTool = state.streamingToolCalls.get(tool.id);
-						const mergedTool = streamingTool
-							? {
-									...tool,
-									args: { ...tool.args, _streamingArgs: streamingTool.args },
-								}
-							: tool;
-
-						const newTools = new Map(state.activeTools).set(
-							tool.id,
-							mergedTool,
-						);
-
-						// 当工具开始执行时，从 streamingToolCalls 中移除
-						// 这样可以避免 tool_use 和 tool 重复显示
-						const newStreamingToolCalls = new Map(state.streamingToolCalls);
-						newStreamingToolCalls.delete(tool.id);
-
-						// 同时更新当前流式消息
-						if (state.currentStreamingMessage) {
-							const contentArray = buildContentArray({
-								...state,
-								activeTools: newTools,
-								streamingToolCalls: newStreamingToolCalls,
-							});
-
-							return {
-								activeTools: newTools,
-								streamingToolCalls: newStreamingToolCalls,
-								currentStreamingMessage: {
-									...state.currentStreamingMessage,
-									content: contentArray,
-								},
-							};
-						}
-
-						return {
-							activeTools: newTools,
-							streamingToolCalls: newStreamingToolCalls,
-						};
-					},
+					(state) => applyToolActivation(state, tool),
 					false,
 					"setActiveTool",
 				);
@@ -743,38 +783,7 @@ export const useChatStore = create<
 
 			updateToolOutput: (toolId: string, output: string, error?: string) => {
 				set(
-					(state) => {
-						const newTools = new Map(state.activeTools);
-						const tool = newTools.get(toolId);
-						if (tool) {
-							newTools.set(toolId, {
-								...tool,
-								output,
-								error,
-								status: error ? "error" : "success",
-								endTime: new Date(),
-							});
-						}
-
-						// 同时更新当前流式消息
-						if (state.currentStreamingMessage) {
-							const contentArray = buildContentArray({
-								...state,
-								activeTools: newTools,
-								streamingToolCalls: state.streamingToolCalls,
-							});
-
-							return {
-								activeTools: newTools,
-								currentStreamingMessage: {
-									...state.currentStreamingMessage,
-									content: contentArray,
-								},
-							};
-						}
-
-						return { activeTools: newTools };
-					},
+					(state) => applyToolCompletion(state, toolId, output, error),
 					false,
 					"updateToolOutput",
 				);
