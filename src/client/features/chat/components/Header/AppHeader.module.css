@@ -257,6 +257,12 @@
 	color: #58a6ff;
 }
 
+/* 选择器容器 - 相对定位用于下拉菜单 */
+.thinkingSelector,
+.modelSelector {
+	position: relative;
+}
+
 /* 选择器按钮样式 - 统一风格 */
 .selectorBtn {
 	display: flex;
