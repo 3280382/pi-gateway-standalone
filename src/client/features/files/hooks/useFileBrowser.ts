@@ -1,6 +1,6 @@
 /**
  * useFileBrowser - 文件浏览器核心逻辑 Hook
- * 
+ *
  * 职责：管理文件浏览器的业务逻辑
  * - 目录加载
  * - 错误处理
@@ -8,12 +8,12 @@
  */
 
 import { useCallback, useEffect, useRef } from "react";
-import { useFileStore } from "@/features/files/stores/fileStore";
 import {
-	loadDirectoryContent,
 	getFriendlyErrorMessage,
+	loadDirectoryContent,
 } from "@/features/files/services/api/fileOperationsApi";
 import { initializeFilePath } from "@/features/files/services/initialization";
+import { useFileStore } from "@/features/files/stores/fileStore";
 import { fileBrowserDebug } from "@/lib/debug";
 
 export interface UseFileBrowserResult {
@@ -70,7 +70,10 @@ export function useFileBrowser(): UseFileBrowserResult {
 				setParentPath(data.parentPath);
 			} catch (err) {
 				const friendlyMessage = getFriendlyErrorMessage(err, path);
-				fileBrowserDebug.error("目录加载失败", { path, error: friendlyMessage });
+				fileBrowserDebug.error("目录加载失败", {
+					path,
+					error: friendlyMessage,
+				});
 				setError(friendlyMessage);
 			} finally {
 				setLoading(false);

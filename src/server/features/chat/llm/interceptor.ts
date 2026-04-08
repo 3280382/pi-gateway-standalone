@@ -2257,7 +2257,7 @@ export function setupHttpInterceptor(
 
 						logManager.log(responseLogEntry);
 						logger.info(
-								`LLM HTTP Response: ${response.statusCode} took ${duration}ms`,
+							`LLM HTTP Response: ${response.statusCode} took ${duration}ms`,
 						);
 
 						listener();

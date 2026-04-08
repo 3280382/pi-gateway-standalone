@@ -15,15 +15,15 @@ export {
 // LLM related
 export { setupLlmInterceptors } from "./features/chat/llm";
 export { LlmLogManager } from "./features/chat/llm/log-manager";
-export { AppFactory } from "./lib/app-factory";
 export type {
+	WSContext,
+	WSHandler,
 	WSMessagePayload,
 	WSMiddleware,
 	WSRoute,
-	WSContext,
-	WSHandler,
 	wsRouter,
 } from "./features/chat/ws-router";
+export { AppFactory } from "./lib/app-factory";
 
 // WebSocket handler registration (import to trigger auto-registration)
 import "./features/chat/ws-handlers/session/index";

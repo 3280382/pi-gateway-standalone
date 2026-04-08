@@ -17,13 +17,13 @@ export const THINKING_LEVELS = [
 	{ id: "high", name: "XHigh", icon: "●" },
 ] as const;
 
-export type ThinkingLevel = typeof THINKING_LEVELS[number]["id"];
+export type ThinkingLevel = (typeof THINKING_LEVELS)[number]["id"];
 
 export interface UseThinkingSelectorReturn {
 	// 状态
 	isOpen: boolean;
 	currentLevel: ThinkingLevel;
-	currentLevelData: typeof THINKING_LEVELS[number];
+	currentLevelData: (typeof THINKING_LEVELS)[number];
 	levels: typeof THINKING_LEVELS;
 
 	// 操作

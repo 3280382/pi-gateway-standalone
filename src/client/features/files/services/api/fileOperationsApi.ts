@@ -1,12 +1,12 @@
 /**
  * File Operations API - 文件业务操作层
- * 
+ *
  * 职责：封装文件相关的业务操作 API 调用
  * 不包含状态管理，只负责与服务器通信
  */
 
-import { browseDirectory } from "./fileApi";
 import type { FileItem } from "@/features/files/stores/fileStore";
+import { browseDirectory } from "./fileApi";
 
 export interface DirectoryData {
 	currentPath: string;
@@ -17,7 +17,9 @@ export interface DirectoryData {
 /**
  * 加载目录内容
  */
-export async function loadDirectoryContent(path: string): Promise<DirectoryData> {
+export async function loadDirectoryContent(
+	path: string,
+): Promise<DirectoryData> {
 	const data = await browseDirectory(path);
 
 	const itemsToSet = [

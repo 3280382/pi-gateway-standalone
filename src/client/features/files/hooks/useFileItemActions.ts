@@ -7,10 +7,10 @@
  */
 
 import { useCallback, useRef, useState } from "react";
+import { batchMoveFiles } from "@/features/files/services/api/fileOperationsApi";
 import type { FileItem } from "@/features/files/stores/fileStore";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
-import { batchMoveFiles } from "@/features/files/services/api/fileOperationsApi";
 
 interface PinchState {
 	startDistance: number;

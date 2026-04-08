@@ -52,12 +52,8 @@ const DEFAULT_FILTERS: SearchFilters = {
 export function useSearchFilters(
 	options: UseSearchFiltersOptions = {},
 ): UseSearchFiltersReturn {
-	const {
-		externalQuery,
-		externalFilters,
-		onQueryChange,
-		onFiltersChange,
-	} = options;
+	const { externalQuery, externalFilters, onQueryChange, onFiltersChange } =
+		options;
 
 	// 内部状态（如果没有外部控制）
 	const [internalQuery, setInternalQuery] = useState("");

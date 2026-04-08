@@ -8,9 +8,9 @@
  */
 
 import React from "react";
-import { useFileBottomMenu } from "@/features/files/hooks";
-import { TreeViewModal } from "@/features/files/components/modals/TreeViewModal";
 import styles from "@/features/files/components/BottomMenu/FileBottomMenu.module.css";
+import { TreeViewModal } from "@/features/files/components/modals/TreeViewModal";
+import { useFileBottomMenu } from "@/features/files/hooks";
 
 export function FileBottomMenu() {
 	const {
@@ -98,7 +98,10 @@ export function FileBottomMenu() {
 			{/* 删除确认对话框 */}
 			{showDeleteModal && (
 				<div className={styles.modalOverlay} onClick={handleCancelDelete}>
-					<div className={styles.deleteModal} onClick={(e) => e.stopPropagation()}>
+					<div
+						className={styles.deleteModal}
+						onClick={(e) => e.stopPropagation()}
+					>
 						<div className={styles.deleteModalTitle}>
 							<WarningIcon />
 							Confirm Delete

@@ -45,7 +45,9 @@ export function createLlmLogController(llmLogManager: LlmLogManager) {
 			try {
 				const { enabled } = req.body;
 				if (typeof enabled !== "boolean") {
-					res.status(400).json({ error: "enabled parameter must be a boolean" });
+					res
+						.status(400)
+						.json({ error: "enabled parameter must be a boolean" });
 					return;
 				}
 

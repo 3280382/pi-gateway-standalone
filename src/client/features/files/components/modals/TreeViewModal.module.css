@@ -1,217 +1,244 @@
 /**
  * TreeViewModal Styles
+ * 全屏紧凑布局
  */
 
+/* 遮罩层 - 全屏 */
 .overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.95);
-  z-index: 2000;
-  display: flex;
-  flex-direction: column;
+	position: fixed;
+	inset: 0;
+	background: rgba(13, 17, 23, 0.98);
+	z-index: 2000;
+	display: flex;
 }
 
-.container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-primary);
+/* 模态窗口 - 全屏填充 */
+.modal {
+	width: 100%;
+	height: 100%;
+	background: #0d1117;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 }
 
-/* 头部 */
+/* 头部 - 两行布局 */
 .header {
-  flex-shrink: 0;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
-  padding: 8px 12px;
+	flex-shrink: 0;
+	padding: 8px 12px;
+	background: #161b22;
+	border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
 }
 
-.row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
+/* 第一行：标题 + 关闭按钮 */
+.headerRow {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
 }
 
-.row:last-child {
-  margin-bottom: 0;
+/* 第二行：控制按钮 */
+.headerRow:last-child {
+	justify-content: flex-start;
 }
 
-.path {
-  flex: 1;
-  font-family: 'JetBrains Mono', Consolas, monospace;
-  font-size: 13px;
-  color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.title {
+	font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
+	font-size: 12px;
+	font-weight: 600;
+	color: #e6edf3;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
-.closeBtn {
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* 按钮 - 与其他组件一致 */
+.closeBtn,
+.copyBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: none;
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.05);
+	color: #8b949e;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	font-size: 14px;
 }
 
 .closeBtn:hover {
-  background: var(--accent-danger);
-  color: white;
-}
-
-.select {
-  padding: 4px 8px;
-  font-size: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 3px;
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  height: 28px;
-  cursor: pointer;
-}
-
-.searchInput {
-  flex: 1;
-  max-width: 200px;
-  padding: 4px 8px;
-  font-size: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 3px;
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  height: 28px;
-}
-
-.copyBtn {
-  padding: 4px 12px;
-  font-size: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 3px;
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  cursor: pointer;
-  height: 28px;
-  margin-left: auto;
+	background: rgba(218, 54, 51, 0.15);
+	color: #f85149;
 }
 
 .copyBtn:hover:not(:disabled) {
-  background: var(--accent-primary);
-  color: white;
-}
-
-.copyBtn.copied {
-  background: var(--accent-success);
-  color: white;
+	background: rgba(88, 166, 255, 0.15);
+	color: #58a6ff;
 }
 
 .copyBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+.copyBtn.copied {
+	background: rgba(35, 134, 54, 0.15);
+	color: #3fb950;
+}
+
+/* 下拉框 - 紧凑 */
+.select {
+	padding: 4px 8px;
+	font-size: 11px;
+	font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
+	border: 1px solid rgba(48, 54, 61, 0.5);
+	border-radius: 4px;
+	background: #0d1117;
+	color: #c9d1d9;
+	cursor: pointer;
+	outline: none;
+	height: 24px;
+}
+
+.select:focus {
+	border-color: #58a6ff;
+}
+
+/* 搜索输入框 - 紧凑 */
+.searchInput {
+	width: 160px;
+	padding: 4px 8px;
+	font-size: 11px;
+	font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
+	border: 1px solid rgba(48, 54, 61, 0.5);
+	border-radius: 4px;
+	background: #0d1117;
+	color: #c9d1d9;
+	outline: none;
+	height: 24px;
+}
+
+.searchInput:focus {
+	border-color: #58a6ff;
+}
+
+.searchInput::placeholder {
+	color: #6e7681;
 }
 
 /* 内容区 */
 .content {
-  flex: 1;
-  overflow: auto;
-  padding: 4px 0;
-  background: var(--bg-primary);
-  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 13px;
-  line-height: 1.5;
+	flex: 1;
+	overflow: auto;
+	padding: 0;
 }
 
-.loading, .empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--text-muted);
+.message {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	font-size: 12px;
+	color: #8b949e;
+	font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
 }
 
-/* 树行 - 关键样式 */
-.treeLine {
-  display: block;
-  padding: 1px 12px;
-  cursor: pointer;
-  white-space: pre;
-  font-family: inherit;
-  line-height: 1.5;
+/* 树形容器 - 关键：紧凑无间距 */
+.tree {
+	font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
+	font-size: 11px;
+	line-height: 1;
 }
 
-.treeLine:hover {
-  background: var(--bg-hover);
+/* 树节点 - 关键：无行间距 */
+.node {
+	display: flex;
+	align-items: center;
+	padding: 1px 12px; /* 极小的上下padding */
+	cursor: pointer;
+	color: #c9d1d9;
+	white-space: nowrap;
+	border: none; /* 确保没有边框导致的间距 */
+	margin: 0; /* 确保没有外边距 */
 }
 
-/* 缩进 - 使用 inline-block 确保宽度 */
-.indent {
-  display: inline;
-  color: var(--text-muted);
+.node:hover {
+	background: rgba(88, 166, 255, 0.1);
 }
 
-/* 连接符 */
+/* 连接线 */
 .connector {
-  display: inline;
-  color: var(--text-muted);
+	display: inline-block;
+	width: 28px;
+	flex-shrink: 0;
+	color: #6e7681;
+	font-family: inherit;
+	font-size: 11px;
 }
 
-/* 展开图标 - 固定3字符宽度 */
+/* 展开图标 - 更紧凑 */
 .expandIcon {
-  display: inline-block;
-  width: 28px;
-  color: var(--text-muted);
+	display: inline-block;
+	width: 20px;
+	flex-shrink: 0;
+	text-align: center;
+	color: #8b949e;
+	font-family: inherit;
+	font-size: 10px;
 }
 
-/* 文件图标 */
-.fileIcon {
-  display: inline;
+/* 文件/目录图标 - 更小 */
+.icon {
+	display: inline-block;
+	width: 14px;
+	flex-shrink: 0;
+	text-align: center;
+	margin-right: 4px;
+	font-size: 10px;
 }
 
 /* 目录名 */
 .dirName {
-  color: var(--text-primary);
-  font-weight: 500;
+	color: #e6edf3;
+	font-weight: 500;
 }
 
 /* 文件名 */
 .fileName {
-  color: var(--text-secondary);
+	color: #8b949e;
 }
 
 /* 搜索高亮 */
 .highlight {
-  background: var(--accent-primary);
-  color: white;
-  padding: 0 2px;
-  border-radius: 2px;
+	background: rgba(88, 166, 255, 0.4);
+	color: #fff;
+	padding: 0 2px;
+	border-radius: 2px;
 }
 
 /* 滚动条 */
 .content::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+	width: 8px;
+	height: 8px;
 }
 
 .content::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+	background: transparent;
 }
 
 .content::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 5px;
+	background: rgba(48, 54, 61, 0.5);
+	border-radius: 4px;
 }
 
 .content::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+	background: rgba(88, 166, 255, 0.5);
 }

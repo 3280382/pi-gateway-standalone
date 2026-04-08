@@ -1,6 +1,6 @@
 /**
  * Chat WebSocket Service - Chat 特定的 WebSocket 方法
- * 
+ *
  * 职责：
  * - 封装 chat feature 特定的 WebSocket 调用
  * - 委托通用连接操作给 websocketService
@@ -84,7 +84,9 @@ export function initChatWorkingDirectory(
  * @deprecated
  */
 export function switchChatWorkingDirectory(path: string): Promise<unknown> {
-	console.warn("switchChatWorkingDirectory 已弃用，请使用 initChatWorkingDirectory");
+	console.warn(
+		"switchChatWorkingDirectory 已弃用，请使用 initChatWorkingDirectory",
+	);
 	return initChatWorkingDirectory(path);
 }
 
@@ -136,7 +138,11 @@ export function setChatModel(
 		modelId,
 		thinkingLevel,
 	});
-	return websocketService.send("set_model", { provider, modelId, thinkingLevel });
+	return websocketService.send("set_model", {
+		provider,
+		modelId,
+		thinkingLevel,
+	});
 }
 
 /**

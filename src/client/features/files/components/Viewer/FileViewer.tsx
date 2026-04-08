@@ -6,18 +6,17 @@
  * - 通过 useFileViewer hook 获取所有逻辑
  */
 
-import React, { useEffect, useRef, useCallback } from "react";
+import { defaultKeymap } from "@codemirror/commands";
+import { Compartment, EditorState } from "@codemirror/state";
+import { oneDark } from "@codemirror/theme-one-dark";
+// ========== 修改点 1: 引入 CodeMirror 6 核心库 ==========
+import { EditorView, keymap } from "@codemirror/view";
+import { basicSetup } from "codemirror";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useFileViewer } from "@/features/files/hooks";
 import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
 import { fileViewerDebug } from "@/lib/debug";
 import styles from "./FileViewer.module.css";
-
-// ========== 修改点 1: 引入 CodeMirror 6 核心库 ==========
-import { EditorView, keymap } from "@codemirror/view";
-import { EditorState, Compartment } from "@codemirror/state";
-import { basicSetup } from "codemirror";
-import { oneDark } from "@codemirror/theme-one-dark";
-import { defaultKeymap } from "@codemirror/commands";
 import { getLanguageExtension } from "./languageExtensions";
 // ======================================================
 
@@ -46,7 +45,7 @@ export function FileViewer() {
 		useFileViewer();
 
 	const terminalRef = useRef<HTMLDivElement>(null);
-	
+
 	// ========== 修改点 2: CodeMirror 编辑器相关 refs ==========
 	const editorContainerRef = useRef<HTMLDivElement>(null);
 	const editorViewRef = useRef<EditorView | null>(null);
@@ -105,12 +104,12 @@ export function FileViewer() {
 				// 自定义主题覆盖
 				EditorView.theme({
 					"&": {
-						fontSize: "14px",
+						fontSize: "10px",
 						fontFamily: 'var(--font-mono, "JetBrains Mono", monospace)',
 						height: "100%",
 					},
 					".cm-content": {
-						padding: "12px",
+						padding: "8px",
 					},
 					".cm-gutters": {
 						backgroundColor: "var(--bg-tertiary)",
@@ -183,11 +182,16 @@ export function FileViewer() {
 
 	// ========== 修改点 5: 动态切换语言 ==========
 	useEffect(() => {
-		if (mode !== "edit" || !editorViewRef.current || !languageCompartmentRef.current) return;
-		
+		if (
+			mode !== "edit" ||
+			!editorViewRef.current ||
+			!languageCompartmentRef.current
+		)
+			return;
+
 		const lang = getLanguage();
 		const newExtension = getLanguageExtension(lang);
-		
+
 		editorViewRef.current.dispatch({
 			effects: languageCompartmentRef.current.reconfigure(newExtension),
 		});
@@ -225,8 +229,12 @@ export function FileViewer() {
 
 	const language = getLanguage();
 	// Prism.js 查看模式语言映射（tsx -> typescript）
-	const prismLanguage = language === "tsx" ? "typescript" : 
-	                       language === "jsx" ? "javascript" : language;
+	const prismLanguage =
+		language === "tsx"
+			? "typescript"
+			: language === "jsx"
+				? "javascript"
+				: language;
 
 	return (
 		<div className={styles.modal}>
@@ -278,7 +286,7 @@ export function FileViewer() {
 						<div className={styles.error}>{error}</div>
 					) : mode === "edit" ? (
 						// ========== 修改点 6: 替换 textarea 为 CodeMirror 容器 ==========
-						<div 
+						<div
 							ref={editorContainerRef}
 							className={styles.editorContainer}
 							onClick={focusEditor}

@@ -120,13 +120,16 @@ export function useSlashCommands(
 	}, []);
 
 	// 获取当前激活的命令
-	const getActiveCommand = useCallback((text: string): SlashCommand | undefined => {
-		const trimmed = text.trimStart();
-		if (!trimmed.startsWith("/")) return undefined;
-		const parts = trimmed.slice(1).split(" ");
-		const cmdName = parts[0];
-		return SLASH_COMMANDS.find((cmd) => cmd.name === cmdName);
-	}, []);
+	const getActiveCommand = useCallback(
+		(text: string): SlashCommand | undefined => {
+			const trimmed = text.trimStart();
+			if (!trimmed.startsWith("/")) return undefined;
+			const parts = trimmed.slice(1).split(" ");
+			const cmdName = parts[0];
+			return SLASH_COMMANDS.find((cmd) => cmd.name === cmdName);
+		},
+		[],
+	);
 
 	return {
 		isOpen,

@@ -160,7 +160,9 @@ export class PiAgentSession {
 			console.log(`  - ${file.path}`);
 		}
 		const systemPrompt = loader.getSystemPrompt();
-		console.log(`[Gateway] System prompt: ${systemPrompt ? "custom" : "default"}`);
+		console.log(
+			`[Gateway] System prompt: ${systemPrompt ? "custom" : "default"}`,
+		);
 		const appendSystemPrompt = loader.getAppendSystemPrompt();
 		if (appendSystemPrompt.length > 0) {
 			console.log(
@@ -274,7 +276,9 @@ export class PiAgentSession {
 		console.log(`[Gateway] Expected sessions directory: ${expectedDir}`);
 		console.log(`[Gateway] Actual sessionFile: ${session.sessionFile}`);
 		if (session.sessionFile && !session.sessionFile.startsWith(expectedDir)) {
-			console.warn(`[Gateway] Path mismatch! Expected prefix: ${expectedDir}, actual: ${session.sessionFile}`);
+			console.warn(
+				`[Gateway] Path mismatch! Expected prefix: ${expectedDir}, actual: ${session.sessionFile}`,
+			);
 		}
 		console.log(
 			`[Gateway] sessionFile exists:`,
@@ -561,7 +565,10 @@ export class PiAgentSession {
 		} catch (error) {
 			this.send({
 				type: "error",
-				error: error instanceof Error ? error.message : "Failed to create new session",
+				error:
+					error instanceof Error
+						? error.message
+						: "Failed to create new session",
 			});
 		}
 	}
@@ -592,7 +599,10 @@ export class PiAgentSession {
 
 		if (!model) {
 			console.error(`[Gateway] Model not found: ${provider}/${modelId}`);
-			this.send({ type: "error", error: `Model ${provider}/${modelId} not found` });
+			this.send({
+				type: "error",
+				error: `Model ${provider}/${modelId} not found`,
+			});
 			return;
 		}
 
@@ -649,7 +659,10 @@ export class PiAgentSession {
 			console.error(`[Gateway] setThinkingLevel error:`, error);
 			this.send({
 				type: "error",
-				error: error instanceof Error ? error.message : "Failed to set thinking level",
+				error:
+					error instanceof Error
+						? error.message
+						: "Failed to set thinking level",
 			});
 		}
 	}
@@ -762,7 +775,8 @@ export class PiAgentSession {
 		} catch (error) {
 			this.send({
 				type: "error",
-				error: error instanceof Error ? error.message : "Failed to list sessions",
+				error:
+					error instanceof Error ? error.message : "Failed to list sessions",
 			});
 		}
 	}
@@ -815,7 +829,8 @@ export class PiAgentSession {
 			this.send({
 				type: "session_loaded",
 				success: false,
-				error: error instanceof Error ? error.message : "Failed to load session",
+				error:
+					error instanceof Error ? error.message : "Failed to load session",
 			});
 		}
 	}
@@ -962,7 +977,10 @@ export class PiAgentSession {
 			});
 		} catch (error) {
 			// If read fails, only send tool result
-			console.error(`[Gateway] Failed to read file content: ${filePath}`, error);
+			console.error(
+				`[Gateway] Failed to read file content: ${filePath}`,
+				error,
+			);
 			this.send({
 				type: "tool_end",
 				toolCallId,

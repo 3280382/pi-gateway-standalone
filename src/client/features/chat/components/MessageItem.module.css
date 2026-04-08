@@ -11,7 +11,11 @@
 }
 
 .userBubble {
-	background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.12) 100%);
+	background: linear-gradient(
+		135deg,
+		rgba(99, 102, 241, 0.15) 0%,
+		rgba(79, 70, 229, 0.12) 100%
+	);
 	border: none;
 	border-radius: 12px 12px 2px 12px;
 	padding: 8px 12px;

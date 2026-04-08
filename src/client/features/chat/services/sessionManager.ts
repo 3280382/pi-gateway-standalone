@@ -1,6 +1,6 @@
 /**
  * Session Manager - 统一会话管理模块
- * 
+ *
  * 职责：
  * 1. 封装 session 生命周期管理（切换目录、选择 session、恢复 session）
  * 2. 协调 sidebarStore、sessionStore、workspaceStore、chatStore 的更新
@@ -66,12 +66,16 @@ function extractSessionId(pathOrId: string): string {
 /**
  * 在 sessions 列表中查找匹配的 session
  */
-function findSessionInList(sessions: Session[], sessionId: string): Session | undefined {
+function findSessionInList(
+	sessions: Session[],
+	sessionId: string,
+): Session | undefined {
 	const normalizedId = extractSessionId(sessionId);
-	return sessions.find((s) => 
-		s.id === sessionId || 
-		s.path.includes(normalizedId) ||
-		extractSessionId(s.path) === normalizedId
+	return sessions.find(
+		(s) =>
+			s.id === sessionId ||
+			s.path.includes(normalizedId) ||
+			extractSessionId(s.path) === normalizedId,
 	);
 }
 
@@ -99,7 +103,11 @@ async function switchDirectory(
 	targetDir: string,
 	options: SwitchDirOptions = {},
 ): Promise<void> {
-	const { clearSessions = true, loadSessions = true, restoreLastSession = true } = options;
+	const {
+		clearSessions = true,
+		loadSessions = true,
+		restoreLastSession = true,
+	} = options;
 	const stores = getStores();
 
 	console.log("[SessionManager] 切换目录:", targetDir, options);
@@ -116,9 +124,9 @@ async function switchDirectory(
 			pid?: number;
 		}>((resolve, reject) => {
 			const timeout = setTimeout(() => reject(new Error("切换目录超时")), 5000);
-			
+
 			changeChatDirectory(targetDir);
-			
+
 			const unsub = websocketService.on("dir_changed", (data) => {
 				clearTimeout(timeout);
 				unsub();
@@ -151,7 +159,8 @@ async function switchDirectory(
 			sessionsList = (data.sessions || []).map((s) => ({
 				id: s.path,
 				path: s.path,
-				name: s.firstMessage?.slice(0, 35) || s.path.split("/").pop() || "Untitled",
+				name:
+					s.firstMessage?.slice(0, 35) || s.path.split("/").pop() || "Untitled",
 				messageCount: s.messageCount || 0,
 				lastModified: new Date(s.modified),
 				firstMessage: s.firstMessage,
@@ -186,7 +195,7 @@ async function switchDirectory(
 			};
 			sessionSource = "server";
 			// 添加到 sessions 列表
-			stores.sidebar.addSession?.(sessionToUse) || 
+			stores.sidebar.addSession?.(sessionToUse) ||
 				stores.sidebar.setSessions([sessionToUse, ...sessionsList]);
 			console.log("[SessionManager] 使用服务端新 session:", response.sessionId);
 		}
@@ -201,7 +210,6 @@ async function switchDirectory(
 			session: sessionToUse?.id,
 			source: sessionSource,
 		});
-
 	} finally {
 		stores.sidebar.setLoading(false);
 	}
@@ -264,19 +272,23 @@ async function createNewSession(): Promise<void> {
 	console.log("[SessionManager] 创建新 session");
 
 	try {
-		const response = await new Promise<{ sessionId: string; sessionFile: string }>(
-			(resolve, reject) => {
-				const timeout = setTimeout(() => reject(new Error("创建 session 超时")), 5000);
-				
-				createNewChatSession();
-				
-				const unsub = websocketService.on("session_created", (data) => {
-					clearTimeout(timeout);
-					unsub();
-					resolve(data);
-				});
-			}
-		);
+		const response = await new Promise<{
+			sessionId: string;
+			sessionFile: string;
+		}>((resolve, reject) => {
+			const timeout = setTimeout(
+				() => reject(new Error("创建 session 超时")),
+				5000,
+			);
+
+			createNewChatSession();
+
+			const unsub = websocketService.on("session_created", (data) => {
+				clearTimeout(timeout);
+				unsub();
+				resolve(data);
+			});
+		});
 
 		// 创建新 session 对象
 		const newSession: Session = {
@@ -288,9 +300,9 @@ async function createNewSession(): Promise<void> {
 		};
 
 		// 添加到列表并激活
-		stores.sidebar.addSession?.(newSession) || 
+		stores.sidebar.addSession?.(newSession) ||
 			stores.sidebar.setSessions([newSession, ...stores.sidebar.sessions]);
-		
+
 		await activateSession(newSession);
 
 		// 清空消息列表（新 session）
@@ -300,7 +312,6 @@ async function createNewSession(): Promise<void> {
 		stores.session.setIsConnected(true);
 
 		console.log("[SessionManager] 新 session 创建完成:", response.sessionId);
-
 	} finally {
 		stores.sidebar.setLoading(false);
 	}

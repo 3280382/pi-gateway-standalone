@@ -3,8 +3,8 @@
  */
 
 import { useEffect } from "react";
-import { useAppStore, type FontSize, type Theme } from "@/stores/appStore";
 import styles from "@/app/SettingsModal.module.css";
+import { type FontSize, type Theme, useAppStore } from "@/stores/appStore";
 
 export function SettingsModal() {
 	const { theme, setTheme, fontSize, setFontSize } = useAppStore();
@@ -16,8 +16,16 @@ export function SettingsModal() {
 
 	// 应用字体大小到 CSS 变量
 	useEffect(() => {
-		const sizes = { tiny: "12px", small: "14px", medium: "16px", large: "18px" };
-		document.documentElement.style.setProperty("--app-font-size", sizes[fontSize]);
+		const sizes = {
+			tiny: "12px",
+			small: "14px",
+			medium: "16px",
+			large: "18px",
+		};
+		document.documentElement.style.setProperty(
+			"--app-font-size",
+			sizes[fontSize],
+		);
 	}, [fontSize]);
 
 	return (

@@ -7,20 +7,17 @@
  */
 
 import React from "react";
-import { useFileStore } from "@/features/files/stores/fileStore";
-import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
-import {
-	useFileBrowser,
-	useFileFiltering,
-} from "@/features/files/hooks";
-import { fileBrowserDebug } from "@/lib/debug";
-
-import { FileActionBar } from "@/features/files/components/Header/FileActionBar";
 import styles from "@/features/files/components/FileBrowser/FileBrowser.module.css";
 import { FileBrowserErrorBoundary } from "@/features/files/components/FileBrowser/FileBrowserErrorBoundary";
 import { FileGrid } from "@/features/files/components/FileBrowser/FileGrid";
 import { FileList } from "@/features/files/components/FileBrowser/FileList";
+
+import { FileActionBar } from "@/features/files/components/Header/FileActionBar";
 import { FileViewer } from "@/features/files/components/Viewer/FileViewer";
+import { useFileBrowser, useFileFiltering } from "@/features/files/hooks";
+import { useFileStore } from "@/features/files/stores/fileStore";
+import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
+import { fileBrowserDebug } from "@/lib/debug";
 
 interface FileBrowserProps {
 	onExecuteOutput?: (output: string) => void;
@@ -32,12 +29,7 @@ export function FileBrowser({
 	onOpenBottomPanel,
 }: FileBrowserProps) {
 	// 获取状态
-	const {
-		viewMode,
-		isLoading,
-		error,
-		items,
-	} = useFileStore();
+	const { viewMode, isLoading, error, items } = useFileStore();
 
 	const fileViewerStore = useFileViewerStore();
 

@@ -44,8 +44,8 @@ import { registerRoutes } from "./app/routes";
 // ============================================================================
 import "./features/chat/ws-handlers/session/index";
 import "./features/chat/ws-handlers/message/index";
-import { type WSContext, wsRouter } from "./features/chat/ws-router";
 import { PiAgentSession } from "./features/chat/agent-session/piAgentSession";
+import { type WSContext, wsRouter } from "./features/chat/ws-router";
 import { AppFactory } from "./lib/app-factory";
 
 // ============================================================================
@@ -63,7 +63,12 @@ process.on("uncaughtException", (error) => {
 });
 
 process.on("unhandledRejection", (reason, promise) => {
-	console.error("[FATAL] Unhandled promise rejection:", promise, "reason:", reason);
+	console.error(
+		"[FATAL] Unhandled promise rejection:",
+		promise,
+		"reason:",
+		reason,
+	);
 });
 
 // ============================================================================
@@ -171,7 +176,10 @@ wss.on("connection", (ws) => {
 				ws.send(
 					JSON.stringify({
 						type: "error",
-						error: error instanceof Error ? error.message : "Failed to process message",
+						error:
+							error instanceof Error
+								? error.message
+								: "Failed to process message",
 						receivedType: type,
 					}),
 				);

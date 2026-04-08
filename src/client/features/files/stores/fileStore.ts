@@ -9,7 +9,13 @@
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import type { FileItem, ViewMode, SortMode, FilterType, BottomPanelType } from "@/features/files/types";
+import type {
+	BottomPanelType,
+	FileItem,
+	FilterType,
+	SortMode,
+	ViewMode,
+} from "@/features/files/types";
 
 // ============================================================================
 // Store State & Actions Types (内联定义)
@@ -47,7 +53,9 @@ export interface FileActions {
 	setParentPath: (path: string) => void;
 	setItems: (items: FileItem[]) => void;
 	setSelectedItems: (items: string[]) => void;
-	setPathCache: (cache: Map<string, { items: FileItem[]; timestamp: number }>) => void;
+	setPathCache: (
+		cache: Map<string, { items: FileItem[]; timestamp: number }>,
+	) => void;
 	setViewMode: (mode: ViewMode) => void;
 	setSortMode: (mode: SortMode) => void;
 	setFilterType: (type: FilterType) => void;
@@ -100,7 +108,8 @@ export const useFileStore = create<FileState & FileActions>()(
 				isDragging: false,
 
 				// 布局状态
-				isSidebarVisible: typeof window !== "undefined" ? window.innerWidth >= 768 : true,
+				isSidebarVisible:
+					typeof window !== "undefined" ? window.innerWidth >= 768 : true,
 				isBottomPanelOpen: false,
 				bottomPanelType: null,
 				bottomPanelHeight: 300,
@@ -192,4 +201,10 @@ export const useFileStore = create<FileState & FileActions>()(
 );
 
 // 基础类型重新导出，方便使用
-export type { FileItem, ViewMode, SortMode, FilterType, BottomPanelType } from "@/features/files/types";
+export type {
+	BottomPanelType,
+	FileItem,
+	FilterType,
+	SortMode,
+	ViewMode,
+} from "@/features/files/types";

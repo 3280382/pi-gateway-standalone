@@ -47,7 +47,10 @@ export async function handleInit(
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: error instanceof Error ? error.message : "Failed to initialize session",
+				error:
+					error instanceof Error
+						? error.message
+						: "Failed to initialize session",
 			}),
 		);
 	}

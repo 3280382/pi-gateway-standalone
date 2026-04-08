@@ -3,12 +3,12 @@
  * 从 workspaceStore 读取数据（唯一数据源）
  */
 
-import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
-import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import { useWorkspaceStore } from "@/features/files/stores";
 import { IconButton } from "@/components/Icon/Icon";
 import { SectionHeader } from "@/features/chat/components/SectionHeader/SectionHeader";
 import styles from "@/features/chat/components/sidebar/RecentWorkspaces/RecentWorkspaces.module.css";
+import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { useWorkspaceStore } from "@/features/files/stores";
 
 export function RecentWorkspaces() {
 	const recentWorkspaces = useWorkspaceStore((state) => state.recentWorkspaces);

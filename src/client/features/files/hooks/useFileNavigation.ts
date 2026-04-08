@@ -35,7 +35,8 @@ export function useFileNavigation(): UseFileNavigationResult {
 	const navigateUp = useCallback(() => {
 		if (currentPath === "/" || currentPath === "") return;
 
-		const parent = parentPath || currentPath.split("/").slice(0, -1).join("/") || "/";
+		const parent =
+			parentPath || currentPath.split("/").slice(0, -1).join("/") || "/";
 		if (parent !== currentPath) {
 			setCurrentPath(parent);
 		}

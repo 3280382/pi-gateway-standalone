@@ -31,7 +31,7 @@ function showErrorBanner(message: string, type: "error" | "promise" = "error") {
 		cursor: pointer;
 	`;
 	errorDiv.innerHTML = `<strong>${isError ? "Global Error" : "Promise Error"}:</strong> ${message}<br><small>Click to dismiss</small>`;
-	
+
 	// 点击关闭
 	errorDiv.onclick = () => {
 		if (errorDiv && errorDiv.parentNode) {
@@ -39,7 +39,7 @@ function showErrorBanner(message: string, type: "error" | "promise" = "error") {
 			errorDiv = null;
 		}
 	};
-	
+
 	document.body.appendChild(errorDiv);
 }
 

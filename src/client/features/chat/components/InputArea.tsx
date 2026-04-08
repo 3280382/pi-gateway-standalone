@@ -18,10 +18,13 @@ interface InputAreaProps {
 	onAbort: () => void;
 	onBashCommand?: (command: string) => void;
 	onSlashCommand?: (command: string, args: string) => void;
-	onSendWithImages?: (text: string, images: Array<{
-		type: "image";
-		source: { type: "base64"; mediaType: string; data: string };
-	}>) => void;
+	onSendWithImages?: (
+		text: string,
+		images: Array<{
+			type: "image";
+			source: { type: "base64"; mediaType: string; data: string };
+		}>,
+	) => void;
 	onNewSession?: () => void;
 }
 
@@ -83,10 +86,14 @@ export function InputArea({
 							<button
 								key={cmd.name}
 								className={`${styles.commandItem} ${
-									index === inputArea.slashCommands.selectedIndex ? styles.selected : ""
+									index === inputArea.slashCommands.selectedIndex
+										? styles.selected
+										: ""
 								}`}
 								onClick={() => inputArea.slashCommands.selectCurrent()}
-								onMouseEnter={() => inputArea.slashCommands.setSelectedIndex(index)}
+								onMouseEnter={() =>
+									inputArea.slashCommands.setSelectedIndex(index)
+								}
 							>
 								<span className={styles.commandIcon}>{cmd.icon}</span>
 								<span className={styles.commandName}>{cmd.name}</span>
@@ -112,10 +119,14 @@ export function InputArea({
 							<button
 								key={file.path}
 								className={`${styles.fileItem} ${
-									index === inputArea.filePicker.selectedIndex ? styles.selected : ""
+									index === inputArea.filePicker.selectedIndex
+										? styles.selected
+										: ""
 								}`}
 								onClick={() => inputArea.filePicker.selectCurrent()}
-								onMouseEnter={() => inputArea.filePicker.setSelectedIndex(index)}
+								onMouseEnter={() =>
+									inputArea.filePicker.setSelectedIndex(index)
+								}
 							>
 								<span className={styles.fileIcon}>
 									{file.isDirectory ? <FolderIcon /> : <DocIcon />}
@@ -131,37 +142,41 @@ export function InputArea({
 			)}
 
 			{/* Image Preview Bar */}
-			{inputArea.imageUpload.images.length > 0 && inputArea.imageUpload.showPreview && (
-				<div className={styles.imagePreviewBar}>
-					{inputArea.imageUpload.images.map((img) => (
-						<div key={img.id} className={styles.imagePreviewItem}>
-							<img src={img.preview} alt="Upload" />
-							{img.isProcessingOCR && (
-								<div className={styles.ocrIndicator}>⋯</div>
-							)}
-							{img.ocrText && <div className={styles.ocrBadge}>T</div>}
-							<button
-								className={styles.removeImageBtn}
-								onClick={() => inputArea.imageUpload.removeImage(img.id)}
-							>
-								<CloseIcon />
-							</button>
-						</div>
-					))}
-					<button
-						className={styles.togglePreviewBtn}
-						onClick={() => inputArea.imageUpload.togglePreview()}
-					>
-						Hide
-					</button>
-				</div>
-			)}
-			{inputArea.imageUpload.images.length > 0 && !inputArea.imageUpload.showPreview && (
-				<div className={styles.imageCountBar}>
-					<span>{inputArea.imageUpload.images.length} image(s)</span>
-					<button onClick={() => inputArea.imageUpload.togglePreview()}>Show</button>
-				</div>
-			)}
+			{inputArea.imageUpload.images.length > 0 &&
+				inputArea.imageUpload.showPreview && (
+					<div className={styles.imagePreviewBar}>
+						{inputArea.imageUpload.images.map((img) => (
+							<div key={img.id} className={styles.imagePreviewItem}>
+								<img src={img.preview} alt="Upload" />
+								{img.isProcessingOCR && (
+									<div className={styles.ocrIndicator}>⋯</div>
+								)}
+								{img.ocrText && <div className={styles.ocrBadge}>T</div>}
+								<button
+									className={styles.removeImageBtn}
+									onClick={() => inputArea.imageUpload.removeImage(img.id)}
+								>
+									<CloseIcon />
+								</button>
+							</div>
+						))}
+						<button
+							className={styles.togglePreviewBtn}
+							onClick={() => inputArea.imageUpload.togglePreview()}
+						>
+							Hide
+						</button>
+					</div>
+				)}
+			{inputArea.imageUpload.images.length > 0 &&
+				!inputArea.imageUpload.showPreview && (
+					<div className={styles.imageCountBar}>
+						<span>{inputArea.imageUpload.images.length} image(s)</span>
+						<button onClick={() => inputArea.imageUpload.togglePreview()}>
+							Show
+						</button>
+					</div>
+				)}
 
 			{/* Input Row */}
 			<div className={styles.inputRow}>

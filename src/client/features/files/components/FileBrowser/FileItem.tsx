@@ -53,7 +53,7 @@ export const FileItem = memo<FileItemProps>(
 	}) => {
 		const icon = getFileIcon(item.extension, item.isDirectory);
 		const isGrid = viewMode === "grid";
-		
+
 		const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 		const [isPressed, setIsPressed] = useState(false);
 
@@ -68,7 +68,7 @@ export const FileItem = memo<FileItemProps>(
 		]
 			.filter(Boolean)
 			.join(" ");
-		
+
 		// 处理鼠标按下 - 开始长按计时
 		const handleMouseDown = useCallback(() => {
 			setIsPressed(true);
@@ -76,7 +76,7 @@ export const FileItem = memo<FileItemProps>(
 				onLongPress();
 			}, LONG_PRESS_DURATION);
 		}, [onLongPress]);
-		
+
 		// 处理鼠标松开 - 取消长按计时
 		const handleMouseUp = useCallback(() => {
 			setIsPressed(false);
@@ -85,7 +85,7 @@ export const FileItem = memo<FileItemProps>(
 				longPressTimerRef.current = null;
 			}
 		}, []);
-		
+
 		// 处理鼠标离开 - 取消长按计时
 		const handleMouseLeave = useCallback(() => {
 			setIsPressed(false);
@@ -94,18 +94,21 @@ export const FileItem = memo<FileItemProps>(
 				longPressTimerRef.current = null;
 			}
 		}, []);
-		
+
 		// 处理点击
-		const handleClick = useCallback((e: React.MouseEvent) => {
-			// 如果点击的是复选框，不触发 tap
-			if (
-				e.target instanceof HTMLElement &&
-				e.target.closest('[data-checkbox="true"]')
-			) {
-				return;
-			}
-			onTap();
-		}, [onTap]);
+		const handleClick = useCallback(
+			(e: React.MouseEvent) => {
+				// 如果点击的是复选框，不触发 tap
+				if (
+					e.target instanceof HTMLElement &&
+					e.target.closest('[data-checkbox="true"]')
+				) {
+					return;
+				}
+				onTap();
+			},
+			[onTap],
+		);
 
 		return (
 			<div

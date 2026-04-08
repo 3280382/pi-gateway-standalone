@@ -53,7 +53,10 @@ export async function handleNewSession(
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: error instanceof Error ? error.message : "Failed to create new session",
+				error:
+					error instanceof Error
+						? error.message
+						: "Failed to create new session",
 			}),
 		);
 	}

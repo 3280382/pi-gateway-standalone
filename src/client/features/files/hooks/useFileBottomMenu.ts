@@ -8,7 +8,10 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { getFileTree, type TreeResponse } from "@/features/files/services/api/fileApi";
+import {
+	getFileTree,
+	type TreeResponse,
+} from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
 import { useFileOperations } from "./useFileOperations";
@@ -96,7 +99,12 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
 		if (isMultiSelectMode) {
 			toggleMultiSelectMode();
 		}
-	}, [deleteSelected, clearSelection, isMultiSelectMode, toggleMultiSelectMode]);
+	}, [
+		deleteSelected,
+		clearSelection,
+		isMultiSelectMode,
+		toggleMultiSelectMode,
+	]);
 
 	const handleCancelDelete = useCallback(() => {
 		setShowDeleteModal(false);

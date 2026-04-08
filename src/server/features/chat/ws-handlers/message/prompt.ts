@@ -29,7 +29,9 @@ export async function handlePrompt(
 ): Promise<void> {
 	const { text, images } = payload;
 
-	logger.info(`[WebSocket] Received prompt message: ${text.substring(0, 50)}...`);
+	logger.info(
+		`[WebSocket] Received prompt message: ${text.substring(0, 50)}...`,
+	);
 
 	// Check if session is initialized
 	if (!ctx.session.session) {

@@ -19,7 +19,9 @@ export async function handleSteer(
 ): Promise<void> {
 	const { text } = payload;
 
-	logger.info(`[WebSocket] Received steer message: ${text.substring(0, 50)}...`);
+	logger.info(
+		`[WebSocket] Received steer message: ${text.substring(0, 50)}...`,
+	);
 
 	// Check if session is initialized
 	if (!ctx.session.session) {

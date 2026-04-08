@@ -9,8 +9,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useChatController } from "@/features/chat/services/api/chatApi";
+import { useChatStore } from "@/features/chat/stores/chatStore";
 
 export interface UseChatPanelReturn {
 	// Refs
@@ -30,13 +30,15 @@ export interface UseChatPanelReturn {
 
 export function useChatPanel(): UseChatPanelReturn {
 	const messagesRef = useRef<HTMLDivElement>(null);
-	
+
 	// 使用 state 而不是 ref，这样可以在变化时触发重新渲染和 useEffect
 	const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
 
 	const inputText = useChatStore((state) => state.inputText);
 	const messages = useChatStore((state) => state.messages);
-	const currentStreamingMessage = useChatStore((state) => state.currentStreamingMessage);
+	const currentStreamingMessage = useChatStore(
+		(state) => state.currentStreamingMessage,
+	);
 	const chatController = useChatController();
 
 	// 首次加载时滚动到底部

@@ -5,8 +5,8 @@
 
 import { SessionManager } from "@mariozechner/pi-coding-agent";
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
-import type { WSContext } from "../../ws-router";
 import { getLocalSessionsDir } from "../../agent-session/utils";
+import type { WSContext } from "../../ws-router";
 
 const logger = new Logger({ level: LogLevel.INFO });
 
@@ -41,7 +41,9 @@ export async function handleListSessions(
 			}),
 		);
 
-		logger.info(`[WebSocket] list_sessions successful: ${sessions.length} sessions`);
+		logger.info(
+			`[WebSocket] list_sessions successful: ${sessions.length} sessions`,
+		);
 	} catch (error) {
 		logger.error(
 			"[WebSocket] list_sessions error:",
@@ -51,7 +53,8 @@ export async function handleListSessions(
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: error instanceof Error ? error.message : "Failed to list sessions",
+				error:
+					error instanceof Error ? error.message : "Failed to list sessions",
 			}),
 		);
 	}

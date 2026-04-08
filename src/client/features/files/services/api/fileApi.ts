@@ -34,6 +34,11 @@ export interface TreeNode {
 	isDirectory: boolean;
 	children?: TreeNode[];
 	truncated?: boolean;
+	// 新增计算字段，供前端直接使用
+	level?: number; // 层级深度
+	isLast?: boolean; // 是否是兄弟节点中的最后一个
+	parentLastStack?: boolean[]; // 父节点 isLast 的堆栈，用于绘制连接线
+	parentPath?: string; // 父节点路径
 }
 
 export interface TreeResponse {
@@ -69,23 +74,55 @@ export async function getFileTree(path: string): Promise<TreeResponse> {
 	const data = await response.json();
 
 	// API returns nested tree structure with children, flatten it for UI
+	// 同时计算 level, isLast, parentLastStack 等字段
 	const items: TreeNode[] = [];
 	const rootPath = data.path || "";
 
-	function flatten(node: TreeNode, depth: number = 0) {
+	function flatten(
+		node: TreeNode,
+		depth: number = 0,
+		parentLastStack: boolean[] = [],
+		siblingsCount: number = 0,
+		myIndex: number = 0,
+	) {
 		// Skip the root node itself, only include children
 		if (depth > 0) {
 			// Get relative path from root
 			const relativePath = node.path.replace(rootPath, "").replace(/^\//, "");
+
+			// 计算是否是最后一个兄弟节点
+			const isLast = myIndex === siblingsCount - 1;
+
+			// 计算父节点路径
+			const parentPath = relativePath.includes("/")
+				? relativePath.substring(0, relativePath.lastIndexOf("/"))
+				: "";
+
 			items.push({
 				name: node.name,
 				path: relativePath || node.name,
 				isDirectory: node.isDirectory,
+				// 新增计算字段
+				level: depth - 1, // level 从 0 开始（相对于根的直接子节点）
+				isLast: isLast,
+				parentLastStack: [...parentLastStack], // 复制数组
+				parentPath: parentPath,
 			});
 		}
+
+		// 递归处理子节点
 		if (node.children && !node.truncated) {
-			for (const child of node.children) {
-				flatten(child, depth + 1);
+			const childCount = node.children.length;
+			const myIsLast = depth === 0 ? false : myIndex === siblingsCount - 1;
+
+			for (let i = 0; i < childCount; i++) {
+				flatten(
+					node.children[i],
+					depth + 1,
+					[...parentLastStack, myIsLast], // 将当前节点的 isLast 添加到堆栈
+					childCount,
+					i,
+				);
 			}
 		}
 	}

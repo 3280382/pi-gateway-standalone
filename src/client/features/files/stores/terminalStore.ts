@@ -18,13 +18,16 @@ interface TerminalActions {
 	clear: () => void;
 }
 
-export const useTerminalStore = create<TerminalState & TerminalActions>((set) => ({
-	output: "",
-	command: "",
-	isExecuting: false,
-	setOutput: (output) => set({ output }),
-	appendOutput: (output) => set((state) => ({ output: state.output + output })),
-	setCommand: (command) => set({ command }),
-	setExecuting: (isExecuting) => set({ isExecuting }),
-	clear: () => set({ output: "", command: "" }),
-}));
+export const useTerminalStore = create<TerminalState & TerminalActions>(
+	(set) => ({
+		output: "",
+		command: "",
+		isExecuting: false,
+		setOutput: (output) => set({ output }),
+		appendOutput: (output) =>
+			set((state) => ({ output: state.output + output })),
+		setCommand: (command) => set({ command }),
+		setExecuting: (isExecuting) => set({ isExecuting }),
+		clear: () => set({ output: "", command: "" }),
+	}),
+);

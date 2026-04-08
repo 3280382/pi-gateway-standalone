@@ -6,13 +6,13 @@
  */
 
 import { useCallback, useRef } from "react";
-import { useChatInit, useChatMessages } from "@/features/chat/hooks";
-import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import styles from "@/features/chat/ChatLayout.module.css";
+import { ChatPanel } from "@/features/chat/components/ChatPanel";
 import { AppHeader } from "@/features/chat/components/Header";
 import { LlmLogPanel } from "@/features/chat/components/panels/LlmLogPanel";
 import { SidebarPanel } from "@/features/chat/components/sidebar/SidebarPanel/SidebarPanel";
-import { ChatPanel } from "@/features/chat/components/ChatPanel";
-import styles from "@/features/chat/ChatLayout.module.css";
+import { useChatInit, useChatMessages } from "@/features/chat/hooks";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 
 interface ChatPageProps {
 	active?: boolean;
@@ -27,10 +27,18 @@ export function ChatPage({ active = false }: ChatPageProps) {
 
 	// 从 sidebarStore 获取布局状态
 	const isSidebarVisible = useSidebarStore((state) => state.isVisible);
-	const isBottomPanelOpen = useSidebarStore((state) => state.isBottomPanelOpen ?? false);
-	const bottomPanelHeight = useSidebarStore((state) => state.bottomPanelHeight ?? 300);
-	const closeBottomPanel = useSidebarStore((state) => state.closeBottomPanel ?? (() => {}));
-	const setBottomPanelHeight = useSidebarStore((state) => state.setBottomPanelHeight ?? (() => {}));
+	const isBottomPanelOpen = useSidebarStore(
+		(state) => state.isBottomPanelOpen ?? false,
+	);
+	const bottomPanelHeight = useSidebarStore(
+		(state) => state.bottomPanelHeight ?? 300,
+	);
+	const closeBottomPanel = useSidebarStore(
+		(state) => state.closeBottomPanel ?? (() => {}),
+	);
+	const setBottomPanelHeight = useSidebarStore(
+		(state) => state.setBottomPanelHeight ?? (() => {}),
+	);
 
 	// 渲染底部面板
 	const renderBottomPanel = useCallback(() => {
@@ -43,7 +51,12 @@ export function ChatPage({ active = false }: ChatPageProps) {
 				onHeightChange={setBottomPanelHeight}
 			/>
 		);
-	}, [isBottomPanelOpen, bottomPanelHeight, closeBottomPanel, setBottomPanelHeight]);
+	}, [
+		isBottomPanelOpen,
+		bottomPanelHeight,
+		closeBottomPanel,
+		setBottomPanelHeight,
+	]);
 
 	// 首次激活时标记为已挂载
 	if (active) {

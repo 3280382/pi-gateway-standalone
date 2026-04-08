@@ -9,13 +9,13 @@
 
 import { useCallback, useRef } from "react";
 import { FileBottomMenu } from "@/features/files/components/BottomMenu/FileBottomMenu";
-import { XTermPanel } from "@/features/files/components/panels/TerminalPanel";
-import { useFileStore, useTerminalStore } from "@/features/files/stores";
-import { useFileBrowser, useFileNavigation } from "@/features/files/hooks";
 import { FileBrowser } from "@/features/files/components/FileBrowser/FileBrowser";
-import { FileSidebar } from "@/features/files/components/Sidebar/FileSidebar";
 import { FileToolbar } from "@/features/files/components/Header/FileToolbar";
+import { XTermPanel } from "@/features/files/components/panels/TerminalPanel";
+import { FileSidebar } from "@/features/files/components/Sidebar/FileSidebar";
 import styles from "@/features/files/FilesLayout.module.css";
+import { useFileBrowser, useFileNavigation } from "@/features/files/hooks";
+import { useFileStore, useTerminalStore } from "@/features/files/stores";
 
 interface FilesPageProps {
 	active?: boolean;
@@ -73,11 +73,10 @@ export function FilesPage({ active = false }: FilesPageProps) {
 		return null;
 	}
 
-
 	return (
 		<div
 			className={styles.layout}
-style={{ display: active ? "flex" : "none" }}
+			style={{ display: active ? "flex" : "none" }}
 		>
 			{/* FileToolbar - 文件浏览器专用顶部工具栏 */}
 			<header className={styles.header}>

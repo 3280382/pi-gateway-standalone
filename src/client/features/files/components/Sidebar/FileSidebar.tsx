@@ -3,9 +3,9 @@
  */
 import type React from "react";
 import { useCallback } from "react";
+import styles from "@/features/files/components/Sidebar/FileSidebar.module.css";
 import { useFileTree } from "@/features/files/hooks";
 import { fileSidebarDebug } from "@/lib/debug";
-import styles from "@/features/files/components/Sidebar/FileSidebar.module.css";
 
 interface FileSidebarProps {
 	visible: boolean;
@@ -17,7 +17,10 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
 
 	// 处理节点点击 - 展开/折叠 + 导航
 	const handleNodeClick = useCallback(
-		async (node: ReturnType<typeof useFileTree>["tree"][0], e: React.MouseEvent) => {
+		async (
+			node: ReturnType<typeof useFileTree>["tree"][0],
+			e: React.MouseEvent,
+		) => {
 			fileSidebarDebug.debug("点击目录节点", { path: node.path });
 
 			if (!node.isDirectory) return;
@@ -96,8 +99,8 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
 							<span className={styles.treeNodeError} title={node.error}>
 								⚠️
 							</span>
-							)}
-							</div>
+						)}
+					</div>
 
 					{/* 子目录 */}
 					{isExpanded && node.children.length > 0 && (
@@ -112,7 +115,9 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
 	);
 
 	return (
-		<aside className={`${styles.sidebar} ${visible ? styles.sidebarVisible : ""}`}>
+		<aside
+			className={`${styles.sidebar} ${visible ? styles.sidebarVisible : ""}`}
+		>
 			<div className={styles.sidebarHeader}>
 				<span className={styles.sidebarTitle}>
 					<span className={styles.sidebarTitleIcon}>📁</span>

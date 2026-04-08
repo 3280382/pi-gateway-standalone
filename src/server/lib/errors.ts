@@ -7,7 +7,12 @@ export class ApiError extends Error {
 	public statusCode: number;
 	public details?: Record<string, any>;
 
-	constructor(code: string, message: string, statusCode = 500, details?: Record<string, any>) {
+	constructor(
+		code: string,
+		message: string,
+		statusCode = 500,
+		details?: Record<string, any>,
+	) {
 		super(message);
 		this.code = code;
 		this.statusCode = statusCode;
@@ -17,7 +22,9 @@ export class ApiError extends Error {
 
 export class NotFoundError extends ApiError {
 	constructor(resource: string, id?: string) {
-		const message = id ? `${resource} ${id} not found` : `${resource} not found`;
+		const message = id
+			? `${resource} ${id} not found`
+			: `${resource} not found`;
 		super("NOT_FOUND", message, 404, { resource, id });
 	}
 }
@@ -33,7 +40,10 @@ export class ErrorFactory {
 		return new NotFoundError(resource, id);
 	}
 
-	static validation(message: string, details?: Record<string, any>): ValidationError {
+	static validation(
+		message: string,
+		details?: Record<string, any>,
+	): ValidationError {
 		return new ValidationError(message, details);
 	}
 }

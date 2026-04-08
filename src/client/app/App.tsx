@@ -4,9 +4,9 @@
 
 import React, { Suspense } from "react";
 import { ErrorBoundary } from "@/app/ErrorBoundary";
-import { useAppStore } from "@/stores/appStore";
 import { Footer } from "@/app/Footer";
 import { LoadingScreen } from "@/app/LoadingScreen";
+import { useAppStore } from "@/stores/appStore";
 import "@/styles/global.css";
 import styles from "@/app/App.module.css";
 
@@ -21,7 +21,7 @@ function AppContent() {
 		<div className={styles.app}>
 			<main className={styles.pageContainer}>
 				{/* Chat - 通过 props 传递 active 状态 */}
-				<Suspense fallback={<LoadingScreen />}>  
+				<Suspense fallback={<LoadingScreen />}>
 					<ChatPage active={currentView === "chat"} />
 				</Suspense>
 

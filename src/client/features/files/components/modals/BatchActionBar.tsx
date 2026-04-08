@@ -6,8 +6,8 @@
  * - 使用 useFileOperations 处理删除逻辑
  */
 import React, { useState } from "react";
-import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileOperations } from "@/features/files/hooks";
+import { useFileStore } from "@/features/files/stores/fileStore";
 import styles from "./BatchActionBar.module.css";
 
 export function BatchActionBar() {

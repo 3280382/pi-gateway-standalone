@@ -5,8 +5,8 @@
  */
 
 import { useMemo } from "react";
-import { useFileStore } from "@/features/files/stores/fileStore";
 import type { FileItem, FilterType } from "@/features/files/stores/fileStore";
+import { useFileStore } from "@/features/files/stores/fileStore";
 
 export interface UseFileFilteringResult {
 	filteredItems: FileItem[];
@@ -86,11 +86,7 @@ function matchesSearchText(item: FileItem, searchText: string): boolean {
 /**
  * 比较两个文件项进行排序
  */
-function compareItems(
-	a: FileItem,
-	b: FileItem,
-	sortMode: string,
-): number {
+function compareItems(a: FileItem, b: FileItem, sortMode: string): number {
 	// ".." 始终排在第一位
 	if (a.name === "..") return -1;
 	if (b.name === "..") return 1;
@@ -127,16 +123,12 @@ export function useFileFiltering(): UseFileFilteringResult {
 
 		// 应用搜索过滤
 		if (filterText) {
-			filtered = filtered.filter((item) =>
-				matchesSearchText(item, filterText),
-			);
+			filtered = filtered.filter((item) => matchesSearchText(item, filterText));
 		}
 
 		// 应用类型过滤
 		if (filterType !== "all") {
-			filtered = filtered.filter((item) =>
-				matchesFilterType(item, filterType),
-			);
+			filtered = filtered.filter((item) => matchesFilterType(item, filterType));
 		}
 
 		// 应用排序

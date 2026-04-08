@@ -4,9 +4,11 @@
 
 // API 层（直接 HTTP 调用）
 export {
+	type BrowseResponse,
 	browseDirectory,
 	checkPathExists,
 	executeFile,
+	type FileContentResponse,
 	formatFileSize,
 	getFileExtension,
 	getFileIcon,
@@ -14,8 +16,6 @@ export {
 	getRawFileUrl,
 	getServerWorkingDir,
 	readFile,
-	type BrowseResponse,
-	type FileContentResponse,
 	type TreeNode,
 	type TreeResponse,
 	writeFile,
@@ -25,10 +25,10 @@ export {
 	batchDeleteFiles,
 	batchMoveFiles,
 	createFile,
+	type DirectoryData,
 	executeFileByPath,
 	getFriendlyErrorMessage,
 	loadDirectoryContent,
-	type DirectoryData,
 } from "./api/fileOperationsApi";
 
 // Service 层（业务逻辑组合）

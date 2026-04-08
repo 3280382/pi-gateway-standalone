@@ -76,7 +76,10 @@ export interface UseInputAreaReturn {
 	handleChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 	handleKeyDown: (e: React.KeyboardEvent) => void;
 	handleSend: () => void;
-	insertTextAtCursor: (text: string, triggerAction?: "file" | "command" | "bash") => void;
+	insertTextAtCursor: (
+		text: string,
+		triggerAction?: "file" | "command" | "bash",
+	) => void;
 	focusInput: () => void;
 }
 
@@ -250,11 +253,7 @@ export function useInputArea(options: UseInputAreaOptions): UseInputAreaReturn {
 				return;
 			}
 		},
-		[
-			filePicker,
-			slashCommands,
-			handleSend,
-		],
+		[filePicker, slashCommands, handleSend],
 	);
 
 	// 在光标位置插入文本

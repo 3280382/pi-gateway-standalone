@@ -3,9 +3,9 @@
  * 包含：LLM Log 开关和刷新间隔
  */
 
+import styles from "@/features/chat/components/sidebar/ChatSettings/ChatSettings.module.css";
 import { useLlmLogStore } from "@/features/chat/stores/llmLogStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
-import styles from "@/features/chat/components/sidebar/ChatSettings/ChatSettings.module.css";
 
 export function ChatSettings() {
 	const llmLogConfig = useLlmLogStore((state) => state.config);
@@ -23,7 +23,9 @@ export function ChatSettings() {
 					<button
 						className={`${styles.toggleBtn} ${llmLogConfig.enabled ? styles.enabled : ""}`}
 						onClick={() => setLlmLogConfig({ enabled: !llmLogConfig.enabled })}
-						title={llmLogConfig.enabled ? "Logging enabled" : "Logging disabled"}
+						title={
+							llmLogConfig.enabled ? "Logging enabled" : "Logging disabled"
+						}
 					>
 						<LogIcon />
 						<span>{llmLogConfig.enabled ? "On" : "Off"}</span>

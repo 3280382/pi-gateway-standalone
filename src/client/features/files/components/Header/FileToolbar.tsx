@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import styles from "@/features/files/components/FileBrowser/FileBrowser.module.css";
+import { useFileNavigation } from "@/features/files/hooks";
 /**
  * FileToolbar - 文件浏览器工具栏（两行布局）
  */
@@ -7,8 +9,6 @@ import {
 	type SortMode,
 	useFileStore,
 } from "@/features/files/stores/fileStore";
-import { useFileNavigation } from "@/features/files/hooks";
-import styles from "@/features/files/components/FileBrowser/FileBrowser.module.css";
 
 // 可执行文件扩展名
 const EXECUTABLE_EXTENSIONS = [

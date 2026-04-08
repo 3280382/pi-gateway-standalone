@@ -43,7 +43,9 @@ interface UseFilePickerOptions {
 	onFocusInput?: () => void;
 }
 
-export function useFilePicker(options: UseFilePickerOptions): UseFilePickerReturn {
+export function useFilePicker(
+	options: UseFilePickerOptions,
+): UseFilePickerReturn {
 	const { value, onChange, onFocusInput } = options;
 	const { currentPath } = useFileStore();
 

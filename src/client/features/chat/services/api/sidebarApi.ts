@@ -1,6 +1,6 @@
 /**
  * Sidebar API - Controller Layer
- * 
+ *
  * 重构后职责：
  * - 提供 React Hook 接口
  * - 委托给 sessionManager 处理 session 逻辑
@@ -52,7 +52,9 @@ export function useSidebarController(): SidebarController {
 				store.setWorkingDir(cwd);
 			} catch (error) {
 				const message =
-					error instanceof Error ? error.message : "Failed to load working directory";
+					error instanceof Error
+						? error.message
+						: "Failed to load working directory";
 				store.setError(message);
 				throw error;
 			} finally {
@@ -91,7 +93,10 @@ export function useSidebarController(): SidebarController {
 			[],
 		),
 
-		selectSession: useCallback((id: string) => sessionManager.selectSession(id), []),
+		selectSession: useCallback(
+			(id: string) => sessionManager.selectSession(id),
+			[],
+		),
 
 		createNewSession: useCallback(() => sessionManager.createNewSession(), []),
 
@@ -115,7 +120,9 @@ export function createSidebarController(): SidebarController {
 				store.setWorkingDir(cwd);
 			} catch (error) {
 				const message =
-					error instanceof Error ? error.message : "Failed to load working directory";
+					error instanceof Error
+						? error.message
+						: "Failed to load working directory";
 				store.setError(message);
 				throw error;
 			} finally {

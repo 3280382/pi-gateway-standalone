@@ -1,16 +1,16 @@
 /**
  * SidebarPanel - Main Sidebar Container
- * 
+ *
  * 重构后：
  * - session 加载由 sessionManager 统一处理
  * - SidebarPanel 只负责 UI 渲染
  */
 
-import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { ChatSettings } from "@/features/chat/components/sidebar/ChatSettings/ChatSettings";
 import { RecentWorkspaces } from "@/features/chat/components/sidebar/RecentWorkspaces/RecentWorkspaces";
 import { Sessions } from "@/features/chat/components/sidebar/Sessions/Sessions";
-import { ChatSettings } from "@/features/chat/components/sidebar/ChatSettings/ChatSettings";
 import styles from "@/features/chat/components/sidebar/SidebarPanel/SidebarPanel.module.css";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 
 interface SidebarPanelProps {
 	onSwitchView?: (view: "chat" | "files") => void;

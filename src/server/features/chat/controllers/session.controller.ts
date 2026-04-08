@@ -8,8 +8,8 @@ import {
 	SessionManager,
 } from "@mariozechner/pi-coding-agent";
 import type { Request, Response } from "express";
-import { expandPath } from "../../files/utils";
 import { Logger, LogLevel } from "../../../lib/utils/logger";
+import { expandPath } from "../../files/utils";
 import { AGENT_DIR, getLocalSessionsDir } from "../agent-session/utils";
 
 const logger = new Logger({ level: LogLevel.INFO });
@@ -24,7 +24,9 @@ export async function getSessions(req: Request, res: Response) {
 	try {
 		const sessions = await SessionManager.list(cwd, localSessionsDir);
 
-		logger.info(`[getSessions] Loaded sessions: ${cwd}, count: ${sessions.length}`);
+		logger.info(
+			`[getSessions] Loaded sessions: ${cwd}, count: ${sessions.length}`,
+		);
 
 		// Print first session path for debugging
 		if (sessions.length > 0) {

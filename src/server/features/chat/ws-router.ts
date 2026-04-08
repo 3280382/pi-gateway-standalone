@@ -88,7 +88,9 @@ export class WSRouter {
 	 */
 	register(type: string, handler: WSHandler): void {
 		if (this.routes.has(type)) {
-			logger.warn(`[WSRouter] Message type "${type}" already registered, will be overwritten`);
+			logger.warn(
+				`[WSRouter] Message type "${type}" already registered, will be overwritten`,
+			);
 		}
 		this.routes.set(type, handler);
 		logger.info(`[WSRouter] Registered handler: ${type}`);
@@ -178,7 +180,9 @@ export class WSRouter {
 					JSON.stringify({
 						type: "error",
 						error:
-							error instanceof Error ? error.message : "Error occurred while processing message",
+							error instanceof Error
+								? error.message
+								: "Error occurred while processing message",
 						messageType: type,
 					}),
 				);

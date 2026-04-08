@@ -3,27 +3,27 @@
  * 连接Zustand Store与后端WebSocket，实现所有后端支持的功能
  */
 
+import {
+	abortChatGeneration,
+	createNewChatSession,
+	executeChatCommand,
+	initChatWorkingDirectory,
+	listChatModels,
+	listChatSessions,
+	sendChatMessage,
+	setChatLlmLogEnabled,
+	setChatModel,
+	steerChat,
+	switchChatSession,
+} from "@/features/chat/services/chatWebSocket";
 import { useChatStore } from "@/features/chat/stores/chatStore";
+import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import type {
 	ChatController,
 	Message,
 	ToolExecution,
 } from "@/features/chat/types/chat";
 import { websocketService } from "@/services/websocket.service";
-import { useSessionStore } from "@/features/chat/stores/sessionStore";
-import {
-	abortChatGeneration,
-	sendChatMessage,
-	steerChat,
-	createNewChatSession,
-	switchChatSession,
-	listChatSessions,
-	setChatModel,
-	listChatModels,
-	executeChatCommand,
-	setChatLlmLogEnabled,
-	initChatWorkingDirectory,
-} from "@/features/chat/services/chatWebSocket";
 
 // ============================================================================
 // Message ID Generator

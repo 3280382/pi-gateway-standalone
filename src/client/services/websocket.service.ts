@@ -1,6 +1,6 @@
 /**
  * WebSocket Service - 通用 WebSocket 连接服务
- * 
+ *
  * 职责（重构后）：
  * - 仅提供通用 WebSocket 连接管理
  * - 不包含任何 feature 特定的业务方法

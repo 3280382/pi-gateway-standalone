@@ -1,15 +1,15 @@
 /**
  * useChatInit - Chat 页面初始化 Hook
- * 
+ *
  * 职责：WebSocket 连接、session 恢复
  * 仅在 Chat 页面加载时执行
  */
 
 import { useCallback, useEffect, useState } from "react";
+import { useWorkspaceStore } from "@/features/files/stores";
 import { websocketService } from "@/services/websocket.service";
 import { setupWebSocketListeners } from "../services/api/chatApi";
 import { sessionManager } from "../services/sessionManager";
-import { useWorkspaceStore } from "@/features/files/stores";
 
 export function useChatInit(): { isConnecting: boolean } {
 	const [isConnecting, setIsConnecting] = useState(true);

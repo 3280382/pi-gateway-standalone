@@ -1,6 +1,6 @@
 /**
  * Sidebar Store - Zustand State Management
- * 
+ *
  * 职责（重构后）：
  * - 管理 Sidebar UI 状态
  * - 持久化 lastSessionByDir（目录 -> session 映射）
@@ -76,7 +76,11 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 				},
 
 				toggleVisibility: () => {
-					set((state) => ({ isVisible: !state.isVisible }), false, "toggleVisibility");
+					set(
+						(state) => ({ isVisible: !state.isVisible }),
+						false,
+						"toggleVisibility",
+					);
 				},
 
 				// Bottom Panel Actions

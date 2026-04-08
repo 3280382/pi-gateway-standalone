@@ -6,6 +6,7 @@
 import { homedir } from "node:os";
 import * as path from "node:path";
 import type { Request, Response } from "express";
+import { Logger, LogLevel } from "../../../lib/utils/logger";
 import {
 	expandPath,
 	getMimeType,
@@ -13,7 +14,6 @@ import {
 	isHighlightable,
 	isPathAllowed,
 } from "../utils";
-import { Logger, LogLevel } from "../../../lib/utils/logger";
 
 const logger = new Logger({ level: LogLevel.INFO });
 

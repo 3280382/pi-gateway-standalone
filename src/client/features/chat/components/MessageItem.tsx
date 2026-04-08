@@ -1,7 +1,7 @@
 /**
  * MessageItem - Compact Edition
  */
-import { memo, useMemo, useState, useCallback } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import type { Message, MessageContent } from "@/features/chat/types/chat";
 import styles from "./MessageItem.module.css";
 
@@ -20,7 +20,11 @@ function safeString(val: unknown): string {
 	if (val === null || val === undefined) return "";
 	if (typeof val === "string") return val;
 	if (typeof val === "object") {
-		if (val && "content" in val && typeof (val as Record<string, unknown>).content === "string") {
+		if (
+			val &&
+			"content" in val &&
+			typeof (val as Record<string, unknown>).content === "string"
+		) {
 			return (val as Record<string, string>).content;
 		}
 		return JSON.stringify(val, null, 2);
@@ -29,7 +33,11 @@ function safeString(val: unknown): string {
 }
 
 export const MessageItem = memo(
-	function MessageItem({ message, showThinking, showTools = true }: MessageItemProps) {
+	function MessageItem({
+		message,
+		showThinking,
+		showTools = true,
+	}: MessageItemProps) {
 		const isUser = message.role === "user";
 
 		const blocks = useMemo(() => {
@@ -82,7 +90,12 @@ interface GlassCardProps {
 	showTools: boolean;
 }
 
-function GlassCard({ block, isStreaming, showThinking, showTools }: GlassCardProps) {
+function GlassCard({
+	block,
+	isStreaming,
+	showThinking,
+	showTools,
+}: GlassCardProps) {
 	const [isExpanded, setIsExpanded] = useState(isStreaming);
 	const [showCopy, setShowCopy] = useState(false);
 
@@ -128,11 +141,16 @@ function GlassCard({ block, isStreaming, showThinking, showTools }: GlassCardPro
 									📋
 								</button>
 							)}
-							<span className={styles.toggleIcon}>{isExpanded ? "-" : "+"}</span>
+							<span className={styles.toggleIcon}>
+								{isExpanded ? "-" : "+"}
+							</span>
 						</div>
 					</div>
 					{isExpanded && (
-						<div className={styles.content} onClick={(e) => e.stopPropagation()}>
+						<div
+							className={styles.content}
+							onClick={(e) => e.stopPropagation()}
+						>
 							<code>{thinkingText}</code>
 						</div>
 					)}
@@ -166,11 +184,16 @@ function GlassCard({ block, isStreaming, showThinking, showTools }: GlassCardPro
 									📋
 								</button>
 							)}
-							<span className={styles.toggleIcon}>{isExpanded ? "-" : "+"}</span>
+							<span className={styles.toggleIcon}>
+								{isExpanded ? "-" : "+"}
+							</span>
 						</div>
 					</div>
 					{isExpanded && (
-						<div className={styles.content} onClick={(e) => e.stopPropagation()}>
+						<div
+							className={styles.content}
+							onClick={(e) => e.stopPropagation()}
+						>
 							<code>{toolArgs}</code>
 						</div>
 					)}
@@ -180,8 +203,14 @@ function GlassCard({ block, isStreaming, showThinking, showTools }: GlassCardPro
 
 		case "tool": {
 			if (!showTools) return null;
-			const status = block.error ? "error" : block.output ? "success" : "pending";
-			const toolContent = safeString(block.output || block.error || "Processing...");
+			const status = block.error
+				? "error"
+				: block.output
+					? "success"
+					: "pending";
+			const toolContent = safeString(
+				block.output || block.error || "Processing...",
+			);
 			return (
 				<div
 					className={`${styles.card} ${styles.toolResult}`}
@@ -205,11 +234,16 @@ function GlassCard({ block, isStreaming, showThinking, showTools }: GlassCardPro
 									📋
 								</button>
 							)}
-							<span className={styles.toggleIcon}>{isExpanded ? "-" : "+"}</span>
+							<span className={styles.toggleIcon}>
+								{isExpanded ? "-" : "+"}
+							</span>
 						</div>
 					</div>
 					{isExpanded && (
-						<div className={styles.content} onClick={(e) => e.stopPropagation()}>
+						<div
+							className={styles.content}
+							onClick={(e) => e.stopPropagation()}
+						>
 							<code>{toolContent}</code>
 						</div>
 					)}
@@ -260,7 +294,11 @@ function TextContent({ text }: { text: string }) {
 		<>
 			{lines.map((line, idx) => {
 				if (line.startsWith("```")) {
-					return <div key={idx} className={styles.codeBlockStart}>{line}</div>;
+					return (
+						<div key={idx} className={styles.codeBlockStart}>
+							{line}
+						</div>
+					);
 				}
 				const parts = line.split(/(`[^`]+`)/g);
 				return (
@@ -276,12 +314,20 @@ function TextContent({ text }: { text: string }) {
 							const boldParts = part.split(/(\*\*[^*]+\*\*)/g);
 							return boldParts.map((bp, bidx) => {
 								if (bp.startsWith("**") && bp.endsWith("**")) {
-									return <strong key={`${pidx}-${bidx}`}>{bp.slice(2, -2)}</strong>;
+									return (
+										<strong key={`${pidx}-${bidx}`}>{bp.slice(2, -2)}</strong>
+									);
 								}
 								const italicParts = bp.split(/(\*[^*]+\*)/g);
 								return italicParts.map((ip, iidx) => {
-									if (ip.startsWith("*") && ip.endsWith("*") && !ip.startsWith("**")) {
-										return <em key={`${pidx}-${bidx}-${iidx}`}>{ip.slice(1, -1)}</em>;
+									if (
+										ip.startsWith("*") &&
+										ip.endsWith("*") &&
+										!ip.startsWith("**")
+									) {
+										return (
+											<em key={`${pidx}-${bidx}-${iidx}`}>{ip.slice(1, -1)}</em>
+										);
 									}
 									return <span key={`${pidx}-${bidx}-${iidx}`}>{ip}</span>;
 								});

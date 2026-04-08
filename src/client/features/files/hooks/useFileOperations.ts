@@ -9,7 +9,6 @@
  */
 
 import { useCallback } from "react";
-import { useFileStore } from "@/features/files/stores/fileStore";
 import {
 	batchDeleteFiles,
 	batchMoveFiles,
@@ -17,6 +16,7 @@ import {
 	executeFileByPath,
 	loadDirectoryContent,
 } from "@/features/files/services/api/fileOperationsApi";
+import { useFileStore } from "@/features/files/stores/fileStore";
 import { fileBrowserDebug } from "@/lib/debug";
 
 export interface UseFileOperationsResult {

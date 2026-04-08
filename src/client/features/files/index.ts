@@ -2,34 +2,27 @@
  * Files Feature - 文件功能模块
  */
 
-// Stores
-export { useFileStore } from "@/features/files/stores/fileStore";
-
 // Services
 export { initializeFilePath } from "@/features/files/services/initialization";
-
-// Components - Header
-export { FileToolbar } from "./components/Header/FileToolbar";
-export { FileActionBar } from "./components/Header/FileActionBar";
-
-// Components - Sidebar
-export { FileSidebar } from "./components/Sidebar/FileSidebar";
-
+// Stores
+export { useFileStore } from "@/features/files/stores/fileStore";
+// Components - BottomMenu
+export { FileBottomMenu } from "./components/BottomMenu/FileBottomMenu";
 // Components - FileBrowser
 export { FileBrowser } from "./components/FileBrowser/FileBrowser";
 export { FileBrowserErrorBoundary } from "./components/FileBrowser/FileBrowserErrorBoundary";
 export { FileGrid } from "./components/FileBrowser/FileGrid";
-export { FileList } from "./components/FileBrowser/FileList";
 export { FileItem } from "./components/FileBrowser/FileItem";
-
-// Components - Viewer
-export { FileViewer } from "./components/Viewer/FileViewer";
-
-// Components - BottomMenu
-export { FileBottomMenu } from "./components/BottomMenu/FileBottomMenu";
-
+export { FileList } from "./components/FileBrowser/FileList";
+export { FileActionBar } from "./components/Header/FileActionBar";
+// Components - Header
+export { FileToolbar } from "./components/Header/FileToolbar";
 // Components - Modals
 export { BatchActionBar } from "./components/modals/BatchActionBar";
+// Components - Sidebar
+export { FileSidebar } from "./components/Sidebar/FileSidebar";
+// Components - Viewer
+export { FileViewer } from "./components/Viewer/FileViewer";
 
 // Page
 export { FilesPage } from "./page";

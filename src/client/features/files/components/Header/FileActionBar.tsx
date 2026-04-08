@@ -1,9 +1,9 @@
 import React from "react";
+import { useFileViewer } from "@/features/files/hooks";
 /**
  * FileActionBar - 选中文件操作栏
  */
 import { useFileStore } from "@/features/files/stores/fileStore";
-import { useFileViewer } from "@/features/files/hooks";
 import styles from "../FileBrowser/FileBrowser.module.css";
 
 // 可执行文件扩展名列表

@@ -7,9 +7,9 @@
  * - 输入处理
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { Terminal } from "@xterm/xterm";
 import type { FitAddon } from "@xterm/addon-fit";
+import type { Terminal } from "@xterm/xterm";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UseXTermOptions {
 	currentDir: string;
@@ -155,7 +155,12 @@ export function useXTerm({
 
 			requestAnimationFrame(() => {
 				fit.fit();
-				console.log("[XTermPanel] Terminal initialized:", term.cols, "x", term.rows);
+				console.log(
+					"[XTermPanel] Terminal initialized:",
+					term.cols,
+					"x",
+					term.rows,
+				);
 			});
 
 			// 处理输入

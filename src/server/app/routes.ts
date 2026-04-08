@@ -4,8 +4,8 @@
  */
 
 import type { Application } from "express";
-import type { LlmLogManager } from "../features/chat/llm/log-manager";
 import { registerChatHTTPRoutes } from "../features/chat/http-routes";
+import type { LlmLogManager } from "../features/chat/llm/log-manager";
 import {
 	registerFilesHTTPRoutes,
 	registerWorkspaceRoutes,

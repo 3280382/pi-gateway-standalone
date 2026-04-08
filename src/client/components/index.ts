@@ -2,4 +2,11 @@
  * Global UI Components
  */
 
-export { Icon, IconButton, IconToggle, type IconName, type IconProps, type IconButtonProps } from "@/components/Icon/Icon";
+export {
+	Icon,
+	IconButton,
+	type IconButtonProps,
+	type IconName,
+	type IconProps,
+	IconToggle,
+} from "@/components/Icon/Icon";

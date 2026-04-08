@@ -97,9 +97,7 @@ export function useImageUpload(): UseImageUploadReturn {
 					} catch {
 						setImages((prev) =>
 							prev.map((img) =>
-								img.id === imageId
-									? { ...img, isProcessingOCR: false }
-									: img,
+								img.id === imageId ? { ...img, isProcessingOCR: false } : img,
 							),
 						);
 					}

@@ -8,8 +8,8 @@
 
 import type React from "react";
 import { memo } from "react";
-import type { FileItem as FileItemType } from "@/features/files/stores/fileStore";
 import { useFileItemActions } from "@/features/files/hooks";
+import type { FileItem as FileItemType } from "@/features/files/stores/fileStore";
 import { FileItem } from "./FileItem";
 import styles from "./FileList.module.css";
 

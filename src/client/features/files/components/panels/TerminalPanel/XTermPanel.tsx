@@ -7,8 +7,8 @@
  */
 
 import { useCallback, useEffect, useRef } from "react";
-import { useWorkspaceStore } from "@/features/files/stores";
 import { useXTerm } from "@/features/files/hooks";
+import { useWorkspaceStore } from "@/features/files/stores";
 import "@xterm/xterm/css/xterm.css";
 
 interface XTermPanelProps {

@@ -1,17 +1,17 @@
 /**
  * Sessions Section
- * 
+ *
  * 重构后：
  * - 使用 sessionManager 处理 session 选择和加载
  * - 只负责 UI 渲染
  */
 
-import { sessionManager } from "@/features/chat/services/sessionManager";
-import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import type { Session } from "@/features/chat/types/sidebar";
 import { IconButton } from "@/components/Icon/Icon";
 import { SectionHeader } from "@/features/chat/components/SectionHeader/SectionHeader";
 import styles from "@/features/chat/components/sidebar/Sessions/Sessions.module.css";
+import { sessionManager } from "@/features/chat/services/sessionManager";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import type { Session } from "@/features/chat/types/sidebar";
 
 export function Sessions() {
 	const sessions = useSidebarStore((state) => state.sessions);
@@ -53,7 +53,10 @@ export function Sessions() {
 						<SessionItem
 							key={session.id}
 							session={session}
-							isSelected={session.id === selectedId || session.path.includes(selectedId || "")}
+							isSelected={
+								session.id === selectedId ||
+								session.path.includes(selectedId || "")
+							}
 							onClick={() => handleSelectSession(session.id)}
 						/>
 					))

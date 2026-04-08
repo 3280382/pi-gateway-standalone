@@ -9,19 +9,17 @@ export { useChatMessages } from "@/features/chat/hooks/useChatMessages";
 
 // ChatPanel 相关 Hooks
 export { useChatPanel } from "@/features/chat/hooks/useChatPanel";
-
-// InputArea 相关 Hooks
-export { useInputArea } from "@/features/chat/hooks/useInputArea";
-export { useFilePicker } from "@/features/chat/hooks/useFilePicker";
-export { useImageUpload } from "@/features/chat/hooks/useImageUpload";
-export { useSlashCommands } from "@/features/chat/hooks/useSlashCommands";
-
 // AppHeader 相关 Hooks
 export { useDirectoryPicker } from "@/features/chat/hooks/useDirectoryPicker";
+export { useFilePicker } from "@/features/chat/hooks/useFilePicker";
+export { useImageUpload } from "@/features/chat/hooks/useImageUpload";
+// InputArea 相关 Hooks
+export { useInputArea } from "@/features/chat/hooks/useInputArea";
 export { useModelSelector } from "@/features/chat/hooks/useModelSelector";
-export {
-	useThinkingSelector,
-	THINKING_LEVELS,
-} from "@/features/chat/hooks/useThinkingSelector";
-export { useSearchFilters } from "@/features/chat/hooks/useSearchFilters";
 export type { SearchFilters } from "@/features/chat/hooks/useSearchFilters";
+export { useSearchFilters } from "@/features/chat/hooks/useSearchFilters";
+export { useSlashCommands } from "@/features/chat/hooks/useSlashCommands";
+export {
+	THINKING_LEVELS,
+	useThinkingSelector,
+} from "@/features/chat/hooks/useThinkingSelector";

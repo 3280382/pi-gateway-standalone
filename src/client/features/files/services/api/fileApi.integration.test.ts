@@ -4,12 +4,12 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { FileItem } from "@/features/files/stores/fileStore";
 import type {
 	BrowseResponse,
 	FileExecuteResponse,
 	FileReadResponse,
 } from "./fileApi";
-import type { FileItem } from "@/features/files/stores/fileStore";
 
 // Mock fetch
 global.fetch = vi.fn();

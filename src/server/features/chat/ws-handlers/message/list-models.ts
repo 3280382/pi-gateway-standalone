@@ -34,7 +34,9 @@ export async function handleListModels(
 			}),
 		);
 
-		logger.info(`[WebSocket] list_models successful: ${available.length} models`);
+		logger.info(
+			`[WebSocket] list_models successful: ${available.length} models`,
+		);
 	} catch (error) {
 		logger.error(
 			"[WebSocket] list_models error:",

@@ -24,4 +24,4 @@ export {
 export { fetchApi } from "./client";
 
 // WebSocket
-export { websocketService, ServiceError } from "./websocket.service";
+export { ServiceError, websocketService } from "./websocket.service";

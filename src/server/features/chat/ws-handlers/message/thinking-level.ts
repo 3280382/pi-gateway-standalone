@@ -21,7 +21,9 @@ export async function handleThinkingLevelChange(
 ): Promise<void> {
 	const { thinkingLevel } = payload;
 
-	logger.info(`[WebSocket] Received thinking_level_change message: ${thinkingLevel}`);
+	logger.info(
+		`[WebSocket] Received thinking_level_change message: ${thinkingLevel}`,
+	);
 
 	// Check if session is initialized
 	if (!ctx.session.session) {
@@ -47,7 +49,10 @@ export async function handleThinkingLevelChange(
 		ctx.ws.send(
 			JSON.stringify({
 				type: "error",
-				error: error instanceof Error ? error.message : "Failed to set thinking level",
+				error:
+					error instanceof Error
+						? error.message
+						: "Failed to set thinking level",
 			}),
 		);
 	}

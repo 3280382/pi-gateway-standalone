@@ -5,8 +5,8 @@
  */
 
 import { useCallback } from "react";
-import { useFileStore } from "@/features/files/stores/fileStore";
 import type { FileItem } from "@/features/files/stores/fileStore";
+import { useFileStore } from "@/features/files/stores/fileStore";
 
 export interface UseFileCacheResult {
 	getCachedItems: (path: string) => FileItem[] | null;

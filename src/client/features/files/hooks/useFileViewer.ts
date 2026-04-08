@@ -21,13 +21,43 @@ import { fileViewerDebug } from "@/lib/debug";
 
 // 文件类型配置
 const FILE_TYPES = {
-	image: ["png", "jpg", "jpeg", "gif", "svg", "webp", "ico", "bmp", "tiff", "tif"],
+	image: [
+		"png",
+		"jpg",
+		"jpeg",
+		"gif",
+		"svg",
+		"webp",
+		"ico",
+		"bmp",
+		"tiff",
+		"tif",
+	],
 	html: ["html", "htm"],
 	markdown: ["md", "markdown"],
 	code: [
-		"js", "ts", "jsx", "tsx", "py", "java", "c", "cpp", "h", "hpp",
-		"cs", "go", "rs", "php", "rb", "pl", "sh", "bash", "zsh",
-		"ps1", "bat", "cmd",
+		"js",
+		"ts",
+		"jsx",
+		"tsx",
+		"py",
+		"java",
+		"c",
+		"cpp",
+		"h",
+		"hpp",
+		"cs",
+		"go",
+		"rs",
+		"php",
+		"rb",
+		"pl",
+		"sh",
+		"bash",
+		"zsh",
+		"ps1",
+		"bat",
+		"cmd",
 	],
 	json: ["json"],
 	xml: ["xml", "xsl", "xslt"],
@@ -35,8 +65,20 @@ const FILE_TYPES = {
 	css: ["css", "scss", "sass", "less"],
 	sql: ["sql"],
 	executable: [
-		"sh", "py", "js", "ts", "bash", "zsh", "pl", "rb",
-		"php", "go", "java", "c", "cpp", "rs",
+		"sh",
+		"py",
+		"js",
+		"ts",
+		"bash",
+		"zsh",
+		"pl",
+		"rb",
+		"php",
+		"go",
+		"java",
+		"c",
+		"cpp",
+		"rs",
 	],
 	nonEditable: ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"],
 };
@@ -44,16 +86,48 @@ const FILE_TYPES = {
 // 语言映射 - 用于 Prism.js (查看模式) 和 CodeMirror (编辑模式)
 const LANG_MAP: Record<string, string> = {
 	// JavaScript/TypeScript - Prism 和 CodeMirror 都使用这些标识
-	js: "javascript", ts: "typescript", jsx: "jsx", tsx: "tsx",
+	js: "javascript",
+	ts: "typescript",
+	jsx: "jsx",
+	tsx: "tsx",
 	// 其他语言
-	py: "python", java: "java", c: "c", cpp: "cpp", h: "c", hpp: "cpp",
-	cs: "csharp", go: "go", rs: "rust", php: "php", rb: "ruby",
-	pl: "perl", swift: "swift", kt: "kotlin", scala: "scala", lua: "lua", r: "r",
-	sh: "bash", bash: "bash", zsh: "bash", ps1: "powershell", bat: "batch", cmd: "batch",
-	html: "html", htm: "html", xml: "xml", xsl: "xml", xslt: "xml",
-	md: "markdown", markdown: "markdown",
-	json: "json", yaml: "yaml", yml: "yaml",
-	css: "css", scss: "scss", sass: "sass", less: "less",
+	py: "python",
+	java: "java",
+	c: "c",
+	cpp: "cpp",
+	h: "c",
+	hpp: "cpp",
+	cs: "csharp",
+	go: "go",
+	rs: "rust",
+	php: "php",
+	rb: "ruby",
+	pl: "perl",
+	swift: "swift",
+	kt: "kotlin",
+	scala: "scala",
+	lua: "lua",
+	r: "r",
+	sh: "bash",
+	bash: "bash",
+	zsh: "bash",
+	ps1: "powershell",
+	bat: "batch",
+	cmd: "batch",
+	html: "html",
+	htm: "html",
+	xml: "xml",
+	xsl: "xml",
+	xslt: "xml",
+	md: "markdown",
+	markdown: "markdown",
+	json: "json",
+	yaml: "yaml",
+	yml: "yaml",
+	css: "css",
+	scss: "scss",
+	sass: "sass",
+	less: "less",
 	sql: "sql",
 };
 
@@ -83,7 +157,7 @@ export interface FileTypeInfo {
 export interface UseFileViewerResult {
 	// 文件类型信息
 	fileTypes: FileTypeInfo;
-	
+
 	// 操作方法
 	loadFile: () => Promise<void>;
 	saveFile: () => Promise<void>;
@@ -113,7 +187,10 @@ export function useFileViewer(): UseFileViewerResult {
 	const abortRef = useRef<AbortController | null>(null);
 
 	// 文件扩展名
-	const ext = useMemo(() => fileName.split(".").pop()?.toLowerCase() || "", [fileName]);
+	const ext = useMemo(
+		() => fileName.split(".").pop()?.toLowerCase() || "",
+		[fileName],
+	);
 
 	// 文件类型判断
 	const fileTypes = useMemo<FileTypeInfo>(() => {

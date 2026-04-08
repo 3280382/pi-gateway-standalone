@@ -19,7 +19,9 @@ export async function handleLoadSession(
 ): Promise<void> {
 	const { sessionPath } = payload;
 
-	logger.info(`[WebSocket] Received load_session message: sessionPath=${sessionPath}`);
+	logger.info(
+		`[WebSocket] Received load_session message: sessionPath=${sessionPath}`,
+	);
 
 	// Check if session is initialized
 	if (!ctx.session.session) {
@@ -47,7 +49,8 @@ export async function handleLoadSession(
 			JSON.stringify({
 				type: "session_loaded",
 				success: false,
-				error: error instanceof Error ? error.message : "Failed to load session",
+				error:
+					error instanceof Error ? error.message : "Failed to load session",
 			}),
 		);
 	}

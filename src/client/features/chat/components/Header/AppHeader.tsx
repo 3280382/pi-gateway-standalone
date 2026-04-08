@@ -8,18 +8,16 @@ import { useEffect, useRef, useState } from "react";
 import { SystemPromptModal } from "@/features/chat/components/modals/SystemPromptModal";
 import { useChatController } from "@/features/chat/services/api/chatApi";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
-import {
-	
-} from "@/features/chat/services/api/systemPromptApi";
+import {} from "@/features/chat/services/api/systemPromptApi";
 import {
 	selectSearchFilters,
 	selectSearchQuery,
 	useChatStore,
 } from "@/features/chat/stores/chatStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
+import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useWorkspaceStore } from "@/features/files/stores";
 import { websocketService } from "@/services/websocket.service";
-import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import styles from "./AppHeader.module.css";
 
 // DirectoryPicker component for selecting working directory
@@ -165,7 +163,7 @@ export function AppHeader({
 		currentModel,
 		thinkingLevel,
 		setThinkingLevel,
-		
+
 		serverPid,
 		isConnected,
 	} = useSessionStore();
@@ -350,10 +348,7 @@ export function AppHeader({
 	// Files 视图：显示文件工具栏
 	if (currentView === "files") {
 		return (
-			<FileToolbarAppHeader
-				connectionStatus={connectionStatus}
-				pid={pid}
-			/>
+			<FileToolbarAppHeader connectionStatus={connectionStatus} pid={pid} />
 		);
 	}
 

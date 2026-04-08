@@ -30,7 +30,9 @@ export class FileBrowserErrorBoundary extends Component<Props, State> {
 	componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
 		// 强制显示到控制台
 		console.error("=".repeat(60));
-		console.error(`[FileBrowserErrorBoundary] ${this.props.componentName || "unknown component"} crashed!`);
+		console.error(
+			`[FileBrowserErrorBoundary] ${this.props.componentName || "unknown component"} crashed!`,
+		);
 		console.error("Error:", error);
 		console.error("Stack:", error.stack);
 		console.error("Component Stack:", errorInfo.componentStack);
@@ -40,11 +42,13 @@ export class FileBrowserErrorBoundary extends Component<Props, State> {
 		if (this.props.onError) {
 			this.props.onError(error, this.props.componentName);
 		}
-		
+
 		// 发送全局事件以便调试
-		window.dispatchEvent(new CustomEvent("filebrowser-error", { 
-			detail: { error, componentName: this.props.componentName }
-		}));
+		window.dispatchEvent(
+			new CustomEvent("filebrowser-error", {
+				detail: { error, componentName: this.props.componentName },
+			}),
+		);
 	}
 	handleRetry = (): void => {
 		this.setState({
