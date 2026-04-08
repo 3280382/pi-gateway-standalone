@@ -191,7 +191,57 @@ export function useChatPanel(): UseChatPanelReturn {
 					}
 					break;
 				case "read":
-					if (args) chatController.sendMessage(`/read ${args}`);
+				case "write":
+				case "edit":
+				case "ls":
+				case "grep":
+				case "tree":
+				case "git":
+					if (args || command === "ls" || command === "tree") {
+						setShouldScrollToBottom(true);
+
+						// 添加用户输入的消息
+						const chatStore = useChatStore.getState();
+						const cmdText = args ? `/${command} ${args}` : `/${command}`;
+						const userMessage: Message = {
+							id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+							role: "user",
+							content: [{ type: "text", text: cmdText }],
+							timestamp: new Date(),
+						};
+						chatStore.addMessage(userMessage);
+
+						// 执行命令
+						chatController
+							.executeCommand(cmdText.replace(/^\//, ""))
+							.then((result) => {
+								// 添加执行结果
+								const resultText =
+									result.output || result.error || "命令执行完成";
+								const systemMessage: Message = {
+									id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+									role: "system",
+									content: [{ type: "text", text: resultText }],
+									timestamp: new Date(),
+								};
+								chatStore.addMessage(systemMessage);
+							})
+							.catch((err) => {
+								// 添加错误消息
+								const errorMessage: Message = {
+									id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+									role: "system",
+									content: [
+										{
+											type: "text",
+											text: `命令执行失败: ${err.message || String(err)}`,
+										},
+									],
+									timestamp: new Date(),
+								};
+								chatStore.addMessage(errorMessage);
+							});
+					}
 					break;
 				default:
 					chatController.sendMessage(`/${command} ${args}`.trim());
