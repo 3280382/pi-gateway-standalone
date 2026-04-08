@@ -11,6 +11,8 @@ import React from "react";
 import styles from "@/features/files/components/BottomMenu/FileBottomMenu.module.css";
 import { TreeViewModal } from "@/features/files/components/modals/TreeViewModal";
 import { useFileBottomMenu } from "@/features/files/hooks";
+import { useFileNavigation } from "@/features/files/hooks/useFileNavigation";
+import { useFileStore } from "@/features/files/stores/fileStore";
 
 export function FileBottomMenu() {
 	const {
@@ -32,9 +34,50 @@ export function FileBottomMenu() {
 		handleCloseTree,
 	} = useFileBottomMenu();
 
+	// 导航功能
+	const { navigateUp, navigateHome, canNavigateUp } = useFileNavigation();
+	// 刷新功能
+	const { refresh, viewMode, toggleViewMode } = useFileStore();
+
 	return (
 		<>
 			<div className={styles.menu}>
+				{/* 导航按钮组 */}
+				<button
+					className={`${styles.btn} ${styles.navBtn}`}
+					onClick={navigateHome}
+					title="Home"
+				>
+					<HomeIcon />
+				</button>
+				<button
+					className={`${styles.btn} ${styles.navBtn}`}
+					onClick={() => window.location.reload()}
+					title="Refresh"
+				>
+					<RefreshIcon />
+				</button>
+				<button
+					className={`${styles.btn} ${styles.navBtn}`}
+					onClick={navigateUp}
+					disabled={!canNavigateUp}
+					title="Go Up"
+				>
+					<UpIcon />
+				</button>
+				{/* 分隔 */}
+				<div className={styles.divider} />
+				{/* 视图切换 */}
+				<button
+					className={`${styles.btn} ${styles.viewBtn}`}
+					onClick={toggleViewMode}
+					title={viewMode === "grid" ? "List View" : "Grid View"}
+				>
+					{viewMode === "grid" ? <ListIcon /> : <GridIcon />}
+				</button>
+				{/* 分隔 */}
+				<div className={styles.divider} />
+				{/* 原有按钮 */}
 				<button
 					className={`${styles.btn} ${styles.newBtn}`}
 					onClick={handleNewClick}
@@ -138,6 +181,56 @@ export function FileBottomMenu() {
 }
 
 // Icons
+function HomeIcon() {
+	return (
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+			<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+			<polyline points="9 22 9 12 15 12 15 22" />
+		</svg>
+	);
+}
+
+function RefreshIcon() {
+	return (
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+			<polyline points="23 4 23 10 17 10" />
+			<path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+		</svg>
+	);
+}
+
+function UpIcon() {
+	return (
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+			<path d="M12 19V5M5 12l7-7 7 7" />
+		</svg>
+	);
+}
+
+function ListIcon() {
+	return (
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+			<line x1="8" y1="6" x2="21" y2="6" />
+			<line x1="8" y1="12" x2="21" y2="12" />
+			<line x1="8" y1="18" x2="21" y2="18" />
+			<line x1="3" y1="6" x2="3.01" y2="6" />
+			<line x1="3" y1="12" x2="3.01" y2="12" />
+			<line x1="3" y1="18" x2="3.01" y2="18" />
+		</svg>
+	);
+}
+
+function GridIcon() {
+	return (
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+			<rect x="3" y="3" width="7" height="7" />
+			<rect x="14" y="3" width="7" height="7" />
+			<rect x="14" y="14" width="7" height="7" />
+			<rect x="3" y="14" width="7" height="7" />
+		</svg>
+	);
+}
+
 function NewIcon() {
 	return (
 		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -177,15 +270,6 @@ function WarningIcon() {
 			<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
 			<line x1="12" y1="9" x2="12" y2="13" />
 			<line x1="12" y1="17" x2="12.01" y2="17" />
-		</svg>
-	);
-}
-
-function CloseIcon() {
-	return (
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-			<line x1="18" y1="6" x2="6" y2="18" />
-			<line x1="6" y1="6" x2="18" y2="18" />
 		</svg>
 	);
 }

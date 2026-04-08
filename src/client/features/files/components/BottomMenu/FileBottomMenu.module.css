@@ -1,4 +1,6 @@
-/* FileBottomMenu - 文件底部菜单 */
+/* FileBottomMenu - 文件底部菜单
+ * 样式与 Chat InputArea Toolbar 统一
+ */
 
 .menu {
 	display: flex;
@@ -6,54 +8,101 @@
 	padding: 4px 8px;
 	background: rgba(13, 17, 23, 0.95);
 	border-top: 1px solid rgba(48, 54, 61, 0.5);
+	align-items: center;
 }
 
+/* 统一按钮基础样式 - 与 Chat toolbarBtn 一致 */
 .btn {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 32px;
-	height: 32px;
+	width: 28px;
+	height: 28px;
 	padding: 0;
 	border: none;
 	border-radius: 6px;
-	background: rgba(255, 255, 255, 0.03);
-	color: #8b949e;
+	background: var(--unified-blue-dim, rgba(88, 166, 255, 0.1));
+	color: var(--unified-blue, #58a6ff);
 	cursor: pointer;
 	transition: all 0.15s ease;
 }
 
-.btn:hover {
-	background: rgba(255, 255, 255, 0.08);
-	color: #e6edf3;
+.btn:hover:not(:disabled) {
+	background: var(--unified-blue-dim-hover, rgba(88, 166, 255, 0.2));
+	color: var(--unified-blue-hover, #79b8ff);
 }
 
 .btn:disabled {
-	opacity: 0.4;
+	opacity: 0.35;
 	cursor: not-allowed;
 }
 
 .btn svg {
-	width: 18px;
-	height: 18px;
+	width: 15px;
+	height: 15px;
 }
 
-/* 新建按钮 */
-.newBtn:hover {
-	background: rgba(35, 134, 54, 0.15);
-	color: #3fb950;
+/* 分隔线 */
+.divider {
+	width: 1px;
+	height: 20px;
+	background: rgba(48, 54, 61, 0.5);
+	margin: 0 4px;
 }
 
-/* 树状视图按钮 */
-.treeBtn:hover {
-	background: rgba(88, 166, 255, 0.15);
-	color: #58a6ff;
+/* 导航按钮 - 青色主题（与Chat区分） */
+.navBtn {
+	background: rgba(34, 211, 238, 0.15);
+	color: #22d3ee;
 }
 
-/* 删除按钮 */
-.deleteBtn:hover {
-	background: rgba(218, 54, 51, 0.15);
-	color: #f85149;
+.navBtn:hover:not(:disabled) {
+	background: rgba(34, 211, 238, 0.25);
+	color: #67e8f9;
+}
+
+/* 视图按钮 - 紫灰色主题 */
+.viewBtn {
+	background: rgba(168, 162, 200, 0.15);
+	color: #a8a2c8;
+}
+
+.viewBtn:hover:not(:disabled) {
+	background: rgba(168, 162, 200, 0.25);
+	color: #c4bfe9;
+}
+
+/* 新建按钮 -  emerald绿色主题 */
+.newBtn {
+	background: rgba(52, 211, 153, 0.15);
+	color: #34d399;
+}
+
+.newBtn:hover:not(:disabled) {
+	background: rgba(52, 211, 153, 0.25);
+	color: #6ee7b7;
+}
+
+/* 树状视图按钮 -  amber橙色主题 */
+.treeBtn {
+	background: rgba(251, 191, 36, 0.15);
+	color: #fbbf24;
+}
+
+.treeBtn:hover:not(:disabled) {
+	background: rgba(251, 191, 36, 0.25);
+	color: #fcd34d;
+}
+
+/* 删除按钮 - rose红色主题 */
+.deleteBtn {
+	background: rgba(251, 113, 133, 0.15);
+	color: #fb7185;
+}
+
+.deleteBtn:hover:not(:disabled) {
+	background: rgba(251, 113, 133, 0.25);
+	color: #fda4af;
 }
 
 /* ============ 对话框通用样式 ============ */
