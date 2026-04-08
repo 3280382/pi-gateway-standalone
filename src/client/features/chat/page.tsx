@@ -11,6 +11,7 @@ import { ChatPanel } from "@/features/chat/components/ChatPanel";
 import { AppHeader } from "@/features/chat/components/Header";
 import { LlmLogPanel } from "@/features/chat/components/panels/LlmLogPanel";
 import { SidebarPanel } from "@/features/chat/components/sidebar/SidebarPanel/SidebarPanel";
+import { SystemPromptModal } from "@/features/chat/components/modals/SystemPromptModal";
 import { useChatInit, useChatMessages } from "@/features/chat/hooks";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 
@@ -100,6 +101,7 @@ export function ChatPage({ active = false }: ChatPageProps) {
 	}
 
 	return (
+		<>
 		<div
 			className={styles.layout}
 			style={{ display: active ? "flex" : "none" }}
@@ -125,6 +127,10 @@ export function ChatPage({ active = false }: ChatPageProps) {
 				</main>
 			</div>
 		</div>
+
+		{/* Modals */}
+		<SystemPromptModal />
+	</>
 	);
 }
 
