@@ -80,17 +80,20 @@ App (100vh flex column)
 ├── PageContainer (flex: 1)
 │   ├── ChatPage
 │   │   └── ChatLayout
-│   │       ├── AppHeader (76px)
+│   │       ├── AppHeader (76px, two-row)
+│   │       │   ├── Row 1: WorkingDir | Thinking | Status
+│   │       │   └── Row 2: Search | Model
 │   │       ├── SidebarPanel (280px overlay)
 │   │       └── ChatPanel (flex: 1)
 │   │           ├── MessageList
-│   │           └── InputArea
+│   │           └── InputArea (with toolbar)
 │   │
 │   └── FilesPage
 │       └── FilesLayout
-│           ├── FileToolbar
+│           ├── FileToolbar (76px, two-row)
 │           ├── FileSidebar (280px overlay)
-│           └── FileBrowser (flex: 1)
+│           ├── FileBrowser (flex: 1)
+│           └── FileBottomMenu (toolbar with navigation)
 │
 └── Footer (44px)
 ```
@@ -412,6 +415,17 @@ Chat feature adopts **Hook-Based Architecture**, completely separating business 
 | `useChat` | Basic chat operations | Multiple components |
 | `useChatInit` | Initialization logic | ChatPage |
 | `useChatMessages` | Message filtering | MessageList |
+
+#### File Feature Hooks
+
+| Hook | Purpose | Corresponding Component |
+|------|---------|------------------------|
+| `useFileBrowser` | File browser main logic | FileBrowser |
+| `useFileNavigation` | Navigate up, home, refresh | FileBottomMenu |
+| `useFileFiltering` | Filter and sort files | FileToolbar |
+| `useFileBottomMenu` | Bottom menu actions | FileBottomMenu |
+| `useDragDrop` | Drag and drop file operations | FileBrowser |
+| `useFileTree` | Directory tree loading | FileSidebar, TreeViewModal |
 
 #### Development Standards
 

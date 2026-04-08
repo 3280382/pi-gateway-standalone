@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **UI Style Unification**: Unified Chat and File component styles
+  - Two-row header layout (76px total: 38px per row) for both Chat and File views
+  - Chat AppHeader: Row 1 (Working Directory + Thinking Level + Status), Row 2 (Search + Model)
+  - FileToolbar: Matching two-row layout with path bar, filter/sort, view toggle
+  - Unified button styles: 28x28px with 15x15px icons, consistent border-radius (6px)
+  - Unified border colors: rgba(48, 54, 61, 0.5) across all components
+  - Moved System Prompt button from AppHeader to InputArea toolbar
+  - Filter badge now integrated inside search input (right-aligned)
+- **FileBottomMenu Enhancement**: New navigation and view controls
+  - Navigation buttons: Home, Refresh, Up (cyan theme)
+  - View toggle: Grid/List switch (purple-gray theme)
+  - New file button: Create files (emerald theme)
+  - Tree view button: Fullscreen directory tree (amber theme)
+  - Delete button: Delete selected files (rose theme)
 - **Client Chat Feature Hooks Architecture**: Complete refactor of chat feature with hook-based architecture
   - New hooks: `useChatPanel`, `useInputArea`, `useFilePicker`, `useImageUpload`, `useSlashCommands`
   - New hooks: `useDirectoryPicker`, `useModelSelector`, `useThinkingSelector`, `useSearchFilters`

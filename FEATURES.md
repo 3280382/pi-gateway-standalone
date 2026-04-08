@@ -14,26 +14,26 @@ All views share a unified layout framework:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Header (64px) - TopBar                                      │
-│ ├─ Row1: [System Prompt] [Model Select ▼] [Thinking ▼] [Status ● PID]  │
-│ └─ Row2: [📁 Working Dir]          [🔍 Search Box]                │
+│ Header (76px) - TopBar (Two-Row Layout)                     │
+│ ├─ Row1: [📁 Working Dir] [Thinking ▼]         [Status ● PID]      │
+│ └─ Row2: [🔍 Search Box + Filter]              [Model Select ▼]    │
 ├──────────┬──────────────────────────────────────────────────┤
 │          │                                                  │
-│ Sidebar  │  Content (Main Content Area)                              │
-│ (Collapsible) │  ├─ contentBody                                  │
-│ 280px    │  │   • Chat: MessageList (Message List)              │
-│          │  │   • Files: FileBrowser (File Browser)           │
-│ Recent Workspaces│  │                                               │
-│ Session List  │  └─ inputArea (Input Box, Chat view only)        │
-│ Settings      │                                                  │
+│ Sidebar  │  Content (Main Content Area)                     │
+│ (Collapsible) │  ├─ contentBody                             │
+│ 280px    │  │   • Chat: MessageList (Message List)         │
+│          │  │   • Files: FileBrowser (File Browser)        │
+│ Recent Workspaces│  │                                      │
+│ Session List  │  └─ inputArea (Input Box, Chat view only)   │
+│ Settings      │       [System Prompt] [@] [/] [!] [Image]   │
 ├──────────┴──────────────────────────────────────────────────┤
 │ Footer (44px) - BottomMenu                                  │
-│ [← Sidebar] [💬 Chat] [📁 Files] [↑ Bottom Panel]               │
+│ [← Sidebar] [💬 Chat] [📁 Files] [↑ Bottom Panel]           │
 ├─────────────────────────────────────────────────────────────┤
 │ BottomPanel (Pop-up, overlay)                               │
-│ ├─ Drag to resize height                                            │
-│ ├─ Terminal output (File execution results)                                  │
-│ └─ Preview content                                                │
+│ ├─ Drag to resize height                                    │
+│ ├─ Terminal output (File execution results)                 │
+│ └─ Preview content                                          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -41,10 +41,10 @@ All views share a unified layout framework:
 
 | Area | Responsibility | Height/Width | Desktop | Mobile |
 |------|---------------|--------------|---------|--------|
-| **Header** | Model selection, Thinking level, Working directory, Search | 64px | Fixed top | Fixed top (56px) |
+| **Header** | Model selection, Thinking level, Working directory, Search | 76px (38px x 2 rows) | Fixed top | Fixed top (56px) |
 | **Sidebar** | Recent workspaces, Session list, Settings | 280px | Left collapsible | Drawer overlay |
 | **Content** | Main content (Message list/File browser) | flex:1 | Right main area | Full width |
-| **InputArea** | Chat input box | auto | Bottom of Content | Bottom of Content |
+| **InputArea** | Chat input box + toolbar buttons | auto | Bottom of Content | Bottom of Content |
 | **Footer** | View switcher, Sidebar control | 44px | Fixed bottom | Fixed bottom |
 | **BottomPanel** | Terminal/Preview | Variable | Pops up from above Footer | Pops up from above Footer |
 
@@ -54,19 +54,21 @@ All views share a unified layout framework:
 
 ### 2.1 TopBar (Top Menu)
 
-#### Row 1 - Main Controls
-| Feature | Description | Status |
-|---------|-------------|--------|
-| System Prompt Button | Display AGENTS.md and SYSTEM prompts | ✅ |
-| Model Selector | Select AI model (deepseek-chat, etc.) | ✅ |
-| Thinking Level | None/Low/Med/High/XHigh | ✅ |
-| Connection Status | Green dot + PID display | ✅ |
+Chat view adopts a two-row header layout (76px total, 38px per row):
 
-#### Row 2 - Working Directory and Search
+#### Row 1 - Directory, Thinking Level, and Status
 | Feature | Description | Status |
 |---------|-------------|--------|
-| Working Directory Button | Click to open directory picker | ✅ |
-| Search Box | Search history messages, supports filters | ✅ |
+| Working Directory Button | Click to open directory picker, displays current path | ✅ |
+| Thinking Level Selector | Thinking level dropdown (None/Low/Med/High/XHigh) | ✅ |
+| Connection Status | Green/red dot + PID display | ✅ |
+
+#### Row 2 - Search and Model Selection
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Search Box | Message search with integrated filter badge inside input | ✅ |
+| Filter Dropdown | Filter by User/Assistant/Thinking/Tools | ✅ |
+| Model Selector | AI model selection dropdown | ✅ |
 
 ---
 
@@ -102,8 +104,12 @@ All views share a unified layout framework:
 | Feature | Description | Status |
 |---------|-------------|--------|
 | Multi-line Input | Supports multi-line text, auto-growing | ✅ |
+| Toolbar Buttons | System Prompt, @ File, / Command, ! Shell, Image upload | ✅ |
 | @ File Reference | Click @ button or type @ to trigger file picker | ✅ |
 | / Slash Command | Click / button or type / to trigger command menu | ✅ |
+| ! Shell Command | Execute shell commands directly | ✅ |
+| Image Upload | Upload images with OCR support | ✅ |
+| System Prompt | View AGENTS.md and SYSTEM prompts | ✅ |
 | Send Button | Paper plane icon, sends message | ✅ |
 | Stop Button | Can stop during streaming output | ✅ |
 | New Session Button | Create new session | ✅ |
@@ -122,6 +128,15 @@ All views share a unified layout framework:
 | File Preview | Text file preview, code highlighting | ✅ |
 | File Edit | Built-in editor, supports saving | ✅ |
 | File Execute | Execute scripts in terminal | ✅ |
+
+#### FileBottomMenu (File Bottom Menu)
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Navigation Buttons | Home, Refresh, Up (cyan theme) | ✅ |
+| View Toggle | Grid/List view switch (purple-gray theme) | ✅ |
+| New File | Create new file/directory (emerald theme) | ✅ |
+| Tree View | Fullscreen directory tree view (amber theme) | ✅ |
+| Delete | Delete selected files (rose theme) | ✅ |
 
 ---
 
