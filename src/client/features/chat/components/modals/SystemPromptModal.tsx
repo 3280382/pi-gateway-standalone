@@ -42,7 +42,7 @@ export function SystemPromptModal() {
 	// Domain State
 	const { isSystemPromptOpen, closeSystemPrompt } = useModalStore();
 	const resourceFiles = useSessionStore((state) => state.resourceFiles);
-	const currentDir = useSessionStore((state) => state.currentDir);
+	const workingDir = useSessionStore((state) => state.workingDir);
 
 	// UI State
 	const [data, setData] = useState<SystemPromptData | null>(null);
@@ -64,7 +64,7 @@ export function SystemPromptModal() {
 
 			try {
 				// Fetch system prompt data
-				const cwd = currentDir || "/root";
+				const cwd = workingDir || "/root";
 				const res = await fetch(
 					`/api/system-prompt?cwd=${encodeURIComponent(cwd)}`,
 				);
@@ -113,7 +113,7 @@ export function SystemPromptModal() {
 		};
 
 		load();
-	}, [isSystemPromptOpen, currentDir]);
+	}, [isSystemPromptOpen, workingDir]);
 
 	if (!isSystemPromptOpen) return null;
 

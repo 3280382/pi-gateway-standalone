@@ -28,7 +28,7 @@ export function FilesPage({ active = false }: FilesPageProps) {
 
 	// 从store获取布局状态
 	const {
-		currentPath,
+		workingDir,
 		isSidebarVisible,
 		isBottomPanelOpen,
 		bottomPanelHeight,
@@ -73,7 +73,7 @@ export function FilesPage({ active = false }: FilesPageProps) {
 			{/* FileToolbar - 文件浏览器专用顶部工具栏 */}
 			<header className={styles.header}>
 				<FileToolbar
-					currentPath={currentPath}
+					workingDir={workingDir}
 					onRefresh={refresh}
 					onNavigate={navigateTo}
 				/>

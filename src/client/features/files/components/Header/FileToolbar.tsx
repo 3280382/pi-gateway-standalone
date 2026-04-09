@@ -34,10 +34,12 @@ const SORT_OPTIONS: { value: SortMode; icon: string; label: string }[] = [
 ];
 
 interface FileToolbarProps {
-	currentPath: string;
+	workingDir: string;
+	onRefresh?: () => void;
+	onNavigate?: (path: string) => void;
 }
 
-export function FileToolbar({ currentPath }: FileToolbarProps) {
+export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarProps) {
 	// ========== 1. State ==========
 	const {
 		sortMode,
@@ -103,7 +105,7 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 			<div className={styles.toolbarRow}>
 				<div className={styles.pathBar}>
 					<PathIcon />
-					<span>{currentPath}</span>
+					<span>{workingDir}</span>
 				</div>
 			</div>
 			{/* 第二行：过滤 + 排序 */}

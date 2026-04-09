@@ -33,9 +33,9 @@ export interface UseFileOperationsResult {
 export function useFileOperations(): UseFileOperationsResult {
 	const {
 		selectedItems,
-		currentPath,
+		workingDir,
 		setItems,
-		setCurrentPath,
+		setWorkingDir,
 		setParentPath,
 		setError,
 		setSelectedItems,
@@ -47,15 +47,15 @@ export function useFileOperations(): UseFileOperationsResult {
 	 */
 	const refreshAfterOperation = useCallback(async () => {
 		try {
-			const data = await loadDirectoryContent(currentPath);
+			const data = await loadDirectoryContent(workingDir);
 			setItems(data.items);
-			setCurrentPath(data.currentPath);
+			setWorkingDir(data.workingDir);
 			setParentPath(data.parentPath);
 		} catch (error) {
 			fileBrowserDebug.error("刷新目录失败", { error });
 			setError("Failed to refresh directory");
 		}
-	}, [currentPath, setItems, setCurrentPath, setParentPath, setError]);
+	}, [workingDir, setItems, setWorkingDir, setParentPath, setError]);
 
 	/**
 	 * 批量删除选中的文件
@@ -131,8 +131,8 @@ export function useFileOperations(): UseFileOperationsResult {
 	const createNewFile = useCallback(
 		async (fileName: string) => {
 			try {
-				fileBrowserDebug.info("创建新文件", { fileName, currentPath });
-				await createFile(currentPath, fileName);
+				fileBrowserDebug.info("创建新文件", { fileName, workingDir });
+				await createFile(workingDir, fileName);
 
 				// 刷新目录
 				await refreshAfterOperation();
@@ -144,7 +144,7 @@ export function useFileOperations(): UseFileOperationsResult {
 				throw error;
 			}
 		},
-		[currentPath, refreshAfterOperation, setError],
+		[workingDir, refreshAfterOperation, setError],
 	);
 
 	/**

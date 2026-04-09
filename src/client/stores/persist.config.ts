@@ -47,7 +47,7 @@ export const STORAGE_VERSION = {
 /** Chat Session Store - 持久化字段 */
 export const CHAT_SESSION_PERSIST = [
 	"currentSessionId",
-	"currentDir", // Chat 独立的当前目录
+	"workingDir", // Chat 独立的当前工作目录
 	"currentModel",
 	"thinkingLevel",
 	"theme",
@@ -59,7 +59,7 @@ export const CHAT_SIDEBAR_PERSIST = ["lastSessionByDir"] as const;
 
 /** Files Browser Store - 持久化字段 */
 export const FILES_BROWSER_PERSIST = [
-	"currentPath", // Files 独立的当前目录
+	"workingDir", // Files 独立的当前工作目录
 	"viewMode",
 	"sortMode",
 	"filterType",

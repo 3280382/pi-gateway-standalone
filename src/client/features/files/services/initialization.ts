@@ -21,16 +21,16 @@ import { useFileStore } from "@/features/files/stores";
  */
 export async function initializeFilePath(): Promise<string> {
 	// 从 fileStore 获取当前路径（已经由 Zustand persist 从 localStorage 恢复）
-	const { currentPath } = useFileStore.getState();
+	const { workingDir } = useFileStore.getState();
 
 	// 如果有持久化的路径，检查是否还存在
-	if (currentPath && currentPath !== "/root") {
-		const exists = await checkPathExists(currentPath);
+	if (workingDir && workingDir !== "/root") {
+		const exists = await checkPathExists(workingDir);
 		if (exists) {
-			console.log("[Init] Using persisted path:", currentPath);
-			return currentPath;
+			console.log("[Init] Using persisted path:", workingDir);
+			return workingDir;
 		}
-		console.log("[Init] Persisted path no longer exists:", currentPath);
+		console.log("[Init] Persisted path no longer exists:", workingDir);
 	}
 
 	// 使用服务器当前目录
@@ -46,5 +46,5 @@ export async function initializeFilePath(): Promise<string> {
  */
 export function getInitialPath(): string {
 	if (typeof window === "undefined") return "/root";
-	return useFileStore.getState().currentPath;
+	return useFileStore.getState().workingDir;
 }

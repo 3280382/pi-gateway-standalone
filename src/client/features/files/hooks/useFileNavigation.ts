@@ -15,44 +15,44 @@ export interface UseFileNavigationResult {
 }
 
 export function useFileNavigation(): UseFileNavigationResult {
-	const { currentPath, parentPath, setCurrentPath } = useFileStore();
+	const { workingDir, parentPath, setWorkingDir } = useFileStore();
 
 	/**
 	 * 导航到指定路径
 	 */
 	const navigateTo = useCallback(
 		(path: string) => {
-			if (path !== currentPath) {
-				setCurrentPath(path);
+			if (path !== workingDir) {
+				setWorkingDir(path);
 			}
 		},
-		[currentPath, setCurrentPath],
+		[workingDir, setWorkingDir],
 	);
 
 	/**
 	 * 向上导航
 	 */
 	const navigateUp = useCallback(() => {
-		if (currentPath === "/" || currentPath === "") return;
+		if (workingDir === "/" || workingDir === "") return;
 
 		const parent =
-			parentPath || currentPath.split("/").slice(0, -1).join("/") || "/";
-		if (parent !== currentPath) {
-			setCurrentPath(parent);
+			parentPath || workingDir.split("/").slice(0, -1).join("/") || "/";
+		if (parent !== workingDir) {
+			setWorkingDir(parent);
 		}
-	}, [currentPath, parentPath, setCurrentPath]);
+	}, [workingDir, parentPath, setWorkingDir]);
 
 	/**
 	 * 导航到主页
 	 */
 	const navigateHome = useCallback(() => {
-		setCurrentPath("/root");
-	}, [setCurrentPath]);
+		setWorkingDir("/root");
+	}, [setWorkingDir]);
 
 	/**
 	 * 是否可以向上导航
 	 */
-	const canNavigateUp = currentPath !== "/" && currentPath !== "";
+	const canNavigateUp = workingDir !== "/" && workingDir !== "";
 
 	return {
 		navigateTo,

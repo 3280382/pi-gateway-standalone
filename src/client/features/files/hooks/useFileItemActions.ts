@@ -54,7 +54,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
 	const {
 		selectedItems,
 		isMultiSelectMode,
-		setCurrentPath,
+		setWorkingDir,
 		setSelectedActionFile,
 		toggleSelection: storeToggleSelection,
 		setIsMultiSelectMode,
@@ -87,7 +87,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
 
 				if (item.isDirectory) {
 					console.log("[useFileItemActions] Navigating to:", item.path);
-					setCurrentPath(item.path);
+					setWorkingDir(item.path);
 				} else {
 					console.log("[useFileItemActions] Opening viewer:", item.path);
 					openViewer(item.path, item.name, "view");
@@ -96,17 +96,17 @@ export function useFileItemActions(): UseFileItemActionsResult {
 				console.error("[useFileItemActions] handleTap error:", err);
 			}
 		},
-		[isMultiSelectMode, storeToggleSelection, setCurrentPath, openViewer],
+		[isMultiSelectMode, storeToggleSelection, setWorkingDir, openViewer],
 	);
 
 	const handleDoubleTap = useCallback(
 		(item: FileItem) => {
 			if (isMultiSelectMode) return;
 			if (item.isDirectory) {
-				setCurrentPath(item.path);
+				setWorkingDir(item.path);
 			}
 		},
-		[isMultiSelectMode, setCurrentPath],
+		[isMultiSelectMode, setWorkingDir],
 	);
 
 	const handleLongPress = useCallback(

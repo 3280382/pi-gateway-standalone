@@ -307,7 +307,7 @@ export function useChatController(): EnhancedChatController {
 				timeoutMessage: "更改工作目录超时",
 				eventName: "dir_changed",
 				onSuccess: (data) => {
-					sessionStore.setCurrentDir(data.cwd);
+					sessionStore.setWorkingDir(data.cwd);
 					chatStore.setSessionId(data.sessionId);
 				},
 				sendAction: () => initChatWorkingDirectory(path),

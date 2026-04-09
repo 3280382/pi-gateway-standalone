@@ -69,7 +69,7 @@ export function AppHeader({
 	// ========== 1. State (Domain State from Zustand) ==========
 	const {
 		currentModel,
-		currentDir: workingDir,
+		workingDir: workingDir,
 		thinkingLevel,
 		setThinkingLevel,
 		serverPid,

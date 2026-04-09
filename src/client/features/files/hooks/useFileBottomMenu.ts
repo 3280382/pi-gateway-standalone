@@ -56,7 +56,7 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
 		isMultiSelectMode,
 		toggleMultiSelectMode,
 		clearSelection,
-		currentPath,
+		workingDir,
 	} = useFileStore();
 
 	const { createNewFile, deleteSelected } = useFileOperations();
@@ -133,21 +133,21 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
 		setIsTreeModalOpen(true);
 		setIsTreeLoading(true);
 		try {
-			const data = await getFileTree(currentPath);
+			const data = await getFileTree(workingDir);
 			setTreeData(data);
 		} catch (error) {
 			console.error("[TreeView] Failed to load file tree:", error);
 		} finally {
 			setIsTreeLoading(false);
 		}
-	}, [currentPath]);
+	}, [workingDir]);
 
 	const handleTreeFileClick = useCallback(
 		(filePath: string, fileName: string) => {
-			const fullPath = currentPath ? `${currentPath}/${filePath}` : filePath;
+			const fullPath = workingDir ? `${workingDir}/${filePath}` : filePath;
 			openViewer(fullPath, fileName, "view");
 		},
-		[currentPath, openViewer],
+		[workingDir, openViewer],
 	);
 
 	const handleCloseTree = useCallback(() => {

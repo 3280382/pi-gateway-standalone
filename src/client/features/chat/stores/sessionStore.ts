@@ -10,7 +10,7 @@ import { CHAT_SESSION_PERSIST, STORAGE_KEYS, STORAGE_VERSION } from "@/stores/pe
 // 初始状态
 const initialState = {
 	currentSessionId: null as string | null,
-	currentDir: "/root",
+	workingDir: "/root",
 	currentModel: null as string | null,
 	thinkingLevel: "off" as ThinkingLevel,
 	theme: "dark" as Theme,
@@ -85,7 +85,7 @@ export interface ChatSessionState {
 	sessions: Session[];
 
 	// 当前工作目录
-	currentDir: string;
+	workingDir: string;
 
 	// 模型设置
 	currentModel: string | null;
@@ -111,7 +111,7 @@ interface ChatSessionActions {
 	removeSession: (id: string) => void;
 
 	// 工作目录
-	setCurrentDir: (dir: string) => void;
+	setWorkingDir: (dir: string) => void;
 
 	// 模型设置
 	setCurrentModel: (model: string | null) => void;
@@ -134,10 +134,10 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
 	devtools(
 		persist(
 			(set) => ({
-				// 初始状态（优先使用迁移的数据）
+				// 初始状态
 				currentSessionId: initialState.currentSessionId,
 				sessions: [],
-				currentDir: "/root",
+				workingDir: initialState.workingDir,
 				currentModel: initialState.currentModel,
 				thinkingLevel: initialState.thinkingLevel,
 				theme: initialState.theme,
@@ -159,7 +159,7 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
 					})),
 
 				// 工作目录
-				setCurrentDir: (dir) => set({ currentDir: dir }),
+				setWorkingDir: (dir) => set({ workingDir: dir }),
 
 				// 模型设置
 				setCurrentModel: (model) => set({ currentModel: model }),

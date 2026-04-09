@@ -60,7 +60,7 @@ export type BottomPanelType = "terminal" | "preview" | null;
 // ============================================================================
 
 export interface BrowseResponse {
-	currentPath: string;
+	workingDir: string;
 	parentPath: string;
 	items: FileItem[];
 }

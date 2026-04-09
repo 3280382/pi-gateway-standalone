@@ -9,7 +9,7 @@ import type { FileItem } from "@/features/files/stores/fileStore";
 import { browseDirectory } from "./fileApi";
 
 export interface DirectoryData {
-	currentPath: string;
+	workingDir: string;
 	parentPath: string;
 	items: FileItem[];
 }
@@ -23,7 +23,7 @@ export async function loadDirectoryContent(
 	const data = await browseDirectory(path);
 
 	const itemsToSet = [
-		...(data.parentPath !== data.currentPath
+		...(data.parentPath !== data.workingDir
 			? [
 					{
 						name: "..",
@@ -37,7 +37,7 @@ export async function loadDirectoryContent(
 	];
 
 	return {
-		currentPath: data.currentPath,
+		workingDir: data.workingDir,
 		parentPath: data.parentPath,
 		items: itemsToSet,
 	};
@@ -84,10 +84,10 @@ export async function batchMoveFiles(
  * 创建新文件
  */
 export async function createFile(
-	currentPath: string,
+	workingDir: string,
 	fileName: string,
 ): Promise<void> {
-	const filePath = `${currentPath}/${fileName}`.replace(/\/+/g, "/");
+	const filePath = `${workingDir}/${fileName}`.replace(/\/+/g, "/");
 
 	const response = await fetch("/api/files/write", {
 		method: "POST",

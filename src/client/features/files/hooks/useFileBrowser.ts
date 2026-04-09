@@ -23,9 +23,9 @@ export interface UseFileBrowserResult {
 
 export function useFileBrowser(): UseFileBrowserResult {
 	const {
-		currentPath,
+		workingDir,
 		setItems,
-		setCurrentPath,
+		setWorkingDir,
 		setParentPath,
 		setLoading,
 		setError,
@@ -39,7 +39,7 @@ export function useFileBrowser(): UseFileBrowserResult {
 	useEffect(() => {
 		const init = async () => {
 			const path = await initializeFilePath();
-			setCurrentPath(path);
+			setWorkingDir(path);
 		};
 		init();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -66,7 +66,7 @@ export function useFileBrowser(): UseFileBrowserResult {
 				lastLoadedPathRef.current = path;
 
 				setItems(data.items);
-				setCurrentPath(data.currentPath);
+				setWorkingDir(data.workingDir);
 				setParentPath(data.parentPath);
 			} catch (err) {
 				const friendlyMessage = getFriendlyErrorMessage(err, path);
@@ -79,7 +79,7 @@ export function useFileBrowser(): UseFileBrowserResult {
 				setLoading(false);
 			}
 		},
-		[setItems, setCurrentPath, setParentPath, setLoading, setError],
+		[setItems, setWorkingDir, setParentPath, setLoading, setError],
 	);
 
 	/**
@@ -87,20 +87,20 @@ export function useFileBrowser(): UseFileBrowserResult {
 	 */
 	const refresh = useCallback(async () => {
 		lastLoadedPathRef.current = "";
-		await loadDirectory(currentPath);
-	}, [currentPath, loadDirectory]);
+		await loadDirectory(workingDir);
+	}, [workingDir, loadDirectory]);
 
 	/**
 	 * 路径变化时自动加载
 	 */
 	useEffect(() => {
-		if (currentPath === lastLoadedPathRef.current) {
+		if (workingDir === lastLoadedPathRef.current) {
 			return;
 		}
 
-		fileBrowserDebug.debug("路径变化，自动加载", { currentPath });
-		loadDirectory(currentPath);
-	}, [currentPath, loadDirectory]);
+		fileBrowserDebug.debug("路径变化，自动加载", { workingDir });
+		loadDirectory(workingDir);
+	}, [workingDir, loadDirectory]);
 
 	return {
 		loadDirectory,

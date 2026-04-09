@@ -47,7 +47,7 @@ export function useFilePicker(
 	options: UseFilePickerOptions,
 ): UseFilePickerReturn {
 	const { value, onChange, onFocusInput } = options;
-	const { currentPath } = useFileStore();
+	const { workingDir } = useFileStore();
 
 	// 状态
 	const [isOpen, setIsOpen] = useState(false);
@@ -60,9 +60,9 @@ export function useFilePicker(
 	const loadFileList = useCallback(async (): Promise<void> => {
 		setIsLoading(true);
 		try {
-			const data = await browseDirectory(currentPath);
+			const data = await browseDirectory(workingDir);
 			const items: FileItem[] = [
-				...(data.parentPath !== data.currentPath
+				...(data.parentPath !== data.workingDir
 					? [{ name: "..", path: data.parentPath, isDirectory: true }]
 					: []),
 				...data.items,
@@ -74,7 +74,7 @@ export function useFilePicker(
 		} finally {
 			setIsLoading(false);
 		}
-	}, [currentPath]);
+	}, [workingDir]);
 
 	// 过滤文件列表
 	const filteredFiles = useMemo(() => {

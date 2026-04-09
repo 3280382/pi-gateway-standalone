@@ -51,8 +51,8 @@ export function useFileTree(): UseFileTreeResult {
 					.map((item) => item.path);
 
 				const node: TreeNode = {
-					name: data.currentPath.split("/").pop() || "/",
-					path: data.currentPath,
+					name: data.workingDir.split("/").pop() || "/",
+					path: data.workingDir,
 					isDirectory: true,
 					children: [],
 					childPaths: childDirs,

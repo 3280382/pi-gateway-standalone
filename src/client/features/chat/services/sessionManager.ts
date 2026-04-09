@@ -138,7 +138,7 @@ async function switchDirectory(
 
 		// 3. 更新各 store 的工作目录和连接状态
 		stores.sidebar.setWorkingDir(response.cwd);
-		stores.session.setCurrentDir(response.cwd);
+		stores.session.setWorkingDir(response.cwd);
 		stores.workspace.addRecentWorkspace(response.cwd);
 		stores.session.setIsConnected(true);
 		if (response.pid) {

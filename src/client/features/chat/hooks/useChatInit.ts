@@ -34,10 +34,10 @@ export function useChatInit(): { isConnecting: boolean } {
 			}
 
 			// 2. 恢复 session（需要当前工作目录）
-			const currentDir = useSessionStore.getState().currentDir;
-			if (wsConnected && currentDir) {
-				console.log("[ChatInit] 恢复 session:", currentDir);
-				await sessionManager.switchDirectory(currentDir, {
+			const workingDir = useSessionStore.getState().workingDir;
+			if (wsConnected && workingDir) {
+				console.log("[ChatInit] 恢复 session:", workingDir);
+				await sessionManager.switchDirectory(workingDir, {
 					clearSessions: true,
 					loadSessions: true,
 					restoreLastSession: true,
