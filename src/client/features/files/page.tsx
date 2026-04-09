@@ -90,14 +90,13 @@ export function FilesPage({ active = false }: FilesPageProps) {
 						onExecuteOutput={(output) =>
 							console.log("[Files] Execute output:", output)
 						}
-						onOpenBottomPanel={setCommand}
+						onOpenBottomPanel={setTerminalCommand}
 					/>
 					{isBottomPanelOpen && (
 						<TerminalPanel
 							height={bottomPanelHeight}
 							onClose={closeBottomPanel}
 							onHeightChange={setBottomPanelHeight}
-							initialCommand={terminalCommand}
 							initialCommand={terminalCommand}
 							onExecuteCommand={(cmd) => {
 								setTerminalCommand(cmd);
