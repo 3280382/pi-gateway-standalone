@@ -21,13 +21,25 @@
 	color: var(--text-secondary);
 	font-size: 14px;
 	cursor: pointer;
-	transition: all 0.2s ease;
+	transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 	user-select: none;
+	outline: none;
+	position: relative;
+	overflow: hidden;
 }
 
 .button:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;
+}
+
+.button:focus {
+	outline: none;
+	box-shadow: 0 0 0 2px var(--accent-bg-blue);
+}
+
+.button:active {
+	transform: translateY(1px);
 }
 
 /* 纯图标按钮 */

@@ -40,9 +40,7 @@ export function Sessions() {
 			<SectionHeader
 				title="Sessions"
 				action={
-					<IconButton onClick={handleNewSession} title="New Session">
-						<PlusIcon />
-					</IconButton>
+					<IconButton name="plus" onClick={handleNewSession} title="New Session" />
 				}
 			/>
 			<div className={styles.list}>

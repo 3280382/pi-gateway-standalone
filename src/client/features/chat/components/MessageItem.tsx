@@ -67,7 +67,7 @@ export const MessageItem = memo(
 						block={block}
 						isStreaming={message.isStreaming}
 						showThinking={showThinking}
-						showTools={showTools}
+						showTools={showTools ?? true}
 					/>
 				))}
 			</div>
@@ -136,17 +136,16 @@ function GlassCard({
 						<span className={styles.dot} />
 						<span className={styles.label}>Thinking</span>
 						<div className={styles.actions}>
-							{showCopy && (
-								<button
-									className={styles.btnCopy}
-									onClick={(e) => {
-										e.stopPropagation();
-										copyToClipboard(thinkingText);
-									}}
-								>
-									📋
-								</button>
-							)}
+							<button
+								className={styles.btnCopy}
+								style={{ visibility: showCopy ? 'visible' : 'hidden' }}
+								onClick={(e) => {
+									e.stopPropagation();
+									copyToClipboard(thinkingText);
+								}}
+							>
+								📋
+							</button>
 							<span className={styles.toggleIcon}>
 								{isExpanded ? "-" : "+"}
 							</span>
@@ -179,21 +178,20 @@ function GlassCard({
 						<span className={styles.label}>{block.toolName}</span>
 						<span className={styles.chip}>running</span>
 						<div className={styles.actions}>
-							{showCopy && (
-								<button
-									className={styles.btnCopy}
-									onClick={(e) => {
-										e.stopPropagation();
-										copyToClipboard(toolArgs);
-									}}
-								>
-									📋
-								</button>
-							)}
-							<span className={styles.toggleIcon}>
-								{isExpanded ? "-" : "+"}
-							</span>
-						</div>
+						<button
+							className={styles.btnCopy}
+							style={{ visibility: showCopy ? 'visible' : 'hidden' }}
+							onClick={(e) => {
+								e.stopPropagation();
+								copyToClipboard(toolArgs);
+							}}
+						>
+							📋
+						</button>
+						<span className={styles.toggleIcon}>
+							{isExpanded ? "-" : "+"}
+						</span>
+					</div>
 					</div>
 					{isExpanded && (
 						<div
@@ -229,21 +227,20 @@ function GlassCard({
 						<span className={styles.label}>{block.toolName}</span>
 						<span className={`${styles.chip} ${styles[status]}`}>{status}</span>
 						<div className={styles.actions}>
-							{showCopy && (
-								<button
-									className={styles.btnCopy}
-									onClick={(e) => {
-										e.stopPropagation();
-										copyToClipboard(toolContent);
-									}}
-								>
-									📋
-								</button>
-							)}
-							<span className={styles.toggleIcon}>
-								{isExpanded ? "-" : "+"}
-							</span>
-						</div>
+						<button
+							className={styles.btnCopy}
+							style={{ visibility: showCopy ? 'visible' : 'hidden' }}
+							onClick={(e) => {
+								e.stopPropagation();
+								copyToClipboard(toolContent);
+							}}
+						>
+							📋
+						</button>
+						<span className={styles.toggleIcon}>
+							{isExpanded ? "-" : "+"}
+						</span>
+					</div>
 					</div>
 					{isExpanded && (
 						<div
@@ -269,18 +266,17 @@ function GlassCard({
 						<span className={styles.dot} />
 						<span className={styles.label}>Assistant</span>
 						<div className={styles.actions}>
-							{showCopy && (
-								<button
-									className={styles.btnCopy}
-									onClick={(e) => {
-										e.stopPropagation();
-										copyToClipboard(block.text || "");
-									}}
-								>
-									📋
-								</button>
-							)}
-						</div>
+						<button
+							className={styles.btnCopy}
+							style={{ visibility: showCopy ? 'visible' : 'hidden' }}
+							onClick={(e) => {
+								e.stopPropagation();
+								copyToClipboard(block.text || "");
+							}}
+						>
+							📋
+						</button>
+					</div>
 					</div>
 					<div className={styles.content}>
 						<TextContent text={block.text} />

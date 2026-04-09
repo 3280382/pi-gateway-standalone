@@ -31,8 +31,8 @@ export const FileList = memo<FileListProps>(({ items }) => {
 	return (
 		<div className={styles.list}>
 			<div className={styles.listHeader}>
-				<span className={styles.headerCheckbox} />
-				<span className={styles.headerIcon} />
+              {isMultiSelectMode && (<span className={styles.headerCheckbox} />)}
+				<span className={styles.headerIcon}>Icon</span>
 				<span className={styles.headerName}>Name</span>
 				<span className={styles.headerSize}>Size</span>
 				<span className={styles.headerModified}>Modified</span>
