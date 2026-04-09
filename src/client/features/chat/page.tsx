@@ -9,9 +9,9 @@ import { useCallback, useRef } from "react";
 import styles from "@/features/chat/ChatLayout.module.css";
 import { ChatPanel } from "@/features/chat/components/ChatPanel";
 import { AppHeader } from "@/features/chat/components/Header";
+import { SystemPromptModal } from "@/features/chat/components/modals/SystemPromptModal";
 import { LlmLogPanel } from "@/features/chat/components/panels/LlmLogPanel";
 import { SidebarPanel } from "@/features/chat/components/sidebar/SidebarPanel/SidebarPanel";
-import { SystemPromptModal } from "@/features/chat/components/modals/SystemPromptModal";
 import { useChatInit, useChatMessages } from "@/features/chat/hooks";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 
@@ -102,35 +102,35 @@ export function ChatPage({ active = false }: ChatPageProps) {
 
 	return (
 		<>
-		<div
-			className={styles.layout}
-			style={{ display: active ? "flex" : "none" }}
-		>
-			{/* Header */}
-			<header className={styles.header}>
-				<AppHeader />
-			</header>
+			<div
+				className={styles.layout}
+				style={{ display: active ? "flex" : "none" }}
+			>
+				{/* Header */}
+				<header className={styles.header}>
+					<AppHeader />
+				</header>
 
-			{/* Body */}
-			<div className={styles.body}>
-				{/* Sidebar - overlay 模式 */}
-				<aside
-					className={`${styles.sidebar} ${isSidebarVisible ? styles.sidebarVisible : styles.sidebarHidden}`}
-				>
-					<SidebarPanel currentView="chat" />
-				</aside>
+				{/* Body */}
+				<div className={styles.body}>
+					{/* Sidebar - overlay 模式 */}
+					<aside
+						className={`${styles.sidebar} ${isSidebarVisible ? styles.sidebarVisible : styles.sidebarHidden}`}
+					>
+						<SidebarPanel currentView="chat" />
+					</aside>
 
-				{/* Content */}
-				<main className={styles.content}>
-					<ChatPanel />
-					{renderBottomPanel()}
-				</main>
+					{/* Content */}
+					<main className={styles.content}>
+						<ChatPanel />
+						{renderBottomPanel()}
+					</main>
+				</div>
 			</div>
-		</div>
 
-		{/* Modals */}
-		<SystemPromptModal />
-	</>
+			{/* Modals */}
+			<SystemPromptModal />
+		</>
 	);
 }
 

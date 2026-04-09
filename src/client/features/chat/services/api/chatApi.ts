@@ -259,7 +259,11 @@ export function useChatController(): EnhancedChatController {
 		},
 
 		// 模型管理
-		setModel: async (provider: string, modelId: string, thinkingLevel?: string) => {
+		setModel: async (
+			provider: string,
+			modelId: string,
+			thinkingLevel?: string,
+		) => {
 			await createPromiseWithTimeout<void>({
 				timeoutMessage: "设置模型超时",
 				eventName: "model_set",

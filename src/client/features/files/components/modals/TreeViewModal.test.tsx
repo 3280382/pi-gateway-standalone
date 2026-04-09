@@ -7,8 +7,7 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	escapeRegExp,
-	filterTreeNodes,
-	flattenTree,
+	filterNodes,
 	generateTreeText,
 	getFileIcon,
 	type TreeNode,
@@ -129,11 +128,11 @@ describe("TreeViewModal", () => {
 			expect(getFileIcon("unknown.xyz", false)).toBe("📄");
 		});
 
-		it("filterTreeNodes 应该正确过滤节点", () => {
+		it("filterNodes 应该正确过滤节点", () => {
 			const tree = createTestTree().items;
 
 			// 正常模式 - 排除 node_modules 和 .git
-			const normal = filterTreeNodes(tree, "normal", "");
+			const normal = filterNodes(tree, "normal", "");
 			expect(normal.length).toBe(2);
 			expect(normal.some((n) => n.name === "src")).toBe(true);
 			expect(normal.some((n) => n.name === "package.json")).toBe(true);
@@ -141,47 +140,18 @@ describe("TreeViewModal", () => {
 			expect(normal.some((n) => n.name === ".git")).toBe(false);
 
 			// 全部模式
-			const all = filterTreeNodes(tree, "all", "");
+			const all = filterNodes(tree, "all", "");
 			expect(all.length).toBe(4);
 
 			// 搜索模式 - 返回包含匹配项的完整树路径
-			const search = filterTreeNodes(tree, "search", "Button");
+			const search = filterNodes(tree, "search", "Button");
 			expect(search.length).toBe(1);
 			expect(search[0].name).toBe("src"); // 返回根节点，包含匹配的路径
 			expect(search[0].children?.[0].name).toBe("components");
 			expect(search[0].children?.[0].children?.[0].name).toBe("Button.tsx");
 		});
 
-		it("flattenTree 应该正确扁平化树结构", () => {
-			const tree = createTestTree().items.slice(0, 1); // 只取 src
-			const expanded = new Set(["/project/src", "/project/src/components"]);
-			const flat = flattenTree(tree, expanded);
 
-			// src (level 0)
-			expect(flat[0].node.name).toBe("src");
-			expect(flat[0].level).toBe(0);
-			expect(flat[0].parentLastStack).toEqual([]);
-
-			// components (level 1) - src 的第一个子节点
-			expect(flat[1].node.name).toBe("components");
-			expect(flat[1].level).toBe(1);
-			expect(flat[1].parentLastStack).toEqual([true]); // src 的 isLast
-
-			// Button.tsx (level 2) - components 的第一个子节点
-			expect(flat[2].node.name).toBe("Button.tsx");
-			expect(flat[2].level).toBe(2);
-			expect(flat[2].parentLastStack).toEqual([true, false]); // src 和 components 的 isLast
-
-			// Input.tsx (level 2) - components 的最后一个子节点
-			expect(flat[3].node.name).toBe("Input.tsx");
-			expect(flat[3].level).toBe(2);
-			expect(flat[3].parentLastStack).toEqual([true, false]); // 注意：不包含 Input.tsx 自己的 isLast
-
-			// utils.ts (level 1) - src 的最后一个子节点
-			expect(flat[4].node.name).toBe("utils.ts");
-			expect(flat[4].level).toBe(1);
-			expect(flat[4].parentLastStack).toEqual([true]); // src 的 isLast
-		});
 
 		it("generateTreeText 应该生成正确的树形文本", () => {
 			const tree = createTestTree().items.slice(0, 1);

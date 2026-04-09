@@ -18,26 +18,26 @@ import type { Message } from "@/features/chat/types/chat";
 // ============================================================================
 
 function createUserMessage(text: string): Message {
-  return {
-    id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    role: "user",
-    content: [{ type: "text", text }],
-    timestamp: new Date(),
-  };
+	return {
+		id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+		role: "user",
+		content: [{ type: "text", text }],
+		timestamp: new Date(),
+	};
 }
 
 function createSystemMessage(text: string): Message {
-  return {
-    id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    role: "system",
-    content: [{ type: "text", text }],
-    timestamp: new Date(),
-  };
+	return {
+		id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+		role: "system",
+		content: [{ type: "text", text }],
+		timestamp: new Date(),
+	};
 }
 
 function createErrorMessage(error: unknown): Message {
-  const errorText = error instanceof Error ? error.message : String(error);
-  return createSystemMessage(`命令执行失败: ${errorText}`);
+	const errorText = error instanceof Error ? error.message : String(error);
+	return createSystemMessage(`命令执行失败: ${errorText}`);
 }
 
 // ============================================================================
@@ -45,22 +45,22 @@ function createErrorMessage(error: unknown): Message {
 // ============================================================================
 
 async function executeCommandWithMessages(
-  command: string,
-  displayText: string,
-  executeFn: (cmd: string) => Promise<any>,
+	command: string,
+	displayText: string,
+	executeFn: (cmd: string) => Promise<any>,
 ): Promise<void> {
-  const chatStore = useChatStore.getState();
+	const chatStore = useChatStore.getState();
 
-  // 添加用户输入消息
-  chatStore.addMessage(createUserMessage(displayText));
+	// 添加用户输入消息
+	chatStore.addMessage(createUserMessage(displayText));
 
-  try {
-    const result = await executeFn(command);
-    const resultText = result?.output || result?.error || "命令执行完成";
-    chatStore.addMessage(createSystemMessage(resultText));
-  } catch (err) {
-    chatStore.addMessage(createErrorMessage(err));
-  }
+	try {
+		const result = await executeFn(command);
+		const resultText = result?.output || result?.error || "命令执行完成";
+		chatStore.addMessage(createSystemMessage(resultText));
+	} catch (err) {
+		chatStore.addMessage(createErrorMessage(err));
+	}
 }
 
 export interface UseChatPanelReturn {
@@ -139,7 +139,11 @@ export function useChatPanel(): UseChatPanelReturn {
 	const handleBashCommand = useCallback(
 		(command: string) => {
 			setShouldScrollToBottom(true);
-			executeCommandWithMessages(command, `!${command}`, chatController.executeCommand);
+			executeCommandWithMessages(
+				command,
+				`!${command}`,
+				chatController.executeCommand,
+			);
 		},
 		[chatController],
 	);
@@ -156,14 +160,16 @@ export function useChatPanel(): UseChatPanelReturn {
 			}
 
 			// 需要发送给 LLM 的命令
-			if (command !== "bash" && 
-				command !== "read" && 
-				command !== "write" && 
-				command !== "edit" && 
-				command !== "ls" && 
-				command !== "grep" && 
-				command !== "tree" && 
-				command !== "git") {
+			if (
+				command !== "bash" &&
+				command !== "read" &&
+				command !== "write" &&
+				command !== "edit" &&
+				command !== "ls" &&
+				command !== "grep" &&
+				command !== "tree" &&
+				command !== "git"
+			) {
 				chatController.sendMessage(`/${command} ${args}`.trim());
 				return;
 			}
@@ -174,8 +180,12 @@ export function useChatPanel(): UseChatPanelReturn {
 
 			const cmdText = args ? `/${command} ${args}` : `/${command}`;
 			const executeCmd = cmdText.replace(/^\//, "");
-			
-			executeCommandWithMessages(executeCmd, cmdText, chatController.executeCommand);
+
+			executeCommandWithMessages(
+				executeCmd,
+				cmdText,
+				chatController.executeCommand,
+			);
 		},
 		[chatController],
 	);

@@ -184,8 +184,6 @@ export function AppHeader({
 		return () => document.removeEventListener("click", handleClickOutside);
 	}, []);
 
-
-
 	return (
 		<div className={styles.topBar}>
 			{/* Row 1: 工作目录、思考级别、PID/状态 */}

@@ -129,7 +129,9 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 						type="text"
 						className={styles.filterComboInput}
 						placeholder="Filter..."
-						value={filterType === "custom" ? filterText : selectedFilterOption.label}
+						value={
+							filterType === "custom" ? filterText : selectedFilterOption.label
+						}
 						onChange={(e) => handleFilterInputChange(e.target.value)}
 						onClick={() => setIsFilterDropdownVisible(true)}
 					/>

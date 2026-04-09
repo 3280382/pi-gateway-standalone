@@ -157,7 +157,9 @@ function buildTextContent(textContent: string): ContentPartWithOrder[] {
 /**
  * 收集工具条目（已完成和流式中）
  */
-function collectToolEntries(state: State): Array<{ tool: any; isCompleted: boolean }> {
+function collectToolEntries(
+	state: State,
+): Array<{ tool: any; isCompleted: boolean }> {
 	const entries: Array<{ tool: any; isCompleted: boolean }> = [];
 
 	// 添加已完成的工具
@@ -185,7 +187,9 @@ function collectToolEntries(state: State): Array<{ tool: any; isCompleted: boole
 /**
  * 构建工具内容部分
  */
-function buildToolContent(toolEntries: Array<{ tool: any; isCompleted: boolean }>): ContentPartWithOrder[] {
+function buildToolContent(
+	toolEntries: Array<{ tool: any; isCompleted: boolean }>,
+): ContentPartWithOrder[] {
 	return toolEntries.map((entry, index) => {
 		const { tool, isCompleted } = entry;
 		const baseOrder = ORDER.TOOL_BASE + index;
@@ -313,7 +317,10 @@ function buildFinalMessage(
 
 	const finalContent =
 		lastTurnMarkerIndex >= 0
-			? [...existingContent.slice(0, lastTurnMarkerIndex + 1), ...currentContent]
+			? [
+					...existingContent.slice(0, lastTurnMarkerIndex + 1),
+					...currentContent,
+				]
 			: currentContent;
 
 	const finalMessage = state.currentStreamingMessage

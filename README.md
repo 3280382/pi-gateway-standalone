@@ -168,8 +168,9 @@ await wsRouter.dispatch(type, ctx, payload);
 - **Naming**: Components PascalCase, Hooks start with `use`, Store `*Store`
 - **Performance**: Virtual scroll for large data, use useMemo/useCallback for caching
 - **Backend**: Feature-Based architecture, WebSocket uses Router dispatch
+- **Code Organization**: Follow section markers (State → Ref → Effects → Computed → Actions → Render) for complex components
 
-See [DEVELOPMENT.md](./DEVELOPMENT.md) for complete standards.
+See [DEVELOPMENT.md](./DEVELOPMENT.md) for complete standards and [UI_REACT_COMPONENT_REFACTOR_GUIDE.md](./docs/UI_REACT_COMPONENT_REFACTOR_GUIDE.md) for refactoring guidelines.
 
 ## Common Commands
 
