@@ -12,7 +12,7 @@ import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
-import { useWorkspaceStore } from "@/features/files/stores";
+import { useFileStore, useWorkspaceStore } from "@/features/files/stores";
 import { fetchApi } from "@/services/client";
 import { websocketService } from "@/services/websocket.service";
 import {
@@ -88,6 +88,7 @@ function getStores() {
 		sidebar: useSidebarStore.getState(),
 		session: useSessionStore.getState(),
 		workspace: useWorkspaceStore.getState(),
+		file: useFileStore.getState(),
 		chat: useChatStore.getState(),
 	};
 }
@@ -138,7 +139,7 @@ async function switchDirectory(
 
 		// 3. 更新各 store 的工作目录和连接状态
 		stores.sidebar.setWorkingDir(response.cwd);
-		stores.workspace.setCurrentDir(response.cwd);
+		stores.file.setCurrentPath(response.cwd);
 		stores.workspace.addRecentWorkspace(response.cwd);
 		stores.session.setIsConnected(true);
 		if (response.pid) {

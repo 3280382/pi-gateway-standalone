@@ -95,6 +95,9 @@ export interface ChatSessionState {
 	currentSessionId: string | null;
 	sessions: Session[];
 
+	// 当前工作目录
+	currentDir: string;
+
 	// 模型设置
 	currentModel: string | null;
 	thinkingLevel: ThinkingLevel;
@@ -117,6 +120,9 @@ interface ChatSessionActions {
 	setSessions: (sessions: Session[]) => void;
 	addSession: (session: Session) => void;
 	removeSession: (id: string) => void;
+
+	// 工作目录
+	setCurrentDir: (dir: string) => void;
 
 	// 模型设置
 	setCurrentModel: (model: string | null) => void;
@@ -142,6 +148,7 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
 				// 初始状态（优先使用迁移的数据）
 				currentSessionId: migratedState.currentSessionId || null,
 				sessions: [],
+				currentDir: "/root",
 				currentModel: migratedState.currentModel || null,
 				thinkingLevel: migratedState.thinkingLevel || "off",
 				theme: migratedState.theme || "dark",
@@ -161,6 +168,9 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
 					set((state) => ({
 						sessions: state.sessions.filter((s) => s.id !== id),
 					})),
+
+				// 工作目录
+				setCurrentDir: (dir) => set({ currentDir: dir }),
 
 				// 模型设置
 				setCurrentModel: (model) => set({ currentModel: model }),
