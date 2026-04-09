@@ -1,46 +1,67 @@
 /**
- * useXTerm - XTerm 终端业务逻辑 Hook
+ * TerminalPanel - XTerm.js Terminal Component
  *
- * 职责：管理 xterm.js 终端的所有业务逻辑
- * - 终端初始化
- * - 命令执行（API 调用）
- * - 输入处理
+ * 职责：
+ * - 提供真实的 xterm.js 终端体验
+ * - 支持命令执行、全屏模式
+ * - 合并了原 useXTerm hook 的所有逻辑
+ *
+ * 结构规范：State → Ref → Effects → Computed → Actions → Render
  */
 
 import type { FitAddon } from "@xterm/addon-fit";
 import type { Terminal } from "@xterm/xterm";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useWorkspaceStore } from "@/features/files/stores";
+import "@xterm/xterm/css/xterm.css";
+import styles from "./TerminalPanel.module.css";
 
-interface UseXTermOptions {
-	currentDir: string;
+// ============================================================================
+// Types
+// ============================================================================
+
+interface TerminalPanelProps {
+	height: number;
+	onClose: () => void;
+	onHeightChange: (height: number) => void;
 	onExecuteCommand?: (command: string) => void;
 	initialCommand?: string;
 }
 
-interface UseXTermResult {
-	terminalRef: React.RefObject<HTMLDivElement>;
-	isFullscreen: boolean;
-	toggleFullscreen: () => void;
-	executeCommand: (command: string) => Promise<void>;
-}
+// ============================================================================
+// Component
+// ============================================================================
 
-export function useXTerm({
-	currentDir,
+export function TerminalPanel({
+	height,
+	onClose,
+	onHeightChange,
 	onExecuteCommand,
 	initialCommand,
-}: UseXTermOptions): UseXTermResult {
+}: TerminalPanelProps) {
+	// ========== 1. State ==========
+	const currentDir = useWorkspaceStore((state) => state.currentDir);
+	const [isFullscreen, setIsFullscreen] = useState(false);
+
+	// ========== 2. Refs ==========
 	const terminalRef = useRef<HTMLDivElement>(null);
 	const terminalInstance = useRef<Terminal | null>(null);
 	const fitAddon = useRef<FitAddon | null>(null);
 	const commandBuffer = useRef("");
 	const abortControllerRef = useRef<AbortController | null>(null);
-	const [isFullscreen, setIsFullscreen] = useState(false);
+	const isResizing = useRef(false);
+	const resizeStartY = useRef(0);
+	const resizeStartHeight = useRef(height);
 
+	// ========== 3. Actions ==========
 	const toggleFullscreen = useCallback(() => {
 		setIsFullscreen((prev) => !prev);
 	}, []);
 
-	// 执行命令（API 调用）
+	const prompt = useCallback((term: Terminal) => {
+		term.write("\x1b[36m$\x1b[0m ");
+	}, []);
+
 	const executeCommand = useCallback(
 		async (command: string, term?: Terminal) => {
 			const targetTerm = term || terminalInstance.current;
@@ -105,19 +126,14 @@ export function useXTerm({
 		[currentDir],
 	);
 
-	// 显示提示符
-	const prompt = useCallback((term: Terminal) => {
-		term.write("\x1b[36m$\x1b[0m ");
-	}, []);
-
-	// 初始化终端
+	// ========== 4. Effects ==========
+	// Initialize terminal
 	useEffect(() => {
 		const container = terminalRef.current;
 		if (!container || terminalInstance.current) return;
 
-		// 确保容器有尺寸
 		if (container.clientHeight === 0 || container.clientWidth === 0) {
-			console.warn("[XTermPanel] Container has no size, delaying init");
+			console.warn("[TerminalPanel] Container has no size, delaying init");
 			const checkSize = setInterval(() => {
 				if (container.clientHeight > 0 && container.clientWidth > 0) {
 					clearInterval(checkSize);
@@ -128,7 +144,6 @@ export function useXTerm({
 			return;
 		}
 
-		// 动态导入 xterm（避免 SSR 问题）
 		const initTerminal = async () => {
 			const { Terminal } = await import("@xterm/xterm");
 			const { FitAddon } = await import("@xterm/addon-fit");
@@ -156,19 +171,17 @@ export function useXTerm({
 			requestAnimationFrame(() => {
 				fit.fit();
 				console.log(
-					"[XTermPanel] Terminal initialized:",
+					"[TerminalPanel] Terminal initialized:",
 					term.cols,
 					"x",
 					term.rows,
 				);
 			});
 
-			// 处理输入
 			term.onData((data) => {
 				const code = data.charCodeAt(0);
 
 				if (code === 13) {
-					// Enter
 					term.writeln("");
 					if (commandBuffer.current.trim()) {
 						const cmd = commandBuffer.current;
@@ -179,18 +192,15 @@ export function useXTerm({
 					}
 					commandBuffer.current = "";
 				} else if (code === 127) {
-					// Backspace
 					if (commandBuffer.current.length > 0) {
 						commandBuffer.current = commandBuffer.current.slice(0, -1);
 						term.write("\b \b");
 					}
 				} else if (code === 3) {
-					// Ctrl+C
 					term.writeln("^C");
 					commandBuffer.current = "";
 					prompt(term);
 				} else if (code === 12) {
-					// Ctrl+L
 					term.clear();
 					prompt(term);
 				} else if (code >= 32 && code < 127) {
@@ -203,14 +213,12 @@ export function useXTerm({
 			fitAddon.current = fit;
 			prompt(term);
 
-			// 执行初始命令
 			if (initialCommand) {
 				term.writeln(`$ ${initialCommand}`);
 				if (onExecuteCommand) onExecuteCommand(initialCommand);
 				executeCommand(initialCommand, term).then(() => prompt(term));
 			}
 
-			// 处理窗口大小变化
 			const handleResize = () => fit.fit();
 			window.addEventListener("resize", handleResize);
 
@@ -229,10 +237,155 @@ export function useXTerm({
 		};
 	}, [currentDir, onExecuteCommand, initialCommand, executeCommand, prompt]);
 
-	return {
-		terminalRef,
-		isFullscreen,
-		toggleFullscreen,
-		executeCommand,
-	};
+	// Resize handlers
+	const handleResizeStart = useCallback(
+		(e: React.MouseEvent) => {
+			isResizing.current = true;
+			resizeStartY.current = e.clientY;
+			resizeStartHeight.current = height;
+			e.preventDefault();
+		},
+		[height],
+	);
+
+	useEffect(() => {
+		const handleMouseMove = (e: MouseEvent) => {
+			if (!isResizing.current) return;
+			const delta = resizeStartY.current - e.clientY;
+			const newHeight = Math.max(
+				100,
+				Math.min(600, resizeStartHeight.current + delta),
+			);
+			onHeightChange(newHeight);
+		};
+
+		const handleMouseUp = () => {
+			isResizing.current = false;
+		};
+
+		if (isResizing.current) {
+			document.addEventListener("mousemove", handleMouseMove);
+			document.addEventListener("mouseup", handleMouseUp);
+			document.body.style.cursor = "ns-resize";
+			document.body.style.userSelect = "none";
+		}
+
+		return () => {
+			document.removeEventListener("mousemove", handleMouseMove);
+			document.removeEventListener("mouseup", handleMouseUp);
+			document.body.style.cursor = "";
+			document.body.style.userSelect = "";
+		};
+	}, [onHeightChange]);
+
+	// ========== 5. Render ==========
+	return (
+		<div
+			className={`${styles.panel} ${isFullscreen ? styles.fullscreen : ""}`}
+			style={{ height: isFullscreen ? "100vh" : `${height}px` }}
+		>
+			{/* Resize handle */}
+			{!isFullscreen && (
+				<div
+					className={styles.resizeHandle}
+					onMouseDown={handleResizeStart}
+				>
+					<div className={styles.resizeGrip} />
+				</div>
+			)}
+
+			{/* Header */}
+			<div className={styles.header}>
+				<div className={styles.title}>
+					<TerminalIcon />
+					<span>Terminal</span>
+				</div>
+				<div className={styles.actions}>
+					<button
+						className={styles.actionBtn}
+						onClick={toggleFullscreen}
+						title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+					>
+						{isFullscreen ? <ExitFullscreenIcon /> : <FullscreenIcon />}
+					</button>
+					<button
+						className={styles.actionBtn}
+						onClick={onClose}
+						title="Close"
+					>
+						<CloseIcon />
+					</button>
+				</div>
+			</div>
+
+			{/* Terminal */}
+			<div ref={terminalRef} className={styles.terminal} />
+		</div>
+	);
+}
+
+// ============================================================================
+// Icons
+// ============================================================================
+
+function TerminalIcon() {
+	return (
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={1.5}
+			width="14"
+			height="14"
+		>
+			<polyline points="4 17 10 11 4 5" />
+			<line x1="12" y1="19" x2="20" y2="19" />
+		</svg>
+	);
+}
+
+function FullscreenIcon() {
+	return (
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+			width="14"
+			height="14"
+		>
+			<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+		</svg>
+	);
+}
+
+function ExitFullscreenIcon() {
+	return (
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+			width="14"
+			height="14"
+		>
+			<path d="M4 14h6m-6-4v6m16-6h-6m6 4v-6M10 4v6m4-6v6m-4 14v-6m4 6v-6" />
+		</svg>
+	);
+}
+
+function CloseIcon() {
+	return (
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+			width="14"
+			height="14"
+		>
+			<line x1="18" y1="6" x2="6" y2="18" />
+			<line x1="6" y1="6" x2="18" y2="18" />
+		</svg>
+	);
 }

@@ -14,11 +14,10 @@ export { FileActionBar } from "./Header/FileActionBar";
 // Header
 export { FileToolbar } from "./Header/FileToolbar";
 // Modals
-export { BatchActionBar } from "./modals/BatchActionBar";
+
 // Panels
 export { TerminalPanel } from "./panels/TerminalPanel";
-export { XTermPanel } from "./panels/TerminalPanel/XTermPanel";
 // Sidebar
 export { FileSidebar } from "./Sidebar/FileSidebar";
-// Viewer
-export { FileViewer } from "./Viewer/FileViewer";
+// Modals - FileViewer
+export { FileViewer } from "./modals/FileViewer";

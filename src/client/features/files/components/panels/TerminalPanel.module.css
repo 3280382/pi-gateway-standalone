@@ -1,15 +1,20 @@
-/* XTermPanel Styles */
+/**
+ * TerminalPanel Styles
+ * 合并了 XTermPanel.module.css 和 TerminalPanel.module.css
+ */
 
+/* Panel container */
 .panel {
 	display: flex;
 	flex-direction: column;
 	background: #0d1117;
 	border-top: 1px solid #30363d;
 	overflow: hidden;
+	flex-shrink: 0;
+	position: relative;
 }
 
-/* Fullscreen mode */
-.fullscreen {
+.panel.fullscreen {
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -27,12 +32,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	transition: background 0.15s ease;
 	flex-shrink: 0;
-}
-
-.resizeHandle:hover {
-	background: #1f6feb;
 }
 
 .resizeGrip {
@@ -40,10 +40,6 @@
 	height: 2px;
 	background: #484f58;
 	border-radius: 2px;
-}
-
-.resizeHandle:hover .resizeGrip {
-	background: #fff;
 }
 
 /* Header */
@@ -66,12 +62,6 @@
 	color: #e6edf3;
 }
 
-.title svg {
-	color: #7ee787;
-	width: 14px;
-	height: 14px;
-}
-
 .actions {
 	display: flex;
 	gap: 4px;
@@ -89,7 +79,7 @@
 	color: #8b949e;
 	border-radius: 4px;
 	cursor: pointer;
-	transition: all 0.15s ease;
+	transition: all 0.15s;
 }
 
 .actionBtn:hover {
@@ -97,12 +87,7 @@
 	color: #e6edf3;
 }
 
-.actionBtn svg {
-	width: 14px;
-	height: 14px;
-}
-
-/* Terminal container - 关键样式 */
+/* Terminal container */
 .terminal {
 	flex: 1;
 	min-height: 0;
@@ -110,15 +95,11 @@
 	background: #0d1117;
 }
 
-/* xterm.js 样式覆盖 */
+/* xterm.js overrides */
 .terminal :global(.xterm) {
-	height: 100% !important;
-}
-
-.terminal :global(.xterm-viewport) {
-	background-color: #0d1117 !important;
+	height: 100%;
 }
 
 .terminal :global(.xterm-screen) {
-	background-color: #0d1117 !important;
+	padding: 4px;
 }

@@ -5,11 +5,11 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
+import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { FileViewer } from "./FileViewer";
 
 // Mock store
-vi.mock("@/stores/fileViewerStore", () => ({
+vi.mock("@/stores/viewerStore", () => ({
 	useFileViewerStore: vi.fn(),
 }));
 

@@ -1,1 +1,1 @@
-export { XTermPanel } from "./TerminalPanel";
+export { TerminalPanel } from "./TerminalPanel";

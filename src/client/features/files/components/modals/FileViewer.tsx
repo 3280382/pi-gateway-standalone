@@ -13,7 +13,7 @@ import { EditorView, keymap } from "@codemirror/view";
 import { basicSetup } from "codemirror";
 import React, { useCallback, useEffect, useRef } from "react";
 import { useFileViewer } from "@/features/files/hooks";
-import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
+import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { fileViewerDebug } from "@/lib/debug";
 import styles from "./FileViewer.module.css";
 import { getLanguageExtension } from "./languageExtensions";

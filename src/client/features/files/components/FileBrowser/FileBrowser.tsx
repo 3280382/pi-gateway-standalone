@@ -13,10 +13,10 @@ import { FileGrid } from "@/features/files/components/FileBrowser/FileGrid";
 import { FileList } from "@/features/files/components/FileBrowser/FileList";
 
 import { FileActionBar } from "@/features/files/components/Header/FileActionBar";
-import { FileViewer } from "@/features/files/components/Viewer/FileViewer";
+import { FileViewer } from "@/features/files/components/modals/FileViewer";
 import { useFileBrowser, useFileFiltering } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
-import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
+import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { fileBrowserDebug } from "@/lib/debug";
 
 interface FileBrowserProps {
@@ -30,14 +30,16 @@ export function FileBrowser({
 }: FileBrowserProps) {
 	// ========== 1. State ==========
 	const { viewMode, isLoading, error, items } = useFileStore();
-	const fileViewerStore = useFileViewerStore();
+	// FileViewer store - 用于打开文件查看器
+	const { isOpen: isViewerOpen } = useFileViewerStore();
 
 	// ========== 2. Ref ==========
 	// 无直接DOM引用
 
 	// ========== 3. Effects ==========
 	// 使用useFileBrowser hook管理副作用
-	const { refresh } = useFileBrowser();
+	// 使用useFileBrowser hook管理副作用和刷新
+	useFileBrowser();
 
 	// ========== 4. Computed ==========
 	const { filteredItems } = useFileFiltering();

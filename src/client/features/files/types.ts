@@ -14,8 +14,7 @@ export interface FileItem {
 	path: string;
 	isDirectory: boolean;
 	size?: number;
-	modified?: string;
-	extension?: string;
+	modified?: string;	extension?: string;
 }
 
 export type ViewMode = "grid" | "list";
@@ -55,3 +54,49 @@ export type FilterType =
 // ============================================================================
 
 export type BottomPanelType = "terminal" | "preview" | null;
+
+// ============================================================================
+// API Response Types (从 fileApi.ts 合并)
+// ============================================================================
+
+export interface BrowseResponse {
+	currentPath: string;
+	parentPath: string;
+	items: FileItem[];
+}
+
+export interface FileContentResponse {
+	path: string;
+	content: string;
+	size: number;
+	modified: string;
+}
+
+export interface FileReadResponse {
+	path: string;
+	content: string;
+}
+
+export interface FileExecuteResponse {
+	stdout: string;
+	stderr: string;
+	exitCode: number;
+}
+
+export interface TreeNode {
+	name: string;
+	path: string;
+	isDirectory: boolean;
+	children?: TreeNode[];
+	truncated?: boolean;
+	// 新增计算字段，供前端直接使用
+	level?: number; // 层级深度
+	isLast?: boolean; // 是否是兄弟节点中的最后一个
+	parentLastStack?: boolean[]; // 父节点 isLast 的堆栈，用于绘制连接线
+	parentPath?: string; // 父节点路径
+}
+
+export interface TreeResponse {
+	path: string;
+	items: TreeNode[];
+}

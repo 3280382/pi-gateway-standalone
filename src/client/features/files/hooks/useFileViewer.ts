@@ -16,7 +16,7 @@ import {
 	readFile,
 	writeFile,
 } from "@/features/files/services/api/fileApi";
-import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
+import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { fileViewerDebug } from "@/lib/debug";
 
 // 文件类型配置

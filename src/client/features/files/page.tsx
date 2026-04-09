@@ -11,11 +11,11 @@ import { useRef } from "react";
 import { FileBottomMenu } from "@/features/files/components/BottomMenu/FileBottomMenu";
 import { FileBrowser } from "@/features/files/components/FileBrowser/FileBrowser";
 import { FileToolbar } from "@/features/files/components/Header/FileToolbar";
-import { XTermPanel } from "@/features/files/components/panels/TerminalPanel";
+import { TerminalPanel } from "@/features/files/components/panels/TerminalPanel";
 import { FileSidebar } from "@/features/files/components/Sidebar/FileSidebar";
 import styles from "@/features/files/FilesLayout.module.css";
 import { useFileBrowser, useFileNavigation } from "@/features/files/hooks";
-import { useFileStore, useTerminalStore } from "@/features/files/stores";
+import { useFileStore, useViewerStore } from "@/features/files/stores";
 
 interface FilesPageProps {
 	active?: boolean;
@@ -36,8 +36,8 @@ export function FilesPage({ active = false }: FilesPageProps) {
 		setBottomPanelHeight,
 	} = useFileStore();
 
-	// 从terminal store获取状态
-	const { output, command, setCommand } = useTerminalStore();
+	// 从viewer store获取终端状态
+	const { terminalOutput, terminalCommand, setTerminalCommand } = useViewerStore();
 
 	// ========== 2. Ref ==========
 	// hasMountedRef已在上面定义
@@ -93,14 +93,14 @@ export function FilesPage({ active = false }: FilesPageProps) {
 						onOpenBottomPanel={setCommand}
 					/>
 					{isBottomPanelOpen && (
-						<XTermPanel
+						<TerminalPanel
 							height={bottomPanelHeight}
 							onClose={closeBottomPanel}
 							onHeightChange={setBottomPanelHeight}
-							output={output}
-							initialCommand={command}
+							initialCommand={terminalCommand}
+							initialCommand={terminalCommand}
 							onExecuteCommand={(cmd) => {
-								setCommand(cmd);
+								setTerminalCommand(cmd);
 							}}
 						/>
 					)}

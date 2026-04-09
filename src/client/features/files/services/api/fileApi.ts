@@ -1,50 +1,19 @@
 /**
  * File API - 文件操作
+ *
+ * 职责：
+ * - 提供文件相关的 API 调用
+ * - 不包含业务逻辑，纯数据访问层
  */
 
-import type { FileItem } from "@/features/files/stores/fileStore";
-
-export interface BrowseResponse {
-	currentPath: string;
-	parentPath: string;
-	items: FileItem[];
-}
-
-export interface FileContentResponse {
-	path: string;
-	content: string;
-	size: number;
-	modified: string;
-}
-
-export interface FileReadResponse {
-	path: string;
-	content: string;
-}
-
-export interface FileExecuteResponse {
-	stdout: string;
-	stderr: string;
-	exitCode: number;
-}
-
-export interface TreeNode {
-	name: string;
-	path: string;
-	isDirectory: boolean;
-	children?: TreeNode[];
-	truncated?: boolean;
-	// 新增计算字段，供前端直接使用
-	level?: number; // 层级深度
-	isLast?: boolean; // 是否是兄弟节点中的最后一个
-	parentLastStack?: boolean[]; // 父节点 isLast 的堆栈，用于绘制连接线
-	parentPath?: string; // 父节点路径
-}
-
-export interface TreeResponse {
-	path: string;
-	items: TreeNode[];
-}
+import type {
+	BrowseResponse,
+	FileContentResponse,
+	FileExecuteResponse,
+	FileItem,
+	TreeNode,
+	TreeResponse,
+} from "@/features/files/types";
 
 // 浏览目录
 export async function browseDirectory(path: string): Promise<BrowseResponse> {

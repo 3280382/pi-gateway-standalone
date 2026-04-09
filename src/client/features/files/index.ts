@@ -18,11 +18,8 @@ export { FileActionBar } from "./components/Header/FileActionBar";
 // Components - Header
 export { FileToolbar } from "./components/Header/FileToolbar";
 // Components - Modals
-export { BatchActionBar } from "./components/modals/BatchActionBar";
+
 // Components - Sidebar
 export { FileSidebar } from "./components/Sidebar/FileSidebar";
-// Components - Viewer
-export { FileViewer } from "./components/Viewer/FileViewer";
-
 // Page
 export { FilesPage } from "./page";

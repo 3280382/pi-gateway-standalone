@@ -12,4 +12,3 @@ export { useFileNavigation } from "@/features/files/hooks/useFileNavigation";
 export { useFileOperations } from "@/features/files/hooks/useFileOperations";
 export { useFileTree } from "@/features/files/hooks/useFileTree";
 export { useFileViewer } from "@/features/files/hooks/useFileViewer";
-export { useXTerm } from "@/features/files/hooks/useXTerm";

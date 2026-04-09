@@ -13,7 +13,7 @@ import {
 	type TreeResponse,
 } from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
-import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
+import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { useFileOperations } from "./useFileOperations";
 
 export interface UseFileBottomMenuResult {

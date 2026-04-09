@@ -12,13 +12,13 @@
 
 import { useCallback } from "react";
 import { IconButton } from "@/components/Icon/Icon";
-import { sessionManager } from "@/features/chat/services/sessionManager";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
-import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { sessionManager } from "@/features/chat/services/sessionManager";
 import { useLlmLogStore } from "@/features/chat/stores/llmLogStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
-import { useWorkspaceStore } from "@/features/files/stores";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
+import { useWorkspaceStore } from "@/features/files/stores";
 import styles from "./SidebarPanel.module.css";
 
 // ============================================================================
@@ -265,10 +265,10 @@ function ChatSettingsSection() {
 				<div className={styles.controls}>
 					<button
 						className={`${styles.toggleBtn} ${llmLogConfig.enabled ? styles.enabled : ""}`}
-						onClick={() =>
-							setLlmLogConfig({ enabled: !llmLogConfig.enabled })
+						onClick={() => setLlmLogConfig({ enabled: !llmLogConfig.enabled })}
+						title={
+							llmLogConfig.enabled ? "Logging enabled" : "Logging disabled"
 						}
-						title={llmLogConfig.enabled ? "Logging enabled" : "Logging disabled"}
 					>
 						<LogIcon />
 						<span>{llmLogConfig.enabled ? "On" : "Off"}</span>
@@ -309,7 +309,13 @@ function ChatSettingsSection() {
 // Shared UI Components (内联，减少文件)
 // ============================================================================
 
-function SectionHeader({ title, action }: { title: string; action?: React.ReactNode }) {
+function SectionHeader({
+	title,
+	action,
+}: {
+	title: string;
+	action?: React.ReactNode;
+}) {
 	return (
 		<div className={styles.sectionHeader}>
 			<span className={styles.sectionTitle}>{title}</span>
