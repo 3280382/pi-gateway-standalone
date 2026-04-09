@@ -5,7 +5,7 @@
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { FILES_WORKSPACE_PERSIST, STORAGE_KEYS, STORAGE_VERSION } from "@/stores/persist.config";
+import { FILES_WORKSPACE_PERSIST, FILES_STORAGE_KEYS, FILES_STORAGE_VERSION } from "./persist.config";
 
 export interface WorkspaceState {
 	recentWorkspaces: string[];
@@ -31,8 +31,8 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
 				clearRecentWorkspaces: () => set({ recentWorkspaces: [] }),
 			}),
 			{
-				name: STORAGE_KEYS.FILES_WORKSPACE,
-				version: STORAGE_VERSION.FILES_WORKSPACE,
+				name: FILES_STORAGE_KEYS.FILES_WORKSPACE,
+				version: FILES_STORAGE_VERSION.FILES_WORKSPACE,
 				partialize: (state) =>
 					Object.fromEntries(
 						FILES_WORKSPACE_PERSIST.map((key) => [key, state[key]]),

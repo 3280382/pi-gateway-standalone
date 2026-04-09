@@ -1,77 +1,53 @@
 /**
- * Persist Config - 全局持久化配置
+ * Persist Config - App 全局持久化配置
+ *
+ * 职责：
+ * - App 级别的持久化配置
+ * - 聚合各 feature 的配置供调试使用
  *
  * 命名规范：
- * - 统一前缀：pi
- * - 层级结构：feature:store
- * - 示例：pi:chat:session, pi:files:browser
- *
- * 注意：
- * - Chat 和 Files 各自维护独立的 currentDir/currentPath
- * - 不持久化运行时状态（如 isLoading, error）
+ * - App: pi:app:{store}
+ * - 各 feature 引用自己的配置文件
  */
 
+import { CHAT_STORAGE_KEYS, CHAT_STORAGE_VERSION } from "@/features/chat/stores/persist.config";
+import { FILES_STORAGE_KEYS, FILES_STORAGE_VERSION } from "@/features/files/stores/persist.config";
+
 // ============================================================================
-// Storage Keys - 统一命名
+// App Storage Keys
 // ============================================================================
 
-export const STORAGE_KEYS = {
-	// Chat Feature
-	CHAT_SESSION: "pi:chat:session",
-	CHAT_SIDEBAR: "pi:chat:sidebar",
-
-	// Files Feature
-	FILES_BROWSER: "pi:files:browser",
-	FILES_WORKSPACE: "pi:files:workspace",
-
-	// App Level
+export const APP_STORAGE_KEYS = {
 	APP_GLOBAL: "pi:app:global",
 } as const;
 
 // ============================================================================
-// 版本号（用于数据迁移）
+// App Storage Versions
 // ============================================================================
 
-export const STORAGE_VERSION = {
-	CHAT_SESSION: 1,
-	CHAT_SIDEBAR: 1,
-	FILES_BROWSER: 1,
-	FILES_WORKSPACE: 1,
+export const APP_STORAGE_VERSION = {
 	APP_GLOBAL: 1,
 } as const;
 
 // ============================================================================
-// Partialize 配置 - 明确哪些字段需要持久化
+// App Persist Fields
 // ============================================================================
 
-/** Chat Session Store - 持久化字段 */
-export const CHAT_SESSION_PERSIST = [
-	"currentSessionId",
-	"workingDir", // Chat 独立的当前工作目录
-	"currentModel",
-	"thinkingLevel",
+export const APP_GLOBAL_PERSIST = [
+	"currentView",
 	"theme",
 	"fontSize",
 ] as const;
 
-/** Chat Sidebar Store - 持久化字段 */
-export const CHAT_SIDEBAR_PERSIST = ["lastSessionByDir"] as const;
+// ============================================================================
+// 聚合所有 Storage Keys（供调试使用）
+// ============================================================================
 
-/** Files Browser Store - 持久化字段 */
-export const FILES_BROWSER_PERSIST = [
-	"workingDir", // Files 独立的当前工作目录
-	"viewMode",
-	"sortMode",
-	"filterType",
-	"isSidebarVisible",
-	"bottomPanelHeight",
-] as const;
-
-/** Files Workspace Store - 持久化字段 */
-export const FILES_WORKSPACE_PERSIST = ["recentWorkspaces"] as const;
-
-/** App Global Store - 持久化字段 */
-export const APP_GLOBAL_PERSIST = ["currentView", "theme", "fontSize"] as const;
+export const ALL_STORAGE_KEYS = {
+	...APP_STORAGE_KEYS,
+	...CHAT_STORAGE_KEYS,
+	...FILES_STORAGE_KEYS,
+} as const;
 
 // ============================================================================
 // 调试工具
@@ -83,7 +59,7 @@ export function inspectPersistedState(): void {
 
 	console.group("🔍 Persisted State in localStorage");
 
-	Object.values(STORAGE_KEYS).forEach((key) => {
+	Object.values(ALL_STORAGE_KEYS).forEach((key) => {
 		const data = localStorage.getItem(key);
 		if (data) {
 			try {
@@ -105,7 +81,7 @@ export function inspectPersistedState(): void {
 
 /** 清空所有持久化状态 */
 export function clearPersistedState(): void {
-	Object.values(STORAGE_KEYS).forEach((key) => {
+	Object.values(ALL_STORAGE_KEYS).forEach((key) => {
 		localStorage.removeItem(key);
 	});
 	console.log("[Persist] All states cleared");
@@ -116,6 +92,6 @@ if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
 	(window as any).__PI_PERSIST = {
 		inspect: inspectPersistedState,
 		clear: clearPersistedState,
-		keys: STORAGE_KEYS,
+		keys: ALL_STORAGE_KEYS,
 	};
 }
