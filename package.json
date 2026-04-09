@@ -20,33 +20,20 @@
 		"CHANGELOG.md"
 	],
 	"scripts": {
-  "clean": "shx rm -rf dist",
-
-  "dev": "tsx watch src/server/server.ts",
-  "dev:react": "vite",
-
-  "build": "vite build --logLevel warn",
-  "build:ci": "vite build --logLevel error --mode production",
-
-  "build:server": "tsc -p tsconfig.json",
-
-  "start": "node dist/server.js",
-
-  // ✅ AI安全：纯检查
-  "check": "biome check --error-on-warnings . && tsc --noEmit --skipLibCheck",
-
-  // ✅ CI专用（同check）
-  "check:ci": "biome check --error-on-warnings . && tsc --noEmit --skipLibCheck",
-
-  // ✅ 修复（只能人工或受控AI）
-  "fix": "biome check --write .",
-
-  "typecheck": "tsc --noEmit && tsc -p tsconfig.react.json --noEmit",
-
-  "test": "vitest --run test/unit test/integration src/",
-
-  "preview": "vite preview"
-},
+		"clean": "shx rm -rf dist",
+		"dev": "tsx watch src/server/server.ts",
+		"dev:react": "vite",
+		"build": "vite build --logLevel warn",
+		"build:ci": "vite build --logLevel error --mode production",
+		"build:server": "tsc -p tsconfig.json",
+		"start": "node dist/server.js",
+		"check": "biome check --error-on-warnings . && tsc --noEmit --skipLibCheck",
+		"check:ci": "biome check --error-on-warnings . && tsc --noEmit --skipLibCheck",
+		"fix": "biome check --write .",
+		"typecheck": "tsc --noEmit && tsc -p tsconfig.react.json --noEmit",
+		"test": "vitest --run test/unit test/integration src/",
+		"preview": "vite preview"
+	},
 	"dependencies": {
 		"@codemirror/commands": "^6.10.3",
 		"@codemirror/lang-css": "^6.3.1",
