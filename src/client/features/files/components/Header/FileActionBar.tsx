@@ -44,8 +44,17 @@ export function FileActionBar({
 	onExecute,
 	onOpenBottomPanel,
 }: FileActionBarProps) {
+	// ========== 1. State ==========
 	const { selectedActionFile, selectedActionFileName } = useFileStore();
 	const { viewFile, editFile, executeFileStream } = useFileViewer();
+	
+	// ========== 2. Ref ==========
+	// 暂无
+	
+	// ========== 3. Effects ==========
+	// 暂无
+	
+	// ========== 4. Computed ==========
 
 	if (!selectedActionFile) {
 		return null;
@@ -61,6 +70,8 @@ export function FileActionBar({
 
 	// 判断文件是否可编辑
 	const isEditable = !NON_EDITABLE_EXTENSIONS.includes(ext);
+	
+	// ========== 5. Actions ==========
 
 	// 处理查看
 	const handleView = () => {
@@ -82,6 +93,7 @@ export function FileActionBar({
 		);
 	};
 
+	// ========== 6. Render ==========
 	return (
 		<div className={styles.actionBar}>
 			<span className={styles.selectedName}>{selectedActionFileName}</span>

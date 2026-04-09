@@ -39,7 +39,7 @@ describe("handlePrompt", () => {
 		expect(mockWs.send).toHaveBeenCalledWith(
 			JSON.stringify({
 				type: "error",
-				error: "会话未初始化，请先发送 init 消息",
+				error: "Session not initialized, please send init message first",
 			}),
 		);
 	});

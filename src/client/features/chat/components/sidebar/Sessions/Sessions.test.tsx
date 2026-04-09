@@ -9,10 +9,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Sessions } from "./Sessions";
 
-// Mock Zustand store with fixed state
-const mockSelectSession = vi.fn();
-const mockCreateNewSession = vi.fn();
-
+// Create mock functions inside the mock factory to avoid hoisting issues
 vi.mock("@/features/chat/stores/sidebarStore", () => ({
 	useSidebarStore: (selector: any) => {
 		const state = {
@@ -20,12 +17,14 @@ vi.mock("@/features/chat/stores/sidebarStore", () => ({
 				{
 					id: "1",
 					name: "Test Session 1",
+					path: "/path/to/session1",
 					messageCount: 5,
 					lastModified: new Date("2024-01-15"),
 				},
 				{
 					id: "2",
 					name: "Test Session 2",
+					path: "/path/to/session2",
 					messageCount: 10,
 					lastModified: new Date("2024-01-16"),
 				},
@@ -37,11 +36,11 @@ vi.mock("@/features/chat/stores/sidebarStore", () => ({
 	},
 }));
 
-vi.mock("../@/services/api/sidebarApi", () => ({
-	useSidebarController: () => ({
-		selectSession: mockSelectSession,
-		createNewSession: mockCreateNewSession,
-	}),
+vi.mock("@/features/chat/services/sessionManager", () => ({
+	sessionManager: {
+		selectSession: vi.fn(),
+		createNewSession: vi.fn(),
+	},
 }));
 
 describe("Sessions Section UI", () => {

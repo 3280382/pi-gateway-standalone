@@ -16,19 +16,25 @@ interface SystemPromptData {
 }
 
 export function SystemPromptModal() {
+	// ========== 1. State ==========
 	const { isSystemPromptOpen, closeSystemPrompt } = useModalStore();
 	const [data, setData] = useState<SystemPromptData | null>(null);
-	const [loading, setLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 	const [activeTab, setActiveTab] = useState<
 		"prompt" | "agents" | "skills" | "resources"
 	>("prompt");
 	const resourceFiles = useSessionStore((state) => state.resourceFiles);
+	
+	// ========== 2. Ref ==========
+	// 暂无
+	
+	// ========== 3. Effects ==========
 
 	useEffect(() => {
 		if (!isSystemPromptOpen) return;
 
 		const load = async () => {
-			setLoading(true);
+			setIsLoading(true);
 			try {
 				const res = await fetch("/api/system-prompt");
 				const json = await res.json();
@@ -36,12 +42,20 @@ export function SystemPromptModal() {
 			} catch (err) {
 				console.error("Failed to load system prompt:", err);
 			} finally {
-				setLoading(false);
+				setIsLoading(false);
 			}
 		};
 
 		load();
 	}, [isSystemPromptOpen]);
+	
+	// ========== 4. Computed ==========
+	// 暂无
+	
+	// ========== 5. Actions ==========
+	// 暂无（事件处理函数在JSX中内联）
+	
+	// ========== 6. Render ==========
 
 	if (!isSystemPromptOpen) return null;
 
@@ -83,7 +97,7 @@ export function SystemPromptModal() {
 				</div>
 
 				<div className={styles.content}>
-					{loading ? (
+					{isLoading ? (
 						<div className={styles.loading}>Loading...</div>
 					) : activeTab === "prompt" ? (
 						<div className={styles.promptSection}>

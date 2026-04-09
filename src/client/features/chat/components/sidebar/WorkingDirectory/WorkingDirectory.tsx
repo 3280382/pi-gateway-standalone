@@ -10,23 +10,37 @@ import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import styles from "./WorkingDirectory.module.css";
 
 export function WorkingDirectory() {
+	// ========== 1. State ==========
 	const workingDir = useSidebarStore((state) => state.workingDir);
 	const isLoading = useSidebarStore((state) => state.isLoading);
 	const controller = useSidebarController();
-	const [showPicker, setShowPicker] = useState(false);
+	const [isPickerVisible, setIsPickerVisible] = useState(false);
+	
+	// ========== 2. Ref ==========
+	// 暂无
+	
+	// ========== 3. Effects ==========
+	// 暂无
+	
+	// ========== 4. Computed ==========
+	// 暂无
+	
+	// ========== 5. Actions ==========
 
 	// 点击工作目录打开选择器
 	const handleClick = () => {
-		setShowPicker(true);
+		setIsPickerVisible(true);
 	};
 
 	// 处理目录选择
 	const handleSelect = async (path: string) => {
-		setShowPicker(false);
+		setIsPickerVisible(false);
 		if (path && path !== workingDir?.path) {
 			await controller.changeWorkingDir(path);
 		}
 	};
+	
+	// ========== 6. Render ==========
 
 	return (
 		<section className={styles.section}>
@@ -45,11 +59,11 @@ export function WorkingDirectory() {
 			</div>
 
 			{/* Directory Picker Modal */}
-			{showPicker && (
+			{isPickerVisible && (
 				<DirectoryPicker
 					currentPath={workingDir?.path || "/root"}
 					onSelect={handleSelect}
-					onClose={() => setShowPicker(false)}
+					onClose={() => setIsPickerVisible(false)}
 				/>
 			)}
 		</section>

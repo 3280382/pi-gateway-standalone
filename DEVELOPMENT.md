@@ -288,6 +288,17 @@ function MessageList({ messages }: MessageListProps) {
 - Event naming uses `on + verb + noun` (e.g., `onToggleCollapse`)
 - Use stable keys, prohibit using index
 
+**Code Organization**:
+For complex components with multiple states and effects, follow the structured order:
+1. **State** - useState, Zustand selectors
+2. **Ref** - useRef for DOM references
+3. **Effects** - useEffect hooks
+4. **Computed** - useMemo for derived values
+5. **Actions** - useCallback for event handlers
+6. **Render** - JSX return statement
+
+Use section markers (`// ========== 1. State ==========`) for clarity. See [UI_REACT_COMPONENT_REFACTOR_GUIDE.md](./docs/UI_REACT_COMPONENT_REFACTOR_GUIDE.md) for detailed refactoring guidelines.
+
 ### State Management
 
 | State Type | Tool | Use Case |
