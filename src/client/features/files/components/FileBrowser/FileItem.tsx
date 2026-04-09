@@ -51,11 +51,18 @@ export const FileItem = memo<FileItemProps>(
 		onToggleSelect,
 		viewMode,
 	}) => {
+		// ========== 1. State ==========
+		const [isPressed, setIsPressed] = useState(false);
+
+		// ========== 2. Ref ==========
+		const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+		// ========== 3. Effects ==========
+		// 无外部副作用，使用事件处理器管理计时器
+
+		// ========== 4. Computed ==========
 		const icon = getFileIcon(item.extension, item.isDirectory);
 		const isGrid = viewMode === "grid";
-
-		const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
-		const [isPressed, setIsPressed] = useState(false);
 
 		// 组合样式
 		const itemClassName = [
@@ -69,6 +76,7 @@ export const FileItem = memo<FileItemProps>(
 			.filter(Boolean)
 			.join(" ");
 
+		// ========== 5. Actions ==========
 		// 处理鼠标按下 - 开始长按计时
 		const handleMouseDown = useCallback(() => {
 			setIsPressed(true);
@@ -110,6 +118,7 @@ export const FileItem = memo<FileItemProps>(
 			[onTap],
 		);
 
+		// ========== 6. Render ==========
 		return (
 			<div
 				className={itemClassName}

@@ -28,15 +28,21 @@ export function FileBrowser({
 	onExecuteOutput,
 	onOpenBottomPanel,
 }: FileBrowserProps) {
-	// 获取状态
+	// ========== 1. State ==========
 	const { viewMode, isLoading, error, items } = useFileStore();
-
 	const fileViewerStore = useFileViewerStore();
 
-	// 使用业务逻辑 hooks
+	// ========== 2. Ref ==========
+	// 无直接DOM引用
+
+	// ========== 3. Effects ==========
+	// 使用useFileBrowser hook管理副作用
 	const { refresh } = useFileBrowser();
+
+	// ========== 4. Computed ==========
 	const { filteredItems } = useFileFiltering();
 
+	// 调试日志
 	fileBrowserDebug.debug("FileBrowser 渲染", {
 		isLoading,
 		error,
@@ -44,6 +50,10 @@ export function FileBrowser({
 		filteredItemsCount: filteredItems.length,
 	});
 
+	// ========== 5. Actions ==========
+	// 通过hooks获取
+
+	// ========== 6. Render ==========
 	return (
 		<section className={styles.fileBrowserSection}>
 			<div className={styles.container}>

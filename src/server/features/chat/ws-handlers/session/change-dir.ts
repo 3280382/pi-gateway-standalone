@@ -33,6 +33,7 @@ export async function handleChangeDir(
 				sessionId: info.sessionId,
 				sessionFile: info.sessionFile,
 				pid: process.pid,
+				resourceFiles: info.resourceFiles,
 			}),
 		);
 

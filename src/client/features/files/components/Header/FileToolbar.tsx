@@ -49,8 +49,8 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 	} = useFileStore();
 
 	// UI状态
-	const [isFilterDropdownVisible, setIsFilterDropdownVisible] = useState(false);
-	const [isSortDropdownVisible, setIsSortDropdownVisible] = useState(false);
+	const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+	const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
 	// ========== 2. Ref ==========
 	const filterDropdownRef = useRef<HTMLDivElement>(null);
@@ -64,13 +64,13 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 				filterDropdownRef.current &&
 				!filterDropdownRef.current.contains(event.target as Node)
 			) {
-				setIsFilterDropdownVisible(false);
+				setIsFilterDropdownOpen(false);
 			}
 			if (
 				sortDropdownRef.current &&
 				!sortDropdownRef.current.contains(event.target as Node)
 			) {
-				setIsSortDropdownVisible(false);
+				setIsSortDropdownOpen(false);
 			}
 		};
 		document.addEventListener("mousedown", handleClickOutside);
@@ -83,15 +83,6 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 		FILTER_OPTIONS.find((opt) => opt.value === filterType) || FILTER_OPTIONS[0];
 
 	// ========== 5. Actions ==========
-	// 处理选项选择
-	const handleFilterSelect = (value: FilterType) => {
-		setFilterType(value);
-		if (value !== "custom") {
-			setFilterText("");
-		}
-		setIsFilterDropdownVisible(false);
-	};
-
 	// 处理输入框变化
 	const handleFilterInputChange = (value: string) => {
 		const option = FILTER_OPTIONS.find(
@@ -104,12 +95,6 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 			setFilterType("custom");
 			setFilterText(value);
 		}
-	};
-
-	// 处理排序选择
-	const handleSortSelect = (value: SortMode) => {
-		setSortMode(value);
-		setIsSortDropdownVisible(false);
 	};
 
 	return (
@@ -133,22 +118,28 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 							filterType === "custom" ? filterText : selectedFilterOption.label
 						}
 						onChange={(e) => handleFilterInputChange(e.target.value)}
-						onClick={() => setIsFilterDropdownVisible(true)}
+						onClick={() => setIsFilterDropdownOpen(true)}
 					/>
 					<button
 						className={styles.filterComboBtn}
-						onClick={() => setIsFilterDropdownVisible(!isFilterDropdownVisible)}
+						onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
 						title="Select filter"
 					>
 						<DropdownIcon />
 					</button>
-					{isFilterDropdownVisible && (
+					{isFilterDropdownOpen && (
 						<div className={styles.filterDropdown}>
 							{FILTER_OPTIONS.map((option) => (
 								<div
 									key={option.value}
 									className={`${styles.filterDropdownItem} ${filterType === option.value ? styles.active : ""}`}
-									onClick={() => handleFilterSelect(option.value)}
+									onClick={() => {
+										setFilterType(option.value);
+										if (option.value !== "custom") {
+											setFilterText("");
+										}
+										setIsFilterDropdownOpen(false);
+									}}
 								>
 									<span className={styles.filterIcon}>{option.icon}</span>
 									<span className={styles.filterLabel}>{option.label}</span>
@@ -162,7 +153,7 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 				<div className={styles.sortCombo} ref={sortDropdownRef}>
 					<button
 						className={styles.sortComboBtn}
-						onClick={() => setIsSortDropdownVisible(!isSortDropdownVisible)}
+						onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
 						title="Sort by"
 					>
 						<span>
@@ -173,7 +164,7 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 						</span>
 						<DropdownIcon />
 					</button>
-					{isSortDropdownVisible && (
+					{isSortDropdownOpen && (
 						<div className={styles.sortDropdown}>
 							{SORT_OPTIONS.map((option) => (
 								<div
@@ -181,7 +172,7 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 									className={`${styles.sortDropdownItem} ${sortMode === option.value ? styles.active : ""}`}
 									onClick={() => {
 										setSortMode(option.value);
-										setIsSortDropdownVisible(false);
+										setIsSortDropdownOpen(false);
 									}}
 								>
 									<span className={styles.sortIcon}>{option.icon}</span>

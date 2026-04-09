@@ -18,6 +18,7 @@ interface FileGridProps {
 }
 
 export const FileGrid = memo<FileGridProps>(({ items }) => {
+	// ========== 1. State ==========
 	const {
 		selectedItems,
 		isMultiSelectMode,
@@ -28,8 +29,19 @@ export const FileGrid = memo<FileGridProps>(({ items }) => {
 		getContainerHandlers,
 	} = useFileItemActions();
 
+	// ========== 2. Ref ==========
+	// 无直接DOM引用
+
+	// ========== 3. Effects ==========
+	// 无外部副作用
+
+	// ========== 4. Computed ==========
 	const containerHandlers = getContainerHandlers();
 
+	// ========== 5. Actions ==========
+	// 通过 useFileItemActions 获取
+
+	// ========== 6. Render ==========
 	return (
 		<>
 			<div className={styles.grid} {...containerHandlers}>

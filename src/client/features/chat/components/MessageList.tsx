@@ -1,13 +1,22 @@
 /**
- * MessageList - Message list component (render only, no scrolling logic)
+ * MessageList - Message list component
  *
- * Note: Scrolling is handled by the parent container (AppLayout.contentBody)
- * This component only renders the list of messages
+ * 职责：
+ * - 渲染消息列表
+ * - 处理空状态显示
+ * - 注意：滚动逻辑由父组件处理
+ *
+ * 结构规范：State → Ref → Effects → Computed → Actions → Render
  */
 
+import { useMemo } from "react";
 import type { Message } from "@/features/chat/types/chat";
 import { MessageItem } from "./MessageItem";
 import styles from "./MessageList.module.css";
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface MessageListProps {
 	messages: Message[];
@@ -21,6 +30,10 @@ interface MessageListProps {
 	onRegenerateMessage?: (id: string) => void;
 }
 
+// ============================================================================
+// Component
+// ============================================================================
+
 export function MessageList({
 	messages,
 	currentStreamingMessage,
@@ -32,15 +45,24 @@ export function MessageList({
 	onDeleteMessage,
 	onRegenerateMessage,
 }: MessageListProps) {
-	// 防止重复：如果 currentStreamingMessage 的 ID 已经在 messages 中，则不添加
-	// 这发生在 finishStreaming 将消息添加到 messages 但 currentStreamingMessage 还未被设为 null 时
-	const allMessages = currentStreamingMessage
-		? messages.some((m) => m.id === currentStreamingMessage.id)
-			? messages // ID 已存在于 messages 中，不重复添加
-			: [...messages, currentStreamingMessage] // ID 不存在，添加流式消息
-		: messages;
+	// ========== 4. Computed ==========
+	// Merge messages with current streaming message, avoid duplicates
+	const allMessages = useMemo(() => {
+		if (!currentStreamingMessage) return messages;
 
-	if (allMessages.length === 0) {
+		// Check if streaming message already exists in messages
+		const exists = messages.some((m) => m.id === currentStreamingMessage.id);
+		return exists ? messages : [...messages, currentStreamingMessage];
+	}, [messages, currentStreamingMessage]);
+
+	// Filter valid messages
+	const validMessages = useMemo(
+		() => allMessages.filter((message) => message && message.id),
+		[allMessages],
+	);
+
+	// ========== 5. Render ==========
+	if (validMessages.length === 0) {
 		return (
 			<div className={styles.empty}>
 				<div className={styles.logo}>π</div>
@@ -52,21 +74,19 @@ export function MessageList({
 
 	return (
 		<div className={styles.container}>
-			{allMessages
-				.filter((message) => message && message.id)
-				.map((message) => (
-					<MessageItem
-						key={message.id}
-						message={message}
-						showThinking={showThinking}
-						showTools={showTools}
-						onToggleCollapse={() => onToggleMessageCollapse(message.id)}
-						onToggleThinking={() => onToggleThinkingCollapse(message.id)}
-						onToggleTools={() => onToggleToolsCollapse?.(message.id)}
-						onDelete={() => onDeleteMessage?.(message.id)}
-						onRegenerate={() => onRegenerateMessage?.(message.id)}
-					/>
-				))}
+			{validMessages.map((message) => (
+				<MessageItem
+					key={message.id}
+					message={message}
+					showThinking={showThinking}
+					showTools={showTools}
+					onToggleCollapse={() => onToggleMessageCollapse(message.id)}
+					onToggleThinking={() => onToggleThinkingCollapse(message.id)}
+					onToggleTools={() => onToggleToolsCollapse?.(message.id)}
+					onDelete={() => onDeleteMessage?.(message.id)}
+					onRegenerate={() => onRegenerateMessage?.(message.id)}
+				/>
+			))}
 		</div>
 	);
 }

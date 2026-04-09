@@ -18,18 +18,15 @@ import { useFileOperations } from "./useFileOperations";
 
 export interface UseFileBottomMenuResult {
 	// UI 状态
-	showNewModal: boolean;
-	showDeleteModal: boolean;
-	showTreeModal: boolean;
+	isNewModalOpen: boolean;
+	isDeleteModalOpen: boolean;
+	isTreeModalOpen: boolean;
 	newFileName: string;
 	treeData: TreeResponse | null;
 	treeLoading: boolean;
 
 	// 状态设置
 	setNewFileName: (name: string) => void;
-	setShowNewModal: (show: boolean) => void;
-	setShowDeleteModal: (show: boolean) => void;
-	setShowTreeModal: (show: boolean) => void;
 
 	// 操作方法
 	handleNewClick: () => void;
@@ -44,13 +41,16 @@ export interface UseFileBottomMenuResult {
 }
 
 export function useFileBottomMenu(): UseFileBottomMenuResult {
-	const [showNewModal, setShowNewModal] = useState(false);
-	const [showDeleteModal, setShowDeleteModal] = useState(false);
-	const [showTreeModal, setShowTreeModal] = useState(false);
+	// ========== 1. State ==========
+	// UI 状态
+	const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [isTreeModalOpen, setIsTreeModalOpen] = useState(false);
 	const [newFileName, setNewFileName] = useState("");
 	const [treeData, setTreeData] = useState<TreeResponse | null>(null);
-	const [treeLoading, setTreeLoading] = useState(false);
+	const [isTreeLoading, setIsTreeLoading] = useState(false);
 
+	// Domain 状态
 	const {
 		selectedItems,
 		isMultiSelectMode,
@@ -62,9 +62,27 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
 	const { createNewFile, deleteSelected } = useFileOperations();
 	const { openViewer } = useFileViewerStore();
 
+	// ========== 2. Ref ==========
+	// 无直接DOM引用
+
+	// ========== 3. Effects ==========
+	// ESC 关闭树状视图
+	useEffect(() => {
+		if (!isTreeModalOpen) return;
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape") handleCloseTree();
+		};
+		document.addEventListener("keydown", handleKeyDown);
+		return () => document.removeEventListener("keydown", handleKeyDown);
+	}, [isTreeModalOpen]);
+
+	// ========== 4. Computed ==========
+	// 简单条件判断，无需useMemo
+
+	// ========== 5. Actions ==========
 	// 新建文件
 	const handleNewClick = useCallback(() => {
-		setShowNewModal(true);
+		setIsNewModalOpen(true);
 		setNewFileName("");
 	}, []);
 
@@ -72,12 +90,12 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
 		if (!newFileName.trim()) return;
 		const fileName = newFileName.trim();
 		await createNewFile(fileName);
-		setShowNewModal(false);
+		setIsNewModalOpen(false);
 		setNewFileName("");
 	}, [newFileName, createNewFile]);
 
 	const handleCancelNew = useCallback(() => {
-		setShowNewModal(false);
+		setIsNewModalOpen(false);
 		setNewFileName("");
 	}, []);
 
@@ -89,12 +107,12 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
 			}
 			return;
 		}
-		setShowDeleteModal(true);
+		setIsDeleteModalOpen(true);
 	}, [selectedItems.length, isMultiSelectMode, toggleMultiSelectMode]);
 
 	const handleConfirmDelete = useCallback(async () => {
 		await deleteSelected();
-		setShowDeleteModal(false);
+		setIsDeleteModalOpen(false);
 		clearSelection();
 		if (isMultiSelectMode) {
 			toggleMultiSelectMode();
@@ -107,20 +125,20 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
 	]);
 
 	const handleCancelDelete = useCallback(() => {
-		setShowDeleteModal(false);
+		setIsDeleteModalOpen(false);
 	}, []);
 
 	// 树状视图
 	const handleTreeClick = useCallback(async () => {
-		setShowTreeModal(true);
-		setTreeLoading(true);
+		setIsTreeModalOpen(true);
+		setIsTreeLoading(true);
 		try {
 			const data = await getFileTree(currentPath);
 			setTreeData(data);
 		} catch (error) {
 			console.error("[TreeView] Failed to load file tree:", error);
 		} finally {
-			setTreeLoading(false);
+			setIsTreeLoading(false);
 		}
 	}, [currentPath]);
 
@@ -133,31 +151,19 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
 	);
 
 	const handleCloseTree = useCallback(() => {
-		setShowTreeModal(false);
+		setIsTreeModalOpen(false);
 		setTreeData(null);
 	}, []);
 
-	// ESC 关闭树状视图
-	useEffect(() => {
-		if (!showTreeModal) return;
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Escape") handleCloseTree();
-		};
-		document.addEventListener("keydown", handleKeyDown);
-		return () => document.removeEventListener("keydown", handleKeyDown);
-	}, [showTreeModal, handleCloseTree]);
-
+	// ========== 6. Return ==========
 	return {
-		showNewModal,
-		showDeleteModal,
-		showTreeModal,
+		isNewModalOpen,
+		isDeleteModalOpen,
+		isTreeModalOpen,
 		newFileName,
 		treeData,
-		treeLoading,
+		treeLoading: isTreeLoading,
 		setNewFileName,
-		setShowNewModal,
-		setShowDeleteModal,
-		setShowTreeModal,
 		handleNewClick,
 		handleConfirmNew,
 		handleCancelNew,

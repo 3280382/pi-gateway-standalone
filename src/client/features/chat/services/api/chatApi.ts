@@ -575,6 +575,22 @@ export function setupWebSocketListeners(): void {
 		}
 	});
 
+	// Initialized handler - 保存 resourceFiles
+	websocketService.on("initialized", (data: any) => {
+		console.log("[setupWebSocketListeners] initialized:", data);
+		if (data?.resourceFiles) {
+			useSessionStore.getState().setResourceFiles(data.resourceFiles);
+		}
+	});
+
+	// Dir changed handler - 也保存 resourceFiles（切换目录时）
+	websocketService.on("dir_changed", (data: any) => {
+		console.log("[setupWebSocketListeners] dir_changed:", data);
+		if (data?.resourceFiles) {
+			useSessionStore.getState().setResourceFiles(data.resourceFiles);
+		}
+	});
+
 	// Agent end handler - 已在 setupWebSocketListeners 中处理
 	// Error handler - 由全局WebSocket服务统一处理
 }

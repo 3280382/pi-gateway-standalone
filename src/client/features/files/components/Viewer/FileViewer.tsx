@@ -9,7 +9,6 @@
 import { defaultKeymap } from "@codemirror/commands";
 import { Compartment, EditorState } from "@codemirror/state";
 import { oneDark } from "@codemirror/theme-one-dark";
-// ========== 修改点 1: 引入 CodeMirror 6 核心库 ==========
 import { EditorView, keymap } from "@codemirror/view";
 import { basicSetup } from "codemirror";
 import React, { useCallback, useEffect, useRef } from "react";
@@ -18,7 +17,6 @@ import { useFileViewerStore } from "@/features/files/stores/fileViewerStore";
 import { fileViewerDebug } from "@/lib/debug";
 import styles from "./FileViewer.module.css";
 import { getLanguageExtension } from "./languageExtensions";
-// ======================================================
 
 export function FileViewer() {
 	// ========== 1. State ==========
@@ -53,15 +51,7 @@ export function FileViewer() {
 	const languageCompartmentRef = useRef<Compartment | null>(null);
 	const isUpdatingRef = useRef(false); // 防止循环更新
 
-	// ========== 3. Actions ==========
-	// 修复编辑器焦点问题
-	const focusEditor = useCallback(() => {
-		if (editorViewRef.current && mode === "edit") {
-			editorViewRef.current.focus();
-		}
-	}, [mode]);
-
-	// ========== 4. Effects ==========
+	// ========== 3. Effects ==========
 	// 自动滚动终端
 	useEffect(() => {
 		if (terminalRef.current) {
@@ -84,7 +74,7 @@ export function FileViewer() {
 		}
 	}, [content, mode, fileTypes.isImage, fileTypes.isHtml]);
 
-	// ========== 修改点 3: 初始化 CodeMirror 编辑器 ==========
+	// 初始化 CodeMirror 编辑器
 	useEffect(() => {
 		// 仅在编辑模式且容器存在时初始化
 		if (mode !== "edit" || !editorContainerRef.current) {
@@ -166,9 +156,8 @@ export function FileViewer() {
 			editorViewRef.current = null;
 		};
 	}, [mode, fileName]); // 模式或文件名变化时重建编辑器
-	// ======================================================
 
-	// ========== 修改点 4: 同步 store 内容到编辑器（外部修改时）==========
+	// 同步 store 内容到编辑器（外部修改时）
 	useEffect(() => {
 		const view = editorViewRef.current;
 		if (!view || mode !== "edit") return;
@@ -187,9 +176,8 @@ export function FileViewer() {
 			isUpdatingRef.current = false;
 		}
 	}, [editedContent, mode]);
-	// ======================================================
 
-	// ========== 修改点 5: 动态切换语言 ==========
+	// 动态切换语言
 	useEffect(() => {
 		if (
 			mode !== "edit" ||
@@ -205,7 +193,6 @@ export function FileViewer() {
 			effects: languageCompartmentRef.current.reconfigure(newExtension),
 		});
 	}, [filePath, mode]); // 文件路径变化时重新配置语言
-	// ======================================================
 
 	// 进入编辑模式后自动聚焦
 	useEffect(() => {
@@ -213,17 +200,25 @@ export function FileViewer() {
 			const timer = setTimeout(focusEditor, 100);
 			return () => clearTimeout(timer);
 		}
-	}, [mode, focusEditor]);
+	}, [mode]);
 
-	// ========== 5. Computed ==========
-	const language = getLanguage();
+	// ========== 4. Computed ==========
 	// Prism.js 查看模式语言映射（tsx -> typescript）
+	const language = getLanguage();
 	const prismLanguage =
 		language === "tsx"
 			? "typescript"
 			: language === "jsx"
 				? "javascript"
 				: language;
+
+	// ========== 5. Actions ==========
+	// 修复编辑器焦点问题
+	const focusEditor = useCallback(() => {
+		if (editorViewRef.current && mode === "edit") {
+			editorViewRef.current.focus();
+		}
+	}, [mode]);
 
 	// ========== 6. Render ==========
 	if (!isOpen) {
@@ -289,13 +284,11 @@ export function FileViewer() {
 					) : error ? (
 						<div className={styles.error}>{error}</div>
 					) : mode === "edit" ? (
-						// ========== 修改点 6: 替换 textarea 为 CodeMirror 容器 ==========
 						<div
 							ref={editorContainerRef}
 							className={styles.editorContainer}
 							onClick={focusEditor}
 						/>
-						// ==============================================================
 					) : mode === "execute" ? (
 						<div className={styles.terminal} ref={terminalRef}>
 							<pre>{terminalOutput}</pre>

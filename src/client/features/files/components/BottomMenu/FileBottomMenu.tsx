@@ -16,9 +16,9 @@ import { useFileStore } from "@/features/files/stores/fileStore";
 
 export function FileBottomMenu() {
 	const {
-		showNewModal,
-		showDeleteModal,
-		showTreeModal,
+		isNewModalOpen,
+		isDeleteModalOpen,
+		isTreeModalOpen,
 		newFileName,
 		treeData,
 		treeLoading,
@@ -102,7 +102,7 @@ export function FileBottomMenu() {
 			</div>
 
 			{/* 新建文件对话框 */}
-			{showNewModal && (
+			{isNewModalOpen && (
 				<div className={styles.modalOverlay} onClick={handleCancelNew}>
 					<div className={styles.modal} onClick={(e) => e.stopPropagation()}>
 						<div className={styles.modalTitle}>New File</div>
@@ -139,7 +139,7 @@ export function FileBottomMenu() {
 			)}
 
 			{/* 删除确认对话框 */}
-			{showDeleteModal && (
+			{isDeleteModalOpen && (
 				<div className={styles.modalOverlay} onClick={handleCancelDelete}>
 					<div
 						className={styles.deleteModal}
@@ -170,7 +170,7 @@ export function FileBottomMenu() {
 
 			{/* 树状视图 - 使用抽离的 TreeViewModal 组件 */}
 			<TreeViewModal
-				isOpen={showTreeModal}
+				isOpen={isTreeModalOpen}
 				treeData={treeData}
 				treeLoading={treeLoading}
 				onClose={handleCloseTree}

@@ -1,8 +1,9 @@
-import React from "react";
-import { useFileViewer } from "@/features/files/hooks";
 /**
  * FileActionBar - 选中文件操作栏
  */
+
+import React from "react";
+import { useFileViewer } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import styles from "../FileBrowser/FileBrowser.module.css";
 
@@ -47,15 +48,15 @@ export function FileActionBar({
 	// ========== 1. State ==========
 	const { selectedActionFile, selectedActionFileName } = useFileStore();
 	const { viewFile, editFile, executeFileStream } = useFileViewer();
-	
-	// ========== 2. Ref ==========
-	// 暂无
-	
-	// ========== 3. Effects ==========
-	// 暂无
-	
-	// ========== 4. Computed ==========
 
+	// ========== 2. Ref ==========
+	// 暂无直接DOM引用
+
+	// ========== 3. Effects ==========
+	// 暂无外部副作用
+
+	// ========== 4. Computed ==========
+	// 无选中文件时不渲染
 	if (!selectedActionFile) {
 		return null;
 	}
@@ -70,9 +71,8 @@ export function FileActionBar({
 
 	// 判断文件是否可编辑
 	const isEditable = !NON_EDITABLE_EXTENSIONS.includes(ext);
-	
-	// ========== 5. Actions ==========
 
+	// ========== 5. Actions ==========
 	// 处理查看
 	const handleView = () => {
 		viewFile(selectedActionFile, selectedActionFileName || "");

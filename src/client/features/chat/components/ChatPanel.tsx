@@ -1,9 +1,12 @@
 /**
  * ChatPanel - Main Chat Container
  *
- * 重构后：
- * - 所有业务逻辑移至 useChatPanel hook
- * - 本组件只负责布局和样式
+ * 职责：
+ * - 负责聊天面板的整体布局
+ * - 协调 MessageList 和 InputArea 组件
+ * - 不包含业务逻辑，只负责视图组合
+ *
+ * 结构规范：State → Ref → Effects → Computed → Actions → Render
  */
 
 import { useChatPanel } from "@/features/chat/hooks/useChatPanel";
@@ -21,17 +24,18 @@ import { InputArea } from "./InputArea";
 import { MessageList } from "./MessageList";
 
 export function ChatPanel() {
-	// 从 store 获取状态
+	// ========== 1. State (Domain State from Zustand) ==========
 	const messages = useChatStore(selectMessages);
 	const currentStreamingMessage = useChatStore(selectCurrentStreamingMessage);
 	const inputText = useChatStore(selectInputText);
 	const isStreaming = useChatStore(selectIsStreaming);
 	const showThinking = useChatStore(selectShowThinking);
 
-	// 使用 hook 处理业务逻辑
+	// ========== 2. Hooks (Business Logic) ==========
 	const chatPanel = useChatPanel();
 	const chatController = useChatController();
 
+	// ========== 3. Render ==========
 	return (
 		<div className={styles.panel}>
 			<div

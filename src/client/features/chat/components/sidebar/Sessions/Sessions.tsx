@@ -1,11 +1,15 @@
 /**
- * Sessions Section
+ * Sessions Section - Sidebar Sessions List
  *
- * 重构后：
- * - 使用 sessionManager 处理 session 选择和加载
- * - 只负责 UI 渲染
+ * 职责：
+ * - 显示会话列表
+ * - 处理会话选择和新会话创建
+ * - 不包含业务逻辑，通过 sessionManager 处理
+ *
+ * 结构规范：State → Ref → Effects → Computed → Actions → Render
  */
 
+import { useCallback } from "react";
 import { IconButton } from "@/components/Icon/Icon";
 import { SectionHeader } from "@/features/chat/components/SectionHeader/SectionHeader";
 import styles from "@/features/chat/components/sidebar/Sessions/Sessions.module.css";
@@ -13,19 +17,26 @@ import { sessionManager } from "@/features/chat/services/sessionManager";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
 
+// ============================================================================
+// Component
+// ============================================================================
+
 export function Sessions() {
+	// ========== 1. State (Domain State from Zustand) ==========
 	const sessions = useSidebarStore((state) => state.sessions);
 	const selectedId = useSidebarStore((state) => state.selectedSessionId);
 	const isLoading = useSidebarStore((state) => state.isLoading);
 
-	const handleNewSession = () => {
+	// ========== 4. Actions ==========
+	const handleNewSession = useCallback(() => {
 		sessionManager.createNewSession();
-	};
+	}, []);
 
-	const handleSelectSession = (sessionId: string) => {
+	const handleSelectSession = useCallback((sessionId: string) => {
 		sessionManager.selectSession(sessionId);
-	};
+	}, []);
 
+	// ========== 5. Render ==========
 	if (isLoading && sessions.length === 0) {
 		return (
 			<section className={styles.section}>
@@ -40,7 +51,11 @@ export function Sessions() {
 			<SectionHeader
 				title="Sessions"
 				action={
-					<IconButton name="plus" onClick={handleNewSession} title="New Session" />
+					<IconButton
+						name="plus"
+						onClick={handleNewSession}
+						title="New Session"
+					/>
 				}
 			/>
 			<div className={styles.list}>

@@ -21,7 +21,10 @@
 	color: var(--text-secondary);
 	font-size: 14px;
 	cursor: pointer;
-	transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease,
+		opacity 0.2s ease;
 	user-select: none;
 	outline: none;
 	position: relative;

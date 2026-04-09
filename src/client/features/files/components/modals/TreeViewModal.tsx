@@ -123,10 +123,26 @@ export function TreeViewModal({
 	onClose,
 	onFileClick,
 }: TreeViewModalProps) {
+	// ========== 1. State ==========
 	const [filterMode, setFilterMode] = useState<FilterMode>("normal");
 	const [searchText, setSearchText] = useState("");
-	const [copySuccess, setCopySuccess] = useState(false);
+	const [isCopySuccess, setIsCopySuccess] = useState(false);
 
+	// ========== 2. Ref ==========
+	// 暂无DOM引用需要管理
+
+	// ========== 3. Effects ==========
+	// ESC 关闭
+	useEffect(() => {
+		if (!isOpen) return;
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape") onClose();
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [isOpen, onClose]);
+
+	// ========== 4. Computed ==========
 	// 过滤节点
 	const filteredItems = useMemo(() => {
 		if (!treeData) return [];
@@ -139,26 +155,19 @@ export function TreeViewModal({
 		return treeData.path + "\n" + generateTreeText(filteredItems);
 	}, [treeData, filteredItems]);
 
+	// ========== 5. Actions ==========
 	// 处理复制
 	const handleCopy = useCallback(async () => {
 		try {
 			await navigator.clipboard.writeText(treeText);
-			setCopySuccess(true);
-			setTimeout(() => setCopySuccess(false), 2000);
+			setIsCopySuccess(true);
+			setTimeout(() => setIsCopySuccess(false), 2000);
 		} catch (err) {
 			console.error("复制失败:", err);
 		}
 	}, [treeText]);
 
-	// ESC 关闭
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Escape") onClose();
-		};
-		window.addEventListener("keydown", handleKeyDown);
-		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [onClose]);
-
+	// ========== 6. Render ==========
 	if (!isOpen) return null;
 
 	return (
@@ -195,11 +204,11 @@ export function TreeViewModal({
 							/>
 						)}
 						<button
-							className={`${styles.copyBtn} ${copySuccess ? styles.copied : ""}`}
+							className={`${styles.copyBtn} ${isCopySuccess ? styles.copied : ""}`}
 							onClick={handleCopy}
 							disabled={!filteredItems.length}
 						>
-							{copySuccess ? "✓ 已复制" : "📋 复制"}
+							{isCopySuccess ? "✓ 已复制" : "📋 复制"}
 						</button>
 					</div>
 				</div>
@@ -216,7 +225,6 @@ export function TreeViewModal({
 								const icon = getFileIcon(node.name, node.isDirectory);
 								const level = node.level || 0;
 								const isLast = node.isLast || false;
-								const parentLastStack = node.parentLastStack || [];
 
 								// 搜索高亮
 								let displayName: React.ReactNode = node.name;

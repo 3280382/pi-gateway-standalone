@@ -7,7 +7,7 @@
  * - 实现 KeepAlive：首次激活才挂载，之后通过 display 控制显示隐藏
  */
 
-import { useCallback, useRef } from "react";
+import { useRef } from "react";
 import { FileBottomMenu } from "@/features/files/components/BottomMenu/FileBottomMenu";
 import { FileBrowser } from "@/features/files/components/FileBrowser/FileBrowser";
 import { FileToolbar } from "@/features/files/components/Header/FileToolbar";
@@ -22,9 +22,11 @@ interface FilesPageProps {
 }
 
 export function FilesPage({ active = false }: FilesPageProps) {
-	const mountedRef = useRef(false);
+	// ========== 1. State ==========
+	// 使用ref跟踪挂载状态
+	const hasMountedRef = useRef(false);
 
-	// 总是在顶层调用 Hooks（React Hooks 规则）
+	// 从store获取布局状态
 	const {
 		currentPath,
 		isSidebarVisible,
@@ -33,43 +35,33 @@ export function FilesPage({ active = false }: FilesPageProps) {
 		closeBottomPanel,
 		setBottomPanelHeight,
 	} = useFileStore();
-	const { refresh } = useFileBrowser();
-	const { navigateTo } = useFileNavigation();
+
+	// 从terminal store获取状态
 	const { output, command, setCommand } = useTerminalStore();
 
+	// ========== 2. Ref ==========
+	// hasMountedRef已在上面定义
+
+	// ========== 3. Effects ==========
+	// 使用useFileBrowser hook管理初始化和副作用
+	const { refresh } = useFileBrowser();
+
+	// ========== 4. Computed ==========
 	// 首次激活时标记为已挂载
 	if (active) {
-		mountedRef.current = true;
+		hasMountedRef.current = true;
 	}
 
-	// useCallback 必须在条件返回之前调用（React Hooks 规则）
-	const renderBottomPanel = useCallback(() => {
-		if (!isBottomPanelOpen) return null;
+	// 从导航hook获取
+	const { navigateTo } = useFileNavigation();
 
-		return (
-			<XTermPanel
-				height={bottomPanelHeight}
-				onClose={closeBottomPanel}
-				onHeightChange={setBottomPanelHeight}
-				output={output}
-				initialCommand={command}
-				onExecuteCommand={(cmd) => {
-					setCommand(cmd);
-				}}
-			/>
-		);
-	}, [
-		isBottomPanelOpen,
-		bottomPanelHeight,
-		output,
-		command,
-		closeBottomPanel,
-		setBottomPanelHeight,
-		setCommand,
-	]);
+	// ========== 5. Actions ==========
+	// 通过hooks获取
+
+	// ========== 6. Render ==========
 	// 从未激活过，返回 null（配合 React.lazy 实现延迟加载）
 	// 注意：这个返回必须在所有 Hooks 调用之后
-	if (!mountedRef.current) {
+	if (!hasMountedRef.current) {
 		return null;
 	}
 
@@ -100,7 +92,18 @@ export function FilesPage({ active = false }: FilesPageProps) {
 						}
 						onOpenBottomPanel={setCommand}
 					/>
-					{renderBottomPanel()}
+					{isBottomPanelOpen && (
+						<XTermPanel
+							height={bottomPanelHeight}
+							onClose={closeBottomPanel}
+							onHeightChange={setBottomPanelHeight}
+							output={output}
+							initialCommand={command}
+							onExecuteCommand={(cmd) => {
+								setCommand(cmd);
+							}}
+						/>
+					)}
 				</main>
 			</div>
 

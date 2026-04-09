@@ -1,15 +1,22 @@
 /**
- * InputArea - Modern minimal design with session control
+ * InputArea - Chat Input Component
  *
- * 重构后：
- * - 所有业务逻辑移至 useInputArea hook
- * - 本组件只负责 UI 渲染
+ * 职责：
+ * - 负责消息输入区域的 UI 渲染
+ * - 包含输入框、工具栏、命令菜单、文件选择器、图片预览
+ * - 不包含业务逻辑，通过 useInputArea hook 处理
+ *
+ * 结构规范：State → Ref → Effects → Computed → Actions → Render
  */
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useInputArea } from "@/features/chat/hooks/useInputArea";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import styles from "./InputArea.module.css";
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface InputAreaProps {
 	value: string;
@@ -29,6 +36,10 @@ interface InputAreaProps {
 	onNewSession?: () => void;
 }
 
+// ============================================================================
+// Component
+// ============================================================================
+
 export function InputArea({
 	value,
 	isStreaming,
@@ -40,10 +51,11 @@ export function InputArea({
 	onSendWithImages,
 	onNewSession,
 }: InputAreaProps) {
+	// ========== 1. Refs ==========
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-	// 使用 useInputArea hook 处理所有业务逻辑
+	// ========== 2. Hooks (Business Logic) ==========
 	const inputArea = useInputArea({
 		value,
 		isStreaming,
@@ -55,23 +67,25 @@ export function InputArea({
 		onSendWithImages,
 	});
 
-	// 自动调整 textarea 高度
-	const autoResizeTextarea = () => {
-		const textarea = textareaRef.current;
-		if (textarea) {
-			textarea.style.height = "auto";
-			const newHeight = Math.max(textarea.scrollHeight, 64);
-			textarea.style.height = `${Math.min(newHeight, 200)}px`;
-		}
-	};
-
-	// 当输入被清空时（发送消息后），重置 textarea 高度
+	// ========== 3. Effects ==========
+	// Auto-resize textarea when value is cleared
 	useEffect(() => {
 		if (value === "" && textareaRef.current) {
 			textareaRef.current.style.height = "auto";
 		}
 	}, [value]);
 
+	// ========== 4. Actions ==========
+	const autoResizeTextarea = useCallback(() => {
+		const textarea = textareaRef.current;
+		if (textarea) {
+			textarea.style.height = "auto";
+			const newHeight = Math.max(textarea.scrollHeight, 64);
+			textarea.style.height = `${Math.min(newHeight, 200)}px`;
+		}
+	}, []);
+
+	// ========== 5. Render ==========
 	return (
 		<div className={styles.container}>
 			<input

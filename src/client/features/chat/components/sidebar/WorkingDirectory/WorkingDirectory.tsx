@@ -15,16 +15,16 @@ export function WorkingDirectory() {
 	const isLoading = useSidebarStore((state) => state.isLoading);
 	const controller = useSidebarController();
 	const [isPickerVisible, setIsPickerVisible] = useState(false);
-	
+
 	// ========== 2. Ref ==========
 	// 暂无
-	
+
 	// ========== 3. Effects ==========
 	// 暂无
-	
+
 	// ========== 4. Computed ==========
 	// 暂无
-	
+
 	// ========== 5. Actions ==========
 
 	// 点击工作目录打开选择器
@@ -39,7 +39,7 @@ export function WorkingDirectory() {
 			await controller.changeWorkingDir(path);
 		}
 	};
-	
+
 	// ========== 6. Render ==========
 
 	return (

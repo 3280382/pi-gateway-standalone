@@ -5,7 +5,7 @@
  * 仅在 Chat 页面加载时执行
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useWorkspaceStore } from "@/features/files/stores";
 import { websocketService } from "@/services/websocket.service";
 import { setupWebSocketListeners } from "../services/api/chatApi";
@@ -13,8 +13,14 @@ import { sessionManager } from "../services/sessionManager";
 
 export function useChatInit(): { isConnecting: boolean } {
 	const [isConnecting, setIsConnecting] = useState(true);
+	// 防止 StrictMode 下的重复初始化
+	const hasInitialized = useRef(false);
 
 	const initialize = useCallback(async () => {
+		// 防止重复初始化
+		if (hasInitialized.current) return;
+		hasInitialized.current = true;
+
 		try {
 			// 1. WebSocket 连接
 			let wsConnected = false;

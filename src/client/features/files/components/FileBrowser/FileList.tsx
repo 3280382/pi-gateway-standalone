@@ -18,6 +18,7 @@ interface FileListProps {
 }
 
 export const FileList = memo<FileListProps>(({ items }) => {
+	// ========== 1. State ==========
 	const {
 		selectedItems,
 		isMultiSelectMode,
@@ -26,12 +27,25 @@ export const FileList = memo<FileListProps>(({ items }) => {
 		getItemHandlers,
 	} = useFileItemActions();
 
+	// ========== 2. Ref ==========
+	// 无直接DOM引用
+
+	// ========== 3. Effects ==========
+	// 无外部副作用
+
+	// ========== 4. Computed ==========
+	// 简单条件渲染，无需useMemo
+
+	// ========== 5. Actions ==========
+	// 通过 useFileItemActions 获取
+
+	// ========== 6. Render ==========
 	if (items.length === 0) return null;
 
 	return (
 		<div className={styles.list}>
 			<div className={styles.listHeader}>
-              {isMultiSelectMode && (<span className={styles.headerCheckbox} />)}
+				{isMultiSelectMode && <span className={styles.headerCheckbox} />}
 				<span className={styles.headerIcon}>Icon</span>
 				<span className={styles.headerName}>Name</span>
 				<span className={styles.headerSize}>Size</span>

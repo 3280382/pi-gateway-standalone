@@ -473,7 +473,7 @@ function useInputArea(options: UseInputAreaOptions) {
 | `Math.random()` as key | Use stable unique ID |
 | Directly modify array/object | Return new object `[...arr]` |
 | Create new function in render | Use useCallback |
-| Component > 200 lines | Split component or extract Hook |
+| Component > 2000 lines | Split component or extract Hook |
 | Props drilling > 3 layers | Use Context or Store |
 | Write business logic in component | Extract to Hook |
 
@@ -501,11 +501,6 @@ Example:
 feat(chat): add message search
 fix(files): fix sidebar duplication
 refactor(core): optimize initialization
-```
-
-**Pre-commit Check**:
-```bash
-npm run build    # Ensure build succeeds
 ```
 
 ### Branch Management

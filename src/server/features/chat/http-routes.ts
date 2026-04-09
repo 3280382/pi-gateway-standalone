@@ -60,6 +60,10 @@ export async function registerChatHTTPRoutes(
 	app.post("/api/session/load", loadSession);
 	app.get("/api/system-prompt", getSystemPrompt);
 
+	// Extensions API
+	const { getExtensions } = await import("./controllers/extension.controller");
+	app.get("/api/extensions", getExtensions);
+
 	// OCR API
 	const { performOCR } = await import("./controllers/ocr.controller");
 	app.post("/api/ocr", performOCR);

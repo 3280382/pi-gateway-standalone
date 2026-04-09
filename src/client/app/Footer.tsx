@@ -6,6 +6,7 @@
 import styles from "@/app/Footer.module.css";
 import { ToolMenu } from "@/app/Tools";
 import { IconButton, IconToggle } from "@/components/Icon/Icon";
+import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useFileStore } from "@/features/files/stores";
 import { useAppStore } from "@/stores/appStore";
@@ -45,6 +46,9 @@ export function Footer() {
 			toggleFilesPanel("terminal");
 		}
 	};
+
+	// System Prompt modal
+	const openSystemPrompt = useModalStore((state) => state.openSystemPrompt);
 
 	return (
 		<nav className={styles.footer}>
@@ -86,8 +90,15 @@ export function Footer() {
 				/>
 			</div>
 
-			{/* 右侧：工具菜单 */}
+			{/* 右侧：系统提示按钮和工具菜单 */}
 			<div className={styles.rightGroup}>
+				<IconButton
+					name="document"
+					label=""
+					variant="toggle"
+					onClick={openSystemPrompt}
+					title="System Prompt"
+				/>
 				<ToolMenu />
 			</div>
 		</nav>

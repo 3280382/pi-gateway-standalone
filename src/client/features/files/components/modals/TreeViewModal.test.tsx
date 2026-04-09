@@ -151,8 +151,6 @@ describe("TreeViewModal", () => {
 			// 组件负责递归渲染子节点
 		});
 
-
-
 		it("generateTreeText 应该生成正确的树形文本", () => {
 			const tree = createTestTree().items.slice(0, 1);
 			const text = generateTreeText(tree);

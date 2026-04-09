@@ -5,12 +5,15 @@
  * 职责：UI 渲染
  * - 使用 useFileOperations 处理删除逻辑
  */
+
 import React, { useState } from "react";
 import { useFileOperations } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import styles from "./BatchActionBar.module.css";
 
 export function BatchActionBar() {
+	// ========== 1. State ==========
+	// Domain 状态
 	const {
 		selectedItems,
 		items,
@@ -19,35 +22,45 @@ export function BatchActionBar() {
 		clearSelection,
 	} = useFileStore();
 
+	// UI 状态
+	const [isDeleting, setIsDeleting] = useState(false);
+	const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
 	const { deleteSelected } = useFileOperations();
 
-	const [isDeleting, setIsDeleting] = useState(false);
-	const [showConfirm, setShowConfirm] = useState(false);
+	// ========== 2. Ref ==========
+	// 无直接DOM引用
 
+	// ========== 3. Effects ==========
+	// 无外部副作用
+
+	// ========== 4. Computed ==========
+	// 非多选模式不渲染
 	if (!isMultiSelectMode) return null;
 
 	const selectedCount = selectedItems.length;
 
-	// Get selected item names for display
+	// 获取选中文件名用于显示
 	const selectedNames = selectedItems
 		.map((path) => {
 			const item = items.find((i) => i.path === path);
 			return item?.name || path.split("/").pop() || path;
 		})
-		.slice(0, 5); // Show max 5 names
+		.slice(0, 5); // 最多显示5个名称
 
 	const hasMore = selectedItems.length > 5;
 
+	// ========== 5. Actions ==========
 	const handleDeleteClick = () => {
 		if (selectedCount === 0) return;
-		setShowConfirm(true);
+		setIsConfirmModalOpen(true);
 	};
 
 	const handleConfirmDelete = async () => {
 		setIsDeleting(true);
 		try {
 			await deleteSelected();
-			setShowConfirm(false);
+			setIsConfirmModalOpen(false);
 		} catch (error) {
 			console.error("Delete failed:", error);
 			alert("Delete failed. Please try again.");
@@ -61,6 +74,7 @@ export function BatchActionBar() {
 		toggleMultiSelectMode();
 	};
 
+	// ========== 6. Render ==========
 	return (
 		<>
 			<div className={styles.batchBar}>
@@ -89,10 +103,10 @@ export function BatchActionBar() {
 			</div>
 
 			{/* Delete Confirmation Modal */}
-			{showConfirm && (
+			{isConfirmModalOpen && (
 				<div
 					className={styles.modalOverlay}
-					onClick={() => !isDeleting && setShowConfirm(false)}
+					onClick={() => !isDeleting && setIsConfirmModalOpen(false)}
 				>
 					<div className={styles.modal} onClick={(e) => e.stopPropagation()}>
 						<div className={styles.modalHeader}>
@@ -123,7 +137,7 @@ export function BatchActionBar() {
 						<div className={styles.modalActions}>
 							<button
 								className={styles.cancelBtn}
-								onClick={() => setShowConfirm(false)}
+								onClick={() => setIsConfirmModalOpen(false)}
 								disabled={isDeleting}
 							>
 								Cancel
