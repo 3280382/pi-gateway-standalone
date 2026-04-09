@@ -12,10 +12,13 @@
 import { useChatPanel } from "@/features/chat/hooks/useChatPanel";
 import { useChatController } from "@/features/chat/services/api/chatApi";
 import {
+	filterMessages,
 	selectCurrentStreamingMessage,
 	selectInputText,
 	selectIsStreaming,
 	selectMessages,
+	selectSearchFilters,
+	selectSearchQuery,
 	selectShowThinking,
 	useChatStore,
 } from "@/features/chat/stores/chatStore";
@@ -30,12 +33,21 @@ export function ChatPanel() {
 	const inputText = useChatStore(selectInputText);
 	const isStreaming = useChatStore(selectIsStreaming);
 	const showThinking = useChatStore(selectShowThinking);
+	const searchQuery = useChatStore(selectSearchQuery);
+	const searchFilters = useChatStore(selectSearchFilters);
 
 	// ========== 2. Hooks (Business Logic) ==========
 	const chatPanel = useChatPanel();
 	const chatController = useChatController();
 
-	// ========== 3. Render ==========
+	// ========== 3. Computed ==========
+	// 应用搜索过滤
+	const filteredMessages = filterMessages(messages, {
+		query: searchQuery,
+		filters: searchFilters,
+	});
+
+	// ========== 4. Render ==========
 	return (
 		<div className={styles.panel}>
 			<div
@@ -44,7 +56,7 @@ export function ChatPanel() {
 				onScroll={chatPanel.handleScroll}
 			>
 				<MessageList
-					messages={messages}
+					messages={filteredMessages}
 					currentStreamingMessage={currentStreamingMessage}
 					showThinking={showThinking}
 					onToggleMessageCollapse={chatController.toggleMessageCollapse}
