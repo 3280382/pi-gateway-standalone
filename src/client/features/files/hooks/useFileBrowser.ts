@@ -66,7 +66,8 @@ export function useFileBrowser(): UseFileBrowserResult {
 				lastLoadedPathRef.current = path;
 
 				setItems(data.items);
-				setWorkingDir(data.workingDir);
+				// 注意：不在这里调用 setWorkingDir，因为路径已由调用者设置
+				// 只更新 parentPath，因为 API 可能返回不同的父路径
 				setParentPath(data.parentPath);
 			} catch (err) {
 				const friendlyMessage = getFriendlyErrorMessage(err, path);
@@ -79,7 +80,7 @@ export function useFileBrowser(): UseFileBrowserResult {
 				setLoading(false);
 			}
 		},
-		[setItems, setWorkingDir, setParentPath, setLoading, setError],
+		[setItems, setParentPath, setLoading, setError],
 	);
 
 	/**
