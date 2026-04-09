@@ -11,7 +11,6 @@
 import { useEffect, useState } from "react";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
-import { useWorkspaceStore } from "@/features/files/stores";
 import styles from "./Modals.module.css";
 
 // ============================================================================
@@ -43,7 +42,7 @@ export function SystemPromptModal() {
 	// Domain State
 	const { isSystemPromptOpen, closeSystemPrompt } = useModalStore();
 	const resourceFiles = useSessionStore((state) => state.resourceFiles);
-	const currentDir = useWorkspaceStore((state) => state.currentDir);
+	const currentDir = useSessionStore((state) => state.currentDir);
 
 	// UI State
 	const [data, setData] = useState<SystemPromptData | null>(null);

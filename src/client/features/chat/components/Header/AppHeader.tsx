@@ -18,7 +18,6 @@ import {
 } from "@/features/chat/stores/chatStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
-import { useWorkspaceStore } from "@/features/files/stores";
 import { websocketService } from "@/services/websocket.service";
 import styles from "./AppHeader.module.css";
 
@@ -70,12 +69,12 @@ export function AppHeader({
 	// ========== 1. State (Domain State from Zustand) ==========
 	const {
 		currentModel,
+		currentDir: workingDir,
 		thinkingLevel,
 		setThinkingLevel,
 		serverPid,
 		isConnected,
 	} = useSessionStore();
-	const { currentDir: workingDir } = useWorkspaceStore();
 	const { isStreaming } = useChatStore();
 
 	// Search state from store

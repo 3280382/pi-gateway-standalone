@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useWorkspaceStore } from "@/features/files/stores";
+import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { websocketService } from "@/services/websocket.service";
 import { setupWebSocketListeners } from "../services/api/chatApi";
 import { sessionManager } from "../services/sessionManager";
@@ -34,7 +34,7 @@ export function useChatInit(): { isConnecting: boolean } {
 			}
 
 			// 2. 恢复 session（需要当前工作目录）
-			const currentDir = useWorkspaceStore.getState().currentDir;
+			const currentDir = useSessionStore.getState().currentDir;
 			if (wsConnected && currentDir) {
 				console.log("[ChatInit] 恢复 session:", currentDir);
 				await sessionManager.switchDirectory(currentDir, {
