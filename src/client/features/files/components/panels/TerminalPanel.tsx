@@ -12,7 +12,7 @@
 import type { FitAddon } from "@xterm/addon-fit";
 import type { Terminal } from "@xterm/xterm";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useWorkspaceStore } from "@/features/files/stores";
+import { useFileStore } from "@/features/files/stores";
 import "@xterm/xterm/css/xterm.css";
 import styles from "./TerminalPanel.module.css";
 
@@ -40,7 +40,7 @@ export function TerminalPanel({
 	initialCommand,
 }: TerminalPanelProps) {
 	// ========== 1. State ==========
-	const currentDir = useWorkspaceStore((state) => state.currentDir);
+	const currentPath = useFileStore((state) => state.currentPath);
 	const [isFullscreen, setIsFullscreen] = useState(false);
 
 	// ========== 2. Refs ==========
@@ -78,7 +78,7 @@ export function TerminalPanel({
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
 						command,
-						cwd: currentDir,
+						cwd: currentPath,
 						streaming: true,
 					}),
 					signal: abortControllerRef.current.signal,
@@ -123,7 +123,7 @@ export function TerminalPanel({
 				}
 			}
 		},
-		[currentDir],
+		[currentPath],
 	);
 
 	// ========== 4. Effects ==========
@@ -235,7 +235,7 @@ export function TerminalPanel({
 			terminalInstance.current?.dispose();
 			terminalInstance.current = null;
 		};
-	}, [currentDir, onExecuteCommand, initialCommand, executeCommand, prompt]);
+	}, [currentPath, onExecuteCommand, initialCommand, executeCommand, prompt]);
 
 	// Resize handlers
 	const handleResizeStart = useCallback(

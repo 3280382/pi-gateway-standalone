@@ -7,12 +7,10 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
 export interface WorkspaceState {
-	currentDir: string;
 	recentWorkspaces: string[];
 }
 
 interface WorkspaceActions {
-	setCurrentDir: (dir: string) => void;
 	addRecentWorkspace: (dir: string) => void;
 	clearRecentWorkspaces: () => void;
 }
@@ -21,10 +19,7 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
 	devtools(
 		persist(
 			(set) => ({
-				currentDir: "/root",
 				recentWorkspaces: [],
-
-				setCurrentDir: (dir) => set({ currentDir: dir }),
 
 				addRecentWorkspace: (dir) =>
 					set((state) => {
@@ -35,9 +30,8 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
 				clearRecentWorkspaces: () => set({ recentWorkspaces: [] }),
 			}),
 			{
-				name: "files-workspace-store",
+				name: "files:workspace",
 				partialize: (state) => ({
-					currentDir: state.currentDir,
 					recentWorkspaces: state.recentWorkspaces,
 				}),
 			},

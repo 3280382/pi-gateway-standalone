@@ -184,7 +184,7 @@ export const useFileStore = create<FileState & FileActions>()(
 					set({ bottomPanelHeight: height }),
 			}),
 			{
-				name: "file-storage",
+				name: "files:browser",
 				version: 1,
 				partialize: (state) => ({
 					currentPath: state.currentPath,
