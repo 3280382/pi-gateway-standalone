@@ -38,8 +38,10 @@ export const MessageItem = memo(
 		showThinking,
 		showTools = true,
 	}: MessageItemProps) {
+		// ========== 1. State ==========
 		const isUser = message.role === "user";
 
+		// ========== 2. Computed ==========
 		const blocks = useMemo(() => {
 			if (!message.content || !Array.isArray(message.content)) return [];
 			return message.content.map((c, idx) => ({ ...c, originalIndex: idx }));
@@ -96,15 +98,19 @@ function GlassCard({
 	showThinking,
 	showTools,
 }: GlassCardProps) {
+	// ========== 1. State ==========
 	const [isExpanded, setIsExpanded] = useState(isStreaming);
 	const [showCopy, setShowCopy] = useState(false);
 
+	// ========== 2. Effects ==========
+	// Note: useMemo is used for side effect here, should ideally be useEffect
 	useMemo(() => {
 		if (!isStreaming && block.type !== "text") {
 			setIsExpanded(false);
 		}
 	}, [isStreaming, block.type]);
 
+	// ========== 3. Actions ==========
 	const toggleExpand = useCallback(() => {
 		if (block.type !== "text") {
 			setIsExpanded(!isExpanded);

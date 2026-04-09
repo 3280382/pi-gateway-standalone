@@ -38,6 +38,7 @@ interface FileToolbarProps {
 }
 
 export function FileToolbar({ currentPath }: FileToolbarProps) {
+	// ========== 1. State ==========
 	const {
 		sortMode,
 		filterType,
@@ -47,49 +48,52 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 		setFilterText,
 	} = useFileStore();
 
-	// 过滤下拉框状态
-	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-	const dropdownRef = useRef<HTMLDivElement>(null);
+	// UI状态
+	const [isFilterDropdownVisible, setIsFilterDropdownVisible] = useState(false);
+	const [isSortDropdownVisible, setIsSortDropdownVisible] = useState(false);
 
-	// 排序下拉框状态
-	const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+	// ========== 2. Ref ==========
+	const filterDropdownRef = useRef<HTMLDivElement>(null);
 	const sortDropdownRef = useRef<HTMLDivElement>(null);
 
+	// ========== 3. Effects ==========
 	// 点击外部关闭下拉框
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
 			if (
-				dropdownRef.current &&
-				!dropdownRef.current.contains(event.target as Node)
+				filterDropdownRef.current &&
+				!filterDropdownRef.current.contains(event.target as Node)
 			) {
-				setIsDropdownOpen(false);
+				setIsFilterDropdownVisible(false);
 			}
 			if (
 				sortDropdownRef.current &&
 				!sortDropdownRef.current.contains(event.target as Node)
 			) {
-				setIsSortDropdownOpen(false);
+				setIsSortDropdownVisible(false);
 			}
 		};
 		document.addEventListener("mousedown", handleClickOutside);
 		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, []);
 
+	// ========== 4. Computed ==========
 	// 获取当前选中的选项
-	const selectedOption =
+	const selectedFilterOption =
 		FILTER_OPTIONS.find((opt) => opt.value === filterType) || FILTER_OPTIONS[0];
 
+	// ========== 5. Actions ==========
 	// 处理选项选择
-	const handleSelect = (value: FilterType) => {
+	const handleFilterSelect = (value: FilterType) => {
 		setFilterType(value);
 		if (value !== "custom") {
 			setFilterText("");
 		}
-		setIsDropdownOpen(false);
+		setIsFilterDropdownVisible(false);
 	};
 
 	// 处理输入框变化
-	const handleInputChange = (value: string) => {
+	const handleFilterInputChange = (value: string) => {
 		const option = FILTER_OPTIONS.find(
 			(opt) => opt.label.toLowerCase() === value.toLowerCase(),
 		);
@@ -100,6 +104,12 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 			setFilterType("custom");
 			setFilterText(value);
 		}
+	};
+
+	// 处理排序选择
+	const handleSortSelect = (value: SortMode) => {
+		setSortMode(value);
+		setIsSortDropdownVisible(false);
 	};
 
 	return (
@@ -114,29 +124,29 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 			{/* 第二行：过滤 + 排序 */}
 			<div className={styles.toolbarRow}>
 				{/* 过滤 */}
-				<div className={styles.filterCombo} ref={dropdownRef}>
+				<div className={styles.filterCombo} ref={filterDropdownRef}>
 					<input
 						type="text"
 						className={styles.filterComboInput}
 						placeholder="Filter..."
-						value={filterType === "custom" ? filterText : selectedOption.label}
-						onChange={(e) => handleInputChange(e.target.value)}
-						onClick={() => setIsDropdownOpen(true)}
+						value={filterType === "custom" ? filterText : selectedFilterOption.label}
+						onChange={(e) => handleFilterInputChange(e.target.value)}
+						onClick={() => setIsFilterDropdownVisible(true)}
 					/>
 					<button
 						className={styles.filterComboBtn}
-						onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+						onClick={() => setIsFilterDropdownVisible(!isFilterDropdownVisible)}
 						title="Select filter"
 					>
 						<DropdownIcon />
 					</button>
-					{isDropdownOpen && (
+					{isFilterDropdownVisible && (
 						<div className={styles.filterDropdown}>
 							{FILTER_OPTIONS.map((option) => (
 								<div
 									key={option.value}
 									className={`${styles.filterDropdownItem} ${filterType === option.value ? styles.active : ""}`}
-									onClick={() => handleSelect(option.value)}
+									onClick={() => handleFilterSelect(option.value)}
 								>
 									<span className={styles.filterIcon}>{option.icon}</span>
 									<span className={styles.filterLabel}>{option.label}</span>
@@ -150,7 +160,7 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 				<div className={styles.sortCombo} ref={sortDropdownRef}>
 					<button
 						className={styles.sortComboBtn}
-						onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+						onClick={() => setIsSortDropdownVisible(!isSortDropdownVisible)}
 						title="Sort by"
 					>
 						<span>
@@ -161,7 +171,7 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 						</span>
 						<DropdownIcon />
 					</button>
-					{isSortDropdownOpen && (
+					{isSortDropdownVisible && (
 						<div className={styles.sortDropdown}>
 							{SORT_OPTIONS.map((option) => (
 								<div
@@ -169,7 +179,7 @@ export function FileToolbar({ currentPath }: FileToolbarProps) {
 									className={`${styles.sortDropdownItem} ${sortMode === option.value ? styles.active : ""}`}
 									onClick={() => {
 										setSortMode(option.value);
-										setIsSortDropdownOpen(false);
+										setIsSortDropdownVisible(false);
 									}}
 								>
 									<span className={styles.sortIcon}>{option.icon}</span>

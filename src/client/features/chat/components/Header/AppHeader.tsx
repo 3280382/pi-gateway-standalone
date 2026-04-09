@@ -4,7 +4,7 @@
  * Row 2: 搜索框、模型选择
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useChatController } from "@/features/chat/services/api/chatApi";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import {
@@ -52,6 +52,8 @@ export function AppHeader({
 	onSearchQueryChange,
 	onSearchFiltersChange,
 }: AppHeaderProps) {
+	// ========== 1. State ==========
+	// Store state
 	const {
 		currentModel,
 		thinkingLevel,
@@ -60,8 +62,6 @@ export function AppHeader({
 		isConnected,
 	} = useSessionStore();
 	const { currentDir: workingDir } = useWorkspaceStore();
-	const connectionStatus = isConnected ? "connected" : "disconnected";
-	const pid = serverPid;
 	const { isStreaming } = useChatStore();
 
 	// Search state
@@ -70,9 +70,7 @@ export function AppHeader({
 	const chatStoreSetSearchQuery = useChatStore((s) => s.setSearchQuery);
 	const chatStoreSetSearchFilters = useChatStore((s) => s.setSearchFilters);
 
-	const searchQuery = externalSearchQuery ?? chatStoreQuery;
-	const filters = externalSearchFilters ?? chatStoreFilters;
-
+	// UI state
 	const [showFilters, setShowFilters] = useState(false);
 	const [showModelDropdown, setShowModelDropdown] = useState(false);
 	const [models, setModels] = useState<
@@ -81,10 +79,30 @@ export function AppHeader({
 	const [modelsLoading, setModelsLoading] = useState(false);
 	const [showThinkingDropdown, setShowThinkingDropdown] = useState(false);
 
+	// Service instances
+	const chatController = useChatController();
+
+	// Derived state
+	const connectionStatus = isConnected ? "connected" : "disconnected";
+	const pid = serverPid;
+	const searchQuery = externalSearchQuery ?? chatStoreQuery;
+	const filters = externalSearchFilters ?? chatStoreFilters;
+
+	// ========== 4. Computed ==========
 	const currentThinking =
 		THINKING_LEVELS.find((t) => t.id === thinkingLevel) || THINKING_LEVELS[2];
-
-	const chatController = useChatController();
+	const hasActiveFilters =
+		filters.user || filters.assistant || filters.thinking || filters.tools;
+	const activeFilterCount = [
+		filters.user,
+		filters.assistant,
+		filters.thinking,
+		filters.tools,
+	].filter(Boolean).length;
+	const currentModelName = currentModel
+		? models.find((m) => m.id === currentModel)?.name ||
+			currentModel.split("-")[0]
+		: "Select Model";
 
 	// Directory browser modal
 	const isDirectoryBrowserOpen = useModalStore(
@@ -97,6 +115,7 @@ export function AppHeader({
 		(state) => state.closeDirectoryBrowser,
 	);
 
+	// ========== 5. Actions ==========
 	const handleFilterChange = (key: keyof typeof filters) => {
 		if (onSearchFiltersChange) {
 			onSearchFiltersChange({ ...filters, [key]: !filters[key] });
@@ -105,15 +124,7 @@ export function AppHeader({
 		}
 	};
 
-	const hasActiveFilters =
-		filters.user || filters.assistant || filters.thinking || filters.tools;
-	const activeFilterCount = [
-		filters.user,
-		filters.assistant,
-		filters.thinking,
-		filters.tools,
-	].filter(Boolean).length;
-
+	// ========== 3. Effects ==========
 	// Load models
 	useEffect(() => {
 		if (showModelDropdown && models.length === 0 && !modelsLoading) {
@@ -173,10 +184,7 @@ export function AppHeader({
 		return () => document.removeEventListener("click", handleClickOutside);
 	}, []);
 
-	const currentModelName = currentModel
-		? models.find((m) => m.id === currentModel)?.name ||
-			currentModel.split("-")[0]
-		: "Select Model";
+
 
 	return (
 		<div className={styles.topBar}>

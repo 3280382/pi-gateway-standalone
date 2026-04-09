@@ -21,6 +21,7 @@ import { getLanguageExtension } from "./languageExtensions";
 // ======================================================
 
 export function FileViewer() {
+	// ========== 1. State ==========
 	// 从 store 获取状态
 	const {
 		isOpen,
@@ -44,15 +45,23 @@ export function FileViewer() {
 	const { fileTypes, saveFile, copyPath, getLanguage, stopExecution } =
 		useFileViewer();
 
+	// ========== 2. Ref ==========
 	const terminalRef = useRef<HTMLDivElement>(null);
-
-	// ========== 修改点 2: CodeMirror 编辑器相关 refs ==========
+	// CodeMirror 编辑器相关 refs
 	const editorContainerRef = useRef<HTMLDivElement>(null);
 	const editorViewRef = useRef<EditorView | null>(null);
 	const languageCompartmentRef = useRef<Compartment | null>(null);
 	const isUpdatingRef = useRef(false); // 防止循环更新
-	// ======================================================
 
+	// ========== 3. Actions ==========
+	// 修复编辑器焦点问题
+	const focusEditor = useCallback(() => {
+		if (editorViewRef.current && mode === "edit") {
+			editorViewRef.current.focus();
+		}
+	}, [mode]);
+
+	// ========== 4. Effects ==========
 	// 自动滚动终端
 	useEffect(() => {
 		if (terminalRef.current) {
@@ -198,13 +207,6 @@ export function FileViewer() {
 	}, [filePath, mode]); // 文件路径变化时重新配置语言
 	// ======================================================
 
-	// 修复编辑器焦点问题
-	const focusEditor = useCallback(() => {
-		if (editorViewRef.current && mode === "edit") {
-			editorViewRef.current.focus();
-		}
-	}, [mode]);
-
 	// 进入编辑模式后自动聚焦
 	useEffect(() => {
 		if (mode === "edit") {
@@ -213,6 +215,17 @@ export function FileViewer() {
 		}
 	}, [mode, focusEditor]);
 
+	// ========== 5. Computed ==========
+	const language = getLanguage();
+	// Prism.js 查看模式语言映射（tsx -> typescript）
+	const prismLanguage =
+		language === "tsx"
+			? "typescript"
+			: language === "jsx"
+				? "javascript"
+				: language;
+
+	// ========== 6. Render ==========
 	if (!isOpen) {
 		fileViewerDebug.debug("FileViewer未渲染 - isOpen=false");
 		return null;
@@ -226,15 +239,6 @@ export function FileViewer() {
 		hasError: !!error,
 		contentLength: content?.length,
 	});
-
-	const language = getLanguage();
-	// Prism.js 查看模式语言映射（tsx -> typescript）
-	const prismLanguage =
-		language === "tsx"
-			? "typescript"
-			: language === "jsx"
-				? "javascript"
-				: language;
 
 	return (
 		<div className={styles.modal}>
