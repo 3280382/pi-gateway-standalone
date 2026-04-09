@@ -81,12 +81,21 @@ export async function getFileTree(path: string): Promise<TreeResponse> {
 
 		// 递归处理子节点
 		if (node.children && !node.truncated) {
-			const childCount = node.children.length;
+			// 排序：先目录后文件，然后按名称排序
+			const sortedChildren = [...node.children].sort((a, b) => {
+				// 先按类型排序（目录在前）
+				if (a.isDirectory && !b.isDirectory) return -1;
+				if (!a.isDirectory && b.isDirectory) return 1;
+				// 再按名称排序
+				return a.name.localeCompare(b.name);
+			});
+
+			const childCount = sortedChildren.length;
 			const myIsLast = depth === 0 ? false : myIndex === siblingsCount - 1;
 
 			for (let i = 0; i < childCount; i++) {
 				flatten(
-					node.children[i],
+					sortedChildren[i],
 					depth + 1,
 					[...parentLastStack, myIsLast], // 将当前节点的 isLast 添加到堆栈
 					childCount,
