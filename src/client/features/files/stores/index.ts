@@ -10,6 +10,7 @@ export {
 	type TerminalState,
 	useFileViewerStore,
 	useTerminalStore,
+	useViewerStore,
 	type ViewerMode,
 } from "@/features/files/stores/viewerStore";
 export { useWorkspaceStore } from "@/features/files/stores/workspaceStore";
