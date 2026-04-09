@@ -67,14 +67,13 @@ export function AppHeader({
 	onSearchFiltersChange,
 }: AppHeaderProps) {
 	// ========== 1. State (Domain State from Zustand) ==========
-	const {
-		currentModel,
-		workingDir: workingDir,
-		thinkingLevel,
-		setThinkingLevel,
-		serverPid,
-		isConnected,
-	} = useSessionStore();
+	const sessionStore = useSessionStore();
+	const currentModel = sessionStore.currentModel ?? null;
+	const workingDir = sessionStore.workingDir ?? "/root";
+	const thinkingLevel = sessionStore.thinkingLevel ?? "off";
+	const setThinkingLevel = sessionStore.setThinkingLevel;
+	const serverPid = sessionStore.serverPid;
+	const isConnected = sessionStore.isConnected;
 	const { isStreaming } = useChatStore();
 
 	// Search state from store
