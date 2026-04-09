@@ -1,10 +1,11 @@
 /**
  * Workspace Store - Files Feature 工作区状态管理
- * 管理工作目录和最近访问的工作区
+ * 管理最近访问的工作区
  */
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
+import { FILES_WORKSPACE_PERSIST, STORAGE_KEYS, STORAGE_VERSION } from "@/stores/persist.config";
 
 export interface WorkspaceState {
 	recentWorkspaces: string[];
@@ -30,10 +31,12 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
 				clearRecentWorkspaces: () => set({ recentWorkspaces: [] }),
 			}),
 			{
-				name: "files:workspace",
-				partialize: (state) => ({
-					recentWorkspaces: state.recentWorkspaces,
-				}),
+				name: STORAGE_KEYS.FILES_WORKSPACE,
+				version: STORAGE_VERSION.FILES_WORKSPACE,
+				partialize: (state) =>
+					Object.fromEntries(
+						FILES_WORKSPACE_PERSIST.map((key) => [key, state[key]]),
+					),
 			},
 		),
 		{ name: "WorkspaceStore" },

@@ -9,6 +9,7 @@
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
+import { CHAT_SIDEBAR_PERSIST, STORAGE_KEYS, STORAGE_VERSION } from "@/stores/persist.config";
 import type { Session, SidebarState } from "@/features/chat/types/sidebar";
 
 // ============================================================================
@@ -158,8 +159,8 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 				},
 			}),
 			{
-				name: "sidebar-storage",
-				version: 1,
+				name: STORAGE_KEYS.CHAT_SIDEBAR,
+				version: STORAGE_VERSION.CHAT_SIDEBAR,
 				partialize: (state) => ({
 					lastSessionByDir: state.lastSessionByDir,
 				}),

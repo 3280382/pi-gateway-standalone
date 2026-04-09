@@ -5,6 +5,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { APP_GLOBAL_PERSIST, STORAGE_KEYS, STORAGE_VERSION } from "./persist.config";
 
 export type ViewType = "chat" | "files";
 export type BottomPanelType = "terminal" | "preview" | null;
@@ -39,12 +40,12 @@ export const useAppStore = create<AppState>()(
 			setFontSize: (size) => set({ fontSize: size }),
 		}),
 		{
-			name: "app-storage",
-			partialize: (state) => ({
-				currentView: state.currentView,
-				theme: state.theme,
-				fontSize: state.fontSize,
-			}),
+			name: STORAGE_KEYS.APP_GLOBAL,
+			version: STORAGE_VERSION.APP_GLOBAL,
+			partialize: (state) =>
+				Object.fromEntries(
+					APP_GLOBAL_PERSIST.map((key) => [key, state[key]]),
+				),
 		},
 	),
 );

@@ -5,28 +5,17 @@
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
+import { CHAT_SESSION_PERSIST, STORAGE_KEYS, STORAGE_VERSION } from "@/stores/persist.config";
 
-// 从旧 store 迁移数据（兼容处理）
-function migrateFromOldStore(): Partial<ChatSessionState> {
-	try {
-		const oldData = localStorage.getItem("session-store");
-		if (oldData) {
-			const parsed = JSON.parse(oldData);
-			return {
-				currentSessionId: parsed.state?.currentSessionId || null,
-				currentModel: parsed.state?.currentModel || null,
-				thinkingLevel: parsed.state?.thinkingLevel || "off",
-				theme: parsed.state?.theme || "dark",
-				fontSize: parsed.state?.fontSize || "tiny",
-			};
-		}
-	} catch {
-		// 忽略解析错误
-	}
-	return {};
-}
-
-const migratedState = migrateFromOldStore();
+// 初始状态
+const initialState = {
+	currentSessionId: null as string | null,
+	currentDir: "/root",
+	currentModel: null as string | null,
+	thinkingLevel: "off" as ThinkingLevel,
+	theme: "dark" as Theme,
+	fontSize: "tiny" as FontSize,
+};
 
 export type ThinkingLevel =
 	| "off"
@@ -146,13 +135,13 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
 		persist(
 			(set) => ({
 				// 初始状态（优先使用迁移的数据）
-				currentSessionId: migratedState.currentSessionId || null,
+				currentSessionId: initialState.currentSessionId,
 				sessions: [],
 				currentDir: "/root",
-				currentModel: migratedState.currentModel || null,
-				thinkingLevel: migratedState.thinkingLevel || "off",
-				theme: migratedState.theme || "dark",
-				fontSize: migratedState.fontSize || "tiny",
+				currentModel: initialState.currentModel,
+				thinkingLevel: initialState.thinkingLevel,
+				theme: initialState.theme,
+				fontSize: initialState.fontSize,
 				serverPid: null,
 				isConnected: false,
 				resourceFiles: null,
@@ -192,7 +181,8 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
 				setResourceFiles: (files) => set({ resourceFiles: files }),
 			}),
 			{
-				name: "session-store",
+				name: STORAGE_KEYS.CHAT_SESSION,
+            version: STORAGE_VERSION.CHAT_SESSION,
 				partialize: (state) => ({
 					currentSessionId: state.currentSessionId,
 					currentModel: state.currentModel,

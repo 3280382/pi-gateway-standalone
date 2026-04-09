@@ -9,6 +9,7 @@
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
+import { FILES_BROWSER_PERSIST, STORAGE_KEYS, STORAGE_VERSION } from "@/stores/persist.config";
 import type {
 	BottomPanelType,
 	FileItem,
@@ -184,16 +185,12 @@ export const useFileStore = create<FileState & FileActions>()(
 					set({ bottomPanelHeight: height }),
 			}),
 			{
-				name: "files:browser",
-				version: 1,
-				partialize: (state) => ({
-					currentPath: state.currentPath,
-					viewMode: state.viewMode,
-					sortMode: state.sortMode,
-					filterType: state.filterType,
-					isSidebarVisible: state.isSidebarVisible,
-					bottomPanelHeight: state.bottomPanelHeight,
-				}),
+				name: STORAGE_KEYS.FILES_BROWSER,
+				version: STORAGE_VERSION.FILES_BROWSER,
+				partialize: (state) =>
+					Object.fromEntries(
+						FILES_BROWSER_PERSIST.map((key) => [key, state[key]]),
+					),
 			},
 		),
 		{ name: "FileStore" },
