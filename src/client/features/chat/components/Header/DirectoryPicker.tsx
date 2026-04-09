@@ -1,11 +1,19 @@
 /**
  * DirectoryPicker - 目录选择器组件
  *
- * 从 AppHeader 提取的独立组件
+ * 职责：
+ * - 显示目录列表供用户选择
+ * - 支持进入子目录和返回上级
+ *
+ * 结构规范：State → Ref → Effects → Computed → Actions → Render
  */
 
 import { useEffect, useState } from "react";
 import styles from "./AppHeader.module.css";
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface DirectoryEntry {
 	name: string;
@@ -19,17 +27,23 @@ interface DirectoryPickerProps {
 	onClose: () => void;
 }
 
+// ============================================================================
+// Component
+// ============================================================================
+
 export function DirectoryPicker({
 	currentPath,
 	onSelect,
 	onClose,
 }: DirectoryPickerProps) {
+	// ========== 1. State ==========
 	const [path, setPath] = useState(currentPath);
 	const [entries, setEntries] = useState<DirectoryEntry[]>([]);
-	const [loading, setLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 
+	// ========== 4. Actions ==========
 	const loadDirectory = async (dirPath: string) => {
-		setLoading(true);
+		setIsLoading(true);
 		try {
 			const response = await fetch("/api/browse", {
 				method: "POST",
@@ -60,14 +74,16 @@ export function DirectoryPicker({
 			console.error("[DirectoryPicker] Failed to load directory:", error);
 			setEntries([]);
 		} finally {
-			setLoading(false);
+			setIsLoading(false);
 		}
 	};
 
+	// ========== 3. Effects ==========
 	useEffect(() => {
 		loadDirectory(currentPath);
 	}, [currentPath]);
 
+	// ========== 6. Render ==========
 	return (
 		<div className={styles.pickerOverlay} onClick={onClose}>
 			<div className={styles.picker} onClick={(e) => e.stopPropagation()}>
@@ -84,7 +100,7 @@ export function DirectoryPicker({
 					</button>
 				</div>
 				<div className={styles.entriesList}>
-					{loading ? (
+					{isLoading ? (
 						<div className={styles.pickerLoading}>Loading...</div>
 					) : (
 						entries.map((entry) => (

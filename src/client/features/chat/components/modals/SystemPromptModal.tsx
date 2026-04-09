@@ -1,11 +1,22 @@
 /**
  * SystemPromptModal - 系统提示查看器
+ *
+ * 职责：
+ * - 显示系统提示、AGENTS.md、Skills、Extensions、Resources
+ * - 通过Tab切换不同内容视图
+ *
+ * 结构规范：State → Ref → Effects → Computed → Actions → Render
  */
 
 import { useEffect, useState } from "react";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
+import { useWorkspaceStore } from "@/features/files/stores";
 import styles from "./Modals.module.css";
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface SystemPromptData {
 	systemPrompt?: string;
@@ -21,18 +32,26 @@ interface SystemPromptData {
 	cwd?: string;
 }
 
+type TabType = "prompt" | "agents" | "skills" | "resources" | "extensions";
+
+// ============================================================================
+// Component
+// ============================================================================
+
 export function SystemPromptModal() {
+	// ========== 1. State ==========
+	// Domain State
 	const { isSystemPromptOpen, closeSystemPrompt } = useModalStore();
+	const resourceFiles = useSessionStore((state) => state.resourceFiles);
+	const currentDir = useWorkspaceStore((state) => state.currentDir);
+
+	// UI State
 	const [data, setData] = useState<SystemPromptData | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [activeTab, setActiveTab] = useState<
-		"prompt" | "agents" | "skills" | "resources" | "extensions"
-	>("prompt");
+	const [activeTab, setActiveTab] = useState<TabType>("prompt");
 
-	const resourceFiles = useSessionStore((state) => state.resourceFiles);
-	const currentDir = useSessionStore((state) => state.currentDir);
-
+	// ========== 3. Effects ==========
 	useEffect(() => {
 		if (!isSystemPromptOpen) {
 			setData(null);
@@ -294,6 +313,7 @@ export function SystemPromptModal() {
 		}
 	};
 
+	// ========== 6. Render ==========
 	return (
 		<div className={styles.overlay} onClick={closeSystemPrompt}>
 			<div
