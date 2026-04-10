@@ -7,7 +7,6 @@
  * - 实现 KeepAlive：首次激活才挂载，之后通过 display 控制显示隐藏
  */
 
-import { useRef } from "react";
 import { FileBottomMenu } from "@/features/files/components/BottomMenu/FileBottomMenu";
 import { FileBrowser } from "@/features/files/components/FileBrowser/FileBrowser";
 import { FileToolbar } from "@/features/files/components/Header/FileToolbar";
@@ -17,15 +16,8 @@ import styles from "@/features/files/FilesLayout.module.css";
 import { useFileBrowser, useFileNavigation } from "@/features/files/hooks";
 import { useFileStore, useViewerStore } from "@/features/files/stores";
 
-interface FilesPageProps {
-	active?: boolean;
-}
-
-export function FilesPage({ active = false }: FilesPageProps) {
+export function FilesPage() {
 	// ========== 1. State ==========
-	// 使用ref跟踪挂载状态
-	const hasMountedRef = useRef(false);
-
 	// 从store获取布局状态
 	const {
 		workingDir,
@@ -40,18 +32,13 @@ export function FilesPage({ active = false }: FilesPageProps) {
 	const { terminalOutput, terminalCommand, setTerminalCommand } = useViewerStore();
 
 	// ========== 2. Ref ==========
-	// hasMountedRef已在上面定义
+	// 不再需要hasMountedRef
 
 	// ========== 3. Effects ==========
 	// 使用useFileBrowser hook管理初始化和副作用
 	const { refresh } = useFileBrowser();
 
 	// ========== 4. Computed ==========
-	// 首次激活时标记为已挂载
-	if (active) {
-		hasMountedRef.current = true;
-	}
-
 	// 从导航hook获取
 	const { navigateTo } = useFileNavigation();
 
@@ -59,17 +46,8 @@ export function FilesPage({ active = false }: FilesPageProps) {
 	// 通过hooks获取
 
 	// ========== 6. Render ==========
-	// 从未激活过，返回 null（配合 React.lazy 实现延迟加载）
-	// 注意：这个返回必须在所有 Hooks 调用之后
-	if (!hasMountedRef.current) {
-		return null;
-	}
-
 	return (
-		<div
-			className={styles.layout}
-			style={{ display: active ? "flex" : "none" }}
-		>
+		<div className={styles.layout}>
 			{/* FileToolbar - 文件浏览器专用顶部工具栏 */}
 			<header className={styles.header}>
 				<FileToolbar
@@ -81,8 +59,10 @@ export function FilesPage({ active = false }: FilesPageProps) {
 
 			{/* Body: FileSidebar + Content */}
 			<div className={styles.body}>
-				{/* FileSidebar - 异步加载的目录树 */}
-				<FileSidebar visible={isSidebarVisible} onNavigate={navigateTo} />
+				{/* FileSidebar - 条件渲染，避免隐藏时加载资源 */}
+				{isSidebarVisible && (
+					<FileSidebar visible={true} onNavigate={navigateTo} />
+				)}
 
 				{/* Content */}
 				<main className={styles.content}>

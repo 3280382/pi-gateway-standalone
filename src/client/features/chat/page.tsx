@@ -5,7 +5,7 @@
  * 合并了原 ChatLayout 的布局逻辑
  */
 
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 import styles from "@/features/chat/ChatLayout.module.css";
 import { ChatPanel } from "@/features/chat/components/ChatPanel";
 import { AppHeader } from "@/features/chat/components/Header";
@@ -15,13 +15,7 @@ import { SidebarPanel } from "@/features/chat/components/sidebar/SidebarPanel";
 import { useChatInit, useChatMessages } from "@/features/chat/hooks";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 
-interface ChatPageProps {
-	active?: boolean;
-}
-
-export function ChatPage({ active = false }: ChatPageProps) {
-	const mountedRef = useRef(false);
-
+export function ChatPage() {
 	// 总是在顶层调用 Hooks（React Hooks 规则）
 	const { isConnecting } = useChatInit();
 	useChatMessages();
@@ -59,24 +53,13 @@ export function ChatPage({ active = false }: ChatPageProps) {
 		setBottomPanelHeight,
 	]);
 
-	// 首次激活时标记为已挂载
-	if (active) {
-		mountedRef.current = true;
-	}
-
-	// 从未激活过，返回 null（配合 React.lazy 实现延迟加载）
-	// 注意：这个返回必须在所有 Hooks 调用之后
-	if (!mountedRef.current) {
-		return null;
-	}
-
 	// 连接中状态
 	if (isConnecting) {
 		return (
 			<div
 				className={styles.loading}
 				style={{
-					display: active ? "flex" : "none",
+					display: "flex",
 					alignItems: "center",
 					justifyContent: "center",
 					flexDirection: "column",
@@ -102,10 +85,7 @@ export function ChatPage({ active = false }: ChatPageProps) {
 
 	return (
 		<>
-			<div
-				className={styles.layout}
-				style={{ display: active ? "flex" : "none" }}
-			>
+			<div className={styles.layout}>
 				{/* Header */}
 				<header className={styles.header}>
 					<AppHeader />
