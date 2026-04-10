@@ -110,33 +110,17 @@ const ORDER = {
 } as const;
 
 /**
- * 构建思考内容部分
+ * 构建思考内容部分 - 只使用当前流式思考，不使用已固化的思考数组
+ * 已固化的思考已经在 existingContent 中
  */
-function buildThinkingContent(
-	thinkings: Array<{ id: string; content: string }>,
-	singleThinking: string,
-): ContentPartWithOrder[] {
-	const content: ContentPartWithOrder[] = [];
+function buildThinkingContent(singleThinking: string): ContentPartWithOrder[] {
+	if (!singleThinking) return [];
 
-	if (thinkings.length > 0) {
-		thinkings.forEach((thinking, index) => {
-			if (thinking.content) {
-				content.push({
-					type: "thinking",
-					thinking: thinking.content,
-					_order: ORDER.THINKING_BASE + index * ORDER.THINKING_STEP,
-				});
-			}
-		});
-	} else if (singleThinking) {
-		content.push({
-			type: "thinking",
-			thinking: singleThinking,
-			_order: ORDER.THINKING_BASE,
-		});
-	}
-
-	return content;
+	return [{
+		type: "thinking",
+		thinking: singleThinking,
+		_order: ORDER.THINKING_BASE,
+	}];
 }
 
 /**
@@ -219,10 +203,11 @@ function buildToolContent(
 /**
  * 构建内容数组，保持时序顺序
  * 顺序：thinking -> tools -> text
+ * 注意：只构建当前流式内容，已固化的内容在 existingContent 中
  */
 function buildContentArray(state: State): ContentPart[] {
 	const content: ContentPartWithOrder[] = [
-		...buildThinkingContent(state.streamingThinkings, state.streamingThinking),
+		...buildThinkingContent(state.streamingThinking),
 		...buildToolContent(collectToolEntries(state)),
 		...buildTextContent(state.streamingContent),
 	];
@@ -248,16 +233,17 @@ let rafId: number | null = null;
 let pendingContentUpdates: PendingUpdates = {};
 
 /**
- * 获取需要保留的内容（turn_marker 之前的轮次）
+ * 获取需要保留的内容（已固化的内容块）
+ * 保留所有非流式内容块（已固化的 thinking, text, tool_use）
  */
 function getPreservedContent(existingContent: any[]): any[] {
-	const lastTurnMarkerIndex = existingContent
-		.map((c: any) => c.type)
-		.lastIndexOf("turn_marker");
-
-	return lastTurnMarkerIndex >= 0
-		? existingContent.slice(0, lastTurnMarkerIndex + 1)
-		: [];
+	if (!existingContent || existingContent.length === 0) return [];
+	
+	// 保留所有已固化的内容（thinking, text, tool_use, tool, turn_marker）
+	// 这些是已经通过 endContentBlock 固化的内容
+	return existingContent.filter((c: any) => 
+		['thinking', 'text', 'tool_use', 'tool', 'turn_marker'].includes(c.type)
+	);
 }
 
 /**
@@ -746,7 +732,7 @@ export const useChatStore = create<
 										thinking: state.streamingThinking,
 									};
 									return {
-										streamingThinking: "", // 清空流式状态
+										streamingThinking: "", // 清空当前流式思考
 										currentStreamingMessage: {
 											...state.currentStreamingMessage,
 											content: [...existingContent, thinkingBlock],
