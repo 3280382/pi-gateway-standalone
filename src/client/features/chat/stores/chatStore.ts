@@ -728,33 +728,75 @@ export const useChatStore = create<
 				);
 			},
 
-			// 结束内容块
+			// 结束内容块 - 将流式内容固化到消息中
 			endContentBlock: (type: 'text' | 'thinking' | 'tool_use', index?: number, meta?: any) => {
 				console.log(`[ChatStore] endContentBlock: type=${type}, index=${index ?? '?'}`, meta);
 				set(
 					(state) => {
 						if (!state.currentStreamingMessage) return {};
 
-						// 根据类型结束内容块，将流式内容固化到消息中
+						const existingContent = state.currentStreamingMessage.content || [];
+
 						switch (type) {
-							case 'thinking':
+							case 'thinking': {
 								if (state.streamingThinking) {
-									const newThinkings = [...state.streamingThinkings, {
-										id: `think-${Date.now()}`,
-										content: state.streamingThinking,
-									}];
+									// 将思考内容固化到消息中
+									const thinkingBlock: ContentPart = {
+										type: 'thinking',
+										thinking: state.streamingThinking,
+									};
 									return {
-										streamingThinkings: newThinkings,
 										streamingThinking: "",
+										currentStreamingMessage: {
+											...state.currentStreamingMessage,
+											content: [...existingContent, thinkingBlock],
+										},
 									};
 								}
 								return {};
-							case 'text':
-								// 文本内容已经在 content_delta 时添加，这里不需要额外处理
+							}
+							case 'text': {
+								if (state.streamingContent) {
+									// 将文本内容固化到消息中
+									const textBlock: ContentPart = {
+										type: 'text',
+										text: state.streamingContent,
+									};
+									return {
+										streamingContent: "",
+										currentStreamingMessage: {
+											...state.currentStreamingMessage,
+											content: [...existingContent, textBlock],
+										},
+									};
+								}
 								return {};
-							case 'tool_use':
-								// 工具调用内容在 toolcall_delta 时添加，这里固化参数
+							}
+							case 'tool_use': {
+								// 将工具调用固化到消息中
+								if (meta?.toolCallId) {
+									const toolCall = state.streamingToolCalls.get(meta.toolCallId);
+									if (toolCall) {
+										const toolBlock: ContentPart = {
+											type: 'tool_use',
+											toolCallId: toolCall.id,
+											toolName: toolCall.name,
+											partialArgs: toolCall.args,
+										};
+										// 从 streamingToolCalls 中移除，避免重复
+										const newToolCalls = new Map(state.streamingToolCalls);
+										newToolCalls.delete(meta.toolCallId);
+										return {
+											streamingToolCalls: newToolCalls,
+											currentStreamingMessage: {
+												...state.currentStreamingMessage,
+												content: [...existingContent, toolBlock],
+											},
+										};
+									}
+								}
 								return {};
+							}
 						}
 						return {};
 					},

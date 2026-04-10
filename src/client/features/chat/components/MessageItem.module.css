@@ -42,6 +42,19 @@
 	transition: background-color 0.15s;
 }
 
+/* 折叠状态样式 */
+.card.collapsed {
+	opacity: 0.8;
+}
+
+.card.collapsed:hover {
+	opacity: 1;
+}
+
+.card.expanded {
+	opacity: 1;
+}
+
 /* 思考块 - 温暖琥珀色 */
 .thinking {
 	background: rgba(251, 191, 36, 0.08);
@@ -197,6 +210,19 @@
 	color: #e2e8f0;
 	flex-shrink: 0;
 	white-space: nowrap;
+}
+
+/* 工具参数摘要（显示在顶部） */
+.summary {
+	font-size: 10px;
+	color: #94a3b8;
+	flex-shrink: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: 200px;
+	margin-left: 4px;
+	font-family: "JetBrains Mono", monospace;
 }
 
 .chip {

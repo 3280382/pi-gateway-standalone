@@ -64,6 +64,51 @@ function safeString(val: unknown): string {
 }
 
 /**
+ * 解析工具参数，提取关键信息用于顶部显示
+ */
+function parseToolSummary(toolName: string, args: string): string {
+	try {
+		const parsed = JSON.parse(args);
+		
+		// 文件写入类工具 - 显示文件路径
+		if (['write_file', 'create_file', 'edit_file', 'apply_diff'].includes(toolName)) {
+			const path = parsed.path || parsed.file_path || parsed.filepath || parsed.filePath;
+			if (path) {
+				// 简化路径显示
+				const shortPath = path.split('/').pop() || path;
+				return `→ ${shortPath}`;
+			}
+		}
+		
+		// bash 命令 - 显示命令前20字符
+		if (toolName === 'bash' && parsed.command) {
+			const cmd = parsed.command.slice(0, 25);
+			return cmd.length < parsed.command.length ? `${cmd}...` : cmd;
+		}
+		
+		// read/grep 等 - 显示路径
+		if (['read', 'grep', 'find'].includes(toolName)) {
+			const path = parsed.path || parsed.file || parsed.pattern;
+			if (path) {
+				const shortPath = String(path).split('/').pop() || String(path);
+				return shortPath.slice(0, 25);
+			}
+		}
+		
+		// 其他工具 - 显示第一个字符串参数
+		for (const key of Object.keys(parsed)) {
+			if (typeof parsed[key] === 'string' && parsed[key].length > 0) {
+				return `${key}: ${parsed[key].slice(0, 25)}${parsed[key].length > 25 ? '...' : ''}`;
+			}
+		}
+	} catch (e) {
+		// 解析失败返回原始参数的前30字符
+		return args.slice(0, 30) + (args.length > 30 ? '...' : '');
+	}
+	return '';
+}
+
+/**
  * 合并相邻的 tool_use 和 tool 块
  * tool_use 后面紧跟的 tool（相同 toolCallId）会合并到一起
  */
@@ -166,7 +211,14 @@ function GlassCard({
 	}, [isStreaming, block.type]);
 
 	// ========== 3. Actions ==========
-	const toggleExpand = useCallback(() => {
+	const toggleExpand = useCallback((e?: React.MouseEvent) => {
+		// 如果点击的是复制按钮或内容区域，不触发折叠
+		if (e) {
+			const target = e.target as HTMLElement;
+			if (target.closest(`.${styles.btnCopy}`) || target.closest(`.${styles.content}`)) {
+				return;
+			}
+		}
 		if (block.type !== "text") {
 			setIsExpanded((prev) => !prev);
 		}
@@ -182,8 +234,8 @@ function GlassCard({
 			const thinkingText = safeString(block.thinking);
 			return (
 				<div
-					className={`${styles.card} ${styles.thinking}`}
-					onClick={toggleExpand}
+					className={`${styles.card} ${styles.thinking} ${isExpanded ? styles.expanded : styles.collapsed}`}
+					onClick={(e) => toggleExpand(e)}
 					onMouseEnter={() => setIsCopyVisible(true)}
 					onMouseLeave={() => setIsCopyVisible(false)}
 				>
@@ -202,7 +254,7 @@ function GlassCard({
 								📋
 							</button>
 							<span className={styles.toggleIcon}>
-								{isExpanded ? "-" : "+"}
+								{isExpanded ? "−" : "+"}
 							</span>
 						</div>
 					</div>
@@ -237,6 +289,9 @@ function GlassCard({
 				status = isError ? "error" : "success";
 			}
 			
+			// 解析参数摘要（显示在顶部）
+			const summary = parseToolSummary(toolName, toolArgs);
+			
 			// 组合显示内容：参数 + 结果
 			const fullContent = hasResult
 				? `// Arguments:\n${toolArgs}\n\n// Result:\n${resultOutput}`
@@ -244,14 +299,15 @@ function GlassCard({
 
 			return (
 				<div
-					className={`${styles.card} ${styles.toolUse} ${hasResult ? (isError ? styles.toolError : styles.toolSuccess) : ""}`}
-					onClick={toggleExpand}
+					className={`${styles.card} ${styles.toolUse} ${hasResult ? (isError ? styles.toolError : styles.toolSuccess) : ""} ${isExpanded ? styles.expanded : styles.collapsed}`}
+					onClick={(e) => toggleExpand(e)}
 					onMouseEnter={() => setIsCopyVisible(true)}
 					onMouseLeave={() => setIsCopyVisible(false)}
 				>
 					<div className={styles.cardHeader}>
 						<span className={styles.dot} />
 						<span className={styles.label}>{toolName}</span>
+						{summary && <span className={styles.summary}>{summary}</span>}
 						<span className={`${styles.chip} ${styles[status]}`}>{status}</span>
 						<div className={styles.actions}>
 							<button
@@ -265,7 +321,7 @@ function GlassCard({
 								📋
 							</button>
 							<span className={styles.toggleIcon}>
-								{isExpanded ? "-" : "+"}
+								{isExpanded ? "−" : "+"}
 							</span>
 						</div>
 					</div>
@@ -309,8 +365,8 @@ function GlassCard({
 			
 			return (
 				<div
-					className={`${styles.card} ${styles.toolResult}`}
-					onClick={toggleExpand}
+					className={`${styles.card} ${styles.toolResult} ${isExpanded ? styles.expanded : styles.collapsed}`}
+					onClick={(e) => toggleExpand(e)}
 					onMouseEnter={() => setIsCopyVisible(true)}
 					onMouseLeave={() => setIsCopyVisible(false)}
 				>
@@ -330,7 +386,7 @@ function GlassCard({
 								📋
 							</button>
 							<span className={styles.toggleIcon}>
-								{isExpanded ? "-" : "+"}
+								{isExpanded ? "−" : "+"}
 							</span>
 						</div>
 					</div>
