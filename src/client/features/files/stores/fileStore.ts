@@ -46,6 +46,10 @@ export interface FileState {
 	isBottomPanelOpen: boolean;
 	bottomPanelType: BottomPanelType;
 	bottomPanelHeight: number;
+
+	// Git 模式状态
+	isGitModeActive: boolean;
+	gitHistoryFile: { path: string; name: string } | null;
 }
 
 export interface FileActions {
@@ -80,6 +84,11 @@ export interface FileActions {
 	closeBottomPanel: () => void;
 	toggleBottomPanel: (type: BottomPanelType) => void;
 	setBottomPanelHeight: (height: number) => void;
+
+	// Git 模式操作
+	toggleGitMode: () => void;
+	setGitModeActive: (active: boolean) => void;
+	setGitHistoryFile: (file: { path: string; name: string } | null) => void;
 }
 
 // ============================================================================
@@ -113,6 +122,10 @@ export const useFileStore = create<FileState & FileActions>()(
 				isBottomPanelOpen: false,
 				bottomPanelType: null,
 				bottomPanelHeight: 300,
+
+				// Git 模式状态
+				isGitModeActive: false,
+				gitHistoryFile: null,
 
 				// 基本设置方法
 				setWorkingDir: (path) => set({ workingDir: path }),
@@ -182,6 +195,14 @@ export const useFileStore = create<FileState & FileActions>()(
 
 				setBottomPanelHeight: (height: number) =>
 					set({ bottomPanelHeight: height }),
+
+				// Git 模式操作
+				toggleGitMode: () =>
+					set((state) => ({ isGitModeActive: !state.isGitModeActive })),
+				setGitModeActive: (active: boolean) =>
+					set({ isGitModeActive: active }),
+				setGitHistoryFile: (file) =>
+					set({ gitHistoryFile: file }),
 			}),
 			{
 				name: FILES_STORAGE_KEYS.FILES_BROWSER,

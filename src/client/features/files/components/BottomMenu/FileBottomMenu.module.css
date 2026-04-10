@@ -105,6 +105,23 @@
 	color: #fda4af;
 }
 
+/* Git 按钮 - violet紫罗兰主题 */
+.gitBtn {
+	background: rgba(139, 92, 246, 0.15);
+	color: #8b5cf6;
+}
+
+.gitBtn:hover:not(:disabled) {
+	background: rgba(139, 92, 246, 0.25);
+	color: #a78bfa;
+}
+
+.gitBtn.active {
+	background: rgba(139, 92, 246, 0.35);
+	color: #c4b5fd;
+	box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+}
+
 /* ============ 对话框通用样式 ============ */
 
 .modalOverlay {

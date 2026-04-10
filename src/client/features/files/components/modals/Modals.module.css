@@ -1,0 +1,210 @@
+/**
+ * Modals Styles - Git History Modal
+ */
+
+/* Overlay */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+/* Git History Modal */
+.gitHistoryModal {
+  background: #1e1e2e;
+  border-radius: 12px;
+  width: 90vw;
+  height: 80vh;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid #313244;
+}
+
+.gitHistoryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #313244;
+}
+
+.gitHistoryHeader h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #cdd6f4;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: #6c7086;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.closeBtn:hover {
+  background: #313244;
+  color: #f38ba8;
+}
+
+.gitHistoryContent {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.gitHistoryLayout {
+  display: flex;
+  height: 100%;
+}
+
+/* History List */
+.historyList {
+  width: 40%;
+  min-width: 300px;
+  max-width: 450px;
+  overflow-y: auto;
+  border-right: 1px solid #313244;
+  padding: 12px;
+}
+
+.historyItem {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: #181825;
+  border: 1px solid #313244;
+  transition: all 0.2s;
+}
+
+.historyItem:hover {
+  background: #252535;
+  border-color: #45475a;
+}
+
+.historyItem.active {
+  background: #1e3a5f;
+  border-color: #3b82f6;
+}
+
+.commitInfo {
+  margin-bottom: 8px;
+}
+
+.commitHash {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #89b4fa;
+  margin-bottom: 4px;
+}
+
+.commitMessage {
+  font-size: 13px;
+  color: #cdd6f4;
+  margin-bottom: 6px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.commitMeta {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: #6c7086;
+}
+
+.commitActions {
+  display: flex;
+  gap: 8px;
+}
+
+.commitBtn {
+  flex: 1;
+  padding: 6px 12px;
+  font-size: 12px;
+  border: 1px solid #45475a;
+  background: #313244;
+  color: #cdd6f4;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.commitBtn:hover {
+  background: #45475a;
+  border-color: #585b70;
+}
+
+/* History Detail */
+.historyDetail {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #11111b;
+}
+
+.contentHeader {
+  padding: 12px 16px;
+  background: #181825;
+  border-bottom: 1px solid #313244;
+  font-size: 13px;
+  color: #cdd6f4;
+}
+
+.contentCode,
+.diffCode {
+  flex: 1;
+  margin: 0;
+  padding: 16px;
+  overflow: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  background: #11111b;
+  color: #cdd6f4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.diffCode {
+  color: #a6e3a1;
+}
+
+/* States */
+.loadingState,
+.errorState,
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+  text-align: center;
+  color: #6c7086;
+}
+
+.errorState {
+  color: #f38ba8;
+}
+
+.contentView,
+.diffView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}

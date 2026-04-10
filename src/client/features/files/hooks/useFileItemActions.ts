@@ -48,12 +48,17 @@ export interface UseFileItemActionsResult {
 	// 选择操作
 	toggleSelection: (path: string) => void;
 	isSelected: (path: string) => boolean;
+
+	// Git 模式
+	isGitModeActive: boolean;
 }
 
 export function useFileItemActions(): UseFileItemActionsResult {
 	const {
 		selectedItems,
 		isMultiSelectMode,
+		isGitModeActive,
+		setGitHistoryFile,
 		setWorkingDir,
 		setSelectedActionFile,
 		toggleSelection: storeToggleSelection,
@@ -85,6 +90,13 @@ export function useFileItemActions(): UseFileItemActionsResult {
 					return;
 				}
 
+				// Git 模式下，点击文件触发 Git 历史弹窗
+				if (isGitModeActive && !item.isDirectory) {
+					console.log("[useFileItemActions] Git mode - selecting file:", item.path);
+					setGitHistoryFile({ path: item.path, name: item.name });
+					return;
+				}
+
 				if (item.isDirectory) {
 					console.log("[useFileItemActions] Navigating to:", item.path);
 					setWorkingDir(item.path);
@@ -96,7 +108,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
 				console.error("[useFileItemActions] handleTap error:", err);
 			}
 		},
-		[isMultiSelectMode, storeToggleSelection, setWorkingDir, openViewer],
+		[isMultiSelectMode, isGitModeActive, storeToggleSelection, setWorkingDir, openViewer, setGitHistoryFile],
 	);
 
 	const handleDoubleTap = useCallback(
@@ -285,5 +297,6 @@ export function useFileItemActions(): UseFileItemActionsResult {
 		getContainerHandlers,
 		toggleSelection,
 		isSelected,
+		isGitModeActive,
 	};
 }

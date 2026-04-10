@@ -20,6 +20,14 @@ export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
 		writeFileContent,
 	} = await import("./controllers/file.controller");
 
+	// Git controller
+	const {
+		checkGitRepoHandler,
+		getGitContentHandler,
+		getGitDiffHandler,
+		getGitHistoryHandler,
+	} = await import("./git-controller");
+
 	app.post("/api/browse", browseDirectory);
 	app.get("/api/files/tree", getDirectoryTree);
 	app.get("/api/files/content", getFileContent);
@@ -28,6 +36,12 @@ export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
 	app.post("/api/files/batch-delete", batchDeleteFiles);
 	app.post("/api/files/batch-move", batchMoveFiles);
 	app.post("/api/execute", executeCommand);
+
+	// Git routes
+	app.get("/api/git/history", getGitHistoryHandler);
+	app.get("/api/git/content", getGitContentHandler);
+	app.get("/api/git/diff", getGitDiffHandler);
+	app.get("/api/git/check", checkGitRepoHandler);
 }
 
 /**

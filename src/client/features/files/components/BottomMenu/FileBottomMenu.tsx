@@ -9,6 +9,7 @@
 
 import React from "react";
 import styles from "@/features/files/components/BottomMenu/FileBottomMenu.module.css";
+import { GitHistoryModal } from "@/features/files/components/modals/GitHistoryModal";
 import { TreeViewModal } from "@/features/files/components/modals/TreeViewModal";
 import { useFileBottomMenu } from "@/features/files/hooks";
 import { useFileNavigation } from "@/features/files/hooks/useFileNavigation";
@@ -38,6 +39,8 @@ export function FileBottomMenu() {
 	const { navigateUp, navigateHome, canNavigateUp } = useFileNavigation();
 	// 刷新功能
 	const { refresh, viewMode, toggleViewMode } = useFileStore();
+	// Git 模式
+	const { isGitModeActive, toggleGitMode, gitHistoryFile, setGitHistoryFile } = useFileStore();
 
 	return (
 		<>
@@ -98,6 +101,16 @@ export function FileBottomMenu() {
 					title="Delete"
 				>
 					<DeleteIcon />
+				</button>
+				{/* 分隔 */}
+				<div className={styles.divider} />
+				{/* Git 模式按钮 */}
+				<button
+					className={`${styles.btn} ${styles.gitBtn} ${isGitModeActive ? styles.active : ""}`}
+					onClick={toggleGitMode}
+					title={isGitModeActive ? "Git Mode (Active)" : "Git Mode"}
+				>
+					<GitIcon />
 				</button>
 			</div>
 
@@ -176,6 +189,16 @@ export function FileBottomMenu() {
 				onClose={handleCloseTree}
 				onFileClick={handleTreeFileClick}
 			/>
+
+			{/* Git 历史弹窗 */}
+			{gitHistoryFile && (
+				<GitHistoryModal
+					isOpen={!!gitHistoryFile}
+					filePath={gitHistoryFile.path}
+					fileName={gitHistoryFile.name}
+					onClose={() => setGitHistoryFile(null)}
+				/>
+			)}
 		</>
 	);
 }
@@ -270,6 +293,22 @@ function WarningIcon() {
 			<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
 			<line x1="12" y1="9" x2="12" y2="13" />
 			<line x1="12" y1="17" x2="12.01" y2="17" />
+		</svg>
+	);
+}
+
+function GitIcon() {
+	return (
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+			<circle cx="12" cy="12" r="4" />
+			<path d="M12 8V4" />
+			<path d="M12 20v-4" />
+			<path d="M4 12h4" />
+			<path d="M16 12h4" />
+			<circle cx="8" cy="8" r="2" />
+			<circle cx="16" cy="16" r="2" />
+			<path d="M8 10V6" />
+			<path d="M16 18v-4" />
 		</svg>
 	);
 }
