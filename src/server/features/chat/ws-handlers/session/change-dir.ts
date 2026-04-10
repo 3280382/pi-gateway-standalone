@@ -18,16 +18,22 @@ export async function handleChangeDir(
 	ctx: WSContext,
 	payload: { path: string },
 ): Promise<void> {
-	let { path: newPath } = payload;
+	const { path: newPath } = payload;
 
 	logger.info(`[WebSocket] Received change_dir message: path=${newPath}`);
 	logger.info(`[WebSocket] payload full content: ${JSON.stringify(payload)}`);
 
 	try {
-		// 检查路径是否存在，如果不存在则使用当前工作目录
+		// 检查路径是否存在，如果不存在则直接报错
 		if (!existsSync(newPath)) {
-			logger.warn(`[WebSocket] Path does not exist: ${newPath}, using current directory`);
-			newPath = process.cwd();
+			logger.error(`[WebSocket] Path does not exist: ${newPath}`);
+			ctx.ws.send(
+				JSON.stringify({
+					type: "error",
+					error: `Path does not exist: ${newPath}`,
+				}),
+			);
+			return;
 		}
 
 		// Reinitialize session to new directory

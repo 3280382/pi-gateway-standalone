@@ -21,17 +21,23 @@ export async function handleInit(
 		sessionId?: string;
 	},
 ): Promise<void> {
-	let { workingDir, sessionId } = payload;
+	const { workingDir, sessionId } = payload;
 
 	logger.info(
 		`[WebSocket] Received init message: workingDir=${workingDir}, sessionId=${sessionId || "not specified"}`,
 	);
 
 	try {
-		// 检查路径是否存在，如果不存在则使用当前工作目录
+		// 检查路径是否存在，如果不存在则直接报错
 		if (!existsSync(workingDir)) {
-			logger.warn(`[WebSocket] Path does not exist: ${workingDir}, using current directory`);
-			workingDir = process.cwd();
+			logger.error(`[WebSocket] Path does not exist: ${workingDir}`);
+			ctx.ws.send(
+				JSON.stringify({
+					type: "error",
+					error: `Path does not exist: ${workingDir}`,
+				}),
+			);
+			return;
 		}
 
 		const info = await ctx.session.initialize(workingDir, sessionId);
