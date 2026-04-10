@@ -112,6 +112,75 @@ function parseToolSummary(toolName: string, args: string | undefined): string {
 }
 
 /**
+ * 格式化工具参数显示
+ * - 第一行显示简要信息（路径、命令等）
+ * - 对于写文件类工具，格式化显示文件路径和内容
+ * - 对内容部分进行适当的格式化（保留换行，代码样式）
+ * - 支持流式字符串 (partialArgs) 和已完成对象 (args)
+ */
+function formatToolArgs(
+	toolName: string,
+	args: string | Record<string, unknown> | undefined,
+): string {
+	if (!args) return "";
+
+	// 统一解析为对象
+	let parsed: Record<string, unknown>;
+	if (typeof args === "string") {
+		try {
+			parsed = JSON.parse(args);
+		} catch (e) {
+			// 不是 JSON，返回原始字符串
+			return args;
+		}
+	} else {
+		parsed = args;
+	}
+
+	// 第一行：简要信息
+	let firstLine = "";
+
+	// 提取第一行简要信息
+	if (
+		["write_file", "create_file", "edit_file", "apply_diff"].includes(toolName)
+	) {
+		const path =
+			parsed.path ||
+			parsed.file_path ||
+			parsed.filepath ||
+			parsed.filePath;
+		if (path) firstLine = `// File: ${path}`;
+	} else if (toolName === "bash" && parsed.command) {
+		firstLine = `$ ${parsed.command}`;
+	} else if (["read", "grep", "find"].includes(toolName)) {
+		const path = parsed.path || parsed.file || parsed.pattern;
+		if (path) firstLine = `// Path: ${path}`;
+	} else if (toolName === "ls" && parsed.path) {
+		firstLine = `// Dir: ${parsed.path}`;
+	}
+
+	// 写文件类工具 - 特殊格式化
+	if (
+		["write_file", "create_file", "edit_file", "apply_diff"].includes(toolName)
+	) {
+		const content =
+			parsed.content ||
+			parsed.new_content ||
+			parsed.newContent ||
+			parsed.text ||
+			"";
+		if (content) {
+			// 格式化：第一行路径，然后空行，然后内容
+			return firstLine ? `${firstLine}\n\n${content}` : String(content);
+		}
+	}
+
+	// 其他工具 - 格式化 JSON，但第一行显示简要信息
+	const formattedJson = JSON.stringify(parsed, null, 2);
+	return firstLine ? `${firstLine}\n${formattedJson}` : formattedJson;
+}
+
+/**
  * 合并相邻的 tool_use 和 tool 块
  * tool_use 后面紧跟的 tool（相同 toolCallId）会合并到一起
  */
@@ -293,7 +362,8 @@ function GlassCard({
 			
 			// 获取工具调用信息
 			const toolName = block.toolName || "unknown";
-			const toolArgs = block.partialArgs || JSON.stringify(block.args, null, 2);
+			// 优先使用流式参数 (字符串)，否则使用已完成的参数 (对象)
+			const toolArgs = block.partialArgs ?? block.args;
 			
 			// 获取执行结果（如果已合并）
 			const toolResult = block.toolResult;
@@ -310,10 +380,13 @@ function GlassCard({
 			// 解析参数摘要（显示在顶部）
 			const summary = parseToolSummary(toolName, toolArgs);
 			
+			// 格式化参数显示
+			const formattedArgs = formatToolArgs(toolName, toolArgs);
+			
 			// 组合显示内容：参数 + 结果
 			const fullContent = hasResult
-				? `// Arguments:\n${toolArgs}\n\n// Result:\n${resultOutput}`
-				: toolArgs;
+				? `${formattedArgs}\n\n// Result:\n${resultOutput}`
+				: formattedArgs;
 
 			return (
 				<div
@@ -348,10 +421,10 @@ function GlassCard({
 							className={styles.content}
 							onClick={(e) => e.stopPropagation()}
 						>
-							{/* 参数部分 */}
+							{/* 参数部分 - 格式化显示 */}
 							<div className={styles.toolSection}>
 								<div className={styles.toolSectionLabel}>Arguments:</div>
-								<code>{toolArgs}</code>
+								<pre className={styles.toolCode}><code>{formattedArgs}</code></pre>
 							</div>
 							
 							{/* 结果部分（如果有） */}
