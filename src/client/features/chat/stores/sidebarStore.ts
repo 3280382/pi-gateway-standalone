@@ -17,8 +17,8 @@ import type { Session, SidebarState } from "@/features/chat/types/sidebar";
 // ============================================================================
 
 const createInitialState = (): Omit<SidebarState, keyof SidebarActions> => ({
-	isVisible: typeof window !== "undefined" ? window.innerWidth >= 768 : true,
-	isBottomPanelOpen: false,
+	isVisible: false, // 默认关闭侧面板
+	isBottomPanelOpen: false, // 默认关闭底面板
 	bottomPanelHeight: 300,
 	workingDir: null,
 	sessions: [],

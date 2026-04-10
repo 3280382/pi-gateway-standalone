@@ -108,9 +108,8 @@ export const useFileStore = create<FileState & FileActions>()(
 				draggedItem: null,
 				isDragging: false,
 
-				// 布局状态
-				isSidebarVisible:
-					typeof window !== "undefined" ? window.innerWidth >= 768 : true,
+				// 布局状态 - 默认都关闭
+				isSidebarVisible: false,
 				isBottomPanelOpen: false,
 				bottomPanelType: null,
 				bottomPanelHeight: 300,
