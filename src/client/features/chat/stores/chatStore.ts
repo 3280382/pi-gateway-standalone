@@ -248,6 +248,7 @@ function getPreservedContent(existingContent: any[]): any[] {
 
 /**
  * 应用 RAF 批处理更新
+ * 只更新流式状态，不操作 currentStreamingMessage.content
  */
 function applyRafUpdate(
 	state: State,
@@ -259,25 +260,10 @@ function applyRafUpdate(
 	const newThinking = state.streamingThinking + (pending.thinking || "");
 	const newToolCalls = pending.toolCalls || state.streamingToolCalls;
 
-	const currentContentArray = buildContentArray({
-		...state,
-		streamingContent: newContent,
-		streamingThinking: newThinking,
-		streamingToolCalls: newToolCalls,
-	});
-
-	const preservedContent = getPreservedContent(
-		state.currentStreamingMessage.content || [],
-	);
-
 	return {
 		streamingContent: newContent,
 		streamingThinking: newThinking,
 		streamingToolCalls: newToolCalls,
-		currentStreamingMessage: {
-			...state.currentStreamingMessage,
-			content: [...preservedContent, ...currentContentArray],
-		},
 	};
 }
 
@@ -714,75 +700,25 @@ export const useChatStore = create<
 				);
 			},
 
-			// 结束内容块 - 将流式内容固化到消息中，并清空流式状态避免重复
+			// 结束内容块 - 只清空流式状态，不固化到消息
+			// 流式期间只使用流式状态变量显示，message_end 时才整体固化
 			endContentBlock: (type: 'text' | 'thinking' | 'tool_use', index?: number, meta?: any) => {
 				console.log(`[ChatStore] endContentBlock: type=${type}, index=${index ?? '?'}`, meta);
+				
 				set(
 					(state) => {
-						if (!state.currentStreamingMessage) return {};
-
-						const existingContent = state.currentStreamingMessage.content || [];
-
 						switch (type) {
-							case 'thinking': {
-								if (state.streamingThinking) {
-									// 将思考内容固化到消息中
-									const thinkingBlock: ContentPart = {
-										type: 'thinking',
-										thinking: state.streamingThinking,
-									};
-									return {
-										streamingThinking: "", // 清空当前流式思考
-										currentStreamingMessage: {
-											...state.currentStreamingMessage,
-											content: [...existingContent, thinkingBlock],
-										},
-									};
-								}
-								return {};
-							}
-							case 'text': {
-								if (state.streamingContent) {
-									// 将文本内容固化到消息中
-									const textBlock: ContentPart = {
-										type: 'text',
-										text: state.streamingContent,
-									};
-									return {
-										streamingContent: "", // 清空流式状态
-										currentStreamingMessage: {
-											...state.currentStreamingMessage,
-											content: [...existingContent, textBlock],
-										},
-									};
-								}
-								return {};
-							}
-							case 'tool_use': {
-								// 将工具调用固化到消息中
+							case 'thinking':
+								return { streamingThinking: "" };
+							case 'text':
+								return { streamingContent: "" };
+							case 'tool_use':
 								if (meta?.toolCallId) {
-									const toolCall = state.streamingToolCalls.get(meta.toolCallId);
-									if (toolCall) {
-										const toolBlock: ContentPart = {
-											type: 'tool_use',
-											toolCallId: toolCall.id,
-											toolName: toolCall.name,
-											partialArgs: toolCall.args,
-										};
-										// 从 streamingToolCalls 中移除，避免重复
-										const newToolCalls = new Map(state.streamingToolCalls);
-										newToolCalls.delete(meta.toolCallId);
-										return {
-											streamingToolCalls: newToolCalls, // 清空流式状态
-											currentStreamingMessage: {
-												...state.currentStreamingMessage,
-												content: [...existingContent, toolBlock],
-											},
-										};
-									}
+									const newToolCalls = new Map(state.streamingToolCalls);
+									newToolCalls.delete(meta.toolCallId);
+									return { streamingToolCalls: newToolCalls };
 								}
 								return {};
-							}
 						}
 						return {};
 					},

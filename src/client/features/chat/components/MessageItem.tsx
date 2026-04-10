@@ -236,7 +236,7 @@ function GlassCard({
 			const thinkingText = safeString(block.thinking);
 			return (
 				<div
-					className={`${styles.card} ${styles.thinking} ${isExpanded ? styles.expanded : styles.collapsed}`}
+					className={`${styles.card} ${styles.thinking} ${isStreaming ? styles.streaming : ""} ${isExpanded ? styles.expanded : styles.collapsed}`}
 					onClick={(e) => toggleExpand(e)}
 					onMouseEnter={() => setIsCopyVisible(true)}
 					onMouseLeave={() => setIsCopyVisible(false)}
@@ -301,7 +301,7 @@ function GlassCard({
 
 			return (
 				<div
-					className={`${styles.card} ${styles.toolUse} ${hasResult ? (isError ? styles.toolError : styles.toolSuccess) : ""} ${isExpanded ? styles.expanded : styles.collapsed}`}
+					className={`${styles.card} ${styles.toolUse} ${isStreaming ? styles.streaming : ""} ${hasResult ? (isError ? styles.toolError : styles.toolSuccess) : ""} ${isExpanded ? styles.expanded : styles.collapsed}`}
 					onClick={(e) => toggleExpand(e)}
 					onMouseEnter={() => setIsCopyVisible(true)}
 					onMouseLeave={() => setIsCopyVisible(false)}
@@ -367,7 +367,7 @@ function GlassCard({
 			
 			return (
 				<div
-					className={`${styles.card} ${styles.toolResult} ${isExpanded ? styles.expanded : styles.collapsed}`}
+					className={`${styles.card} ${styles.toolResult} ${isStreaming ? styles.streaming : ""} ${isExpanded ? styles.expanded : styles.collapsed}`}
 					onClick={(e) => toggleExpand(e)}
 					onMouseEnter={() => setIsCopyVisible(true)}
 					onMouseLeave={() => setIsCopyVisible(false)}
@@ -408,7 +408,7 @@ function GlassCard({
 			if (!block.text) return null;
 			return (
 				<div
-					className={`${styles.card} ${styles.output}`}
+					className={`${styles.card} ${styles.output} ${isStreaming ? styles.streaming : ""}`}
 					onMouseEnter={() => setIsCopyVisible(true)}
 					onMouseLeave={() => setIsCopyVisible(false)}
 				>
