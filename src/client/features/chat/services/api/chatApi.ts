@@ -490,14 +490,27 @@ export function setupWebSocketListeners(): void {
 	});
 
 	// Message start/end handlers
-	websocketService.on("message_start", () => {
+	websocketService.on("message_start", (data: { message?: any }) => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] message_start`);
+		const message = data?.message;
+		console.log(`[${ts}] [RECV] message_start: role=${message?.role || 'unknown'}, id=${message?.id || 'new'}`);
+		
+		// 如果是用户消息，已经在 sendMessage 中添加过了
+		// 如果是AI消息，创建新的流式消息
+		if (message?.role === 'assistant') {
+			store.createStreamingMessage(message.id);
+		}
 	});
 
-	websocketService.on("message_end", () => {
+	websocketService.on("message_end", (data: { message?: any }) => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] message_end`);
+		const message = data?.message;
+		console.log(`[${ts}] [RECV] message_end: role=${message?.role || 'unknown'}, id=${message?.id}`);
+		
+		// 如果是AI消息且流式消息存在，完成它
+		if (message?.role === 'assistant' && store.currentStreamingMessage) {
+			store.finishStreaming();
+		}
 	});
 
 	// Turn start/end handlers

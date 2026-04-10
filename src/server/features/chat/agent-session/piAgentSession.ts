@@ -407,38 +407,58 @@ export class PiAgentSession {
 					break;
 				}
 				case "message_start": {
-					console.log(`[${timestamp}] [SEND] message_start`);
-					this.send({ type: "message_start" });
+					const startMsg = event.message;
+					console.log(`[${timestamp}] [SEND] message_start: role=${startMsg.role}, id=${startMsg.id || 'new'}`);
+					this.send({
+						type: "message_start",
+						message: startMsg,
+					});
 					break;
 				}
 				case "message_end": {
-					console.log(`[${timestamp}] [SEND] message_end`);
-					this.send({ type: "message_end" });
+					const endMsg = event.message;
+					console.log(`[${timestamp}] [SEND] message_end: role=${endMsg.role}, id=${endMsg.id}`);
+					this.send({
+						type: "message_end",
+						message: endMsg,
+					});
 					break;
 				}
 				case "agent_start": {
 					console.log(`[${timestamp}] [SEND] agent_start`);
 					this.isStreaming = true;
-					this.send({ type: "agent_start" });
+					this.send({
+						type: "agent_start",
+						timestamp: Date.now(),
+					});
 					break;
 				}
 				case "agent_end": {
-					console.log(`[${timestamp}] [SEND] agent_end`);
+					const messages = event.messages;
+					console.log(`[${timestamp}] [SEND] agent_end: totalMessages=${messages.length}`);
 					this.isStreaming = false;
-					this.send({ type: "agent_end" });
+					this.send({
+						type: "agent_end",
+						messages: messages,
+						timestamp: Date.now(),
+					});
 					break;
 				}
 				case "turn_start": {
 					console.log(`[${timestamp}] [SEND] turn_start`);
-					this.send({ type: "turn_start" });
+					this.send({
+						type: "turn_start",
+						timestamp: Date.now(),
+					});
 					break;
 				}
 				case "turn_end": {
-					console.log(`[${timestamp}] [SEND] turn_end`);
+					console.log(`[${timestamp}] [SEND] turn_end: messages=${this.session?.messages.length || 0}`);
 					this.send({
 						type: "turn_end",
 						message: event.message,
 						toolResults: event.toolResults,
+						timestamp: Date.now(),
 					});
 					break;
 				}

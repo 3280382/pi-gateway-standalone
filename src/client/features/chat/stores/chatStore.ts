@@ -566,6 +566,7 @@ export const useChatStore = create<
 
 		// Streaming Actions - Batch Updates
 		startStreaming: () => void;
+		createStreamingMessage: (messageId?: string) => void;
 		startNewTurn: () => void;
 		batchUpdateContent: (updates: {
 			content?: string;
@@ -661,6 +662,32 @@ export const useChatStore = create<
 					},
 					false,
 					"startStreaming",
+				);
+			},
+
+			// 创建流式消息（使用服务器提供的ID）
+			createStreamingMessage: (messageId?: string) => {
+				const streamingMessage: Message = {
+					id: messageId || generateMessageId(),
+					role: "assistant",
+					content: [],
+					timestamp: new Date(),
+					isStreaming: true,
+					isThinkingCollapsed: true,
+					isToolsCollapsed: true,
+				};
+				set(
+					{
+						isStreaming: true,
+						streamingContent: "",
+						streamingThinking: "",
+						streamingThinkings: [],
+						streamingToolCalls: new Map(),
+						activeTools: new Map(),
+						currentStreamingMessage: streamingMessage,
+					},
+					false,
+					"createStreamingMessage",
 				);
 			},
 
