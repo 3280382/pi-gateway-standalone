@@ -354,37 +354,12 @@ export function setupWebSocketListeners(): void {
 	const store = useChatStore.getState();
 
 	// =========================================================================
-	// Session Level Events
-	// =========================================================================
-	websocketService.on("agent_start", () => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] agent_start`);
-	});
-
-	websocketService.on("agent_end", () => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] agent_end`);
-		store.finishStreaming();
-	});
-
-	websocketService.on("turn_start", () => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] turn_start`);
-		store.startNewTurn();
-	});
-
-	websocketService.on("turn_end", () => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] turn_end`);
-	});
-
-	// =========================================================================
-	// Message Level Events
+	// Message Level Events - 核心：处理每个消息的完整生命周期
 	// =========================================================================
 	websocketService.on("message_start", (data: { message?: any }) => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
 		const message = data?.message;
-		console.log(`[${ts}] [RECV] message_start: role=${message?.role || 'unknown'}, id=${message?.id || 'new'}`);
+		console.log(`[${ts}] [RECV] message_start: ${message?.role}, id=${message?.id || 'new'}`);
 		
 		if (message?.role === 'assistant') {
 			store.createStreamingMessage(message.id);
@@ -394,9 +369,9 @@ export function setupWebSocketListeners(): void {
 	websocketService.on("message_end", (data: { message?: any }) => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
 		const message = data?.message;
-		console.log(`[${ts}] [RECV] message_end: role=${message?.role || 'unknown'}, id=${message?.id}`);
+		console.log(`[${ts}] [RECV] message_end: ${message?.role}, id=${message?.id}`);
 		
-		if (message?.role === 'assistant' && store.currentStreamingMessage) {
+		if (message?.role === 'assistant') {
 			store.finishStreaming();
 		}
 	});
@@ -502,11 +477,12 @@ export function setupWebSocketListeners(): void {
 		store.updateToolOutput(data.toolCallId, data?.result || "", error);
 	});
 
-	// Compaction start/end handlers
+	// =========================================================================
+	// System Events - 仅显示，不处理业务逻辑
+	// =========================================================================
 	websocketService.on("compaction_start", () => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
 		console.log(`[${ts}] [RECV] compaction_start`);
-		// 添加系统消息到消息列表
 		store.addMessage({
 			id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
 			role: "system",

@@ -728,7 +728,7 @@ export const useChatStore = create<
 				);
 			},
 
-			// 结束内容块 - 将流式内容固化到消息中
+			// 结束内容块 - 将流式内容固化到消息中，并清空流式状态避免重复
 			endContentBlock: (type: 'text' | 'thinking' | 'tool_use', index?: number, meta?: any) => {
 				console.log(`[ChatStore] endContentBlock: type=${type}, index=${index ?? '?'}`, meta);
 				set(
@@ -746,7 +746,7 @@ export const useChatStore = create<
 										thinking: state.streamingThinking,
 									};
 									return {
-										streamingThinking: "",
+										streamingThinking: "", // 清空流式状态
 										currentStreamingMessage: {
 											...state.currentStreamingMessage,
 											content: [...existingContent, thinkingBlock],
@@ -763,7 +763,7 @@ export const useChatStore = create<
 										text: state.streamingContent,
 									};
 									return {
-										streamingContent: "",
+										streamingContent: "", // 清空流式状态
 										currentStreamingMessage: {
 											...state.currentStreamingMessage,
 											content: [...existingContent, textBlock],
@@ -787,7 +787,7 @@ export const useChatStore = create<
 										const newToolCalls = new Map(state.streamingToolCalls);
 										newToolCalls.delete(meta.toolCallId);
 										return {
-											streamingToolCalls: newToolCalls,
+											streamingToolCalls: newToolCalls, // 清空流式状态
 											currentStreamingMessage: {
 												...state.currentStreamingMessage,
 												content: [...existingContent, toolBlock],
