@@ -441,29 +441,41 @@ function GlassCard({
 		}
 
 		case "tool": {
-			// tool 类型应该已经和 tool_use 合并了
-			// 如果单独出现，显示为简化的结果卡片
+			// tool 类型包含已完成的工具调用（参数 + 结果）
 			if (!showTools) return null;
 			
+			const toolName = block.toolName || "unknown";
+			const toolArgs = block.args;
 			const status = block.error
 				? "error"
 				: block.output
 					? "success"
 					: "pending";
-			const toolContent = safeString(
-				block.output || block.error || "Processing...",
-			);
+			
+			// 格式化参数和结果
+			const formattedArgs = formatToolArgs(toolName, toolArgs);
+			const resultOutput = block.output || block.error || "";
+			const hasResult = !!resultOutput;
+			
+			// 完整内容（复制用）
+			const fullContent = hasResult
+				? `${formattedArgs}\n\n// Result:\n${resultOutput}`
+				: formattedArgs;
+			
+			// 摘要显示在顶部
+			const summary = parseToolSummary(toolName, typeof toolArgs === 'string' ? toolArgs : JSON.stringify(toolArgs));
 			
 			return (
 				<div
-					className={`${styles.card} ${styles.toolResult} ${isStreaming ? styles.streaming : ""} ${isExpanded ? styles.expanded : styles.collapsed}`}
+					className={`${styles.card} ${styles.toolUse} ${isStreaming ? styles.streaming : ""} ${block.error ? styles.toolError : block.output ? styles.toolSuccess : ""} ${isExpanded ? styles.expanded : styles.collapsed}`}
 					onClick={(e) => toggleExpand(e)}
 					onMouseEnter={() => setIsCopyVisible(true)}
 					onMouseLeave={() => setIsCopyVisible(false)}
 				>
 					<div className={styles.cardHeader}>
 						<span className={styles.dot} />
-						<span className={styles.label}>{block.toolName}</span>
+						<span className={styles.label}>{toolName}</span>
+						{summary && <span className={styles.summary}>{summary}</span>}
 						<span className={`${styles.chip} ${styles[status]}`}>{status}</span>
 						<div className={styles.actions}>
 							<button
@@ -471,7 +483,7 @@ function GlassCard({
 								style={{ visibility: isCopyVisible ? "visible" : "hidden" }}
 								onClick={(e) => {
 									e.stopPropagation();
-									copyToClipboard(toolContent);
+									copyToClipboard(fullContent);
 								}}
 							>
 								📋
@@ -486,7 +498,19 @@ function GlassCard({
 							className={styles.content}
 							onClick={(e) => e.stopPropagation()}
 						>
-							<code>{toolContent}</code>
+							{/* 参数部分 */}
+							<div className={styles.toolSection}>
+								<div className={styles.toolSectionLabel}>Arguments:</div>
+								<pre className={styles.toolCode}><code>{formattedArgs}</code></pre>
+							</div>
+							
+							{/* 结果部分（如果有） */}
+							{hasResult && (
+								<div className={`${styles.toolSection} ${block.error ? styles.toolSectionError : styles.toolSectionSuccess}`}>
+									<div className={styles.toolSectionLabel}>Result:</div>
+									<code>{resultOutput}</code>
+								</div>
+							)}
 						</div>
 					)}
 				</div>
