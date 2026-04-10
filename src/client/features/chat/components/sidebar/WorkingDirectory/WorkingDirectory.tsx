@@ -34,13 +34,9 @@ export function WorkingDirectory() {
 
 	// 处理目录选择
 	const handleSelect = async (path: string) => {
-		console.log(`[WorkingDirectory] handleSelect called: path="${path}", current="${workingDir?.path}"`);
 		setIsPickerVisible(false);
 		if (path && path !== workingDir?.path) {
-			console.log(`[WorkingDirectory] Path changed, calling controller.changeWorkingDir("${path}")`);
 			await controller.changeWorkingDir(path);
-		} else {
-			console.log(`[WorkingDirectory] Path not changed or invalid, skipping`);
 		}
 	};
 
@@ -143,13 +139,7 @@ function DirectoryPicker({
 				</div>
 				<div className={styles.currentPath}>{path}</div>
 				<div className={styles.pickerActions}>
-					<button 
-						className={styles.selectBtn} 
-						onClick={() => {
-							console.log(`[DirectoryPicker] Select button clicked, path="${path}"`);
-							onSelect(path);
-						}}
-					>
+					<button className={styles.selectBtn} onClick={() => onSelect(path)}>
 						Select This Directory
 					</button>
 				</div>

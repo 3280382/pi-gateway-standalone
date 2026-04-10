@@ -84,14 +84,12 @@ export function useSidebarController(): SidebarController {
 
 		// Actions - 委托给 sessionManager
 		changeWorkingDir: useCallback(
-			(path: string) => {
-				console.log(`[sidebarApi.changeWorkingDir] Called with path="${path}"`);
-				return sessionManager.switchDirectory(path, {
+			(path: string) =>
+				sessionManager.switchDirectory(path, {
 					clearSessions: true,
 					loadSessions: true,
 					restoreLastSession: true,
-				});
-			},
+				}),
 			[],
 		),
 
@@ -149,14 +147,12 @@ export function createSidebarController(): SidebarController {
 			}
 		},
 
-		changeWorkingDir: (path: string) => {
-			console.log(`[createSidebarController.changeWorkingDir] Called with path="${path}"`);
-			return sessionManager.switchDirectory(path, {
+		changeWorkingDir: (path: string) =>
+			sessionManager.switchDirectory(path, {
 				clearSessions: false,
 				loadSessions: false,
 				restoreLastSession: true,
-			});
-		},
+			}),
 
 		selectSession: (id: string) => sessionManager.selectSession(id),
 

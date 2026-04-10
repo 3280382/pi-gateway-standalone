@@ -33,15 +33,20 @@ export function useChatInit(): { isConnecting: boolean } {
 				console.warn("[ChatInit] WebSocket not available");
 			}
 
-			// 2. 恢复 session（需要当前工作目录）
+			// 2. 恢复 session（只在需要时）
+			// 检查是否已经有 active session，避免重复切换
+			const currentSessionId = useSessionStore.getState().currentSessionId;
 			const workingDir = useSessionStore.getState().workingDir;
-			if (wsConnected && workingDir) {
-				console.log("[ChatInit] 恢复 session:", workingDir);
+			
+			if (wsConnected && workingDir && !currentSessionId) {
+				console.log("[ChatInit] 没有 active session，恢复上次的工作目录:", workingDir);
 				await sessionManager.switchDirectory(workingDir, {
 					clearSessions: true,
 					loadSessions: true,
 					restoreLastSession: true,
 				});
+			} else {
+				console.log("[ChatInit] 已有 session 或未设置工作目录，跳过自动恢复");
 			}
 		} catch (err) {
 			console.error("[ChatInit] 初始化错误:", err);

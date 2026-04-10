@@ -12,7 +12,7 @@ import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
-import { useFileStore, useWorkspaceStore } from "@/features/files/stores";
+import { useWorkspaceStore } from "@/features/files/stores";
 import { fetchApi } from "@/services/client";
 import { websocketService } from "@/services/websocket.service";
 import {
@@ -89,7 +89,6 @@ function getStores() {
 		session: useSessionStore.getState(),
 		workspace: useWorkspaceStore.getState(),
 		chat: useChatStore.getState(),
-		file: useFileStore.getState(),
 	};
 }
 
@@ -154,9 +153,6 @@ async function switchDirectory(
 		if (response.pid) {
 			stores.session.setServerPid(response.pid);
 		}
-		// 同步更新 fileStore 的 workingDir，让文件浏览器同步切换
-		console.log(`[SessionManager.switchDirectory] 6b. Syncing fileStore workingDir to "${response.cwd}"`);
-		stores.file.setWorkingDir(response.cwd);
 
 		// 4. 处理 sessions 列表
 		if (clearSessions) {
