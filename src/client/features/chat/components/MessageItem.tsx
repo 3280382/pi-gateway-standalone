@@ -39,6 +39,7 @@ interface MergedContentBlock extends MessageContent {
 interface GlassCardProps {
 	block: MergedContentBlock;
 	isStreaming?: boolean;
+	isNewMessage?: boolean; // true=流式消息(默认展开), false=历史消息(思考/工具默认折叠)
 	showThinking: boolean;
 	showTools?: boolean;
 }
@@ -175,6 +176,7 @@ export const MessageItem = memo(
 						key={`${block.type}-${idx}`}
 						block={block}
 						isStreaming={message.isStreaming}
+						isNewMessage={message.isStreaming} // 流式消息视为新消息
 						showThinking={showThinking}
 						showTools={showTools ?? true}
 					/>
@@ -197,25 +199,34 @@ export const MessageItem = memo(
 function GlassCard({
 	block,
 	isStreaming = false,
+	isNewMessage = false,
 	showThinking,
 	showTools = true,
 }: GlassCardProps) {
 	// ========== 1. State ==========
-	const [isExpanded, setIsExpanded] = useState(isStreaming);
+	// 默认展开规则：
+	// - 新消息（流式中）：全部展开
+	// - 历史消息：text 展开，thinking/tool 折叠
+	const getDefaultExpanded = () => {
+		if (isNewMessage) return true;
+		if (block.type === 'text') return true;
+		return false; // thinking, tool_use, tool 默认折叠
+	};
+	const [isExpanded, setIsExpanded] = useState(getDefaultExpanded);
 	const [isCopyVisible, setIsCopyVisible] = useState(false);
 
 	// ========== 2. Effects ==========
-	// 只在流式真正结束时（从 true 变为 false）才折叠
+	// 只在流式真正结束时（从 true 变为 false）才折叠（针对流式消息）
 	const wasStreamingRef = useRef(isStreaming);
 	useEffect(() => {
 		const wasStreaming = wasStreamingRef.current;
 		wasStreamingRef.current = isStreaming;
 		
-		// 只在流式结束（true -> false）且不是 text 类型时才折叠
-		if (wasStreaming && !isStreaming && block.type !== "text") {
+		// 只对新消息：流式结束（true -> false）且不是 text 类型时才折叠
+		if (isNewMessage && wasStreaming && !isStreaming && block.type !== "text") {
 			setIsExpanded(false);
 		}
-	}, [isStreaming, block.type]);
+	}, [isStreaming, block.type, isNewMessage]);
 
 	// ========== 3. Actions ==========
 	const toggleExpand = useCallback((e?: React.MouseEvent) => {
