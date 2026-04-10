@@ -1,12 +1,5 @@
 /**
  * MessageList - Message list component
- *
- * 职责：
- * - 渲染消息列表
- * - 处理空状态显示
- * - 注意：滚动逻辑由父组件处理
- *
- * 结构规范：State → Ref → Effects → Computed → Actions → Render
  */
 
 import { useMemo } from "react";
@@ -14,10 +7,6 @@ import type { Message, MessageContent } from "@/features/chat/types/chat";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { MessageItem } from "./MessageItem";
 import styles from "./MessageList.module.css";
-
-// ============================================================================
-// Types
-// ============================================================================
 
 interface MessageListProps {
 	messages: Message[];
@@ -30,10 +19,6 @@ interface MessageListProps {
 	onDeleteMessage?: (id: string) => void;
 	onRegenerateMessage?: (id: string) => void;
 }
-
-// ============================================================================
-// Component
-// ============================================================================
 
 export function MessageList({
 	messages,
@@ -51,24 +36,22 @@ export function MessageList({
 	const streamingThinking = useChatStore((state) => state.streamingThinking);
 	const streamingToolCalls = useChatStore((state) => state.streamingToolCalls);
 
-	// ========== 4. Computed ==========
-	// Merge messages with current streaming message, avoid duplicates
-	const allMessages = useMemo(() => {
-		if (!currentStreamingMessage) return messages;
+	// 构建流式消息内容
+	const streamingMessageWithContent = useMemo(() => {
+		if (!currentStreamingMessage) return null;
 
-		// Check if streaming message already exists in messages
-		const exists = messages.some((m) => m.id === currentStreamingMessage.id);
-		if (exists) return messages;
-
-		// 为流式消息构建内容
 		const content: MessageContent[] = [];
-		
-		// 添加思考块（如果有）
+
+		// 已固化的内容
+		if (currentStreamingMessage.content?.length) {
+			content.push(...currentStreamingMessage.content);
+		}
+
+		// 当前流式内容
 		if (streamingThinking) {
 			content.push({ type: "thinking", thinking: streamingThinking });
 		}
-		
-		// 添加工具调用块（如果有）
+
 		streamingToolCalls.forEach((tool) => {
 			content.push({
 				type: "tool_use",
@@ -77,35 +60,34 @@ export function MessageList({
 				partialArgs: tool.args,
 			});
 		});
-		
-		// 添加文本块（如果有）
+
 		if (streamingContent) {
 			content.push({ type: "text", text: streamingContent });
 		}
 
-		// 合并原有内容（已固化的）和流式内容
-		const streamingMessageWithContent: Message = {
+		return {
 			...currentStreamingMessage,
-			content: [...(currentStreamingMessage.content || []), ...content],
+			content,
 		};
-
-		return [...messages, streamingMessageWithContent];
 	}, [
-		messages,
 		currentStreamingMessage,
 		streamingContent,
 		streamingThinking,
 		streamingToolCalls,
 	]);
 
-	// Filter valid messages
-	const validMessages = useMemo(
-		() => allMessages.filter((message) => message && message.id),
-		[allMessages],
-	);
+	// 合并所有消息
+	const allMessages = useMemo(() => {
+		if (!streamingMessageWithContent) return messages;
+		
+		// 检查是否已存在
+		const exists = messages.some((m) => m.id === streamingMessageWithContent.id);
+		if (exists) return messages;
 
-	// ========== 5. Render ==========
-	if (validMessages.length === 0) {
+		return [...messages, streamingMessageWithContent];
+	}, [messages, streamingMessageWithContent]);
+
+	if (allMessages.length === 0) {
 		return (
 			<div className={styles.empty}>
 				<div className={styles.logo}>π</div>
@@ -117,7 +99,7 @@ export function MessageList({
 
 	return (
 		<div className={styles.container}>
-			{validMessages.map((message) => (
+			{allMessages.map((message) => (
 				<MessageItem
 					key={message.id}
 					message={message}

@@ -90,6 +90,9 @@ export function useChatPanel(): UseChatPanelReturn {
 	const currentStreamingMessage = useChatStore(
 		(state) => state.currentStreamingMessage,
 	);
+	// 流式状态，用于触发自动滚动
+	const streamingContent = useChatStore((state) => state.streamingContent);
+	const streamingThinking = useChatStore((state) => state.streamingThinking);
 	const chatController = useChatController();
 
 	// 首次加载时滚动到底部
@@ -103,12 +106,12 @@ export function useChatPanel(): UseChatPanelReturn {
 		return () => clearTimeout(timer);
 	}, []);
 
-	// 消息变化时自动滚动
+	// 消息变化时自动滚动（包括流式内容变化）
 	useEffect(() => {
 		if (messagesRef.current && shouldScrollToBottom) {
 			messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
 		}
-	}, [messages.length, currentStreamingMessage, shouldScrollToBottom]);
+	}, [messages.length, currentStreamingMessage, streamingContent, streamingThinking, shouldScrollToBottom]);
 
 	// 处理滚动事件，检测用户是否手动向上滚动
 	const handleScroll = useCallback(() => {

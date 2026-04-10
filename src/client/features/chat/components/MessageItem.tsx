@@ -10,7 +10,7 @@
  * 结构规范：State → Ref → Effects → Computed → Actions → Render
  */
 
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Message, MessageContent } from "@/features/chat/types/chat";
 import styles from "./MessageItem.module.css";
 
@@ -205,9 +205,14 @@ function GlassCard({
 	const [isCopyVisible, setIsCopyVisible] = useState(false);
 
 	// ========== 2. Effects ==========
-	// Collapse card when streaming ends (for non-text blocks)
+	// 只在流式真正结束时（从 true 变为 false）才折叠
+	const wasStreamingRef = useRef(isStreaming);
 	useEffect(() => {
-		if (!isStreaming && block.type !== "text") {
+		const wasStreaming = wasStreamingRef.current;
+		wasStreamingRef.current = isStreaming;
+		
+		// 只在流式结束（true -> false）且不是 text 类型时才折叠
+		if (wasStreaming && !isStreaming && block.type !== "text") {
 			setIsExpanded(false);
 		}
 	}, [isStreaming, block.type]);

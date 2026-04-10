@@ -712,27 +712,57 @@ export const useChatStore = create<
 				);
 			},
 
-			// 结束内容块 - 只清空流式状态，不固化到消息
-			// 流式期间只使用流式状态变量显示，message_end 时才整体固化
+			// 结束内容块 - 将流式内容固化到 currentStreamingMessage.content，然后清空流式状态
 			endContentBlock: (type: 'text' | 'thinking' | 'tool_use', index?: number, meta?: any) => {
 				console.log(`[ChatStore] endContentBlock: type=${type}, index=${index ?? '?'}`, meta);
 				
 				set(
 					(state) => {
+						if (!state.currentStreamingMessage) return {};
+						
+						const existingContent = state.currentStreamingMessage.content || [];
+						let newBlock: ContentPart | null = null;
+						const updates: Partial<State> = {};
+						
 						switch (type) {
 							case 'thinking':
-								return { streamingThinking: "" };
+								if (state.streamingThinking) {
+									newBlock = { type: 'thinking', thinking: state.streamingThinking };
+									updates.streamingThinking = "";
+								}
+								break;
 							case 'text':
-								return { streamingContent: "" };
+								if (state.streamingContent) {
+									newBlock = { type: 'text', text: state.streamingContent };
+									updates.streamingContent = "";
+								}
+								break;
 							case 'tool_use':
 								if (meta?.toolCallId) {
-									const newToolCalls = new Map(state.streamingToolCalls);
-									newToolCalls.delete(meta.toolCallId);
-									return { streamingToolCalls: newToolCalls };
+									const toolCall = state.streamingToolCalls.get(meta.toolCallId);
+									if (toolCall) {
+										newBlock = {
+											type: 'tool_use',
+											toolCallId: toolCall.id,
+											toolName: toolCall.name,
+											partialArgs: toolCall.args,
+										};
+										const newToolCalls = new Map(state.streamingToolCalls);
+										newToolCalls.delete(meta.toolCallId);
+										updates.streamingToolCalls = newToolCalls;
+									}
 								}
-								return {};
+								break;
 						}
-						return {};
+						
+						if (newBlock) {
+							updates.currentStreamingMessage = {
+								...state.currentStreamingMessage,
+								content: [...existingContent, newBlock],
+							};
+						}
+						
+						return updates;
 					},
 					false,
 					"endContentBlock",
