@@ -107,19 +107,21 @@
 
 /* Git 按钮 - violet紫罗兰主题 */
 .gitBtn {
-	background: rgba(139, 92, 246, 0.15);
-	color: #8b5cf6;
+	background: rgba(139, 92, 246, 0.1);
+	color: #7c3aed;
+	transition: all 0.2s ease;
 }
 
 .gitBtn:hover:not(:disabled) {
-	background: rgba(139, 92, 246, 0.25);
-	color: #a78bfa;
+	background: rgba(139, 92, 246, 0.2);
+	color: #8b5cf6;
 }
 
 .gitBtn.active {
-	background: rgba(139, 92, 246, 0.35);
-	color: #c4b5fd;
-	box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+	background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+	color: #ffffff;
+	box-shadow: 0 0 12px rgba(139, 92, 246, 0.6), 0 0 24px rgba(139, 92, 246, 0.3);
+	font-weight: 600;
 }
 
 /* ============ 对话框通用样式 ============ */
