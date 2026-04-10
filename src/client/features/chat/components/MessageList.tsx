@@ -31,10 +31,11 @@ export function MessageList({
 	onDeleteMessage,
 	onRegenerateMessage,
 }: MessageListProps) {
-	// 获取流式状态
+	// 获取流式状态和工具状态
 	const streamingContent = useChatStore((state) => state.streamingContent);
 	const streamingThinking = useChatStore((state) => state.streamingThinking);
 	const streamingToolCalls = useChatStore((state) => state.streamingToolCalls);
+	const activeTools = useChatStore((state) => state.activeTools);
 
 	// 构建流式消息内容
 	const streamingMessageWithContent = useMemo(() => {
@@ -52,12 +53,25 @@ export function MessageList({
 			content.push({ type: "thinking", thinking: streamingThinking });
 		}
 
+		// 流式中的工具调用
 		streamingToolCalls.forEach((tool) => {
 			content.push({
 				type: "tool_use",
 				toolCallId: tool.id,
 				toolName: tool.name,
 				partialArgs: tool.args,
+			});
+		});
+
+		// 已完成的工具调用（包含结果）
+		activeTools.forEach((tool) => {
+			content.push({
+				type: "tool",
+				toolCallId: tool.id,
+				toolName: tool.name,
+				args: tool.args,
+				output: tool.output,
+				error: tool.error,
 			});
 		});
 
@@ -74,6 +88,7 @@ export function MessageList({
 		streamingContent,
 		streamingThinking,
 		streamingToolCalls,
+		activeTools,
 	]);
 
 	// 合并所有消息

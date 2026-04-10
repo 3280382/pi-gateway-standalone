@@ -371,6 +371,8 @@ function applyToolActivation(
 
 /**
  * 应用工具完成
+ * 更新 activeTools 中的工具状态，但不替换整个 content
+ * 工具显示由 MessageList 根据 activeTools 动态生成
  */
 function applyToolCompletion(
 	state: State,
@@ -391,23 +393,9 @@ function applyToolCompletion(
 		});
 	}
 
-	if (!state.currentStreamingMessage) {
-		return { activeTools: newTools };
-	}
-
-	const contentArray = buildContentArray({
-		...state,
-		activeTools: newTools,
-		streamingToolCalls: state.streamingToolCalls,
-	});
-
-	return {
-		activeTools: newTools,
-		currentStreamingMessage: {
-			...state.currentStreamingMessage,
-			content: contentArray,
-		},
-	};
+	// 只更新 activeTools，不修改 currentStreamingMessage.content
+	// MessageList 会基于 activeTools 动态渲染工具结果
+	return { activeTools: newTools };
 }
 
 /**

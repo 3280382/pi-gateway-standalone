@@ -29,15 +29,13 @@ interface MessageItemProps {
 	onRegenerate?: () => void;
 }
 
-// 合并后的内容块类型
-interface MergedContentBlock extends MessageContent {
+// 内容块类型（带原始索引）
+interface IndexedContentBlock extends MessageContent {
 	originalIndex: number;
-	// 用于 tool_use + tool 合并
-	toolResult?: MessageContent; // 对应的 tool 结果块
 }
 
 interface GlassCardProps {
-	block: MergedContentBlock;
+	block: IndexedContentBlock;
 	isStreaming?: boolean;
 	isNewMessage?: boolean; // true=流式消息(默认展开), false=历史消息(思考/工具默认折叠)
 	showThinking: boolean;
@@ -181,29 +179,10 @@ function formatToolArgs(
 }
 
 /**
- * 合并相邻的 tool_use 和 tool 块
- * tool_use 后面紧跟的 tool（相同 toolCallId）会合并到一起
+ * 为内容块添加索引
  */
-function mergeToolBlocks(content: MessageContent[]): MergedContentBlock[] {
-	const result: MergedContentBlock[] = [];
-	
-	for (let i = 0; i < content.length; i++) {
-		const current = content[i];
-		const mergedBlock: MergedContentBlock = { ...current, originalIndex: i };
-		
-		// 如果是 tool_use，检查下一个是否是匹配的 tool 结果
-		if (current.type === "tool_use" && i + 1 < content.length) {
-			const next = content[i + 1];
-			if (next.type === "tool" && next.toolCallId === current.toolCallId) {
-				mergedBlock.toolResult = next;
-				i++; // 跳过下一个，因为已经合并了
-			}
-		}
-		
-		result.push(mergedBlock);
-	}
-	
-	return result;
+function indexContentBlocks(content: MessageContent[]): IndexedContentBlock[] {
+	return content.map((item, index) => ({ ...item, originalIndex: index }));
 }
 
 // ============================================================================
@@ -221,8 +200,8 @@ export const MessageItem = memo(
 
 		const blocks = useMemo(() => {
 			if (!message.content || !Array.isArray(message.content)) return [];
-			// 合并 tool_use 和 tool 块
-			return mergeToolBlocks(message.content);
+			// 为内容块添加索引
+			return indexContentBlocks(message.content);
 		}, [message.content]);
 
 		// ========== 5. Render ==========
@@ -358,39 +337,19 @@ function GlassCard({
 		}
 
 		case "tool_use": {
+			// 流式中的工具调用 - 只显示参数，没有结果
 			if (!showTools) return null;
 			
-			// 获取工具调用信息
 			const toolName = block.toolName || "unknown";
-			// 优先使用流式参数 (字符串)，否则使用已完成的参数 (对象)
 			const toolArgs = block.partialArgs ?? block.args;
 			
-			// 获取执行结果（如果已合并）
-			const toolResult = block.toolResult;
-			const hasResult = !!toolResult;
-			const isError = toolResult?.error ? true : false;
-			const resultOutput = toolResult?.output || toolResult?.error || "";
-			
-			// 确定状态
-			let status: "running" | "success" | "error" = "running";
-			if (hasResult) {
-				status = isError ? "error" : "success";
-			}
-			
-			// 解析参数摘要（显示在顶部）
+			// 解析参数摘要和格式化
 			const summary = parseToolSummary(toolName, toolArgs);
-			
-			// 格式化参数显示
 			const formattedArgs = formatToolArgs(toolName, toolArgs);
 			
-			// 组合显示内容：参数 + 结果
-			const fullContent = hasResult
-				? `${formattedArgs}\n\n// Result:\n${resultOutput}`
-				: formattedArgs;
-
 			return (
 				<div
-					className={`${styles.card} ${styles.toolUse} ${isStreaming ? styles.streaming : ""} ${hasResult ? (isError ? styles.toolError : styles.toolSuccess) : ""} ${isExpanded ? styles.expanded : styles.collapsed}`}
+					className={`${styles.card} ${styles.toolUse} ${isStreaming ? styles.streaming : ""} ${isExpanded ? styles.expanded : styles.collapsed}`}
 					onClick={(e) => toggleExpand(e)}
 					onMouseEnter={() => setIsCopyVisible(true)}
 					onMouseLeave={() => setIsCopyVisible(false)}
@@ -399,14 +358,14 @@ function GlassCard({
 						<span className={styles.dot} />
 						<span className={styles.label}>{toolName}</span>
 						{summary && <span className={styles.summary}>{summary}</span>}
-						<span className={`${styles.chip} ${styles[status]}`}>{status}</span>
+						<span className={`${styles.chip} ${styles.running}`}>running</span>
 						<div className={styles.actions}>
 							<button
 								className={styles.btnCopy}
 								style={{ visibility: isCopyVisible ? "visible" : "hidden" }}
 								onClick={(e) => {
 									e.stopPropagation();
-									copyToClipboard(fullContent);
+									copyToClipboard(formattedArgs);
 								}}
 							>
 								📋
@@ -421,19 +380,10 @@ function GlassCard({
 							className={styles.content}
 							onClick={(e) => e.stopPropagation()}
 						>
-							{/* 参数部分 - 格式化显示 */}
 							<div className={styles.toolSection}>
 								<div className={styles.toolSectionLabel}>Arguments:</div>
 								<pre className={styles.toolCode}><code>{formattedArgs}</code></pre>
 							</div>
-							
-							{/* 结果部分（如果有） */}
-							{hasResult && (
-								<div className={`${styles.toolSection} ${isError ? styles.toolSectionError : styles.toolSectionSuccess}`}>
-									<div className={styles.toolSectionLabel}>Result:</div>
-									<code>{resultOutput}</code>
-								</div>
-							)}
 						</div>
 					)}
 				</div>

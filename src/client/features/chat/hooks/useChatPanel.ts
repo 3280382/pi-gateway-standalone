@@ -114,10 +114,12 @@ export function useChatPanel(): UseChatPanelReturn {
 	}, [messages.length, currentStreamingMessage, streamingContent, streamingThinking, shouldScrollToBottom]);
 
 	// 处理滚动事件，检测用户是否手动向上滚动
+	// 使用更大的容差值，避免工具输出瞬间内容高度变化导致的误判
 	const handleScroll = useCallback(() => {
 		if (messagesRef.current) {
 			const { scrollTop, scrollHeight, clientHeight } = messagesRef.current;
-			const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+			// 增加容差值到 100px，避免内容高度突然变化导致的误判
+			const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
 			// 用户向上滚动时，暂停自动滚动
 			if (!isAtBottom && shouldScrollToBottom) {
 				setShouldScrollToBottom(false);
