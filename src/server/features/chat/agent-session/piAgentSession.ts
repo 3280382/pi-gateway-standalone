@@ -87,6 +87,9 @@ export class PiAgentSession {
 		toolName?: string;
 	} = { type: null, index: -1 };
 
+	/** Track if message_start has been sent for current message */
+	private messageStarted: boolean = false;
+
 	/**
 	 * Create new PiAgentSession
 	 * @param ws WebSocket connection
@@ -352,33 +355,102 @@ export class PiAgentSession {
 
 	/**
 	 * Setup event handlers
+	 * 
+	 * 事件层级结构:
+	 * 1. Session Level: agent_start/end, turn_start/end
+	 * 2. Message Level: message_start/end (包含完整消息元数据)
+	 * 3. Content Block Level: 每个内容块有独立的 start/delta/end
+	 *    - thinking_start, thinking_delta, thinking_end
+	 *    - text_start, text_delta, text_end  
+	 *    - toolcall_start, toolcall_delta, toolcall_end
+	 * 4. Tool Execution Level: tool_execution_start, tool_execution_update, tool_execution_end
 	 */
 	setupEventHandlers() {
 		if (!this.session) return;
 
 		this.unsubscribeFn = this.session.subscribe((event: AgentSessionEvent) => {
 			const timestamp = new Date().toISOString().split("T")[1].split(".")[0];
+			
 			switch (event.type) {
+				// ===== Session Level Events =====
+				case "agent_start": {
+					console.log(`[${timestamp}] [SEND] agent_start`);
+					this.isStreaming = true;
+					this.messageStarted = false;
+					this.send({ type: "agent_start", timestamp: Date.now() });
+					break;
+				}
+				
+				case "agent_end": {
+					const messages = event.messages;
+					console.log(`[${timestamp}] [SEND] agent_end: totalMessages=${messages.length}`);
+					this.isStreaming = false;
+					this.messageStarted = false;
+					this.send({ type: "agent_end", messages, timestamp: Date.now() });
+					break;
+				}
+				
+				case "turn_start": {
+					console.log(`[${timestamp}] [SEND] turn_start`);
+					this.send({ type: "turn_start", timestamp: Date.now() });
+					break;
+				}
+				
+				case "turn_end": {
+					console.log(`[${timestamp}] [SEND] turn_end`);
+					// Ensure any pending content block is closed
+					this.endCurrentContentBlock(timestamp);
+					this.send({
+						type: "turn_end",
+						message: event.message,
+						toolResults: event.toolResults,
+						timestamp: Date.now(),
+					});
+					break;
+				}
+
+				// ===== Message Level Events =====
+				case "message_start": {
+					const startMsg = event.message;
+					// Only send message_start for assistant messages to avoid duplication with user messages
+					if (startMsg.role === 'assistant') {
+						console.log(`[${timestamp}] [SEND] message_start: assistant, id=${startMsg.id || 'new'}`);
+						this.messageStarted = true;
+						this.send({ type: "message_start", message: startMsg });
+					}
+					break;
+				}
+				
+				case "message_end": {
+					const endMsg = event.message;
+					// End any remaining content block before message_end
+					this.endCurrentContentBlock(timestamp);
+					
+					if (endMsg.role === 'assistant' && this.messageStarted) {
+						console.log(`[${timestamp}] [SEND] message_end: assistant, id=${endMsg.id}`);
+						this.send({ type: "message_end", message: endMsg });
+						this.messageStarted = false;
+					}
+					break;
+				}
+
+				// ===== Content Block Level Events (from message_update) =====
 				case "message_update": {
 					const msgEvent = event.assistantMessageEvent;
 					const contentIndex = msgEvent.contentIndex;
 					const partial = msgEvent.partial;
 
-					// Handle content block start/end based on event type
 					switch (msgEvent.type) {
+						// --- Thinking Block ---
 						case "thinking_start": {
-							// End previous block if any
 							this.endCurrentContentBlock(timestamp);
 							this.currentContentBlock = { type: 'thinking', index: contentIndex };
-							console.log(`[${timestamp}] [SEND] thinking_start`);
-							this.send({
-								type: "thinking_start",
-								index: contentIndex,
-							});
+							console.log(`[${timestamp}] [SEND] thinking_start[${contentIndex}]`);
+							this.send({ type: "thinking_start", index: contentIndex });
 							break;
 						}
 						case "thinking_delta": {
-							console.log(`[${timestamp}] [SEND] thinking_delta`);
+							console.log(`[${timestamp}] [SEND] thinking_delta[${contentIndex}]`);
 							this.send({
 								type: "thinking_delta",
 								thinking: msgEvent.delta,
@@ -387,45 +459,38 @@ export class PiAgentSession {
 							break;
 						}
 						case "thinking_end": {
-							console.log(`[${timestamp}] [SEND] thinking_end`);
-							this.send({
-								type: "thinking_end",
-								index: contentIndex,
-							});
+							console.log(`[${timestamp}] [SEND] thinking_end[${contentIndex}]`);
+							this.send({ type: "thinking_end", index: contentIndex });
 							this.currentContentBlock = { type: null, index: -1 };
 							break;
 						}
+
+						// --- Text Block ---
 						case "text_start": {
-							// End previous block if any
 							this.endCurrentContentBlock(timestamp);
 							this.currentContentBlock = { type: 'text', index: contentIndex };
-							console.log(`[${timestamp}] [SEND] text_start`);
-							this.send({
-								type: "text_start",
-								index: contentIndex,
-							});
+							console.log(`[${timestamp}] [SEND] text_start[${contentIndex}]`);
+							this.send({ type: "text_start", index: contentIndex });
 							break;
 						}
 						case "text_delta": {
-							console.log(`[${timestamp}] [SEND] content_delta`);
+							console.log(`[${timestamp}] [SEND] text_delta[${contentIndex}]`);
 							this.send({
-								type: "content_delta",
+								type: "text_delta",
 								text: msgEvent.delta,
 								index: contentIndex,
 							});
 							break;
 						}
 						case "text_end": {
-							console.log(`[${timestamp}] [SEND] text_end`);
-							this.send({
-								type: "text_end",
-								index: contentIndex,
-							});
+							console.log(`[${timestamp}] [SEND] text_end[${contentIndex}]`);
+							this.send({ type: "text_end", index: contentIndex });
 							this.currentContentBlock = { type: null, index: -1 };
 							break;
 						}
+
+						// --- Tool Call Block ---
 						case "toolcall_start": {
-							// End previous block if any
 							this.endCurrentContentBlock(timestamp);
 							const toolCall = partial.content?.[contentIndex];
 							if (toolCall?.type === "toolCall") {
@@ -435,7 +500,7 @@ export class PiAgentSession {
 									toolCallId: toolCall.id,
 									toolName: toolCall.name,
 								};
-								console.log(`[${timestamp}] [SEND] toolcall_start: ${toolCall.name}`);
+								console.log(`[${timestamp}] [SEND] toolcall_start[${contentIndex}]: ${toolCall.name}`);
 								this.send({
 									type: "toolcall_start",
 									toolCallId: toolCall.id,
@@ -448,7 +513,7 @@ export class PiAgentSession {
 						case "toolcall_delta": {
 							const toolCall = partial.content?.[contentIndex];
 							if (toolCall?.type === "toolCall") {
-								console.log(`[${timestamp}] [SEND] toolcall_delta: ${toolCall.name}`);
+								console.log(`[${timestamp}] [SEND] toolcall_delta[${contentIndex}]: ${toolCall.name}`);
 								this.send({
 									type: "toolcall_delta",
 									toolCallId: toolCall.id,
@@ -463,7 +528,7 @@ export class PiAgentSession {
 						case "toolcall_end": {
 							const toolCall = partial.content?.[contentIndex];
 							if (toolCall?.type === "toolCall") {
-								console.log(`[${timestamp}] [SEND] toolcall_end: ${toolCall.name}`);
+								console.log(`[${timestamp}] [SEND] toolcall_end[${contentIndex}]: ${toolCall.name}`);
 								this.send({
 									type: "toolcall_end",
 									toolCallId: toolCall.id,
@@ -477,42 +542,40 @@ export class PiAgentSession {
 					}
 					break;
 				}
+
+				// ===== Tool Execution Level Events =====
 				case "tool_execution_start": {
-					console.log(`[${timestamp}] [SEND] tool_start: ${event.toolName}`);
+					console.log(`[${timestamp}] [SEND] tool_execution_start: ${event.toolName}`);
 					this.send({
-						type: "tool_start",
-						toolName: event.toolName,
+						type: "tool_execution_start",
 						toolCallId: event.toolCallId,
+						toolName: event.toolName,
 						args: event.args,
 					});
 					break;
 				}
+				
 				case "tool_execution_update": {
-					console.log(`[${timestamp}] [SEND] tool_update: ${event.toolCallId}`);
+					console.log(`[${timestamp}] [SEND] tool_execution_update: ${event.toolCallId}`);
 					this.send({
-						type: "tool_update",
+						type: "tool_execution_update",
 						toolCallId: event.toolCallId,
-						chunk:
-							(event as unknown as { partialResult?: string }).partialResult ??
-							"",
+						chunk: (event as any).partialResult ?? "",
 					});
 					break;
 				}
+				
 				case "tool_execution_end": {
-					console.log(`[${timestamp}] [SEND] tool_end: ${event.toolCallId}`);
+					console.log(`[${timestamp}] [SEND] tool_execution_end: ${event.toolCallId}`);
 					const toolResult = event.result;
 					const toolName = event.toolName;
-					const isWriteOperation =
-						toolName &&
-						(writeFileTools.includes(toolName) ||
-							toolName.toLowerCase().includes("write") ||
-							toolName.toLowerCase().includes("create"));
+					const isWriteOperation = toolName && writeFileTools.some(t => 
+						toolName.toLowerCase().includes(t.toLowerCase().replace('_', ''))
+					);
+					
 					if (isWriteOperation && !event.isError) {
-						const args = (
-							event as unknown as { args?: Record<string, unknown> }
-						).args;
-						const filePath =
-							args?.path || args?.file_path || args?.filepath || args?.filePath;
+						const args = (event as any).args;
+						const filePath = args?.path || args?.file_path || args?.filepath || args?.filePath;
 						if (typeof filePath === "string") {
 							this.sendToolEndWithFileContent(
 								event.toolCallId,
@@ -520,82 +583,20 @@ export class PiAgentSession {
 								event.isError,
 								filePath,
 							);
-						} else {
-							this.send({
-								type: "tool_end",
-								toolCallId: event.toolCallId,
-								result: toolResult,
-								isError: event.isError,
-							});
+							break;
 						}
-					} else {
-						this.send({
-							type: "tool_end",
-							toolCallId: event.toolCallId,
-							result: toolResult,
-							isError: event.isError,
-						});
 					}
-					break;
-				}
-				case "message_start": {
-					const startMsg = event.message;
-					console.log(`[${timestamp}] [SEND] message_start: role=${startMsg.role}, id=${startMsg.id || 'new'}`);
+					
 					this.send({
-						type: "message_start",
-						message: startMsg,
+						type: "tool_execution_end",
+						toolCallId: event.toolCallId,
+						result: toolResult,
+						isError: event.isError,
 					});
 					break;
 				}
-				case "message_end": {
-					const endMsg = event.message;
-					// End any remaining content block before message_end
-					this.endCurrentContentBlock(timestamp);
-					console.log(`[${timestamp}] [SEND] message_end: role=${endMsg.role}, id=${endMsg.id}`);
-					this.send({
-						type: "message_end",
-						message: endMsg,
-					});
-					break;
-				}
-				case "agent_start": {
-					console.log(`[${timestamp}] [SEND] agent_start`);
-					this.isStreaming = true;
-					this.send({
-						type: "agent_start",
-						timestamp: Date.now(),
-					});
-					break;
-				}
-				case "agent_end": {
-					const messages = event.messages;
-					console.log(`[${timestamp}] [SEND] agent_end: totalMessages=${messages.length}`);
-					this.isStreaming = false;
-					this.send({
-						type: "agent_end",
-						messages: messages,
-						timestamp: Date.now(),
-					});
-					break;
-				}
-				case "turn_start": {
-					console.log(`[${timestamp}] [SEND] turn_start`);
-					this.send({
-						type: "turn_start",
-						timestamp: Date.now(),
-					});
-					break;
-				}
-				case "turn_end": {
-					console.log(`[${timestamp}] [SEND] turn_end: messages=${this.session?.messages.length || 0}`);
-					this.send({
-						type: "turn_end",
-						message: event.message,
-						toolResults: event.toolResults,
-						timestamp: Date.now(),
-					});
-					break;
-				}
+
+				// ===== System Events =====
 				case "auto_compaction_start": {
 					console.log(`[${timestamp}] [SEND] compaction_start`);
 					this.send({ type: "compaction_start" });

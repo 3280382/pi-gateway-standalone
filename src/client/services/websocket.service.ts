@@ -26,27 +26,31 @@ export type WebSocketEvent =
 	| "disconnected"
 	| "error"
 	| "message"
-	// Chat 相关事件 - 由 chat feature 订阅处理
-	// Content block events
+	// Session Level Events
+	| "agent_start"
+	| "agent_end"
+	| "turn_start"
+	| "turn_end"
+	// Message Level Events
+	| "message_start"
+	| "message_end"
+	// Content Block Level Events - Text
 	| "text_start"
-	| "content_delta"
+	| "text_delta"
 	| "text_end"
+	// Content Block Level Events - Thinking
 	| "thinking_start"
 	| "thinking_delta"
 	| "thinking_end"
+	// Content Block Level Events - Tool Call (LLM generating)
 	| "toolcall_start"
 	| "toolcall_delta"
 	| "toolcall_end"
-	// Legacy events
-	| "tool_start"
-	| "tool_update"
-	| "tool_end"
-	| "agent_start"
-	| "agent_end"
-	| "message_start"
-	| "message_end"
-	| "turn_start"
-	| "turn_end"
+	// Tool Execution Level Events (Actual tool running)
+	| "tool_execution_start"
+	| "tool_execution_update"
+	| "tool_execution_end"
+	// System Events
 	| "compaction_start"
 	| "compaction_end"
 	| "retry_start"
@@ -329,28 +333,31 @@ export class WebSocketService {
 	 */
 	private emitSpecificEvent(type: string, data: any): void {
 		const eventMap: Record<string, WebSocketEvent> = {
-			// Content block events
+			// Session Level
+			agent_start: "agent_start",
+			agent_end: "agent_end",
+			turn_start: "turn_start",
+			turn_end: "turn_end",
+			// Message Level
+			message_start: "message_start",
+			message_end: "message_end",
+			// Content Block - Text
 			text_start: "text_start",
-			content_delta: "content_delta",
+			text_delta: "text_delta",
 			text_end: "text_end",
+			// Content Block - Thinking
 			thinking_start: "thinking_start",
 			thinking_delta: "thinking_delta",
 			thinking_end: "thinking_end",
+			// Content Block - Tool Call
 			toolcall_start: "toolcall_start",
 			toolcall_delta: "toolcall_delta",
 			toolcall_end: "toolcall_end",
-			// Legacy events
-			content: "content_delta",
-			thinking: "thinking_delta",
-			tool_start: "tool_start",
-			tool_update: "tool_update",
-			tool_end: "tool_end",
-			agent_start: "agent_start",
-			agent_end: "agent_end",
-			message_start: "message_start",
-			message_end: "message_end",
-			turn_start: "turn_start",
-			turn_end: "turn_end",
+			// Tool Execution
+			tool_execution_start: "tool_execution_start",
+			tool_execution_update: "tool_execution_update",
+			tool_execution_end: "tool_execution_end",
+			// System Events
 			compaction_start: "compaction_start",
 			compaction_end: "compaction_end",
 			retry_start: "retry_start",

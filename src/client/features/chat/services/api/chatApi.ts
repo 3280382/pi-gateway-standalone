@@ -353,184 +353,39 @@ export function setupWebSocketListeners(): void {
 
 	const store = useChatStore.getState();
 
-	// 只设置一次全局监听器
-	// Content block handlers - text
-	websocketService.on("text_start", (data: { index?: number }) => {
+	// =========================================================================
+	// Session Level Events
+	// =========================================================================
+	websocketService.on("agent_start", () => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] text_start: index=${data?.index ?? '?'}`);
-		store.startContentBlock('text', data?.index);
+		console.log(`[${ts}] [RECV] agent_start`);
 	});
 
-	websocketService.on(
-		"content_delta",
-		(data: { text?: string; delta?: string; index?: number }) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(`[${ts}] [RECV] content_delta: index=${data?.index ?? '?'}`);
-			const content = data?.text || data?.delta;
-			if (content) {
-				store.appendStreamingContent(content);
-			}
-		},
-	);
-
-	websocketService.on("text_end", (data: { index?: number; implicit?: boolean }) => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] text_end: index=${data?.index ?? '?'}${data?.implicit ? ' (implicit)' : ''}`);
-		store.endContentBlock('text', data?.index);
-	});
-
-	// Content block handlers - thinking
-	websocketService.on("thinking_start", (data: { index?: number }) => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] thinking_start: index=${data?.index ?? '?'}`);
-		store.startContentBlock('thinking', data?.index);
-	});
-
-	websocketService.on(
-		"thinking_delta",
-		(data: { thinking?: string; delta?: string; index?: number }) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(`[${ts}] [RECV] thinking_delta: index=${data?.index ?? '?'}`);
-			const content = data?.thinking || data?.delta;
-			if (content) {
-				store.appendStreamingThinking(content);
-			}
-		},
-	);
-
-	websocketService.on("thinking_end", (data: { index?: number; implicit?: boolean }) => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] thinking_end: index=${data?.index ?? '?'}${data?.implicit ? ' (implicit)' : ''}`);
-		store.endContentBlock('thinking', data?.index);
-	});
-
-	// Content block handlers - tool call
-	websocketService.on("toolcall_start", (data: { toolCallId?: string; toolName?: string; index?: number }) => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] toolcall_start: ${data?.toolName || "unknown"}, id=${data?.toolCallId}`);
-		store.startContentBlock('tool_use', data?.index, { toolCallId: data?.toolCallId, toolName: data?.toolName });
-	});
-
-	websocketService.on("toolcall_delta", (data: any) => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] toolcall_delta: ${data?.toolName || "unknown"}, index=${data?.index ?? '?'}`);
-		try {
-			if (data?.toolCallId && data?.toolName) {
-				store.appendToolCallDelta(
-					data.toolCallId,
-					data.toolName,
-					data.delta || "",
-				);
-			}
-		} catch (error) {
-			console.error(
-				"[setupWebSocketListeners] Error in toolcall_delta handler:",
-				error,
-			);
-		}
-	});
-
-	websocketService.on("toolcall_end", (data: { toolCallId?: string; toolName?: string; index?: number; implicit?: boolean }) => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] toolcall_end: ${data?.toolName || "unknown"}${data?.implicit ? ' (implicit)' : ''}`);
-		store.endContentBlock('tool_use', data?.index, { toolCallId: data?.toolCallId, toolName: data?.toolName });
-	});
-
-	// Tool start handler
-	websocketService.on(
-		"tool_start",
-		(data: { toolCallId?: string; toolName: string; args?: any }) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(`[${ts}] [RECV] tool_start: ${data?.toolName || "unknown"}`);
-			try {
-				if (!data || typeof data !== "object") {
-					console.error(
-						"[setupWebSocketListeners] Invalid tool_start data:",
-						data,
-					);
-					return;
-				}
-				const toolCallId = data.toolCallId || generateToolId();
-				const toolName = data.toolName || "unknown";
-				const args = data.args || {};
-				const tool: ToolExecution = {
-					id: toolCallId,
-					name: toolName,
-					args: args,
-					status: "executing",
-					startTime: new Date(),
-				};
-				store.setActiveTool(tool);
-			} catch (error) {
-				console.error(
-					"[setupWebSocketListeners] Error in tool_start handler:",
-					error,
-					"data:",
-					data,
-				);
-			}
-		},
-	);
-
-	// Tool update handler
-	websocketService.on(
-		"tool_update",
-		(data: { toolCallId: string; chunk?: string; output?: string }) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(`[${ts}] [RECV] tool_update: ${data?.toolCallId}`);
-			try {
-				const content = data.chunk || data.output;
-				if (content) {
-					store.updateToolOutput(data.toolCallId, content, undefined);
-				}
-			} catch (error) {
-				console.error(
-					"[setupWebSocketListeners] Error in tool_update handler:",
-					error,
-				);
-			}
-		},
-	);
-
-	// Tool end handler
-	websocketService.on(
-		"tool_end",
-		(data: {
-			toolCallId: string;
-			result?: string;
-			isError?: boolean;
-			error?: string;
-		}) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(`[${ts}] [RECV] tool_end: ${data?.toolCallId}`);
-			try {
-				const output = data.result || "";
-				const error = data.isError ? "工具执行失败" : undefined;
-				store.updateToolOutput(data.toolCallId, output, error);
-			} catch (error) {
-				console.error(
-					"[setupWebSocketListeners] Error in tool_end handler:",
-					error,
-				);
-			}
-		},
-	);
-
-	// Agent end handler
 	websocketService.on("agent_end", () => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
 		console.log(`[${ts}] [RECV] agent_end`);
 		store.finishStreaming();
 	});
 
-	// Message start/end handlers
+	websocketService.on("turn_start", () => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] turn_start`);
+		store.startNewTurn();
+	});
+
+	websocketService.on("turn_end", () => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] turn_end`);
+	});
+
+	// =========================================================================
+	// Message Level Events
+	// =========================================================================
 	websocketService.on("message_start", (data: { message?: any }) => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
 		const message = data?.message;
 		console.log(`[${ts}] [RECV] message_start: role=${message?.role || 'unknown'}, id=${message?.id || 'new'}`);
 		
-		// 如果是用户消息，已经在 sendMessage 中添加过了
-		// 如果是AI消息，创建新的流式消息
 		if (message?.role === 'assistant') {
 			store.createStreamingMessage(message.id);
 		}
@@ -541,22 +396,110 @@ export function setupWebSocketListeners(): void {
 		const message = data?.message;
 		console.log(`[${ts}] [RECV] message_end: role=${message?.role || 'unknown'}, id=${message?.id}`);
 		
-		// 如果是AI消息且流式消息存在，完成它
 		if (message?.role === 'assistant' && store.currentStreamingMessage) {
 			store.finishStreaming();
 		}
 	});
 
-	// Turn start/end handlers
-	websocketService.on("turn_start", () => {
+	// =========================================================================
+	// Content Block Level Events - Text
+	// =========================================================================
+	websocketService.on("text_start", (data: { index?: number }) => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] turn_start`);
-		store.startNewTurn();
+		console.log(`[${ts}] [RECV] text_start[${data?.index ?? '?'}]`);
+		store.startContentBlock('text', data?.index);
 	});
 
-	websocketService.on("turn_end", () => {
+	websocketService.on("text_delta", (data: { text?: string; index?: number }) => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] turn_end`);
+		console.log(`[${ts}] [RECV] text_delta[${data?.index ?? '?'}]`);
+		if (data?.text) {
+			store.appendStreamingContent(data.text);
+		}
+	});
+
+	websocketService.on("text_end", (data: { index?: number; implicit?: boolean }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] text_end[${data?.index ?? '?'}]${data?.implicit ? ' (implicit)' : ''}`);
+		store.endContentBlock('text', data?.index);
+	});
+
+	// =========================================================================
+	// Content Block Level Events - Thinking
+	// =========================================================================
+	websocketService.on("thinking_start", (data: { index?: number }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] thinking_start[${data?.index ?? '?'}]`);
+		store.startContentBlock('thinking', data?.index);
+	});
+
+	websocketService.on("thinking_delta", (data: { thinking?: string; index?: number }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] thinking_delta[${data?.index ?? '?'}]`);
+		if (data?.thinking) {
+			store.appendStreamingThinking(data.thinking);
+		}
+	});
+
+	websocketService.on("thinking_end", (data: { index?: number; implicit?: boolean }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] thinking_end[${data?.index ?? '?'}]${data?.implicit ? ' (implicit)' : ''}`);
+		store.endContentBlock('thinking', data?.index);
+	});
+
+	// =========================================================================
+	// Content Block Level Events - Tool Call (LLM generating tool call)
+	// =========================================================================
+	websocketService.on("toolcall_start", (data: { toolCallId?: string; toolName?: string; index?: number }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] toolcall_start[${data?.index ?? '?'}]: ${data?.toolName || "unknown"}`);
+		store.startContentBlock('tool_use', data?.index, { toolCallId: data?.toolCallId, toolName: data?.toolName });
+	});
+
+	websocketService.on("toolcall_delta", (data: { toolCallId?: string; toolName?: string; delta?: string; index?: number }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] toolcall_delta[${data?.index ?? '?'}]: ${data?.toolName || "unknown"}`);
+		if (data?.toolCallId && data?.toolName) {
+			store.appendToolCallDelta(data.toolCallId, data.toolName, data.delta || "");
+		}
+	});
+
+	websocketService.on("toolcall_end", (data: { toolCallId?: string; toolName?: string; index?: number; implicit?: boolean }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] toolcall_end[${data?.index ?? '?'}]: ${data?.toolName || "unknown"}${data?.implicit ? ' (implicit)' : ''}`);
+		store.endContentBlock('tool_use', data?.index, { toolCallId: data?.toolCallId, toolName: data?.toolName });
+	});
+
+	// =========================================================================
+	// Tool Execution Level Events (Actual tool running)
+	// =========================================================================
+	websocketService.on("tool_execution_start", (data: { toolCallId?: string; toolName: string; args?: any }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] tool_execution_start: ${data?.toolName || "unknown"}`);
+		
+		const tool: ToolExecution = {
+			id: data?.toolCallId || generateToolId(),
+			name: data?.toolName || "unknown",
+			args: data?.args || {},
+			status: "executing",
+			startTime: new Date(),
+		};
+		store.setActiveTool(tool);
+	});
+
+	websocketService.on("tool_execution_update", (data: { toolCallId: string; chunk?: string }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] tool_execution_update: ${data?.toolCallId}`);
+		if (data?.chunk) {
+			store.updateToolOutput(data.toolCallId, data.chunk, undefined);
+		}
+	});
+
+	websocketService.on("tool_execution_end", (data: { toolCallId: string; result?: string; isError?: boolean }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] tool_execution_end: ${data?.toolCallId}`);
+		const error = data?.isError ? "工具执行失败" : undefined;
+		store.updateToolOutput(data.toolCallId, data?.result || "", error);
 	});
 
 	// Compaction start/end handlers
