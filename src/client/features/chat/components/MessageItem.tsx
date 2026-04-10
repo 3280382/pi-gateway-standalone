@@ -66,7 +66,9 @@ function safeString(val: unknown): string {
 /**
  * 解析工具参数，提取关键信息用于顶部显示
  */
-function parseToolSummary(toolName: string, args: string): string {
+function parseToolSummary(toolName: string, args: string | undefined): string {
+	if (!args) return '';
+	
 	try {
 		const parsed = JSON.parse(args);
 		

@@ -110,6 +110,49 @@ export class PiAgentSession {
 	 * @returns Session information
 	 */
 	async initialize(workingDir: string, sessionId?: string) {
+		const localSessionsDir = getLocalSessionsDir(workingDir);
+		
+		// Check if we have an existing session with the same working directory
+		if (this.session && this.workingDir === workingDir) {
+			console.log(`[Gateway] Reconnecting to existing session in same directory: ${workingDir}`);
+			
+			// Unsubscribe from old event handlers
+			if (this.unsubscribeFn) {
+				this.unsubscribeFn();
+				this.unsubscribeFn = null;
+			}
+			
+			// Re-setup event handlers (re-subscribe)
+			this.setupEventHandlers();
+			
+			// Return current session info
+			const loader = new DefaultResourceLoader({
+				cwd: workingDir,
+				agentDir: AGENT_DIR,
+				settingsManager: this.settingsManager,
+			});
+			await loader.reload();
+			
+			return {
+				sessionId: this.session.sessionId,
+				sessionFile: this.session.sessionFile,
+				workingDir: this.workingDir,
+				model: this.session.model?.id || null,
+				modelProvider: this.session.model?.provider || null,
+				thinkingLevel: this.session.thinkingLevel,
+				systemPrompt: loader.getSystemPrompt() || "",
+				agentsFiles: loader.getAgentsFiles().agentsFiles.map((f: any) => ({
+					path: f.path,
+					content: f.content,
+				})),
+				skills: loader.getSkills().skills.map((s: any) => ({
+					name: s.name,
+					description: s.description,
+				})),
+			};
+		}
+
+		// Different working directory or no existing session - use original logic
 		// Unsubscribe from old session events
 		if (this.unsubscribeFn) {
 			this.unsubscribeFn();
@@ -609,11 +652,21 @@ export class PiAgentSession {
 	}
 
 	/**
-	 * Create new session
+	 * Create new session - ensures using current working directory
 	 */
 	async newSession() {
 		if (!this.session) return;
 		try {
+			// Check if we need to reinitialize to ensure correct working directory
+			const currentSessionFile = this.session.sessionFile;
+			const expectedSessionsDir = getLocalSessionsDir(this.workingDir);
+			
+			// If current session file is not in the expected directory, reinitialize
+			if (currentSessionFile && !currentSessionFile.startsWith(expectedSessionsDir)) {
+				console.log(`[Gateway] Session directory mismatch, reinitializing with: ${this.workingDir}`);
+				await this.initialize(this.workingDir);
+			}
+			
 			await this.session.newSession();
 			this.send({
 				type: "session_info",
