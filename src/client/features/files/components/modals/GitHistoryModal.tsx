@@ -13,15 +13,9 @@ import {
 import { useFileStore } from "@/features/files/stores/fileStore";
 import styles from "./Modals.module.css";
 
-// 从文件路径推断 Git 仓库目录
-function inferGitRoot(filePath: string): string {
-  // 尝试找到 .git 目录，这里简化处理，使用文件所在目录
-  // 实际应该逐级向上查找 .git 目录
-  const parts = filePath.split("/");
-  // 移除文件名，保留目录
-  parts.pop();
-  return parts.join("/") || "/";
-}
+// 固定的 Git 仓库根目录
+// 注意：实际应用中应该动态查找 .git 目录
+const GIT_ROOT = "/root/pi-gateway-standalone";
 
 interface GitHistoryModalProps {
   isOpen: boolean;
@@ -36,8 +30,7 @@ export function GitHistoryModal({
   fileName,
   onClose,
 }: GitHistoryModalProps) {
-  // 使用文件所在目录作为 Git 仓库根目录
-  const gitRoot = inferGitRoot(filePath);
+  // 使用固定的 Git 仓库根目录
 
   const [history, setHistory] = useState<GitCommit[]>([]);
   const [loading, setLoading] = useState(false);
@@ -65,14 +58,14 @@ export function GitHistoryModal({
       setError(null);
 
       try {
-        const isGit = await checkGitRepo(gitRoot);
+        const isGit = await checkGitRepo(GIT_ROOT);
         if (!isGit) {
           setError("Not a git repository");
           setLoading(false);
           return;
         }
 
-        const historyData = await getGitHistory(filePath, gitRoot);
+        const historyData = await getGitHistory(filePath, GIT_ROOT);
         setHistory(historyData);
 
         if (historyData.length === 0) {
@@ -86,12 +79,12 @@ export function GitHistoryModal({
     };
 
     loadHistory();
-  }, [isOpen, filePath, gitRoot]);
+  }, [isOpen, filePath]);
 
   const handleViewContent = async (commit: GitCommit) => {
     setContentModal({ isOpen: true, commit, content: "", type: "content", loading: true });
     try {
-      const content = await getGitContent(filePath, commit.hash, gitRoot);
+      const content = await getGitContent(filePath, commit.hash, GIT_ROOT);
       setContentModal((prev) => ({ ...prev, content, loading: false }));
     } catch (err: any) {
       console.error("[GitHistory] Content error:", err);
@@ -106,7 +99,7 @@ export function GitHistoryModal({
   const handleViewDiff = async (commit: GitCommit) => {
     setContentModal({ isOpen: true, commit, content: "", type: "diff", loading: true });
     try {
-      const diff = await getGitDiff(filePath, commit.hash, gitRoot);
+      const diff = await getGitDiff(filePath, commit.hash, GIT_ROOT);
       setContentModal((prev) => ({ ...prev, content: diff, loading: false }));
     } catch (err: any) {
       console.error("[GitHistory] Diff error:", err);

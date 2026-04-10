@@ -5,7 +5,7 @@
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import type { Request, Response } from "express";
-import { resolve, relative } from "node:path";
+import { relative } from "node:path";
 
 const execAsync = promisify(exec);
 
@@ -19,18 +19,56 @@ export interface GitCommit {
 }
 
 /**
+ * 获取 Git 仓库根目录
+ */
+async function getGitRoot(workingDir: string): Promise<string | null> {
+  try {
+    const { stdout } = await execAsync("git rev-parse --show-toplevel", { cwd: workingDir });
+    return stdout.trim();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 检查目录是否是 Git 仓库
+ */
+async function isGitRepo(workingDir: string): Promise<boolean> {
+  const root = await getGitRoot(workingDir);
+  return root !== null;
+}
+
+/**
+ * 获取文件相对于 Git 仓库根目录的路径
+ */
+function getRelativePath(gitRoot: string, filePath: string): string {
+  // 如果 filePath 是绝对路径，计算相对路径
+  if (filePath.startsWith("/")) {
+    return relative(gitRoot, filePath);
+  }
+  // 如果已经是相对路径，直接返回
+  return filePath;
+}
+
+/**
  * Get git history for a file
  */
 async function getGitHistory(
   workingDir: string,
   filePath: string,
 ): Promise<GitCommit[]> {
+  const gitRoot = await getGitRoot(workingDir);
+  if (!gitRoot) {
+    throw new Error("Not a git repository");
+  }
+
+  const relativePath = getRelativePath(gitRoot, filePath);
+  console.log(`[GitController] History: gitRoot=${gitRoot}, relativePath=${relativePath}`);
+
   try {
-    // 获取相对于 workingDir 的路径
-    const relativePath = relative(workingDir, filePath);
     const { stdout } = await execAsync(
       `git log --follow --format="%H|%s|%an|%ad" --date=unix "${relativePath}"`,
-      { cwd: workingDir },
+      { cwd: gitRoot },
     );
 
     if (!stdout.trim()) {
@@ -65,29 +103,23 @@ async function getFileContent(
   filePath: string,
   commitHash: string,
 ): Promise<string> {
+  const gitRoot = await getGitRoot(workingDir);
+  if (!gitRoot) {
+    throw new Error("Not a git repository");
+  }
+
+  const relativePath = getRelativePath(gitRoot, filePath);
+  console.log(`[GitController] Content: commit=${commitHash}, gitRoot=${gitRoot}, relativePath=${relativePath}`);
+
   try {
-    // 获取相对于 workingDir 的路径
-    const relativePath = relative(workingDir, filePath);
-    console.log(`[GitController] Getting content: commit=${commitHash}, path=${relativePath}, cwd=${workingDir}`);
-    
     const { stdout } = await execAsync(
       `git show "${commitHash}:${relativePath}"`,
-      { cwd: workingDir },
+      { cwd: gitRoot },
     );
     return stdout;
   } catch (error: any) {
-    console.error("[GitController] Error getting content:", error?.message || error);
-    // 尝试使用绝对路径
-    try {
-      const { stdout } = await execAsync(
-        `git show "${commitHash}:${filePath}"`,
-        { cwd: workingDir },
-      );
-      return stdout;
-    } catch (error2: any) {
-      console.error("[GitController] Error with absolute path:", error2?.message || error2);
-      throw new Error(`Failed to get file content: ${error2?.message || "Unknown error"}`);
-    }
+    console.error("[GitController] Error getting content:", error?.stderr || error?.message || error);
+    throw new Error(`Failed to get file content: ${error?.stderr || error?.message || "Unknown error"}`);
   }
 }
 
@@ -99,41 +131,23 @@ async function getFileDiff(
   filePath: string,
   commitHash: string,
 ): Promise<string> {
+  const gitRoot = await getGitRoot(workingDir);
+  if (!gitRoot) {
+    throw new Error("Not a git repository");
+  }
+
+  const relativePath = getRelativePath(gitRoot, filePath);
+  console.log(`[GitController] Diff: commit=${commitHash}, gitRoot=${gitRoot}, relativePath=${relativePath}`);
+
   try {
-    // 获取相对于 workingDir 的路径
-    const relativePath = relative(workingDir, filePath);
-    console.log(`[GitController] Getting diff: commit=${commitHash}, path=${relativePath}, cwd=${workingDir}`);
-    
     const { stdout } = await execAsync(
       `git diff "${commitHash}" HEAD -- "${relativePath}"`,
-      { cwd: workingDir },
+      { cwd: gitRoot },
     );
     return stdout || "No differences";
   } catch (error: any) {
-    console.error("[GitController] Error getting diff:", error?.message || error);
-    // 尝试使用绝对路径
-    try {
-      const { stdout } = await execAsync(
-        `git diff "${commitHash}" HEAD -- "${filePath}"`,
-        { cwd: workingDir },
-      );
-      return stdout || "No differences";
-    } catch (error2: any) {
-      console.error("[GitController] Error with absolute path:", error2?.message || error2);
-      throw new Error(`Failed to get diff: ${error2?.message || "Unknown error"}`);
-    }
-  }
-}
-
-/**
- * Check if directory is a git repository
- */
-async function isGitRepo(workingDir: string): Promise<boolean> {
-  try {
-    await execAsync("git rev-parse --git-dir", { cwd: workingDir });
-    return true;
-  } catch {
-    return false;
+    console.error("[GitController] Error getting diff:", error?.stderr || error?.message || error);
+    throw new Error(`Failed to get diff: ${error?.stderr || error?.message || "Unknown error"}`);
   }
 }
 
