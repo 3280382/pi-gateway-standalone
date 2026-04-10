@@ -3,6 +3,7 @@
  * Handles requests to switch working directory
  */
 
+import { existsSync } from "node:fs";
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
 import type { WSContext } from "../../ws-router";
 
@@ -17,12 +18,18 @@ export async function handleChangeDir(
 	ctx: WSContext,
 	payload: { path: string },
 ): Promise<void> {
-	const { path: newPath } = payload;
+	let { path: newPath } = payload;
 
 	logger.info(`[WebSocket] Received change_dir message: path=${newPath}`);
 	logger.info(`[WebSocket] payload full content: ${JSON.stringify(payload)}`);
 
 	try {
+		// 检查路径是否存在，如果不存在则使用当前工作目录
+		if (!existsSync(newPath)) {
+			logger.warn(`[WebSocket] Path does not exist: ${newPath}, using current directory`);
+			newPath = process.cwd();
+		}
+
 		// Reinitialize session to new directory
 		const info = await ctx.session.initialize(newPath);
 

@@ -3,6 +3,7 @@
  * Handles session initialization requests
  */
 
+import { existsSync } from "node:fs";
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
 import type { WSContext } from "../../ws-router";
 
@@ -20,13 +21,19 @@ export async function handleInit(
 		sessionId?: string;
 	},
 ): Promise<void> {
-	const { workingDir, sessionId } = payload;
+	let { workingDir, sessionId } = payload;
 
 	logger.info(
 		`[WebSocket] Received init message: workingDir=${workingDir}, sessionId=${sessionId || "not specified"}`,
 	);
 
 	try {
+		// 检查路径是否存在，如果不存在则使用当前工作目录
+		if (!existsSync(workingDir)) {
+			logger.warn(`[WebSocket] Path does not exist: ${workingDir}, using current directory`);
+			workingDir = process.cwd();
+		}
+
 		const info = await ctx.session.initialize(workingDir, sessionId);
 
 		ctx.ws.send(
