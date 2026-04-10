@@ -50,6 +50,10 @@ export interface FileState {
 	// Git 模式状态
 	isGitModeActive: boolean;
 	gitHistoryFile: { path: string; name: string } | null;
+
+	// Todo 模式状态
+	isTodoModeActive: boolean;
+	todoInputFile: { path: string; name: string } | null;
 }
 
 export interface FileActions {
@@ -89,6 +93,11 @@ export interface FileActions {
 	toggleGitMode: () => void;
 	setGitModeActive: (active: boolean) => void;
 	setGitHistoryFile: (file: { path: string; name: string } | null) => void;
+
+	// Todo 模式操作
+	toggleTodoMode: () => void;
+	setTodoModeActive: (active: boolean) => void;
+	setTodoInputFile: (file: { path: string; name: string } | null) => void;
 }
 
 // ============================================================================
@@ -126,6 +135,10 @@ export const useFileStore = create<FileState & FileActions>()(
 				// Git 模式状态
 				isGitModeActive: false,
 				gitHistoryFile: null,
+
+				// Todo 模式状态
+				isTodoModeActive: false,
+				todoInputFile: null,
 
 				// 基本设置方法
 				setWorkingDir: (path) => set({ workingDir: path }),
@@ -203,6 +216,14 @@ export const useFileStore = create<FileState & FileActions>()(
 					set({ isGitModeActive: active }),
 				setGitHistoryFile: (file) =>
 					set({ gitHistoryFile: file }),
+
+				// Todo 模式操作
+				toggleTodoMode: () =>
+					set((state) => ({ isTodoModeActive: !state.isTodoModeActive })),
+				setTodoModeActive: (active: boolean) =>
+					set({ isTodoModeActive: active }),
+				setTodoInputFile: (file) =>
+					set({ todoInputFile: file }),
 			}),
 			{
 				name: FILES_STORAGE_KEYS.FILES_BROWSER,

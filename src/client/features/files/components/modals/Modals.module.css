@@ -199,8 +199,8 @@
   border-radius: 6px;
 }
 
-/* Diff View */
-.diff {
+/* Diff View - 用于 GitHistoryModal */
+.diffView {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   line-height: 1.4;
@@ -208,61 +208,190 @@
   border-radius: 6px;
   overflow: auto;
   height: 100%;
+  padding: 8px 0;
 }
 
-.line {
+.diffLine {
   display: flex;
   padding: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
 }
 
-.lineno {
-  min-width: 36px;
-  padding: 0 6px;
+.diffLine .lineno {
+  min-width: 40px;
+  padding: 1px 6px;
   text-align: right;
   color: #414868;
   background: rgba(0, 0, 0, 0.3);
   border-right: 1px solid rgba(255, 255, 255, 0.04);
   user-select: none;
   font-size: 9px;
+  flex-shrink: 0;
 }
 
-.text {
-  padding: 0 8px;
+.diffLine .lineText {
+  padding: 1px 10px;
   flex: 1;
   white-space: pre-wrap;
   word-break: break-all;
 }
 
 /* Diff Colors */
-.add {
+.diffLine.add {
   background: rgba(158, 206, 106, 0.1);
 }
-.add .text {
+.diffLine.add .lineText {
   color: #9ece6a;
 }
 
-.remove {
+.diffLine.remove {
   background: rgba(243, 139, 168, 0.1);
 }
-.remove .text {
+.diffLine.remove .lineText {
   color: #f38ba8;
 }
 
-.marker {
+.diffLine.marker {
   background: rgba(122, 162, 247, 0.1);
 }
-.marker .text {
+.diffLine.marker .lineText {
   color: #7aa2f7;
   font-weight: 500;
 }
 
-.header {
+.diffLine.header {
   background: rgba(187, 154, 247, 0.08);
 }
-.header .text {
+.diffLine.header .lineText {
   color: #bb9af7;
 }
 
-.normal .text {
+.diffLine.normal .lineText {
   color: #565f89;
+}
+
+/* ===== Todo Input Modal ===== */
+.todoModal {
+  background: linear-gradient(145deg, #1a1b26 0%, #16161e 100%);
+  width: 480px;
+  max-width: 90vw;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.todoHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.todoTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #cdd6f4;
+}
+
+.todoContent {
+  padding: 18px;
+}
+
+.todoFileInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: rgba(30, 30, 46, 0.6);
+  border-radius: 6px;
+}
+
+.todoFileLabel {
+  font-size: 12px;
+  color: #6c7086;
+}
+
+.todoFilePath {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #89b4fa;
+}
+
+.todoInput {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  background: #0d0e15;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #cdd6f4;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.todoInput:focus {
+  border-color: #f9e2af;
+}
+
+.todoHint {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #585b70;
+  text-align: right;
+}
+
+.todoFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 18px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.todoCancelBtn {
+  padding: 8px 16px;
+  font-size: 12px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(110, 118, 129, 0.2);
+  color: #8b949e;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.todoCancelBtn:hover {
+  background: rgba(110, 118, 129, 0.3);
+  color: #e6edf3;
+}
+
+.todoSubmitBtn {
+  padding: 8px 18px;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  background: #f9e2af;
+  color: #1a1b26;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.todoSubmitBtn:hover:not(:disabled) {
+  background: #fae7b9;
+  transform: translateY(-1px);
+}
+
+.todoSubmitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

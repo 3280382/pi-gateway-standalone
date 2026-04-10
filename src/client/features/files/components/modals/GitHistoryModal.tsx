@@ -1,5 +1,8 @@
 /**
  * GitHistoryModal - Git 历史版本浏览弹窗（美化版）
+ * 
+ * Content 使用 FileViewer（带代码高亮）
+ * Diff 使用内置窗口（彩色 diff 显示）
  */
 
 import { useEffect, useState } from "react";
@@ -10,11 +13,10 @@ import {
   getGitHistory,
   type GitCommit,
 } from "@/features/files/services/gitApi";
-import { useFileStore } from "@/features/files/stores/fileStore";
+import { useViewerStore } from "@/features/files/stores/viewerStore";
 import styles from "./Modals.module.css";
 
 // 固定的 Git 仓库根目录
-// 注意：实际应用中应该动态查找 .git 目录
 const GIT_ROOT = "/root/pi-gateway-standalone";
 
 interface GitHistoryModalProps {
@@ -30,25 +32,25 @@ export function GitHistoryModal({
   fileName,
   onClose,
 }: GitHistoryModalProps) {
-  // 使用固定的 Git 仓库根目录
-
   const [history, setHistory] = useState<GitCommit[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [contentModal, setContentModal] = useState<{
+  // Diff 子窗口状态
+  const [diffModal, setDiffModal] = useState<{
     isOpen: boolean;
     commit: GitCommit | null;
-    content: string;
-    type: "content" | "diff";
+    diff: string;
     loading: boolean;
   }>({
     isOpen: false,
     commit: null,
-    content: "",
-    type: "content",
+    diff: "",
     loading: false,
   });
+
+  // 使用 FileViewer 显示 Content
+  const openViewerWithContent = useViewerStore((state) => state.openViewerWithContent);
 
   useEffect(() => {
     if (!isOpen || !filePath) return;
@@ -81,38 +83,45 @@ export function GitHistoryModal({
     loadHistory();
   }, [isOpen, filePath]);
 
+  // Content 使用 FileViewer
   const handleViewContent = async (commit: GitCommit) => {
-    setContentModal({ isOpen: true, commit, content: "", type: "content", loading: true });
     try {
       const content = await getGitContent(filePath, commit.hash, GIT_ROOT);
-      setContentModal((prev) => ({ ...prev, content, loading: false }));
+      // fileName 保持纯净（带扩展名），FileViewer 用它来判断语言
+      openViewerWithContent(
+        fileName,
+        `// ${fileName} @ ${commit.shortHash}\n// ${commit.message}\n\n${content}`,
+        "view"
+      );
     } catch (err: any) {
       console.error("[GitHistory] Content error:", err);
-      setContentModal((prev) => ({ 
-        ...prev, 
-        content: `Error: ${err?.message || "Failed to load content"}`, 
-        loading: false 
-      }));
+      openViewerWithContent(
+        fileName,
+        `Error loading ${fileName} @ ${commit.shortHash}:\n${err?.message || "Failed to load content"}`,
+        "view"
+      );
     }
   };
 
+  // Diff 使用内置窗口
   const handleViewDiff = async (commit: GitCommit) => {
-    setContentModal({ isOpen: true, commit, content: "", type: "diff", loading: true });
+    setDiffModal({ isOpen: true, commit, diff: "", loading: true });
     try {
       const diff = await getGitDiff(filePath, commit.hash, GIT_ROOT);
-      setContentModal((prev) => ({ ...prev, content: diff, loading: false }));
+      setDiffModal({ isOpen: true, commit, diff, loading: false });
     } catch (err: any) {
       console.error("[GitHistory] Diff error:", err);
-      setContentModal((prev) => ({ 
-        ...prev, 
-        content: `Error: ${err?.message || "Failed to load diff"}`, 
+      setDiffModal({ 
+        isOpen: true, 
+        commit, 
+        diff: `Error: ${err?.message || "Failed to load diff"}`, 
         loading: false 
-      }));
+      });
     }
   };
 
-  const closeContentModal = () => {
-    setContentModal({ isOpen: false, commit: null, content: "", type: "content", loading: false });
+  const closeDiffModal = () => {
+    setDiffModal({ isOpen: false, commit: null, diff: "", loading: false });
   };
 
   const formatDate = (dateStr: string) => {
@@ -120,6 +129,7 @@ export function GitHistoryModal({
     return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
   };
 
+  // 解析 diff 为行
   const parseDiffLines = (diff: string) => {
     return diff.split("\n").map((line, index) => {
       let type = "normal";
@@ -135,6 +145,7 @@ export function GitHistoryModal({
 
   return (
     <>
+      {/* 主窗口 - Git History 列表 */}
       <div className={styles.overlay} onClick={onClose}>
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <div className={styles.header}>
@@ -156,8 +167,8 @@ export function GitHistoryModal({
                       <span className={styles.author}>{commit.author}</span>
                       <span className={styles.date}>{formatDate(commit.date)}</span>
                       <div className={styles.actions}>
-                        <button className={`${styles.btn} ${styles.cBtn}`} onClick={() => handleViewContent(commit)}>📄</button>
-                        <button className={`${styles.btn} ${styles.dBtn}`} onClick={() => handleViewDiff(commit)}>📊</button>
+                        <button className={`${styles.btn} ${styles.cBtn}`} onClick={() => handleViewContent(commit)} title="View content">📄</button>
+                        <button className={`${styles.btn} ${styles.dBtn}`} onClick={() => handleViewDiff(commit)} title="View diff">📊</button>
                       </div>
                     </div>
                     <div className={styles.msg}>{commit.message}</div>
@@ -169,26 +180,25 @@ export function GitHistoryModal({
         </div>
       </div>
 
-      {contentModal.isOpen && (
-        <div className={styles.overlay} onClick={closeContentModal}>
+      {/* Diff 子窗口 */}
+      {diffModal.isOpen && (
+        <div className={styles.overlay} onClick={closeDiffModal}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.header}>
               <span className={styles.title}>
-                {contentModal.type === "content" ? "📄" : "📊"} {contentModal.commit?.shortHash}
+                📊 Diff: {diffModal.commit?.shortHash} → HEAD
               </span>
-              <button className={styles.close} onClick={closeContentModal}>✕</button>
+              <button className={styles.close} onClick={closeDiffModal}>✕</button>
             </div>
             <div className={styles.content}>
-              {contentModal.loading ? (
+              {diffModal.loading ? (
                 <div className={styles.loading}>Loading...</div>
-              ) : contentModal.type === "content" ? (
-                <pre className={styles.code}>{contentModal.content}</pre>
               ) : (
-                <div className={styles.diff}>
-                  {parseDiffLines(contentModal.content).map(({ line, type, index }) => (
-                    <div key={index} className={`${styles.line} ${styles[type]}`}>
+                <div className={styles.diffView}>
+                  {parseDiffLines(diffModal.diff).map(({ line, type, index }) => (
+                    <div key={index} className={`${styles.diffLine} ${styles[type]}`}>
                       <span className={styles.lineno}>{index + 1}</span>
-                      <span className={styles.text}>{line}</span>
+                      <span className={styles.lineText}>{line}</span>
                     </div>
                   ))}
                 </div>

@@ -428,3 +428,22 @@
 .treeChildren {
 	/* Indent handled by paddingLeft in inline style - reduced from 16px to 12px per level */
 }
+
+/* Todo 按钮 - 黄色主题 */
+.todoBtn {
+	background: rgba(249, 226, 175, 0.1);
+	color: #f9e2af;
+	transition: all 0.2s ease;
+}
+
+.todoBtn:hover:not(:disabled) {
+	background: rgba(249, 226, 175, 0.2);
+	color: #fae7b9;
+}
+
+.todoBtn.active {
+	background: linear-gradient(135deg, #f9e2af 0%, #fae7b9 100%);
+	color: #1a1b26;
+	box-shadow: 0 0 12px rgba(249, 226, 175, 0.6), 0 0 24px rgba(249, 226, 175, 0.3);
+	font-weight: 600;
+}

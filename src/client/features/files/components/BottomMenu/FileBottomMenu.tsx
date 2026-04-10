@@ -10,6 +10,7 @@
 import React from "react";
 import styles from "@/features/files/components/BottomMenu/FileBottomMenu.module.css";
 import { GitHistoryModal } from "@/features/files/components/modals/GitHistoryModal";
+import { TodoInputModal } from "@/features/files/components/modals/TodoInputModal";
 import { TreeViewModal } from "@/features/files/components/modals/TreeViewModal";
 import { useFileBottomMenu } from "@/features/files/hooks";
 import { useFileNavigation } from "@/features/files/hooks/useFileNavigation";
@@ -41,6 +42,8 @@ export function FileBottomMenu() {
 	const { refresh, viewMode, toggleViewMode } = useFileStore();
 	// Git 模式
 	const { isGitModeActive, toggleGitMode, gitHistoryFile, setGitHistoryFile } = useFileStore();
+	// Todo 模式
+	const { isTodoModeActive, toggleTodoMode, todoInputFile, setTodoInputFile } = useFileStore();
 
 	return (
 		<>
@@ -111,6 +114,14 @@ export function FileBottomMenu() {
 					title={isGitModeActive ? "Git Mode (Active)" : "Git Mode"}
 				>
 					<GitIcon />
+				</button>
+				{/* Todo 按钮 */}
+				<button
+					className={`${styles.btn} ${styles.todoBtn} ${isTodoModeActive ? styles.active : ""}`}
+					onClick={toggleTodoMode}
+					title={isTodoModeActive ? "Todo Mode (Active)" : "Todo Mode"}
+				>
+					<TodoIcon />
 				</button>
 			</div>
 
@@ -197,6 +208,16 @@ export function FileBottomMenu() {
 					filePath={gitHistoryFile.path}
 					fileName={gitHistoryFile.name}
 					onClose={() => setGitHistoryFile(null)}
+				/>
+			)}
+
+			{/* Todo 输入弹窗 */}
+			{todoInputFile && (
+				<TodoInputModal
+					isOpen={!!todoInputFile}
+					filePath={todoInputFile.path}
+					fileName={todoInputFile.name}
+					onClose={() => setTodoInputFile(null)}
 				/>
 			)}
 		</>
@@ -309,6 +330,15 @@ function GitIcon() {
 			<circle cx="16" cy="16" r="2" />
 			<path d="M8 10V6" />
 			<path d="M16 18v-4" />
+		</svg>
+	);
+}
+
+function TodoIcon() {
+	return (
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+			<path d="M9 11l3 3L22 4" />
+			<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
 		</svg>
 	);
 }

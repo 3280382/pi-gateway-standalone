@@ -35,6 +35,7 @@ export const FILES_BROWSER_PERSIST = [
 	"isSidebarVisible",
 	"bottomPanelHeight",
 	"isGitModeActive",
+	"isTodoModeActive",
 ] as const;
 
 /** Files Workspace Store - 持久化字段 */

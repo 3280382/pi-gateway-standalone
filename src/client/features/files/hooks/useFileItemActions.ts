@@ -58,7 +58,9 @@ export function useFileItemActions(): UseFileItemActionsResult {
 		selectedItems,
 		isMultiSelectMode,
 		isGitModeActive,
+		isTodoModeActive,
 		setGitHistoryFile,
+		setTodoInputFile,
 		setWorkingDir,
 		setSelectedActionFile,
 		toggleSelection: storeToggleSelection,
@@ -97,6 +99,13 @@ export function useFileItemActions(): UseFileItemActionsResult {
 					return;
 				}
 
+				// Todo 模式下，点击文件弹出 Todo 输入框
+				if (isTodoModeActive && !item.isDirectory) {
+					console.log("[useFileItemActions] Todo mode - selecting file:", item.path);
+					setTodoInputFile({ path: item.path, name: item.name });
+					return;
+				}
+
 				if (item.isDirectory) {
 					console.log("[useFileItemActions] Navigating to:", item.path);
 					setWorkingDir(item.path);
@@ -108,7 +117,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
 				console.error("[useFileItemActions] handleTap error:", err);
 			}
 		},
-		[isMultiSelectMode, isGitModeActive, storeToggleSelection, setWorkingDir, openViewer, setGitHistoryFile],
+		[isMultiSelectMode, isGitModeActive, isTodoModeActive, storeToggleSelection, setWorkingDir, openViewer, setGitHistoryFile, setTodoInputFile],
 	);
 
 	const handleDoubleTap = useCallback(

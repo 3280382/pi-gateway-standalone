@@ -40,6 +40,7 @@ export interface ViewerState {
 interface ViewerActions {
 	// 文件查看器操作
 	openViewer: (path: string, name: string, mode: ViewerMode) => void;
+	openViewerWithContent: (name: string, content: string, mode?: ViewerMode) => void;
 	closeViewer: () => void;
 	setContent: (content: string) => void;
 	setLoading: (loading: boolean) => void;
@@ -95,6 +96,21 @@ export const useViewerStore = create<ViewerState & ViewerActions>()((set) => ({
 			isLoading: true,
 			error: null,
 			editedContent: "",
+			terminalOutput: "",
+		});
+	},
+
+	openViewerWithContent: (name, content, mode = "view") => {
+		console.log("[ViewerStore] openViewerWithContent:", { name, contentLength: content?.length, mode });
+		set({
+			isOpen: true,
+			filePath: "",
+			fileName: name,
+			mode,
+			content,
+			isLoading: false,
+			error: null,
+			editedContent: content,
 			terminalOutput: "",
 		});
 	},
