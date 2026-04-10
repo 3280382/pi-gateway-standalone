@@ -110,9 +110,13 @@ export class PiAgentSession {
 	 * @returns Session information
 	 */
 	async initialize(workingDir: string, sessionId?: string) {
+		console.log(`[PiAgentSession.initialize] ========== START ==========`);
+		console.log(`[PiAgentSession.initialize] Input: workingDir="${workingDir}", sessionId="${sessionId || 'not provided'}"`);
+		console.log(`[PiAgentSession.initialize] Current state: this.workingDir="${this.workingDir}", this.session exists: ${!!this.session}`);
+		
 		// Check if we have an existing session with the same working directory
 		if (this.session && this.workingDir === workingDir) {
-			console.log(`[Gateway] Reconnecting to existing session in same directory: ${workingDir}`);
+			console.log(`[PiAgentSession.initialize] SAME DIRECTORY - Reconnecting to existing session`);
 			
 			// Unsubscribe from old event handlers
 			if (this.unsubscribeFn) {
@@ -131,7 +135,7 @@ export class PiAgentSession {
 			});
 			await loader.reload();
 			
-			return {
+			const result = {
 				sessionId: this.session.sessionId,
 				sessionFile: this.session.sessionFile,
 				workingDir: this.workingDir,
@@ -148,9 +152,13 @@ export class PiAgentSession {
 					description: s.description,
 				})),
 			};
+			console.log(`[PiAgentSession.initialize] ========== END (same dir reconnect) ==========`);
+			return result;
 		}
 
 		// Different working directory or no existing session - use original logic
+		console.log(`[PiAgentSession.initialize] NEW DIRECTORY - Creating new session`);
+		
 		// Unsubscribe from old session events
 		if (this.unsubscribeFn) {
 			this.unsubscribeFn();
@@ -159,42 +167,44 @@ export class PiAgentSession {
 
 		// Cleanup old session
 		if (this.session) {
+			console.log(`[PiAgentSession.initialize] Disposing old session`);
 			this.session.dispose();
 			this.session = null;
 		}
 
 		this.workingDir = workingDir;
 		const localSessionsDir = getLocalSessionsDir(workingDir);
-		console.log(
-			`[Gateway] Initializing with workingDir: ${workingDir}, localSessionsDir: ${localSessionsDir}`,
-		);
+		console.log(`[PiAgentSession.initialize] Set this.workingDir="${workingDir}"`);
+		console.log(`[PiAgentSession.initialize] localSessionsDir="${localSessionsDir}"`);
 
 		let sessionManager: ReturnType<typeof SessionManager.create> | undefined;
-		console.log(`[Gateway] Looking for sessionId: ${sessionId}`);
+		console.log(`[PiAgentSession.initialize] Looking for sessionId: "${sessionId || 'not provided'}"`);
 
 		if (sessionId) {
 			// Try to find session by partial UUID in local sessions directory
+			console.log(`[PiAgentSession.initialize] Calling SessionManager.list("${workingDir}", "${localSessionsDir}")`);
 			const sessions = await SessionManager.list(workingDir, localSessionsDir);
-			console.log(`[Gateway] Found ${sessions.length} sessions`);
+			console.log(`[PiAgentSession.initialize] Found ${sessions.length} sessions in directory`);
 			sessions.forEach((s, i) =>
-				console.log(`[Gateway]   [${i}] id=${s.id}, path=${s.path}`),
+				console.log(`[PiAgentSession.initialize]   [${i}] id=${s.id}, path=${s.path}`),
 			);
 
 			const matching = sessions.find(
 				(s) => s.id.startsWith(sessionId) || s.path.includes(sessionId),
 			);
 			console.log(
-				`[Gateway] Matching result:`,
-				matching ? `id=${matching.id}, path=${matching.path}` : "null",
+				`[PiAgentSession.initialize] Matching result for sessionId "${sessionId}":`,
+				matching ? `FOUND id=${matching.id}, path=${matching.path}` : "NOT FOUND",
 			);
 
 			if (matching) {
+				console.log(`[PiAgentSession.initialize] Opening existing session: ${matching.path}`);
 				sessionManager = SessionManager.open(matching.path, localSessionsDir);
 			}
 		}
 
 		if (!sessionManager) {
-			console.log(`[Gateway] No match found, creating new session`);
+			console.log(`[PiAgentSession.initialize] Creating NEW session for workingDir="${workingDir}"`);
 			sessionManager = SessionManager.create(workingDir, localSessionsDir);
 		}
 
