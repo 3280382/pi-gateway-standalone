@@ -10,7 +10,8 @@
  */
 
 import { useMemo } from "react";
-import type { Message } from "@/features/chat/types/chat";
+import type { Message, MessageContent } from "@/features/chat/types/chat";
+import { useChatStore } from "@/features/chat/stores/chatStore";
 import { MessageItem } from "./MessageItem";
 import styles from "./MessageList.module.css";
 
@@ -45,6 +46,11 @@ export function MessageList({
 	onDeleteMessage,
 	onRegenerateMessage,
 }: MessageListProps) {
+	// 获取流式状态
+	const streamingContent = useChatStore((state) => state.streamingContent);
+	const streamingThinking = useChatStore((state) => state.streamingThinking);
+	const streamingToolCalls = useChatStore((state) => state.streamingToolCalls);
+
 	// ========== 4. Computed ==========
 	// Merge messages with current streaming message, avoid duplicates
 	const allMessages = useMemo(() => {
@@ -52,8 +58,45 @@ export function MessageList({
 
 		// Check if streaming message already exists in messages
 		const exists = messages.some((m) => m.id === currentStreamingMessage.id);
-		return exists ? messages : [...messages, currentStreamingMessage];
-	}, [messages, currentStreamingMessage]);
+		if (exists) return messages;
+
+		// 为流式消息构建内容
+		const content: MessageContent[] = [];
+		
+		// 添加思考块（如果有）
+		if (streamingThinking) {
+			content.push({ type: "thinking", thinking: streamingThinking });
+		}
+		
+		// 添加工具调用块（如果有）
+		streamingToolCalls.forEach((tool) => {
+			content.push({
+				type: "tool_use",
+				toolCallId: tool.id,
+				toolName: tool.name,
+				partialArgs: tool.args,
+			});
+		});
+		
+		// 添加文本块（如果有）
+		if (streamingContent) {
+			content.push({ type: "text", text: streamingContent });
+		}
+
+		// 合并原有内容（已固化的）和流式内容
+		const streamingMessageWithContent: Message = {
+			...currentStreamingMessage,
+			content: [...(currentStreamingMessage.content || []), ...content],
+		};
+
+		return [...messages, streamingMessageWithContent];
+	}, [
+		messages,
+		currentStreamingMessage,
+		streamingContent,
+		streamingThinking,
+		streamingToolCalls,
+	]);
 
 	// Filter valid messages
 	const validMessages = useMemo(
