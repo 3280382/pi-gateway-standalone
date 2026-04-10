@@ -27,9 +27,17 @@ export type WebSocketEvent =
 	| "error"
 	| "message"
 	// Chat 相关事件 - 由 chat feature 订阅处理
+	// Content block events
+	| "text_start"
 	| "content_delta"
+	| "text_end"
+	| "thinking_start"
 	| "thinking_delta"
+	| "thinking_end"
+	| "toolcall_start"
 	| "toolcall_delta"
+	| "toolcall_end"
+	// Legacy events
 	| "tool_start"
 	| "tool_update"
 	| "tool_end"
@@ -321,11 +329,19 @@ export class WebSocketService {
 	 */
 	private emitSpecificEvent(type: string, data: any): void {
 		const eventMap: Record<string, WebSocketEvent> = {
-			content: "content_delta",
+			// Content block events
+			text_start: "text_start",
 			content_delta: "content_delta",
-			thinking: "thinking_delta",
+			text_end: "text_end",
+			thinking_start: "thinking_start",
 			thinking_delta: "thinking_delta",
+			thinking_end: "thinking_end",
+			toolcall_start: "toolcall_start",
 			toolcall_delta: "toolcall_delta",
+			toolcall_end: "toolcall_end",
+			// Legacy events
+			content: "content_delta",
+			thinking: "thinking_delta",
 			tool_start: "tool_start",
 			tool_update: "tool_update",
 			tool_end: "tool_end",

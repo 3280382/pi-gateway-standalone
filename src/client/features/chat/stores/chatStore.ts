@@ -568,6 +568,8 @@ export const useChatStore = create<
 		startStreaming: () => void;
 		createStreamingMessage: (messageId?: string) => void;
 		startNewTurn: () => void;
+		startContentBlock: (type: 'text' | 'thinking' | 'tool_use', index?: number, meta?: any) => void;
+		endContentBlock: (type: 'text' | 'thinking' | 'tool_use', index?: number, meta?: any) => void;
 		batchUpdateContent: (updates: {
 			content?: string;
 			thinking?: string;
@@ -688,6 +690,76 @@ export const useChatStore = create<
 					},
 					false,
 					"createStreamingMessage",
+				);
+			},
+
+			// 开始内容块
+			startContentBlock: (type: 'text' | 'thinking' | 'tool_use', index?: number, meta?: any) => {
+				console.log(`[ChatStore] startContentBlock: type=${type}, index=${index ?? '?'}`, meta);
+				set(
+					(state) => {
+						if (!state.currentStreamingMessage) return {};
+
+						// 根据类型初始化相应的内容块
+						switch (type) {
+							case 'thinking':
+								// 开始新的思考块
+								return { streamingThinking: "" };
+							case 'text':
+								// 文本块在 content_delta 时处理
+								return {};
+							case 'tool_use':
+								// 工具调用块在 toolcall_delta 时初始化
+								if (meta?.toolCallId && meta?.toolName) {
+									const newToolCalls = new Map(state.streamingToolCalls);
+									newToolCalls.set(meta.toolCallId, {
+										id: meta.toolCallId,
+										name: meta.toolName,
+										args: "",
+									});
+									return { streamingToolCalls: newToolCalls };
+								}
+								return {};
+						}
+						return {};
+					},
+					false,
+					"startContentBlock",
+				);
+			},
+
+			// 结束内容块
+			endContentBlock: (type: 'text' | 'thinking' | 'tool_use', index?: number, meta?: any) => {
+				console.log(`[ChatStore] endContentBlock: type=${type}, index=${index ?? '?'}`, meta);
+				set(
+					(state) => {
+						if (!state.currentStreamingMessage) return {};
+
+						// 根据类型结束内容块，将流式内容固化到消息中
+						switch (type) {
+							case 'thinking':
+								if (state.streamingThinking) {
+									const newThinkings = [...state.streamingThinkings, {
+										id: `think-${Date.now()}`,
+										content: state.streamingThinking,
+									}];
+									return {
+										streamingThinkings: newThinkings,
+										streamingThinking: "",
+									};
+								}
+								return {};
+							case 'text':
+								// 文本内容已经在 content_delta 时添加，这里不需要额外处理
+								return {};
+							case 'tool_use':
+								// 工具调用内容在 toolcall_delta 时添加，这里固化参数
+								return {};
+						}
+						return {};
+					},
+					false,
+					"endContentBlock",
 				);
 			},
 

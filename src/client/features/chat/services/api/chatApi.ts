@@ -354,12 +354,18 @@ export function setupWebSocketListeners(): void {
 	const store = useChatStore.getState();
 
 	// 只设置一次全局监听器
-	// Content delta handler - handles streaming text
+	// Content block handlers - text
+	websocketService.on("text_start", (data: { index?: number }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] text_start: index=${data?.index ?? '?'}`);
+		store.startContentBlock('text', data?.index);
+	});
+
 	websocketService.on(
 		"content_delta",
-		(data: { text?: string; delta?: string }) => {
+		(data: { text?: string; delta?: string; index?: number }) => {
 			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(`[${ts}] [RECV] content_delta`);
+			console.log(`[${ts}] [RECV] content_delta: index=${data?.index ?? '?'}`);
 			const content = data?.text || data?.delta;
 			if (content) {
 				store.appendStreamingContent(content);
@@ -367,12 +373,24 @@ export function setupWebSocketListeners(): void {
 		},
 	);
 
-	// Thinking delta handler
+	websocketService.on("text_end", (data: { index?: number; implicit?: boolean }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] text_end: index=${data?.index ?? '?'}${data?.implicit ? ' (implicit)' : ''}`);
+		store.endContentBlock('text', data?.index);
+	});
+
+	// Content block handlers - thinking
+	websocketService.on("thinking_start", (data: { index?: number }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] thinking_start: index=${data?.index ?? '?'}`);
+		store.startContentBlock('thinking', data?.index);
+	});
+
 	websocketService.on(
 		"thinking_delta",
-		(data: { thinking?: string; delta?: string }) => {
+		(data: { thinking?: string; delta?: string; index?: number }) => {
 			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(`[${ts}] [RECV] thinking_delta`);
+			console.log(`[${ts}] [RECV] thinking_delta: index=${data?.index ?? '?'}`);
 			const content = data?.thinking || data?.delta;
 			if (content) {
 				store.appendStreamingThinking(content);
@@ -380,12 +398,22 @@ export function setupWebSocketListeners(): void {
 		},
 	);
 
-	// Tool call delta handler
+	websocketService.on("thinking_end", (data: { index?: number; implicit?: boolean }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] thinking_end: index=${data?.index ?? '?'}${data?.implicit ? ' (implicit)' : ''}`);
+		store.endContentBlock('thinking', data?.index);
+	});
+
+	// Content block handlers - tool call
+	websocketService.on("toolcall_start", (data: { toolCallId?: string; toolName?: string; index?: number }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] toolcall_start: ${data?.toolName || "unknown"}, id=${data?.toolCallId}`);
+		store.startContentBlock('tool_use', data?.index, { toolCallId: data?.toolCallId, toolName: data?.toolName });
+	});
+
 	websocketService.on("toolcall_delta", (data: any) => {
 		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(
-			`[${ts}] [RECV] toolcall_delta: ${data?.toolName || "unknown"}`,
-		);
+		console.log(`[${ts}] [RECV] toolcall_delta: ${data?.toolName || "unknown"}, index=${data?.index ?? '?'}`);
 		try {
 			if (data?.toolCallId && data?.toolName) {
 				store.appendToolCallDelta(
@@ -400,6 +428,12 @@ export function setupWebSocketListeners(): void {
 				error,
 			);
 		}
+	});
+
+	websocketService.on("toolcall_end", (data: { toolCallId?: string; toolName?: string; index?: number; implicit?: boolean }) => {
+		const ts = new Date().toISOString().split("T")[1].split(".")[0];
+		console.log(`[${ts}] [RECV] toolcall_end: ${data?.toolName || "unknown"}${data?.implicit ? ' (implicit)' : ''}`);
+		store.endContentBlock('tool_use', data?.index, { toolCallId: data?.toolCallId, toolName: data?.toolName });
 	});
 
 	// Tool start handler
