@@ -1,178 +1,326 @@
 /**
- * Modals Styles - Git History Modal (Fullscreen + Compact)
+ * Modals Styles - Git History Modal (Fullscreen + Beautiful)
  */
 
-/* 全屏遮罩 */
+/* ===== 全屏遮罩 ===== */
 .fullscreenOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.92);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(8px);
 }
 
-/* 全屏弹窗 */
+/* ===== 全屏弹窗 ===== */
 .fullscreenModal {
-  background: #1e1e2e;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   width: 98vw;
   height: 96vh;
-  border-radius: 12px;
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  border: 1px solid #313244;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
   overflow: hidden;
 }
 
-/* Header */
+/* ===== Header ===== */
 .fullscreenHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid #313244;
-  background: #181825;
+  padding: 14px 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
 }
 
-.fullscreenHeader h3 {
-  margin: 0;
-  font-size: 14px;
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #89b4fa;
+}
+
+.headerTitle {
+  font-size: 15px;
   font-weight: 600;
   color: #cdd6f4;
 }
 
-.closeBtn {
-  background: transparent;
-  border: none;
+.headerSubtitle {
+  font-size: 12px;
   color: #6c7086;
-  font-size: 18px;
+  padding-left: 12px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.closeBtn {
+  background: rgba(243, 139, 168, 0.1);
+  border: 1px solid rgba(243, 139, 168, 0.2);
+  color: #f38ba8;
+  font-size: 16px;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 6px 12px;
+  border-radius: 8px;
   transition: all 0.2s;
 }
 
 .closeBtn:hover {
-  background: #313244;
-  color: #f38ba8;
+  background: rgba(243, 139, 168, 0.25);
+  border-color: rgba(243, 139, 168, 0.4);
 }
 
-/* Content 区域 */
+/* ===== Content 区域 ===== */
 .fullscreenContent {
   flex: 1;
   overflow: auto;
-  padding: 12px;
+  padding: 16px 20px;
 }
 
 /* 居中消息 */
 .centerMessage {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100%;
+  gap: 16px;
   color: #6c7086;
   font-size: 14px;
 }
 
-/* 紧凑列表 */
-.compactList {
+.errorIcon {
+  font-size: 48px;
+  color: #f38ba8;
+}
+
+/* 加载动画 */
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(137, 180, 250, 0.2);
+  border-top-color: #89b4fa;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== Commit 列表 ===== */
+.commitList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
-/* 紧凑项 */
-.compactItem {
-  background: #181825;
-  border: 1px solid #313244;
-  border-radius: 6px;
-  padding: 8px 12px;
-  transition: all 0.15s;
+/* Commit 卡片 - 无边框，用背景区分 */
+.commitCard {
+  background: rgba(30, 30, 46, 0.6);
+  border-radius: 10px;
+  padding: 12px 16px;
+  transition: all 0.2s;
+  border: 1px solid transparent;
 }
 
-.compactItem:hover {
-  background: #252535;
-  border-color: #45475a;
+.commitCard:hover {
+  background: rgba(49, 50, 68, 0.6);
+  border-color: rgba(137, 180, 250, 0.2);
+  transform: translateX(4px);
 }
 
-/* 第一行：版本号 + 按钮 */
-.compactRow1 {
+/* 第一行：序号 + hash + 作者 + 日期 + 按钮 */
+.commitRow1 {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
 }
 
-.compactHash {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: #89b4fa;
-  min-width: 70px;
-}
-
-.compactBtn {
+.commitIndex {
   font-size: 11px;
+  color: #585b70;
+  font-weight: 600;
+  min-width: 28px;
+}
+
+.commitHash {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: 12px;
+  color: #f9e2af;
+  background: rgba(249, 226, 175, 0.1);
   padding: 2px 8px;
-  border: 1px solid #45475a;
-  background: #313244;
-  color: #cdd6f4;
-  border-radius: 3px;
+  border-radius: 4px;
+}
+
+.commitAuthor {
+  font-size: 12px;
+  color: #a6e3a1;
+  font-weight: 500;
+}
+
+.commitDate {
+  font-size: 11px;
+  color: #89b4fa;
+}
+
+.commitActions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.actionBtn {
+  font-size: 11px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
   transition: all 0.15s;
-  line-height: 1.4;
-}
-
-.compactBtn:hover {
-  background: #45475a;
-  border-color: #585b70;
-}
-
-/* 第二行：修改摘要 */
-.compactRow2 {
+  font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 12px;
+  gap: 4px;
 }
 
-.compactMessage {
+.contentBtn {
+  background: rgba(137, 180, 250, 0.15);
+  color: #89b4fa;
+}
+
+.contentBtn:hover {
+  background: rgba(137, 180, 250, 0.3);
+  color: #b4befe;
+}
+
+.diffBtn {
+  background: rgba(166, 227, 161, 0.15);
+  color: #a6e3a1;
+}
+
+.diffBtn:hover {
+  background: rgba(166, 227, 161, 0.3);
+  color: #c8f6c4;
+}
+
+/* 第二行：完整修改摘要 */
+.commitMessage {
+  font-size: 13px;
   color: #cdd6f4;
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.5;
+  padding-left: 38px; /* 对齐第一行 */
+  word-break: break-word;
 }
 
-.compactMeta {
-  color: #6c7086;
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-/* 代码块 */
-.codeBlock {
+/* ===== Content/Diff 视图 ===== */
+.codeView {
   margin: 0;
   padding: 16px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: 11px;
   line-height: 1.6;
-  background: #11111b;
+  background: #0d0d15;
   color: #cdd6f4;
   white-space: pre-wrap;
   word-break: break-word;
   overflow: auto;
   height: 100%;
+  border-radius: 8px;
+}
+
+/* Diff 视图 */
+.diffView {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: 10px;
+  line-height: 1.5;
+  background: #0d0d15;
+  border-radius: 8px;
+  overflow: auto;
+  height: 100%;
+}
+
+.diffLine {
+  display: flex;
+  padding: 1px 0;
+}
+
+.diffLineNum {
+  min-width: 45px;
+  padding: 0 8px;
+  text-align: right;
+  color: #585b70;
+  background: rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  user-select: none;
+}
+
+.diffLineContent {
+  padding: 0 12px;
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* Diff 行类型颜色 */
+.diffLine.add {
+  background: rgba(166, 227, 161, 0.08);
+}
+
+.diffLine.add .diffLineContent {
+  color: #a6e3a1;
+}
+
+.diffLine.add .diffLineContent::before {
+  content: "+ ";
+  color: #a6e3a1;
+}
+
+.diffLine.remove {
+  background: rgba(243, 139, 168, 0.08);
+}
+
+.diffLine.remove .diffLineContent {
+  color: #f38ba8;
+}
+
+.diffLine.remove .diffLineContent::before {
+  content: "- ";
+  color: #f38ba8;
+}
+
+.diffLine.marker {
+  background: rgba(137, 180, 250, 0.1);
+}
+
+.diffLine.marker .diffLineContent {
+  color: #89b4fa;
+  font-weight: 500;
+}
+
+.diffLine.header {
+  background: rgba(203, 166, 247, 0.08);
+}
+
+.diffLine.header .diffLineContent {
+  color: #cba6f7;
+}
+
+.diffLine.normal .diffLineContent {
+  color: #9399b2;
 }
 
 /* ============ 旧样式（保留兼容） ============ */
 
-/* Overlay */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -187,7 +335,6 @@
   padding: 20px;
 }
 
-/* Git History Modal */
 .gitHistoryModal {
   background: #1e1e2e;
   border-radius: 12px;
@@ -226,7 +373,6 @@
   height: 100%;
 }
 
-/* History List */
 .historyList {
   width: 40%;
   min-width: 300px;
@@ -303,7 +449,6 @@
   border-color: #585b70;
 }
 
-/* History Detail */
 .historyDetail {
   flex: 1;
   overflow: hidden;
@@ -339,7 +484,6 @@
   color: #a6e3a1;
 }
 
-/* States */
 .loadingState,
 .errorState,
 .emptyState {
