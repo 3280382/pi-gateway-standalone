@@ -110,8 +110,6 @@ export class PiAgentSession {
 	 * @returns Session information
 	 */
 	async initialize(workingDir: string, sessionId?: string) {
-		const localSessionsDir = getLocalSessionsDir(workingDir);
-		
 		// Check if we have an existing session with the same working directory
 		if (this.session && this.workingDir === workingDir) {
 			console.log(`[Gateway] Reconnecting to existing session in same directory: ${workingDir}`);
