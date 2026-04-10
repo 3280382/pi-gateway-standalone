@@ -269,6 +269,7 @@ function applyRafUpdate(
 
 /**
  * 构建最终消息内容
+ * 使用已固化的 existingContent + 剩余流式状态
  */
 function buildFinalMessage(
 	state: State,
@@ -277,23 +278,34 @@ function buildFinalMessage(
 ): { finalMessage: any | null; finalContent: any[] } {
 	const existingContent = state.currentStreamingMessage?.content || [];
 
-	const currentContent = buildContentArray({
-		...state,
-		streamingContent: state.streamingContent + finalContentToApply,
-		streamingThinking: state.streamingThinking + finalThinkingToApply,
+	// 构建剩余的流式内容（endContentBlock 后可能还有未清空的）
+	const remainingContent: ContentPart[] = [];
+	
+	if (state.streamingThinking || finalThinkingToApply) {
+		remainingContent.push({
+			type: "thinking",
+			thinking: state.streamingThinking + finalThinkingToApply,
+		});
+	}
+	
+	state.streamingToolCalls.forEach((tool) => {
+		remainingContent.push({
+			type: "tool_use",
+			toolCallId: tool.id,
+			toolName: tool.name,
+			partialArgs: tool.args,
+		});
 	});
+	
+	if (state.streamingContent || finalContentToApply) {
+		remainingContent.push({
+			type: "text",
+			text: state.streamingContent + finalContentToApply,
+		});
+	}
 
-	const lastTurnMarkerIndex = existingContent
-		.map((c: any) => c.type)
-		.lastIndexOf("turn_marker");
-
-	const finalContent =
-		lastTurnMarkerIndex >= 0
-			? [
-					...existingContent.slice(0, lastTurnMarkerIndex + 1),
-					...currentContent,
-				]
-			: currentContent;
+	// 合并已固化内容和剩余流式内容
+	const finalContent = [...existingContent, ...remainingContent];
 
 	const finalMessage = state.currentStreamingMessage
 		? {
@@ -951,33 +963,42 @@ export const useChatStore = create<
 				set(createInitialState(), false, "reset");
 			},
 
-			// Legacy compatibility methods - 使用 RAF 批处理优化
+			// 直接同步更新流式状态，不用 RAF 批处理避免竞争
 			appendStreamingContent: (text: string) => {
-				pendingContentUpdates.content =
-					(pendingContentUpdates.content || "") + text;
-				scheduleRafUpdate(get, set);
+				set(
+					(state) => ({
+						streamingContent: state.streamingContent + text,
+					}),
+					false,
+					"appendStreamingContent",
+				);
 			},
 
 			appendStreamingThinking: (thinking: string) => {
-				pendingContentUpdates.thinking =
-					(pendingContentUpdates.thinking || "") + thinking;
-				scheduleRafUpdate(get, set);
+				set(
+					(state) => ({
+						streamingThinking: state.streamingThinking + thinking,
+					}),
+					false,
+					"appendStreamingThinking",
+				);
 			},
 
 			appendToolCallDelta: (id: string, name: string, delta: string) => {
-				// 使用 RAF 批处理，与 content/thinking 保持一致
-				const state = get();
-				const newToolCalls = new Map(state.streamingToolCalls);
-				const existing = newToolCalls.get(id);
-				if (existing) {
-					newToolCalls.set(id, { ...existing, args: existing.args + delta });
-				} else {
-					newToolCalls.set(id, { id, name, args: delta });
-				}
-
-				// 累积到 pending 状态，让 RAF 统一更新
-				pendingContentUpdates.toolCalls = newToolCalls;
-				scheduleRafUpdate(get, set);
+				set(
+					(state) => {
+						const newToolCalls = new Map(state.streamingToolCalls);
+						const existing = newToolCalls.get(id);
+						if (existing) {
+							newToolCalls.set(id, { ...existing, args: existing.args + delta });
+						} else {
+							newToolCalls.set(id, { id, name, args: delta });
+						}
+						return { streamingToolCalls: newToolCalls };
+					},
+					false,
+					"appendToolCallDelta",
+				);
 			},
 
 			// Message collapse toggle
