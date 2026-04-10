@@ -68,6 +68,63 @@
 	background: #34d399;
 }
 
+/* 工具调用成功状态 */
+.toolUse.toolSuccess {
+	background: rgba(16, 185, 129, 0.1);
+}
+
+.toolUse.toolSuccess:hover {
+	background: rgba(16, 185, 129, 0.15);
+}
+
+.toolUse.toolSuccess .dot {
+	background: #10b981;
+}
+
+/* 工具调用错误状态 */
+.toolUse.toolError {
+	background: rgba(244, 63, 94, 0.1);
+}
+
+.toolUse.toolError:hover {
+	background: rgba(244, 63, 94, 0.15);
+}
+
+.toolUse.toolError .dot {
+	background: #f43f5e;
+}
+
+/* 工具调用内容分区 */
+.toolSection {
+	margin-bottom: 12px;
+	padding: 8px;
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 6px;
+}
+
+.toolSection:last-child {
+	margin-bottom: 0;
+}
+
+.toolSectionLabel {
+	font-size: 10px;
+	font-weight: 600;
+	color: #94a3b8;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-bottom: 6px;
+}
+
+.toolSectionSuccess {
+	background: rgba(16, 185, 129, 0.15);
+	border-left: 2px solid #10b981;
+}
+
+.toolSectionError {
+	background: rgba(244, 63, 94, 0.15);
+	border-left: 2px solid #f43f5e;
+}
+
 /* 工具结果块 - 根据状态 */
 .toolResult {
 	background: rgba(148, 163, 184, 0.06);

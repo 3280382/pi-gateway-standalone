@@ -4,6 +4,7 @@
  * 职责：
  * - 渲染单条消息（用户或AI）
  * - 处理消息内容的块级渲染（thinking, tool_use, tool, text）
+ * - 将 tool_use 和 tool 结果合并为一个完整的工具调用卡片
  * - 不包含业务逻辑
  *
  * 结构规范：State → Ref → Effects → Computed → Actions → Render
@@ -28,8 +29,15 @@ interface MessageItemProps {
 	onRegenerate?: () => void;
 }
 
+// 合并后的内容块类型
+interface MergedContentBlock extends MessageContent {
+	originalIndex: number;
+	// 用于 tool_use + tool 合并
+	toolResult?: MessageContent; // 对应的 tool 结果块
+}
+
 interface GlassCardProps {
-	block: MessageContent & { originalIndex?: number };
+	block: MergedContentBlock;
 	isStreaming?: boolean;
 	showThinking: boolean;
 	showTools?: boolean;
@@ -55,6 +63,32 @@ function safeString(val: unknown): string {
 	return String(val);
 }
 
+/**
+ * 合并相邻的 tool_use 和 tool 块
+ * tool_use 后面紧跟的 tool（相同 toolCallId）会合并到一起
+ */
+function mergeToolBlocks(content: MessageContent[]): MergedContentBlock[] {
+	const result: MergedContentBlock[] = [];
+	
+	for (let i = 0; i < content.length; i++) {
+		const current = content[i];
+		const mergedBlock: MergedContentBlock = { ...current, originalIndex: i };
+		
+		// 如果是 tool_use，检查下一个是否是匹配的 tool 结果
+		if (current.type === "tool_use" && i + 1 < content.length) {
+			const next = content[i + 1];
+			if (next.type === "tool" && next.toolCallId === current.toolCallId) {
+				mergedBlock.toolResult = next;
+				i++; // 跳过下一个，因为已经合并了
+			}
+		}
+		
+		result.push(mergedBlock);
+	}
+	
+	return result;
+}
+
 // ============================================================================
 // Component
 // ============================================================================
@@ -70,7 +104,8 @@ export const MessageItem = memo(
 
 		const blocks = useMemo(() => {
 			if (!message.content || !Array.isArray(message.content)) return [];
-			return message.content.map((c, idx) => ({ ...c, originalIndex: idx }));
+			// 合并 tool_use 和 tool 块
+			return mergeToolBlocks(message.content);
 		}, [message.content]);
 
 		// ========== 5. Render ==========
@@ -185,25 +220,46 @@ function GlassCard({
 
 		case "tool_use": {
 			if (!showTools) return null;
+			
+			// 获取工具调用信息
+			const toolName = block.toolName || "unknown";
 			const toolArgs = block.partialArgs || JSON.stringify(block.args, null, 2);
+			
+			// 获取执行结果（如果已合并）
+			const toolResult = block.toolResult;
+			const hasResult = !!toolResult;
+			const isError = toolResult?.error ? true : false;
+			const resultOutput = toolResult?.output || toolResult?.error || "";
+			
+			// 确定状态
+			let status: "running" | "success" | "error" = "running";
+			if (hasResult) {
+				status = isError ? "error" : "success";
+			}
+			
+			// 组合显示内容：参数 + 结果
+			const fullContent = hasResult
+				? `// Arguments:\n${toolArgs}\n\n// Result:\n${resultOutput}`
+				: toolArgs;
+
 			return (
 				<div
-					className={`${styles.card} ${styles.toolUse}`}
+					className={`${styles.card} ${styles.toolUse} ${hasResult ? (isError ? styles.toolError : styles.toolSuccess) : ""}`}
 					onClick={toggleExpand}
 					onMouseEnter={() => setIsCopyVisible(true)}
 					onMouseLeave={() => setIsCopyVisible(false)}
 				>
 					<div className={styles.cardHeader}>
 						<span className={styles.dot} />
-						<span className={styles.label}>{block.toolName}</span>
-						<span className={styles.chip}>running</span>
+						<span className={styles.label}>{toolName}</span>
+						<span className={`${styles.chip} ${styles[status]}`}>{status}</span>
 						<div className={styles.actions}>
 							<button
 								className={styles.btnCopy}
 								style={{ visibility: isCopyVisible ? "visible" : "hidden" }}
 								onClick={(e) => {
 									e.stopPropagation();
-									copyToClipboard(toolArgs);
+									copyToClipboard(fullContent);
 								}}
 							>
 								📋
@@ -218,7 +274,19 @@ function GlassCard({
 							className={styles.content}
 							onClick={(e) => e.stopPropagation()}
 						>
-							<code>{toolArgs}</code>
+							{/* 参数部分 */}
+							<div className={styles.toolSection}>
+								<div className={styles.toolSectionLabel}>Arguments:</div>
+								<code>{toolArgs}</code>
+							</div>
+							
+							{/* 结果部分（如果有） */}
+							{hasResult && (
+								<div className={`${styles.toolSection} ${isError ? styles.toolSectionError : styles.toolSectionSuccess}`}>
+									<div className={styles.toolSectionLabel}>Result:</div>
+									<code>{resultOutput}</code>
+								</div>
+							)}
 						</div>
 					)}
 				</div>
@@ -226,7 +294,10 @@ function GlassCard({
 		}
 
 		case "tool": {
+			// tool 类型应该已经和 tool_use 合并了
+			// 如果单独出现，显示为简化的结果卡片
 			if (!showTools) return null;
+			
 			const status = block.error
 				? "error"
 				: block.output
@@ -235,6 +306,7 @@ function GlassCard({
 			const toolContent = safeString(
 				block.output || block.error || "Processing...",
 			);
+			
 			return (
 				<div
 					className={`${styles.card} ${styles.toolResult}`}
