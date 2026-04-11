@@ -218,12 +218,30 @@ export const useFileStore = create<FileState & FileActions>()(
 				setGitHistoryFile: (file) =>
 					set({ gitHistoryFile: file }),
 				updateFileGitStatuses: (statusMap: Record<string, string>) =>
-					set((state) => ({
-						items: state.items.map((item) => ({
-							...item,
-							gitStatus: statusMap[item.path] || statusMap[item.name] || undefined,
-						})),
-					})),
+					set((state) => {
+						let hasChanges = false;
+						const newItems = state.items.map((item) => {
+							const newGitStatus = statusMap[item.path] || statusMap[item.name] || undefined;
+							
+							// 检查状态是否变化
+							if (item.gitStatus === newGitStatus) {
+								return item; // 没有变化，返回原对象
+							}
+							
+							hasChanges = true;
+							return {
+								...item,
+								gitStatus: newGitStatus,
+							};
+						});
+						
+						// 只有在有变化时才返回新数组
+						if (!hasChanges) {
+							return state; // 返回原状态，表示没有变化
+						}
+						
+						return { items: newItems };
+					}),
 
 				// Todo 模式操作
 				toggleTodoMode: () =>
