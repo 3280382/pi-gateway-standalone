@@ -19,11 +19,22 @@ export function useGitStatus() {
 	const isInitialMount = useRef(true);
 
 	useEffect(() => {
+		console.log('useGitStatus effect triggered', { 
+			isGitModeActive, 
+			workingDir, 
+			itemsLength: items.length,
+			lastFetchedPath: lastFetchedPathRef.current,
+			itemsLengthRef: itemsLengthRef.current,
+			isInitialMount: isInitialMount.current
+		});
+		
 		// Git模式关闭时，清空所有文件的git状态
 		if (!isGitModeActive) {
+			console.log('Git模式关闭，清空状态');
 			// 只有当items有git状态时才清空
 			const hasGitStatus = items.some(item => item.gitStatus);
 			if (hasGitStatus) {
+				console.log('有git状态，清空');
 				updateFileGitStatuses({});
 			}
 			lastFetchedPathRef.current = ""; // 重置路径缓存
@@ -34,6 +45,7 @@ export function useGitStatus() {
 
 		// Git模式激活但无文件项，不执行操作
 		if (items.length === 0) {
+			console.log('Git模式激活但无文件项');
 			return;
 		}
 
@@ -47,15 +59,31 @@ export function useGitStatus() {
 			isInitialMount.current
 		);
 
+		console.log('是否需要获取Git状态:', shouldFetchGitStatus, {
+			workingDir,
+			lastFetchedPath: lastFetchedPathRef.current,
+			itemsLength: items.length,
+			itemsLengthRef: itemsLengthRef.current,
+			isInitialMount: isInitialMount.current
+		});
+
 		if (!shouldFetchGitStatus) {
+			console.log('不需要获取Git状态，跳过');
 			return;
 		}
 
 		const fetchGitStatus = async () => {
+			console.log('开始获取Git状态', { workingDir });
 			fileBrowserDebug.debug("开始获取Git状态", { workingDir });
 			
 			try {
+				console.log('调用getGitStatus API');
 				const statuses = await getGitStatus(workingDir);
+				console.log('获取到Git状态:', { 
+					workingDir, 
+					statusCount: Object.keys(statuses).length,
+					statuses: Object.entries(statuses).slice(0, 5) // 只显示前5个
+				});
 				fileBrowserDebug.debug("获取到Git状态", { 
 					workingDir, 
 					statusCount: Object.keys(statuses).length 
@@ -64,6 +92,7 @@ export function useGitStatus() {
 				// 将状态映射转换为与文件项路径匹配的格式
 				const itemStatusMap: Record<string, string> = {};
 				
+				console.log('开始匹配文件项，items数量:', items.length);
 				// 遍历所有文件项，查找匹配的git状态
 				for (const item of items) {
 					// 跳过父目录项 ".."
@@ -83,13 +112,22 @@ export function useGitStatus() {
 						}
 					}
 					
+					console.log('文件项匹配:', { 
+						name: item.name, 
+						path: item.path, 
+						relativePath,
+						hasStatus: !!statuses[relativePath]
+					});
+					
 					// 检查相对路径是否匹配
 					if (relativePath && statuses[relativePath]) {
 						matchedStatus = statuses[relativePath];
+						console.log('通过相对路径匹配成功:', matchedStatus);
 					} 
 					// 2. 尝试文件名匹配
 					else if (statuses[item.name]) {
 						matchedStatus = statuses[item.name];
+						console.log('通过文件名匹配成功:', matchedStatus);
 					}
 					// 3. 尝试路径后缀匹配（对于嵌套目录）
 					else {
@@ -97,6 +135,7 @@ export function useGitStatus() {
 						for (const [statusPath, status] of Object.entries(statuses)) {
 							if (statusPath.endsWith(`/${relativePath}`) || statusPath === relativePath) {
 								matchedStatus = status;
+								console.log('通过路径后缀匹配成功:', { statusPath, status });
 								break;
 							}
 						}
@@ -104,15 +143,20 @@ export function useGitStatus() {
 					
 					if (matchedStatus) {
 						itemStatusMap[item.path] = matchedStatus;
+						console.log('添加到itemStatusMap:', item.path, '->', matchedStatus);
 					}
 				}
 				
+				console.log('最终itemStatusMap:', itemStatusMap);
+				console.log('调用updateFileGitStatuses');
 				// 更新store中的文件项git状态
 				updateFileGitStatuses(itemStatusMap);
 				lastFetchedPathRef.current = workingDir;
 				itemsLengthRef.current = items.length;
 				isInitialMount.current = false;
+				console.log('Git状态更新完成');
 			} catch (error) {
+				console.error('获取Git状态失败:', error);
 				fileBrowserDebug.error("获取Git状态失败", { 
 					workingDir, 
 					error: error instanceof Error ? error.message : String(error) 

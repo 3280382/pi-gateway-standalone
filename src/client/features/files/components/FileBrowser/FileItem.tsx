@@ -65,6 +65,11 @@ export const FileItem = memo<FileItemProps>(
 		const isGrid = viewMode === "grid";
 
 		// Git状态图标
+		console.log('FileItem渲染:', { 
+			name: item.name, 
+			gitStatus: item.gitStatus,
+			path: item.path 
+		});
 		const gitStatusIcon = item.gitStatus ? {
 			untracked: { symbol: "🆕", color: "#f97316" }, // 橙色
 			modified: { symbol: "📝", color: "#eab308" }, // 黄色
