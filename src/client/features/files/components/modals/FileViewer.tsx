@@ -190,6 +190,14 @@ export function FileViewer() {
     });
   }, [mode, getLanguage]); // 文件路径变化时重新配置语言
 
+  // ========== 4. Actions ==========
+  // 修复编辑器焦点问题
+  const focusEditor = useCallback(() => {
+    if (editorViewRef.current && mode === "edit") {
+      editorViewRef.current.focus();
+    }
+  }, [mode]);
+
   // 进入编辑模式后自动聚焦
   useEffect(() => {
     if (mode === "edit") {
@@ -198,7 +206,7 @@ export function FileViewer() {
     }
   }, [mode, focusEditor]);
 
-  // ========== 4. Computed ==========
+  // ========== 5. Computed ==========
   // Prism.js 查看模式语言映射（tsx -> typescript）
   const language = getLanguage();
   const prismLanguage =
@@ -215,14 +223,6 @@ export function FileViewer() {
       .replace(/\n/g, "¶\n") // 换行符（在行尾添加）
       .replace(/\r/g, "↵"); // 回车符
   };
-
-  // ========== 5. Actions ==========
-  // 修复编辑器焦点问题
-  const focusEditor = useCallback(() => {
-    if (editorViewRef.current && mode === "edit") {
-      editorViewRef.current.focus();
-    }
-  }, [mode]);
 
   // ========== 6. Render ==========
   if (!isOpen) {
