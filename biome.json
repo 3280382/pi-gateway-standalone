@@ -18,7 +18,16 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "correctness": {
+        "noUnusedVariables": "warn",
+        "noUnusedFunctionParameters": "warn"
+      },
+      "style": {
+        "noUnusedTemplateLiteral": "off",
+        "useTemplate": "warn",
+        "useNodejsImportProtocol": "warn"
+      }
     }
   },
   "javascript": {
