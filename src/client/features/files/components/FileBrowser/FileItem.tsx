@@ -71,14 +71,14 @@ export const FileItem = memo<FileItemProps>(
 			path: item.path 
 		});
 		const gitStatusIcon = item.gitStatus ? {
-			untracked: { symbol: "U", color: "#f97316" }, // 橙色
-			modified: { symbol: "M", color: "#eab308" }, // 黄色
-			added: { symbol: "A", color: "#22c55e" }, // 绿色
-			deleted: { symbol: "D", color: "#ef4444" }, // 红色
-			renamed: { symbol: "R", color: "#8b5cf6" }, // 紫色
-			copied: { symbol: "C", color: "#0ea5e9" }, // 蓝色
-			conflict: { symbol: "!", color: "#dc2626" }, // 深红色
-			other: { symbol: "?", color: "#6b7280" }, // 灰色
+			untracked: { symbol: "U", color: "#f97316" }, // 橙色 - 未跟踪
+			modified: { symbol: "M", color: "#eab308" }, // 黄色 - 已修改
+			added: { symbol: "A", color: "#22c55e" }, // 绿色 - 已添加
+			deleted: { symbol: "D", color: "#ef4444" }, // 红色 - 已删除
+			renamed: { symbol: "R", color: "#8b5cf6" }, // 紫色 - 已重命名
+			copied: { symbol: "C", color: "#0ea5e9" }, // 蓝色 - 已复制
+			conflict: { symbol: "!", color: "#dc2626" }, // 深红色 - 冲突
+			other: { symbol: "?", color: "#ec4899" }, // 粉色 - 其他状态
 		}[item.gitStatus] : null;
 
 		// 组合样式
@@ -212,3 +212,4 @@ export const FileItem = memo<FileItemProps>(
 
 FileItem.displayName = "FileItem";
 // Test for git badge visibility
+// Another modification
