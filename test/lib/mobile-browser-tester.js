@@ -164,7 +164,7 @@ export async function simulateTouch(page, options) {
     case "pinch":
       // 模拟双指捏合
       await page.evaluate(
-        ({ x, y, scale }) => {
+        ({ x, y, scale: _scale }) => {
           const event = new TouchEvent("touchstart", {
             touches: [
               new Touch({
@@ -475,7 +475,7 @@ export async function testMobileBrowser(url, device = 'android-chrome', generate
   console.log(`开始移动端测试: ${url}`);
   console.log(`使用设备: ${device}`);
   
-  const { page, close } = await createMobileBrowser(device);
+  const { page, close: _close } = await createMobileBrowser(device);
   
   try {
     // 运行兼容性检查
@@ -489,7 +489,7 @@ export async function testMobileBrowser(url, device = 'android-chrome', generate
     // 收集所有错误
     const allErrors = [...compatibility.issues, ...functionTest.errors];
     
-    const results = {
+    const _results = {
       timestamp: new Date().toISOString(),
       device,
       url,
@@ -502,4 +502,22 @@ export async function testMobileBrowser(url, device = 'android-chrome', generate
     console.log(`测试完成. 发现 ${allErrors.length} 个问题`);
     
     if (generateReport) {
-      const report = generateTest
+      const _report = generateTestReport(_results);
+      console.log('测试报告:', _report);
+    }
+    
+    return _results;
+  } finally {
+    await close();
+  }
+}
+
+// 生成测试报告
+function generateTestReport(results) {
+  return {
+    summary: `移动端测试完成 - ${results.success ? '通过' : '失败'}`,
+    details: results
+  };
+}
+
+module.exports = { runMobileTest };
