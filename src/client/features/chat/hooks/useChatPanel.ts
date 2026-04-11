@@ -90,7 +90,7 @@ export function useChatPanel(): UseChatPanelReturn {
 
   // ===== [ANCHOR:STORE_SELECTORS] =====
   const inputText = useChatStore((state) => state.inputText);
-  const _messages = useChatStore((state) => state.messages);
+  const messages = useChatStore((state) => state.messages);
   const _currentStreamingMessage = useChatStore((state) => state.currentStreamingMessage);
   const _streamingContent = useChatStore((state) => state.streamingContent);
   const _streamingThinking = useChatStore((state) => state.streamingThinking);
@@ -112,7 +112,14 @@ export function useChatPanel(): UseChatPanelReturn {
     if (messagesRef.current && shouldScrollToBottom) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
-  }, [shouldScrollToBottom]);
+  }, [shouldScrollToBottom, messages]); // 添加 messages 依赖，当消息变化时滚动
+
+  // 当切换 session 或消息列表清空时，自动启用滚屏
+  useEffect(() => {
+    if (messages.length === 0) {
+      setShouldScrollToBottom(true);
+    }
+  }, [messages.length]);
 
   // ===== [ANCHOR:HANDLERS] =====
   const handleScroll = useCallback(() => {

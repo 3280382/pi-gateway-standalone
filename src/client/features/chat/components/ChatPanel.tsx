@@ -78,6 +78,9 @@ export function ChatPanel() {
           onBashCommand={chatPanel.handleBashCommand}
           onSlashCommand={chatPanel.handleSlashCommand}
           onNewSession={chatPanel.handleNewSession}
+          // 自动滚屏相关
+          shouldScrollToBottom={chatPanel.shouldScrollToBottom}
+          onToggleScroll={() => chatPanel.setShouldScrollToBottom(!chatPanel.shouldScrollToBottom)}
         />
       </div>
     </div>

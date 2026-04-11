@@ -198,6 +198,17 @@
   height: 15px;
 }
 
+/* 激活状态的工具栏按钮 */
+.toolbarBtn.active {
+  background: var(--unified-blue);
+  color: #0d1117;
+}
+
+.toolbarBtn.active:hover:not(:disabled) {
+  background: var(--unified-blue-hover);
+  color: #0d1117;
+}
+
 /* Dropdown menus */
 .commandMenu,
 .filePicker {

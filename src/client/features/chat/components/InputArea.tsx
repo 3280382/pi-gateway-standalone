@@ -32,6 +32,9 @@ interface InputAreaProps {
     }>
   ) => void;
   onNewSession?: () => void;
+  // 自动滚屏相关
+  shouldScrollToBottom?: boolean;
+  onToggleScroll?: () => void;
 }
 
 // ===== [ANCHOR:COMPONENT] =====
@@ -46,6 +49,9 @@ export function InputArea({
   onSlashCommand,
   onSendWithImages,
   onNewSession,
+  // 自动滚屏相关
+  shouldScrollToBottom = true,
+  onToggleScroll,
 }: InputAreaProps) {
   // ===== [ANCHOR:REFS] =====
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -255,6 +261,18 @@ export function InputArea({
         >
           <ImageIcon />
         </button>
+        
+        {/* 自动滚屏按钮 */}
+        {onToggleScroll && (
+          <button type="button"
+            className={`${styles.toolbarBtn} ${shouldScrollToBottom ? styles.active : ""}`}
+            onClick={onToggleScroll}
+            title={shouldScrollToBottom ? "自动滚屏已启用 (点击关闭)" : "自动滚屏已关闭 (点击启用)"}
+            disabled={isStreaming}
+          >
+            <ScrollIcon active={shouldScrollToBottom} />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -330,6 +348,19 @@ function CloseIcon() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+function ScrollIcon({ active = true }: { active?: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />
+      {active ? (
+        <circle cx="12" cy="12" r="2" fill="currentColor" />
+      ) : (
+        <circle cx="12" cy="12" r="2" stroke="currentColor" fill="none" />
+      )}
     </svg>
   );
 }
