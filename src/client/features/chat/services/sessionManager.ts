@@ -56,7 +56,8 @@ export interface SessionManagerAPI {
 /**
  * 从 session ID 或 path 中提取可匹配的标识
  */
-function extractSessionId(pathOrId: string): string {
+function extractSessionId(pathOrId: string | undefined): string {
+	if (!pathOrId) return "";
 	// 如果是 path（如 /root/.pi/.../xxx.jsonl），提取文件名中的 UUID
 	if (pathOrId.includes("/")) {
 		const fileName = pathOrId.split("/").pop() || "";
@@ -182,7 +183,9 @@ async function switchDirectory(
 				id: s.path,
 				path: s.path,
 				name:
-					s.firstMessage?.slice(0, 35) || s.path.split("/").pop() || "Untitled",
+					s.firstMessage?.slice(0, 35) ||
+					s.path?.split("/").pop() ||
+					"Untitled",
 				messageCount: s.messageCount || 0,
 				lastModified: new Date(s.modified),
 				firstMessage: s.firstMessage,
@@ -366,7 +369,7 @@ async function loadSessionsList(dir: string): Promise<Session[]> {
 			id: s.path,
 			path: s.path,
 			name:
-				s.firstMessage?.slice(0, 35) || s.path.split("/").pop() || "Untitled",
+				s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
 			messageCount: s.messageCount || 0,
 			lastModified: new Date(s.modified),
 			firstMessage: s.firstMessage,
