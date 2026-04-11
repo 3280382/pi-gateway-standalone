@@ -55,14 +55,23 @@ export function initChatWorkingDirectory(
 ): Promise<any> {
 	return new Promise((resolve, reject) => {
 		// 设置一次性监听器等待 initialized 响应
-		const unsubscribe = websocketService.on("initialized", (data: unknown) => {
-			unsubscribe();
+		const unsubscribeInitialized = websocketService.on("initialized", (data: unknown) => {
+			unsubscribeInitialized();
+			unsubscribeError();
 			resolve(data);
+		});
+
+		// 也监听 error 事件
+		const unsubscribeError = websocketService.on("error", (data: unknown) => {
+			unsubscribeInitialized();
+			unsubscribeError();
+			reject(new Error(`Server error: ${JSON.stringify(data)}`));
 		});
 
 		// 超时
 		setTimeout(() => {
-			unsubscribe();
+			unsubscribeInitialized();
+			unsubscribeError();
 			reject(new Error(`Timeout waiting for initialization (${timeoutMs}ms)`));
 		}, timeoutMs);
 
@@ -73,7 +82,8 @@ export function initChatWorkingDirectory(
 		});
 
 		if (!sent) {
-			unsubscribe();
+			unsubscribeInitialized();
+			unsubscribeError();
 			reject(new Error("Failed to send init message"));
 		}
 	});

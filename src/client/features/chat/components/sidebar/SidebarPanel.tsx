@@ -130,10 +130,10 @@ function RecentWorkspacesSection() {
 				}
 			/>
 			<div className={styles.list}>
-				{recentWorkspaces.map((workspace) => {
-					const path = workspace.replace(/\/$/, "");
+				{recentWorkspaces.map((safeWorkspace) => {
+					const path = safeWorkspace.replace(/\/$/, "");
 					const name = path.split("/").pop() || path;
-					const isActive = currentPath === path || currentPath === workspace;
+					const isActive = currentPath === path || currentPath === safeWorkspace;
 
 					return (
 						<button

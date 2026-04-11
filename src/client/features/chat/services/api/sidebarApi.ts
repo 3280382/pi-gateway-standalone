@@ -29,7 +29,7 @@ function mapSession(s: SessionsResponse["sessions"][number]): Session {
 	return {
 		id: s.path,
 		path: s.path,
-		name: s.firstMessage?.slice(0, 35) || s.path.split("/").pop() || "Untitled",
+		name: s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
 		messageCount: s.messageCount || 0,
 		lastModified: new Date(s.modified),
 		firstMessage: s.firstMessage,

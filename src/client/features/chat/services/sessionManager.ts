@@ -61,6 +61,7 @@ function extractSessionId(pathOrId: string | undefined): string {
 	// 如果是 path（如 /root/.pi/.../xxx.jsonl），提取文件名中的 UUID
 	if (pathOrId.includes("/")) {
 		const fileName = pathOrId.split("/").pop() || "";
+		if (!fileName) return pathOrId;
 		return fileName.replace(".jsonl", "").split("_").pop() || pathOrId;
 	}
 	return pathOrId;

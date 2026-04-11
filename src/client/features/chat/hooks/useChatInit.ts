@@ -71,12 +71,12 @@ export function useChatInit(): { isConnecting: boolean } {
 					resolve(data as InitResponse);
 				});
 
-				// 发送 init 请求
-				initChatWorkingDirectory(savedWorkingDir || "/root", undefined);
+				// 发送 init 请求，带上当前 sessionId 以便服务器恢复现有 session
+				initChatWorkingDirectory(savedWorkingDir || "/root", currentSessionId || undefined);
 			});
 
 			// 3. 如果服务器返回 active session，恢复 UI
-			if (initResponse?.sessionId && initResponse?.sessionFile) {
+			if (initResponse?.sessionId && initResponse?.sessionFile && initResponse?.cwd) {
 				console.log("[ChatInit] 服务器已有 session，恢复 UI:", {
 					sessionId: initResponse.sessionId,
 					cwd: initResponse.cwd,
@@ -101,13 +101,21 @@ export function useChatInit(): { isConnecting: boolean } {
 				}
 
 				// 加载 session 消息历史
-				await useChatStore.getState().loadSession(initResponse.sessionFile);
+				try {
+					await useChatStore.getState().loadSession(initResponse.sessionFile);
+				} catch (e) {
+					console.warn("[ChatInit] 加载 session 消息失败:", e);
+				}
 
 				// 加载 sessions 列表
-				const sessions = await sessionManager.loadSessionsList(
-					initResponse.cwd,
-				);
-				useSidebarStore.getState().setSessions(sessions);
+				try {
+					const sessions = await sessionManager.loadSessionsList(
+						initResponse.cwd,
+					);
+					useSidebarStore.getState().setSessions(sessions);
+				} catch (e) {
+					console.warn("[ChatInit] 加载 sessions 列表失败:", e);
+				}
 
 				// 选中当前 session
 				useSidebarStore

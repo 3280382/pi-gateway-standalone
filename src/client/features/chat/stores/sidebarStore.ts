@@ -103,8 +103,9 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 
 				// Data Actions
 				setWorkingDir: (path: string) => {
-					const displayName = path.split("/").pop() || path;
-					set({ workingDir: { path, displayName } }, false, "setWorkingDir");
+					const safePath = path || "";
+					const displayName = safePath.split("/").pop() || safePath;
+					set({ workingDir: { path: safePath, displayName } }, false, "setWorkingDir");
 				},
 
 				setSessions: (sessions: Session[]) => {
