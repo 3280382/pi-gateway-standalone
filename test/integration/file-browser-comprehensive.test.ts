@@ -3,9 +3,9 @@
  * Tests all file browser features: sidebar, file selection, viewing, editing, execution
  */
 
-import { spawn } from "child_process";
+import { spawn } from "node:child_process";
+import { join } from "node:path";
 import fetch from "node-fetch";
-import { join } from "path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const SERVER_PORT = 3466;

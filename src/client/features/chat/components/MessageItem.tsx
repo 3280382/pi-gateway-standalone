@@ -98,7 +98,7 @@ function parseToolSummary(toolName: string, args: string | undefined): string {
         return `${key}: ${parsed[key].slice(0, 25)}${parsed[key].length > 25 ? "..." : ""}`;
       }
     }
-  } catch (e) {
+  } catch (_e) {
     // 解析失败返回原始参数的前30字符
     return args.slice(0, 30) + (args.length > 30 ? "..." : "");
   }
@@ -123,7 +123,7 @@ function formatToolArgs(
   if (typeof args === "string") {
     try {
       parsed = JSON.parse(args);
-    } catch (e) {
+    } catch (_e) {
       // 不是 JSON，返回原始字符串
       return args;
     }

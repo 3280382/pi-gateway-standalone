@@ -27,7 +27,6 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type {
   ChatSearchFilters,
-  ChatState,
   Message,
   SearchResult,
   ToolExecution,
@@ -448,7 +447,7 @@ function applyBatchUpdates(
     streamingToolCalls: newToolCalls,
   });
 
-  const preservedContent = getPreservedContent(state.currentStreamingMessage!.content || []);
+  const preservedContent = getPreservedContent(state.currentStreamingMessage?.content || []);
 
   return {
     streamingContent: newContent,
@@ -464,7 +463,7 @@ function applyBatchUpdates(
 /**
  * 调度 RAF 更新
  */
-function scheduleRafUpdate(
+function _scheduleRafUpdate(
   getState: () => State,
   set: (fn: (state: State) => Partial<State>, replace?: boolean, action?: string) => void
 ) {

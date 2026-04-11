@@ -108,7 +108,7 @@ export function SystemPromptModal() {
     };
 
     load();
-  }, [isSystemPromptOpen, workingDir]);
+  }, [isSystemPromptOpen, workingDir, resourceFiles]);
 
   if (!isSystemPromptOpen) return null;
 

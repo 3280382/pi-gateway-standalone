@@ -10,7 +10,7 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import type { Session, SidebarState } from "@/features/chat/types/sidebar";
-import { CHAT_SIDEBAR_PERSIST, CHAT_STORAGE_KEYS, CHAT_STORAGE_VERSION } from "./persist.config";
+import { CHAT_STORAGE_KEYS, CHAT_STORAGE_VERSION } from "./persist.config";
 
 // ============================================================================
 // Initial State Factory

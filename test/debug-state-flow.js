@@ -74,7 +74,7 @@ console.log("   - API响应可能被错误处理");
 
 console.log("\n=== 直接测试API ===");
 
-const { execSync } = require("child_process");
+const { execSync } = require("node:child_process");
 
 console.log("\n测试后端API:");
 try {

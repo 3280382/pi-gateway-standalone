@@ -6,7 +6,6 @@
  * - 通过 useFileItemActions 获取所有交互处理器
  */
 
-import type React from "react";
 import { memo } from "react";
 import { useFileItemActions } from "@/features/files/hooks";
 import type { FileItem as FileItemType } from "@/features/files/stores/fileStore";

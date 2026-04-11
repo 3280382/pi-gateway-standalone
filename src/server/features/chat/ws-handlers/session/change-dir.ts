@@ -64,7 +64,7 @@ export async function handleChangeDir(ctx: WSContext, payload: { path: string })
       sessionId: info.sessionId,
       sessionFile: info.sessionFile,
       pid: process.pid,
-      resourceFiles: info.resourceFiles,
+      resourceFiles: (info as any).resourceFiles || [],
     };
 
     logger.info(`[change_dir] 7. Sending response to client: ${JSON.stringify(response)}`);

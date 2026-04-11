@@ -3,7 +3,7 @@
  * Real-time HTTP request/response log display
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./LlmLogPanel.module.css";
 
 interface LlmLogPanelProps {
@@ -61,11 +61,11 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
     } catch (error) {
       console.error("[LlmLogPanel] Failed to fetch logs:", error);
     }
-  }, []);
+  }, [parseLogEntry]);
 
   // Parse a log entry into structured format
   const parseLogEntry = (entry: any): LogEntry | null => {
-    if (!entry || !entry.type) return null;
+    if (!entry?.type) return null;
 
     try {
       const parsedContent = JSON.parse(entry.content);
@@ -105,7 +105,7 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
     if (contentRef.current && autoScroll && !isFullscreen) {
       contentRef.current.scrollTop = contentRef.current.scrollHeight;
     }
-  }, [logs, autoScroll, isFullscreen]);
+  }, [autoScroll, isFullscreen]);
 
   // Handle manual scroll
   const handleScroll = useCallback(() => {
@@ -203,7 +203,7 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
   const truncateUrl = (url?: string, maxLength: number = 50): string => {
     if (!url) return "";
     if (url.length <= maxLength) return url;
-    return url.substring(0, maxLength) + "...";
+    return `${url.substring(0, maxLength)}...`;
   };
 
   // Format body content with syntax highlighting

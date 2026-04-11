@@ -148,7 +148,7 @@ export function TreeViewModal({
   // 生成复制文本
   const treeText = useMemo(() => {
     if (!treeData) return "";
-    return treeData.path + "\n" + generateTreeText(filteredItems);
+    return `${treeData.path}\n${generateTreeText(filteredItems)}`;
   }, [treeData, filteredItems]);
 
   // ========== 5. Actions ==========
@@ -196,7 +196,6 @@ export function TreeViewModal({
                 placeholder="输入过滤文字..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                autoFocus
               />
             )}
             <button

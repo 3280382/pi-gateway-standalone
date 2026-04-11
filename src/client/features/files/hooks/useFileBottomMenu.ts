@@ -66,7 +66,7 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isTreeModalOpen]);
+  }, [isTreeModalOpen, handleCloseTree]);
 
   // ========== 4. Computed ==========
   // 简单条件判断，无需useMemo

@@ -68,7 +68,7 @@ test.describe("InputArea Buttons", () => {
 
   test("image button should trigger file input", async ({ page }) => {
     // 监听文件输入的点击事件
-    const fileInput = page.locator('input[type="file"]');
+    const _fileInput = page.locator('input[type="file"]');
 
     // 找到图片按钮并点击
     const imageButton = page.locator('button[title="Upload image/file"]');

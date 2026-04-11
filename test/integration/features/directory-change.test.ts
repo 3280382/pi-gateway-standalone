@@ -1,5 +1,5 @@
-import { spawn } from "child_process";
-import { join } from "path";
+import { spawn } from "node:child_process";
+import { join } from "node:path";
 import { type Browser, chromium, type Page } from "playwright";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 

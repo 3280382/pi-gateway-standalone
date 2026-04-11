@@ -16,7 +16,7 @@ async function diagnoseSidebarIssue() {
     const response = await fetch("http://127.0.0.1:5173/");
     const html = await response.text();
     const dom = new JSDOM(html);
-    const document = dom.window.document;
+    const _document = dom.window.document;
 
     // 检查是否有FileSidebar相关的元素
     const hasFileSidebar =

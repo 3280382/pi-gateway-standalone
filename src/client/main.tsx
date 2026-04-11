@@ -11,7 +11,7 @@ let errorDiv: HTMLDivElement | null = null;
 
 function showErrorBanner(message: string, type: "error" | "promise" = "error") {
   // 如果已有错误提示，先移除
-  if (errorDiv && errorDiv.parentNode) {
+  if (errorDiv?.parentNode) {
     errorDiv.parentNode.removeChild(errorDiv);
   }
 
@@ -34,7 +34,7 @@ function showErrorBanner(message: string, type: "error" | "promise" = "error") {
 
   // 点击关闭
   errorDiv.onclick = () => {
-    if (errorDiv && errorDiv.parentNode) {
+    if (errorDiv?.parentNode) {
       errorDiv.parentNode.removeChild(errorDiv);
       errorDiv = null;
     }

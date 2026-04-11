@@ -138,7 +138,7 @@ export function useFileTree(): UseFileTreeResult {
       fileSidebarDebug.info("加载子目录", { path: node.path });
 
       // 标记为加载中
-      setTree((prev) => updateNodeInTree(node.path, (n) => ({ ...n, loading: true })));
+      setTree((_prev) => updateNodeInTree(node.path, (n) => ({ ...n, loading: true })));
 
       try {
         // 并行加载所有子目录
@@ -158,7 +158,7 @@ export function useFileTree(): UseFileTreeResult {
         const validChildren = childNodes.filter((child): child is TreeNode => child !== null);
 
         // 更新节点
-        setTree((prev) =>
+        setTree((_prev) =>
           updateNodeInTree(node.path, (n) => ({
             ...n,
             children: validChildren,
@@ -174,7 +174,7 @@ export function useFileTree(): UseFileTreeResult {
         });
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : "加载失败";
-        setTree((prev) =>
+        setTree((_prev) =>
           updateNodeInTree(node.path, (n) => ({
             ...n,
             loading: false,
@@ -198,7 +198,7 @@ export function useFileTree(): UseFileTreeResult {
 
       // 如果已加载，直接切换展开状态
       if (node.loaded) {
-        setTree((prev) =>
+        setTree((_prev) =>
           updateNodeInTree(node.path, (n) => ({
             ...n,
             expanded: !n.expanded,

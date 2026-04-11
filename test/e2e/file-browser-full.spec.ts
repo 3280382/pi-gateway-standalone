@@ -131,7 +131,7 @@ test.describe("文件浏览器 - 核心功能验证", () => {
       await page.waitForTimeout(500);
 
       // 验证文件查看器或预览面板出现
-      const viewer = page
+      const _viewer = page
         .locator('[class*="viewer"], [class*="modal"], [class*="preview"]')
         .first();
       // 不强制要求viewer必须出现，因为可能是目录
@@ -256,7 +256,7 @@ test.describe("文件浏览器 - 快捷键和交互", () => {
     await page.waitForTimeout(2000);
 
     // 记录当前路径
-    const initialContent = await page.locator('[class*="contentArea"]').first().textContent();
+    const _initialContent = await page.locator('[class*="contentArea"]').first().textContent();
 
     // 刷新页面（模拟F5）
     await page.reload();

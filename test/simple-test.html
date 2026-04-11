@@ -64,7 +64,7 @@
             document.getElementById(containerId).innerHTML = '';
         }
         
-        async function testFrontend() {
+        async function _testFrontend() {
             clearLog('service-status');
             log('service-status', '测试前端服务...');
             
@@ -80,7 +80,7 @@
             }
         }
         
-        async function testBackend() {
+        async function _testBackend() {
             clearLog('service-status');
             log('service-status', '测试后端API...');
             
@@ -97,7 +97,7 @@
             }
         }
         
-        async function testBrowse() {
+        async function _testBrowse() {
             clearLog('browse-result');
             const path = document.getElementById('path-input').value;
             log('browse-result', `浏览目录: ${path}`);
@@ -134,7 +134,7 @@
             }
         }
         
-        async function testReadFile() {
+        async function _testReadFile() {
             clearLog('read-result');
             const filePath = document.getElementById('file-input').value;
             log('read-result', `读取文件: ${filePath}`);
@@ -190,7 +190,7 @@
             }
         }
         
-        async function runFullTest() {
+        async function _runFullTest() {
             clearLog('full-test-result');
             log('full-test-result', '开始完整功能测试...');
             

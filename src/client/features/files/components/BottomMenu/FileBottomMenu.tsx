@@ -7,7 +7,6 @@
  * - TreeView 已抽离到 modals/TreeViewModal
  */
 
-import React from "react";
 import styles from "@/features/files/components/BottomMenu/FileBottomMenu.module.css";
 import { GitHistoryModal } from "@/features/files/components/modals/GitHistoryModal";
 import { TodoInputModal } from "@/features/files/components/modals/TodoInputModal";
@@ -133,7 +132,6 @@ export function FileBottomMenu() {
                 value={newFileName}
                 onChange={(e) => setNewFileName(e.target.value)}
                 placeholder="Enter file name..."
-                autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleConfirmNew();
                   if (e.key === "Escape") handleCancelNew();

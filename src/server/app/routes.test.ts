@@ -2,7 +2,7 @@
  * Register Routes 单元测试
  */
 
-import type { Application, Request, Response } from "express";
+import type { Application, Request } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LlmLogManager } from "../features/chat/llm/log-manager";
 import { registerRoutes } from "./routes";
@@ -17,13 +17,13 @@ describe("registerRoutes", () => {
     mockApp = {
       get: vi.fn((path: string, handler: Function) => {
         routes.set(`GET ${path}`, handler);
-      }),
+      }) as any,
       post: vi.fn((path: string, handler: Function) => {
         routes.set(`POST ${path}`, handler);
-      }),
+      }) as any,
       delete: vi.fn((path: string, handler: Function) => {
         routes.set(`DELETE ${path}`, handler);
-      }),
+      }) as any,
     };
     mockLlmLogManager = {
       getLogFilePath: vi.fn().mockReturnValue("/path/to/log"),
@@ -74,7 +74,7 @@ describe("registerRoutes", () => {
       json: vi.fn(),
     };
 
-    handler?.({} as Request, mockRes as Response);
+    handler?.({} as Request, mockRes as any);
 
     expect(mockRes.json).toHaveBeenCalledWith({
       theme: "dark",

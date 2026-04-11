@@ -74,7 +74,6 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
             placeholder="Enter todo description..."
             value={todoText}
             onChange={(e) => setTodoText(e.target.value)}
-            autoFocus
             onKeyDown={(e) => {
               if (e.key === "Enter" && e.metaKey) {
                 handleSubmit();

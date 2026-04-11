@@ -105,7 +105,7 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
   const open = useCallback(
     async (triggerAtEnd = true) => {
       if (triggerAtEnd) {
-        const newValue = value + "@";
+        const newValue = `${value}@`;
         onChange(newValue);
       }
       setFilter("");

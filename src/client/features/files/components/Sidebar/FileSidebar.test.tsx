@@ -3,7 +3,6 @@
  */
 
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { FileSidebar } from "./FileSidebar";
@@ -22,7 +21,7 @@ describe("FileSidebar", () => {
   const mockSetCurrentPath = vi.fn();
   const mockLoadFiles = vi.fn();
 
-  const mockTreeData = {
+  const _mockTreeData = {
     "/": {
       name: "/",
       path: "/",
@@ -129,7 +128,7 @@ describe("FileSidebar", () => {
     expect(screen.getByText("...")).toBeInTheDocument();
 
     // Resolve the promise
-    resolveBrowse!({ items: [] });
+    resolveBrowse?.({ items: [] });
 
     await waitFor(() => {
       expect(screen.queryByText("...")).not.toBeInTheDocument();
@@ -179,7 +178,7 @@ describe("FileSidebar", () => {
 
     // The active directory should have active class
     // This depends on CSS implementation
-    const homeItem = screen.queryByText("home");
+    const _homeItem = screen.queryByText("home");
     // Note: home might not be rendered if tree hasn't loaded it yet
   });
 

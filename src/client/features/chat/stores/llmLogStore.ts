@@ -42,7 +42,7 @@ interface LlmLogActions {
 
 export const useLlmLogStore = create<LlmLogState & LlmLogActions>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       // 初始状态
       config: {
         enabled: true,

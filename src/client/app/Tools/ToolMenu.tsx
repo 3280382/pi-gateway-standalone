@@ -46,7 +46,7 @@ export function ToolMenu() {
             <DebugTool />
             <PageAgentTool />
             <div className={styles.divider} />
-            <button className={styles.item} onClick={openSettings}>
+            <button type="button" className={styles.item} onClick={openSettings}>
               <span className={styles.menuIcon}>⚙️</span>
               <span>Settings</span>
             </button>

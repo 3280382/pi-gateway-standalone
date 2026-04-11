@@ -4,8 +4,8 @@
  */
 
 import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import type { AgentMessage } from "@mariozechner/pi-agent-core";
 import type { ImageContent } from "@mariozechner/pi-ai";
 import {
@@ -431,7 +431,7 @@ export class PiAgentSession {
         case "message_start": {
           const startMsg = event.message;
           if (startMsg.role === "assistant") {
-            console.log(`[${timestamp}] [SEND] message_start: ${startMsg.id || "new"}`);
+            console.log(`[${timestamp}] [SEND] message_start: ${(startMsg as any).id || "new"}`);
             this.messageStarted = true;
             this.send({ type: "message_start", message: startMsg });
           }
@@ -443,7 +443,7 @@ export class PiAgentSession {
           this.endCurrentContentBlock(timestamp);
 
           if (endMsg.role === "assistant" && this.messageStarted) {
-            console.log(`[${timestamp}] [SEND] message_end: ${endMsg.id}`);
+            console.log(`[${timestamp}] [SEND] message_end: ${(endMsg as any).id}`);
             this.send({ type: "message_end", message: endMsg });
             this.messageStarted = false;
           }
@@ -453,8 +453,8 @@ export class PiAgentSession {
         // Content blocks - 实际的消息内容
         case "message_update": {
           const msgEvent = event.assistantMessageEvent;
-          const contentIndex = msgEvent.contentIndex;
-          const partial = msgEvent.partial;
+          const contentIndex = (msgEvent as any).contentIndex;
+          const partial = (msgEvent as any).partial;
 
           switch (msgEvent.type) {
             case "thinking_start": {

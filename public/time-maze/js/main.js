@@ -122,7 +122,7 @@ class StateRecorder {
     };
   }
 
-  static applyState(state, player, entities, shadowClones) {
+  static applyState(state, player, entities, _shadowClones) {
     if (player && state.player) {
       player.x = state.player.x;
       player.y = state.player.y;
@@ -348,7 +348,7 @@ class ShadowClone {
       ctx.fill();
     });
 
-    const progress = this.currentIndex / this.states.length;
+    const _progress = this.currentIndex / this.states.length;
     const alpha = this.isComplete ? 0.3 : 0.6;
 
     ctx.globalAlpha = alpha;
@@ -402,7 +402,7 @@ class Entity {
   }
 
   update() {}
-  render(ctx) {}
+  render(_ctx) {}
 }
 
 // -------------------- 墙壁类 --------------------
@@ -869,7 +869,7 @@ class LevelManager {
   }
 
   checkInteractions(player, shadowClones = []) {
-    const playerCircle = { x: player.x, y: player.y, radius: player.radius };
+    const _playerCircle = { x: player.x, y: player.y, radius: player.radius };
     let reachedExit = false;
     const allActors = [player, ...shadowClones.filter((s) => s.active)];
 
@@ -1095,7 +1095,7 @@ class GameEngine {
     if (!this.player) return;
 
     if (this.timeManager.isRewinding) {
-      const canContinue = this.timeManager.rewindStep();
+      const _canContinue = this.timeManager.rewindStep();
       const state = this.timeManager.getCurrentState();
 
       if (state) {

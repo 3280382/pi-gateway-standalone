@@ -3,11 +3,11 @@
  * 验证基本功能：侧边栏加载、滚动、文件选择
  */
 
-import fs from "fs";
+import fs from "node:fs";
+import path from "node:path";
 import fetch from "node-fetch";
-import path from "path";
 
-const BASE_URL = "http://127.0.0.1:5173";
+const _BASE_URL = "http://127.0.0.1:5173";
 const API_URL = "http://127.0.0.1:3000";
 
 class FileBrowserUAT {
@@ -300,7 +300,7 @@ class FileBrowserUAT {
             body: JSON.stringify(ep.body),
           });
           if (res.ok) passed++;
-        } catch (e) {
+        } catch (_e) {
           // ignore
         }
       }

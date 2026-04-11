@@ -84,8 +84,8 @@ async function getGitHistory(workingDir: string, filePath: string): Promise<GitC
           shortHash: parts[0].slice(0, 7),
           message: parts[1] || "",
           author: parts[2] || "",
-          date: new Date(parseInt(parts[3]) * 1000).toISOString(),
-          timestamp: parseInt(parts[3]),
+          date: new Date(parseInt(parts[3], 10) * 1000).toISOString(),
+          timestamp: parseInt(parts[3], 10),
         };
       });
   } catch (error) {

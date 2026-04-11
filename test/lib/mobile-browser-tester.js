@@ -471,24 +471,24 @@ export function generateTestReport(results) {
  * @param {string} device - 设备名称
  * @param {boolean} generateReport - 是否生成报告
  */
-export async function testMobileBrowser(url, device = 'android-chrome', generateReport = true) {
+export async function testMobileBrowser(url, device = "android-chrome", generateReport = true) {
   console.log(`开始移动端测试: ${url}`);
   console.log(`使用设备: ${device}`);
-  
+
   const { page, close: _close } = await createMobileBrowser(device);
-  
+
   try {
     // 运行兼容性检查
-    console.log('运行兼容性检查...');
+    console.log("运行兼容性检查...");
     const compatibility = await checkMobileCompatibility(page);
-    
+
     // 运行功能测试
-    console.log('运行功能测试...');
+    console.log("运行功能测试...");
     const functionTest = await runMobileFunctionTest(page, url);
-    
+
     // 收集所有错误
     const allErrors = [...compatibility.issues, ...functionTest.errors];
-    
+
     const _results = {
       timestamp: new Date().toISOString(),
       device,
@@ -496,16 +496,16 @@ export async function testMobileBrowser(url, device = 'android-chrome', generate
       compatibility,
       functionTest,
       errors: allErrors,
-      success: allErrors.length === 0
+      success: allErrors.length === 0,
     };
-    
+
     console.log(`测试完成. 发现 ${allErrors.length} 个问题`);
-    
+
     if (generateReport) {
       const _report = generateTestReport(_results);
-      console.log('测试报告:', _report);
+      console.log("测试报告:", _report);
     }
-    
+
     return _results;
   } finally {
     await close();
@@ -513,10 +513,10 @@ export async function testMobileBrowser(url, device = 'android-chrome', generate
 }
 
 // 生成测试报告
-function generateTestReport(results) {
+function _generateTestReport(results) {
   return {
-    summary: `移动端测试完成 - ${results.success ? '通过' : '失败'}`,
-    details: results
+    summary: `移动端测试完成 - ${results.success ? "通过" : "失败"}`,
+    details: results,
   };
 }
 

@@ -7,7 +7,7 @@ import { getTestServerUrl, isDevServerRunning } from "./test-utils.js";
 
 describe("LLM Log Host List", () => {
   it("should include all required LLM provider hosts", async () => {
-    const serverCode = await import("fs").then((fs) =>
+    const serverCode = await import("node:fs").then((fs) =>
       fs.readFileSync("/root/pi-gateway-standalone/dist/server.js", "utf-8")
     );
 
@@ -32,7 +32,7 @@ describe("LLM Log Host List", () => {
   });
 
   it("should use llmLogManagerRef in fetch interceptor", async () => {
-    const serverCode = await import("fs").then((fs) =>
+    const serverCode = await import("node:fs").then((fs) =>
       fs.readFileSync("/root/pi-gateway-standalone/dist/server.js", "utf-8")
     );
 
@@ -41,7 +41,7 @@ describe("LLM Log Host List", () => {
   });
 
   it("should set up global fetch interceptor at the start of the file", async () => {
-    const serverCode = await import("fs").then((fs) =>
+    const serverCode = await import("node:fs").then((fs) =>
       fs.readFileSync("/root/pi-gateway-standalone/dist/server.js", "utf-8")
     );
 

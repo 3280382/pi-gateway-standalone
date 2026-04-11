@@ -2,9 +2,9 @@
  * 验证所有修复
  */
 
-import fs from "fs";
+import fs from "node:fs";
+import path from "node:path";
 import fetch from "node-fetch";
-import path from "path";
 
 async function verifyAllFixes() {
   console.log("=== 验证所有修复 ===\n");

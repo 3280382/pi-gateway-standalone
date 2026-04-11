@@ -133,28 +133,28 @@ describe("ChatApi Utils", () => {
       const result = finalizeStreamingMessage(streamingMsg, "Final text", "");
 
       expect(result).not.toBeNull();
-      expect(result!.isStreaming).toBe(false);
-      expect(result!.content).toHaveLength(1);
-      expect(result!.content[0].type).toBe("text");
-      expect(result!.content[0].text).toBe("Final text");
+      expect(result?.isStreaming).toBe(false);
+      expect(result?.content).toHaveLength(1);
+      expect(result?.content[0].type).toBe("text");
+      expect(result?.content[0].text).toBe("Final text");
     });
 
     it("should finalize with thinking content only", () => {
       const streamingMsg = createAssistantMessage();
       const result = finalizeStreamingMessage(streamingMsg, "", "Thinking...");
 
-      expect(result!.content).toHaveLength(1);
-      expect(result!.content[0].type).toBe("thinking");
-      expect(result!.content[0].thinking).toBe("Thinking...");
+      expect(result?.content).toHaveLength(1);
+      expect(result?.content[0].type).toBe("thinking");
+      expect(result?.content[0].thinking).toBe("Thinking...");
     });
 
     it("should finalize with both text and thinking", () => {
       const streamingMsg = createAssistantMessage();
       const result = finalizeStreamingMessage(streamingMsg, "Text", "Thinking");
 
-      expect(result!.content).toHaveLength(2);
-      expect(result!.content[0].type).toBe("thinking");
-      expect(result!.content[1].type).toBe("text");
+      expect(result?.content).toHaveLength(2);
+      expect(result?.content[0].type).toBe("thinking");
+      expect(result?.content[1].type).toBe("text");
     });
 
     it("should preserve message ID when finalizing", () => {
@@ -162,14 +162,14 @@ describe("ChatApi Utils", () => {
       const originalId = streamingMsg.id;
       const result = finalizeStreamingMessage(streamingMsg, "Text", "");
 
-      expect(result!.id).toBe(originalId);
+      expect(result?.id).toBe(originalId);
     });
 
     it("should handle empty content", () => {
       const streamingMsg = createAssistantMessage();
       const result = finalizeStreamingMessage(streamingMsg, "", "");
 
-      expect(result!.content).toHaveLength(0);
+      expect(result?.content).toHaveLength(0);
     });
   });
 

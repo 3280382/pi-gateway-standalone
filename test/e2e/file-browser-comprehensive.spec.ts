@@ -47,7 +47,7 @@ test.describe("文件浏览器功能验证", () => {
     await expect(sidebarButton).toBeVisible();
 
     // 获取侧边栏元素（如果存在）
-    const sidebar = page.locator('aside, [class*="sidebar"]').first();
+    const _sidebar = page.locator('aside, [class*="sidebar"]').first();
 
     // 点击切换按钮
     await sidebarButton.click();
@@ -108,7 +108,7 @@ test.describe("文件浏览器功能验证", () => {
 
   test("文件执行API正常", async ({ request }) => {
     // 创建测试脚本
-    const testScript = `#!/bin/bash\necho "Test execution successful"\n`;
+    const _testScript = `#!/bin/bash\necho "Test execution successful"\n`;
 
     // 先测试API端点是否响应
     const response = await request.post(`${API_URL}/api/execute`, {

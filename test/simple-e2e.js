@@ -3,7 +3,7 @@
  * 验证文件浏览器基本功能是否工作
  */
 
-const http = require("http");
+const http = require("node:http");
 
 // 测试前端服务
 console.log("测试前端服务...");
@@ -38,7 +38,7 @@ const apiTest = http.request(
       try {
         const json = JSON.parse(data);
         console.log("✅ 后端API正常:", json);
-      } catch (e) {
+      } catch (_e) {
         console.log("✅ 后端API响应:", data.substring(0, 100));
       }
     });

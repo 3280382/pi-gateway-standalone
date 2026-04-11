@@ -7,7 +7,7 @@
  * - 处理目录选择
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 export interface DirectoryEntry {
   name: string;

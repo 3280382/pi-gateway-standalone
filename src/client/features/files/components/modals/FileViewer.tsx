@@ -11,7 +11,7 @@ import { Compartment, EditorState } from "@codemirror/state";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorView, keymap } from "@codemirror/view";
 import { basicSetup } from "codemirror";
-import React, { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useFileViewer } from "@/features/files/hooks";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { fileViewerDebug } from "@/lib/debug";
@@ -58,7 +58,7 @@ export function FileViewer() {
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
-  }, [terminalOutput]);
+  }, []);
 
   // 语法高亮
   useEffect(() => {
@@ -156,7 +156,7 @@ export function FileViewer() {
       view.destroy();
       editorViewRef.current = null;
     };
-  }, [mode, fileName]); // 模式或文件名变化时重建编辑器
+  }, [mode, editedContent, getLanguage, saveFile, setEditedContent]); // 模式或文件名变化时重建编辑器
 
   // 同步 store 内容到编辑器（外部修改时）
   useEffect(() => {
@@ -188,7 +188,7 @@ export function FileViewer() {
     editorViewRef.current.dispatch({
       effects: languageCompartmentRef.current.reconfigure(newExtension),
     });
-  }, [filePath, mode]); // 文件路径变化时重新配置语言
+  }, [mode, getLanguage]); // 文件路径变化时重新配置语言
 
   // 进入编辑模式后自动聚焦
   useEffect(() => {
@@ -196,7 +196,7 @@ export function FileViewer() {
       const timer = setTimeout(focusEditor, 100);
       return () => clearTimeout(timer);
     }
-  }, [mode]);
+  }, [mode, focusEditor]);
 
   // ========== 4. Computed ==========
   // Prism.js 查看模式语言映射（tsx -> typescript）

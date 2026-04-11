@@ -1,5 +1,5 @@
-import { spawn } from "child_process";
-import { join } from "path";
+import { spawn } from "node:child_process";
+import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const SERVER_PORT = 3475;
@@ -23,10 +23,10 @@ describe("Gateway API", () => {
         () => reject(new Error(`Server startup timeout after 30000ms`)),
         30000
       );
-      let output = "";
+      let _output = "";
       const handleData = (data: Buffer) => {
         const text = data.toString();
-        output += text;
+        _output += text;
         console.log(`[Server Output] ${text.trim()}`);
         if (text.includes("Server started on") || text.includes("Pi Gateway Server")) {
           console.log(`✅ 服务器启动成功，检测到启动消息`);

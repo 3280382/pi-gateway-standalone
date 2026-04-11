@@ -8,10 +8,10 @@
  * await controller.clearCache();
  */
 
-import { execSync, spawn } from "child_process";
-import { existsSync, renameSync, statSync } from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import { execSync } from "node:child_process";
+import { existsSync, renameSync, statSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -119,7 +119,7 @@ const controller = {
         const oldLog = `${GATEWAY_DIR}/logs/frontend_${oldTimestamp}.log`;
         renameSync(frontendLog, oldLog);
       }
-    } catch (e) {
+    } catch (_e) {
       // 忽略错误
     }
 
@@ -151,7 +151,7 @@ const controller = {
         const oldLog = `${GATEWAY_DIR}/logs/backend_${oldTimestamp}.log`;
         renameSync(backendLog, oldLog);
       }
-    } catch (e) {
+    } catch (_e) {
       // 忽略错误
     }
 

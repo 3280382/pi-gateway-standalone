@@ -14,7 +14,7 @@ describe("handleAbort", () => {
 
   beforeEach(() => {
     mockWs = {
-      send: vi.fn(),
+      send: vi.fn() as any,
       readyState: 1,
     };
     mockSession = {

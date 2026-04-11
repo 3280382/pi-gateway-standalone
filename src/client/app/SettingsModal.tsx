@@ -54,6 +54,7 @@ export function SettingsModal() {
         <div className={styles.fontSizeSelector}>
           {(["tiny", "small", "medium", "large"] as FontSize[]).map((size) => (
             <button
+              type="button"
               key={size}
               className={`${styles.fontSizeBtn} ${fontSize === size ? styles.active : ""}`}
               onClick={() => setFontSize(size)}
@@ -81,6 +82,7 @@ function ThemeButton({
 }) {
   return (
     <button
+      type="button"
       className={`${styles.themeBtn} ${isActive ? styles.active : ""}`}
       onClick={onClick}
       title={theme}

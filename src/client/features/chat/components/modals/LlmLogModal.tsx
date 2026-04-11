@@ -90,7 +90,7 @@ export function LlmLogModal() {
               min={1}
               max={60}
               value={refreshInterval}
-              onChange={(e) => setRefreshInterval(parseInt(e.target.value) || 5)}
+              onChange={(e) => setRefreshInterval(parseInt(e.target.value, 10) || 5)}
               disabled={!enabled}
             />
           </label>
@@ -111,7 +111,7 @@ export function LlmLogModal() {
                 max={50000}
                 step={100}
                 value={truncateSize}
-                onChange={(e) => setTruncateSize(parseInt(e.target.value) || 5000)}
+                onChange={(e) => setTruncateSize(parseInt(e.target.value, 10) || 5000)}
               />
             </label>
           )}

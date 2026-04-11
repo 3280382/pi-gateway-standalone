@@ -229,7 +229,7 @@ export function TerminalPanel({
       terminalInstance.current?.dispose();
       terminalInstance.current = null;
     };
-  }, [workingDir, onExecuteCommand, initialCommand, executeCommand, prompt]);
+  }, [onExecuteCommand, initialCommand, executeCommand, prompt]);
 
   // Resize handlers
   const handleResizeStart = useCallback(

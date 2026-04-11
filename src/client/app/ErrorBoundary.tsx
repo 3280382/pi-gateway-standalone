@@ -54,6 +54,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {this.state.error?.stack}
           </pre>
           <button
+            type="button"
             onClick={() => window.location.reload()}
             style={{
               marginTop: "20px",

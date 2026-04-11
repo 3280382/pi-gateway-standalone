@@ -64,8 +64,8 @@ export function formatPath(path: string, maxLength: number = 30): string {
   const parts = path.split("/").filter(Boolean);
   if (parts.length <= 2) return path;
 
-  const shortPath = ".../" + parts.slice(-2).join("/");
-  return shortPath.length > maxLength ? ".../" + parts.slice(-1).join("/") : shortPath;
+  const shortPath = `.../${parts.slice(-2).join("/")}`;
+  return shortPath.length > maxLength ? `.../${parts.slice(-1).join("/")}` : shortPath;
 }
 
 /**

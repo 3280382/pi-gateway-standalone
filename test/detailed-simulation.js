@@ -236,7 +236,7 @@ function formatFileSize(bytes) {
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
+  return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
 function delay(ms) {
@@ -277,7 +277,7 @@ async function runDetailedSimulation() {
 
   // 总结
   const totalTime = (Date.now() - startTime) / 1000;
-  console.log("\n" + "=".repeat(50));
+  console.log(`\n${"=".repeat(50)}`);
   console.log("=== 测试总结 ===");
   console.log(`总测试时间: ${totalTime.toFixed(1)} 秒`);
   console.log(`测试场景: ${results.length} 个`);

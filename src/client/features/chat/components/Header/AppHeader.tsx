@@ -526,7 +526,7 @@ function DirectoryPickerModal({
 
   useEffect(() => {
     loadDirectory(currentPath);
-  }, [currentPath]);
+  }, [currentPath, loadDirectory]);
 
   const handleSelect = async () => {
     if (path && path !== currentPath) {

@@ -3,7 +3,6 @@
  */
 
 import { fireEvent, render, screen } from "@testing-library/react";
-import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
@@ -11,7 +10,7 @@ import { FileList } from "./FileList";
 
 // Mock file icon function
 vi.mock("@/services/api/fileApi", () => ({
-  getFileIcon: vi.fn((extension, isDirectory) => (isDirectory ? "📁" : "📄")),
+  getFileIcon: vi.fn((_extension, isDirectory) => (isDirectory ? "📁" : "📄")),
   formatFileSize: vi.fn((size) => {
     if (size === 0) return "0 B";
     if (size === 1024) return "1 KB";

@@ -3,9 +3,9 @@
  * 模拟用户操作，观察控制台和日志输出
  */
 
-import fs from "fs";
+import fs from "node:fs";
+import path from "node:path";
 import fetch from "node-fetch";
-import path from "path";
 
 async function testSidebarFunctionWithLogging() {
   console.log("=== 最终侧边栏功能测试 ===\n");

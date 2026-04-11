@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "@/features/files/components/FileBrowser/FileBrowser.module.css";
 import { type FilterType, type SortMode, useFileStore } from "@/features/files/stores/fileStore";
 

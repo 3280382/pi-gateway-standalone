@@ -39,7 +39,7 @@
       if (localStorage.getItem(CONFIG.localStorageKey) === "true") {
         return { enabled: true, reason: "localStorage" };
       }
-    } catch (e) {
+    } catch (_e) {
       // localStorage not available
     }
 
@@ -173,7 +173,7 @@
       // Save to localStorage for persistence
       try {
         localStorage.setItem("DEBUG_LOGS", JSON.stringify(logs.slice(-50)));
-      } catch (e) {}
+      } catch (_e) {}
     }
 
     // Capture window errors
@@ -209,7 +209,7 @@
   /**
    * Create debug toggle button
    */
-  function createToggleButton() {
+  function _createToggleButton() {
     const btn = document.createElement("button");
     btn.id = "debug-toggle";
     btn.textContent = "🐛";
@@ -266,8 +266,8 @@
 
           // Add startup logs
           eruda.get("console").log("Debug System Active");
-          eruda.get("console").log("Reason: " + debugCheck.reason);
-          eruda.get("console").log("UA: " + navigator.userAgent);
+          eruda.get("console").log(`Reason: ${debugCheck.reason}`);
+          eruda.get("console").log(`UA: ${navigator.userAgent}`);
         })
         .catch((err) => {
           console.warn("[DebugSystem] Eruda failed, using fallback:", err);

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Debug</title>
@@ -19,14 +19,14 @@
     };
     
     window.addEventListener('unhandledrejection', (e) => {
-      addLog('REJECTION: ' + e.reason);
+      addLog(`REJECTION: ${e.reason}`);
     });
     
     // 加载主应用
     import('/src/main.tsx').then(() => {
       addLog('✅ main.tsx loaded');
     }).catch(e => {
-      addLog('❌ Failed to load main.tsx: ' + e.message);
+      addLog(`❌ Failed to load main.tsx: ${e.message}`);
     });
   </script>
 </body>

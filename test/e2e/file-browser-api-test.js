@@ -3,9 +3,9 @@
  * 不依赖浏览器，直接测试API和代码逻辑
  */
 
-import fs from "fs";
+import fs from "node:fs";
+import path from "node:path";
 import fetch from "node-fetch";
-import path from "path";
 
 const BASE_URL = "http://127.0.0.1:5173";
 const API_URL = "http://127.0.0.1:3000";
@@ -296,7 +296,7 @@ class FileBrowserTest {
     await this.testDataFlow();
 
     // Summary
-    console.log("\n" + "=".repeat(70));
+    console.log(`\n${"=".repeat(70)}`);
     console.log("测试结果汇总");
     console.log("=".repeat(70));
     console.log(`✅ 通过: ${this.passed}`);

@@ -23,7 +23,7 @@ async function scanExtensions(): Promise<ExtensionInfo[]> {
   // 扫描全局扩展目录
   const globalExtPath = process.env.PI_GLOBAL_EXTENSIONS || "/root/.pi/extensions";
   // 扫描项目扩展目录
-  const projectExtPath = process.cwd() + "/.pi/extensions";
+  const projectExtPath = `${process.cwd()}/.pi/extensions`;
 
   const scanPaths = [
     { path: globalExtPath, type: "global" },

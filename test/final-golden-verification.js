@@ -2,14 +2,14 @@
  * 最终黄金验证 - 端到端功能验证
  */
 
-import fs from "fs";
+import fs from "node:fs";
+import path from "node:path";
 import fetch from "node-fetch";
-import path from "path";
 
 async function goldenVerification() {
   console.log("=".repeat(70));
   console.log("FINAL GOLDEN VERIFICATION - 端到端功能验证");
-  console.log("=".repeat(70) + "\n");
+  console.log(`${"=".repeat(70)}\n`);
 
   const startTime = Date.now();
   const issues = [];
@@ -106,7 +106,7 @@ echo "COMPLETE"
 
     if (response.ok) {
       const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("text/plain")) {
+      if (contentType?.includes("text/plain")) {
         console.log("   响应类型: ✅ text/plain (流式)");
       } else {
         console.log("   响应类型: ⚠️ 非标准流式响应");
@@ -279,7 +279,7 @@ echo "COMPLETE"
   // 8. 结果汇总
   const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
-  console.log("\n" + "=".repeat(70));
+  console.log(`\n${"=".repeat(70)}`);
   console.log("验证结果汇总");
   console.log("=".repeat(70));
 
@@ -312,7 +312,7 @@ echo "COMPLETE"
     console.log("   • CSS样式: overlay设计✅");
     console.log("   • Store状态: 一致性✅");
 
-    console.log("\n" + "=".repeat(70));
+    console.log(`\n${"=".repeat(70)}`);
     console.log("GOLDEN VERIFICATION COMPLETE - 所有问题已修复");
     console.log("=".repeat(70));
 
@@ -323,7 +323,7 @@ echo "COMPLETE"
       console.log(`   ${index + 1}. ${issue}`);
     });
 
-    console.log("\n" + "=".repeat(70));
+    console.log(`\n${"=".repeat(70)}`);
     console.log("GOLDEN VERIFICATION FAILED - 需要进一步修复");
     console.log("=".repeat(70));
 

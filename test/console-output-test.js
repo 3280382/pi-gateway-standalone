@@ -3,9 +3,9 @@
  * 验证前端和后端是否同时输出到控制台和日志文件
  */
 
-import fs from "fs";
+import fs from "node:fs";
+import path from "node:path";
 import fetch from "node-fetch";
-import path from "path";
 
 async function testConsoleAndLogOutput() {
   console.log("=== 控制台和日志输出测试 ===\n");
@@ -128,7 +128,7 @@ async function testConsoleAndLogOutput() {
   // 5. 检查tmux服务状态
   console.log("\n5. 服务状态检查:");
   try {
-    const { execSync } = await import("child_process");
+    const { execSync } = await import("node:child_process");
     const statusOutput = execSync(
       "cd /root/pi-gateway-standalone && node scripts/tmux-controller.js status 2>&1",
       { encoding: "utf8" }

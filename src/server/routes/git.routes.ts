@@ -4,7 +4,10 @@
 
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
-import type { FastifyInstance } from "fastify";
+
+// biome-ignore lint: fastify types not installed
+// import type { FastifyInstance } from "fastify";
+type FastifyInstance = any;
 
 const execAsync = promisify(exec);
 
@@ -58,8 +61,8 @@ async function getGitHistory(workingDir: string, filePath: string): Promise<GitC
           shortHash: parts[0].slice(0, 7),
           message: parts[1] || "",
           author: parts[2] || "",
-          date: new Date(parseInt(parts[3]) * 1000).toISOString(),
-          timestamp: parseInt(parts[3]),
+          date: new Date(parseInt(parts[3], 10) * 1000).toISOString(),
+          timestamp: parseInt(parts[3], 10),
         };
       });
   } catch (error) {
@@ -120,9 +123,7 @@ async function isGitRepo(workingDir: string): Promise<boolean> {
 
 export async function gitRoutes(fastify: FastifyInstance): Promise<void> {
   // Get git history for a file
-  fastify.get<{
-    Querystring: { filePath: string; workingDir: string };
-  }>("/git/history", async (request, reply) => {
+  fastify.get("/git/history", async (request: any, reply: any) => {
     const { filePath, workingDir } = request.query;
 
     if (!filePath || !workingDir) {
@@ -143,9 +144,7 @@ export async function gitRoutes(fastify: FastifyInstance): Promise<void> {
   });
 
   // Get file content at specific commit
-  fastify.get<{
-    Querystring: { filePath: string; commitHash: string; workingDir: string };
-  }>("/git/content", async (request, reply) => {
+  fastify.get("/git/content", async (request: any, reply: any) => {
     const { filePath, commitHash, workingDir } = request.query;
 
     if (!filePath || !commitHash || !workingDir) {
@@ -165,9 +164,7 @@ export async function gitRoutes(fastify: FastifyInstance): Promise<void> {
   });
 
   // Get diff between commit and current
-  fastify.get<{
-    Querystring: { filePath: string; commitHash: string; workingDir: string };
-  }>("/git/diff", async (request, reply) => {
+  fastify.get("/git/diff", async (request: any, reply: any) => {
     const { filePath, commitHash, workingDir } = request.query;
 
     if (!filePath || !commitHash || !workingDir) {
@@ -187,9 +184,7 @@ export async function gitRoutes(fastify: FastifyInstance): Promise<void> {
   });
 
   // Check if directory is git repo
-  fastify.get<{
-    Querystring: { workingDir: string };
-  }>("/git/check", async (request, reply) => {
+  fastify.get("/git/check", async (request: any, reply: any) => {
     const { workingDir } = request.query;
 
     if (!workingDir) {

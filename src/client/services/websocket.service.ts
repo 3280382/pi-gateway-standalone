@@ -242,7 +242,7 @@ export class WebSocketService {
       this.eventHandlers.set(event, new Set());
     }
 
-    this.eventHandlers.get(event)!.add(handler);
+    this.eventHandlers.get(event)?.add(handler);
 
     return () => {
       const handlers = this.eventHandlers.get(event);

@@ -124,7 +124,7 @@ function DirectoryPicker({
 
   useEffect(() => {
     loadDirectory(currentPath);
-  }, [currentPath]);
+  }, [currentPath, loadDirectory]);
 
   return (
     <div className={styles.pickerOverlay} onClick={onClose}>

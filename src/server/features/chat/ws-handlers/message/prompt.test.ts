@@ -14,7 +14,7 @@ describe("handlePrompt", () => {
 
   beforeEach(() => {
     mockWs = {
-      send: vi.fn(),
+      send: vi.fn() as any,
       readyState: 1,
     };
     // GatewaySession has prompt method directly and session property with AgentSession

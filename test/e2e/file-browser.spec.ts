@@ -228,7 +228,7 @@ test.describe("文件浏览器端到端测试 - 桌面浏览器", () => {
   });
 });
 
-test.describe('文件浏览器端到端测试 - 手机浏览器', () => {
+test.describe("文件浏览器端到端测试 - 手机浏览器", () => {
   // 使用手机视口和用户代理
   test.use({
     viewport: iPhone12.viewport,
@@ -237,11 +237,11 @@ test.describe('文件浏览器端到端测试 - 手机浏览器', () => {
 
   test.beforeEach(async ({ page }) => {
     // 导航到应用
-    await page.goto('http://127.0.0.1:5173');
-    
+    await page.goto("http://127.0.0.1:5173");
+
     // 等待应用加载
-    await page.waitForLoadState('networkidle');
-    
+    await page.waitForLoadState("networkidle");
+
     // 在手机上可能需要点击菜单按钮来切换到文件浏览器
     const menuButton = page.locator('[data-testid="mobile-menu-button"]');
     if (await menuButton.isVisible()) {
@@ -251,41 +251,43 @@ test.describe('文件浏览器端到端测试 - 手机浏览器', () => {
       // 如果没有移动菜单，直接尝试点击标签页
       await page.click('[data-testid="files-tab"]');
     }
-    
+
     // 等待文件浏览器加载
     await page.waitForSelector('[data-testid="file-browser"]', { timeout: 15000 });
   });
 
-  test('手机端：应该正确加载文件浏览器界面', async ({ page }) => {
+  test("手机端：应该正确加载文件浏览器界面", async ({ page }) => {
     // 验证基本元素存在
     await expect(page.locator('[data-testid="file-browser"]')).toBeVisible();
-    
+
     // 在手机上，侧边栏可能默认隐藏或可折叠
     const sidebar = page.locator('[data-testid="file-sidebar"]');
     if (await sidebar.isVisible()) {
       await expect(sidebar).toBeVisible();
     }
-    
+
     // 工具栏应该可见
     await expect(page.locator('[data-testid="file-toolbar"]')).toBeVisible();
-    
+
     // 文件列表应该可见
-    await expect(page.locator('[data-testid="file-list"], [data-testid="file-grid"]')).toBeVisible();
-    
+    await expect(
+      page.locator('[data-testid="file-list"], [data-testid="file-grid"]')
+    ).toBeVisible();
+
     // 验证视口大小
     const viewportSize = page.viewportSize();
     expect(viewportSize?.width).toBeLessThanOrEqual(390); // iPhone 12宽度
     expect(viewportSize?.height).toBeGreaterThan(800); // iPhone 12高度
   });
 
-  test('手机端：应该显示当前目录的文件列表', async ({ page }) => {
+  test("手机端：应该显示当前目录的文件列表", async ({ page }) => {
     // 等待文件加载
     await page.waitForSelector('[data-testid^="file-item-"]', { timeout: 8000 });
-    
+
     // 验证至少有一个文件项
     const fileItems = page.locator('[data-testid^="file-item-"]');
     await expect(fileItems.first()).toBeVisible();
-    
+
     // 在手机上验证触摸友好的UI
     const firstItem = fileItems.first();
     const itemBox = await firstItem.boundingBox();
@@ -293,17 +295,17 @@ test.describe('文件浏览器端到端测试 - 手机浏览器', () => {
     expect(itemBox?.width).toBeGreaterThan(60);
   });
 
-  test('手机端：应该能够点击文件进行选择', async ({ page }) => {
+  test("手机端：应该能够点击文件进行选择", async ({ page }) => {
     // 等待文件加载
     await page.waitForSelector('[data-testid^="file-item-"]', { timeout: 8000 });
-    
+
     // 点击第一个文件
     const firstFile = page.locator('[data-testid^="file-item-"]').first();
     await firstFile.click();
-    
+
     // 验证文件被选中
     await expect(firstFile).toHaveClass(/selected/);
-    
+
     // 在手机上，操作栏可能以不同方式显示
     const actionBar = page.locator('[data-testid="file-actionbar"]');
     if (await actionBar.isVisible()) {
@@ -315,30 +317,30 @@ test.describe('文件浏览器端到端测试 - 手机浏览器', () => {
     }
   });
 
-  test('手机端：应该能够触摸文件打开查看器', async ({ page }) => {
+  test("手机端：应该能够触摸文件打开查看器", async ({ page }) => {
     // 等待文件加载
     await page.waitForSelector('[data-testid^="file-item-"]', { timeout: 8000 });
-    
+
     // 在手机上，可能是单击或双击打开
     const firstFile = page.locator('[data-testid^="file-item-"]').first();
-    
+
     // 尝试单击（移动端通常单击打开）
     await firstFile.click();
-    
+
     // 等待查看器打开
     await page.waitForTimeout(1000);
-    
+
     // 检查是否打开了查看器
     const viewer = page.locator('[data-testid="file-viewer"]');
-    if (!await viewer.isVisible()) {
+    if (!(await viewer.isVisible())) {
       // 如果没有打开，尝试双击
       await firstFile.dblclick();
       await page.waitForTimeout(1000);
     }
-    
+
     // 验证文件查看器打开
     await expect(page.locator('[data-testid="file-viewer"]')).toBeVisible({ timeout: 3000 });
-    
+
     // 在手机上，查看器应该是全屏或模态框
     const viewerBox = await viewer.boundingBox();
     const viewport = page.viewportSize();
@@ -349,10 +351,10 @@ test.describe('文件浏览器端到端测试 - 手机浏览器', () => {
     }
   });
 
-  test('手机端：应该能够使用触摸刷新文件列表', async ({ page }) => {
+  test("手机端：应该能够使用触摸刷新文件列表", async ({ page }) => {
     // 查找刷新按钮
     const refreshBtn = page.locator('[data-testid="refresh-btn"]');
-    
+
     if (await refreshBtn.isVisible()) {
       await refreshBtn.click();
     } else {
@@ -365,21 +367,23 @@ test.describe('文件浏览器端到端测试 - 手机浏览器', () => {
       await page.mouse.move(0, 100);
       await page.mouse.up();
     }
-    
+
     // 等待刷新完成
     await page.waitForTimeout(1500);
-    
+
     // 验证文件列表仍然存在
-    await expect(page.locator('[data-testid^="file-item-"]').first()).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[data-testid^="file-item-"]').first()).toBeVisible({
+      timeout: 5000,
+    });
   });
 
-  test('手机端：应该能够滑动浏览文件列表', async ({ page }) => {
+  test("手机端：应该能够滑动浏览文件列表", async ({ page }) => {
     // 等待文件加载
     await page.waitForSelector('[data-testid^="file-item-"]', { timeout: 8000 });
-    
+
     // 获取文件列表容器
     const fileList = page.locator('[data-testid="file-list"], [data-testid="file-grid"]');
-    
+
     // 模拟滑动
     const listBox = await fileList.boundingBox();
     if (listBox) {
@@ -387,52 +391,52 @@ test.describe('文件浏览器端到端测试 - 手机浏览器', () => {
       const startX = listBox.x + listBox.width / 2;
       const startY = listBox.y + listBox.height / 2;
       const endY = listBox.y + 50;
-      
+
       await page.mouse.move(startX, startY);
       await page.mouse.down();
       await page.mouse.move(startX, endY, { steps: 10 });
       await page.mouse.up();
-      
+
       // 等待滑动动画
       await page.waitForTimeout(500);
-      
+
       // 验证UI仍然正常
       await expect(fileList).toBeVisible();
     }
   });
 
-  test('手机端：应该能够使用移动端搜索', async ({ page }) => {
+  test("手机端：应该能够使用移动端搜索", async ({ page }) => {
     // 在手机上，搜索可能隐藏在菜单中
     const searchButton = page.locator('[data-testid="mobile-search-button"]');
     const searchInput = page.locator('[data-testid="search-input"]');
-    
+
     if (await searchButton.isVisible()) {
       // 点击搜索按钮展开搜索框
       await searchButton.click();
       await page.waitForTimeout(500);
     }
-    
+
     if (await searchInput.isVisible()) {
       // 在搜索框中输入
-      await searchInput.fill('test');
-      
+      await searchInput.fill("test");
+
       // 等待搜索过滤
       await page.waitForTimeout(1000);
-      
+
       // 验证文件列表更新
       const fileItems = page.locator('[data-testid^="file-item-"]');
       await expect(fileItems.first()).toBeVisible({ timeout: 3000 });
     }
   });
 
-  test('手机端：应该能够查看文件内容（触摸友好）', async ({ page }) => {
+  test("手机端：应该能够查看文件内容（触摸友好）", async ({ page }) => {
     // 等待文件加载
     await page.waitForSelector('[data-testid^="file-item-"]', { timeout: 8000 });
-    
+
     // 点击第一个文件
     const firstFile = page.locator('[data-testid^="file-item-"]').first();
     await firstFile.click();
-    
+
     // 查找查看按钮（可能在操作栏或上下文菜单）
     const viewButton = page.locator('[data-testid="view-btn"], [data-testid="mobile-view-btn"]');
     if (await viewButton.isVisible()) {
@@ -441,10 +445,10 @@ test.describe('文件浏览器端到端测试 - 手机浏览器', () => {
       // 如果没有按钮，尝试双击文件
       await firstFile.dblclick();
     }
-    
+
     // 验证文件查看器打开
     await expect(page.locator('[data-testid="file-viewer"]')).toBeVisible({ timeout: 4000 });
-    
+
     // 验证触摸友好的查看器控件
     const closeButton = page.locator('[data-testid="viewer-close-btn"]');
     if (await closeButton.isVisible()) {
@@ -452,13 +456,13 @@ test.describe('文件浏览器端到端测试 - 手机浏览器', () => {
       expect(closeBox?.height).toBeGreaterThan(44); // iOS最小触摸目标
       expect(closeBox?.width).toBeGreaterThan(44);
     }
-    
+
     // 验证内容区域可滚动
     const contentArea = page.locator('[data-testid="viewer-content"]');
     await expect(contentArea).toBeVisible();
   });
 
-  test('手机端：应该能够执行可执行文件（移动适配）', async ({ page }) => {
+  test("手机端：应该能够执行可执行文件（移动适配）", async ({ page }) => {
     // 这个测试暂时跳过，因为文件不完整
     test.skip();
   });

@@ -2,9 +2,9 @@
  * 诊断所有问题
  */
 
-import fs from "fs";
+import fs from "node:fs";
+import path from "node:path";
 import fetch from "node-fetch";
-import path from "path";
 
 async function diagnoseAllIssues() {
   console.log("=== 诊断所有问题 ===\n");

@@ -77,7 +77,7 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
   // ========== 3. Effects ==========
   useEffect(() => {
     loadDirectory(currentPath);
-  }, [currentPath]);
+  }, [currentPath, loadDirectory]);
 
   // ========== 6. Render ==========
   return (

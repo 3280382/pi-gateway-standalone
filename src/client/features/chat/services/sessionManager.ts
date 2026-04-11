@@ -15,11 +15,7 @@ import type { Session } from "@/features/chat/types/sidebar";
 import { useWorkspaceStore } from "@/features/files/stores";
 import { fetchApi } from "@/services/client";
 import { websocketService } from "@/services/websocket.service";
-import {
-  changeChatDirectory,
-  createNewChatSession,
-  initChatWorkingDirectory,
-} from "./chatWebSocket";
+import { changeChatDirectory, createNewChatSession } from "./chatWebSocket";
 
 // ============================================================================
 // Types

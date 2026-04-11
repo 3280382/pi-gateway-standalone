@@ -2,8 +2,8 @@
  * Comprehensive Gateway Test Suite
  * Tests all core functionality including API, WebSocket, and UI features
  */
-import { spawn } from "child_process";
-import { join } from "path";
+import { spawn } from "node:child_process";
+import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import WebSocket from "ws";
 
@@ -31,10 +31,10 @@ describe("Gateway Comprehensive Tests", () => {
         () => reject(new Error(`Server startup timeout after 30000ms`)),
         30000
       );
-      let output = "";
+      let _output = "";
       const handleData = (data: Buffer) => {
         const text = data.toString();
-        output += text;
+        _output += text;
         console.log(`[Server Output] ${text.trim()}`);
         if (text.includes("Server started on") || text.includes("Pi Gateway Server")) {
           console.log(`✅ 服务器启动成功，检测到启动消息`);
@@ -131,7 +131,7 @@ describe("Gateway Comprehensive Tests", () => {
 
   describe("2. WebSocket Connection Tests", () => {
     it("should establish WebSocket connection", async () => {
-      const wsUrl = SERVER_URL!.replace("http://", "ws://");
+      const wsUrl = SERVER_URL?.replace("http://", "ws://");
       ws = new WebSocket(wsUrl);
 
       await new Promise<void>((resolve, reject) => {
@@ -139,12 +139,12 @@ describe("Gateway Comprehensive Tests", () => {
           reject(new Error("WebSocket connection timeout"));
         }, WS_TIMEOUT);
 
-        ws!.on("open", () => {
+        ws?.on("open", () => {
           clearTimeout(timeout);
           resolve();
         });
 
-        ws!.on("error", (err) => {
+        ws?.on("error", (err) => {
           clearTimeout(timeout);
           reject(err);
         });
@@ -154,7 +154,7 @@ describe("Gateway Comprehensive Tests", () => {
     });
 
     it("should receive pid in initialized message", async () => {
-      const wsUrl = SERVER_URL!.replace("http://", "ws://");
+      const wsUrl = SERVER_URL?.replace("http://", "ws://");
       const testWs = new WebSocket(wsUrl);
 
       const result = await new Promise<{ sessionId: string; pid: number }>((resolve, reject) => {
@@ -188,7 +188,7 @@ describe("Gateway Comprehensive Tests", () => {
     });
 
     it("should list models via WebSocket", async () => {
-      const wsUrl = SERVER_URL!.replace("http://", "ws://");
+      const wsUrl = SERVER_URL?.replace("http://", "ws://");
       const testWs = new WebSocket(wsUrl);
 
       const models = await new Promise<Array<any>>((resolve, reject) => {
@@ -227,7 +227,7 @@ describe("Gateway Comprehensive Tests", () => {
     });
 
     it("should handle session lifecycle", async () => {
-      const wsUrl = SERVER_URL!.replace("http://", "ws://");
+      const wsUrl = SERVER_URL?.replace("http://", "ws://");
       const testWs = new WebSocket(wsUrl);
 
       const events: string[] = [];
@@ -275,7 +275,7 @@ describe("Gateway Comprehensive Tests", () => {
         return;
       }
 
-      const wsUrl = SERVER_URL!.replace("http://", "ws://");
+      const wsUrl = SERVER_URL?.replace("http://", "ws://");
       const testWs = new WebSocket(wsUrl);
 
       const result = await new Promise<{
@@ -376,7 +376,7 @@ describe("Gateway Comprehensive Tests", () => {
 
     it("should log LLM API calls", async () => {
       // Trigger a prompt first
-      const wsUrl = SERVER_URL!.replace("http://", "ws://");
+      const wsUrl = SERVER_URL?.replace("http://", "ws://");
       const testWs = new WebSocket(wsUrl);
 
       await new Promise<void>((resolve, _reject) => {
@@ -442,7 +442,7 @@ describe("Gateway Comprehensive Tests", () => {
 
   describe("4. UI State Tests", () => {
     it("should handle status updates correctly", async () => {
-      const wsUrl = SERVER_URL!.replace("http://", "ws://");
+      const wsUrl = SERVER_URL?.replace("http://", "ws://");
       const testWs = new WebSocket(wsUrl);
 
       const statuses: string[] = [];
@@ -483,7 +483,7 @@ describe("Gateway Comprehensive Tests", () => {
 
   describe("5. Error Handling Tests", () => {
     it("should handle invalid message types gracefully", async () => {
-      const wsUrl = SERVER_URL!.replace("http://", "ws://");
+      const wsUrl = SERVER_URL?.replace("http://", "ws://");
       const testWs = new WebSocket(wsUrl);
 
       const result = await new Promise<{
@@ -521,7 +521,7 @@ describe("Gateway Comprehensive Tests", () => {
     });
 
     it("should handle session not initialized error", async () => {
-      const wsUrl = SERVER_URL!.replace("http://", "ws://");
+      const wsUrl = SERVER_URL?.replace("http://", "ws://");
       const testWs = new WebSocket(wsUrl);
 
       const result = await new Promise<{ gotError: boolean }>((resolve, _reject) => {
@@ -556,7 +556,7 @@ describe("Gateway Comprehensive Tests", () => {
 
   describe("6. Session Management Tests", () => {
     it("should list and load sessions", async () => {
-      const wsUrl = SERVER_URL!.replace("http://", "ws://");
+      const wsUrl = SERVER_URL?.replace("http://", "ws://");
       const testWs = new WebSocket(wsUrl);
 
       const sessions = await new Promise<Array<any>>((resolve, reject) => {

@@ -10,8 +10,8 @@
  * - 各 feature 引用自己的配置文件
  */
 
-import { CHAT_STORAGE_KEYS, CHAT_STORAGE_VERSION } from "@/features/chat/stores/persist.config";
-import { FILES_STORAGE_KEYS, FILES_STORAGE_VERSION } from "@/features/files/stores/persist.config";
+import { CHAT_STORAGE_KEYS } from "@/features/chat/stores/persist.config";
+import { FILES_STORAGE_KEYS } from "@/features/files/stores/persist.config";
 
 // ============================================================================
 // App Storage Keys

@@ -1,8 +1,8 @@
 /**
  * Test tool display flow - ensures toolcall_delta and tool_start are properly coordinated
  */
-import { spawn } from "child_process";
-import { join } from "path";
+import { spawn } from "node:child_process";
+import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import WebSocket from "ws";
 
@@ -59,7 +59,7 @@ describe("Tool Display Flow", () => {
             if (!toolEvents.has(msg.toolCallId)) {
               toolEvents.set(msg.toolCallId, []);
             }
-            toolEvents.get(msg.toolCallId)!.push(msg.type);
+            toolEvents.get(msg.toolCallId)?.push(msg.type);
           }
 
           if (msg.type === "initialized") {

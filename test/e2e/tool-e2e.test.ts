@@ -2,8 +2,8 @@
  * End-to-end test for tool display with real WebSocket
  * Tests the complete flow including frontend message handling
  */
-import { spawn } from "child_process";
-import { join } from "path";
+import { spawn } from "node:child_process";
+import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import WebSocket from "ws";
 
@@ -116,7 +116,7 @@ describe("Tool E2E Test", () => {
           if (!toolEvents.has(e.toolCallId)) {
             toolEvents.set(e.toolCallId, []);
           }
-          toolEvents.get(e.toolCallId)!.push(e.type);
+          toolEvents.get(e.toolCallId)?.push(e.type);
         }
       }
 

@@ -3,7 +3,6 @@
  */
 
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   escapeRegExp,
@@ -287,7 +286,8 @@ describe("TreeViewModal", () => {
       expect(level2).toBeTruthy();
 
       // 获取 paddingLeft 值
-      const getPadding = (el: Element) => parseInt((el as HTMLElement).style.paddingLeft || "0");
+      const getPadding = (el: Element) =>
+        parseInt((el as HTMLElement).style.paddingLeft || "0", 10);
 
       const p0 = getPadding(level0!);
       const p1 = getPadding(level1!);

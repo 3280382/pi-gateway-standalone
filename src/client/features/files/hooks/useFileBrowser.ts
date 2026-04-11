@@ -54,7 +54,7 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
     };
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActive]);
+  }, [isActive, setWorkingDir]);
 
   /**
    * 加载目录内容

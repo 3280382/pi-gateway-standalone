@@ -207,7 +207,7 @@ export function formatObject(obj: any, maxDepth = 3): string {
   try {
     return JSON.stringify(
       obj,
-      (key, value) => {
+      (_key, value) => {
         if (typeof value === "object" && value !== null) {
           // 限制深度
           if (maxDepth <= 0) return "[Object]";

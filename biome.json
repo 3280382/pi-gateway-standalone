@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!!**/dist"]
+    "includes": ["**", "!!**/dist", "!public/fonts", "!public/vendor", "!node_modules"]
   },
   "formatter": {
     "enabled": true,

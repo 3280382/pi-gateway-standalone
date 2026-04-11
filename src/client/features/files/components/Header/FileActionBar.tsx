@@ -2,7 +2,6 @@
  * FileActionBar - 选中文件操作栏
  */
 
-import React from "react";
 import { useFileViewer } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import styles from "../FileBrowser/FileBrowser.module.css";
@@ -55,7 +54,7 @@ export function FileActionBar({ onExecute, onOpenBottomPanel }: FileActionBarPro
   // 判断文件是否可执行
   const isExecutable =
     EXECUTABLE_EXTENSIONS.some((ext) =>
-      selectedActionFileName?.toLowerCase().endsWith("." + ext)
+      selectedActionFileName?.toLowerCase().endsWith(`.${ext}`)
     ) || !selectedActionFileName?.includes(".");
 
   // 判断文件是否可编辑

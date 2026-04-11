@@ -3,9 +3,9 @@
  * 简化版本 - 检查文件是否存在而不是导入
  */
 
-import { existsSync } from "fs";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
+import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const __filename = fileURLToPath(import.meta.url);

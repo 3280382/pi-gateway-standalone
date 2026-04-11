@@ -69,7 +69,7 @@ export function createLogger(namespace: string) {
     return level <= moduleLevel; // 开发环境根据模块级别
   };
 
-  const formatMessage = (message: string, data?: any): string => {
+  const formatMessage = (message: string, _data?: any): string => {
     const timestamp = new Date().toLocaleTimeString("zh-CN", {
       hour12: false,
       hour: "2-digit",

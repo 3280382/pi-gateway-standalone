@@ -9,8 +9,6 @@
 import type {
   BrowseResponse,
   FileContentResponse,
-  FileExecuteResponse,
-  FileItem,
   TreeNode,
   TreeResponse,
 } from "@/features/files/types";

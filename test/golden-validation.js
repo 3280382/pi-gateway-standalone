@@ -3,10 +3,10 @@
  * 不依赖手动测试，完全自动化验证所有修复
  */
 
-import fs from "fs";
+import fs from "node:fs";
+import path from "node:path";
+import { setTimeout } from "node:timers/promises";
 import fetch from "node-fetch";
-import path from "path";
-import { setTimeout } from "timers/promises";
 
 class GoldenValidation {
   constructor() {
@@ -149,7 +149,7 @@ echo "=== TEST COMPLETE ==="
         
         // 验证响应类型
         const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('text/plain')) {
+        if (contentType?.includes('text/plain')) {
           this.log('执行API: ✅ 流式响应类型正确');
         } else {
           this.log('执行API: ⚠️ 响应类型可能不是流式', 'WARN');
@@ -380,9 +380,9 @@ echo "=== TEST COMPLETE ==="
   }
   
   async run() {
-    console.log('\n' + '='.repeat(60));
+    console.log(`\n${'='.repeat(60)}`);
     console.log('GOLDEN VALIDATION - 端到端功能验证');
-    console.log('='.repeat(60) + '\n');
+    console.log(`${'='.repeat(60)}\n`);
     
     const startTime = Date.now();
     
@@ -399,7 +399,7 @@ echo "=== TEST COMPLETE ==="
       
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
       
-      console.log('\n' + '='.repeat(60));
+      console.log(`\n${'='.repeat(60)}`);
       console.log('验证结果汇总');
       console.log('='.repeat(60));
       
@@ -432,5 +432,5 @@ echo "=== TEST COMPLETE ==="
         return { success: true, duration, issues: [] };
       } else {
         console.log(`❌ 发现 ${this.results.length} 个问题:`);
-        this.results.forEach((issue, index) => {
+        this.results.forEach((_issue, index) => {
           console.log(`   ${index + 1}.

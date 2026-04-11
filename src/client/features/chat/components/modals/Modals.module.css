@@ -44,10 +44,10 @@
 }
 
 .modal.fullscreen {
-  width: 98vw !important;
-  max-width: 1600px !important;
-  max-height: 95vh !important;
-  height: 95vh !important;
+  width: 98vw;
+  max-width: 1600px;
+  max-height: 95vh;
+  height: 95vh;
 }
 
 /* ========== Header ========== */

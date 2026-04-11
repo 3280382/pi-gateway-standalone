@@ -121,7 +121,7 @@ const LANG_MAP: Record<string, string> = {
 };
 
 // Prism.js 语言映射 - 用于查看模式（某些语言需要映射到 Prism 支持的名字）
-const PRISM_LANG_MAP: Record<string, string> = {
+const _PRISM_LANG_MAP: Record<string, string> = {
   tsx: "typescript", // Prism 使用 typescript 来高亮 TSX
   jsx: "javascript", // Prism 使用 javascript 来高亮 JSX
 };

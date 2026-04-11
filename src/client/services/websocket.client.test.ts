@@ -102,7 +102,7 @@ class WebSocketClient {
     if (!this.messageHandlers.has(event)) {
       this.messageHandlers.set(event, []);
     }
-    this.messageHandlers.get(event)!.push(handler);
+    this.messageHandlers.get(event)?.push(handler);
 
     // Return unsubscribe function
     return () => {

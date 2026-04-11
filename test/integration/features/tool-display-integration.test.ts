@@ -2,8 +2,8 @@
  * Integration test for tool display - verifies frontend correctly handles
  * toolcall_delta and tool_start without creating duplicate tools
  */
-import { spawn } from "child_process";
-import { join } from "path";
+import { spawn } from "node:child_process";
+import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import WebSocket from "ws";
 
@@ -113,7 +113,7 @@ describe("Tool Display Integration", () => {
           if (!eventsByTool.has(e.toolCallId)) {
             eventsByTool.set(e.toolCallId, []);
           }
-          eventsByTool.get(e.toolCallId)!.push(e.type);
+          eventsByTool.get(e.toolCallId)?.push(e.type);
         }
       }
 

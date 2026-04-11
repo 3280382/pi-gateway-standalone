@@ -73,7 +73,7 @@ export function useSlashCommands(options: UseSlashCommandsOptions): UseSlashComm
 
   // 打开命令选择器
   const open = useCallback(() => {
-    const newValue = value + "/";
+    const newValue = `${value}/`;
     onChange(newValue);
     setFilter("");
     setIsOpen(true);

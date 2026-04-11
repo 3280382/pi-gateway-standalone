@@ -3,9 +3,9 @@
  * 按照FEATURES.md验证所有功能
  */
 
-import fs from "fs";
+import fs from "node:fs";
+import path from "node:path";
 import fetch from "node-fetch";
-import path from "path";
 
 const BASE_URL = "http://127.0.0.1:5173";
 const API_URL = "http://127.0.0.1:3000";
@@ -384,7 +384,7 @@ class FileBrowserGoldenTest {
     await this.testIntegration();
 
     // Summary
-    console.log("\n" + "=".repeat(70));
+    console.log(`\n${"=".repeat(70)}`);
     console.log("验证结果汇总");
     console.log("=".repeat(70));
     console.log(`✅ 通过: ${this.passed}`);

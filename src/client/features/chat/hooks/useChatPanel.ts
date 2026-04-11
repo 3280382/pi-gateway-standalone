@@ -90,10 +90,10 @@ export function useChatPanel(): UseChatPanelReturn {
 
   // ===== [ANCHOR:STORE_SELECTORS] =====
   const inputText = useChatStore((state) => state.inputText);
-  const messages = useChatStore((state) => state.messages);
-  const currentStreamingMessage = useChatStore((state) => state.currentStreamingMessage);
-  const streamingContent = useChatStore((state) => state.streamingContent);
-  const streamingThinking = useChatStore((state) => state.streamingThinking);
+  const _messages = useChatStore((state) => state.messages);
+  const _currentStreamingMessage = useChatStore((state) => state.currentStreamingMessage);
+  const _streamingContent = useChatStore((state) => state.streamingContent);
+  const _streamingThinking = useChatStore((state) => state.streamingThinking);
   const chatController = useChatController();
 
   // ===== [ANCHOR:EFFECTS] =====
@@ -112,13 +112,7 @@ export function useChatPanel(): UseChatPanelReturn {
     if (messagesRef.current && shouldScrollToBottom) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
-  }, [
-    messages.length,
-    currentStreamingMessage,
-    streamingContent,
-    streamingThinking,
-    shouldScrollToBottom,
-  ]);
+  }, [shouldScrollToBottom]);
 
   // ===== [ANCHOR:HANDLERS] =====
   const handleScroll = useCallback(() => {

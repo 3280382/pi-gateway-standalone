@@ -149,7 +149,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
     [isMultiSelectMode, setIsMultiSelectMode, storeToggleSelection]
   );
 
-  const handleSelectForAction = useCallback(
+  const _handleSelectForAction = useCallback(
     (item: FileItem) => {
       setSelectedActionFile(item.path, item.name);
     },
