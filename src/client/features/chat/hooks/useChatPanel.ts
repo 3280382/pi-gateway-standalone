@@ -74,6 +74,13 @@ export interface UseChatPanelReturn {
 
   // 消息操作
   handleSend: () => Promise<void>;
+  handleSendWithImages: (
+    text: string,
+    images: Array<{
+      type: "image";
+      source: { type: "base64"; mediaType: string; data: string };
+    }>
+  ) => Promise<void>;
   handleBashCommand: (command: string) => void;
   handleSlashCommand: (command: string, args: string) => void;
   handleNewSession: () => Promise<void>;
@@ -174,6 +181,26 @@ export function useChatPanel(): UseChatPanelReturn {
     }
   }, [inputText, chatController]);
 
+  const handleSendWithImages = useCallback(
+    async (
+      text: string,
+      images: Array<{
+        type: "image";
+        source: { type: "base64"; mediaType: string; data: string };
+      }>
+    ) => {
+      if (text.trim() || images.length > 0) {
+        setShouldScrollToBottom(true);
+        try {
+          await chatController.sendMessage(text, images);
+        } catch (err) {
+          console.error("[useChatPanel] sendMessage with images failed:", err);
+        }
+      }
+    },
+    [chatController]
+  );
+
   const handleBashCommand = useCallback(
     (command: string) => {
       setShouldScrollToBottom(true);
@@ -228,6 +255,7 @@ export function useChatPanel(): UseChatPanelReturn {
     setShouldScrollToBottom,
     handleScroll,
     handleSend,
+    handleSendWithImages,
     handleBashCommand,
     handleSlashCommand,
     handleNewSession,

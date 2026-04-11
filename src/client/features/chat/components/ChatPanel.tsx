@@ -74,6 +74,7 @@ export function ChatPanel() {
           isStreaming={isStreaming}
           onChange={chatController.setInputText}
           onSend={chatPanel.handleSend}
+          onSendWithImages={chatPanel.handleSendWithImages}
           onAbort={chatController.abortGeneration}
           onBashCommand={chatPanel.handleBashCommand}
           onSlashCommand={chatPanel.handleSlashCommand}
