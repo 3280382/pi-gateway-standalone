@@ -20,6 +20,6 @@ export type { SearchFilters } from "@/features/chat/hooks/useSearchFilters";
 export { useSearchFilters } from "@/features/chat/hooks/useSearchFilters";
 export { useSlashCommands } from "@/features/chat/hooks/useSlashCommands";
 export {
-	THINKING_LEVELS,
-	useThinkingSelector,
+  THINKING_LEVELS,
+  useThinkingSelector,
 } from "@/features/chat/hooks/useThinkingSelector";

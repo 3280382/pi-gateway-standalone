@@ -20,23 +20,23 @@ import { checkPathExists, getServerWorkingDir } from "./api/fileApi";
  * 3. 如果无效，使用服务器当前目录
  */
 export async function initializeFilePath(): Promise<string> {
-	// 从 fileStore 获取当前路径（已经由 Zustand persist 从 localStorage 恢复）
-	const { workingDir } = useFileStore.getState();
+  // 从 fileStore 获取当前路径（已经由 Zustand persist 从 localStorage 恢复）
+  const { workingDir } = useFileStore.getState();
 
-	// 如果有持久化的路径，检查是否还存在
-	if (workingDir && workingDir !== "/root") {
-		const exists = await checkPathExists(workingDir);
-		if (exists) {
-			console.log("[Init] Using persisted path:", workingDir);
-			return workingDir;
-		}
-		console.log("[Init] Persisted path no longer exists:", workingDir);
-	}
+  // 如果有持久化的路径，检查是否还存在
+  if (workingDir && workingDir !== "/root") {
+    const exists = await checkPathExists(workingDir);
+    if (exists) {
+      console.log("[Init] Using persisted path:", workingDir);
+      return workingDir;
+    }
+    console.log("[Init] Persisted path no longer exists:", workingDir);
+  }
 
-	// 使用服务器当前目录
-	const serverDir = await getServerWorkingDir();
-	console.log("[Init] Using server working dir:", serverDir);
-	return serverDir;
+  // 使用服务器当前目录
+  const serverDir = await getServerWorkingDir();
+  console.log("[Init] Using server working dir:", serverDir);
+  return serverDir;
 }
 
 /**
@@ -45,6 +45,6 @@ export async function initializeFilePath(): Promise<string> {
  * 注意：此函数仅返回 store 中的当前值，不验证路径有效性
  */
 export function getInitialPath(): string {
-	if (typeof window === "undefined") return "/root";
-	return useFileStore.getState().workingDir;
+  if (typeof window === "undefined") return "/root";
+  return useFileStore.getState().workingDir;
 }

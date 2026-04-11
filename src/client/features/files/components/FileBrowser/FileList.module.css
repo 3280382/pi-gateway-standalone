@@ -2,99 +2,99 @@
  * FileList Styles
  */
 .list {
-	display: flex;
-	flex-direction: column;
-	overflow-y: auto;
-	touch-action: pan-y pinch-zoom;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  touch-action: pan-y pinch-zoom;
 }
 
 .listHeader {
-	display: grid;
-	grid-template-columns: 1fr 80px 120px;
-	gap: 12px;
-	padding: 8px 16px;
-	background: var(--bg-secondary);
-	border-bottom: 1px solid var(--border-color);
-	font-size: var(--font-xs);
-	font-weight: 600;
-	color: var(--text-secondary);
-	position: sticky;
-	top: 0;
-	z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr 80px 120px;
+  gap: 12px;
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .headerName {
-	padding-left: 8px;
+  padding-left: 8px;
 }
 
 .listItem {
-	display: grid;
-	grid-template-columns: auto auto 1fr 80px 120px;
-	gap: 12px;
-	align-items: center;
-	padding: 8px 16px;
-	border-bottom: 1px solid var(--border-subtle);
-	cursor: pointer;
-	transition: all 0.15s ease;
-	user-select: none;
-	-webkit-user-select: none;
+  display: grid;
+  grid-template-columns: auto auto 1fr 80px 120px;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .listItem:hover {
-	background: var(--bg-hover);
+  background: var(--bg-hover);
 }
 
 .listItem.selected {
-	background: var(--accent-bg-blue);
+  background: var(--accent-bg-blue);
 }
 
 .listItem.directory {
-	background: var(--accent-bg-yellow);
+  background: var(--accent-bg-yellow);
 }
 
 .listItem.directory:hover {
-	background: var(--accent-yellow);
-	opacity: 0.8;
+  background: var(--accent-yellow);
+  opacity: 0.8;
 }
 
 .listItem.dropTarget {
-	border: 2px dashed var(--accent-green);
-	background: var(--accent-bg-green);
+  border: 2px dashed var(--accent-green);
+  background: var(--accent-bg-green);
 }
 
 .listItem.dragging {
-	opacity: 0.5;
+  opacity: 0.5;
 }
 
 .checkbox {
-	font-size: 16px;
-	color: var(--accent-blue);
-	width: 24px;
-	text-align: center;
+  font-size: 16px;
+  color: var(--accent-blue);
+  width: 24px;
+  text-align: center;
 }
 
 .listIcon {
-	font-size: 18px;
-	width: 24px;
-	text-align: center;
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
 }
 
 .listName {
-	font-size: var(--font-sm);
-	color: var(--text-primary);
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+  font-size: var(--font-sm);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .listSize {
-	font-size: var(--font-xs);
-	color: var(--text-secondary);
-	text-align: right;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  text-align: right;
 }
 
 .listModified {
-	font-size: var(--font-xs);
-	color: var(--text-secondary);
-	text-align: right;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  text-align: right;
 }

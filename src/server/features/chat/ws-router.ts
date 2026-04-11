@@ -24,7 +24,7 @@ const logger = new Logger({ level: LogLevel.INFO });
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface WSMessagePayload {
-	[key: string]: unknown;
+  [key: string]: unknown;
 }
 
 /**
@@ -32,40 +32,40 @@ export interface WSMessagePayload {
  * Each WebSocket connection has its own context
  */
 export interface WSContext {
-	/** WebSocket connection */
-	ws: WebSocket;
-	/** Gateway session */
-	session: PiAgentSession;
-	/** Connection ID */
-	connectionId: string;
-	/** Connection time */
-	connectedAt: Date;
+  /** WebSocket connection */
+  ws: WebSocket;
+  /** Gateway session */
+  session: PiAgentSession;
+  /** Connection ID */
+  connectionId: string;
+  /** Connection time */
+  connectedAt: Date;
 }
 
 /**
  * Message handler type
  */
 export type WSHandler = (
-	ctx: WSContext,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	payload: any,
+  ctx: WSContext,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: any
 ) => Promise<void> | void;
 
 /**
  * Middleware function type
  */
 export type WSMiddleware = (
-	ctx: WSContext,
-	payload: WSMessagePayload,
-	next: () => Promise<void>,
+  ctx: WSContext,
+  payload: WSMessagePayload,
+  next: () => Promise<void>
 ) => Promise<void>;
 
 /**
  * Route item
  */
 export interface WSRoute {
-	type: string;
-	handler: WSHandler;
+  type: string;
+  handler: WSHandler;
 }
 
 // ============================================================================
@@ -77,155 +77,145 @@ export interface WSRoute {
  * Manages message type to handler mapping
  */
 export class WSRouter {
-	private routes: Map<string, WSHandler> = new Map();
-	private middlewares: WSMiddleware[] = [];
-	private errorHandler?: (error: Error, ctx: WSContext, type: string) => void;
+  private routes: Map<string, WSHandler> = new Map();
+  private middlewares: WSMiddleware[] = [];
+  private errorHandler?: (error: Error, ctx: WSContext, type: string) => void;
 
-	/**
-	 * Register message handler
-	 * @param type Message type
-	 * @param handler Handler function
-	 */
-	register(type: string, handler: WSHandler): void {
-		if (this.routes.has(type)) {
-			logger.warn(
-				`[WSRouter] Message type "${type}" already registered, will be overwritten`,
-			);
-		}
-		this.routes.set(type, handler);
-		logger.info(`[WSRouter] Registered handler: ${type}`);
-	}
+  /**
+   * Register message handler
+   * @param type Message type
+   * @param handler Handler function
+   */
+  register(type: string, handler: WSHandler): void {
+    if (this.routes.has(type)) {
+      logger.warn(`[WSRouter] Message type "${type}" already registered, will be overwritten`);
+    }
+    this.routes.set(type, handler);
+    logger.info(`[WSRouter] Registered handler: ${type}`);
+  }
 
-	/**
-	 * Batch register message handlers
-	 * @param routes Route array
-	 */
-	registerBatch(routes: WSRoute[]): void {
-		for (const { type, handler } of routes) {
-			this.register(type, handler);
-		}
-	}
+  /**
+   * Batch register message handlers
+   * @param routes Route array
+   */
+  registerBatch(routes: WSRoute[]): void {
+    for (const { type, handler } of routes) {
+      this.register(type, handler);
+    }
+  }
 
-	/**
-	 * Remove message handler
-	 * @param type Message type
-	 */
-	unregister(type: string): void {
-		this.routes.delete(type);
-		logger.info(`[WSRouter] Unregistered handler: ${type}`);
-	}
+  /**
+   * Remove message handler
+   * @param type Message type
+   */
+  unregister(type: string): void {
+    this.routes.delete(type);
+    logger.info(`[WSRouter] Unregistered handler: ${type}`);
+  }
 
-	/**
-	 * Add middleware
-	 * @param middleware Middleware function
-	 */
-	use(middleware: WSMiddleware): void {
-		this.middlewares.push(middleware);
-	}
+  /**
+   * Add middleware
+   * @param middleware Middleware function
+   */
+  use(middleware: WSMiddleware): void {
+    this.middlewares.push(middleware);
+  }
 
-	/**
-	 * Set error handler
-	 * @param handler Error handler
-	 */
-	setErrorHandler(
-		handler: (error: Error, ctx: WSContext, type: string) => void,
-	): void {
-		this.errorHandler = handler;
-	}
+  /**
+   * Set error handler
+   * @param handler Error handler
+   */
+  setErrorHandler(handler: (error: Error, ctx: WSContext, type: string) => void): void {
+    this.errorHandler = handler;
+  }
 
-	/**
-	 * Dispatch message to corresponding handler
-	 * @param type Message type
-	 * @param ctx WebSocket context
-	 * @param payload Message payload
-	 */
-	async dispatch(
-		type: string,
-		ctx: WSContext,
-		payload: WSMessagePayload,
-	): Promise<void> {
-		const handler = this.routes.get(type);
+  /**
+   * Dispatch message to corresponding handler
+   * @param type Message type
+   * @param ctx WebSocket context
+   * @param payload Message payload
+   */
+  async dispatch(type: string, ctx: WSContext, payload: WSMessagePayload): Promise<void> {
+    const handler = this.routes.get(type);
 
-		if (!handler) {
-			logger.warn(`[WSRouter] No handler found for message type "${type}"`);
-			ctx.ws.send(
-				JSON.stringify({
-					type: "error",
-					error: `Unknown message type: ${type}`,
-				}),
-			);
-			return;
-		}
+    if (!handler) {
+      logger.warn(`[WSRouter] No handler found for message type "${type}"`);
+      ctx.ws.send(
+        JSON.stringify({
+          type: "error",
+          error: `Unknown message type: ${type}`,
+        })
+      );
+      return;
+    }
 
-		try {
-			// Build middleware chain
-			const executeHandler = async () => {
-				await handler(ctx, payload);
-			};
+    try {
+      // Build middleware chain
+      const executeHandler = async () => {
+        await handler(ctx, payload);
+      };
 
-			// Apply middleware
-			await this.applyMiddlewares(ctx, payload, executeHandler);
-		} catch (error) {
-			logger.error(
-				`[WSRouter] Error processing message "${type}":`,
-				{},
-				error instanceof Error ? error : undefined,
-			);
+      // Apply middleware
+      await this.applyMiddlewares(ctx, payload, executeHandler);
+    } catch (error) {
+      logger.error(
+        `[WSRouter] Error processing message "${type}":`,
+        {},
+        error instanceof Error ? error : undefined
+      );
 
-			if (this.errorHandler) {
-				this.errorHandler(error as Error, ctx, type);
-			} else {
-				// Default error handling
-				ctx.ws.send(
-					JSON.stringify({
-						type: "error",
-						error:
-							error instanceof Error
-								? error.message
-								: "Error occurred while processing message",
-						messageType: type,
-					}),
-				);
-			}
-		}
-	}
+      if (this.errorHandler) {
+        this.errorHandler(error as Error, ctx, type);
+      } else {
+        // Default error handling
+        ctx.ws.send(
+          JSON.stringify({
+            type: "error",
+            error:
+              error instanceof Error ? error.message : "Error occurred while processing message",
+            messageType: type,
+          })
+        );
+      }
+    }
+  }
 
-	/**
-	 * Apply middleware chain
-	 */
-	private async applyMiddlewares(
-		ctx: WSContext,
-		payload: WSMessagePayload,
-		finalHandler: () => Promise<void>,
-	): Promise<void> {
-		let index = 0;
+  /**
+   * Apply middleware chain
+   */
+  private async applyMiddlewares(
+    ctx: WSContext,
+    payload: WSMessagePayload,
+    finalHandler: () => Promise<void>
+  ): Promise<void> {
+    let index = 0;
 
-		const next = async (): Promise<void> => {
-			if (index < this.middlewares.length) {
-				const middleware = this.middlewares[index++];
-				await middleware(ctx, payload, next);
-			} else {
-				await finalHandler();
-			}
-		};
+    const next = async (): Promise<void> => {
+      if (index < this.middlewares.length) {
+        const middleware = this.middlewares[index++];
+        await middleware(ctx, payload, next);
+      } else {
+        await finalHandler();
+      }
+    };
 
-		await next();
-	}
+    await next();
+  }
 
-	/**
-	 * Get list of registered message types
-	 */
-	getRegisteredTypes(): string[] {
-		return Array.from(this.routes.keys());
-	}
+  /**
+   * Get list of registered message types
+   */
+  getRegisteredTypes(): string[] {
+    return Array.from(this.routes.keys());
+  }
 
-	/**
-	 * Check if message type is registered
-	 * @param type Message type
-	 */
-	has(type: string): boolean {
-		return this.routes.has(type);
-	}
+  /**
+   * Check if message type is registered
+   * @param type Message type
+   */
+  has(type: string): boolean {
+    return this.routes.has(type);
+  }
 }
 
 /**
@@ -237,42 +227,34 @@ export const wsRouter = new WSRouter();
  * Message type validation middleware
  * Validates message format is correct
  */
-export const validateMessageMiddleware: WSMiddleware = async (
-	ctx,
-	payload,
-	next,
-) => {
-	if (payload === null || payload === undefined) {
-		ctx.ws.send(
-			JSON.stringify({
-				type: "error",
-				error: "Message payload cannot be empty",
-			}),
-		);
-		return;
-	}
-	await next();
+export const validateMessageMiddleware: WSMiddleware = async (ctx, payload, next) => {
+  if (payload === null || payload === undefined) {
+    ctx.ws.send(
+      JSON.stringify({
+        type: "error",
+        error: "Message payload cannot be empty",
+      })
+    );
+    return;
+  }
+  await next();
 };
 
 /**
  * Session check middleware
  * Checks if session is initialized
  */
-export const requireSessionMiddleware: WSMiddleware = async (
-	ctx,
-	_payload,
-	next,
-) => {
-	if (!ctx.session.session) {
-		ctx.ws.send(
-			JSON.stringify({
-				type: "error",
-				error: "Session not initialized, please send init message first",
-			}),
-		);
-		return;
-	}
-	await next();
+export const requireSessionMiddleware: WSMiddleware = async (ctx, _payload, next) => {
+  if (!ctx.session.session) {
+    ctx.ws.send(
+      JSON.stringify({
+        type: "error",
+        error: "Session not initialized, please send init message first",
+      })
+    );
+    return;
+  }
+  await next();
 };
 
 /**
@@ -280,7 +262,7 @@ export const requireSessionMiddleware: WSMiddleware = async (
  * Records message processing logs
  */
 export const loggingMiddleware: WSMiddleware = async (_ctx, payload, next) => {
-	const type = (payload?.type as string) || "unknown";
-	logger.debug(`[WS] Received message: ${type}`);
-	await next();
+  const type = (payload?.type as string) || "unknown";
+  logger.debug(`[WS] Received message: ${type}`);
+  await next();
 };

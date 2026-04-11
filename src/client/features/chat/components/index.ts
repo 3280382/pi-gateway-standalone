@@ -11,9 +11,9 @@ export { LlmLogPanel } from "./panels/LlmLogPanel";
 
 // Sidebar 组件
 export {
-	RecentWorkspaces,
-	Sessions,
-	Settings,
-	SidebarPanel,
-	WorkingDirectory,
+  RecentWorkspaces,
+  Sessions,
+  Settings,
+  SidebarPanel,
+  WorkingDirectory,
 } from "./sidebar";

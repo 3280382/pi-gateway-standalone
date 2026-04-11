@@ -9,275 +9,261 @@ import type { TreeNode } from "@/features/files/services/api/fileApi";
 import styles from "./TreeViewModal.module.css";
 
 export interface TreeViewModalProps {
-	isOpen: boolean;
-	treeData: { path: string; items: TreeNode[] } | null;
-	treeLoading: boolean;
-	onClose: () => void;
-	onFileClick: (path: string, name: string) => void;
+  isOpen: boolean;
+  treeData: { path: string; items: TreeNode[] } | null;
+  treeLoading: boolean;
+  onClose: () => void;
+  onFileClick: (path: string, name: string) => void;
 }
 
 type FilterMode = "normal" | "all" | "search";
 
 const DEFAULT_EXCLUDES = [
-	"node_modules",
-	"__pycache__",
-	".git",
-	".svn",
-	".hg",
-	"dist",
-	"build",
-	".next",
-	".nuxt",
-	"coverage",
-	".coverage",
-	".idea",
-	".vscode",
+  "node_modules",
+  "__pycache__",
+  ".git",
+  ".svn",
+  ".hg",
+  "dist",
+  "build",
+  ".next",
+  ".nuxt",
+  "coverage",
+  ".coverage",
+  ".idea",
+  ".vscode",
 ];
 
 /** 转义正则表达式特殊字符 */
 function escapeRegExp(string: string): string {
-	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /** 获取文件图标 */
 function getFileIcon(name: string, isDirectory: boolean): string {
-	if (isDirectory) return "📁";
-	const ext = name.split(".").pop()?.toLowerCase() || "";
-	const icons: Record<string, string> = {
-		js: "📜",
-		ts: "📘",
-		jsx: "⚛️",
-		tsx: "⚛️",
-		py: "🐍",
-		java: "☕",
-		go: "🔵",
-		rs: "🦀",
-		c: "🔧",
-		cpp: "🔧",
-		h: "📋",
-		hpp: "📋",
-		cs: "🔷",
-		php: "🐘",
-		rb: "💎",
-		sh: "🐚",
-		bash: "🐚",
-		html: "🌐",
-		json: "📋",
-		yaml: "📋",
-		yml: "📋",
-		md: "📝",
-		css: "🎨",
-		scss: "🎨",
-		png: "🖼️",
-		jpg: "🖼️",
-		svg: "🎨",
-		txt: "📄",
-		pdf: "📕",
-		zip: "📦",
-		"7z": "📦",
-	};
-	return icons[ext] || "📄";
+  if (isDirectory) return "📁";
+  const ext = name.split(".").pop()?.toLowerCase() || "";
+  const icons: Record<string, string> = {
+    js: "📜",
+    ts: "📘",
+    jsx: "⚛️",
+    tsx: "⚛️",
+    py: "🐍",
+    java: "☕",
+    go: "🔵",
+    rs: "🦀",
+    c: "🔧",
+    cpp: "🔧",
+    h: "📋",
+    hpp: "📋",
+    cs: "🔷",
+    php: "🐘",
+    rb: "💎",
+    sh: "🐚",
+    bash: "🐚",
+    html: "🌐",
+    json: "📋",
+    yaml: "📋",
+    yml: "📋",
+    md: "📝",
+    css: "🎨",
+    scss: "🎨",
+    png: "🖼️",
+    jpg: "🖼️",
+    svg: "🎨",
+    txt: "📄",
+    pdf: "📕",
+    zip: "📦",
+    "7z": "📦",
+  };
+  return icons[ext] || "📄";
 }
 
 /** 过滤树节点 */
-function filterNodes(
-	items: TreeNode[],
-	mode: FilterMode,
-	search: string,
-): TreeNode[] {
-	if (mode === "all" && !search) return items;
+function filterNodes(items: TreeNode[], mode: FilterMode, search: string): TreeNode[] {
+  if (mode === "all" && !search) return items;
 
-	return items.filter((item) => {
-		// 搜索模式
-		if (search) {
-			return item.name.toLowerCase().includes(search.toLowerCase());
-		}
+  return items.filter((item) => {
+    // 搜索模式
+    if (search) {
+      return item.name.toLowerCase().includes(search.toLowerCase());
+    }
 
-		// 正常模式 - 排除隐藏文件
-		if (mode === "normal") {
-			if (item.name.startsWith(".") || DEFAULT_EXCLUDES.includes(item.name)) {
-				return false;
-			}
-		}
+    // 正常模式 - 排除隐藏文件
+    if (mode === "normal") {
+      if (item.name.startsWith(".") || DEFAULT_EXCLUDES.includes(item.name)) {
+        return false;
+      }
+    }
 
-		return true;
-	});
+    return true;
+  });
 }
 
 /** 生成树形文本（用于复制） */
 function generateTreeText(items: TreeNode[]): string {
-	return items
-		.map((item) => {
-			const indent = "  ".repeat(item.level || 0);
-			const connector = item.isLast ? "└── " : "├── ";
-			const icon = getFileIcon(item.name, item.isDirectory);
-			return `${indent}${connector}${icon} ${item.name}`;
-		})
-		.join("\n");
+  return items
+    .map((item) => {
+      const indent = "  ".repeat(item.level || 0);
+      const connector = item.isLast ? "└── " : "├── ";
+      const icon = getFileIcon(item.name, item.isDirectory);
+      return `${indent}${connector}${icon} ${item.name}`;
+    })
+    .join("\n");
 }
 
 export function TreeViewModal({
-	isOpen,
-	treeData,
-	treeLoading,
-	onClose,
-	onFileClick,
+  isOpen,
+  treeData,
+  treeLoading,
+  onClose,
+  onFileClick,
 }: TreeViewModalProps) {
-	// ========== 1. State ==========
-	const [filterMode, setFilterMode] = useState<FilterMode>("normal");
-	const [searchText, setSearchText] = useState("");
-	const [isCopySuccess, setIsCopySuccess] = useState(false);
+  // ========== 1. State ==========
+  const [filterMode, setFilterMode] = useState<FilterMode>("normal");
+  const [searchText, setSearchText] = useState("");
+  const [isCopySuccess, setIsCopySuccess] = useState(false);
 
-	// ========== 2. Ref ==========
-	// 暂无DOM引用需要管理
+  // ========== 2. Ref ==========
+  // 暂无DOM引用需要管理
 
-	// ========== 3. Effects ==========
-	// ESC 关闭
-	useEffect(() => {
-		if (!isOpen) return;
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Escape") onClose();
-		};
-		window.addEventListener("keydown", handleKeyDown);
-		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [isOpen, onClose]);
+  // ========== 3. Effects ==========
+  // ESC 关闭
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
-	// ========== 4. Computed ==========
-	// 过滤节点
-	const filteredItems = useMemo(() => {
-		if (!treeData) return [];
-		return filterNodes(treeData.items, filterMode, searchText);
-	}, [treeData, filterMode, searchText]);
+  // ========== 4. Computed ==========
+  // 过滤节点
+  const filteredItems = useMemo(() => {
+    if (!treeData) return [];
+    return filterNodes(treeData.items, filterMode, searchText);
+  }, [treeData, filterMode, searchText]);
 
-	// 生成复制文本
-	const treeText = useMemo(() => {
-		if (!treeData) return "";
-		return treeData.path + "\n" + generateTreeText(filteredItems);
-	}, [treeData, filteredItems]);
+  // 生成复制文本
+  const treeText = useMemo(() => {
+    if (!treeData) return "";
+    return treeData.path + "\n" + generateTreeText(filteredItems);
+  }, [treeData, filteredItems]);
 
-	// ========== 5. Actions ==========
-	// 处理复制
-	const handleCopy = useCallback(async () => {
-		try {
-			await navigator.clipboard.writeText(treeText);
-			setIsCopySuccess(true);
-			setTimeout(() => setIsCopySuccess(false), 2000);
-		} catch (err) {
-			console.error("复制失败:", err);
-		}
-	}, [treeText]);
+  // ========== 5. Actions ==========
+  // 处理复制
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(treeText);
+      setIsCopySuccess(true);
+      setTimeout(() => setIsCopySuccess(false), 2000);
+    } catch (err) {
+      console.error("复制失败:", err);
+    }
+  }, [treeText]);
 
-	// ========== 6. Render ==========
-	if (!isOpen) return null;
+  // ========== 6. Render ==========
+  if (!isOpen) return null;
 
-	return (
-		<div className={styles.overlay} onClick={onClose}>
-			<div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-				{/* 头部 */}
-				<div className={styles.header}>
-					<div className={styles.headerRow}>
-						<span className={styles.title}>{treeData?.path || "."}</span>
-						<button className={styles.closeBtn} onClick={onClose}>
-							×
-						</button>
-					</div>
-					<div className={styles.headerRow}>
-						<select
-							className={styles.select}
-							value={filterMode}
-							onChange={(e) => {
-								setFilterMode(e.target.value as FilterMode);
-								if (e.target.value !== "search") setSearchText("");
-							}}
-						>
-							<option value="normal">隐藏排除文件</option>
-							<option value="all">显示所有</option>
-							<option value="search">搜索过滤...</option>
-						</select>
-						{filterMode === "search" && (
-							<input
-								className={styles.searchInput}
-								placeholder="输入过滤文字..."
-								value={searchText}
-								onChange={(e) => setSearchText(e.target.value)}
-								autoFocus
-							/>
-						)}
-						<button
-							className={`${styles.copyBtn} ${isCopySuccess ? styles.copied : ""}`}
-							onClick={handleCopy}
-							disabled={!filteredItems.length}
-						>
-							{isCopySuccess ? "✓ 已复制" : "📋 复制"}
-						</button>
-					</div>
-				</div>
+  return (
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        {/* 头部 */}
+        <div className={styles.header}>
+          <div className={styles.headerRow}>
+            <span className={styles.title}>{treeData?.path || "."}</span>
+            <button className={styles.closeBtn} onClick={onClose}>
+              ×
+            </button>
+          </div>
+          <div className={styles.headerRow}>
+            <select
+              className={styles.select}
+              value={filterMode}
+              onChange={(e) => {
+                setFilterMode(e.target.value as FilterMode);
+                if (e.target.value !== "search") setSearchText("");
+              }}
+            >
+              <option value="normal">隐藏排除文件</option>
+              <option value="all">显示所有</option>
+              <option value="search">搜索过滤...</option>
+            </select>
+            {filterMode === "search" && (
+              <input
+                className={styles.searchInput}
+                placeholder="输入过滤文字..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                autoFocus
+              />
+            )}
+            <button
+              className={`${styles.copyBtn} ${isCopySuccess ? styles.copied : ""}`}
+              onClick={handleCopy}
+              disabled={!filteredItems.length}
+            >
+              {isCopySuccess ? "✓ 已复制" : "📋 复制"}
+            </button>
+          </div>
+        </div>
 
-				{/* 树内容 */}
-				<div className={styles.content}>
-					{treeLoading ? (
-						<div className={styles.message}>Loading...</div>
-					) : filteredItems.length === 0 ? (
-						<div className={styles.message}>无内容</div>
-					) : (
-						<div className={styles.tree}>
-							{filteredItems.map((node) => {
-								const icon = getFileIcon(node.name, node.isDirectory);
-								const level = node.level || 0;
-								const isLast = node.isLast || false;
+        {/* 树内容 */}
+        <div className={styles.content}>
+          {treeLoading ? (
+            <div className={styles.message}>Loading...</div>
+          ) : filteredItems.length === 0 ? (
+            <div className={styles.message}>无内容</div>
+          ) : (
+            <div className={styles.tree}>
+              {filteredItems.map((node) => {
+                const icon = getFileIcon(node.name, node.isDirectory);
+                const level = node.level || 0;
+                const isLast = node.isLast || false;
 
-								// 搜索高亮
-								let displayName: React.ReactNode = node.name;
-								if (searchText) {
-									const escaped = escapeRegExp(searchText);
-									const parts = node.name.split(
-										new RegExp(`(${escaped})`, "gi"),
-									);
-									displayName = parts.map((p, i) =>
-										p.toLowerCase() === searchText.toLowerCase() ? (
-											<mark key={i} className={styles.highlight}>
-												{p}
-											</mark>
-										) : (
-											p
-										),
-									);
-								}
+                // 搜索高亮
+                let displayName: React.ReactNode = node.name;
+                if (searchText) {
+                  const escaped = escapeRegExp(searchText);
+                  const parts = node.name.split(new RegExp(`(${escaped})`, "gi"));
+                  displayName = parts.map((p, i) =>
+                    p.toLowerCase() === searchText.toLowerCase() ? (
+                      <mark key={i} className={styles.highlight}>
+                        {p}
+                      </mark>
+                    ) : (
+                      p
+                    )
+                  );
+                }
 
-								return (
-									<div
-										key={node.path}
-										className={styles.node}
-										style={{ paddingLeft: `${level * 24 + 16}px` }}
-										onClick={() =>
-											!node.isDirectory && onFileClick(node.path, node.name)
-										}
-									>
-										{/* 连接线 */}
-										<span className={styles.connector}>
-											{isLast ? "└── " : "├── "}
-										</span>
+                return (
+                  <div
+                    key={node.path}
+                    className={styles.node}
+                    style={{ paddingLeft: `${level * 24 + 16}px` }}
+                    onClick={() => !node.isDirectory && onFileClick(node.path, node.name)}
+                  >
+                    {/* 连接线 */}
+                    <span className={styles.connector}>{isLast ? "└── " : "├── "}</span>
 
-										{/* 文件图标 */}
-										<span className={styles.icon}>{icon}</span>
+                    {/* 文件图标 */}
+                    <span className={styles.icon}>{icon}</span>
 
-										{/* 文件名 */}
-										<span
-											className={
-												node.isDirectory ? styles.dirName : styles.fileName
-											}
-										>
-											{displayName}
-										</span>
-									</div>
-								);
-							})}
-						</div>
-					)}
-				</div>
-			</div>
-		</div>
-	);
+                    {/* 文件名 */}
+                    <span className={node.isDirectory ? styles.dirName : styles.fileName}>
+                      {displayName}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // 导出工具函数

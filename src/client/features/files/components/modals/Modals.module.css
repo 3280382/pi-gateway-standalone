@@ -1,402 +1,402 @@
 /* Git History Modal - Compact & Beautiful */
 
 .overlay {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.92);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 1000;
-	backdrop-filter: blur(4px);
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
 }
 
 .modal {
-	background: linear-gradient(145deg, #1a1b26 0%, #16161e 100%);
-	width: 96vw;
-	height: 94vh;
-	border-radius: 12px;
-	display: flex;
-	flex-direction: column;
-	box-shadow:
-		0 20px 60px rgba(0, 0, 0, 0.8),
-		0 0 0 1px rgba(255, 255, 255, 0.06);
-	overflow: hidden;
+  background: linear-gradient(145deg, #1a1b26 0%, #16161e 100%);
+  width: 96vw;
+  height: 94vh;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+  overflow: hidden;
 }
 
 .header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 10px 16px;
-	background: rgba(0, 0, 0, 0.4);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-	flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
 }
 
 .title {
-	font-size: 13px;
-	font-weight: 600;
-	color: #a9b1d6;
+  font-size: 13px;
+  font-weight: 600;
+  color: #a9b1d6;
 }
 
 .close {
-	background: transparent;
-	border: none;
-	color: #565f89;
-	font-size: 16px;
-	cursor: pointer;
-	padding: 4px 8px;
-	border-radius: 4px;
-	transition: all 0.15s;
+  background: transparent;
+  border: none;
+  color: #565f89;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.15s;
 }
 
 .close:hover {
-	background: rgba(243, 139, 168, 0.2);
-	color: #f38ba8;
+  background: rgba(243, 139, 168, 0.2);
+  color: #f38ba8;
 }
 
 .content {
-	flex: 1;
-	overflow: auto;
-	padding: 8px;
+  flex: 1;
+  overflow: auto;
+  padding: 8px;
 }
 
 .loading,
 .error {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 100%;
-	color: #565f89;
-	font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #565f89;
+  font-size: 13px;
 }
 
 .error {
-	color: #f38ba8;
+  color: #f38ba8;
 }
 
 /* Commit List */
 .list {
-	display: flex;
-	flex-direction: column;
-	gap: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .item {
-	padding: 8px 12px;
-	border-radius: 6px;
-	transition: all 0.15s;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.15s;
 }
 
 /* 交替颜色 */
 .item.even {
-	background: rgba(30, 30, 46, 0.4);
+  background: rgba(30, 30, 46, 0.4);
 }
 
 .item.odd {
-	background: rgba(26, 26, 40, 0.6);
+  background: rgba(26, 26, 40, 0.6);
 }
 
 .item:hover {
-	background: rgba(49, 50, 68, 0.8);
+  background: rgba(49, 50, 68, 0.8);
 }
 
 /* 第一行 - 紧凑布局 */
 .row1 {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin-bottom: 4px;
-	flex-wrap: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: nowrap;
 }
 
 .num {
-	font-size: 10px;
-	color: #565f89;
-	font-weight: 600;
-	min-width: 24px;
+  font-size: 10px;
+  color: #565f89;
+  font-weight: 600;
+  min-width: 24px;
 }
 
 .hash {
-	font-family: "JetBrains Mono", monospace;
-	font-size: 11px;
-	color: #e0af68;
-	background: rgba(224, 175, 104, 0.1);
-	padding: 1px 6px;
-	border-radius: 3px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: #e0af68;
+  background: rgba(224, 175, 104, 0.1);
+  padding: 1px 6px;
+  border-radius: 3px;
 }
 
 .author {
-	font-size: 11px;
-	color: #9ece6a;
-	font-weight: 500;
+  font-size: 11px;
+  color: #9ece6a;
+  font-weight: 500;
 }
 
 .date {
-	font-size: 10px;
-	color: #7aa2f7;
+  font-size: 10px;
+  color: #7aa2f7;
 }
 
 .actions {
-	display: flex;
-	gap: 4px;
-	margin-left: auto;
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
 }
 
 /* 小图标按钮 */
 .btn {
-	width: 24px;
-	height: 24px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 12px;
-	border: none;
-	border-radius: 4px;
-	cursor: pointer;
-	transition: all 0.15s;
-	background: transparent;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: transparent;
 }
 
 .cBtn {
-	background: rgba(122, 162, 247, 0.15);
+  background: rgba(122, 162, 247, 0.15);
 }
 
 .cBtn:hover {
-	background: rgba(122, 162, 247, 0.35);
-	transform: scale(1.1);
+  background: rgba(122, 162, 247, 0.35);
+  transform: scale(1.1);
 }
 
 .dBtn {
-	background: rgba(158, 206, 106, 0.15);
+  background: rgba(158, 206, 106, 0.15);
 }
 
 .dBtn:hover {
-	background: rgba(158, 206, 106, 0.35);
-	transform: scale(1.1);
+  background: rgba(158, 206, 106, 0.35);
+  transform: scale(1.1);
 }
 
 /* 第二行 - 完整消息 */
 .msg {
-	font-size: 12px;
-	color: #a9b1d6;
-	line-height: 1.4;
-	padding-left: 32px;
-	word-break: break-word;
+  font-size: 12px;
+  color: #a9b1d6;
+  line-height: 1.4;
+  padding-left: 32px;
+  word-break: break-word;
 }
 
 /* Code View */
 .code {
-	margin: 0;
-	padding: 12px;
-	font-family: "JetBrains Mono", monospace;
-	font-size: 11px;
-	line-height: 1.5;
-	background: #0d0e15;
-	color: #a9b1d6;
-	white-space: pre-wrap;
-	word-break: break-word;
-	overflow: auto;
-	height: 100%;
-	border-radius: 6px;
+  margin: 0;
+  padding: 12px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  background: #0d0e15;
+  color: #a9b1d6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: auto;
+  height: 100%;
+  border-radius: 6px;
 }
 
 /* Diff View - 用于 GitHistoryModal */
 .diffView {
-	font-family: "JetBrains Mono", monospace;
-	font-size: 10px;
-	line-height: 1.4;
-	background: #0d0e15;
-	border-radius: 6px;
-	overflow: auto;
-	height: 100%;
-	padding: 8px 0;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  background: #0d0e15;
+  border-radius: 6px;
+  overflow: auto;
+  height: 100%;
+  padding: 8px 0;
 }
 
 .diffLine {
-	display: flex;
-	padding: 0;
-	font-family: "JetBrains Mono", monospace;
-	font-size: 10px;
+  display: flex;
+  padding: 0;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
 }
 
 .diffLine .lineno {
-	min-width: 40px;
-	padding: 1px 6px;
-	text-align: right;
-	color: #414868;
-	background: rgba(0, 0, 0, 0.3);
-	border-right: 1px solid rgba(255, 255, 255, 0.04);
-	user-select: none;
-	font-size: 9px;
-	flex-shrink: 0;
+  min-width: 40px;
+  padding: 1px 6px;
+  text-align: right;
+  color: #414868;
+  background: rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  user-select: none;
+  font-size: 9px;
+  flex-shrink: 0;
 }
 
 .diffLine .lineText {
-	padding: 1px 10px;
-	flex: 1;
-	white-space: pre-wrap;
-	word-break: break-all;
+  padding: 1px 10px;
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 /* Diff Colors */
 .diffLine.add {
-	background: rgba(158, 206, 106, 0.1);
+  background: rgba(158, 206, 106, 0.1);
 }
 .diffLine.add .lineText {
-	color: #9ece6a;
+  color: #9ece6a;
 }
 
 .diffLine.remove {
-	background: rgba(243, 139, 168, 0.1);
+  background: rgba(243, 139, 168, 0.1);
 }
 .diffLine.remove .lineText {
-	color: #f38ba8;
+  color: #f38ba8;
 }
 
 .diffLine.marker {
-	background: rgba(122, 162, 247, 0.1);
+  background: rgba(122, 162, 247, 0.1);
 }
 .diffLine.marker .lineText {
-	color: #7aa2f7;
-	font-weight: 500;
+  color: #7aa2f7;
+  font-weight: 500;
 }
 
 .diffLine.header {
-	background: rgba(187, 154, 247, 0.08);
+  background: rgba(187, 154, 247, 0.08);
 }
 .diffLine.header .lineText {
-	color: #bb9af7;
+  color: #bb9af7;
 }
 
 .diffLine.normal .lineText {
-	color: #565f89;
+  color: #565f89;
 }
 
 /* ===== Todo Input Modal ===== */
 .todoModal {
-	background: linear-gradient(145deg, #1a1b26 0%, #16161e 100%);
-	width: 480px;
-	max-width: 90vw;
-	border-radius: 12px;
-	display: flex;
-	flex-direction: column;
-	box-shadow:
-		0 20px 60px rgba(0, 0, 0, 0.6),
-		0 0 0 1px rgba(255, 255, 255, 0.05);
-	overflow: hidden;
+  background: linear-gradient(145deg, #1a1b26 0%, #16161e 100%);
+  width: 480px;
+  max-width: 90vw;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  overflow: hidden;
 }
 
 .todoHeader {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 14px 18px;
-	background: rgba(0, 0, 0, 0.3);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .todoTitle {
-	font-size: 14px;
-	font-weight: 600;
-	color: #cdd6f4;
+  font-size: 14px;
+  font-weight: 600;
+  color: #cdd6f4;
 }
 
 .todoContent {
-	padding: 18px;
+  padding: 18px;
 }
 
 .todoFileInfo {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin-bottom: 12px;
-	padding: 8px 12px;
-	background: rgba(30, 30, 46, 0.6);
-	border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: rgba(30, 30, 46, 0.6);
+  border-radius: 6px;
 }
 
 .todoFileLabel {
-	font-size: 12px;
-	color: #6c7086;
+  font-size: 12px;
+  color: #6c7086;
 }
 
 .todoFilePath {
-	font-family: "JetBrains Mono", monospace;
-	font-size: 12px;
-	color: #89b4fa;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: #89b4fa;
 }
 
 .todoInput {
-	width: 100%;
-	min-height: 100px;
-	padding: 12px;
-	background: #0d0e15;
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	border-radius: 8px;
-	color: #cdd6f4;
-	font-size: 13px;
-	line-height: 1.5;
-	resize: vertical;
-	outline: none;
-	transition: border-color 0.2s;
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  background: #0d0e15;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #cdd6f4;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
 .todoInput:focus {
-	border-color: #f9e2af;
+  border-color: #f9e2af;
 }
 
 .todoHint {
-	margin-top: 8px;
-	font-size: 11px;
-	color: #585b70;
-	text-align: right;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #585b70;
+  text-align: right;
 }
 
 .todoFooter {
-	display: flex;
-	justify-content: flex-end;
-	gap: 10px;
-	padding: 14px 18px;
-	background: rgba(0, 0, 0, 0.2);
-	border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 18px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .todoCancelBtn {
-	padding: 8px 16px;
-	font-size: 12px;
-	border: none;
-	border-radius: 6px;
-	background: rgba(110, 118, 129, 0.2);
-	color: #8b949e;
-	cursor: pointer;
-	transition: all 0.15s;
+  padding: 8px 16px;
+  font-size: 12px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(110, 118, 129, 0.2);
+  color: #8b949e;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
 .todoCancelBtn:hover {
-	background: rgba(110, 118, 129, 0.3);
-	color: #e6edf3;
+  background: rgba(110, 118, 129, 0.3);
+  color: #e6edf3;
 }
 
 .todoSubmitBtn {
-	padding: 8px 18px;
-	font-size: 12px;
-	font-weight: 500;
-	border: none;
-	border-radius: 6px;
-	background: #f9e2af;
-	color: #1a1b26;
-	cursor: pointer;
-	transition: all 0.15s;
+  padding: 8px 18px;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  background: #f9e2af;
+  color: #1a1b26;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
 .todoSubmitBtn:hover:not(:disabled) {
-	background: #fae7b9;
-	transform: translateY(-1px);
+  background: #fae7b9;
+  transform: translateY(-1px);
 }
 
 .todoSubmitBtn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }

@@ -10,20 +10,20 @@ export { SectionHeader } from "@/features/chat/components/SectionHeader/SectionH
 export { useChat } from "@/features/chat/hooks";
 export { useChatMessages } from "@/features/chat/hooks/useChatMessages";
 export {
-	setupWebSocketListeners,
-	useChatController,
+  setupWebSocketListeners,
+  useChatController,
 } from "@/features/chat/services/api/chatApi";
 export { useChatStore, useSessionStore } from "@/features/chat/stores";
 export type {
-	ChatState,
-	ChatWebSocketMessage,
-	Message,
-	ToolExecution,
+  ChatState,
+  ChatWebSocketMessage,
+  Message,
+  ToolExecution,
 } from "@/features/chat/types";
 // Files Feature
 export {
-	fileApi,
-	useFileController,
+  fileApi,
+  useFileController,
 } from "@/features/files/services/api/fileApi";
 export { useWorkspaceStore } from "@/features/files/stores";
 // Hooks

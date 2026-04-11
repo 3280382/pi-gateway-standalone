@@ -14,52 +14,46 @@ const logger = new Logger({ level: LogLevel.INFO });
  * @param payload Message payload
  */
 export async function handleSetModel(
-	ctx: WSContext,
-	payload: {
-		provider: string;
-		modelId: string;
-		thinkingLevel?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
-	},
+  ctx: WSContext,
+  payload: {
+    provider: string;
+    modelId: string;
+    thinkingLevel?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
+  }
 ): Promise<void> {
-	const { provider, modelId, thinkingLevel } = payload;
+  const { provider, modelId, thinkingLevel } = payload;
 
-	console.log(`[WebSocket] Received set_model message:`, {
-		provider,
-		modelId,
-		thinkingLevel,
-	});
-	logger.info(
-		`[WebSocket] Received set_model message: provider=${provider}, modelId=${modelId}`,
-	);
+  console.log(`[WebSocket] Received set_model message:`, {
+    provider,
+    modelId,
+    thinkingLevel,
+  });
+  logger.info(`[WebSocket] Received set_model message: provider=${provider}, modelId=${modelId}`);
 
-	// Check if session is initialized
-	if (!ctx.session.session) {
-		ctx.ws.send(
-			JSON.stringify({
-				type: "error",
-				error: "Session not initialized, please send init message first",
-			}),
-		);
-		return;
-	}
+  // Check if session is initialized
+  if (!ctx.session.session) {
+    ctx.ws.send(
+      JSON.stringify({
+        type: "error",
+        error: "Session not initialized, please send init message first",
+      })
+    );
+    return;
+  }
 
-	try {
-		await ctx.session.setModel(provider, modelId, thinkingLevel);
-		// setModel already sends response internally
-		logger.info(`[WebSocket] set_model successful`);
-	} catch (error) {
-		logger.error(
-			"[WebSocket] set_model error:",
-			{},
-			error instanceof Error ? error : undefined,
-		);
-		ctx.ws.send(
-			JSON.stringify({
-				type: "error",
-				error: error instanceof Error ? error.message : "Failed to set model",
-			}),
-		);
-	}
+  try {
+    await ctx.session.setModel(provider, modelId, thinkingLevel);
+    // setModel already sends response internally
+    logger.info(`[WebSocket] set_model successful`);
+  } catch (error) {
+    logger.error("[WebSocket] set_model error:", {}, error instanceof Error ? error : undefined);
+    ctx.ws.send(
+      JSON.stringify({
+        type: "error",
+        error: error instanceof Error ? error.message : "Failed to set model",
+      })
+    );
+  }
 }
 
 /**
@@ -68,12 +62,12 @@ export async function handleSetModel(
  * @param payload Message payload
  */
 export async function handleModelChange(
-	ctx: WSContext,
-	payload: {
-		provider: string;
-		modelId: string;
-	},
+  ctx: WSContext,
+  payload: {
+    provider: string;
+    modelId: string;
+  }
 ): Promise<void> {
-	// Reuse set_model logic
-	await handleSetModel(ctx, payload);
+  // Reuse set_model logic
+  await handleSetModel(ctx, payload);
 }

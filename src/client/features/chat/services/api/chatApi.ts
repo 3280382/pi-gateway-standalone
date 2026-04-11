@@ -4,25 +4,21 @@
  */
 
 import {
-	abortChatGeneration,
-	createNewChatSession,
-	executeChatCommand,
-	initChatWorkingDirectory,
-	listChatModels,
-	listChatSessions,
-	sendChatMessage,
-	setChatLlmLogEnabled,
-	setChatModel,
-	steerChat,
-	switchChatSession,
+  abortChatGeneration,
+  createNewChatSession,
+  executeChatCommand,
+  initChatWorkingDirectory,
+  listChatModels,
+  listChatSessions,
+  sendChatMessage,
+  setChatLlmLogEnabled,
+  setChatModel,
+  steerChat,
+  switchChatSession,
 } from "@/features/chat/services/chatWebSocket";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
-import type {
-	ChatController,
-	Message,
-	ToolExecution,
-} from "@/features/chat/types/chat";
+import type { ChatController, Message, ToolExecution } from "@/features/chat/types/chat";
 import { websocketService } from "@/services/websocket.service";
 
 // ============================================================================
@@ -30,11 +26,11 @@ import { websocketService } from "@/services/websocket.service";
 // ============================================================================
 
 function generateMessageId(): string {
-	return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 function generateToolId(): string {
-	return `tool-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `tool-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 // ============================================================================
@@ -42,20 +38,16 @@ function generateToolId(): string {
 // ============================================================================
 
 export interface EnhancedChatController extends ChatController {
-	// 扩展功能
-	steer: (text: string) => void;
-	createNewSession: () => Promise<void>;
-	loadSession: (sessionPath: string) => Promise<void>;
-	listSessions: (cwd: string) => Promise<any>;
-	setModel: (
-		provider: string,
-		modelId: string,
-		thinkingLevel?: string,
-	) => Promise<void>;
-	listModels: () => Promise<any>;
-	executeCommand: (command: string) => Promise<any>;
-	setLlmLogEnabled: (enabled: boolean) => Promise<void>;
-	changeWorkingDir: (path: string) => Promise<void>;
+  // 扩展功能
+  steer: (text: string) => void;
+  createNewSession: () => Promise<void>;
+  loadSession: (sessionPath: string) => Promise<void>;
+  listSessions: (cwd: string) => Promise<any>;
+  setModel: (provider: string, modelId: string, thinkingLevel?: string) => Promise<void>;
+  listModels: () => Promise<any>;
+  executeCommand: (command: string) => Promise<any>;
+  setLlmLogEnabled: (enabled: boolean) => Promise<void>;
+  changeWorkingDir: (path: string) => Promise<void>;
 }
 
 // ============================================================================
@@ -63,34 +55,34 @@ export interface EnhancedChatController extends ChatController {
 // ============================================================================
 
 interface PromiseConfig<T> {
-	timeoutMs?: number;
-	timeoutMessage: string;
-	eventName: string;
-	onSuccess: (data: T) => void;
-	sendAction: () => void;
+  timeoutMs?: number;
+  timeoutMessage: string;
+  eventName: string;
+  onSuccess: (data: T) => void;
+  sendAction: () => void;
 }
 
 function createPromiseWithTimeout<T>({
-	timeoutMs = 5000,
-	timeoutMessage,
-	eventName,
-	onSuccess,
-	sendAction,
+  timeoutMs = 5000,
+  timeoutMessage,
+  eventName,
+  onSuccess,
+  sendAction,
 }: PromiseConfig<T>): Promise<T> {
-	return new Promise((resolve, reject) => {
-		const timeout = setTimeout(() => {
-			reject(new Error(timeoutMessage));
-		}, timeoutMs);
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error(timeoutMessage));
+    }, timeoutMs);
 
-		const unsubscribe = websocketService.on(eventName, (data: T) => {
-			clearTimeout(timeout);
-			onSuccess(data);
-			unsubscribe();
-			resolve(data);
-		});
+    const unsubscribe = websocketService.on(eventName, (data: T) => {
+      clearTimeout(timeout);
+      onSuccess(data);
+      unsubscribe();
+      resolve(data);
+    });
 
-		sendAction();
-	});
+    sendAction();
+  });
 }
 
 // ============================================================================
@@ -98,222 +90,215 @@ function createPromiseWithTimeout<T>({
 // ============================================================================
 
 export function useChatController(): EnhancedChatController {
-	const chatStore = useChatStore();
-	const sessionStore = useSessionStore();
+  const chatStore = useChatStore();
+  const sessionStore = useSessionStore();
 
-	// 注意：全局流式处理器由 setupWebSocketListeners() 统一设置
-	// 在应用初始化时调用一次，这里不再重复设置，避免消息重复处理
+  // 注意：全局流式处理器由 setupWebSocketListeners() 统一设置
+  // 在应用初始化时调用一次，这里不再重复设置，避免消息重复处理
 
-	return {
-		// 基础聊天功能（支持图片）
-		sendMessage: async (
-			text: string,
-			images?: Array<{
-				type: "image";
-				source: { type: "base64"; mediaType: string; data: string };
-			}>,
-		) => {
-			if (!text.trim() && (!images || images.length === 0))
-				return Promise.resolve();
+  return {
+    // 基础聊天功能（支持图片）
+    sendMessage: async (
+      text: string,
+      images?: Array<{
+        type: "image";
+        source: { type: "base64"; mediaType: string; data: string };
+      }>
+    ) => {
+      if (!text.trim() && (!images || images.length === 0)) return Promise.resolve();
 
-			// 检查WebSocket连接状态
-			if (!websocketService.isConnected) {
-				console.error(
-					"[ChatAPI] WebSocket not connected, attempting to connect...",
-				);
-				try {
-					await websocketService.connect();
-				} catch (error) {
-					console.error("[ChatAPI] Failed to connect WebSocket:", error);
-					throw new Error("无法连接到服务器，请检查网络连接");
-				}
-			}
+      // 检查WebSocket连接状态
+      if (!websocketService.isConnected) {
+        console.error("[ChatAPI] WebSocket not connected, attempting to connect...");
+        try {
+          await websocketService.connect();
+        } catch (error) {
+          console.error("[ChatAPI] Failed to connect WebSocket:", error);
+          throw new Error("无法连接到服务器，请检查网络连接");
+        }
+      }
 
-			// 构建消息内容（文本 + 图片）
-			const content: Message["content"] = [{ type: "text", text }];
-			if (images && images.length > 0) {
-				content.push(
-					...images.map((img) => ({
-						type: "image" as const,
-						imageUrl: `data:${img.source.mediaType};base64,${img.source.data}`,
-					})),
-				);
-			}
+      // 构建消息内容（文本 + 图片）
+      const content: Message["content"] = [{ type: "text", text }];
+      if (images && images.length > 0) {
+        content.push(
+          ...images.map((img) => ({
+            type: "image" as const,
+            imageUrl: `data:${img.source.mediaType};base64,${img.source.data}`,
+          }))
+        );
+      }
 
-			// 添加用户消息
-			const userMessage: Message = {
-				id: generateMessageId(),
-				role: "user",
-				content,
-				timestamp: new Date(),
-			};
+      // 添加用户消息
+      const userMessage: Message = {
+        id: generateMessageId(),
+        role: "user",
+        content,
+        timestamp: new Date(),
+      };
 
-			chatStore.addMessage(userMessage);
-			chatStore.clearInput();
-			chatStore.startStreaming();
+      chatStore.addMessage(userMessage);
+      chatStore.clearInput();
+      chatStore.startStreaming();
 
-			// 通过WebSocket发送消息
-			const success = sendChatMessage(text, undefined, undefined, images);
+      // 通过WebSocket发送消息
+      const success = sendChatMessage(text, undefined, undefined, images);
 
-			if (!success) {
-				chatStore.abortStreaming();
-				throw new Error("消息发送失败，请重试");
-			}
-		},
+      if (!success) {
+        chatStore.abortStreaming();
+        throw new Error("消息发送失败，请重试");
+      }
+    },
 
-		abortGeneration: () => {
-			abortChatGeneration();
-			chatStore.abortStreaming();
-		},
+    abortGeneration: () => {
+      abortChatGeneration();
+      chatStore.abortStreaming();
+    },
 
-		steer: (text: string) => {
-			if (!text.trim()) return;
-			steerChat(text);
-		},
+    steer: (text: string) => {
+      if (!text.trim()) return;
+      steerChat(text);
+    },
 
-		// 输入控制
-		setInputText: (text: string) => {
-			chatStore.setInputText(text);
-		},
+    // 输入控制
+    setInputText: (text: string) => {
+      chatStore.setInputText(text);
+    },
 
-		clearInput: () => {
-			chatStore.clearInput();
-		},
+    clearInput: () => {
+      chatStore.clearInput();
+    },
 
-		// 消息操作
-		toggleMessageCollapse: (messageId: string) => {
-			chatStore.toggleMessageCollapse(messageId);
-		},
+    // 消息操作
+    toggleMessageCollapse: (messageId: string) => {
+      chatStore.toggleMessageCollapse(messageId);
+    },
 
-		toggleThinkingCollapse: (messageId: string) => {
-			chatStore.toggleThinkingCollapse(messageId);
-		},
+    toggleThinkingCollapse: (messageId: string) => {
+      chatStore.toggleThinkingCollapse(messageId);
+    },
 
-		toggleToolsCollapse: (messageId: string) => {
-			chatStore.toggleToolsCollapse(messageId);
-		},
+    toggleToolsCollapse: (messageId: string) => {
+      chatStore.toggleToolsCollapse(messageId);
+    },
 
-		deleteMessage: (messageId: string) => {
-			chatStore.deleteMessage(messageId);
-		},
+    deleteMessage: (messageId: string) => {
+      chatStore.deleteMessage(messageId);
+    },
 
-		clearMessages: () => {
-			chatStore.clearMessages();
-		},
+    clearMessages: () => {
+      chatStore.clearMessages();
+    },
 
-		regenerateMessage: (messageId: string) => {
-			chatStore.regenerateMessage(messageId);
-		},
+    regenerateMessage: (messageId: string) => {
+      chatStore.regenerateMessage(messageId);
+    },
 
-		// 思考显示
-		setShowThinking: (show: boolean) => {
-			chatStore.setShowThinking(show);
-		},
+    // 思考显示
+    setShowThinking: (show: boolean) => {
+      chatStore.setShowThinking(show);
+    },
 
-		// 工具操作（占位符实现）
-		expandToolOutput: (_toolId: string) => {
-			// 工具输出展开在组件状态中处理
-		},
+    // 工具操作（占位符实现）
+    expandToolOutput: (_toolId: string) => {
+      // 工具输出展开在组件状态中处理
+    },
 
-		collapseToolOutput: (_toolId: string) => {
-			// 工具输出折叠在组件状态中处理
-		},
+    collapseToolOutput: (_toolId: string) => {
+      // 工具输出折叠在组件状态中处理
+    },
 
-		// 会话管理
-		createNewSession: async () => {
-			await createPromiseWithTimeout<void>({
-				timeoutMessage: "创建新会话超时",
-				eventName: "session_created",
-				onSuccess: (data) => {
-					chatStore.clearMessages();
-					chatStore.setSessionId(data.sessionId);
-				},
-				sendAction: createNewChatSession,
-			});
-		},
+    // 会话管理
+    createNewSession: async () => {
+      await createPromiseWithTimeout<void>({
+        timeoutMessage: "创建新会话超时",
+        eventName: "session_created",
+        onSuccess: (data) => {
+          chatStore.clearMessages();
+          chatStore.setSessionId(data.sessionId);
+        },
+        sendAction: createNewChatSession,
+      });
+    },
 
-		loadSession: async (sessionPath: string) => {
-			const data = await createPromiseWithTimeout<any>({
-				timeoutMessage: "加载会话超时",
-				eventName: "session_loaded",
-				onSuccess: async (data) => {
-					if (data.success) {
-						chatStore.setSessionId(data.sessionId);
-						await chatStore.loadSession(sessionPath);
-					} else {
-						throw new Error(data.error || "加载会话失败");
-					}
-				},
-				sendAction: () => switchChatSession(sessionPath),
-			});
-			return data;
-		},
+    loadSession: async (sessionPath: string) => {
+      const data = await createPromiseWithTimeout<any>({
+        timeoutMessage: "加载会话超时",
+        eventName: "session_loaded",
+        onSuccess: async (data) => {
+          if (data.success) {
+            chatStore.setSessionId(data.sessionId);
+            await chatStore.loadSession(sessionPath);
+          } else {
+            throw new Error(data.error || "加载会话失败");
+          }
+        },
+        sendAction: () => switchChatSession(sessionPath),
+      });
+      return data;
+    },
 
-		listSessions: async (cwd: string) => {
-			return createPromiseWithTimeout({
-				timeoutMessage: "列出会话超时",
-				eventName: "sessions_list",
-				onSuccess: () => {},
-				sendAction: () => listChatSessions(cwd),
-			});
-		},
+    listSessions: async (cwd: string) => {
+      return createPromiseWithTimeout({
+        timeoutMessage: "列出会话超时",
+        eventName: "sessions_list",
+        onSuccess: () => {},
+        sendAction: () => listChatSessions(cwd),
+      });
+    },
 
-		// 模型管理
-		setModel: async (
-			provider: string,
-			modelId: string,
-			thinkingLevel?: string,
-		) => {
-			await createPromiseWithTimeout<void>({
-				timeoutMessage: "设置模型超时",
-				eventName: "model_set",
-				onSuccess: () => sessionStore.setCurrentModel(modelId),
-				sendAction: () => setChatModel(provider, modelId, thinkingLevel),
-			});
-		},
+    // 模型管理
+    setModel: async (provider: string, modelId: string, thinkingLevel?: string) => {
+      await createPromiseWithTimeout<void>({
+        timeoutMessage: "设置模型超时",
+        eventName: "model_set",
+        onSuccess: () => sessionStore.setCurrentModel(modelId),
+        sendAction: () => setChatModel(provider, modelId, thinkingLevel),
+      });
+    },
 
-		listModels: async () => {
-			return createPromiseWithTimeout({
-				timeoutMessage: "列出模型超时",
-				eventName: "models_list",
-				onSuccess: () => {},
-				sendAction: listChatModels,
-			});
-		},
+    listModels: async () => {
+      return createPromiseWithTimeout({
+        timeoutMessage: "列出模型超时",
+        eventName: "models_list",
+        onSuccess: () => {},
+        sendAction: listChatModels,
+      });
+    },
 
-		// 系统命令
-		executeCommand: async (command: string) => {
-			return createPromiseWithTimeout({
-				timeoutMessage: "执行命令超时",
-				eventName: "command_result",
-				onSuccess: () => {},
-				sendAction: () => executeChatCommand(command),
-			});
-		},
+    // 系统命令
+    executeCommand: async (command: string) => {
+      return createPromiseWithTimeout({
+        timeoutMessage: "执行命令超时",
+        eventName: "command_result",
+        onSuccess: () => {},
+        sendAction: () => executeChatCommand(command),
+      });
+    },
 
-		// LLM日志
-		setLlmLogEnabled: async (enabled: boolean) => {
-			await createPromiseWithTimeout<void>({
-				timeoutMessage: "设置LLM日志超时",
-				eventName: "llm_log_set",
-				onSuccess: () => {},
-				sendAction: () => setChatLlmLogEnabled(enabled),
-			});
-		},
+    // LLM日志
+    setLlmLogEnabled: async (enabled: boolean) => {
+      await createPromiseWithTimeout<void>({
+        timeoutMessage: "设置LLM日志超时",
+        eventName: "llm_log_set",
+        onSuccess: () => {},
+        sendAction: () => setChatLlmLogEnabled(enabled),
+      });
+    },
 
-		// 工作目录
-		changeWorkingDir: async (path: string) => {
-			await createPromiseWithTimeout<void>({
-				timeoutMessage: "更改工作目录超时",
-				eventName: "dir_changed",
-				onSuccess: (data) => {
-					sessionStore.setWorkingDir(data.cwd);
-					chatStore.setSessionId(data.sessionId);
-				},
-				sendAction: () => initChatWorkingDirectory(path),
-			});
-		},
-	};
+    // 工作目录
+    changeWorkingDir: async (path: string) => {
+      await createPromiseWithTimeout<void>({
+        timeoutMessage: "更改工作目录超时",
+        eventName: "dir_changed",
+        onSuccess: (data) => {
+          sessionStore.setWorkingDir(data.cwd);
+          chatStore.setSessionId(data.sessionId);
+        },
+        sendAction: () => initChatWorkingDirectory(path),
+      });
+    },
+  };
 }
 
 // ============================================================================
@@ -347,284 +332,249 @@ let handlersSetup = false;
  * setupWebSocketListeners();
  */
 export function setupWebSocketListeners(): void {
-	// 防止重复设置
-	if (handlersSetup) return;
-	handlersSetup = true;
+  // 防止重复设置
+  if (handlersSetup) return;
+  handlersSetup = true;
 
-	const store = useChatStore.getState();
+  const store = useChatStore.getState();
 
-	// =========================================================================
-	// Message Level Events - 核心：处理每个消息的完整生命周期
-	// =========================================================================
-	websocketService.on("message_start", (data: { message?: any }) => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		const message = data?.message;
-		console.log(
-			`[${ts}] [RECV] message_start: ${message?.role}, id=${message?.id || "new"}`,
-		);
+  // =========================================================================
+  // Message Level Events - 核心：处理每个消息的完整生命周期
+  // =========================================================================
+  websocketService.on("message_start", (data: { message?: any }) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    const message = data?.message;
+    console.log(`[${ts}] [RECV] message_start: ${message?.role}, id=${message?.id || "new"}`);
 
-		if (message?.role === "assistant") {
-			store.createStreamingMessage(message.id);
-		}
-	});
+    if (message?.role === "assistant") {
+      store.createStreamingMessage(message.id);
+    }
+  });
 
-	websocketService.on("message_end", (data: { message?: any }) => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		const message = data?.message;
-		console.log(
-			`[${ts}] [RECV] message_end: ${message?.role}, id=${message?.id}`,
-		);
+  websocketService.on("message_end", (data: { message?: any }) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    const message = data?.message;
+    console.log(`[${ts}] [RECV] message_end: ${message?.role}, id=${message?.id}`);
 
-		if (message?.role === "assistant") {
-			store.finishStreaming();
-		}
-	});
+    if (message?.role === "assistant") {
+      store.finishStreaming();
+    }
+  });
 
-	// =========================================================================
-	// Content Block Level Events - Text
-	// =========================================================================
-	websocketService.on("text_start", (data: { index?: number }) => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] text_start[${data?.index ?? "?"}]`);
-		store.startContentBlock("text", data?.index);
-	});
+  // =========================================================================
+  // Content Block Level Events - Text
+  // =========================================================================
+  websocketService.on("text_start", (data: { index?: number }) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] text_start[${data?.index ?? "?"}]`);
+    store.startContentBlock("text", data?.index);
+  });
 
-	websocketService.on(
-		"text_delta",
-		(data: { text?: string; index?: number }) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(`[${ts}] [RECV] text_delta[${data?.index ?? "?"}]`);
-			if (data?.text) {
-				store.appendStreamingContent(data.text);
-			}
-		},
-	);
+  websocketService.on("text_delta", (data: { text?: string; index?: number }) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] text_delta[${data?.index ?? "?"}]`);
+    if (data?.text) {
+      store.appendStreamingContent(data.text);
+    }
+  });
 
-	websocketService.on(
-		"text_end",
-		(data: { index?: number; implicit?: boolean }) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(
-				`[${ts}] [RECV] text_end[${data?.index ?? "?"}]${data?.implicit ? " (implicit)" : ""}`,
-			);
-			store.endContentBlock("text", data?.index);
-		},
-	);
+  websocketService.on("text_end", (data: { index?: number; implicit?: boolean }) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(
+      `[${ts}] [RECV] text_end[${data?.index ?? "?"}]${data?.implicit ? " (implicit)" : ""}`
+    );
+    store.endContentBlock("text", data?.index);
+  });
 
-	// =========================================================================
-	// Content Block Level Events - Thinking
-	// =========================================================================
-	websocketService.on("thinking_start", (data: { index?: number }) => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] thinking_start[${data?.index ?? "?"}]`);
-		store.startContentBlock("thinking", data?.index);
-	});
+  // =========================================================================
+  // Content Block Level Events - Thinking
+  // =========================================================================
+  websocketService.on("thinking_start", (data: { index?: number }) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] thinking_start[${data?.index ?? "?"}]`);
+    store.startContentBlock("thinking", data?.index);
+  });
 
-	websocketService.on(
-		"thinking_delta",
-		(data: { thinking?: string; index?: number }) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(`[${ts}] [RECV] thinking_delta[${data?.index ?? "?"}]`);
-			if (data?.thinking) {
-				store.appendStreamingThinking(data.thinking);
-			}
-		},
-	);
+  websocketService.on("thinking_delta", (data: { thinking?: string; index?: number }) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] thinking_delta[${data?.index ?? "?"}]`);
+    if (data?.thinking) {
+      store.appendStreamingThinking(data.thinking);
+    }
+  });
 
-	websocketService.on(
-		"thinking_end",
-		(data: { index?: number; implicit?: boolean }) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(
-				`[${ts}] [RECV] thinking_end[${data?.index ?? "?"}]${data?.implicit ? " (implicit)" : ""}`,
-			);
-			store.endContentBlock("thinking", data?.index);
-		},
-	);
+  websocketService.on("thinking_end", (data: { index?: number; implicit?: boolean }) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(
+      `[${ts}] [RECV] thinking_end[${data?.index ?? "?"}]${data?.implicit ? " (implicit)" : ""}`
+    );
+    store.endContentBlock("thinking", data?.index);
+  });
 
-	// =========================================================================
-	// Content Block Level Events - Tool Call (LLM generating tool call)
-	// =========================================================================
-	websocketService.on(
-		"toolcall_start",
-		(data: { toolCallId?: string; toolName?: string; index?: number }) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(
-				`[${ts}] [RECV] toolcall_start[${data?.index ?? "?"}]: ${data?.toolName || "unknown"}`,
-			);
-			store.startContentBlock("tool_use", data?.index, {
-				toolCallId: data?.toolCallId,
-				toolName: data?.toolName,
-			});
-		},
-	);
+  // =========================================================================
+  // Content Block Level Events - Tool Call (LLM generating tool call)
+  // =========================================================================
+  websocketService.on(
+    "toolcall_start",
+    (data: { toolCallId?: string; toolName?: string; index?: number }) => {
+      const ts = new Date().toISOString().split("T")[1].split(".")[0];
+      console.log(
+        `[${ts}] [RECV] toolcall_start[${data?.index ?? "?"}]: ${data?.toolName || "unknown"}`
+      );
+      store.startContentBlock("tool_use", data?.index, {
+        toolCallId: data?.toolCallId,
+        toolName: data?.toolName,
+      });
+    }
+  );
 
-	websocketService.on(
-		"toolcall_delta",
-		(data: {
-			toolCallId?: string;
-			toolName?: string;
-			delta?: string;
-			index?: number;
-		}) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(
-				`[${ts}] [RECV] toolcall_delta[${data?.index ?? "?"}]: ${data?.toolName || "unknown"}`,
-			);
-			if (data?.toolCallId && data?.toolName) {
-				store.appendToolCallDelta(
-					data.toolCallId,
-					data.toolName,
-					data.delta || "",
-				);
-			}
-		},
-	);
+  websocketService.on(
+    "toolcall_delta",
+    (data: { toolCallId?: string; toolName?: string; delta?: string; index?: number }) => {
+      const ts = new Date().toISOString().split("T")[1].split(".")[0];
+      console.log(
+        `[${ts}] [RECV] toolcall_delta[${data?.index ?? "?"}]: ${data?.toolName || "unknown"}`
+      );
+      if (data?.toolCallId && data?.toolName) {
+        store.appendToolCallDelta(data.toolCallId, data.toolName, data.delta || "");
+      }
+    }
+  );
 
-	websocketService.on(
-		"toolcall_end",
-		(data: {
-			toolCallId?: string;
-			toolName?: string;
-			index?: number;
-			implicit?: boolean;
-		}) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(
-				`[${ts}] [RECV] toolcall_end[${data?.index ?? "?"}]: ${data?.toolName || "unknown"}${data?.implicit ? " (implicit)" : ""}`,
-			);
-			store.endContentBlock("tool_use", data?.index, {
-				toolCallId: data?.toolCallId,
-				toolName: data?.toolName,
-			});
-		},
-	);
+  websocketService.on(
+    "toolcall_end",
+    (data: { toolCallId?: string; toolName?: string; index?: number; implicit?: boolean }) => {
+      const ts = new Date().toISOString().split("T")[1].split(".")[0];
+      console.log(
+        `[${ts}] [RECV] toolcall_end[${data?.index ?? "?"}]: ${data?.toolName || "unknown"}${data?.implicit ? " (implicit)" : ""}`
+      );
+      store.endContentBlock("tool_use", data?.index, {
+        toolCallId: data?.toolCallId,
+        toolName: data?.toolName,
+      });
+    }
+  );
 
-	// =========================================================================
-	// Tool Execution Level Events (Actual tool running)
-	// =========================================================================
-	websocketService.on(
-		"tool_execution_start",
-		(data: { toolCallId?: string; toolName: string; args?: any }) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(
-				`[${ts}] [RECV] tool_execution_start: ${data?.toolName || "unknown"}`,
-			);
+  // =========================================================================
+  // Tool Execution Level Events (Actual tool running)
+  // =========================================================================
+  websocketService.on(
+    "tool_execution_start",
+    (data: { toolCallId?: string; toolName: string; args?: any }) => {
+      const ts = new Date().toISOString().split("T")[1].split(".")[0];
+      console.log(`[${ts}] [RECV] tool_execution_start: ${data?.toolName || "unknown"}`);
 
-			const tool: ToolExecution = {
-				id: data?.toolCallId || generateToolId(),
-				name: data?.toolName || "unknown",
-				args: data?.args || {},
-				status: "executing",
-				startTime: new Date(),
-			};
-			store.setActiveTool(tool);
-		},
-	);
+      const tool: ToolExecution = {
+        id: data?.toolCallId || generateToolId(),
+        name: data?.toolName || "unknown",
+        args: data?.args || {},
+        status: "executing",
+        startTime: new Date(),
+      };
+      store.setActiveTool(tool);
+    }
+  );
 
-	websocketService.on(
-		"tool_execution_update",
-		(data: { toolCallId: string; chunk?: string }) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(`[${ts}] [RECV] tool_execution_update: ${data?.toolCallId}`);
-			if (data?.chunk) {
-				store.updateToolOutput(data.toolCallId, data.chunk, undefined);
-			}
-		},
-	);
+  websocketService.on("tool_execution_update", (data: { toolCallId: string; chunk?: string }) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] tool_execution_update: ${data?.toolCallId}`);
+    if (data?.chunk) {
+      store.updateToolOutput(data.toolCallId, data.chunk, undefined);
+    }
+  });
 
-	websocketService.on(
-		"tool_execution_end",
-		(data: { toolCallId: string; result?: string; isError?: boolean }) => {
-			const ts = new Date().toISOString().split("T")[1].split(".")[0];
-			console.log(`[${ts}] [RECV] tool_execution_end: ${data?.toolCallId}`);
-			const error = data?.isError ? "工具执行失败" : undefined;
-			store.updateToolOutput(data.toolCallId, data?.result || "", error);
-		},
-	);
+  websocketService.on(
+    "tool_execution_end",
+    (data: { toolCallId: string; result?: string; isError?: boolean }) => {
+      const ts = new Date().toISOString().split("T")[1].split(".")[0];
+      console.log(`[${ts}] [RECV] tool_execution_end: ${data?.toolCallId}`);
+      const error = data?.isError ? "工具执行失败" : undefined;
+      store.updateToolOutput(data.toolCallId, data?.result || "", error);
+    }
+  );
 
-	// =========================================================================
-	// System Events - 仅显示，不处理业务逻辑
-	// =========================================================================
-	websocketService.on("compaction_start", () => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] compaction_start`);
-		store.addMessage({
-			id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-			role: "system",
-			content: [{ type: "text", text: "🗜️ 正在压缩上下文..." }],
-			timestamp: new Date(),
-		});
-	});
+  // =========================================================================
+  // System Events - 仅显示，不处理业务逻辑
+  // =========================================================================
+  websocketService.on("compaction_start", () => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] compaction_start`);
+    store.addMessage({
+      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      role: "system",
+      content: [{ type: "text", text: "🗜️ 正在压缩上下文..." }],
+      timestamp: new Date(),
+    });
+  });
 
-	websocketService.on("compaction_end", () => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] compaction_end`);
-		// 添加系统消息到消息列表
-		store.addMessage({
-			id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-			role: "system",
-			content: [{ type: "text", text: "✅ 上下文压缩完成" }],
-			timestamp: new Date(),
-		});
-	});
+  websocketService.on("compaction_end", () => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] compaction_end`);
+    // 添加系统消息到消息列表
+    store.addMessage({
+      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      role: "system",
+      content: [{ type: "text", text: "✅ 上下文压缩完成" }],
+      timestamp: new Date(),
+    });
+  });
 
-	// Retry start/end handlers
-	websocketService.on("retry_start", () => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] retry_start`);
-		// 添加系统消息到消息列表
-		store.addMessage({
-			id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-			role: "system",
-			content: [{ type: "text", text: "🔄 正在重试..." }],
-			timestamp: new Date(),
-		});
-	});
+  // Retry start/end handlers
+  websocketService.on("retry_start", () => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] retry_start`);
+    // 添加系统消息到消息列表
+    store.addMessage({
+      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      role: "system",
+      content: [{ type: "text", text: "🔄 正在重试..." }],
+      timestamp: new Date(),
+    });
+  });
 
-	websocketService.on("retry_end", () => {
-		const ts = new Date().toISOString().split("T")[1].split(".")[0];
-		console.log(`[${ts}] [RECV] retry_end`);
-		// 添加系统消息到消息列表
-		store.addMessage({
-			id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-			role: "system",
-			content: [{ type: "text", text: "✅ 重试完成" }],
-			timestamp: new Date(),
-		});
-	});
+  websocketService.on("retry_end", () => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] retry_end`);
+    // 添加系统消息到消息列表
+    store.addMessage({
+      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      role: "system",
+      content: [{ type: "text", text: "✅ 重试完成" }],
+      timestamp: new Date(),
+    });
+  });
 
-	// Connection status handlers
-	websocketService.on("connected", () => {
-		console.log("[setupWebSocketListeners] WebSocket connected");
-	});
+  // Connection status handlers
+  websocketService.on("connected", () => {
+    console.log("[setupWebSocketListeners] WebSocket connected");
+  });
 
-	websocketService.on("disconnected", () => {
-		console.log("[setupWebSocketListeners] WebSocket disconnected");
-		// 如果正在流式生成，中止
-		if (store.isStreaming) {
-			store.abortStreaming();
-		}
-	});
+  websocketService.on("disconnected", () => {
+    console.log("[setupWebSocketListeners] WebSocket disconnected");
+    // 如果正在流式生成，中止
+    if (store.isStreaming) {
+      store.abortStreaming();
+    }
+  });
 
-	// Initialized handler - 保存 resourceFiles
-	websocketService.on("initialized", (data: any) => {
-		console.log("[setupWebSocketListeners] initialized:", data);
-		if (data?.resourceFiles) {
-			useSessionStore.getState().setResourceFiles(data.resourceFiles);
-		}
-	});
+  // Initialized handler - 保存 resourceFiles
+  websocketService.on("initialized", (data: any) => {
+    console.log("[setupWebSocketListeners] initialized:", data);
+    if (data?.resourceFiles) {
+      useSessionStore.getState().setResourceFiles(data.resourceFiles);
+    }
+  });
 
-	// Dir changed handler - 也保存 resourceFiles（切换目录时）
-	websocketService.on("dir_changed", (data: any) => {
-		console.log("[setupWebSocketListeners] dir_changed:", data);
-		if (data?.resourceFiles) {
-			useSessionStore.getState().setResourceFiles(data.resourceFiles);
-		}
-	});
+  // Dir changed handler - 也保存 resourceFiles（切换目录时）
+  websocketService.on("dir_changed", (data: any) => {
+    console.log("[setupWebSocketListeners] dir_changed:", data);
+    if (data?.resourceFiles) {
+      useSessionStore.getState().setResourceFiles(data.resourceFiles);
+    }
+  });
 
-	// Agent end handler - 已在 setupWebSocketListeners 中处理
-	// Error handler - 由全局WebSocket服务统一处理
+  // Agent end handler - 已在 setupWebSocketListeners 中处理
+  // Error handler - 由全局WebSocket服务统一处理
 }
 
 // ============================================================================

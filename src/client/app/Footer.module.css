@@ -3,44 +3,44 @@
  */
 
 .footer {
-	position: relative;
-	width: 100%;
-	height: 44px;
-	min-height: 44px;
-	background: var(--bg-secondary);
-	border-top: 1px solid var(--border-subtle);
-	display: flex;
-	align-items: center;
-	padding: 0 12px;
-	flex-shrink: 0;
-	z-index: 100;
+  position: relative;
+  width: 100%;
+  height: 44px;
+  min-height: 44px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  flex-shrink: 0;
+  z-index: 100;
 }
 
 /* 左侧组 */
 .leftGroup {
-	display: flex;
-	align-items: center;
-	gap: 4px;
-	flex-shrink: 0;
-	width: 80px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  width: 80px;
 }
 
 /* 中间组 - 绝对居中 */
 .centerGroup {
-	position: absolute;
-	left: 50%;
-	transform: translateX(-50%);
-	display: flex;
-	align-items: center;
-	gap: 8px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* 右侧组 */
 .rightGroup {
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
-	flex-shrink: 0;
-	width: 80px;
-	margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  width: 80px;
+  margin-left: auto;
 }

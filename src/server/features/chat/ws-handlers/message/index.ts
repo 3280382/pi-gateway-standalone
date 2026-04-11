@@ -18,25 +18,25 @@ import { handleToolRequest } from "./tool-request";
  * Register all Chat Feature WebSocket handlers
  */
 export function registerChatWSHandlers(): void {
-	// Chat core functionality
-	wsRouter.register("prompt", handlePrompt);
-	wsRouter.register("abort", handleAbort);
-	wsRouter.register("steer", handleSteer);
+  // Chat core functionality
+  wsRouter.register("prompt", handlePrompt);
+  wsRouter.register("abort", handleAbort);
+  wsRouter.register("steer", handleSteer);
 
-	// Model related
-	wsRouter.register("set_model", handleSetModel);
-	wsRouter.register("model_change", handleModelChange);
-	wsRouter.register("list_models", handleListModels);
-	wsRouter.register("thinking_level_change", handleThinkingLevelChange);
+  // Model related
+  wsRouter.register("set_model", handleSetModel);
+  wsRouter.register("model_change", handleModelChange);
+  wsRouter.register("list_models", handleListModels);
+  wsRouter.register("thinking_level_change", handleThinkingLevelChange);
 
-	// Tool related
-	wsRouter.register("tool_request", handleToolRequest);
+  // Tool related
+  wsRouter.register("tool_request", handleToolRequest);
 
-	// Command execution
-	wsRouter.register("command", handleCommand);
+  // Command execution
+  wsRouter.register("command", handleCommand);
 
-	// LLM logs
-	wsRouter.register("set_llm_log", handleSetLlmLog);
+  // LLM logs
+  wsRouter.register("set_llm_log", handleSetLlmLog);
 }
 
 // Auto-register (when module loads)
@@ -44,14 +44,14 @@ registerChatWSHandlers();
 
 // Export handlers (for standalone use)
 export {
-	handleAbort,
-	handleCommand,
-	handleListModels,
-	handleModelChange,
-	handlePrompt,
-	handleSetLlmLog,
-	handleSetModel,
-	handleSteer,
-	handleThinkingLevelChange,
-	handleToolRequest,
+  handleAbort,
+  handleCommand,
+  handleListModels,
+  handleModelChange,
+  handlePrompt,
+  handleSetLlmLog,
+  handleSetModel,
+  handleSteer,
+  handleThinkingLevelChange,
+  handleToolRequest,
 };

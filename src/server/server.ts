@@ -19,14 +19,14 @@ import { Logger, LogLevel } from "./lib/utils/logger";
 
 // Global LLM log manager
 const llmLogManager = new LlmLogManager({
-	enabled: Config.getLlmLogConfig().enabled,
-	truncateLimit: Config.getLlmLogConfig().truncateLimit,
+  enabled: Config.getLlmLogConfig().enabled,
+  truncateLimit: Config.getLlmLogConfig().truncateLimit,
 });
 
 // Setup LLM interceptors (must be before importing pi-coding-agent)
 setupLlmInterceptors(llmLogManager, {
-	setupHttpInterceptor: true,
-	truncateLimit: Config.getLlmLogConfig().truncateLimit,
+  setupHttpInterceptor: true,
+  truncateLimit: Config.getLlmLogConfig().truncateLimit,
 });
 
 // ===== [ANCHOR:STEP2_IMPORTS_MODULES] =====
@@ -49,16 +49,11 @@ const SERVER_START_TIME = Date.now();
 // ===== [ANCHOR:ERROR_HANDLERS] =====
 
 process.on("uncaughtException", (error) => {
-	console.error("[FATAL] Uncaught exception:", error);
+  console.error("[FATAL] Uncaught exception:", error);
 });
 
 process.on("unhandledRejection", (reason, promise) => {
-	console.error(
-		"[FATAL] Unhandled promise rejection:",
-		promise,
-		"reason:",
-		reason,
-	);
+  console.error("[FATAL] Unhandled promise rejection:", promise, "reason:", reason);
 });
 
 // ===== [ANCHOR:LOGGER] =====
@@ -68,8 +63,8 @@ const logger = new Logger({ level: LogLevel.INFO });
 // ===== [ANCHOR:VALIDATION_SCHEMA] =====
 
 const _WebSocketMessageSchema = z.object({
-	type: z.string(),
-	payload: z.record(z.unknown()).optional(),
+  type: z.string(),
+  payload: z.record(z.unknown()).optional(),
 });
 
 // ===== [ANCHOR:APP_SETUP] =====
@@ -92,142 +87,139 @@ const wss = new WebSocketServer({ server });
 let connectionCounter = 0;
 
 wss.on("connection", (ws) => {
-	const connectionId = `conn_${++connectionCounter}_${Date.now()}`;
-	logger.info(`[WebSocket] New connection established: ${connectionId}`);
+  const connectionId = `conn_${++connectionCounter}_${Date.now()}`;
+  logger.info(`[WebSocket] New connection established: ${connectionId}`);
 
-	// Create PiAgentSession instance
-	const piAgentSession = new PiAgentSession(ws, llmLogManager);
+  // Create PiAgentSession instance
+  const piAgentSession = new PiAgentSession(ws, llmLogManager);
 
-	// Create WebSocket context
-	const ctx: WSContext = {
-		ws,
-		session: piAgentSession,
-		connectionId,
-		connectedAt: new Date(),
-	};
+  // Create WebSocket context
+  const ctx: WSContext = {
+    ws,
+    session: piAgentSession,
+    connectionId,
+    connectedAt: new Date(),
+  };
 
-	// WebSocket message handling - using Router dispatch
-	ws.on("message", async (data) => {
-		let rawMessage: unknown;
+  // WebSocket message handling - using Router dispatch
+  ws.on("message", async (data) => {
+    let rawMessage: unknown;
 
-		// 1. Parse JSON
-		try {
-			rawMessage = JSON.parse(data.toString());
-		} catch {
-			ws.send(
-				JSON.stringify({
-					type: "error",
-					error: "Invalid JSON message",
-				}),
-			);
-			return;
-		}
+    // 1. Parse JSON
+    try {
+      rawMessage = JSON.parse(data.toString());
+    } catch {
+      ws.send(
+        JSON.stringify({
+          type: "error",
+          error: "Invalid JSON message",
+        })
+      );
+      return;
+    }
 
-		// 2. Extract type and payload
-		let type: string;
-		let payload: any;
+    // 2. Extract type and payload
+    let type: string;
+    let payload: any;
 
-		if (rawMessage && typeof rawMessage === "object" && "type" in rawMessage) {
-			type = (rawMessage as any).type;
-			// Use entire object as payload, excluding type field
-			const { type: _, ...rest } = rawMessage as any;
-			payload = rest;
-		} else {
-			ws.send(
-				JSON.stringify({
-					type: "error",
-					error: "Message must contain type field",
-				}),
-			);
-			return;
-		}
+    if (rawMessage && typeof rawMessage === "object" && "type" in rawMessage) {
+      type = (rawMessage as any).type;
+      // Use entire object as payload, excluding type field
+      const { type: _, ...rest } = rawMessage as any;
+      payload = rest;
+    } else {
+      ws.send(
+        JSON.stringify({
+          type: "error",
+          error: "Message must contain type field",
+        })
+      );
+      return;
+    }
 
-		// 3. Use Router to dispatch message
-		try {
-			await wsRouter.dispatch(type, ctx, payload);
-		} catch (error) {
-			logger.error(
-				`[WebSocket] Error processing message "${type}":`,
-				{ rawMessage },
-				error instanceof Error ? error : undefined,
-			);
+    // 3. Use Router to dispatch message
+    try {
+      await wsRouter.dispatch(type, ctx, payload);
+    } catch (error) {
+      logger.error(
+        `[WebSocket] Error processing message "${type}":`,
+        { rawMessage },
+        error instanceof Error ? error : undefined
+      );
 
-			try {
-				ws.send(
-					JSON.stringify({
-						type: "error",
-						error:
-							error instanceof Error
-								? error.message
-								: "Failed to process message",
-						receivedType: type,
-					}),
-				);
-			} catch (sendError) {
-				logger.error(
-					"[WebSocket] Failed to send error message:",
-					{},
-					sendError instanceof Error ? sendError : undefined,
-				);
-			}
-		}
-	});
+      try {
+        ws.send(
+          JSON.stringify({
+            type: "error",
+            error: error instanceof Error ? error.message : "Failed to process message",
+            receivedType: type,
+          })
+        );
+      } catch (sendError) {
+        logger.error(
+          "[WebSocket] Failed to send error message:",
+          {},
+          sendError instanceof Error ? sendError : undefined
+        );
+      }
+    }
+  });
 
-	// Connection close handling
-	ws.on("close", () => {
-		logger.info(`[WebSocket] Connection closed: ${connectionId}`);
-		piAgentSession.dispose();
-	});
+  // Connection close handling
+  ws.on("close", () => {
+    logger.info(`[WebSocket] Connection closed: ${connectionId}`);
+    piAgentSession.dispose();
+  });
 
-	// Error handling
-	ws.on("error", (error) => {
-		logger.error(`[WebSocket] Connection error: ${connectionId}`, {}, error);
-		piAgentSession.dispose();
-	});
+  // Error handling
+  ws.on("error", (error) => {
+    logger.error(`[WebSocket] Connection error: ${connectionId}`, {}, error);
+    piAgentSession.dispose();
+  });
 });
 
 // ===== [ANCHOR:GRACEFUL_SHUTDOWN] =====
 
 function setupGracefulShutdown() {
-	const shutdownSignals = ["SIGINT", "SIGTERM", "SIGQUIT"];
+  const shutdownSignals = ["SIGINT", "SIGTERM", "SIGQUIT"];
 
-	shutdownSignals.forEach((signal) => {
-		process.on(signal, async () => {
-			logger.info(`Received ${signal} signal, shutting down gracefully...`);
+  shutdownSignals.forEach((signal) => {
+    process.on(signal, async () => {
+      logger.info(`Received ${signal} signal, shutting down gracefully...`);
 
-			// Close WebSocket server
-			if (wss) {
-				logger.info("Closing WebSocket server...");
-				wss.clients.forEach((client) => {
-					if (client.readyState === WebSocket.OPEN) {
-						client.close(1001, "Server is shutting down");
-					}
-				});
-				wss.close();
-			}
+      // Close WebSocket server
+      if (wss) {
+        logger.info("Closing WebSocket server...");
+        wss.clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.close(1001, "Server is shutting down");
+          }
+        });
+        wss.close();
+      }
 
-			// Cleanup LLM log manager
-			llmLogManager.dispose();
+      // Cleanup LLM log manager
+      llmLogManager.dispose();
 
-			// Close HTTP server
-			if (server) {
-				server.close(() => {
-					logger.info("HTTP server closed");
-					process.exit(0);
-				});
+      // Close HTTP server
+      if (server) {
+        server.close(() => {
+          logger.info("HTTP server closed");
+          process.exit(0);
+        });
 
-				// Force timeout
-				setTimeout(() => {
-					logger.error("Force shutdown timeout");
-					process.exit(1);
-				}, 10000);
-			} else {
-				process.exit(0);
-			}
-		});
-	});
+        // Force timeout
+        setTimeout(() => {
+          logger.error("Force shutdown timeout");
+          process.exit(1);
+        }, 10000);
+      } else {
+        process.exit(0);
+      }
+    });
+  });
 
-	logger.info("Graceful shutdown handling set up");
+  logger.info("Graceful shutdown handling set up");
 }
 
 setupGracefulShutdown();
@@ -235,17 +227,17 @@ setupGracefulShutdown();
 // ===== [ANCHOR:SERVER_START] =====
 
 const isMainModule =
-	import.meta.url.endsWith(process.argv[1]) ||
-	process.argv[1]?.includes("server.ts") ||
-	process.argv[1]?.includes("server.js");
+  import.meta.url.endsWith(process.argv[1]) ||
+  process.argv[1]?.includes("server.ts") ||
+  process.argv[1]?.includes("server.js");
 
 if (isMainModule) {
-	const port = Config.getPort();
+  const port = Config.getPort();
 
-	appFactory
-		.start()
-		.then(() => {
-			console.log(`
+  appFactory
+    .start()
+    .then(() => {
+      console.log(`
 ╔════════════════════════════════════════════════════════╗
 ║                                                        ║
 ║   Pi Gateway Server (Feature-Based Architecture)       ║
@@ -254,11 +246,11 @@ if (isMainModule) {
 ║                                                        ║
 ╚════════════════════════════════════════════════════════╝
     `);
-		})
-		.catch((error) => {
-			console.error("Failed to start server:", error);
-			process.exit(1);
-		});
+    })
+    .catch((error) => {
+      console.error("Failed to start server:", error);
+      process.exit(1);
+    });
 }
 
 // ===== [ANCHOR:EXPORTS] =====

@@ -9,36 +9,33 @@ const API_BASE = "/api";
 // ============================================================================
 
 export class ApiError extends Error {
-	constructor(
-		public status: number,
-		public statusText: string,
-		public response?: any,
-	) {
-		super(`API Error: ${status} ${statusText}`);
-		this.name = "ApiError";
-	}
+  constructor(
+    public status: number,
+    public statusText: string,
+    public response?: any
+  ) {
+    super(`API Error: ${status} ${statusText}`);
+    this.name = "ApiError";
+  }
 }
 
-export async function fetchApi<T>(
-	path: string,
-	options?: RequestInit,
-): Promise<T> {
-	const url = `${API_BASE}${path}`;
+export async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
+  const url = `${API_BASE}${path}`;
 
-	const response = await fetch(url, {
-		headers: {
-			"Content-Type": "application/json",
-			...options?.headers,
-		},
-		...options,
-	});
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+    ...options,
+  });
 
-	if (!response.ok) {
-		const errorBody = await response.text().catch(() => undefined);
-		throw new ApiError(response.status, response.statusText, errorBody);
-	}
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => undefined);
+    throw new ApiError(response.status, response.statusText, errorBody);
+  }
 
-	return response.json();
+  return response.json();
 }
 
 // ============================================================================
@@ -48,105 +45,103 @@ export async function fetchApi<T>(
 type MessageHandler = (data: any) => void;
 
 class WebSocketClient {
-	private ws: WebSocket | null = null;
-	private messageHandlers: Map<string, Set<MessageHandler>> = new Map();
-	private reconnectAttempts = 0;
-	private maxReconnectAttempts = 5;
-	private reconnectDelay = 1000;
+  private ws: WebSocket | null = null;
+  private messageHandlers: Map<string, Set<MessageHandler>> = new Map();
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
+  private reconnectDelay = 1000;
 
-	connect(url: string = `ws://${window.location.host}`) {
-		if (this.ws?.readyState === WebSocket.OPEN) {
-			console.log("[WebSocket] Already connected");
-			return;
-		}
+  connect(url: string = `ws://${window.location.host}`) {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      console.log("[WebSocket] Already connected");
+      return;
+    }
 
-		console.log("[WebSocket] Connecting to", url);
-		this.ws = new WebSocket(url);
+    console.log("[WebSocket] Connecting to", url);
+    this.ws = new WebSocket(url);
 
-		this.ws.onopen = () => {
-			console.log("[WebSocket] Connected");
-			this.reconnectAttempts = 0;
-		};
+    this.ws.onopen = () => {
+      console.log("[WebSocket] Connected");
+      this.reconnectAttempts = 0;
+    };
 
-		this.ws.onmessage = (event) => {
-			try {
-				const message = JSON.parse(event.data);
-				this.handleMessage(message);
-			} catch (error) {
-				console.error("[WebSocket] Failed to parse message:", error);
-			}
-		};
+    this.ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        this.handleMessage(message);
+      } catch (error) {
+        console.error("[WebSocket] Failed to parse message:", error);
+      }
+    };
 
-		this.ws.onclose = () => {
-			console.log("[WebSocket] Disconnected");
-			this.attemptReconnect(url);
-		};
+    this.ws.onclose = () => {
+      console.log("[WebSocket] Disconnected");
+      this.attemptReconnect(url);
+    };
 
-		this.ws.onerror = (error) => {
-			console.error("[WebSocket] Error:", error);
-		};
-	}
+    this.ws.onerror = (error) => {
+      console.error("[WebSocket] Error:", error);
+    };
+  }
 
-	private handleMessage(message: any) {
-		const handlers = this.messageHandlers.get(message.type);
-		if (handlers) {
-			handlers.forEach((handler) => {
-				try {
-					handler(message);
-				} catch (error) {
-					console.error("[WebSocket] Handler error:", error);
-				}
-			});
-		}
-	}
+  private handleMessage(message: any) {
+    const handlers = this.messageHandlers.get(message.type);
+    if (handlers) {
+      handlers.forEach((handler) => {
+        try {
+          handler(message);
+        } catch (error) {
+          console.error("[WebSocket] Handler error:", error);
+        }
+      });
+    }
+  }
 
-	private attemptReconnect(url: string) {
-		if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-			console.error("[WebSocket] Max reconnection attempts reached");
-			return;
-		}
+  private attemptReconnect(url: string) {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.error("[WebSocket] Max reconnection attempts reached");
+      return;
+    }
 
-		this.reconnectAttempts++;
-		const delay = this.reconnectDelay * 2 ** (this.reconnectAttempts - 1);
+    this.reconnectAttempts++;
+    const delay = this.reconnectDelay * 2 ** (this.reconnectAttempts - 1);
 
-		console.log(
-			`[WebSocket] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`,
-		);
+    console.log(`[WebSocket] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
 
-		setTimeout(() => {
-			this.connect(url);
-		}, delay);
-	}
+    setTimeout(() => {
+      this.connect(url);
+    }, delay);
+  }
 
-	on(type: string, handler: MessageHandler): () => void {
-		if (!this.messageHandlers.has(type)) {
-			this.messageHandlers.set(type, new Set());
-		}
-		this.messageHandlers.get(type)!.add(handler);
+  on(type: string, handler: MessageHandler): () => void {
+    if (!this.messageHandlers.has(type)) {
+      this.messageHandlers.set(type, new Set());
+    }
+    this.messageHandlers.get(type)!.add(handler);
 
-		// Return unsubscribe function
-		return () => {
-			this.messageHandlers.get(type)?.delete(handler);
-		};
-	}
+    // Return unsubscribe function
+    return () => {
+      this.messageHandlers.get(type)?.delete(handler);
+    };
+  }
 
-	send(message: any) {
-		if (this.ws?.readyState === WebSocket.OPEN) {
-			this.ws.send(JSON.stringify(message));
-		} else {
-			console.warn("[WebSocket] Not connected, message queued:", message);
-			// Could implement message queuing here
-		}
-	}
+  send(message: any) {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(message));
+    } else {
+      console.warn("[WebSocket] Not connected, message queued:", message);
+      // Could implement message queuing here
+    }
+  }
 
-	disconnect() {
-		this.ws?.close();
-		this.ws = null;
-	}
+  disconnect() {
+    this.ws?.close();
+    this.ws = null;
+  }
 
-	isConnected(): boolean {
-		return this.ws?.readyState === WebSocket.OPEN;
-	}
+  isConnected(): boolean {
+    return this.ws?.readyState === WebSocket.OPEN;
+  }
 }
 
 // Singleton instance
@@ -157,7 +152,7 @@ export const wsClient = new WebSocketClient();
 // ============================================================================
 
 export function initConnection() {
-	wsClient.connect();
+  wsClient.connect();
 }
 
 // 注：控制器、服务和模型导出已移到各自目录的 index.ts

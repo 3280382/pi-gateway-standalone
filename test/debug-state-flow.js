@@ -19,24 +19,18 @@ console.log("\n=== 状态流追踪 ===");
 console.log("\n1. App.tsx状态管理:");
 console.log('   - currentView初始值: "chat" (需要点击"Files"按钮切换)');
 console.log("   - isSidebarVisible初始值: 根据窗口宽度决定");
-console.log(
-	"   - BottomMenu接收onToggleSidebar: () => setIsSidebarVisible(!isSidebarVisible)",
-);
+console.log("   - BottomMenu接收onToggleSidebar: () => setIsSidebarVisible(!isSidebarVisible)");
 console.log("   - FileBrowser接收externalSidebarVisible={isSidebarVisible}");
 
 // 2. FileBrowser传递状态
 console.log("\n2. FileBrowser传递状态:");
 console.log("   - 接收externalSidebarVisible和onToggleSidebar");
 console.log("   - 传递给FileSidebar: visible={sidebarVisible}");
-console.log(
-	"   - sidebarVisible = externalSidebarVisible ?? storeSidebarVisible",
-);
+console.log("   - sidebarVisible = externalSidebarVisible ?? storeSidebarVisible");
 
 // 3. FileSidebar行为
 console.log("\n3. FileSidebar行为:");
-console.log(
-	"   - useEffect([visible, loadRoot]): visible为true时调用loadRoot()",
-);
+console.log("   - useEffect([visible, loadRoot]): visible为true时调用loadRoot()");
 console.log('   - loadRoot(): 调用loadDirectory("/root")');
 console.log("   - loadDirectory(): 调用browseDirectory API");
 console.log("   - 成功: 更新tree状态，显示文件");
@@ -84,13 +78,13 @@ const { execSync } = require("child_process");
 
 console.log("\n测试后端API:");
 try {
-	const apiTest = execSync(
-		'curl -s -X POST http://127.0.0.1:3000/api/browse -H "Content-Type: application/json" -d \'{"path":"/root"}\' | jq ".items | length"',
-		{ encoding: "utf8" },
-	);
-	console.log(`   /api/browse /root: ✅ ${apiTest.trim()} 个项目`);
+  const apiTest = execSync(
+    'curl -s -X POST http://127.0.0.1:3000/api/browse -H "Content-Type: application/json" -d \'{"path":"/root"}\' | jq ".items | length"',
+    { encoding: "utf8" }
+  );
+  console.log(`   /api/browse /root: ✅ ${apiTest.trim()} 个项目`);
 } catch (error) {
-	console.log(`   /api/browse /root: ❌ ${error.message}`);
+  console.log(`   /api/browse /root: ❌ ${error.message}`);
 }
 
 console.log("\n=== 结论 ===");

@@ -16,77 +16,70 @@ import { FileList } from "@/features/files/components/FileBrowser/FileList";
 
 import { FileActionBar } from "@/features/files/components/Header/FileActionBar";
 import { FileViewer } from "@/features/files/components/modals/FileViewer";
-import {
-	useFileBrowser,
-	useFileFiltering,
-	useGitStatus,
-} from "@/features/files/hooks";
+import { useFileBrowser, useFileFiltering, useGitStatus } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
 
 // ===== [ANCHOR:TYPES] =====
 
 interface FileBrowserProps {
-	/** 是否处于激活状态 - 控制数据加载 */
-	isActive?: boolean;
-	onExecuteOutput?: (output: string) => void;
-	onOpenBottomPanel?: (output: string) => void;
+  /** 是否处于激活状态 - 控制数据加载 */
+  isActive?: boolean;
+  onExecuteOutput?: (output: string) => void;
+  onOpenBottomPanel?: (output: string) => void;
 }
 
 // ===== [ANCHOR:COMPONENT] =====
 
 export function FileBrowser({
-	isActive = true,
-	onExecuteOutput,
-	onOpenBottomPanel,
+  isActive = true,
+  onExecuteOutput,
+  onOpenBottomPanel,
 }: FileBrowserProps) {
-	// ===== [ANCHOR:STATE] =====
-	const { viewMode, isLoading, error } = useFileStore();
+  // ===== [ANCHOR:STATE] =====
+  const { viewMode, isLoading, error } = useFileStore();
 
-	// ===== [ANCHOR:HOOKS] =====
-	// 仅在激活状态下获取数据
-	useFileBrowser({ isActive });
-	useGitStatus({ isActive });
+  // ===== [ANCHOR:HOOKS] =====
+  // 仅在激活状态下获取数据
+  useFileBrowser({ isActive });
+  useGitStatus({ isActive });
 
-	// ===== [ANCHOR:COMPUTED] =====
-	const { filteredItems } = useFileFiltering();
+  // ===== [ANCHOR:COMPUTED] =====
+  const { filteredItems } = useFileFiltering();
 
-	// ===== [ANCHOR:RENDER] =====
-	return (
-		<section className={styles.fileBrowserSection}>
-			<div className={styles.container}>
-				{/* 主内容区 */}
-				<div className={styles.main}>
-					{/* 选中文件操作栏 */}
-					<FileBrowserErrorBoundary componentName="File Action Bar">
-						<FileActionBar
-							onExecute={onExecuteOutput}
-							onOpenBottomPanel={onOpenBottomPanel}
-						/>
-					</FileBrowserErrorBoundary>
+  // ===== [ANCHOR:RENDER] =====
+  return (
+    <section className={styles.fileBrowserSection}>
+      <div className={styles.container}>
+        {/* 主内容区 */}
+        <div className={styles.main}>
+          {/* 选中文件操作栏 */}
+          <FileBrowserErrorBoundary componentName="File Action Bar">
+            <FileActionBar onExecute={onExecuteOutput} onOpenBottomPanel={onOpenBottomPanel} />
+          </FileBrowserErrorBoundary>
 
-					{/* 文件列表区域 */}
-					<div className={styles.contentArea}>
-						{isLoading ? (
-							<div className={styles.loading}>Loading...</div>
-						) : error ? (
-							<div className={styles.error}>{error}</div>
-						) : filteredItems.length === 0 ? (
-							<div className={styles.empty}>No files found</div>
-						) : viewMode === "grid" ? (
-							<FileBrowserErrorBoundary componentName="File Grid">
-								<FileGrid items={filteredItems} />
-							</FileBrowserErrorBoundary>
-						) : (
-							<FileBrowserErrorBoundary componentName="File List">
-								<FileList items={filteredItems} />
-							</FileBrowserErrorBoundary>
-						)}
-					</div>
-				</div>
-			</div>
+          {/* 文件列表区域 */}
+          <div className={styles.contentArea}>
+            {isLoading ? (
+              <div className={styles.loading}>Loading...</div>
+            ) : error ? (
+              <div className={styles.error}>{error}</div>
+            ) : filteredItems.length === 0 ? (
+              <div className={styles.empty}>No files found</div>
+            ) : viewMode === "grid" ? (
+              <FileBrowserErrorBoundary componentName="File Grid">
+                <FileGrid items={filteredItems} />
+              </FileBrowserErrorBoundary>
+            ) : (
+              <FileBrowserErrorBoundary componentName="File List">
+                <FileList items={filteredItems} />
+              </FileBrowserErrorBoundary>
+            )}
+          </div>
+        </div>
+      </div>
 
-			{/* 文件查看器模态框 */}
-			<FileViewer />
-		</section>
-	);
+      {/* 文件查看器模态框 */}
+      <FileViewer />
+    </section>
+  );
 }

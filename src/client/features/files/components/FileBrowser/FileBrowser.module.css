@@ -3,880 +3,880 @@
  */
 
 .fileBrowserSection {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-	min-height: 0;
-	background: var(--bg-primary);
-	overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  background: var(--bg-primary);
+  overflow: hidden;
 }
 
 .container {
-	display: flex;
-	flex: 1;
-	min-height: 0;
-	width: 100%;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
 }
 
 .sidebar {
-	position: absolute;
-	top: 0;
-	left: 0;
-	bottom: 0;
-	width: 280px;
-	background: var(--bg-secondary);
-	border-right: 1px solid var(--border-subtle);
-	overflow-y: auto;
-	z-index: 100;
-	box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-	transform: translateX(-100%);
-	transition: transform 0.3s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-subtle);
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
 }
 
 .sidebarVisible {
-	transform: translateX(0);
+  transform: translateX(0);
 }
 
 .main {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	min-height: 0; /* 关键：允许flex子项收缩 */
-	overflow: hidden; /* 让contentArea控制滚动 */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* 关键：允许flex子项收缩 */
+  overflow: hidden; /* 让contentArea控制滚动 */
 }
 
 .contentArea {
-	flex: 1;
-	overflow-y: auto;
-	overflow-x: hidden;
-	padding: 8px;
-	min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px;
+  min-height: 0;
 }
 
 .loading,
 .error,
 .empty {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 100%;
-	color: var(--text-muted);
-	font-size: var(--font-sm);
-	padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+  padding: 20px;
 }
 
 .error {
-	color: var(--accent-red);
+  color: var(--accent-red);
 }
 
 /* ====== 工具栏 ====== */
 .toolbarWrapper {
-	display: flex;
-	flex-direction: column;
-	background: var(--bg-secondary);
-	border-bottom: 1px solid rgba(48, 54, 61, 0.5);
-	flex-shrink: 0;
-	height: 76px;
-	min-height: 76px;
-	max-height: 76px;
-	box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  flex-shrink: 0;
+  height: 76px;
+  min-height: 76px;
+  max-height: 76px;
+  box-sizing: border-box;
 }
 
 .toolbarRow {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 4px 12px;
-	height: 38px;
-	min-height: 38px;
-	max-height: 38px;
-	box-sizing: border-box;
-	line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  height: 38px;
+  min-height: 38px;
+  max-height: 38px;
+  box-sizing: border-box;
+  line-height: 1;
 }
 
 .toolbarRow + .toolbarRow {
-	border-top: 1px solid rgba(48, 54, 61, 0.5);
+  border-top: 1px solid rgba(48, 54, 61, 0.5);
 }
 
 .toolbarRow * {
-	line-height: 1;
+  line-height: 1;
 }
 
 .toolbarBtn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 24px;
-	height: 24px;
-	padding: 4px;
-	background: var(--bg-tertiary);
-	border: none;
-	border-radius: 3px;
-	color: var(--text-secondary);
-	font-size: var(--font-xs);
-	cursor: pointer;
-	transition: all 0.15s ease;
-	box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 4px;
+  background: var(--bg-tertiary);
+  border: none;
+  border-radius: 3px;
+  color: var(--text-secondary);
+  font-size: var(--font-xs);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
 }
 
 .toolbarBtn:hover {
-	background: var(--bg-hover);
-	color: var(--text-primary);
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .toolbarBtn.active {
-	background: var(--accent-blue-transparent);
-	color: var(--accent-blue);
+  background: var(--accent-blue-transparent);
+  color: var(--accent-blue);
 }
 
 /* 仅图标按钮 */
 .iconBtn {
-	width: 24px;
-	height: 24px;
-	padding: 4px;
+  width: 24px;
+  height: 24px;
+  padding: 4px;
 }
 
 .iconBtn svg {
-	width: 16px;
-	height: 16px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Execute button - green color */
 .exeBtn {
-	color: var(--accent-green);
-	background: var(--accent-bg-green);
+  color: var(--accent-green);
+  background: var(--accent-bg-green);
 }
 
 .exeBtn:hover {
-	background: var(--accent-green);
-	color: white;
+  background: var(--accent-green);
+  color: white;
 }
 
 /* Path bar - 美化样式匹配 Chat */
 .pathBar {
-	flex: 1;
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 0 12px;
-	height: 28px;
-	background: rgba(88, 166, 255, 0.1);
-	border: 1px solid rgba(88, 166, 255, 0.2);
-	border-radius: 6px;
-	font-size: 12px;
-	color: #58a6ff;
-	font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
-	overflow: hidden;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: 28px;
+  background: rgba(88, 166, 255, 0.1);
+  border: 1px solid rgba(88, 166, 255, 0.2);
+  border-radius: 6px;
+  font-size: 12px;
+  color: #58a6ff;
+  font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
+  overflow: hidden;
 }
 
 .pathBar svg {
-	flex-shrink: 0;
-	width: 14px;
-	height: 14px;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
 }
 
 .pathBar span {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* View mode toggle - 统一样式 */
 .viewToggle {
-	display: flex;
-	gap: 2px;
-	background: rgba(88, 166, 255, 0.1);
-	border-radius: 6px;
-	padding: 2px;
+  display: flex;
+  gap: 2px;
+  background: rgba(88, 166, 255, 0.1);
+  border-radius: 6px;
+  padding: 2px;
 }
 
 .viewToggleBtn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 28px;
-	height: 24px;
-	padding: 0;
-	background: transparent;
-	border: none;
-	border-radius: 4px;
-	color: #8b949e;
-	cursor: pointer;
-	transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #8b949e;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
 .viewToggleBtn:hover {
-	background: rgba(88, 166, 255, 0.1);
-	color: #58a6ff;
+  background: rgba(88, 166, 255, 0.1);
+  color: #58a6ff;
 }
 
 .viewToggleBtn.active {
-	background: rgba(88, 166, 255, 0.2);
-	color: #58a6ff;
+  background: rgba(88, 166, 255, 0.2);
+  color: #58a6ff;
 }
 
 .viewToggleBtn svg {
-	width: 14px;
-	height: 14px;
+  width: 14px;
+  height: 14px;
 }
 
 /* Filter and sort */
 .filterSortRow {
-	display: flex;
-	align-items: center;
-	gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* 合并过滤组件：统一样式 */
 .filterCombo {
-	flex: 1;
-	display: flex;
-	align-items: center;
-	background: #0d1117;
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 6px;
-	overflow: visible;
-	height: 28px;
-	position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #0d1117;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 6px;
+  overflow: visible;
+  height: 28px;
+  position: relative;
 }
 
 .filterComboInput {
-	flex: 1;
-	padding: 0 10px;
-	background: transparent;
-	border: none;
-	color: #c9d1d9;
-	font-size: 12px;
-	min-width: 0;
-	outline: none;
+  flex: 1;
+  padding: 0 10px;
+  background: transparent;
+  border: none;
+  color: #c9d1d9;
+  font-size: 12px;
+  min-width: 0;
+  outline: none;
 }
 
 .filterComboInput::placeholder {
-	color: #6e7681;
+  color: #6e7681;
 }
 
 .filterComboBtn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 26px;
-	height: 26px;
-	padding: 0;
-	margin: 1px;
-	background: transparent;
-	border: none;
-	border-left: 1px solid var(--border-subtle);
-	border-radius: 0 2px 2px 0;
-	color: var(--text-secondary);
-	cursor: pointer;
-	transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  margin: 1px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--border-subtle);
+  border-radius: 0 2px 2px 0;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .filterComboBtn:hover {
-	background: rgba(88, 166, 255, 0.1);
-	color: #58a6ff;
+  background: rgba(88, 166, 255, 0.1);
+  color: #58a6ff;
 }
 
 .filterComboBtn svg {
-	width: 12px;
-	height: 12px;
+  width: 12px;
+  height: 12px;
 }
 
 /* 自定义下拉菜单 - 统一样式 */
 .filterDropdown {
-	position: absolute;
-	top: 100%;
-	left: 0;
-	margin-top: 4px;
-	background: #161b22;
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 6px;
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-	max-height: 200px;
-	overflow-y: auto;
-	z-index: 100;
-	min-width: 160px;
-	padding: 4px;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background: #161b22;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  min-width: 160px;
+  padding: 4px;
 }
 
 .filterDropdownItem {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 8px 12px;
-	cursor: pointer;
-	font-size: 12px;
-	color: #c9d1d9;
-	transition: background 0.15s ease;
-	border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #c9d1d9;
+  transition: background 0.15s ease;
+  border-radius: 4px;
 }
 
 .filterDropdownItem:hover,
 .filterDropdownItem.active {
-	background: rgba(88, 166, 255, 0.1);
-	color: #58a6ff;
+  background: rgba(88, 166, 255, 0.1);
+  color: #58a6ff;
 }
 
 .filterIcon {
-	font-size: 14px;
-	width: 20px;
-	text-align: center;
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
 }
 
 .filterLabel {
-	flex: 1;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 排序下拉框 - 统一样式 */
 .sortCombo {
-	position: relative;
-	display: flex;
-	align-items: center;
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .sortComboBtn {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	padding: 0 10px;
-	height: 28px;
-	background: #0d1117;
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 6px;
-	color: #c9d1d9;
-	font-size: 12px;
-	cursor: pointer;
-	transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  height: 28px;
+  background: #0d1117;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 6px;
+  color: #c9d1d9;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .sortComboBtn:hover {
-	border-color: #8b949e;
-	background: rgba(255, 255, 255, 0.05);
+  border-color: #8b949e;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .sortComboBtn svg {
-	width: 12px;
-	height: 12px;
+  width: 12px;
+  height: 12px;
 }
 
 /* 排序下拉菜单 */
 .sortDropdown {
-	position: absolute;
-	top: 100%;
-	right: 0;
-	margin-top: 4px;
-	background: #161b22;
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 6px;
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-	max-height: 200px;
-	overflow-y: auto;
-	z-index: 100;
-	min-width: 140px;
-	padding: 4px;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: #161b22;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  min-width: 140px;
+  padding: 4px;
 }
 
 .sortDropdownItem {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 8px 12px;
-	cursor: pointer;
-	font-size: 12px;
-	color: #c9d1d9;
-	transition: background 0.15s ease;
-	border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #c9d1d9;
+  transition: background 0.15s ease;
+  border-radius: 4px;
 }
 
 .sortDropdownItem:hover,
 .sortDropdownItem.active {
-	background: rgba(88, 166, 255, 0.1);
-	color: #58a6ff;
+  background: rgba(88, 166, 255, 0.1);
+  color: #58a6ff;
 }
 
 .sortIcon {
-	font-size: 14px;
-	width: 20px;
-	text-align: center;
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
 }
 
 .sortLabel {
-	flex: 1;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ====== 文件列表视图 ====== */
 .list {
-	display: flex;
-	flex-direction: column;
-	overflow-y: auto;
-	overflow-x: hidden;
-	padding: 0 8px;
-	min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 8px;
+  min-height: 0;
 }
 
 .listHeader {
-	display: grid;
-	grid-template-columns: 18px 1fr 60px 90px;
-	gap: 6px;
-	padding: 3px 8px;
-	margin-bottom: 1px;
-	font-size: var(--font-xs);
-	color: var(--text-muted);
-	border-bottom: 1px solid var(--border-subtle);
+  display: grid;
+  grid-template-columns: 18px 1fr 60px 90px;
+  gap: 6px;
+  padding: 3px 8px;
+  margin-bottom: 1px;
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .headerName {
-	grid-column: 2;
+  grid-column: 2;
 }
 
 .headerSize {
-	grid-column: 3;
-	text-align: right;
+  grid-column: 3;
+  text-align: right;
 }
 
 .headerModified {
-	grid-column: 4;
+  grid-column: 4;
 }
 
 .listItem {
-	display: grid;
-	grid-template-columns: 18px 1fr 60px 90px;
-	gap: 6px;
-	padding: 3px 8px;
-	border-radius: 2px;
-	font-size: var(--font-sm);
-	cursor: pointer;
-	transition: background 0.15s;
-	margin-bottom: 1px;
+  display: grid;
+  grid-template-columns: 18px 1fr 60px 90px;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 2px;
+  font-size: var(--font-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 1px;
 }
 
 .listItem:hover {
-	background: var(--bg-hover);
+  background: var(--bg-hover);
 }
 
 .listItem.selected {
-	background: var(--accent-blue-transparent);
-	color: var(--accent-blue);
+  background: var(--accent-blue-transparent);
+  color: var(--accent-blue);
 }
 
 .listIcon {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: var(--font-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-base);
 }
 
 .listName {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .listItem.directory .listName {
-	font-weight: 500;
+  font-weight: 500;
 }
 
 .listSize {
-	color: var(--text-muted);
-	text-align: right;
+  color: var(--text-muted);
+  text-align: right;
 }
 
 .listModified {
-	color: var(--text-muted);
+  color: var(--text-muted);
 }
 
 /* ====== 网格视图 ====== */
 .grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-	gap: 4px;
-	padding: 8px;
-	overflow-y: auto;
-	min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 4px;
+  padding: 8px;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .gridItem {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	padding: 6px;
-	border-radius: 4px;
-	cursor: pointer;
-	transition: all 0.15s;
-	text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
 }
 
 .gridItem:hover {
-	background: var(--bg-hover);
+  background: var(--bg-hover);
 }
 
 .gridItem.selected {
-	background: var(--accent-blue-transparent);
-	color: var(--accent-blue);
+  background: var(--accent-blue-transparent);
+  color: var(--accent-blue);
 }
 
 .gridItem.directory {
-	font-weight: 500;
+  font-weight: 500;
 }
 
 .gridIcon {
-	font-size: var(--font-xl);
-	margin-bottom: 4px;
+  font-size: var(--font-xl);
+  margin-bottom: 4px;
 }
 
 .gridName {
-	font-size: var(--font-xs);
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	width: 100%;
+  font-size: var(--font-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 /* ====== 侧边栏树视图 ====== */
 .tree {
-	padding: 6px 0;
+  padding: 6px 0;
 }
 
 .sidebarHeader {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 12px 16px;
-	border-bottom: 1px solid var(--border-subtle);
-	font-weight: 600;
-	color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .treeLabel {
-	flex: 1;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .treeItem {
-	display: flex;
-	align-items: center;
-	padding: 3px 8px;
-	cursor: pointer;
-	transition: background 0.15s;
-	font-size: var(--font-sm);
-	user-select: none;
+  display: flex;
+  align-items: center;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: var(--font-sm);
+  user-select: none;
 }
 
 .treeItem:hover {
-	background: var(--bg-hover);
-	color: var(--text-primary);
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .treeItem.active {
-	background: var(--accent-blue-transparent);
-	color: var(--accent-blue);
+  background: var(--accent-blue-transparent);
+  color: var(--accent-blue);
 }
 
 .treeIcon {
-	font-size: var(--font-base);
-	width: 16px;
-	text-align: center;
-	margin-right: 4px;
+  font-size: var(--font-base);
+  width: 16px;
+  text-align: center;
+  margin-right: 4px;
 }
 
 .treeName,
 .treeLabel {
-	flex: 1;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .treeLoadingIcon {
-	font-size: var(--font-xs);
-	color: var(--text-muted);
-	margin-left: 4px;
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  margin-left: 4px;
 }
 
 .treeLoading {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 8px;
-	padding: 24px;
-	color: var(--text-muted);
-	font-size: var(--font-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  color: var(--text-muted);
+  font-size: var(--font-base);
 }
 
 .treeError {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 8px;
-	padding: 24px;
-	color: var(--accent-red);
-	font-size: var(--font-base);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px;
+  color: var(--accent-red);
+  font-size: var(--font-base);
 }
 
 .treeError button {
-	padding: 4px 12px;
-	background: var(--bg-tertiary);
-	border: 1px solid var(--border-subtle);
-	border-radius: 4px;
-	color: var(--text-primary);
-	cursor: pointer;
-	font-size: var(--font-sm);
+  padding: 4px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: var(--font-sm);
 }
 
 .treeError button:hover {
-	background: var(--bg-hover);
+  background: var(--bg-hover);
 }
 
 .treeExpandIcon {
-	font-size: var(--font-xs);
-	color: var(--text-muted);
-	margin-left: 4px;
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  margin-left: 4px;
 }
 
 .treeChildren {
-	margin-left: 12px;
+  margin-left: 12px;
 }
 
 .treeEmpty {
-	padding: 12px;
-	text-align: center;
-	color: var(--text-muted);
-	font-size: var(--font-xs);
+  padding: 12px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-xs);
 }
 
 .sidebarActions {
-	display: flex;
-	align-items: center;
-	gap: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .clearCacheBtn {
-	background: none;
-	border: none;
-	color: var(--text-muted);
-	cursor: pointer;
-	font-size: var(--font-xs);
-	padding: 2px;
-	border-radius: 2px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: var(--font-xs);
+  padding: 2px;
+  border-radius: 2px;
 }
 
 .clearCacheBtn:hover {
-	background: var(--bg-hover);
-	color: var(--text-primary);
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .copyTreeBtn {
-	background: none;
-	border: none;
-	color: var(--text-muted);
-	cursor: pointer;
-	padding: 4px;
-	border-radius: 3px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .copyTreeBtn:hover:not(:disabled) {
-	background: var(--bg-hover);
-	color: var(--text-primary);
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .copyTreeBtn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ====== 选中文件操作栏 ====== */
 .actionBar {
-	display: flex;
-	align-items: center;
-	gap: 4px;
-	padding: 4px 8px;
-	background: var(--bg-secondary);
-	border-bottom: 1px solid var(--border-subtle);
-	font-size: var(--font-sm);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--font-sm);
 }
 
 .selectedName {
-	flex: 1;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	color: var(--text-primary);
-	font-weight: 500;
-	padding-right: 8px;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary);
+  font-weight: 500;
+  padding-right: 8px;
 }
 
 .actionBtn {
-	display: flex;
-	align-items: center;
-	gap: 4px;
-	padding: 3px 8px;
-	background: var(--bg-tertiary);
-	border: 1px solid var(--border-subtle);
-	border-radius: 3px;
-	color: var(--text-secondary);
-	font-size: var(--font-xs);
-	cursor: pointer;
-	transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  color: var(--text-secondary);
+  font-size: var(--font-xs);
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
 .actionBtn:hover {
-	background: var(--bg-hover);
-	color: var(--text-primary);
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .actionBtn.view {
-	color: var(--accent-blue);
+  color: var(--accent-blue);
 }
 
 .actionBtn.edit {
-	color: var(--accent-green);
+  color: var(--accent-green);
 }
 
 .actionBtn.execute {
-	color: var(--accent-green);
+  color: var(--accent-green);
 }
 
 /* ====== 文件查看器 ====== */
 .viewerOverlay {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background: rgba(0, 0, 0, 0.7);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 1000;
-	padding: 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
 }
 
 .viewerContent {
-	background: var(--bg-primary);
-	border-radius: 8px;
-	width: 90%;
-	max-width: 1000px;
-	max-height: 90vh;
-	display: flex;
-	flex-direction: column;
-	overflow: hidden;
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  background: var(--bg-primary);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 1000px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .viewerHeader {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 10px 16px;
-	background: var(--bg-secondary);
-	border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .viewerTitle {
-	font-size: var(--font-md);
-	font-weight: 500;
-	color: var(--text-primary);
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+  font-size: var(--font-md);
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .viewerClose {
-	background: none;
-	border: none;
-	color: var(--text-muted);
-	cursor: pointer;
-	padding: 4px;
-	border-radius: 4px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .viewerClose:hover {
-	background: var(--bg-hover);
-	color: var(--text-primary);
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .viewerBody {
-	flex: 1;
-	overflow: auto;
-	padding: 16px;
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
 }
 
 .viewerLoading,
 .viewerError {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 200px;
-	color: var(--text-muted);
-	font-size: var(--font-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-muted);
+  font-size: var(--font-base);
 }
 
 .viewerError {
-	color: var(--accent-red);
+  color: var(--accent-red);
 }
 
 .viewerCode {
-	background: var(--bg-secondary);
-	border-radius: 6px;
-	padding: 16px;
-	overflow: auto;
-	font-family: "JetBrains Mono", monospace;
-	font-size: var(--font-base);
-	line-height: 1.5;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  padding: 16px;
+  overflow: auto;
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--font-base);
+  line-height: 1.5;
 }
 
 .viewerFooter {
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
-	gap: 8px;
-	padding: 12px 16px;
-	background: var(--bg-secondary);
-	border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .viewerBtn {
-	padding: 6px 12px;
-	border-radius: 4px;
-	font-size: var(--font-base);
-	cursor: pointer;
-	transition: all 0.15s;
-	border: 1px solid var(--border-subtle);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: var(--font-base);
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1px solid var(--border-subtle);
 }
 
 .viewerBtn.primary {
-	background: var(--accent-blue);
-	color: white;
-	border-color: var(--accent-blue);
+  background: var(--accent-blue);
+  color: white;
+  border-color: var(--accent-blue);
 }
 
 .viewerBtn.secondary {
-	background: var(--bg-tertiary);
-	color: var(--text-primary);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 .viewerBtn.danger {
-	background: var(--accent-red);
-	color: white;
-	border-color: var(--accent-red);
+  background: var(--accent-red);
+  color: white;
+  border-color: var(--accent-red);
 }
 
 .viewerBtn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }

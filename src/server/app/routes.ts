@@ -6,10 +6,7 @@
 import type { Application } from "express";
 import { registerChatHTTPRoutes } from "../features/chat/http-routes";
 import type { LlmLogManager } from "../features/chat/llm/log-manager";
-import {
-	registerFilesHTTPRoutes,
-	registerWorkspaceRoutes,
-} from "../features/files/http-routes";
+import { registerFilesHTTPRoutes, registerWorkspaceRoutes } from "../features/files/http-routes";
 
 /**
  * Register all HTTP API routes
@@ -18,18 +15,18 @@ import {
  * @param serverStartTime Server start time
  */
 export async function registerRoutes(
-	app: Application,
-	llmLogManager: LlmLogManager,
-	serverStartTime: number,
+  app: Application,
+  llmLogManager: LlmLogManager,
+  serverStartTime: number
 ): Promise<void> {
-	// Register routes for each Feature in parallel
-	await Promise.all([
-		registerChatHTTPRoutes(app, llmLogManager, serverStartTime),
-		registerFilesHTTPRoutes(app),
-	]);
+  // Register routes for each Feature in parallel
+  await Promise.all([
+    registerChatHTTPRoutes(app, llmLogManager, serverStartTime),
+    registerFilesHTTPRoutes(app),
+  ]);
 
-	// Register Workspace routes synchronously
-	registerWorkspaceRoutes(app);
+  // Register Workspace routes synchronously
+  registerWorkspaceRoutes(app);
 
-	console.log("[API] All routes registered");
+  console.log("[API] All routes registered");
 }

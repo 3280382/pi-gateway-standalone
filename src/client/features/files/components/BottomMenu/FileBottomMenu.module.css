@@ -3,451 +3,451 @@
  */
 
 .menu {
-	display: flex;
-	gap: 4px;
-	padding: 4px 8px;
-	background: rgba(13, 17, 23, 0.95);
-	border-top: 1px solid rgba(48, 54, 61, 0.5);
-	align-items: center;
+  display: flex;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(13, 17, 23, 0.95);
+  border-top: 1px solid rgba(48, 54, 61, 0.5);
+  align-items: center;
 }
 
 /* 统一按钮基础样式 - 与 Chat toolbarBtn 一致 */
 .btn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 28px;
-	height: 28px;
-	padding: 0;
-	border: none;
-	border-radius: 6px;
-	background: var(--unified-blue-dim, rgba(88, 166, 255, 0.1));
-	color: var(--unified-blue, #58a6ff);
-	cursor: pointer;
-	transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: var(--unified-blue-dim, rgba(88, 166, 255, 0.1));
+  color: var(--unified-blue, #58a6ff);
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .btn:hover:not(:disabled) {
-	background: var(--unified-blue-dim-hover, rgba(88, 166, 255, 0.2));
-	color: var(--unified-blue-hover, #79b8ff);
+  background: var(--unified-blue-dim-hover, rgba(88, 166, 255, 0.2));
+  color: var(--unified-blue-hover, #79b8ff);
 }
 
 .btn:disabled {
-	opacity: 0.35;
-	cursor: not-allowed;
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .btn svg {
-	width: 15px;
-	height: 15px;
+  width: 15px;
+  height: 15px;
 }
 
 /* 分隔线 */
 .divider {
-	width: 1px;
-	height: 20px;
-	background: rgba(48, 54, 61, 0.5);
-	margin: 0 4px;
+  width: 1px;
+  height: 20px;
+  background: rgba(48, 54, 61, 0.5);
+  margin: 0 4px;
 }
 
 /* 导航按钮 - 青色主题（与Chat区分） */
 .navBtn {
-	background: rgba(34, 211, 238, 0.15);
-	color: #22d3ee;
+  background: rgba(34, 211, 238, 0.15);
+  color: #22d3ee;
 }
 
 .navBtn:hover:not(:disabled) {
-	background: rgba(34, 211, 238, 0.25);
-	color: #67e8f9;
+  background: rgba(34, 211, 238, 0.25);
+  color: #67e8f9;
 }
 
 /* 视图按钮 - 紫灰色主题 */
 .viewBtn {
-	background: rgba(168, 162, 200, 0.15);
-	color: #a8a2c8;
+  background: rgba(168, 162, 200, 0.15);
+  color: #a8a2c8;
 }
 
 .viewBtn:hover:not(:disabled) {
-	background: rgba(168, 162, 200, 0.25);
-	color: #c4bfe9;
+  background: rgba(168, 162, 200, 0.25);
+  color: #c4bfe9;
 }
 
 /* 新建按钮 -  emerald绿色主题 */
 .newBtn {
-	background: rgba(52, 211, 153, 0.15);
-	color: #34d399;
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
 }
 
 .newBtn:hover:not(:disabled) {
-	background: rgba(52, 211, 153, 0.25);
-	color: #6ee7b7;
+  background: rgba(52, 211, 153, 0.25);
+  color: #6ee7b7;
 }
 
 /* 树状视图按钮 -  amber橙色主题 */
 .treeBtn {
-	background: rgba(251, 191, 36, 0.15);
-	color: #fbbf24;
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
 }
 
 .treeBtn:hover:not(:disabled) {
-	background: rgba(251, 191, 36, 0.25);
-	color: #fcd34d;
+  background: rgba(251, 191, 36, 0.25);
+  color: #fcd34d;
 }
 
 /* 删除按钮 - rose红色主题 */
 .deleteBtn {
-	background: rgba(251, 113, 133, 0.15);
-	color: #fb7185;
+  background: rgba(251, 113, 133, 0.15);
+  color: #fb7185;
 }
 
 .deleteBtn:hover:not(:disabled) {
-	background: rgba(251, 113, 133, 0.25);
-	color: #fda4af;
+  background: rgba(251, 113, 133, 0.25);
+  color: #fda4af;
 }
 
 /* Git 按钮 - violet紫罗兰主题 */
 .gitBtn {
-	background: rgba(139, 92, 246, 0.1);
-	color: #7c3aed;
-	transition: all 0.2s ease;
+  background: rgba(139, 92, 246, 0.1);
+  color: #7c3aed;
+  transition: all 0.2s ease;
 }
 
 .gitBtn:hover:not(:disabled) {
-	background: rgba(139, 92, 246, 0.2);
-	color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.2);
+  color: #8b5cf6;
 }
 
 .gitBtn.active {
-	background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
-	color: #ffffff;
-	box-shadow:
-		0 0 12px rgba(139, 92, 246, 0.6),
-		0 0 24px rgba(139, 92, 246, 0.3);
-	font-weight: 600;
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+  color: #ffffff;
+  box-shadow:
+    0 0 12px rgba(139, 92, 246, 0.6),
+    0 0 24px rgba(139, 92, 246, 0.3);
+  font-weight: 600;
 }
 
 /* ============ 对话框通用样式 ============ */
 
 .modalOverlay {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.7);
-	backdrop-filter: blur(4px);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 1000;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
 
 .modal {
-	background: #161b22;
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 10px;
-	padding: 20px;
-	min-width: 280px;
-	max-width: 90vw;
-	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  background: #161b22;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 10px;
+  padding: 20px;
+  min-width: 280px;
+  max-width: 90vw;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
 .modalTitle {
-	font-size: 14px;
-	font-weight: 600;
-	color: #e6edf3;
-	margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #e6edf3;
+  margin-bottom: 16px;
 }
 
 .inputRow {
-	margin-bottom: 16px;
+  margin-bottom: 16px;
 }
 
 .input {
-	width: 100%;
-	padding: 10px 12px;
-	background: #0d1117;
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 6px;
-	color: #e6edf3;
-	font-size: 13px;
-	outline: none;
-	transition: border-color 0.15s;
+  width: 100%;
+  padding: 10px 12px;
+  background: #0d1117;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 6px;
+  color: #e6edf3;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
 }
 
 .input:focus {
-	border-color: #58a6ff;
+  border-color: #58a6ff;
 }
 
 .modalActions {
-	display: flex;
-	justify-content: flex-end;
-	gap: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .modalBtn {
-	padding: 8px 16px;
-	border: none;
-	border-radius: 6px;
-	font-size: 13px;
-	font-weight: 500;
-	cursor: pointer;
-	transition: all 0.15s;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
 .cancelBtn {
-	background: rgba(110, 118, 129, 0.2);
-	color: #8b949e;
+  background: rgba(110, 118, 129, 0.2);
+  color: #8b949e;
 }
 
 .cancelBtn:hover {
-	background: rgba(110, 118, 129, 0.3);
-	color: #e6edf3;
+  background: rgba(110, 118, 129, 0.3);
+  color: #e6edf3;
 }
 
 .confirmBtn {
-	background: #238636;
-	color: white;
+  background: #238636;
+  color: white;
 }
 
 .confirmBtn:hover {
-	background: #2ea043;
+  background: #2ea043;
 }
 
 /* 删除对话框 */
 .deleteModal {
-	background: #161b22;
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 10px;
-	padding: 20px;
-	min-width: 280px;
-	max-width: 90vw;
-	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  background: #161b22;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 10px;
+  padding: 20px;
+  min-width: 280px;
+  max-width: 90vw;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
 .deleteModalTitle {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	font-size: 14px;
-	font-weight: 600;
-	color: #f85149;
-	margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f85149;
+  margin-bottom: 12px;
 }
 
 .deleteModalText {
-	font-size: 13px;
-	color: #8b949e;
-	margin-bottom: 20px;
+  font-size: 13px;
+  color: #8b949e;
+  margin-bottom: 20px;
 }
 
 /* ============ 树状视图全屏样式 ============ */
 
 .treeFullscreenOverlay {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.85);
-	backdrop-filter: blur(8px);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 2000;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
 }
 
 .treeFullscreenContainer {
-	width: 90vw;
-	height: 90vh;
-	background: #0d1117;
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 12px;
-	display: flex;
-	flex-direction: column;
-	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
-	overflow: hidden;
+  width: 90vw;
+  height: 90vh;
+  background: #0d1117;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
 }
 
 .treeHeader {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 16px 20px;
-	background: rgba(22, 27, 34, 0.8);
-	border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(22, 27, 34, 0.8);
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
 }
 
 .treeTitle {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	margin: 0;
-	font-size: 14px;
-	font-weight: 600;
-	color: #e6edf3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #e6edf3;
 }
 
 .treeTitle svg {
-	width: 18px;
-	height: 18px;
-	color: #58a6ff;
+  width: 18px;
+  height: 18px;
+  color: #58a6ff;
 }
 
 .treeHeaderActions {
-	display: flex;
-	align-items: center;
-	gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .treeCopyBtn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 32px;
-	height: 32px;
-	border: none;
-	border-radius: 6px;
-	background: rgba(255, 255, 255, 0.05);
-	color: #8b949e;
-	cursor: pointer;
-	transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #8b949e;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
 .treeCopyBtn:hover:not(:disabled) {
-	background: rgba(88, 166, 255, 0.15);
-	color: #58a6ff;
+  background: rgba(88, 166, 255, 0.15);
+  color: #58a6ff;
 }
 
 .treeCopyBtn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .treeCopyBtn svg {
-	width: 16px;
-	height: 16px;
+  width: 16px;
+  height: 16px;
 }
 
 .treeCloseBtn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 32px;
-	height: 32px;
-	border: none;
-	border-radius: 6px;
-	background: rgba(255, 255, 255, 0.05);
-	color: #8b949e;
-	cursor: pointer;
-	transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #8b949e;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
 .treeCloseBtn:hover {
-	background: rgba(218, 54, 51, 0.15);
-	color: #f85149;
+  background: rgba(218, 54, 51, 0.15);
+  color: #f85149;
 }
 
 .treeCloseBtn svg {
-	width: 18px;
-	height: 18px;
+  width: 18px;
+  height: 18px;
 }
 
 .treeContent {
-	flex: 1;
-	overflow: auto;
-	padding: 8px 12px;
+  flex: 1;
+  overflow: auto;
+  padding: 8px 12px;
 }
 
 .treeLoading,
 .treeEmpty {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 100%;
-	font-size: 14px;
-	color: #8b949e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 14px;
+  color: #8b949e;
 }
 
 /* 树状视图 - 紧凑样式 */
 .treeView {
-	font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
-	font-size: 11px;
-	line-height: 1.4;
+  font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .treeNode {
-	user-select: none;
+  user-select: none;
 }
 
 .treeNodeHeader {
-	display: flex;
-	align-items: center;
-	gap: 2px;
-	padding: 1px 4px;
-	border-radius: 3px;
-	cursor: pointer;
-	transition: background 0.1s;
-	height: 18px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.1s;
+  height: 18px;
 }
 
 .treeNodeHeader:hover {
-	background: rgba(88, 166, 255, 0.08);
+  background: rgba(88, 166, 255, 0.08);
 }
 
 .treeExpandIcon,
 .treeExpandIconPlaceholder {
-	width: 12px;
-	flex-shrink: 0;
-	font-size: 8px;
-	color: #6e7681;
-	text-align: center;
+  width: 12px;
+  flex-shrink: 0;
+  font-size: 8px;
+  color: #6e7681;
+  text-align: center;
 }
 
 .treeIcon {
-	flex-shrink: 0;
-	font-size: 11px;
+  flex-shrink: 0;
+  font-size: 11px;
 }
 
 .treeDirName {
-	font-weight: 500;
-	color: #58a6ff;
+  font-weight: 500;
+  color: #58a6ff;
 }
 
 .treeFileName {
-	color: #c9d1d9;
+  color: #c9d1d9;
 }
 
 .treeFileClickable {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 .treeFileClickable:hover .treeFileName {
-	color: #58a6ff;
-	text-decoration: underline;
+  color: #58a6ff;
+  text-decoration: underline;
 }
 
 .treeTruncated {
-	color: #6e7681;
-	font-style: italic;
-	font-size: 10px;
+  color: #6e7681;
+  font-style: italic;
+  font-size: 10px;
 }
 
 .treeChildren {
-	/* Indent handled by paddingLeft in inline style - reduced from 16px to 12px per level */
+  /* Indent handled by paddingLeft in inline style - reduced from 16px to 12px per level */
 }
 
 /* Todo 按钮 - 黄色主题 */
 .todoBtn {
-	background: rgba(249, 226, 175, 0.1);
-	color: #f9e2af;
-	transition: all 0.2s ease;
+  background: rgba(249, 226, 175, 0.1);
+  color: #f9e2af;
+  transition: all 0.2s ease;
 }
 
 .todoBtn:hover:not(:disabled) {
-	background: rgba(249, 226, 175, 0.2);
-	color: #fae7b9;
+  background: rgba(249, 226, 175, 0.2);
+  color: #fae7b9;
 }
 
 .todoBtn.active {
-	background: linear-gradient(135deg, #f9e2af 0%, #fae7b9 100%);
-	color: #1a1b26;
-	box-shadow:
-		0 0 12px rgba(249, 226, 175, 0.6),
-		0 0 24px rgba(249, 226, 175, 0.3);
-	font-weight: 600;
+  background: linear-gradient(135deg, #f9e2af 0%, #fae7b9 100%);
+  color: #1a1b26;
+  box-shadow:
+    0 0 12px rgba(249, 226, 175, 0.6),
+    0 0 24px rgba(249, 226, 175, 0.3);
+  font-weight: 600;
 }

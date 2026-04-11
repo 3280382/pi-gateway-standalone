@@ -1,74 +1,64 @@
 {
-	"extends": ["@biomejs/biome"],
-	"rules": {
-		"no-restricted-imports": [
-			"error",
-			{
-				"patterns": [
-					{
-						"group": ["@server/**"],
-						"message": "Client code cannot import server code. Use API calls instead.",
-						"allowTypeImports": true
-					},
-					{
-						"group": ["../server/**", "../../server/**", "../../../server/**"],
-						"message": "Client code cannot import server code. Use API calls instead."
-					},
-					{
-						"group": ["@client/**"],
-						"message": "Server code cannot import client code.",
-						"allowTypeImports": true
-					},
-					{
-						"group": ["../client/**", "../../client/**", "../../../client/**"],
-						"message": "Server code cannot import client code."
-					}
-				]
-			}
-		]
-	},
-	"overrides": [
-		{
-			"files": ["src/client/**/*"],
-			"rules": {
-				"no-restricted-imports": [
-					"error",
-					{
-						"patterns": [
-							{
-								"group": [
-									"@server/**",
-									"../server/**",
-									"../../server/**",
-									"../../../server/**"
-								],
-								"message": "Client code cannot import server code. Use API calls instead."
-							}
-						]
-					}
-				]
-			}
-		},
-		{
-			"files": ["src/server/**/*"],
-			"rules": {
-				"no-restricted-imports": [
-					"error",
-					{
-						"patterns": [
-							{
-								"group": [
-									"@client/**",
-									"../client/**",
-									"../../client/**",
-									"../../../client/**"
-								],
-								"message": "Server code cannot import client code."
-							}
-						]
-					}
-				]
-			}
-		}
-	]
+  "extends": ["@biomejs/biome"],
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["@server/**"],
+            "message": "Client code cannot import server code. Use API calls instead.",
+            "allowTypeImports": true
+          },
+          {
+            "group": ["../server/**", "../../server/**", "../../../server/**"],
+            "message": "Client code cannot import server code. Use API calls instead."
+          },
+          {
+            "group": ["@client/**"],
+            "message": "Server code cannot import client code.",
+            "allowTypeImports": true
+          },
+          {
+            "group": ["../client/**", "../../client/**", "../../../client/**"],
+            "message": "Server code cannot import client code."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/client/**/*"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@server/**", "../server/**", "../../server/**", "../../../server/**"],
+                "message": "Client code cannot import server code. Use API calls instead."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/server/**/*"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@client/**", "../client/**", "../../client/**", "../../../client/**"],
+                "message": "Server code cannot import client code."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }

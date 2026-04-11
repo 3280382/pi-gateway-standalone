@@ -9,8 +9,8 @@
 // ============================================================================
 
 export const CHAT_STORAGE_KEYS = {
-	CHAT_SESSION: "pi:chat:session",
-	CHAT_SIDEBAR: "pi:chat:sidebar",
+  CHAT_SESSION: "pi:chat:session",
+  CHAT_SIDEBAR: "pi:chat:sidebar",
 } as const;
 
 // ============================================================================
@@ -18,8 +18,8 @@ export const CHAT_STORAGE_KEYS = {
 // ============================================================================
 
 export const CHAT_STORAGE_VERSION = {
-	CHAT_SESSION: 1,
-	CHAT_SIDEBAR: 1,
+  CHAT_SESSION: 1,
+  CHAT_SIDEBAR: 1,
 } as const;
 
 // ============================================================================
@@ -28,10 +28,10 @@ export const CHAT_STORAGE_VERSION = {
 
 /** Chat Session Store - 持久化字段 */
 export const CHAT_SESSION_PERSIST = [
-	"currentSessionId",
-	"workingDir",
-	"currentModel",
-	"thinkingLevel",
+  "currentSessionId",
+  "workingDir",
+  "currentModel",
+  "thinkingLevel",
 ] as const;
 
 /** Chat Sidebar Store - 持久化字段 */

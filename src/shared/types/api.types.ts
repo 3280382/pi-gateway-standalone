@@ -8,41 +8,41 @@
 // ============================================================================
 
 export interface ApiResponse<T = any> {
-	success: boolean;
-	data?: T;
-	error?: ApiError;
-	meta?: ApiMeta;
+  success: boolean;
+  data?: T;
+  error?: ApiError;
+  meta?: ApiMeta;
 }
 
 export interface ApiError {
-	code: string;
-	message: string;
-	details?: Record<string, any>;
-	stack?: string;
+  code: string;
+  message: string;
+  details?: Record<string, any>;
+  stack?: string;
 }
 
 export interface ApiMeta {
-	timestamp: string;
-	requestId: string;
-	pagination?: PaginationMeta;
-	cache?: CacheMeta;
-	warnings?: string[];
+  timestamp: string;
+  requestId: string;
+  pagination?: PaginationMeta;
+  cache?: CacheMeta;
+  warnings?: string[];
 }
 
 export interface PaginationMeta {
-	total: number;
-	page: number;
-	pageSize: number;
-	totalPages: number;
-	hasNext: boolean;
-	hasPrev: boolean;
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
 }
 
 export interface CacheMeta {
-	hit: boolean;
-	key?: string;
-	ttl?: number;
-	age?: number;
+  hit: boolean;
+  key?: string;
+  ttl?: number;
+  age?: number;
 }
 
 // ============================================================================
@@ -50,27 +50,27 @@ export interface CacheMeta {
 // ============================================================================
 
 export enum ErrorCode {
-	// Generic errors
-	INTERNAL_ERROR = "INTERNAL_ERROR",
-	VALIDATION_ERROR = "VALIDATION_ERROR",
-	NOT_FOUND = "NOT_FOUND",
-	UNAUTHORIZED = "UNAUTHORIZED",
-	FORBIDDEN = "FORBIDDEN",
-	BAD_REQUEST = "BAD_REQUEST",
-	CONFLICT = "CONFLICT",
-	TIMEOUT = "TIMEOUT",
+  // Generic errors
+  INTERNAL_ERROR = "INTERNAL_ERROR",
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+  NOT_FOUND = "NOT_FOUND",
+  UNAUTHORIZED = "UNAUTHORIZED",
+  FORBIDDEN = "FORBIDDEN",
+  BAD_REQUEST = "BAD_REQUEST",
+  CONFLICT = "CONFLICT",
+  TIMEOUT = "TIMEOUT",
 
-	// Business errors
-	CHAT_ERROR = "CHAT_ERROR",
-	FILE_ERROR = "FILE_ERROR",
-	SESSION_ERROR = "SESSION_ERROR",
-	LLM_ERROR = "LLM_ERROR",
-	TOOL_ERROR = "TOOL_ERROR",
+  // Business errors
+  CHAT_ERROR = "CHAT_ERROR",
+  FILE_ERROR = "FILE_ERROR",
+  SESSION_ERROR = "SESSION_ERROR",
+  LLM_ERROR = "LLM_ERROR",
+  TOOL_ERROR = "TOOL_ERROR",
 
-	// Network errors
-	NETWORK_ERROR = "NETWORK_ERROR",
-	WEBSOCKET_ERROR = "WEBSOCKET_ERROR",
-	CONNECTION_ERROR = "CONNECTION_ERROR",
+  // Network errors
+  NETWORK_ERROR = "NETWORK_ERROR",
+  WEBSOCKET_ERROR = "WEBSOCKET_ERROR",
+  CONNECTION_ERROR = "CONNECTION_ERROR",
 }
 
 // ============================================================================
@@ -78,27 +78,27 @@ export enum ErrorCode {
 // ============================================================================
 
 export interface ApiVersion {
-	version: string;
-	contractVersion: string;
-	timestamp: string;
-	deprecated?: boolean;
-	sunsetDate?: string;
+  version: string;
+  contractVersion: string;
+  timestamp: string;
+  deprecated?: boolean;
+  sunsetDate?: string;
 }
 
 export interface HealthStatus {
-	status: "healthy" | "degraded" | "unhealthy";
-	timestamp: string;
-	uptime: number;
-	memory: NodeJS.MemoryUsage;
-	services: Record<string, ServiceStatus>;
-	metrics?: Record<string, any>;
+  status: "healthy" | "degraded" | "unhealthy";
+  timestamp: string;
+  uptime: number;
+  memory: NodeJS.MemoryUsage;
+  services: Record<string, ServiceStatus>;
+  metrics?: Record<string, any>;
 }
 
 export interface ServiceStatus {
-	status: "healthy" | "degraded" | "unhealthy";
-	message?: string;
-	lastCheck: string;
-	latency?: number;
+  status: "healthy" | "degraded" | "unhealthy";
+  message?: string;
+  lastCheck: string;
+  latency?: number;
 }
 
 // ============================================================================
@@ -106,19 +106,19 @@ export interface ServiceStatus {
 // ============================================================================
 
 export interface PaginationRequest {
-	page?: number;
-	pageSize?: number;
-	sortBy?: string;
-	sortOrder?: "asc" | "desc";
+  page?: number;
+  pageSize?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }
 
 export interface FilterRequest {
-	filters?: Record<string, any>;
-	search?: string;
-	dateRange?: {
-		from?: string;
-		to?: string;
-	};
+  filters?: Record<string, any>;
+  search?: string;
+  dateRange?: {
+    from?: string;
+    to?: string;
+  };
 }
 
 // ============================================================================
@@ -128,6 +128,6 @@ export interface FilterRequest {
 export type MaybePromise<T> = T | Promise<T>;
 
 export type ApiHandler<TRequest = any, TResponse = any> = (
-	req: TRequest,
-	meta?: ApiMeta,
+  req: TRequest,
+  meta?: ApiMeta
 ) => MaybePromise<ApiResponse<TResponse>>;

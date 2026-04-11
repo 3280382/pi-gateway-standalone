@@ -8,170 +8,157 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import {
-	getFileTree,
-	type TreeResponse,
-} from "@/features/files/services/api/fileApi";
+import { getFileTree, type TreeResponse } from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { useFileOperations } from "./useFileOperations";
 
 export interface UseFileBottomMenuResult {
-	// UI 状态
-	isNewModalOpen: boolean;
-	isDeleteModalOpen: boolean;
-	isTreeModalOpen: boolean;
-	newFileName: string;
-	treeData: TreeResponse | null;
-	treeLoading: boolean;
+  // UI 状态
+  isNewModalOpen: boolean;
+  isDeleteModalOpen: boolean;
+  isTreeModalOpen: boolean;
+  newFileName: string;
+  treeData: TreeResponse | null;
+  treeLoading: boolean;
 
-	// 状态设置
-	setNewFileName: (name: string) => void;
+  // 状态设置
+  setNewFileName: (name: string) => void;
 
-	// 操作方法
-	handleNewClick: () => void;
-	handleConfirmNew: () => Promise<void>;
-	handleCancelNew: () => void;
-	handleDeleteClick: () => void;
-	handleConfirmDelete: () => Promise<void>;
-	handleCancelDelete: () => void;
-	handleTreeClick: () => Promise<void>;
-	handleTreeFileClick: (filePath: string, fileName: string) => void;
-	handleCloseTree: () => void;
+  // 操作方法
+  handleNewClick: () => void;
+  handleConfirmNew: () => Promise<void>;
+  handleCancelNew: () => void;
+  handleDeleteClick: () => void;
+  handleConfirmDelete: () => Promise<void>;
+  handleCancelDelete: () => void;
+  handleTreeClick: () => Promise<void>;
+  handleTreeFileClick: (filePath: string, fileName: string) => void;
+  handleCloseTree: () => void;
 }
 
 export function useFileBottomMenu(): UseFileBottomMenuResult {
-	// ========== 1. State ==========
-	// UI 状态
-	const [isNewModalOpen, setIsNewModalOpen] = useState(false);
-	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-	const [isTreeModalOpen, setIsTreeModalOpen] = useState(false);
-	const [newFileName, setNewFileName] = useState("");
-	const [treeData, setTreeData] = useState<TreeResponse | null>(null);
-	const [isTreeLoading, setIsTreeLoading] = useState(false);
+  // ========== 1. State ==========
+  // UI 状态
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isTreeModalOpen, setIsTreeModalOpen] = useState(false);
+  const [newFileName, setNewFileName] = useState("");
+  const [treeData, setTreeData] = useState<TreeResponse | null>(null);
+  const [isTreeLoading, setIsTreeLoading] = useState(false);
 
-	// Domain 状态
-	const {
-		selectedItems,
-		isMultiSelectMode,
-		toggleMultiSelectMode,
-		clearSelection,
-		workingDir,
-	} = useFileStore();
+  // Domain 状态
+  const { selectedItems, isMultiSelectMode, toggleMultiSelectMode, clearSelection, workingDir } =
+    useFileStore();
 
-	const { createNewFile, deleteSelected } = useFileOperations();
-	const { openViewer } = useFileViewerStore();
+  const { createNewFile, deleteSelected } = useFileOperations();
+  const { openViewer } = useFileViewerStore();
 
-	// ========== 2. Ref ==========
-	// 无直接DOM引用
+  // ========== 2. Ref ==========
+  // 无直接DOM引用
 
-	// ========== 3. Effects ==========
-	// ESC 关闭树状视图
-	useEffect(() => {
-		if (!isTreeModalOpen) return;
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Escape") handleCloseTree();
-		};
-		document.addEventListener("keydown", handleKeyDown);
-		return () => document.removeEventListener("keydown", handleKeyDown);
-	}, [isTreeModalOpen]);
+  // ========== 3. Effects ==========
+  // ESC 关闭树状视图
+  useEffect(() => {
+    if (!isTreeModalOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleCloseTree();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isTreeModalOpen]);
 
-	// ========== 4. Computed ==========
-	// 简单条件判断，无需useMemo
+  // ========== 4. Computed ==========
+  // 简单条件判断，无需useMemo
 
-	// ========== 5. Actions ==========
-	// 新建文件
-	const handleNewClick = useCallback(() => {
-		setIsNewModalOpen(true);
-		setNewFileName("");
-	}, []);
+  // ========== 5. Actions ==========
+  // 新建文件
+  const handleNewClick = useCallback(() => {
+    setIsNewModalOpen(true);
+    setNewFileName("");
+  }, []);
 
-	const handleConfirmNew = useCallback(async () => {
-		if (!newFileName.trim()) return;
-		const fileName = newFileName.trim();
-		await createNewFile(fileName);
-		setIsNewModalOpen(false);
-		setNewFileName("");
-	}, [newFileName, createNewFile]);
+  const handleConfirmNew = useCallback(async () => {
+    if (!newFileName.trim()) return;
+    const fileName = newFileName.trim();
+    await createNewFile(fileName);
+    setIsNewModalOpen(false);
+    setNewFileName("");
+  }, [newFileName, createNewFile]);
 
-	const handleCancelNew = useCallback(() => {
-		setIsNewModalOpen(false);
-		setNewFileName("");
-	}, []);
+  const handleCancelNew = useCallback(() => {
+    setIsNewModalOpen(false);
+    setNewFileName("");
+  }, []);
 
-	// 删除文件
-	const handleDeleteClick = useCallback(() => {
-		if (selectedItems.length === 0) {
-			if (!isMultiSelectMode) {
-				toggleMultiSelectMode();
-			}
-			return;
-		}
-		setIsDeleteModalOpen(true);
-	}, [selectedItems.length, isMultiSelectMode, toggleMultiSelectMode]);
+  // 删除文件
+  const handleDeleteClick = useCallback(() => {
+    if (selectedItems.length === 0) {
+      if (!isMultiSelectMode) {
+        toggleMultiSelectMode();
+      }
+      return;
+    }
+    setIsDeleteModalOpen(true);
+  }, [selectedItems.length, isMultiSelectMode, toggleMultiSelectMode]);
 
-	const handleConfirmDelete = useCallback(async () => {
-		await deleteSelected();
-		setIsDeleteModalOpen(false);
-		clearSelection();
-		if (isMultiSelectMode) {
-			toggleMultiSelectMode();
-		}
-	}, [
-		deleteSelected,
-		clearSelection,
-		isMultiSelectMode,
-		toggleMultiSelectMode,
-	]);
+  const handleConfirmDelete = useCallback(async () => {
+    await deleteSelected();
+    setIsDeleteModalOpen(false);
+    clearSelection();
+    if (isMultiSelectMode) {
+      toggleMultiSelectMode();
+    }
+  }, [deleteSelected, clearSelection, isMultiSelectMode, toggleMultiSelectMode]);
 
-	const handleCancelDelete = useCallback(() => {
-		setIsDeleteModalOpen(false);
-	}, []);
+  const handleCancelDelete = useCallback(() => {
+    setIsDeleteModalOpen(false);
+  }, []);
 
-	// 树状视图
-	const handleTreeClick = useCallback(async () => {
-		setIsTreeModalOpen(true);
-		setIsTreeLoading(true);
-		try {
-			const data = await getFileTree(workingDir);
-			setTreeData(data);
-		} catch (error) {
-			console.error("[TreeView] Failed to load file tree:", error);
-		} finally {
-			setIsTreeLoading(false);
-		}
-	}, [workingDir]);
+  // 树状视图
+  const handleTreeClick = useCallback(async () => {
+    setIsTreeModalOpen(true);
+    setIsTreeLoading(true);
+    try {
+      const data = await getFileTree(workingDir);
+      setTreeData(data);
+    } catch (error) {
+      console.error("[TreeView] Failed to load file tree:", error);
+    } finally {
+      setIsTreeLoading(false);
+    }
+  }, [workingDir]);
 
-	const handleTreeFileClick = useCallback(
-		(filePath: string, fileName: string) => {
-			const fullPath = workingDir ? `${workingDir}/${filePath}` : filePath;
-			openViewer(fullPath, fileName, "view");
-		},
-		[workingDir, openViewer],
-	);
+  const handleTreeFileClick = useCallback(
+    (filePath: string, fileName: string) => {
+      const fullPath = workingDir ? `${workingDir}/${filePath}` : filePath;
+      openViewer(fullPath, fileName, "view");
+    },
+    [workingDir, openViewer]
+  );
 
-	const handleCloseTree = useCallback(() => {
-		setIsTreeModalOpen(false);
-		setTreeData(null);
-	}, []);
+  const handleCloseTree = useCallback(() => {
+    setIsTreeModalOpen(false);
+    setTreeData(null);
+  }, []);
 
-	// ========== 6. Return ==========
-	return {
-		isNewModalOpen,
-		isDeleteModalOpen,
-		isTreeModalOpen,
-		newFileName,
-		treeData,
-		treeLoading: isTreeLoading,
-		setNewFileName,
-		handleNewClick,
-		handleConfirmNew,
-		handleCancelNew,
-		handleDeleteClick,
-		handleConfirmDelete,
-		handleCancelDelete,
-		handleTreeClick,
-		handleTreeFileClick,
-		handleCloseTree,
-	};
+  // ========== 6. Return ==========
+  return {
+    isNewModalOpen,
+    isDeleteModalOpen,
+    isTreeModalOpen,
+    newFileName,
+    treeData,
+    treeLoading: isTreeLoading,
+    setNewFileName,
+    handleNewClick,
+    handleConfirmNew,
+    handleCancelNew,
+    handleDeleteClick,
+    handleConfirmDelete,
+    handleCancelDelete,
+    handleTreeClick,
+    handleTreeFileClick,
+    handleCloseTree,
+  };
 }

@@ -13,29 +13,29 @@ const logger = new Logger({ level: LogLevel.INFO });
  * Get available models list
  */
 export async function getModels(_req: Request, res: Response) {
-	try {
-		const authStorage = AuthStorage.create();
-		const modelRegistry = new ModelRegistry(authStorage);
-		const available = await modelRegistry.getAvailable();
+  try {
+    const authStorage = AuthStorage.create();
+    const modelRegistry = new ModelRegistry(authStorage);
+    const available = await modelRegistry.getAvailable();
 
-		logger.info(`Retrieved model list, count: ${available.length}`);
-		// Debug: log first model to check id type
-		if (available.length > 0) {
-			logger.info(
-				`First model: id=${JSON.stringify(available[0].id)}, typeof id=${typeof available[0].id}`,
-			);
-		}
-		const models = available.map((m) => ({
-			id: typeof m.id === "object" ? (m.id as any).id || String(m.id) : m.id,
-			provider: m.provider,
-			name: m.name ?? (typeof m.id === "object" ? String(m.id) : m.id),
-			description: "",
-		}));
-		res.json({ models });
-	} catch (error) {
-		logger.error(
-			`Error retrieving model list: ${error instanceof Error ? error.message : String(error)}`,
-		);
-		res.status(500).json({ error: String(error) });
-	}
+    logger.info(`Retrieved model list, count: ${available.length}`);
+    // Debug: log first model to check id type
+    if (available.length > 0) {
+      logger.info(
+        `First model: id=${JSON.stringify(available[0].id)}, typeof id=${typeof available[0].id}`
+      );
+    }
+    const models = available.map((m) => ({
+      id: typeof m.id === "object" ? (m.id as any).id || String(m.id) : m.id,
+      provider: m.provider,
+      name: m.name ?? (typeof m.id === "object" ? String(m.id) : m.id),
+      description: "",
+    }));
+    res.json({ models });
+  } catch (error) {
+    logger.error(
+      `Error retrieving model list: ${error instanceof Error ? error.message : String(error)}`
+    );
+    res.status(500).json({ error: String(error) });
+  }
 }

@@ -5,10 +5,10 @@
 import styles from "@/app/App.module.css";
 
 export function LoadingScreen() {
-	return (
-		<div className={styles.loading}>
-			<div className={styles.spinner} />
-			<p>加载中...</p>
-		</div>
-	);
+  return (
+    <div className={styles.loading}>
+      <div className={styles.spinner} />
+      <p>加载中...</p>
+    </div>
+  );
 }

@@ -4,364 +4,360 @@
 
 /* 用户消息 - 柔和紫蓝色 */
 .userMessage {
-	display: flex;
-	justify-content: flex-end;
-	padding: 0 8px;
-	margin: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 8px;
+  margin: 0;
 }
 
 .userBubble {
-	background: linear-gradient(
-		135deg,
-		rgba(99, 102, 241, 0.15) 0%,
-		rgba(79, 70, 229, 0.12) 100%
-	);
-	border: none;
-	border-radius: 12px 12px 2px 12px;
-	padding: 8px 12px;
-	color: #e0e7ff;
-	font-size: 13px;
-	max-width: 85%;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.12) 100%);
+  border: none;
+  border-radius: 12px 12px 2px 12px;
+  padding: 8px 12px;
+  color: #e0e7ff;
+  font-size: 13px;
+  max-width: 85%;
 }
 
 /* AI消息容器 - 零间隙 */
 .aiContainer {
-	display: flex;
-	flex-direction: column;
-	gap: 0;
-	padding: 0 8px;
-	margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0 8px;
+  margin: 0;
 }
 
 /* Card 基础 - 无边框，可点击 */
 .card {
-	border: none;
-	border-radius: 0;
-	margin: 0;
-	cursor: pointer;
-	transition: background-color 0.15s;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  cursor: pointer;
+  transition: background-color 0.15s;
 }
 
 /* 流式状态 - 半透明 + 脉冲动画 */
 .streaming {
-	opacity: 0.7;
-	animation: pulse 2s ease-in-out infinite;
+  opacity: 0.7;
+  animation: pulse 2s ease-in-out infinite;
 }
 
 @keyframes pulse {
-	0%,
-	100% {
-		opacity: 0.7;
-	}
-	50% {
-		opacity: 0.9;
-	}
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.9;
+  }
 }
 
 /* 折叠状态样式 */
 .card.collapsed {
-	opacity: 0.8;
+  opacity: 0.8;
 }
 
 .card.collapsed:hover {
-	opacity: 1;
+  opacity: 1;
 }
 
 .card.expanded {
-	opacity: 1;
+  opacity: 1;
 }
 
 /* 思考块 - 温暖琥珀色 */
 .thinking {
-	background: rgba(251, 191, 36, 0.08);
+  background: rgba(251, 191, 36, 0.08);
 }
 
 .thinking:hover {
-	background: rgba(251, 191, 36, 0.12);
+  background: rgba(251, 191, 36, 0.12);
 }
 
 .thinking .dot {
-	background: #fbbf24;
+  background: #fbbf24;
 }
 
 /* 工具调用块 - 清新翡翠色 */
 .toolUse {
-	background: rgba(52, 211, 153, 0.08);
+  background: rgba(52, 211, 153, 0.08);
 }
 
 .toolUse:hover {
-	background: rgba(52, 211, 153, 0.12);
+  background: rgba(52, 211, 153, 0.12);
 }
 
 .toolUse .dot {
-	background: #34d399;
+  background: #34d399;
 }
 
 /* 工具调用成功状态 */
 .toolUse.toolSuccess {
-	background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.1);
 }
 
 .toolUse.toolSuccess:hover {
-	background: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.15);
 }
 
 .toolUse.toolSuccess .dot {
-	background: #10b981;
+  background: #10b981;
 }
 
 /* 工具调用错误状态 */
 .toolUse.toolError {
-	background: rgba(244, 63, 94, 0.1);
+  background: rgba(244, 63, 94, 0.1);
 }
 
 .toolUse.toolError:hover {
-	background: rgba(244, 63, 94, 0.15);
+  background: rgba(244, 63, 94, 0.15);
 }
 
 .toolUse.toolError .dot {
-	background: #f43f5e;
+  background: #f43f5e;
 }
 
 /* 工具调用内容分区 */
 .toolSection {
-	margin-bottom: 12px;
-	padding: 8px;
-	background: rgba(0, 0, 0, 0.2);
-	border-radius: 6px;
+  margin-bottom: 12px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
 }
 
 .toolSection:last-child {
-	margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .toolSectionLabel {
-	font-size: 10px;
-	font-weight: 600;
-	color: #94a3b8;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	margin-bottom: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
 }
 
 .toolSectionSuccess {
-	background: rgba(16, 185, 129, 0.15);
-	border-left: 2px solid #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  border-left: 2px solid #10b981;
 }
 
 .toolSectionError {
-	background: rgba(244, 63, 94, 0.15);
-	border-left: 2px solid #f43f5e;
+  background: rgba(244, 63, 94, 0.15);
+  border-left: 2px solid #f43f5e;
 }
 
 /* 工具结果块 - 根据状态 */
 .toolResult {
-	background: rgba(148, 163, 184, 0.06);
+  background: rgba(148, 163, 184, 0.06);
 }
 
 .toolResult:hover {
-	background: rgba(148, 163, 184, 0.1);
+  background: rgba(148, 163, 184, 0.1);
 }
 
 .toolResult .dot {
-	background: #94a3b8;
+  background: #94a3b8;
 }
 
 .toolResult.success {
-	background: rgba(16, 185, 129, 0.06);
+  background: rgba(16, 185, 129, 0.06);
 }
 
 .toolResult.success:hover {
-	background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.1);
 }
 
 .toolResult.success .dot {
-	background: #10b981;
+  background: #10b981;
 }
 
 .toolResult.error {
-	background: rgba(244, 63, 94, 0.06);
+  background: rgba(244, 63, 94, 0.06);
 }
 
 .toolResult.error:hover {
-	background: rgba(244, 63, 94, 0.1);
+  background: rgba(244, 63, 94, 0.1);
 }
 
 /* 工具代码块样式 */
 .toolCode {
-	margin: 0;
-	padding: 8px;
-	background: rgba(0, 0, 0, 0.3);
-	border-radius: 4px;
-	font-size: 12px;
-	line-height: 1.5;
-	overflow-x: auto;
-	white-space: pre-wrap;
-	word-break: break-word;
+  margin: 0;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .toolResult.error .dot {
-	background: #f43f5e;
+  background: #f43f5e;
 }
 
 /* AI输出块 - 柔和天蓝色 */
 .output {
-	background: rgba(56, 189, 248, 0.06);
-	cursor: default;
+  background: rgba(56, 189, 248, 0.06);
+  cursor: default;
 }
 
 .output:hover {
-	background: rgba(56, 189, 248, 0.1);
+  background: rgba(56, 189, 248, 0.1);
 }
 
 .output .dot {
-	background: #38bdf8;
+  background: #38bdf8;
 }
 
 /* Card Header - 紧凑 */
 .cardHeader {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
 }
 
 .dot {
-	width: 6px;
-	height: 6px;
-	border-radius: 50%;
-	flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .label {
-	font-size: 11px;
-	font-weight: 500;
-	color: #e2e8f0;
-	flex-shrink: 0;
-	white-space: nowrap;
+  font-size: 11px;
+  font-weight: 500;
+  color: #e2e8f0;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* 工具参数摘要（显示在顶部） */
 .summary {
-	font-size: 10px;
-	color: #94a3b8;
-	flex-shrink: 1;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	max-width: 200px;
-	margin-left: 4px;
-	font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  color: #94a3b8;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+  margin-left: 4px;
+  font-family: "JetBrains Mono", monospace;
 }
 
 .chip {
-	font-size: 9px;
-	padding: 1px 6px;
-	border-radius: 8px;
-	background: rgba(255, 255, 255, 0.1);
-	color: #94a3b8;
-	text-transform: uppercase;
-	flex-shrink: 0;
-	white-space: nowrap;
-	min-width: 48px;
-	text-align: center;
-	box-sizing: border-box;
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  white-space: nowrap;
+  min-width: 48px;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .chip.success {
-	background: rgba(16, 185, 129, 0.2);
-	color: #34d399;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
 }
 
 .chip.error {
-	background: rgba(244, 63, 94, 0.2);
-	color: #f43f5e;
+  background: rgba(244, 63, 94, 0.2);
+  color: #f43f5e;
 }
 
 .chip.pending {
-	background: rgba(148, 163, 184, 0.2);
-	color: #94a3b8;
+  background: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
 }
 
 .actions {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	margin-left: auto;
-	flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 /* 复制按钮 */
 .btnCopy {
-	background: transparent;
-	border: none;
-	color: #64748b;
-	font-size: 12px;
-	cursor: pointer;
-	padding: 2px 4px;
-	border-radius: 3px;
-	transition: all 0.15s;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: all 0.15s;
 }
 
 .btnCopy:hover {
-	background: rgba(255, 255, 255, 0.1);
-	color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
 }
 
 /* 折叠图标 - 无背景 */
 .toggleIcon {
-	font-size: 10px;
-	color: #64748b;
-	padding: 2px;
-	user-select: none;
+  font-size: 10px;
+  color: #64748b;
+  padding: 2px;
+  user-select: none;
 }
 
 /* Card Content */
 .content {
-	padding: 6px 8px 8px 20px;
-	font-size: 13px;
-	line-height: 1.5;
-	color: #cbd5e1;
-	cursor: text;
+  padding: 6px 8px 8px 20px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #cbd5e1;
+  cursor: text;
 }
 
 .content code {
-	font-family: "JetBrains Mono", monospace;
-	font-size: 12px;
-	white-space: pre-wrap;
-	word-break: break-word;
-	color: #e2e8f0;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #e2e8f0;
 }
 
 /* Text Content Styles */
 .line {
-	margin: 1px 0;
+  margin: 1px 0;
 }
 
 .inlineCode {
-	background: rgba(99, 102, 241, 0.2);
-	padding: 1px 4px;
-	border-radius: 3px;
-	color: #a5b4fc;
-	font-family: "JetBrains Mono", monospace;
-	font-size: 12px;
+  background: rgba(99, 102, 241, 0.2);
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: #a5b4fc;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
 }
 
 .codeBlockStart {
-	color: #64748b;
-	font-family: "JetBrains Mono", monospace;
-	font-size: 11px;
-	padding: 2px 0;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-	margin-bottom: 4px;
+  color: #64748b;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 4px;
 }
 
 strong {
-	color: #f8fafc;
-	font-weight: 600;
+  color: #f8fafc;
+  font-weight: 600;
 }
 
 em {
-	color: #e2e8f0;
-	font-style: italic;
+  color: #e2e8f0;
+  font-style: italic;
 }

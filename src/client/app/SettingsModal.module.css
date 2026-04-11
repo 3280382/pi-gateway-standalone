@@ -1,102 +1,102 @@
 /* Settings Modal */
 
 .modal {
-	padding: 16px;
-	min-width: 200px;
+  padding: 16px;
+  min-width: 200px;
 }
 
 .title {
-	margin: 0 0 16px 0;
-	font-size: 14px;
-	font-weight: 600;
-	color: var(--text-primary);
-	border-bottom: 1px solid var(--border-subtle);
-	padding-bottom: 8px;
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 8px;
 }
 
 .setting {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 12px;
-	margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .setting:last-child {
-	margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .label {
-	font-size: 13px;
-	color: var(--text-secondary);
-	white-space: nowrap;
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 /* Theme Selector */
 .themeSelector {
-	display: flex;
-	gap: 4px;
+  display: flex;
+  gap: 4px;
 }
 
 .themeBtn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 32px;
-	height: 32px;
-	padding: 0;
-	border: 1px solid var(--border-subtle);
-	border-radius: 6px;
-	background: var(--bg-tertiary);
-	color: var(--text-secondary);
-	cursor: pointer;
-	transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
 .themeBtn:hover {
-	background: var(--bg-hover);
-	color: var(--text-primary);
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .themeBtn.active {
-	background: var(--accent-blue-transparent);
-	border-color: var(--accent-blue);
-	color: var(--accent-blue);
+  background: var(--accent-blue-transparent);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
 }
 
 .themeBtn svg {
-	width: 16px;
-	height: 16px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Font Size Selector */
 .fontSizeSelector {
-	display: flex;
-	gap: 2px;
+  display: flex;
+  gap: 2px;
 }
 
 .fontSizeBtn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 28px;
-	height: 28px;
-	padding: 0;
-	border: 1px solid var(--border-subtle);
-	border-radius: 4px;
-	background: var(--bg-tertiary);
-	color: var(--text-secondary);
-	cursor: pointer;
-	transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
 .fontSizeBtn:hover {
-	background: var(--bg-hover);
-	color: var(--text-primary);
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .fontSizeBtn.active {
-	background: var(--accent-blue-transparent);
-	border-color: var(--accent-blue);
-	color: var(--accent-blue);
+  background: var(--accent-blue-transparent);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
 }

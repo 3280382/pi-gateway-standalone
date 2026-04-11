@@ -5,121 +5,117 @@ import React, { Component, type ErrorInfo, type ReactNode } from "react";
  * Specialized error boundary for file browser components
  */
 interface Props {
-	children: ReactNode;
-	componentName?: string;
-	onError?: (error: Error, componentName?: string) => void;
+  children: ReactNode;
+  componentName?: string;
+  onError?: (error: Error, componentName?: string) => void;
 }
 interface State {
-	hasError: boolean;
-	error: Error | null;
+  hasError: boolean;
+  error: Error | null;
 }
 export class FileBrowserErrorBoundary extends Component<Props, State> {
-	constructor(props: Props) {
-		super(props);
-		this.state = {
-			hasError: false,
-			error: null,
-		};
-	}
-	static getDerivedStateFromError(error: Error): State {
-		return {
-			hasError: true,
-			error,
-		};
-	}
-	componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-		// 强制显示到控制台
-		console.error("=".repeat(60));
-		console.error(
-			`[FileBrowserErrorBoundary] ${this.props.componentName || "unknown component"} crashed!`,
-		);
-		console.error("Error:", error);
-		console.error("Stack:", error.stack);
-		console.error("Component Stack:", errorInfo.componentStack);
-		console.error("=".repeat(60));
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: null,
+    };
+  }
+  static getDerivedStateFromError(error: Error): State {
+    return {
+      hasError: true,
+      error,
+    };
+  }
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    // 强制显示到控制台
+    console.error("=".repeat(60));
+    console.error(
+      `[FileBrowserErrorBoundary] ${this.props.componentName || "unknown component"} crashed!`
+    );
+    console.error("Error:", error);
+    console.error("Stack:", error.stack);
+    console.error("Component Stack:", errorInfo.componentStack);
+    console.error("=".repeat(60));
 
-		// Call the onError callback if provided
-		if (this.props.onError) {
-			this.props.onError(error, this.props.componentName);
-		}
+    // Call the onError callback if provided
+    if (this.props.onError) {
+      this.props.onError(error, this.props.componentName);
+    }
 
-		// 发送全局事件以便调试
-		window.dispatchEvent(
-			new CustomEvent("filebrowser-error", {
-				detail: { error, componentName: this.props.componentName },
-			}),
-		);
-	}
-	handleRetry = (): void => {
-		this.setState({
-			hasError: false,
-			error: null,
-		});
-	};
-	render(): ReactNode {
-		if (this.state.hasError) {
-			const componentName = this.props.componentName || "File Browser";
+    // 发送全局事件以便调试
+    window.dispatchEvent(
+      new CustomEvent("filebrowser-error", {
+        detail: { error, componentName: this.props.componentName },
+      })
+    );
+  }
+  handleRetry = (): void => {
+    this.setState({
+      hasError: false,
+      error: null,
+    });
+  };
+  render(): ReactNode {
+    if (this.state.hasError) {
+      const componentName = this.props.componentName || "File Browser";
 
-			return (
-				<div className="file-browser-error">
-					<div className="error-icon">
-						<svg
-							width="48"
-							height="48"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="1.5"
-						>
-							<path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-						</svg>
-					</div>
-					<h3>{componentName} Error</h3>
-					<p className="error-message">
-						{this.state.error?.message ||
-							"An error occurred while loading this component"}
-					</p>
-					<div className="error-suggestions">
-						<p>This might be caused by:</p>
-						<ul>
-							<li>Network connectivity issues</li>
-							<li>File permission problems</li>
-							<li>Corrupted file data</li>
-							<li>Browser compatibility issues</li>
-						</ul>
-					</div>
-					<div className="error-actions">
-						<button className="retry-btn" onClick={this.handleRetry}>
-							<svg
-								width="16"
-								height="16"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="2"
-							>
-								<path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
-							</svg>
-							Retry
-						</button>
-						<button
-							className="refresh-btn"
-							onClick={() => window.location.reload()}
-						>
-							<svg
-								width="16"
-								height="16"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="2"
-							>
-								<path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3" />
-							</svg>
-							Refresh Page
-						</button>
-					</div>
-					<style>{`
+      return (
+        <div className="file-browser-error">
+          <div className="error-icon">
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3>{componentName} Error</h3>
+          <p className="error-message">
+            {this.state.error?.message || "An error occurred while loading this component"}
+          </p>
+          <div className="error-suggestions">
+            <p>This might be caused by:</p>
+            <ul>
+              <li>Network connectivity issues</li>
+              <li>File permission problems</li>
+              <li>Corrupted file data</li>
+              <li>Browser compatibility issues</li>
+            </ul>
+          </div>
+          <div className="error-actions">
+            <button className="retry-btn" onClick={this.handleRetry}>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+              </svg>
+              Retry
+            </button>
+            <button className="refresh-btn" onClick={() => window.location.reload()}>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3" />
+              </svg>
+              Refresh Page
+            </button>
+          </div>
+          <style>{`
             .file-browser-error {
               display: flex;
               flex-direction: column;
@@ -223,64 +219,56 @@ export class FileBrowserErrorBoundary extends Component<Props, State> {
               flex-shrink: 0;
             }
           `}</style>
-				</div>
-			);
-		}
-		return this.props.children;
-	}
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 /**
  * Wrapper components for specific file browser components
  */
 export const FileBrowserWithErrorBoundary: React.FC<{
-	children: ReactNode;
+  children: ReactNode;
 }> = ({ children }) => (
-	<FileBrowserErrorBoundary componentName="File Browser">
-		{children}
-	</FileBrowserErrorBoundary>
+  <FileBrowserErrorBoundary componentName="File Browser">{children}</FileBrowserErrorBoundary>
 );
-export const FileViewerWithErrorBoundary: React.FC<{ children: ReactNode }> = ({
-	children,
-}) => (
-	<FileBrowserErrorBoundary componentName="File Viewer">
-		{children}
-	</FileBrowserErrorBoundary>
+export const FileViewerWithErrorBoundary: React.FC<{ children: ReactNode }> = ({ children }) => (
+  <FileBrowserErrorBoundary componentName="File Viewer">{children}</FileBrowserErrorBoundary>
 );
 export const FileSidebarWithErrorBoundary: React.FC<{
-	children: ReactNode;
+  children: ReactNode;
 }> = ({ children }) => (
-	<FileBrowserErrorBoundary componentName="File Sidebar">
-		{children}
-	</FileBrowserErrorBoundary>
+  <FileBrowserErrorBoundary componentName="File Sidebar">{children}</FileBrowserErrorBoundary>
 );
 /**
  * Hook for file browser specific error handling
  */
 export function useFileBrowserErrorHandler() {
-	const [error, setError] = React.useState<Error | null>(null);
-	const [errorContext, setErrorContext] = React.useState<string>("");
-	const handleError = React.useCallback((err: Error, context?: string) => {
-		console.error(`File browser error${context ? ` in ${context}` : ""}:`, err);
-		setError(err);
-		setErrorContext(context || "");
-	}, []);
-	const clearError = React.useCallback(() => {
-		setError(null);
-		setErrorContext("");
-	}, []);
-	const getErrorMessage = React.useCallback(() => {
-		if (!error) return "";
+  const [error, setError] = React.useState<Error | null>(null);
+  const [errorContext, setErrorContext] = React.useState<string>("");
+  const handleError = React.useCallback((err: Error, context?: string) => {
+    console.error(`File browser error${context ? ` in ${context}` : ""}:`, err);
+    setError(err);
+    setErrorContext(context || "");
+  }, []);
+  const clearError = React.useCallback(() => {
+    setError(null);
+    setErrorContext("");
+  }, []);
+  const getErrorMessage = React.useCallback(() => {
+    if (!error) return "";
 
-		const baseMessage = error.message;
-		const contextMessage = errorContext ? ` (${errorContext})` : "";
+    const baseMessage = error.message;
+    const contextMessage = errorContext ? ` (${errorContext})` : "";
 
-		return `${baseMessage}${contextMessage}`;
-	}, [error, errorContext]);
-	return {
-		error,
-		errorContext,
-		errorMessage: getErrorMessage(),
-		handleError,
-		clearError,
-	};
+    return `${baseMessage}${contextMessage}`;
+  }, [error, errorContext]);
+  return {
+    error,
+    errorContext,
+    errorMessage: getErrorMessage(),
+    handleError,
+    clearError,
+  };
 }

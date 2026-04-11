@@ -8,45 +8,45 @@ import type { WSContext } from "../../ws-router";
 import { handleAbort } from "./abort";
 
 describe("handleAbort", () => {
-	let mockCtx: WSContext;
-	let mockWs: Partial<WebSocket>;
-	let mockSession: any;
+  let mockCtx: WSContext;
+  let mockWs: Partial<WebSocket>;
+  let mockSession: any;
 
-	beforeEach(() => {
-		mockWs = {
-			send: vi.fn(),
-			readyState: 1,
-		};
-		mockSession = {
-			session: {},
-			abort: vi.fn().mockResolvedValue(undefined),
-		};
-		mockCtx = {
-			ws: mockWs as WebSocket,
-			session: mockSession,
-			connectionId: "test-conn-1",
-			connectedAt: new Date(),
-		};
-	});
+  beforeEach(() => {
+    mockWs = {
+      send: vi.fn(),
+      readyState: 1,
+    };
+    mockSession = {
+      session: {},
+      abort: vi.fn().mockResolvedValue(undefined),
+    };
+    mockCtx = {
+      ws: mockWs as WebSocket,
+      session: mockSession,
+      connectionId: "test-conn-1",
+      connectedAt: new Date(),
+    };
+  });
 
-	it("should do nothing if session not initialized", async () => {
-		mockCtx.session.session = null;
+  it("should do nothing if session not initialized", async () => {
+    mockCtx.session.session = null;
 
-		await handleAbort(mockCtx, {});
+    await handleAbort(mockCtx, {});
 
-		expect(mockWs.send).not.toHaveBeenCalled();
-	});
+    expect(mockWs.send).not.toHaveBeenCalled();
+  });
 
-	it("should call session.abort when session exists", async () => {
-		await handleAbort(mockCtx, {});
+  it("should call session.abort when session exists", async () => {
+    await handleAbort(mockCtx, {});
 
-		expect(mockSession.abort).toHaveBeenCalled();
-	});
+    expect(mockSession.abort).toHaveBeenCalled();
+  });
 
-	it("should handle abort errors gracefully", async () => {
-		mockSession.abort = vi.fn().mockRejectedValue(new Error("Abort failed"));
+  it("should handle abort errors gracefully", async () => {
+    mockSession.abort = vi.fn().mockRejectedValue(new Error("Abort failed"));
 
-		// Should not throw
-		await expect(handleAbort(mockCtx, {})).resolves.not.toThrow();
-	});
+    // Should not throw
+    await expect(handleAbort(mockCtx, {})).resolves.not.toThrow();
+  });
 });

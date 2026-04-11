@@ -23,69 +23,61 @@ import { useAppStore } from "@/stores/appStore";
 // ===== [ANCHOR:COMPONENT] =====
 
 export function FilesPage() {
-	// ===== [ANCHOR:STATE] =====
-	const { currentView } = useAppStore();
-	const isActive = currentView === "files";
+  // ===== [ANCHOR:STATE] =====
+  const { currentView } = useAppStore();
+  const isActive = currentView === "files";
 
-	const {
-		workingDir,
-		isSidebarVisible,
-		isBottomPanelOpen,
-		bottomPanelHeight,
-		closeBottomPanel,
-		setBottomPanelHeight,
-	} = useFileStore();
+  const {
+    workingDir,
+    isSidebarVisible,
+    isBottomPanelOpen,
+    bottomPanelHeight,
+    closeBottomPanel,
+    setBottomPanelHeight,
+  } = useFileStore();
 
-	const { terminalCommand, setTerminalCommand } = useViewerStore();
+  const { terminalCommand, setTerminalCommand } = useViewerStore();
 
-	// ===== [ANCHOR:HOOKS] =====
-	// 仅在激活状态下加载数据
-	const { refresh } = useFileBrowser({ isActive });
-	const { navigateTo } = useFileNavigation();
+  // ===== [ANCHOR:HOOKS] =====
+  // 仅在激活状态下加载数据
+  const { refresh } = useFileBrowser({ isActive });
+  const { navigateTo } = useFileNavigation();
 
-	// ===== [ANCHOR:RENDER] =====
-	return (
-		<div className={styles.layout}>
-			{/* FileToolbar */}
-			<header className={styles.header}>
-				<FileToolbar
-					workingDir={workingDir}
-					onRefresh={refresh}
-					onNavigate={navigateTo}
-				/>
-			</header>
+  // ===== [ANCHOR:RENDER] =====
+  return (
+    <div className={styles.layout}>
+      {/* FileToolbar */}
+      <header className={styles.header}>
+        <FileToolbar workingDir={workingDir} onRefresh={refresh} onNavigate={navigateTo} />
+      </header>
 
-			{/* Body: FileSidebar + Content */}
-			<div className={styles.body}>
-				{isSidebarVisible && (
-					<FileSidebar visible={true} onNavigate={navigateTo} />
-				)}
+      {/* Body: FileSidebar + Content */}
+      <div className={styles.body}>
+        {isSidebarVisible && <FileSidebar visible={true} onNavigate={navigateTo} />}
 
-				<main className={styles.content}>
-					<FileBrowser
-						isActive={isActive}
-						onExecuteOutput={(output) =>
-							console.log("[Files] Execute output:", output)
-						}
-						onOpenBottomPanel={setTerminalCommand}
-					/>
-					{isBottomPanelOpen && (
-						<TerminalPanel
-							height={bottomPanelHeight}
-							onClose={closeBottomPanel}
-							onHeightChange={setBottomPanelHeight}
-							initialCommand={terminalCommand}
-							onExecuteCommand={(cmd) => {
-								setTerminalCommand(cmd);
-							}}
-						/>
-					)}
-				</main>
-			</div>
+        <main className={styles.content}>
+          <FileBrowser
+            isActive={isActive}
+            onExecuteOutput={(output) => console.log("[Files] Execute output:", output)}
+            onOpenBottomPanel={setTerminalCommand}
+          />
+          {isBottomPanelOpen && (
+            <TerminalPanel
+              height={bottomPanelHeight}
+              onClose={closeBottomPanel}
+              onHeightChange={setBottomPanelHeight}
+              initialCommand={terminalCommand}
+              onExecuteCommand={(cmd) => {
+                setTerminalCommand(cmd);
+              }}
+            />
+          )}
+        </main>
+      </div>
 
-			<FileBottomMenu />
-		</div>
-	);
+      <FileBottomMenu />
+    </div>
+  );
 }
 
 export default FilesPage;

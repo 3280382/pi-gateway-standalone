@@ -4,449 +4,449 @@
 
 /* Unified blue color */
 :root {
-	--unified-blue: #58a6ff;
-	--unified-blue-hover: #79b8ff;
-	--unified-blue-dim: rgba(88, 166, 255, 0.15);
-	--unified-blue-dim-hover: rgba(88, 166, 255, 0.25);
+  --unified-blue: #58a6ff;
+  --unified-blue-hover: #79b8ff;
+  --unified-blue-dim: rgba(88, 166, 255, 0.15);
+  --unified-blue-dim-hover: rgba(88, 166, 255, 0.25);
 }
 
 .container {
-	display: flex;
-	flex-direction: column;
-	padding: 6px 10px;
-	background: transparent;
-	gap: 4px;
-	position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 10px;
+  background: transparent;
+  gap: 4px;
+  position: relative;
 }
 
 .hiddenInput {
-	display: none;
+  display: none;
 }
 
 /* Input Row - textarea and button column */
 .inputRow {
-	display: flex;
-	flex-direction: row;
-	gap: 6px;
-	align-items: stretch;
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  align-items: stretch;
 }
 
 /* Textarea - matches button column height */
 .textarea {
-	flex: 1;
-	height: 80px;
-	min-height: 80px;
-	max-height: 200px;
-	padding: 10px 14px;
-	background: rgba(22, 27, 34, 0.6);
-	border: 1px solid rgba(48, 54, 61, 0.6);
-	border-radius: 10px;
-	color: #e6edf3;
-	font-size: 14px;
-	line-height: 1.5;
-	resize: none;
-	outline: none;
-	transition: all 0.15s ease;
+  flex: 1;
+  height: 80px;
+  min-height: 80px;
+  max-height: 200px;
+  padding: 10px 14px;
+  background: rgba(22, 27, 34, 0.6);
+  border: 1px solid rgba(48, 54, 61, 0.6);
+  border-radius: 10px;
+  color: #e6edf3;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+  transition: all 0.15s ease;
 }
 
 .textarea::placeholder {
-	color: #484f58;
+  color: #484f58;
 }
 
 .textarea:hover {
-	background: rgba(22, 27, 34, 0.8);
-	border-color: rgba(88, 166, 255, 0.3);
+  background: rgba(22, 27, 34, 0.8);
+  border-color: rgba(88, 166, 255, 0.3);
 }
 
 .textarea:focus {
-	background: rgba(22, 27, 34, 0.9);
-	border-color: var(--unified-blue);
-	box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+  background: rgba(22, 27, 34, 0.9);
+  border-color: var(--unified-blue);
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
 }
 
 .textarea:disabled {
-	opacity: 0.5;
+  opacity: 0.5;
 }
 
 /* Bash mode */
 .textarea.bashMode {
-	border-color: #3fb950;
+  border-color: #3fb950;
 }
 
 .textarea.bashMode:focus {
-	box-shadow: 0 0 0 2px rgba(63, 185, 80, 0.2);
+  box-shadow: 0 0 0 2px rgba(63, 185, 80, 0.2);
 }
 
 /* Button column - matches textarea height (80px) */
 .buttonColumn {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-	width: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 40px;
 }
 
 /* Send button - taller */
 .sendButton {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 40px;
-	height: 48px;
-	border: none;
-	border-radius: 8px;
-	background: var(--unified-blue);
-	color: #0d1117;
-	cursor: pointer;
-	transition: all 0.15s ease;
-	flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 48px;
+  border: none;
+  border-radius: 8px;
+  background: var(--unified-blue);
+  color: #0d1117;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
 .sendButton:hover:not(:disabled) {
-	background: var(--unified-blue-hover);
+  background: var(--unified-blue-hover);
 }
 
 .sendButton:disabled {
-	opacity: 0.4;
-	cursor: not-allowed;
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .sendButton.stopButton {
-	background: #f85149;
+  background: #f85149;
 }
 
 .sendButton.stopButton:hover:not(:disabled) {
-	background: #ff7b72;
+  background: #ff7b72;
 }
 
 .sendButton svg {
-	width: 18px;
-	height: 18px;
+  width: 18px;
+  height: 18px;
 }
 
 /* New session button - shorter, same width */
 .newSessionButton {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 40px;
-	height: 28px;
-	border: none;
-	border-radius: 8px;
-	background: var(--unified-blue-dim);
-	color: var(--unified-blue);
-	cursor: pointer;
-	transition: all 0.15s ease;
-	flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: var(--unified-blue-dim);
+  color: var(--unified-blue);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
 .newSessionButton:hover:not(:disabled) {
-	background: var(--unified-blue-dim-hover);
-	color: var(--unified-blue-hover);
+  background: var(--unified-blue-dim-hover);
+  color: var(--unified-blue-hover);
 }
 
 .newSessionButton:disabled {
-	opacity: 0.4;
-	cursor: not-allowed;
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .newSessionButton svg {
-	width: 16px;
-	height: 16px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Toolbar - minimal spacing */
 .toolbar {
-	display: flex;
-	flex-direction: row;
-	gap: 4px;
-	padding: 0;
-	margin-left: 2px;
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  padding: 0;
+  margin-left: 2px;
 }
 
 .toolbarBtn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 28px;
-	height: 28px;
-	border: none;
-	border-radius: 6px;
-	background: var(--unified-blue-dim);
-	color: var(--unified-blue);
-	cursor: pointer;
-	transition: all 0.15s ease;
-	padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: var(--unified-blue-dim);
+  color: var(--unified-blue);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
 }
 
 .toolbarBtn:hover:not(:disabled) {
-	background: var(--unified-blue-dim-hover);
-	color: var(--unified-blue-hover);
+  background: var(--unified-blue-dim-hover);
+  color: var(--unified-blue-hover);
 }
 
 .toolbarBtn:disabled {
-	opacity: 0.35;
-	cursor: not-allowed;
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .btnIcon {
-	font-size: 13px;
-	font-weight: 600;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .toolbarBtn svg {
-	width: 15px;
-	height: 15px;
+  width: 15px;
+  height: 15px;
 }
 
 /* Dropdown menus */
 .commandMenu,
 .filePicker {
-	position: absolute;
-	bottom: calc(100% - 4px);
-	left: 10px;
-	right: 56px;
-	max-height: 200px;
-	overflow-y: auto;
-	background: rgba(13, 17, 23, 0.98);
-	border: 1px solid rgba(48, 54, 61, 0.8);
-	border-radius: 8px;
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-	z-index: 100;
-	padding: 4px;
+  position: absolute;
+  bottom: calc(100% - 4px);
+  left: 10px;
+  right: 56px;
+  max-height: 200px;
+  overflow-y: auto;
+  background: rgba(13, 17, 23, 0.98);
+  border: 1px solid rgba(48, 54, 61, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  padding: 4px;
 }
 
 .commandItem,
 .fileItem {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	width: 100%;
-	padding: 8px 10px;
-	border: none;
-	border-radius: 6px;
-	background: transparent;
-	color: #7d8590;
-	font-size: 13px;
-	cursor: pointer;
-	transition: all 0.12s ease;
-	text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #7d8590;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  text-align: left;
 }
 
 .commandItem:hover,
 .commandItem.selected,
 .fileItem:hover,
 .fileItem.selected {
-	background: var(--unified-blue-dim);
-	color: var(--unified-blue);
+  background: var(--unified-blue-dim);
+  color: var(--unified-blue);
 }
 
 .commandIcon {
-	font-size: 14px;
-	width: 20px;
-	height: 20px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: var(--unified-blue-dim);
-	border-radius: 5px;
-	color: var(--unified-blue);
+  font-size: 14px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--unified-blue-dim);
+  border-radius: 5px;
+  color: var(--unified-blue);
 }
 
 .commandName {
-	font-weight: 500;
+  font-weight: 500;
 }
 
 /* File picker specific */
 .filePickerHeader {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	padding: 6px 10px;
-	border-bottom: 1px solid rgba(48, 54, 61, 0.5);
-	margin-bottom: 4px;
-	font-size: 11px;
-	color: #484f58;
-	font-weight: 500;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: #484f58;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .filePickerHeader svg {
-	width: 14px;
-	height: 14px;
+  width: 14px;
+  height: 14px;
 }
 
 .fileIcon {
-	width: 18px;
-	height: 18px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: #484f58;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #484f58;
 }
 
 .fileIcon svg {
-	width: 16px;
-	height: 16px;
+  width: 16px;
+  height: 16px;
 }
 
 .fileName {
-	font-weight: 500;
-	flex: 1;
-	color: #e6edf3;
+  font-weight: 500;
+  flex: 1;
+  color: #e6edf3;
 }
 
 .filePath {
-	font-size: 10px;
-	color: #484f58;
-	max-width: 100px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+  font-size: 10px;
+  color: #484f58;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Image previews */
 .imagePreviewBar {
-	display: flex;
-	gap: 6px;
-	padding: 6px;
-	overflow-x: auto;
-	background: rgba(22, 27, 34, 0.5);
-	border: 1px solid rgba(48, 54, 61, 0.3);
-	border-radius: 8px;
-	margin-bottom: 2px;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  overflow-x: auto;
+  background: rgba(22, 27, 34, 0.5);
+  border: 1px solid rgba(48, 54, 61, 0.3);
+  border-radius: 8px;
+  margin-bottom: 2px;
 }
 
 .imagePreviewItem {
-	position: relative;
-	width: 52px;
-	height: 52px;
-	border-radius: 6px;
-	overflow: hidden;
-	flex-shrink: 0;
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .imagePreviewItem img {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .ocrIndicator,
 .ocrBadge {
-	position: absolute;
-	padding: 1px 4px;
-	font-size: 9px;
-	font-weight: 600;
-	border-radius: 3px;
+  position: absolute;
+  padding: 1px 4px;
+  font-size: 9px;
+  font-weight: 600;
+  border-radius: 3px;
 }
 
 .ocrIndicator {
-	bottom: 3px;
-	left: 3px;
-	background: var(--unified-blue);
-	color: #0d1117;
+  bottom: 3px;
+  left: 3px;
+  background: var(--unified-blue);
+  color: #0d1117;
 }
 
 .ocrBadge {
-	top: 3px;
-	left: 3px;
-	background: #3fb950;
-	color: #0d1117;
+  top: 3px;
+  left: 3px;
+  background: #3fb950;
+  color: #0d1117;
 }
 
 .removeImageBtn {
-	position: absolute;
-	top: 2px;
-	right: 2px;
-	width: 16px;
-	height: 16px;
-	border: none;
-	border-radius: 50%;
-	background: rgba(248, 81, 73, 0.9);
-	color: white;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	opacity: 0;
-	transition: opacity 0.15s;
-	padding: 0;
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(248, 81, 73, 0.9);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+  padding: 0;
 }
 
 .imagePreviewItem:hover .removeImageBtn {
-	opacity: 1;
+  opacity: 1;
 }
 
 .removeImageBtn svg {
-	width: 10px;
-	height: 10px;
+  width: 10px;
+  height: 10px;
 }
 
 .togglePreviewBtn {
-	padding: 4px 8px;
-	border: none;
-	border-radius: 5px;
-	background: rgba(48, 54, 61, 0.5);
-	color: #7d8590;
-	font-size: 11px;
-	cursor: pointer;
-	flex-shrink: 0;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 5px;
+  background: rgba(48, 54, 61, 0.5);
+  color: #7d8590;
+  font-size: 11px;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .togglePreviewBtn:hover {
-	background: rgba(48, 54, 61, 0.8);
-	color: #e6edf3;
+  background: rgba(48, 54, 61, 0.8);
+  color: #e6edf3;
 }
 
 .imageCountBar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 6px 10px;
-	background: rgba(22, 27, 34, 0.5);
-	border: 1px solid rgba(48, 54, 61, 0.3);
-	border-radius: 6px;
-	font-size: 12px;
-	color: #7d8590;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: rgba(22, 27, 34, 0.5);
+  border: 1px solid rgba(48, 54, 61, 0.3);
+  border-radius: 6px;
+  font-size: 12px;
+  color: #7d8590;
 }
 
 .imageCountBar button {
-	padding: 3px 8px;
-	border: none;
-	border-radius: 4px;
-	background: var(--unified-blue-dim);
-	color: var(--unified-blue);
-	font-size: 11px;
-	cursor: pointer;
+  padding: 3px 8px;
+  border: none;
+  border-radius: 4px;
+  background: var(--unified-blue-dim);
+  color: var(--unified-blue);
+  font-size: 11px;
+  cursor: pointer;
 }
 
 .imageCountBar button:hover {
-	background: var(--unified-blue-dim-hover);
+  background: var(--unified-blue-dim-hover);
 }
 
 /* Scrollbar */
 .commandMenu::-webkit-scrollbar,
 .filePicker::-webkit-scrollbar,
 .imagePreviewBar::-webkit-scrollbar {
-	width: 4px;
-	height: 4px;
+  width: 4px;
+  height: 4px;
 }
 
 .commandMenu::-webkit-scrollbar-thumb,
 .filePicker::-webkit-scrollbar-thumb,
 .imagePreviewBar::-webkit-scrollbar-thumb {
-	background: rgba(88, 166, 255, 0.3);
-	border-radius: 2px;
+  background: rgba(88, 166, 255, 0.3);
+  border-radius: 2px;
 }
 
 /* Loading state in file picker */
 .loadingItem {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 20px 12px;
-	color: #64748b;
-	font-size: 13px;
-	font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 12px;
+  color: #64748b;
+  font-size: 13px;
+  font-style: italic;
 }

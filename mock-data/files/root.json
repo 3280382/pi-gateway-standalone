@@ -1,56 +1,56 @@
 {
-	"currentPath": "/root",
-	"parentPath": "/",
-	"items": [
-		{
-			"name": "Documents",
-			"path": "/root/Documents",
-			"isDirectory": true,
-			"size": 0,
-			"modified": "2026-03-26T16:40:45.187Z",
-			"description": "文档目录"
-		},
-		{
-			"name": "Downloads",
-			"path": "/root/Downloads",
-			"isDirectory": true,
-			"size": 0,
-			"modified": "2026-03-26T16:40:45.187Z",
-			"description": "下载目录"
-		},
-		{
-			"name": "node_modules",
-			"path": "/root/node_modules",
-			"isDirectory": true,
-			"size": 0,
-			"modified": "2026-03-25T16:40:45.187Z",
-			"description": "依赖包目录"
-		},
-		{
-			"name": "src",
-			"path": "/root/src",
-			"isDirectory": true,
-			"size": 0,
-			"modified": "2026-03-26T16:40:45.187Z",
-			"description": "源代码目录"
-		},
-		{
-			"name": "package.json",
-			"path": "/root/package.json",
-			"isDirectory": false,
-			"size": 2500,
-			"modified": "2026-03-26T16:40:45.187Z",
-			"extension": "json",
-			"description": "项目配置文件"
-		},
-		{
-			"name": "README.md",
-			"path": "/root/README.md",
-			"isDirectory": false,
-			"size": 4000,
-			"modified": "2026-03-26T16:40:45.187Z",
-			"extension": "md",
-			"description": "项目说明文档"
-		}
-	]
+  "currentPath": "/root",
+  "parentPath": "/",
+  "items": [
+    {
+      "name": "Documents",
+      "path": "/root/Documents",
+      "isDirectory": true,
+      "size": 0,
+      "modified": "2026-03-26T16:40:45.187Z",
+      "description": "文档目录"
+    },
+    {
+      "name": "Downloads",
+      "path": "/root/Downloads",
+      "isDirectory": true,
+      "size": 0,
+      "modified": "2026-03-26T16:40:45.187Z",
+      "description": "下载目录"
+    },
+    {
+      "name": "node_modules",
+      "path": "/root/node_modules",
+      "isDirectory": true,
+      "size": 0,
+      "modified": "2026-03-25T16:40:45.187Z",
+      "description": "依赖包目录"
+    },
+    {
+      "name": "src",
+      "path": "/root/src",
+      "isDirectory": true,
+      "size": 0,
+      "modified": "2026-03-26T16:40:45.187Z",
+      "description": "源代码目录"
+    },
+    {
+      "name": "package.json",
+      "path": "/root/package.json",
+      "isDirectory": false,
+      "size": 2500,
+      "modified": "2026-03-26T16:40:45.187Z",
+      "extension": "json",
+      "description": "项目配置文件"
+    },
+    {
+      "name": "README.md",
+      "path": "/root/README.md",
+      "isDirectory": false,
+      "size": 4000,
+      "modified": "2026-03-26T16:40:45.187Z",
+      "extension": "md",
+      "description": "项目说明文档"
+    }
+  ]
 }

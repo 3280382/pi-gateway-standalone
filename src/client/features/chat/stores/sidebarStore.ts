@@ -10,27 +10,23 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import type { Session, SidebarState } from "@/features/chat/types/sidebar";
-import {
-	CHAT_SIDEBAR_PERSIST,
-	CHAT_STORAGE_KEYS,
-	CHAT_STORAGE_VERSION,
-} from "./persist.config";
+import { CHAT_SIDEBAR_PERSIST, CHAT_STORAGE_KEYS, CHAT_STORAGE_VERSION } from "./persist.config";
 
 // ============================================================================
 // Initial State Factory
 // ============================================================================
 
 const createInitialState = (): Omit<SidebarState, keyof SidebarActions> => ({
-	isVisible: false, // 默认关闭侧面板
-	isBottomPanelOpen: false, // 默认关闭底面板
-	bottomPanelHeight: 300,
-	workingDir: null,
-	sessions: [],
-	isLoading: false,
-	error: null,
-	selectedSessionId: null,
-	// 按工作目录保存最后选中的 session (唯一持久化字段)
-	lastSessionByDir: {} as Record<string, string>,
+  isVisible: false, // 默认关闭侧面板
+  isBottomPanelOpen: false, // 默认关闭底面板
+  bottomPanelHeight: 300,
+  workingDir: null,
+  sessions: [],
+  isLoading: false,
+  error: null,
+  selectedSessionId: null,
+  // 按工作目录保存最后选中的 session (唯一持久化字段)
+  lastSessionByDir: {} as Record<string, string>,
 });
 
 // ============================================================================
@@ -38,31 +34,31 @@ const createInitialState = (): Omit<SidebarState, keyof SidebarActions> => ({
 // ============================================================================
 
 interface SidebarActions {
-	// Visibility Actions
-	setIsVisible: (visible: boolean) => void;
-	toggleVisibility: () => void;
+  // Visibility Actions
+  setIsVisible: (visible: boolean) => void;
+  toggleVisibility: () => void;
 
-	// Bottom Panel Actions
-	setBottomPanelOpen: (open: boolean) => void;
-	closeBottomPanel: () => void;
-	setBottomPanelHeight: (height: number) => void;
+  // Bottom Panel Actions
+  setBottomPanelOpen: (open: boolean) => void;
+  closeBottomPanel: () => void;
+  setBottomPanelHeight: (height: number) => void;
 
-	// Data Actions
-	setWorkingDir: (path: string) => void;
-	setSessions: (sessions: Session[]) => void;
-	addSession: (session: Session) => void;
+  // Data Actions
+  setWorkingDir: (path: string) => void;
+  setSessions: (sessions: Session[]) => void;
+  addSession: (session: Session) => void;
 
-	// UI Actions
-	setLoading: (loading: boolean) => void;
-	setError: (error: string | null) => void;
-	/** 选择 session 并更新 lastSessionByDir */
-	selectSession: (id: string | null) => void;
-	/** 仅设置 selectedSessionId（不更新 lastSessionByDir，用于 sessionManager） */
-	setSelectedSessionId: (id: string | null) => void;
-	clearError: () => void;
+  // UI Actions
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  /** 选择 session 并更新 lastSessionByDir */
+  selectSession: (id: string | null) => void;
+  /** 仅设置 selectedSessionId（不更新 lastSessionByDir，用于 sessionManager） */
+  setSelectedSessionId: (id: string | null) => void;
+  clearError: () => void;
 
-	// Reset
-	reset: () => void;
+  // Reset
+  reset: () => void;
 }
 
 // ============================================================================
@@ -70,109 +66,105 @@ interface SidebarActions {
 // ============================================================================
 
 export const useSidebarStore = create<SidebarState & SidebarActions>()(
-	devtools(
-		persist(
-			(set, get) => ({
-				...createInitialState(),
+  devtools(
+    persist(
+      (set, get) => ({
+        ...createInitialState(),
 
-				// Visibility Actions
-				setIsVisible: (visible: boolean) => {
-					set({ isVisible: visible }, false, "setIsVisible");
-				},
+        // Visibility Actions
+        setIsVisible: (visible: boolean) => {
+          set({ isVisible: visible }, false, "setIsVisible");
+        },
 
-				toggleVisibility: () => {
-					set(
-						(state) => ({ isVisible: !state.isVisible }),
-						false,
-						"toggleVisibility",
-					);
-				},
+        toggleVisibility: () => {
+          set((state) => ({ isVisible: !state.isVisible }), false, "toggleVisibility");
+        },
 
-				// Bottom Panel Actions
-				setBottomPanelOpen: (open: boolean) => {
-					set({ isBottomPanelOpen: open }, false, "setBottomPanelOpen");
-				},
+        // Bottom Panel Actions
+        setBottomPanelOpen: (open: boolean) => {
+          set({ isBottomPanelOpen: open }, false, "setBottomPanelOpen");
+        },
 
-				closeBottomPanel: () => {
-					set({ isBottomPanelOpen: false }, false, "closeBottomPanel");
-				},
+        closeBottomPanel: () => {
+          set({ isBottomPanelOpen: false }, false, "closeBottomPanel");
+        },
 
-				setBottomPanelHeight: (height: number) => {
-					set({ bottomPanelHeight: height }, false, "setBottomPanelHeight");
-				},
+        setBottomPanelHeight: (height: number) => {
+          set({ bottomPanelHeight: height }, false, "setBottomPanelHeight");
+        },
 
-				// Data Actions
-				setWorkingDir: (path: string) => {
-					const safePath = path || "";
-					const displayName = safePath.split("/").pop() || safePath;
-					set({ workingDir: { path: safePath, displayName } }, false, "setWorkingDir");
-				},
+        // Data Actions
+        setWorkingDir: (path: string) => {
+          const safePath = path || "";
+          const displayName = safePath.split("/").pop() || safePath;
+          set({ workingDir: { path: safePath, displayName } }, false, "setWorkingDir");
+        },
 
-				setSessions: (sessions: Session[]) => {
-					set({ sessions }, false, "setSessions");
-				},
+        setSessions: (sessions: Session[]) => {
+          set({ sessions }, false, "setSessions");
+        },
 
-				addSession: (session: Session) => {
-					set(
-						(state) => ({
-							sessions: [session, ...state.sessions],
-						}),
-						false,
-						"addSession",
-					);
-				},
+        addSession: (session: Session) => {
+          set(
+            (state) => ({
+              sessions: [session, ...state.sessions],
+            }),
+            false,
+            "addSession"
+          );
+        },
 
-				// UI Actions
-				setLoading: (loading: boolean) => {
-					set({ isLoading: loading }, false, "setLoading");
-				},
+        // UI Actions
+        setLoading: (loading: boolean) => {
+          set({ isLoading: loading }, false, "setLoading");
+        },
 
-				setError: (error: string | null) => {
-					set({ error }, false, "setError");
-				},
+        setError: (error: string | null) => {
+          set({ error }, false, "setError");
+        },
 
-				selectSession: (id: string | null) => {
-					const currentDir = get().workingDir?.path;
-					const lastSessionByDir = { ...get().lastSessionByDir };
+        selectSession: (id: string | null) => {
+          const currentDir = get().workingDir?.path;
+          const lastSessionByDir = { ...get().lastSessionByDir };
 
-					// 如果有当前目录，保存 session 到对应目录
-					if (currentDir && id) {
-						lastSessionByDir[currentDir] = id;
-					}
+          // 如果有当前目录，保存 session 到对应目录
+          if (currentDir && id) {
+            lastSessionByDir[currentDir] = id;
+          }
 
-					set(
-						{
-							selectedSessionId: id,
-							lastSessionByDir,
-						},
-						false,
-						"selectSession",
-					);
-				},
+          set(
+            {
+              selectedSessionId: id,
+              lastSessionByDir,
+            },
+            false,
+            "selectSession"
+          );
+        },
 
-				setSelectedSessionId: (id: string | null) => {
-					set({ selectedSessionId: id }, false, "setSelectedSessionId");
-				},
+        setSelectedSessionId: (id: string | null) => {
+          set({ selectedSessionId: id }, false, "setSelectedSessionId");
+        },
 
-				clearError: () => {
-					set({ error: null }, false, "clearError");
-				},
+        clearError: () => {
+          set({ error: null }, false, "clearError");
+        },
 
-				// Reset
-				reset: () => {
-					set(createInitialState(), false, "reset");
-				},
-			}),
-			{
-				name: CHAT_STORAGE_KEYS.CHAT_SIDEBAR,
-				version: CHAT_STORAGE_VERSION.CHAT_SIDEBAR,
-				partialize: (state) => ({
-					lastSessionByDir: state.lastSessionByDir,
-				}),
-			},
-		),
-		{ name: "SidebarStore" },
-	),
+        // Reset
+        reset: () => {
+          set(createInitialState(), false, "reset");
+        },
+      }),
+      {
+        name: CHAT_STORAGE_KEYS.CHAT_SIDEBAR,
+        version: CHAT_STORAGE_VERSION.CHAT_SIDEBAR,
+        partialize: (state) => ({
+          lastSessionByDir: state.lastSessionByDir,
+        }),
+      }
+    ),
+    { name: "SidebarStore" }
+  )
 );
 
 // ============================================================================
@@ -181,7 +173,6 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 
 export const selectWorkingDir = (state: SidebarState) => state.workingDir;
 export const selectSessions = (state: SidebarState) => state.sessions;
-export const selectSelectedSessionId = (state: SidebarState) =>
-	state.selectedSessionId;
+export const selectSelectedSessionId = (state: SidebarState) => state.selectedSessionId;
 export const selectIsLoading = (state: SidebarState) => state.isLoading;
 export const selectError = (state: SidebarState) => state.error;

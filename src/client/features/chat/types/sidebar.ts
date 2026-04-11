@@ -7,17 +7,17 @@
 // ============================================================================
 
 export interface WorkingDirectory {
-	path: string;
-	displayName: string;
+  path: string;
+  displayName: string;
 }
 
 export interface Session {
-	id: string;
-	path: string;
-	name: string;
-	messageCount: number;
-	lastModified: Date;
-	firstMessage?: string;
+  id: string;
+  path: string;
+  name: string;
+  messageCount: number;
+  lastModified: Date;
+  firstMessage?: string;
 }
 
 export type Theme = "dark" | "light";
@@ -28,27 +28,27 @@ export type FontSize = "tiny" | "small" | "medium" | "large";
 // ============================================================================
 
 export interface WorkspaceInfo {
-	path: string;
-	name?: string;
+  path: string;
+  name?: string;
 }
 
 export interface SidebarState {
-	// UI 状态
-	isVisible: boolean;
+  // UI 状态
+  isVisible: boolean;
 
-	// LLM Log Panel 状态
-	isBottomPanelOpen: boolean;
-	bottomPanelHeight: number;
+  // LLM Log Panel 状态
+  isBottomPanelOpen: boolean;
+  bottomPanelHeight: number;
 
-	// 运行时状态（不持久化）
-	workingDir: WorkingDirectory | null;
-	sessions: Session[];
-	isLoading: boolean;
-	error: string | null;
-	selectedSessionId: string | null;
+  // 运行时状态（不持久化）
+  workingDir: WorkingDirectory | null;
+  sessions: Session[];
+  isLoading: boolean;
+  error: string | null;
+  selectedSessionId: string | null;
 
-	// 持久化状态（唯一存储）
-	lastSessionByDir: Record<string, string>;
+  // 持久化状态（唯一存储）
+  lastSessionByDir: Record<string, string>;
 }
 
 // ============================================================================
@@ -56,17 +56,17 @@ export interface SidebarState {
 // ============================================================================
 
 export interface SidebarController {
-	// Data Loading
-	loadWorkingDir: () => Promise<void>;
-	loadSessions: (cwd: string) => Promise<void>;
+  // Data Loading
+  loadWorkingDir: () => Promise<void>;
+  loadSessions: (cwd: string) => Promise<void>;
 
-	// Actions
-	changeWorkingDir: (path: string) => Promise<void>;
-	selectSession: (id: string) => void;
-	createNewSession: () => Promise<void>;
+  // Actions
+  changeWorkingDir: (path: string) => Promise<void>;
+  selectSession: (id: string) => void;
+  createNewSession: () => Promise<void>;
 
-	// Error Handling
-	clearError: () => void;
+  // Error Handling
+  clearError: () => void;
 }
 
 // ============================================================================
@@ -74,16 +74,16 @@ export interface SidebarController {
 // ============================================================================
 
 export interface SessionsResponse {
-	sessions: Array<{
-		path: string;
-		firstMessage?: string;
-		messageCount: number;
-		modified: string;
-	}>;
+  sessions: Array<{
+    path: string;
+    firstMessage?: string;
+    messageCount: number;
+    modified: string;
+  }>;
 }
 
 export interface WorkingDirResponse {
-	cwd: string;
+  cwd: string;
 }
 
 // ============================================================================
@@ -91,19 +91,19 @@ export interface WorkingDirResponse {
 // ============================================================================
 
 export interface SectionHeaderProps {
-	title: string;
-	action?: React.ReactNode;
+  title: string;
+  action?: React.ReactNode;
 }
 
 export interface IconButtonProps {
-	onClick?: () => void;
-	title?: string;
-	children: React.ReactNode;
-	className?: string;
+  onClick?: () => void;
+  title?: string;
+  children: React.ReactNode;
+  className?: string;
 }
 
 export interface SessionItemProps {
-	session: Session;
-	isSelected: boolean;
-	onClick: () => void;
+  session: Session;
+  isSelected: boolean;
+  onClick: () => void;
 }

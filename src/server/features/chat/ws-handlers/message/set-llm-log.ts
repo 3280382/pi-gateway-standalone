@@ -14,22 +14,22 @@ const logger = new Logger({ level: LogLevel.INFO });
  * @param payload Message payload
  */
 export async function handleSetLlmLog(
-	ctx: WSContext,
-	payload: { enabled: boolean },
+  ctx: WSContext,
+  payload: { enabled: boolean }
 ): Promise<void> {
-	const { enabled } = payload;
+  const { enabled } = payload;
 
-	logger.info(`[WebSocket] Received set_llm_log message: enabled=${enabled}`);
+  logger.info(`[WebSocket] Received set_llm_log message: enabled=${enabled}`);
 
-	// Set LLM log status
-	ctx.session.llmLogManager.setEnabled(enabled);
+  // Set LLM log status
+  ctx.session.llmLogManager.setEnabled(enabled);
 
-	logger.info(`LLM logging ${enabled ? "enabled" : "disabled"}`);
+  logger.info(`LLM logging ${enabled ? "enabled" : "disabled"}`);
 
-	ctx.ws.send(
-		JSON.stringify({
-			type: "llm_log_set",
-			enabled,
-		}),
-	);
+  ctx.ws.send(
+    JSON.stringify({
+      type: "llm_log_set",
+      enabled,
+    })
+  );
 }

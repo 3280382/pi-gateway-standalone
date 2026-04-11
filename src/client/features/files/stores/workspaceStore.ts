@@ -6,43 +6,41 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import {
-	FILES_STORAGE_KEYS,
-	FILES_STORAGE_VERSION,
-	FILES_WORKSPACE_PERSIST,
+  FILES_STORAGE_KEYS,
+  FILES_STORAGE_VERSION,
+  FILES_WORKSPACE_PERSIST,
 } from "./persist.config";
 
 export interface WorkspaceState {
-	recentWorkspaces: string[];
+  recentWorkspaces: string[];
 }
 
 interface WorkspaceActions {
-	addRecentWorkspace: (dir: string) => void;
-	clearRecentWorkspaces: () => void;
+  addRecentWorkspace: (dir: string) => void;
+  clearRecentWorkspaces: () => void;
 }
 
 export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
-	devtools(
-		persist(
-			(set) => ({
-				recentWorkspaces: [],
+  devtools(
+    persist(
+      (set) => ({
+        recentWorkspaces: [],
 
-				addRecentWorkspace: (dir) =>
-					set((state) => {
-						const filtered = state.recentWorkspaces.filter((w) => w !== dir);
-						return { recentWorkspaces: [dir, ...filtered].slice(0, 10) };
-					}),
+        addRecentWorkspace: (dir) =>
+          set((state) => {
+            const filtered = state.recentWorkspaces.filter((w) => w !== dir);
+            return { recentWorkspaces: [dir, ...filtered].slice(0, 10) };
+          }),
 
-				clearRecentWorkspaces: () => set({ recentWorkspaces: [] }),
-			}),
-			{
-				name: FILES_STORAGE_KEYS.FILES_WORKSPACE,
-				version: FILES_STORAGE_VERSION.FILES_WORKSPACE,
-				partialize: (state) =>
-					Object.fromEntries(
-						FILES_WORKSPACE_PERSIST.map((key) => [key, state[key]]),
-					),
-			},
-		),
-		{ name: "WorkspaceStore" },
-	),
+        clearRecentWorkspaces: () => set({ recentWorkspaces: [] }),
+      }),
+      {
+        name: FILES_STORAGE_KEYS.FILES_WORKSPACE,
+        version: FILES_STORAGE_VERSION.FILES_WORKSPACE,
+        partialize: (state) =>
+          Object.fromEntries(FILES_WORKSPACE_PERSIST.map((key) => [key, state[key]])),
+      }
+    ),
+    { name: "WorkspaceStore" }
+  )
 );

@@ -8,65 +8,65 @@ global.React = React;
 
 // 全局清理
 afterEach(() => {
-	cleanup();
+  cleanup();
 });
 
 // 模拟window对象（仅当需要时）
 if (typeof window !== "undefined") {
-	// 模拟WebSocket
-	(window as any).WebSocket = class MockWebSocket {
-		static CONNECTING = 0;
-		static OPEN = 1;
-		static CLOSING = 2;
-		static CLOSED = 3;
+  // 模拟WebSocket
+  (window as any).WebSocket = class MockWebSocket {
+    static CONNECTING = 0;
+    static OPEN = 1;
+    static CLOSING = 2;
+    static CLOSED = 3;
 
-		onopen: (() => void) | null = null;
-		onclose: (() => void) | null = null;
-		onerror: ((error: any) => void) | null = null;
-		onmessage: ((event: any) => void) | null = null;
+    onopen: (() => void) | null = null;
+    onclose: (() => void) | null = null;
+    onerror: ((error: any) => void) | null = null;
+    onmessage: ((event: any) => void) | null = null;
 
-		readyState = MockWebSocket.OPEN;
+    readyState = MockWebSocket.OPEN;
 
-		constructor(public url: string) {
-			setTimeout(() => {
-				if (this.onopen) this.onopen();
-			}, 0);
-		}
+    constructor(public url: string) {
+      setTimeout(() => {
+        if (this.onopen) this.onopen();
+      }, 0);
+    }
 
-		send(data: string) {
-			console.log("MockWebSocket send:", data);
-		}
+    send(data: string) {
+      console.log("MockWebSocket send:", data);
+    }
 
-		close() {
-			this.readyState = MockWebSocket.CLOSED;
-			if (this.onclose) this.onclose();
-		}
-	};
+    close() {
+      this.readyState = MockWebSocket.CLOSED;
+      if (this.onclose) this.onclose();
+    }
+  };
 
-	// 模拟localStorage
-	const localStorageMock = (() => {
-		let store: Record<string, string> = {};
-		return {
-			getItem(key: string) {
-				return store[key] || null;
-			},
-			setItem(key: string, value: string) {
-				store[key] = value;
-			},
-			removeItem(key: string) {
-				delete store[key];
-			},
-			clear() {
-				store = {};
-			},
-		};
-	})();
+  // 模拟localStorage
+  const localStorageMock = (() => {
+    let store: Record<string, string> = {};
+    return {
+      getItem(key: string) {
+        return store[key] || null;
+      },
+      setItem(key: string, value: string) {
+        store[key] = value;
+      },
+      removeItem(key: string) {
+        delete store[key];
+      },
+      clear() {
+        store = {};
+      },
+    };
+  })();
 
-	Object.defineProperty(window, "localStorage", { value: localStorageMock });
+  Object.defineProperty(window, "localStorage", { value: localStorageMock });
 
-	// 不模拟fetch，使用真实的fetch进行集成测试
-	// 如果需要模拟fetch，请取消注释以下代码
-	/*
+  // 不模拟fetch，使用真实的fetch进行集成测试
+  // 如果需要模拟fetch，请取消注释以下代码
+  /*
   (window as any).fetch = async (url: string, options?: any) => {
     console.log('Mock fetch:', url, options);
     

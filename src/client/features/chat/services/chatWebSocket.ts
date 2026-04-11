@@ -12,36 +12,36 @@ import { websocketService } from "@/services/websocket.service";
  * 发送聊天消息（对应后端的 prompt 类型）
  */
 export function sendChatMessage(
-	text: string,
-	sessionId?: string,
-	model?: string,
-	images?: Array<{
-		type: "image";
-		source: { type: "base64"; mediaType: string; data: string };
-	}>,
+  text: string,
+  sessionId?: string,
+  model?: string,
+  images?: Array<{
+    type: "image";
+    source: { type: "base64"; mediaType: string; data: string };
+  }>
 ): boolean {
-	return websocketService.send("prompt", {
-		text,
-		sessionId,
-		model,
-		images,
-	});
+  return websocketService.send("prompt", {
+    text,
+    sessionId,
+    model,
+    images,
+  });
 }
 
 /**
  * 中止生成（对应后端的 abort 类型）
  */
 export function abortChatGeneration(): boolean {
-	return websocketService.send("abort");
+  return websocketService.send("abort");
 }
 
 /**
  * 切换会话（对应后端的 load_session 类型）
  */
 export function switchChatSession(sessionId: string): boolean {
-	return websocketService.send("load_session", {
-		sessionPath: sessionId,
-	});
+  return websocketService.send("load_session", {
+    sessionPath: sessionId,
+  });
 }
 
 /**
@@ -49,44 +49,44 @@ export function switchChatSession(sessionId: string): boolean {
  * 返回 Promise 等待 initialized 响应
  */
 export function initChatWorkingDirectory(
-	path: string,
-	sessionId?: string,
-	timeoutMs = 1000,
+  path: string,
+  sessionId?: string,
+  timeoutMs = 1000
 ): Promise<any> {
-	return new Promise((resolve, reject) => {
-		// 设置一次性监听器等待 initialized 响应
-		const unsubscribeInitialized = websocketService.on("initialized", (data: unknown) => {
-			unsubscribeInitialized();
-			unsubscribeError();
-			resolve(data);
-		});
+  return new Promise((resolve, reject) => {
+    // 设置一次性监听器等待 initialized 响应
+    const unsubscribeInitialized = websocketService.on("initialized", (data: unknown) => {
+      unsubscribeInitialized();
+      unsubscribeError();
+      resolve(data);
+    });
 
-		// 也监听 error 事件
-		const unsubscribeError = websocketService.on("error", (data: unknown) => {
-			unsubscribeInitialized();
-			unsubscribeError();
-			reject(new Error(`Server error: ${JSON.stringify(data)}`));
-		});
+    // 也监听 error 事件
+    const unsubscribeError = websocketService.on("error", (data: unknown) => {
+      unsubscribeInitialized();
+      unsubscribeError();
+      reject(new Error(`Server error: ${JSON.stringify(data)}`));
+    });
 
-		// 超时
-		setTimeout(() => {
-			unsubscribeInitialized();
-			unsubscribeError();
-			reject(new Error(`Timeout waiting for initialization (${timeoutMs}ms)`));
-		}, timeoutMs);
+    // 超时
+    setTimeout(() => {
+      unsubscribeInitialized();
+      unsubscribeError();
+      reject(new Error(`Timeout waiting for initialization (${timeoutMs}ms)`));
+    }, timeoutMs);
 
-		// 发送 init 消息
-		const sent = websocketService.send("init", {
-			workingDir: path,
-			sessionId,
-		});
+    // 发送 init 消息
+    const sent = websocketService.send("init", {
+      workingDir: path,
+      sessionId,
+    });
 
-		if (!sent) {
-			unsubscribeInitialized();
-			unsubscribeError();
-			reject(new Error("Failed to send init message"));
-		}
-	});
+    if (!sent) {
+      unsubscribeInitialized();
+      unsubscribeError();
+      reject(new Error("Failed to send init message"));
+    }
+  });
 }
 
 /**
@@ -94,89 +94,81 @@ export function initChatWorkingDirectory(
  * @deprecated
  */
 export function switchChatWorkingDirectory(path: string): Promise<unknown> {
-	console.warn(
-		"switchChatWorkingDirectory 已弃用，请使用 initChatWorkingDirectory",
-	);
-	return initChatWorkingDirectory(path);
+  console.warn("switchChatWorkingDirectory 已弃用，请使用 initChatWorkingDirectory");
+  return initChatWorkingDirectory(path);
 }
 
 /**
  * 流式传输时引导（对应后端的 steer 类型）
  */
 export function steerChat(text: string): boolean {
-	return websocketService.send("steer", { text });
+  return websocketService.send("steer", { text });
 }
 
 /**
  * 执行命令（对应后端的 command 类型）
  */
 export function executeChatCommand(command: string): boolean {
-	return websocketService.send("command", { text: command });
+  return websocketService.send("command", { text: command });
 }
 
 /**
  * 列出可用模型（对应后端的 list_models 类型）
  */
 export function listChatModels(): boolean {
-	return websocketService.send("list_models");
+  return websocketService.send("list_models");
 }
 
 /**
  * 设置 LLM 日志（对应后端的 set_llm_log 类型）
  */
 export function setChatLlmLogEnabled(enabled: boolean): boolean {
-	return websocketService.send("set_llm_log", { enabled });
+  return websocketService.send("set_llm_log", { enabled });
 }
 
 /**
  * 列出会话（对应后端的 list_sessions 类型）
  */
 export function listChatSessions(cwd: string): boolean {
-	return websocketService.send("list_sessions", { cwd });
+  return websocketService.send("list_sessions", { cwd });
 }
 
 /**
  * 设置模型（对应后端的 set_model 类型）
  */
-export function setChatModel(
-	provider: string,
-	modelId: string,
-	thinkingLevel?: string,
-): boolean {
-	console.log("[ChatWebSocket] setModel called:", {
-		provider,
-		modelId,
-		thinkingLevel,
-	});
-	return websocketService.send("set_model", {
-		provider,
-		modelId,
-		thinkingLevel,
-	});
+export function setChatModel(provider: string, modelId: string, thinkingLevel?: string): boolean {
+  console.log("[ChatWebSocket] setModel called:", {
+    provider,
+    modelId,
+    thinkingLevel,
+  });
+  return websocketService.send("set_model", {
+    provider,
+    modelId,
+    thinkingLevel,
+  });
 }
 
 /**
  * 发送思考级别变更
  */
 export function setChatThinkingLevel(level: string): boolean {
-	return websocketService.send("thinking_level_change", { level });
+  return websocketService.send("thinking_level_change", { level });
 }
 
 /**
  * 创建新 session
  */
 export function createNewChatSession(): boolean {
-	return websocketService.send("new_session", {});
+  return websocketService.send("new_session", {});
 }
 
 /**
  * 发送切换目录请求
  */
 export function changeChatDirectory(path: string): boolean {
-	console.log(
-		`[changeChatDirectory] Sending change_dir request: path="${path}"`,
-	);
-	const sent = websocketService.send("change_dir", { path });
-	console.log(`[changeChatDirectory] WebSocket send result: ${sent}`);
-	return sent;
+  console.log(`[changeChatDirectory] Sending change_dir request: path="${path}"`);
+  const sent = websocketService.send("change_dir", { path });
+  console.log(`[changeChatDirectory] WebSocket send result: ${sent}`);
+  return sent;
 }

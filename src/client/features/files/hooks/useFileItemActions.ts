@@ -13,314 +13,303 @@ import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 
 interface PinchState {
-	startDistance: number;
-	isPinching: boolean;
+  startDistance: number;
+  isPinching: boolean;
 }
 
 export interface UseFileItemActionsResult {
-	// 状态
-	isMultiSelectMode: boolean;
-	selectedItems: string[];
-	draggingItem: string | null;
-	dropTarget: string | null;
-	showPinchHint: boolean;
+  // 状态
+  isMultiSelectMode: boolean;
+  selectedItems: string[];
+  draggingItem: string | null;
+  dropTarget: string | null;
+  showPinchHint: boolean;
 
-	// 文件项事件处理器（直接绑定到 FileItem）
-	getItemHandlers: (item: FileItem) => {
-		onTap: () => void;
-		onDoubleTap: () => void;
-		onLongPress: () => void;
-		onDragStart: (e: React.DragEvent) => void;
-		onDragOver: (e: React.DragEvent) => void;
-		onDragLeave: () => void;
-		onDrop: (e: React.DragEvent) => void;
-		onDragEnd: () => void;
-		onToggleSelect: () => void;
-	};
+  // 文件项事件处理器（直接绑定到 FileItem）
+  getItemHandlers: (item: FileItem) => {
+    onTap: () => void;
+    onDoubleTap: () => void;
+    onLongPress: () => void;
+    onDragStart: (e: React.DragEvent) => void;
+    onDragOver: (e: React.DragEvent) => void;
+    onDragLeave: () => void;
+    onDrop: (e: React.DragEvent) => void;
+    onDragEnd: () => void;
+    onToggleSelect: () => void;
+  };
 
-	// 容器手势处理器（绑定到 grid/list 容器）
-	getContainerHandlers: () => {
-		onTouchStart: (e: React.TouchEvent) => void;
-		onTouchMove: (e: React.TouchEvent) => void;
-		onTouchEnd: () => void;
-	};
+  // 容器手势处理器（绑定到 grid/list 容器）
+  getContainerHandlers: () => {
+    onTouchStart: (e: React.TouchEvent) => void;
+    onTouchMove: (e: React.TouchEvent) => void;
+    onTouchEnd: () => void;
+  };
 
-	// 选择操作
-	toggleSelection: (path: string) => void;
-	isSelected: (path: string) => boolean;
+  // 选择操作
+  toggleSelection: (path: string) => void;
+  isSelected: (path: string) => boolean;
 
-	// Git 模式
-	isGitModeActive: boolean;
+  // Git 模式
+  isGitModeActive: boolean;
 }
 
 export function useFileItemActions(): UseFileItemActionsResult {
-	const {
-		selectedItems,
-		isMultiSelectMode,
-		isGitModeActive,
-		isTodoModeActive,
-		setGitHistoryFile,
-		setTodoInputFile,
-		setWorkingDir,
-		setSelectedActionFile,
-		toggleSelection: storeToggleSelection,
-		setIsMultiSelectMode,
-		setDraggedItem,
-		setIsDragging,
-		isSelected: storeIsSelected,
-	} = useFileStore();
+  const {
+    selectedItems,
+    isMultiSelectMode,
+    isGitModeActive,
+    isTodoModeActive,
+    setGitHistoryFile,
+    setTodoInputFile,
+    setWorkingDir,
+    setSelectedActionFile,
+    toggleSelection: storeToggleSelection,
+    setIsMultiSelectMode,
+    setDraggedItem,
+    setIsDragging,
+    isSelected: storeIsSelected,
+  } = useFileStore();
 
-	const { openViewer } = useFileViewerStore();
+  const { openViewer } = useFileViewerStore();
 
-	// 本地状态
-	const [dropTarget, setDropTarget] = useState<string | null>(null);
-	const [draggingItem, setDraggingItem] = useState<string | null>(null);
-	const [showPinchHint, setShowPinchHint] = useState(false);
+  // 本地状态
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
+  const [draggingItem, setDraggingItem] = useState<string | null>(null);
+  const [showPinchHint, setShowPinchHint] = useState(false);
 
-	// Pinch 手势状态
-	const pinchState = useRef<PinchState | null>(null);
-	const pinchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Pinch 手势状态
+  const pinchState = useRef<PinchState | null>(null);
+  const pinchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-	// ===== 文件项操作 =====
+  // ===== 文件项操作 =====
 
-	const handleTap = useCallback(
-		(item: FileItem) => {
-			console.log("[useFileItemActions] handleTap:", item.name);
-			try {
-				if (isMultiSelectMode) {
-					storeToggleSelection(item.path);
-					return;
-				}
+  const handleTap = useCallback(
+    (item: FileItem) => {
+      console.log("[useFileItemActions] handleTap:", item.name);
+      try {
+        if (isMultiSelectMode) {
+          storeToggleSelection(item.path);
+          return;
+        }
 
-				// Git 模式下，点击文件触发 Git 历史弹窗
-				if (isGitModeActive && !item.isDirectory) {
-					console.log(
-						"[useFileItemActions] Git mode - selecting file:",
-						item.path,
-					);
-					setGitHistoryFile({ path: item.path, name: item.name });
-					return;
-				}
+        // Git 模式下，点击文件触发 Git 历史弹窗
+        if (isGitModeActive && !item.isDirectory) {
+          console.log("[useFileItemActions] Git mode - selecting file:", item.path);
+          setGitHistoryFile({ path: item.path, name: item.name });
+          return;
+        }
 
-				// Todo 模式下，点击文件弹出 Todo 输入框
-				if (isTodoModeActive && !item.isDirectory) {
-					console.log(
-						"[useFileItemActions] Todo mode - selecting file:",
-						item.path,
-					);
-					setTodoInputFile({ path: item.path, name: item.name });
-					return;
-				}
+        // Todo 模式下，点击文件弹出 Todo 输入框
+        if (isTodoModeActive && !item.isDirectory) {
+          console.log("[useFileItemActions] Todo mode - selecting file:", item.path);
+          setTodoInputFile({ path: item.path, name: item.name });
+          return;
+        }
 
-				if (item.isDirectory) {
-					console.log("[useFileItemActions] Navigating to:", item.path);
-					setWorkingDir(item.path);
-				} else {
-					console.log("[useFileItemActions] Opening viewer:", item.path);
-					openViewer(item.path, item.name, "view");
-				}
-			} catch (err) {
-				console.error("[useFileItemActions] handleTap error:", err);
-			}
-		},
-		[
-			isMultiSelectMode,
-			isGitModeActive,
-			isTodoModeActive,
-			storeToggleSelection,
-			setWorkingDir,
-			openViewer,
-			setGitHistoryFile,
-			setTodoInputFile,
-		],
-	);
+        if (item.isDirectory) {
+          console.log("[useFileItemActions] Navigating to:", item.path);
+          setWorkingDir(item.path);
+        } else {
+          console.log("[useFileItemActions] Opening viewer:", item.path);
+          openViewer(item.path, item.name, "view");
+        }
+      } catch (err) {
+        console.error("[useFileItemActions] handleTap error:", err);
+      }
+    },
+    [
+      isMultiSelectMode,
+      isGitModeActive,
+      isTodoModeActive,
+      storeToggleSelection,
+      setWorkingDir,
+      openViewer,
+      setGitHistoryFile,
+      setTodoInputFile,
+    ]
+  );
 
-	const handleDoubleTap = useCallback(
-		(item: FileItem) => {
-			if (isMultiSelectMode) return;
-			if (item.isDirectory) {
-				setWorkingDir(item.path);
-			}
-		},
-		[isMultiSelectMode, setWorkingDir],
-	);
+  const handleDoubleTap = useCallback(
+    (item: FileItem) => {
+      if (isMultiSelectMode) return;
+      if (item.isDirectory) {
+        setWorkingDir(item.path);
+      }
+    },
+    [isMultiSelectMode, setWorkingDir]
+  );
 
-	const handleLongPress = useCallback(
-		(item: FileItem) => {
-			if (!isMultiSelectMode) {
-				setIsMultiSelectMode(true);
-			}
-			storeToggleSelection(item.path);
-		},
-		[isMultiSelectMode, setIsMultiSelectMode, storeToggleSelection],
-	);
+  const handleLongPress = useCallback(
+    (item: FileItem) => {
+      if (!isMultiSelectMode) {
+        setIsMultiSelectMode(true);
+      }
+      storeToggleSelection(item.path);
+    },
+    [isMultiSelectMode, setIsMultiSelectMode, storeToggleSelection]
+  );
 
-	const handleSelectForAction = useCallback(
-		(item: FileItem) => {
-			setSelectedActionFile(item.path, item.name);
-		},
-		[setSelectedActionFile],
-	);
+  const handleSelectForAction = useCallback(
+    (item: FileItem) => {
+      setSelectedActionFile(item.path, item.name);
+    },
+    [setSelectedActionFile]
+  );
 
-	// ===== 拖拽操作 =====
+  // ===== 拖拽操作 =====
 
-	const handleDragStart = useCallback(
-		(item: FileItem) => (e: React.DragEvent) => {
-			setDraggedItem(item);
-			setIsDragging(true);
-			setDraggingItem(item.path);
-			e.dataTransfer.effectAllowed = "move";
-			e.dataTransfer.setData("text/plain", item.path);
-		},
-		[setDraggedItem, setIsDragging],
-	);
+  const handleDragStart = useCallback(
+    (item: FileItem) => (e: React.DragEvent) => {
+      setDraggedItem(item);
+      setIsDragging(true);
+      setDraggingItem(item.path);
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", item.path);
+    },
+    [setDraggedItem, setIsDragging]
+  );
 
-	const handleDragOver = useCallback(
-		(item: FileItem) => (e: React.DragEvent) => {
-			if (!item.isDirectory) return;
-			e.preventDefault();
-			e.dataTransfer.dropEffect = "move";
-			setDropTarget(item.path);
-		},
-		[],
-	);
+  const handleDragOver = useCallback(
+    (item: FileItem) => (e: React.DragEvent) => {
+      if (!item.isDirectory) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      setDropTarget(item.path);
+    },
+    []
+  );
 
-	const handleDragLeave = useCallback(() => {
-		setDropTarget(null);
-	}, []);
+  const handleDragLeave = useCallback(() => {
+    setDropTarget(null);
+  }, []);
 
-	const handleDrop = useCallback(
-		(targetItem: FileItem) => async (e: React.DragEvent) => {
-			e.preventDefault();
-			if (!targetItem.isDirectory) return;
+  const handleDrop = useCallback(
+    (targetItem: FileItem) => async (e: React.DragEvent) => {
+      e.preventDefault();
+      if (!targetItem.isDirectory) return;
 
-			setDropTarget(null);
-			setDraggingItem(null);
+      setDropTarget(null);
+      setDraggingItem(null);
 
-			try {
-				await batchMoveFiles(selectedItems, targetItem.path);
-			} catch (error) {
-				console.error("Move failed:", error);
-			}
-		},
-		[selectedItems],
-	);
+      try {
+        await batchMoveFiles(selectedItems, targetItem.path);
+      } catch (error) {
+        console.error("Move failed:", error);
+      }
+    },
+    [selectedItems]
+  );
 
-	const handleDragEnd = useCallback(() => {
-		setDraggedItem(null);
-		setIsDragging(false);
-		setDraggingItem(null);
-		setDropTarget(null);
-	}, [setDraggedItem, setIsDragging]);
+  const handleDragEnd = useCallback(() => {
+    setDraggedItem(null);
+    setIsDragging(false);
+    setDraggingItem(null);
+    setDropTarget(null);
+  }, [setDraggedItem, setIsDragging]);
 
-	// ===== 手势操作 =====
+  // ===== 手势操作 =====
 
-	const handleTouchStart = useCallback((e: React.TouchEvent) => {
-		if (e.touches.length === 2) {
-			const t1 = e.touches[0];
-			const t2 = e.touches[1];
-			const distance = Math.sqrt(
-				(t2.clientX - t1.clientX) ** 2 + (t2.clientY - t1.clientY) ** 2,
-			);
-			pinchState.current = {
-				startDistance: distance,
-				isPinching: true,
-			};
-		}
-	}, []);
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const distance = Math.sqrt((t2.clientX - t1.clientX) ** 2 + (t2.clientY - t1.clientY) ** 2);
+      pinchState.current = {
+        startDistance: distance,
+        isPinching: true,
+      };
+    }
+  }, []);
 
-	const handleTouchMove = useCallback(
-		(e: React.TouchEvent) => {
-			if (!pinchState.current?.isPinching || e.touches.length !== 2) return;
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!pinchState.current?.isPinching || e.touches.length !== 2) return;
 
-			const t1 = e.touches[0];
-			const t2 = e.touches[1];
-			const currentDistance = Math.sqrt(
-				(t2.clientX - t1.clientX) ** 2 + (t2.clientY - t1.clientY) ** 2,
-			);
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const currentDistance = Math.sqrt(
+        (t2.clientX - t1.clientX) ** 2 + (t2.clientY - t1.clientY) ** 2
+      );
 
-			const scale = currentDistance / pinchState.current.startDistance;
+      const scale = currentDistance / pinchState.current.startDistance;
 
-			// Pinch in (scale < 0.7) triggers multi-select
-			if (scale < 0.7 && !isMultiSelectMode) {
-				setIsMultiSelectMode(true);
-				setShowPinchHint(true);
+      // Pinch in (scale < 0.7) triggers multi-select
+      if (scale < 0.7 && !isMultiSelectMode) {
+        setIsMultiSelectMode(true);
+        setShowPinchHint(true);
 
-				if (pinchTimeoutRef.current) {
-					clearTimeout(pinchTimeoutRef.current);
-				}
-				pinchTimeoutRef.current = setTimeout(() => {
-					setShowPinchHint(false);
-				}, 2000);
-			}
-		},
-		[isMultiSelectMode, setIsMultiSelectMode],
-	);
+        if (pinchTimeoutRef.current) {
+          clearTimeout(pinchTimeoutRef.current);
+        }
+        pinchTimeoutRef.current = setTimeout(() => {
+          setShowPinchHint(false);
+        }, 2000);
+      }
+    },
+    [isMultiSelectMode, setIsMultiSelectMode]
+  );
 
-	const handleTouchEnd = useCallback(() => {
-		pinchState.current = null;
-	}, []);
+  const handleTouchEnd = useCallback(() => {
+    pinchState.current = null;
+  }, []);
 
-	// ===== 选择操作 =====
+  // ===== 选择操作 =====
 
-	const toggleSelection = useCallback(
-		(path: string) => {
-			storeToggleSelection(path);
-		},
-		[storeToggleSelection],
-	);
+  const toggleSelection = useCallback(
+    (path: string) => {
+      storeToggleSelection(path);
+    },
+    [storeToggleSelection]
+  );
 
-	const isSelected = useCallback(
-		(path: string) => storeIsSelected(path),
-		[storeIsSelected],
-	);
+  const isSelected = useCallback((path: string) => storeIsSelected(path), [storeIsSelected]);
 
-	// ===== 返回绑定的处理器 =====
+  // ===== 返回绑定的处理器 =====
 
-	const getItemHandlers = useCallback(
-		(item: FileItem) => ({
-			onTap: () => handleTap(item),
-			onDoubleTap: () => handleDoubleTap(item),
-			onLongPress: () => handleLongPress(item),
-			onDragStart: handleDragStart(item),
-			onDragOver: handleDragOver(item),
-			onDragLeave: handleDragLeave,
-			onDrop: handleDrop(item),
-			onDragEnd: handleDragEnd,
-			onToggleSelect: () => toggleSelection(item.path),
-		}),
-		[
-			handleTap,
-			handleDoubleTap,
-			handleLongPress,
-			handleDragStart,
-			handleDragOver,
-			handleDragLeave,
-			handleDrop,
-			handleDragEnd,
-			toggleSelection,
-		],
-	);
+  const getItemHandlers = useCallback(
+    (item: FileItem) => ({
+      onTap: () => handleTap(item),
+      onDoubleTap: () => handleDoubleTap(item),
+      onLongPress: () => handleLongPress(item),
+      onDragStart: handleDragStart(item),
+      onDragOver: handleDragOver(item),
+      onDragLeave: handleDragLeave,
+      onDrop: handleDrop(item),
+      onDragEnd: handleDragEnd,
+      onToggleSelect: () => toggleSelection(item.path),
+    }),
+    [
+      handleTap,
+      handleDoubleTap,
+      handleLongPress,
+      handleDragStart,
+      handleDragOver,
+      handleDragLeave,
+      handleDrop,
+      handleDragEnd,
+      toggleSelection,
+    ]
+  );
 
-	const getContainerHandlers = useCallback(
-		() => ({
-			onTouchStart: handleTouchStart,
-			onTouchMove: handleTouchMove,
-			onTouchEnd: handleTouchEnd,
-		}),
-		[handleTouchStart, handleTouchMove, handleTouchEnd],
-	);
+  const getContainerHandlers = useCallback(
+    () => ({
+      onTouchStart: handleTouchStart,
+      onTouchMove: handleTouchMove,
+      onTouchEnd: handleTouchEnd,
+    }),
+    [handleTouchStart, handleTouchMove, handleTouchEnd]
+  );
 
-	return {
-		isMultiSelectMode,
-		selectedItems,
-		draggingItem,
-		dropTarget,
-		showPinchHint,
-		getItemHandlers,
-		getContainerHandlers,
-		toggleSelection,
-		isSelected,
-		isGitModeActive,
-	};
+  return {
+    isMultiSelectMode,
+    selectedItems,
+    draggingItem,
+    dropTarget,
+    showPinchHint,
+    getItemHandlers,
+    getContainerHandlers,
+    toggleSelection,
+    isSelected,
+    isGitModeActive,
+  };
 }

@@ -28,31 +28,31 @@ import { websocketService } from "@/services/websocket.service";
 // ============================================================================
 
 export interface UseChatReturn {
-	// State
-	messages: Message[];
-	currentStreamingMessage: Message | null;
-	inputText: string;
-	isStreaming: boolean;
-	showThinking: boolean;
-	activeTools: Map<string, ToolExecution>;
+  // State
+  messages: Message[];
+  currentStreamingMessage: Message | null;
+  inputText: string;
+  isStreaming: boolean;
+  showThinking: boolean;
+  activeTools: Map<string, ToolExecution>;
 
-	// Actions
-	setInputText: (text: string) => void;
-	sendMessage: () => void;
-	abortGeneration: () => void;
-	clearMessages: () => void;
-	toggleMessageCollapse: (messageId: string) => void;
-	toggleThinkingCollapse: (messageId: string) => void;
-	setShowThinking: (show: boolean) => void;
+  // Actions
+  setInputText: (text: string) => void;
+  sendMessage: () => void;
+  abortGeneration: () => void;
+  clearMessages: () => void;
+  toggleMessageCollapse: (messageId: string) => void;
+  toggleThinkingCollapse: (messageId: string) => void;
+  setShowThinking: (show: boolean) => void;
 
-	// Tool actions
-	getToolStatus: (toolId: string) => ToolExecution | undefined;
-	expandToolOutput: (toolId: string) => void;
-	collapseToolOutput: (toolId: string) => void;
+  // Tool actions
+  getToolStatus: (toolId: string) => ToolExecution | undefined;
+  expandToolOutput: (toolId: string) => void;
+  collapseToolOutput: (toolId: string) => void;
 
-	// Utils
-	isBashCommand: (text: string) => boolean;
-	getSlashCommand: (text: string) => string | null;
+  // Utils
+  isBashCommand: (text: string) => boolean;
+  getSlashCommand: (text: string) => string | null;
 }
 
 // ============================================================================
@@ -60,7 +60,7 @@ export interface UseChatReturn {
 // ============================================================================
 
 function generateMessageId(): string {
-	return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 // ============================================================================
@@ -68,160 +68,160 @@ function generateMessageId(): string {
 // ============================================================================
 
 export function useChat(): UseChatReturn {
-	const store = useChatStore();
+  const store = useChatStore();
 
-	// Check if text is a bash command
-	const isBashCommand = useCallback((text: string): boolean => {
-		return text.trimStart().startsWith("!");
-	}, []);
+  // Check if text is a bash command
+  const isBashCommand = useCallback((text: string): boolean => {
+    return text.trimStart().startsWith("!");
+  }, []);
 
-	// Get slash command from text
-	const getSlashCommand = useCallback((text: string): string | null => {
-		const trimmed = text.trimStart();
-		if (trimmed.startsWith("/")) {
-			const match = trimmed.match(/^\/(\w+)/);
-			return match ? match[1] : null;
-		}
-		return null;
-	}, []);
+  // Get slash command from text
+  const getSlashCommand = useCallback((text: string): string | null => {
+    const trimmed = text.trimStart();
+    if (trimmed.startsWith("/")) {
+      const match = trimmed.match(/^\/(\w+)/);
+      return match ? match[1] : null;
+    }
+    return null;
+  }, []);
 
-	// Process input for bash/slash commands
-	const processInput = useCallback(
-		(text: string): { processed: string; isBash: boolean } => {
-			const trimmed = text.trim();
+  // Process input for bash/slash commands
+  const processInput = useCallback(
+    (text: string): { processed: string; isBash: boolean } => {
+      const trimmed = text.trim();
 
-			if (isBashCommand(trimmed)) {
-				return {
-					processed: trimmed.slice(1).trim(),
-					isBash: true,
-				};
-			}
+      if (isBashCommand(trimmed)) {
+        return {
+          processed: trimmed.slice(1).trim(),
+          isBash: true,
+        };
+      }
 
-			return { processed: trimmed, isBash: false };
-		},
-		[isBashCommand],
-	);
+      return { processed: trimmed, isBash: false };
+    },
+    [isBashCommand]
+  );
 
-	// Send message
-	const sendMessage = useCallback(() => {
-		const text = store.inputText;
-		if (!text.trim()) return;
+  // Send message
+  const sendMessage = useCallback(() => {
+    const text = store.inputText;
+    if (!text.trim()) return;
 
-		const { processed, isBash } = processInput(text);
+    const { processed, isBash } = processInput(text);
 
-		// Create user message
-		const userMessage: Message = {
-			id: generateMessageId(),
-			role: "user",
-			content: [{ type: "text", text: processed }],
-			timestamp: new Date(),
-		};
+    // Create user message
+    const userMessage: Message = {
+      id: generateMessageId(),
+      role: "user",
+      content: [{ type: "text", text: processed }],
+      timestamp: new Date(),
+    };
 
-		// Add user message to store
-		store.addMessage(userMessage);
-		store.clearInput();
-		store.startStreaming();
+    // Add user message to store
+    store.addMessage(userMessage);
+    store.clearInput();
+    store.startStreaming();
 
-		// Send via WebSocket
-		if (isBash) {
-			websocketService.send("prompt", {
-				text: `Execute this bash command: ${processed}`,
-			});
-		} else {
-			websocketService.send("prompt", { text: processed });
-		}
-	}, [store, processInput]);
+    // Send via WebSocket
+    if (isBash) {
+      websocketService.send("prompt", {
+        text: `Execute this bash command: ${processed}`,
+      });
+    } else {
+      websocketService.send("prompt", { text: processed });
+    }
+  }, [store, processInput]);
 
-	// Abort generation
-	const abortGeneration = useCallback(() => {
-		websocketService.send("abort", {});
-		store.abortStreaming();
-	}, [store]);
+  // Abort generation
+  const abortGeneration = useCallback(() => {
+    websocketService.send("abort", {});
+    store.abortStreaming();
+  }, [store]);
 
-	// Clear all messages
-	const clearMessages = useCallback(() => {
-		store.clearMessages();
-	}, [store]);
+  // Clear all messages
+  const clearMessages = useCallback(() => {
+    store.clearMessages();
+  }, [store]);
 
-	// Toggle message collapse
-	const toggleMessageCollapse = useCallback(
-		(messageId: string) => {
-			store.toggleMessageCollapse(messageId);
-		},
-		[store],
-	);
+  // Toggle message collapse
+  const toggleMessageCollapse = useCallback(
+    (messageId: string) => {
+      store.toggleMessageCollapse(messageId);
+    },
+    [store]
+  );
 
-	// Toggle thinking collapse
-	const toggleThinkingCollapse = useCallback(
-		(messageId: string) => {
-			store.toggleThinkingCollapse(messageId);
-		},
-		[store],
-	);
+  // Toggle thinking collapse
+  const toggleThinkingCollapse = useCallback(
+    (messageId: string) => {
+      store.toggleThinkingCollapse(messageId);
+    },
+    [store]
+  );
 
-	// Set show thinking
-	const setShowThinking = useCallback(
-		(show: boolean) => {
-			store.setShowThinking(show);
-		},
-		[store],
-	);
+  // Set show thinking
+  const setShowThinking = useCallback(
+    (show: boolean) => {
+      store.setShowThinking(show);
+    },
+    [store]
+  );
 
-	// Set input text
-	const setInputText = useCallback(
-		(text: string) => {
-			store.setInputText(text);
-		},
-		[store],
-	);
+  // Set input text
+  const setInputText = useCallback(
+    (text: string) => {
+      store.setInputText(text);
+    },
+    [store]
+  );
 
-	// Get tool status
-	const getToolStatus = useCallback(
-		(toolId: string): ToolExecution | undefined => {
-			return store.activeTools.get(toolId);
-		},
-		[store.activeTools],
-	);
+  // Get tool status
+  const getToolStatus = useCallback(
+    (toolId: string): ToolExecution | undefined => {
+      return store.activeTools.get(toolId);
+    },
+    [store.activeTools]
+  );
 
-	// Expand tool output
-	const expandToolOutput = useCallback((toolId: string) => {
-		// 工具展开状态在组件本地管理
-		console.log("[useChat] expand tool:", toolId);
-	}, []);
+  // Expand tool output
+  const expandToolOutput = useCallback((toolId: string) => {
+    // 工具展开状态在组件本地管理
+    console.log("[useChat] expand tool:", toolId);
+  }, []);
 
-	// Collapse tool output
-	const collapseToolOutput = useCallback((toolId: string) => {
-		// 工具折叠状态在组件本地管理
-		console.log("[useChat] collapse tool:", toolId);
-	}, []);
+  // Collapse tool output
+  const collapseToolOutput = useCallback((toolId: string) => {
+    // 工具折叠状态在组件本地管理
+    console.log("[useChat] collapse tool:", toolId);
+  }, []);
 
-	return {
-		// State
-		messages: store.messages,
-		currentStreamingMessage: store.currentStreamingMessage,
-		inputText: store.inputText,
-		isStreaming: store.isStreaming,
-		showThinking: store.showThinking,
-		activeTools: store.activeTools,
+  return {
+    // State
+    messages: store.messages,
+    currentStreamingMessage: store.currentStreamingMessage,
+    inputText: store.inputText,
+    isStreaming: store.isStreaming,
+    showThinking: store.showThinking,
+    activeTools: store.activeTools,
 
-		// Actions
-		setInputText,
-		sendMessage,
-		abortGeneration,
-		clearMessages,
-		toggleMessageCollapse,
-		toggleThinkingCollapse,
-		setShowThinking,
+    // Actions
+    setInputText,
+    sendMessage,
+    abortGeneration,
+    clearMessages,
+    toggleMessageCollapse,
+    toggleThinkingCollapse,
+    setShowThinking,
 
-		// Tool actions
-		getToolStatus,
-		expandToolOutput,
-		collapseToolOutput,
+    // Tool actions
+    getToolStatus,
+    expandToolOutput,
+    collapseToolOutput,
 
-		// Utils
-		isBashCommand,
-		getSlashCommand,
-	};
+    // Utils
+    isBashCommand,
+    getSlashCommand,
+  };
 }
 
 // ============================================================================

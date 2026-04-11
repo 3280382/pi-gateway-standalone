@@ -14,60 +14,55 @@ import { FileItem } from "./FileItem";
 import styles from "./FileList.module.css";
 
 interface FileListProps {
-	items: FileItemType[];
+  items: FileItemType[];
 }
 
 export const FileList = memo<FileListProps>(({ items }) => {
-	// ========== 1. State ==========
-	const {
-		selectedItems,
-		isMultiSelectMode,
-		draggingItem,
-		dropTarget,
-		getItemHandlers,
-	} = useFileItemActions();
+  // ========== 1. State ==========
+  const { selectedItems, isMultiSelectMode, draggingItem, dropTarget, getItemHandlers } =
+    useFileItemActions();
 
-	// ========== 2. Ref ==========
-	// 无直接DOM引用
+  // ========== 2. Ref ==========
+  // 无直接DOM引用
 
-	// ========== 3. Effects ==========
-	// 无外部副作用
+  // ========== 3. Effects ==========
+  // 无外部副作用
 
-	// ========== 4. Computed ==========
-	// 简单条件渲染，无需useMemo
+  // ========== 4. Computed ==========
+  // 简单条件渲染，无需useMemo
 
-	// ========== 5. Actions ==========
-	// 通过 useFileItemActions 获取
+  // ========== 5. Actions ==========
+  // 通过 useFileItemActions 获取
 
-	// ========== 6. Render ==========
-	if (items.length === 0) return null;
+  // ========== 6. Render ==========
+  if (items.length === 0) return null;
 
-	return (
-		<div className={styles.list}>
-			<div className={styles.listHeader}>
-				{isMultiSelectMode && <span className={styles.headerCheckbox} />}
-				<span className={styles.headerIcon}>Icon</span>
-				<span className={styles.headerName}>Name</span>
-				<span className={styles.headerSize}>Size</span>
-				<span className={styles.headerModified}>Modified</span>
-			</div>
-			{items.map((item) => {
-				const handlers = getItemHandlers(item);
-				return (
-					<FileItem
-						key={item.path}
-						item={item}
-						isSelected={selectedItems.includes(item.path)}
-						isMultiSelectMode={isMultiSelectMode}
-						isDropTarget={dropTarget === item.path}
-						isDragging={draggingItem === item.path}
-						{...handlers}
-						viewMode="list"
-					/>
-				);
-			})}
-		</div>
-	);
+  return (
+    <div className={styles.list}>
+      <div className={styles.listHeader}>
+        {isMultiSelectMode && <span className={styles.headerCheckbox} />}
+        <span className={styles.headerIcon}>Icon</span>
+        <span className={styles.headerName}>Name</span>
+        <span className={styles.headerSize}>Size</span>
+        <span className={styles.headerModified}>Modified</span>
+      </div>
+      {items.map((item) => {
+        const handlers = getItemHandlers(item);
+        return (
+          <FileItem
+            key={item.path}
+            item={item}
+            isSelected={selectedItems.includes(item.path)}
+            isMultiSelectMode={isMultiSelectMode}
+            isDropTarget={dropTarget === item.path}
+            isDragging={draggingItem === item.path}
+            {...handlers}
+            viewMode="list"
+          />
+        );
+      })}
+    </div>
+  );
 });
 
 FileList.displayName = "FileList";

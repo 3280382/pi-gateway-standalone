@@ -26,70 +26,64 @@ const FilesPage = React.lazy(() => import("@/features/files/page"));
  * - 通过 display 控制显示隐藏
  * - 避免未激活页面提前加载资源
  */
-function KeepAlive({
-	active,
-	children,
-}: {
-	active: boolean;
-	children: React.ReactNode;
-}) {
-	const mountedRef = useRef(false);
+function KeepAlive({ active, children }: { active: boolean; children: React.ReactNode }) {
+  const mountedRef = useRef(false);
 
-	// 首次激活时标记
-	if (active) {
-		mountedRef.current = true;
-	}
+  // 首次激活时标记
+  if (active) {
+    mountedRef.current = true;
+  }
 
-	// 未激活过，不渲染（避免提前加载）
-	if (!mountedRef.current) return null;
+  // 未激活过，不渲染（避免提前加载）
+  if (!mountedRef.current) return null;
 
-	return (
-		<div
-			style={{
-				display: active ? "flex" : "none",
-				height: "100%",
-				width: "100%",
-			}}
-		>
-			{children}
-		</div>
-	);
+  return (
+    <div
+      style={{
+        display: active ? "flex" : "none",
+        height: "100%",
+        width: "100%",
+      }}
+    >
+      {children}
+    </div>
+  );
 }
 
 // ===== [ANCHOR:APP_CONTENT_COMPONENT] =====
 
 function AppContent() {
-	const { currentView } = useAppStore();
+  const { currentView } = useAppStore();
 
-	return (
-		<div className={styles.app}>
-			<main className={styles.pageContainer}>
-				{/* Chat */}
-				<KeepAlive active={currentView === "chat"}>
-					<Suspense fallback={<LoadingScreen />}>
-						<ChatPage />
-					</Suspense>
-				</KeepAlive>
+  return (
+    <div className={styles.app}>
+      <main className={styles.pageContainer}>
+        {/* Chat */}
+        <KeepAlive active={currentView === "chat"}>
+          <Suspense fallback={<LoadingScreen />}>
+            <ChatPage />
+          </Suspense>
+        </KeepAlive>
 
-				{/* Files */}
-				<KeepAlive active={currentView === "files"}>
-					<Suspense fallback={<LoadingScreen />}>
-						<FilesPage />
-					</Suspense>
-				</KeepAlive>
-			</main>
+        {/* Files */}
+        <KeepAlive active={currentView === "files"}>
+          <Suspense fallback={<LoadingScreen />}>
+            <FilesPage />
+          </Suspense>
+        </KeepAlive>
+      </main>
 
-			<Footer />
-		</div>
-	);
+      <Footer />
+    </div>
+  );
 }
 
 // ===== [ANCHOR:EXPORTS] =====
 
 export default function App() {
-	return (
-		<ErrorBoundary>
-			<AppContent />
-		</ErrorBoundary>
-	);
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
+  );
 }

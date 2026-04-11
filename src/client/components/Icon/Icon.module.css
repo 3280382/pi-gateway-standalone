@@ -4,111 +4,111 @@
 
 /* 基础图标 */
 .icon {
-	display: inline-block;
-	flex-shrink: 0;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 /* 按钮基础 */
 .button {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	padding: 6px 12px;
-	background: transparent;
-	border: none;
-	border-radius: var(--radius-md, 6px);
-	color: var(--text-secondary);
-	font-size: 14px;
-	cursor: pointer;
-	transition:
-		background-color 0.2s ease,
-		color 0.2s ease,
-		opacity 0.2s ease;
-	user-select: none;
-	outline: none;
-	position: relative;
-	overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md, 6px);
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
+  user-select: none;
+  outline: none;
+  position: relative;
+  overflow: hidden;
 }
 
 .button:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .button:focus {
-	outline: none;
-	box-shadow: 0 0 0 2px var(--accent-bg-blue);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-bg-blue);
 }
 
 .button:active {
-	transform: translateY(1px);
+  transform: translateY(1px);
 }
 
 /* 纯图标按钮 */
 .iconOnly {
-	padding: 6px;
+  padding: 6px;
 }
 
 /* 文字样式 */
 .label {
-	white-space: nowrap;
+  white-space: nowrap;
 }
 
 /* 后缀内容 */
 .suffix {
-	margin-left: auto;
-	display: flex;
-	align-items: center;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
 }
 
 /* ========== 变体 ========== */
 
 /* default */
 .default:hover:not(:disabled) {
-	background: var(--bg-hover);
-	color: var(--text-primary);
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 /* primary */
 .primary {
-	background: var(--accent-primary);
-	color: white;
+  background: var(--accent-primary);
+  color: white;
 }
 
 .primary:hover:not(:disabled) {
-	opacity: 0.9;
+  opacity: 0.9;
 }
 
 /* ghost */
 .ghost {
-	padding: 6px 10px;
+  padding: 6px 10px;
 }
 
 .ghost:hover:not(:disabled) {
-	background: var(--bg-hover);
-	color: var(--text-primary);
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 /* danger */
 .danger {
-	color: var(--accent-red);
+  color: var(--accent-red);
 }
 
 .danger:hover:not(:disabled) {
-	background: rgba(248, 81, 73, 0.1);
+  background: rgba(248, 81, 73, 0.1);
 }
 
 /* toggle */
 .toggle {
-	padding: 6px;
+  padding: 6px;
 }
 
 .toggle:hover:not(:disabled) {
-	background: var(--bg-hover);
+  background: var(--bg-hover);
 }
 
 .toggle.active {
-	color: var(--accent-primary);
-	background: var(--accent-bg-blue);
+  color: var(--accent-primary);
+  background: var(--accent-bg-blue);
 }

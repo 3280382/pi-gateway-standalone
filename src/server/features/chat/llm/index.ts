@@ -3,9 +3,9 @@
  */
 
 export {
-	setupGlobalFetchInterceptor,
-	setupHttpInterceptor,
-	setupLlmInterceptors,
+  setupGlobalFetchInterceptor,
+  setupHttpInterceptor,
+  setupLlmInterceptors,
 } from "./interceptor";
 export { LlmLogManager } from "./log-manager";
 export * from "./types";

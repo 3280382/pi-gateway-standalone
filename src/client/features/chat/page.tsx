@@ -16,102 +16,89 @@ import { useChatInit, useChatMessages } from "@/features/chat/hooks";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 
 export function ChatPage() {
-	// 总是在顶层调用 Hooks（React Hooks 规则）
-	const { isConnecting } = useChatInit();
-	useChatMessages();
+  // 总是在顶层调用 Hooks（React Hooks 规则）
+  const { isConnecting } = useChatInit();
+  useChatMessages();
 
-	// 从 sidebarStore 获取布局状态
-	const isSidebarVisible = useSidebarStore((state) => state.isVisible);
-	const isBottomPanelOpen = useSidebarStore(
-		(state) => state.isBottomPanelOpen ?? false,
-	);
-	const bottomPanelHeight = useSidebarStore(
-		(state) => state.bottomPanelHeight ?? 300,
-	);
-	const closeBottomPanel = useSidebarStore(
-		(state) => state.closeBottomPanel ?? (() => {}),
-	);
-	const setBottomPanelHeight = useSidebarStore(
-		(state) => state.setBottomPanelHeight ?? (() => {}),
-	);
+  // 从 sidebarStore 获取布局状态
+  const isSidebarVisible = useSidebarStore((state) => state.isVisible);
+  const isBottomPanelOpen = useSidebarStore((state) => state.isBottomPanelOpen ?? false);
+  const bottomPanelHeight = useSidebarStore((state) => state.bottomPanelHeight ?? 300);
+  const closeBottomPanel = useSidebarStore((state) => state.closeBottomPanel ?? (() => {}));
+  const setBottomPanelHeight = useSidebarStore((state) => state.setBottomPanelHeight ?? (() => {}));
 
-	// 渲染底部面板
-	const renderBottomPanel = useCallback(() => {
-		if (!isBottomPanelOpen) return null;
+  // 渲染底部面板
+  const renderBottomPanel = useCallback(() => {
+    if (!isBottomPanelOpen) return null;
 
-		return (
-			<LlmLogPanel
-				height={bottomPanelHeight}
-				onClose={closeBottomPanel}
-				onHeightChange={setBottomPanelHeight}
-			/>
-		);
-	}, [
-		isBottomPanelOpen,
-		bottomPanelHeight,
-		closeBottomPanel,
-		setBottomPanelHeight,
-	]);
+    return (
+      <LlmLogPanel
+        height={bottomPanelHeight}
+        onClose={closeBottomPanel}
+        onHeightChange={setBottomPanelHeight}
+      />
+    );
+  }, [isBottomPanelOpen, bottomPanelHeight, closeBottomPanel, setBottomPanelHeight]);
 
-	// 连接中状态
-	if (isConnecting) {
-		return (
-			<div
-				className={styles.loading}
-				style={{
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					flexDirection: "column",
-					gap: "16px",
-					height: "100%",
-				}}
-			>
-				<div
-					className={styles.spinner}
-					style={{
-						width: "40px",
-						height: "40px",
-						border: "3px solid var(--border-color)",
-						borderTopColor: "var(--accent-primary)",
-						borderRadius: "50%",
-						animation: "spin 1s linear infinite",
-					}}
-				/>
-				<p style={{ color: "var(--text-muted)" }}>连接中...</p>
-			</div>
-		);
-	}
+  // 连接中状态
+  if (isConnecting) {
+    return (
+      <div
+        className={styles.loading}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          gap: "16px",
+          height: "100%",
+        }}
+      >
+        <div
+          className={styles.spinner}
+          style={{
+            width: "40px",
+            height: "40px",
+            border: "3px solid var(--border-color)",
+            borderTopColor: "var(--accent-primary)",
+            borderRadius: "50%",
+            animation: "spin 1s linear infinite",
+          }}
+        />
+        <p style={{ color: "var(--text-muted)" }}>连接中...</p>
+      </div>
+    );
+  }
 
-	return (
-		<>
-			<div className={styles.layout}>
-				{/* Header */}
-				<header className={styles.header}>
-					<AppHeader />
-				</header>
+  return (
+    <>
+      <div className={styles.layout}>
+        {/* Header */}
+        <header className={styles.header}>
+          <AppHeader />
+        </header>
 
-				{/* Body */}
-				<div className={styles.body}>
-					{/* Sidebar - overlay 模式 */}
-					<aside
-						className={`${styles.sidebar} ${isSidebarVisible ? styles.sidebarVisible : styles.sidebarHidden}`}
-					>
-						<SidebarPanel currentView="chat" />
-					</aside>
+        {/* Body */}
+        <div className={styles.body}>
+          {/* Sidebar - overlay 模式 */}
+          <aside
+            className={`${styles.sidebar} ${isSidebarVisible ? styles.sidebarVisible : styles.sidebarHidden}`}
+          >
+            <SidebarPanel currentView="chat" />
+          </aside>
 
-					{/* Content */}
-					<main className={styles.content}>
-						<ChatPanel />
-						{renderBottomPanel()}
-					</main>
-				</div>
-			</div>
+          {/* Content */}
+          <main className={styles.content}>
+            <ChatPanel />
+            {renderBottomPanel()}
+          </main>
+        </div>
+      </div>
 
-			{/* Modals */}
-			<SystemPromptModal />
-		</>
-	);
+      {/* Modals */}
+      <SystemPromptModal />
+    </>
+  );
 }
 
 export default ChatPage;

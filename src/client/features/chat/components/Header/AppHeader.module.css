@@ -3,476 +3,476 @@
  */
 
 .topBar {
-	display: flex;
-	flex-direction: column;
-	background: #161b22;
-	border-bottom: 1px solid rgba(48, 54, 61, 0.5);
-	height: 76px;
-	min-height: 76px;
-	max-height: 76px;
-	flex: none;
-	box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: #161b22;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  height: 76px;
+  min-height: 76px;
+  max-height: 76px;
+  flex: none;
+  box-sizing: border-box;
 }
 
 /* Row 1: 工作目录、状态、PID */
 .topRow {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	padding: 4px 12px;
-	height: 38px;
-	min-height: 38px;
-	max-height: 38px;
-	box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 12px;
+  height: 38px;
+  min-height: 38px;
+  max-height: 38px;
+  box-sizing: border-box;
 }
 
 /* Row 2: 搜索、模型、思考级别 */
 .bottomRow {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	padding: 4px 12px;
-	height: 37px;
-	min-height: 37px;
-	max-height: 37px;
-	box-sizing: border-box;
-	border-top: 1px solid rgba(48, 54, 61, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 12px;
+  height: 37px;
+  min-height: 37px;
+  max-height: 37px;
+  box-sizing: border-box;
+  border-top: 1px solid rgba(48, 54, 61, 0.5);
 }
 
 .spacer {
-	flex: 1;
+  flex: 1;
 }
 
 /* 工作目录按钮 - 加宽样式 */
 .workingDirBtn {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 0 12px;
-	height: 28px;
-	min-width: 200px;
-	flex: 1;
-	max-width: 600px;
-	background: rgba(88, 166, 255, 0.1);
-	border: 1px solid rgba(88, 166, 255, 0.2);
-	border-radius: 6px;
-	color: #58a6ff;
-	font-size: 12px;
-	font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
-	cursor: pointer;
-	transition: all 0.15s ease;
-	box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: 28px;
+  min-width: 200px;
+  flex: 1;
+  max-width: 600px;
+  background: rgba(88, 166, 255, 0.1);
+  border: 1px solid rgba(88, 166, 255, 0.2);
+  border-radius: 6px;
+  color: #58a6ff;
+  font-size: 12px;
+  font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
 }
 
 .workingDirBtn:hover {
-	background: rgba(88, 166, 255, 0.15);
-	border-color: rgba(88, 166, 255, 0.3);
+  background: rgba(88, 166, 255, 0.15);
+  border-color: rgba(88, 166, 255, 0.3);
 }
 
 .workingDirBtn svg {
-	width: 14px;
-	height: 14px;
-	flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .btnText {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 状态指示器 */
 .status {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	padding: 0 8px;
-	height: 28px;
-	background: rgba(255, 255, 255, 0.05);
-	border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
 }
 
 .statusDot {
-	width: 8px;
-	height: 8px;
-	border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
 }
 
 .statusDot.connected {
-	background: #3fb950;
+  background: #3fb950;
 }
 
 .statusDot.disconnected {
-	background: #f85149;
+  background: #f85149;
 }
 
 .pid {
-	font-size: 11px;
-	color: #8b949e;
-	font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
+  font-size: 11px;
+  color: #8b949e;
+  font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
 }
 
 /* 搜索区域 */
 .searchWrapper {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	position: relative;
-	flex: 1;
-	max-width: 400px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  flex: 1;
+  max-width: 400px;
 }
 
 .searchWrapper > svg.searchIcon {
-	position: absolute;
-	left: 10px;
-	width: 14px;
-	height: 14px;
-	color: #6e7681;
-	pointer-events: none;
+  position: absolute;
+  left: 10px;
+  width: 14px;
+  height: 14px;
+  color: #6e7681;
+  pointer-events: none;
 }
 
 .searchInput {
-	flex: 1;
-	height: 28px;
-	padding: 0 56px 0 28px;
-	background: #0d1117;
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 6px;
-	color: #c9d1d9;
-	font-size: 12px;
-	font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
-	outline: none;
-	transition: all 0.15s ease;
+  flex: 1;
+  height: 28px;
+  padding: 0 56px 0 28px;
+  background: #0d1117;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 6px;
+  color: #c9d1d9;
+  font-size: 12px;
+  font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
+  outline: none;
+  transition: all 0.15s ease;
 }
 
 .searchInput:focus {
-	border-color: #58a6ff;
-	background: rgba(88, 166, 255, 0.05);
+  border-color: #58a6ff;
+  background: rgba(88, 166, 255, 0.05);
 }
 
 .clearBtn {
-	position: absolute;
-	right: 34px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 18px;
-	height: 18px;
-	padding: 0;
-	background: transparent;
-	border: none;
-	border-radius: 4px;
-	color: #6e7681;
-	cursor: pointer;
-	transition: all 0.15s ease;
+  position: absolute;
+  right: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #6e7681;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .clearBtn:hover {
-	background: rgba(255, 255, 255, 0.1);
-	color: #c9d1d9;
+  background: rgba(255, 255, 255, 0.1);
+  color: #c9d1d9;
 }
 
 /* 筛选按钮 - 放在输入框内部最尾部 */
 .filterToggle {
-	position: absolute;
-	right: 8px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 22px;
-	height: 22px;
-	padding: 0;
-	background: transparent;
-	border: none;
-	border-radius: 4px;
-	color: #6e7681;
-	cursor: pointer;
-	transition: all 0.15s ease;
+  position: absolute;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #6e7681;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .filterToggle:hover {
-	background: rgba(255, 255, 255, 0.1);
-	color: #c9d1d9;
+  background: rgba(255, 255, 255, 0.1);
+  color: #c9d1d9;
 }
 
 .filterToggle.active {
-	background: rgba(88, 166, 255, 0.15);
-	color: #58a6ff;
+  background: rgba(88, 166, 255, 0.15);
+  color: #58a6ff;
 }
 
 .filterCount {
-	position: absolute;
-	top: -5px;
-	right: -5px;
-	width: 14px;
-	height: 14px;
-	background: #58a6ff;
-	border-radius: 50%;
-	font-size: 9px;
-	color: #fff;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-weight: 600;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 14px;
+  height: 14px;
+  background: #58a6ff;
+  border-radius: 50%;
+  font-size: 9px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
 }
 
 /* 筛选下拉菜单 */
 .filterDropdown {
-	position: absolute;
-	top: 100%;
-	left: 0;
-	margin-top: 4px;
-	padding: 4px;
-	background: #161b22;
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 6px;
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-	display: flex;
-	gap: 4px;
-	z-index: 100;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  padding: 4px;
+  background: #161b22;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  display: flex;
+  gap: 4px;
+  z-index: 100;
 }
 
 .filterChip {
-	display: flex;
-	align-items: center;
-	gap: 4px;
-	padding: 4px 8px;
-	background: transparent;
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 4px;
-	color: #8b949e;
-	font-size: 11px;
-	cursor: pointer;
-	transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 4px;
+  color: #8b949e;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .filterChip:hover {
-	border-color: #8b949e;
-	color: #c9d1d9;
+  border-color: #8b949e;
+  color: #c9d1d9;
 }
 
 .filterChip.checked {
-	background: rgba(88, 166, 255, 0.1);
-	border-color: #58a6ff;
-	color: #58a6ff;
+  background: rgba(88, 166, 255, 0.1);
+  border-color: #58a6ff;
+  color: #58a6ff;
 }
 
 /* 选择器容器 - 相对定位用于下拉菜单 */
 .thinkingSelector,
 .modelSelector {
-	position: relative;
+  position: relative;
 }
 
 /* 选择器按钮样式 - 统一风格 */
 .selectorBtn {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	padding: 0 10px;
-	height: 28px;
-	background: #0d1117;
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 6px;
-	color: #c9d1d9;
-	font-size: 12px;
-	cursor: pointer;
-	transition: all 0.15s ease;
-	white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  height: 28px;
+  background: #0d1117;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 6px;
+  color: #c9d1d9;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .selectorBtn:hover:not(:disabled) {
-	border-color: #8b949e;
-	background: rgba(255, 255, 255, 0.05);
+  border-color: #8b949e;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .selectorBtn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .selectorValue {
-	font-weight: 500;
-	font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
+  font-weight: 500;
+  font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
 }
 
 /* 下拉菜单通用样式 */
 .modelDropdown,
 .thinkingDropdown {
-	position: absolute;
-	top: 100%;
-	right: 0;
-	margin-top: 4px;
-	min-width: 160px;
-	max-height: 300px;
-	overflow-y: auto;
-	background: #161b22;
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 6px;
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-	z-index: 100;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  min-width: 160px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: #161b22;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 100;
 }
 
 .dropdownItem {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 8px 12px;
-	cursor: pointer;
-	transition: background 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
 }
 
 .dropdownItem:hover {
-	background: rgba(88, 166, 255, 0.1);
+  background: rgba(88, 166, 255, 0.1);
 }
 
 .dropdownItem.active {
-	background: rgba(88, 166, 255, 0.15);
+  background: rgba(88, 166, 255, 0.15);
 }
 
 .modelName {
-	font-size: 12px;
-	color: #c9d1d9;
+  font-size: 12px;
+  color: #c9d1d9;
 }
 
 .modelProvider {
-	font-size: 10px;
-	color: #6e7681;
-	padding: 2px 6px;
-	background: rgba(255, 255, 255, 0.05);
-	border-radius: 4px;
+  font-size: 10px;
+  color: #6e7681;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
 }
 
 .thinkingName {
-	font-size: 12px;
-	color: #c9d1d9;
+  font-size: 12px;
+  color: #c9d1d9;
 }
 
 .dropdownLoading {
-	padding: 12px;
-	font-size: 12px;
-	color: #6e7681;
-	text-align: center;
+  padding: 12px;
+  font-size: 12px;
+  color: #6e7681;
+  text-align: center;
 }
 
 /* Modal 样式 */
 .modalOverlay {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.7);
-	backdrop-filter: blur(4px);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 1000;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
 
 .pickerModal {
-	background: #161b22;
-	border: 1px solid rgba(48, 54, 61, 0.5);
-	border-radius: 10px;
-	width: 400px;
-	max-width: 90vw;
-	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-	overflow: hidden;
+  background: #161b22;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 10px;
+  width: 400px;
+  max-width: 90vw;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
 }
 
 .pickerHeader {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 16px 20px;
-	border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
 }
 
 .pickerHeader h4 {
-	margin: 0;
-	font-size: 14px;
-	font-weight: 600;
-	color: #e6edf3;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #e6edf3;
 }
 
 .closeBtn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 28px;
-	height: 28px;
-	padding: 0;
-	background: transparent;
-	border: none;
-	border-radius: 6px;
-	color: #8b949e;
-	cursor: pointer;
-	transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #8b949e;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .closeBtn:hover {
-	background: rgba(218, 54, 51, 0.15);
-	color: #f85149;
+  background: rgba(218, 54, 51, 0.15);
+  color: #f85149;
 }
 
 .currentPath {
-	padding: 12px 20px;
-	font-size: 12px;
-	font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
-	color: #58a6ff;
-	background: rgba(88, 166, 255, 0.05);
-	border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  padding: 12px 20px;
+  font-size: 12px;
+  font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
+  color: #58a6ff;
+  background: rgba(88, 166, 255, 0.05);
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
 }
 
 .pickerActions {
-	padding: 12px 20px;
-	border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
 }
 
 .selectBtn {
-	width: 100%;
-	padding: 8px 16px;
-	background: rgba(88, 166, 255, 0.1);
-	border: 1px solid rgba(88, 166, 255, 0.3);
-	border-radius: 6px;
-	color: #58a6ff;
-	font-size: 12px;
-	font-weight: 500;
-	cursor: pointer;
-	transition: all 0.15s ease;
+  width: 100%;
+  padding: 8px 16px;
+  background: rgba(88, 166, 255, 0.1);
+  border: 1px solid rgba(88, 166, 255, 0.3);
+  border-radius: 6px;
+  color: #58a6ff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .selectBtn:hover {
-	background: rgba(88, 166, 255, 0.15);
-	border-color: rgba(88, 166, 255, 0.5);
+  background: rgba(88, 166, 255, 0.15);
+  border-color: rgba(88, 166, 255, 0.5);
 }
 
 .entriesList {
-	max-height: 300px;
-	overflow-y: auto;
-	padding: 8px 0;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 8px 0;
 }
 
 .entry {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	padding: 8px 20px;
-	cursor: pointer;
-	transition: background 0.15s ease;
-	font-size: 13px;
-	color: #c9d1d9;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  font-size: 13px;
+  color: #c9d1d9;
 }
 
 .entry:hover {
-	background: rgba(88, 166, 255, 0.1);
+  background: rgba(88, 166, 255, 0.1);
 }
 
 .entry svg {
-	width: 16px;
-	height: 16px;
-	color: #58a6ff;
+  width: 16px;
+  height: 16px;
+  color: #58a6ff;
 }
 
 .loadingItem {
-	padding: 20px;
-	text-align: center;
-	font-size: 12px;
-	color: #6e7681;
+  padding: 20px;
+  text-align: center;
+  font-size: 12px;
+  color: #6e7681;
 }

@@ -13,26 +13,19 @@ const logger = new Logger({ level: LogLevel.INFO });
  * @param ctx WebSocket context
  * @param _payload Message payload (abort doesn't need extra data)
  */
-export async function handleAbort(
-	ctx: WSContext,
-	_payload: unknown,
-): Promise<void> {
-	logger.info("[WebSocket] Received abort message");
+export async function handleAbort(ctx: WSContext, _payload: unknown): Promise<void> {
+  logger.info("[WebSocket] Received abort message");
 
-	// Check if session is initialized
-	if (!ctx.session.session) {
-		logger.warn("[WebSocket] abort failed: session not initialized");
-		return;
-	}
+  // Check if session is initialized
+  if (!ctx.session.session) {
+    logger.warn("[WebSocket] abort failed: session not initialized");
+    return;
+  }
 
-	try {
-		await ctx.session.abort();
-		logger.info("[WebSocket] abort successful");
-	} catch (error) {
-		logger.error(
-			"[WebSocket] abort error:",
-			{},
-			error instanceof Error ? error : undefined,
-		);
-	}
+  try {
+    await ctx.session.abort();
+    logger.info("[WebSocket] abort successful");
+  } catch (error) {
+    logger.error("[WebSocket] abort error:", {}, error instanceof Error ? error : undefined);
+  }
 }
