@@ -44,6 +44,12 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
   const isResizing = useRef(false);
   const resizeStartY = useRef(0);
   const resizeStartHeight = useRef(height);
+  const fetchLogsRef = useRef(fetchLogs);
+  
+  // 更新 ref 以保持最新的 fetchLogs
+  useEffect(() => {
+    fetchLogsRef.current = fetchLogs;
+  }, [fetchLogs]);
 
   // Parse a log entry into structured format
   const parseLogEntry = (entry: any): LogEntry | null => {
@@ -88,19 +94,24 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
 
   
 
-  // Initial fetch and polling
+    // Initial fetch and polling
   useEffect(() => {
+    console.log('[LlmLogPanel] useEffect running, setting up polling');
     setIsLoading(true);
-    fetchLogs().finally(() => setIsLoading(false));
+    fetchLogsRef.current().finally(() => setIsLoading(false));
 
-    intervalRef.current = setInterval(fetchLogs, 2000);
+    intervalRef.current = setInterval(() => {
+      fetchLogsRef.current();
+    }, 2000);
 
     return () => {
+      console.log('[LlmLogPanel] Cleaning up polling interval');
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, [fetchLogs]);
+  }, []);  // 空依赖数组，只在挂载时运行
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -168,8 +179,8 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
 
   const handleRefresh = useCallback(() => {
     setIsLoading(true);
-    fetchLogs().finally(() => setIsLoading(false));
-  }, [fetchLogs]);
+    fetchLogsRef.current().finally(() => setIsLoading(false));
+  }, []);
 
   const handleLogClick = (log: LogEntry) => {
     setSelectedLog(log);
