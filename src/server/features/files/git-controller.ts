@@ -5,7 +5,7 @@
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import type { Request, Response } from "express";
-import { relative, join } from "node:path";
+import { relative, join, normalize } from "node:path";
 
 const execAsync = promisify(exec);
 
@@ -309,14 +309,42 @@ export async function getGitStatusHandler(
       if (line.trim() === "") continue;
       
       // 解析状态代码和文件路径
-      const status = line.substring(0, 2);
-      const path = line.substring(3);
+      // Git porcelain格式: XY PATH
+      // 但有时X可能是空格，导致格式不一致
+      // 更好的方法：找到第二个空格后的所有内容
+      const firstSpaceIndex = line.indexOf(' ');
+      let status, path;
+      
+      if (firstSpaceIndex >= 0) {
+        // 第一个空格后的下一个字符开始是状态代码的第二部分
+        // 状态代码是前2个字符
+        status = line.substring(0, 2);
+        
+        // 找到状态代码后的空格
+        // 状态代码后可能有一个或多个空格
+        let pathStart = 2;
+        while (pathStart < line.length && line[pathStart] === ' ') {
+          pathStart++;
+        }
+        path = line.substring(pathStart);
+      } else {
+        // 后备方案：使用原来的逻辑
+        status = line.substring(0, 2);
+        path = line.substring(3);
+      }
+      
+      console.log('[Git] 解析行:', { line, status, path, firstSpaceIndex });
       
       // 如果路径被引号包裹，去除引号
       let filePath = path.trim();
+      console.log('[Git] 修剪后路径:', filePath);
+      
       if (filePath.startsWith('"') && filePath.endsWith('"')) {
+        console.log('[Git] 路径被引号包裹，去除引号');
         filePath = filePath.slice(1, -1);
       }
+      
+      console.log('[Git] 处理后文件路径:', filePath);
       
       // 将状态映射为更易读的格式
       let displayStatus = "";
@@ -340,9 +368,14 @@ export async function getGitStatusHandler(
       
       // 计算相对于 workingDir 的路径
       let relativePath = filePath;
-      if (gitRoot !== workingDir) {
-        const absolutePath = join(gitRoot, filePath);
-        relativePath = relative(workingDir, absolutePath);
+      
+      // 规范化路径以处理尾部斜杠差异
+      const normalizedGitRoot = normalize(gitRoot);
+      const normalizedWorkingDir = normalize(workingDir);
+      
+      if (normalizedGitRoot !== normalizedWorkingDir) {
+        const absolutePath = join(normalizedGitRoot, filePath);
+        relativePath = relative(normalizedWorkingDir, absolutePath);
         
         // 如果相对路径以 ../ 开头，表示文件不在 workingDir 下
         // 这种情况可能发生在子模块或特殊情况下
@@ -350,6 +383,9 @@ export async function getGitStatusHandler(
         if (relativePath.startsWith("../")) {
           relativePath = filePath;
         }
+      } else {
+        // gitRoot 和 workingDir 相同，文件路径已经是相对于根目录的
+        relativePath = filePath;
       }
       
       statuses[relativePath] = displayStatus;

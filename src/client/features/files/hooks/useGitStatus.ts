@@ -117,7 +117,9 @@ export function useGitStatus() {
 						name: item.name, 
 						path: item.path, 
 						relativePath,
-						hasStatus: !!statuses[relativePath]
+						hasStatus: !!statuses[relativePath],
+						workingDir,
+						itemPathStartsWithWorkingDir: item.path.startsWith(workingDir)
 					});
 					
 					// 检查相对路径是否匹配
@@ -133,12 +135,45 @@ export function useGitStatus() {
 					// 3. 尝试路径后缀匹配（对于嵌套目录）
 					else {
 						// 查找任何以相对路径结尾的状态键
+						console.log('尝试路径后缀匹配，搜索包含相对路径的状态键');
+						let foundMatch = false;
 						for (const [statusPath, status] of Object.entries(statuses)) {
-							if (statusPath.endsWith(`/${relativePath}`) || statusPath === relativePath) {
+							// 方法1：完全相等
+							if (statusPath === relativePath) {
 								matchedStatus = status;
-								console.log('通过路径后缀匹配成功:', { statusPath, status });
+								foundMatch = true;
+								console.log('通过完全相等匹配成功:', { statusPath, status, relativePath });
 								break;
 							}
+							
+							// 方法2：以 /relativePath 结尾
+							if (statusPath.endsWith(`/${relativePath}`)) {
+								matchedStatus = status;
+								foundMatch = true;
+								console.log('通过 /相对路径 结尾匹配成功:', { statusPath, status, relativePath });
+								break;
+							}
+							
+							// 方法3：更通用的匹配 - 以 relativePath 结尾，并且前一个字符是 / 或者字符串长度相等
+							if (statusPath.endsWith(relativePath)) {
+								// 检查是否是完整的文件名匹配，而不是部分匹配
+								const pathLength = statusPath.length;
+								const relLength = relativePath.length;
+								if (pathLength === relLength) {
+									// 完全相等，已经被方法1处理
+								} else if (statusPath[pathLength - relLength - 1] === '/') {
+									// 前一个字符是 /，确保是完整的路径组件
+									matchedStatus = status;
+									foundMatch = true;
+									console.log('通过通用路径后缀匹配成功:', { statusPath, status, relativePath });
+									break;
+								} else {
+									console.log(`跳过部分匹配: "${statusPath}" 以 "${relativePath}" 结尾但不是完整路径组件`);
+								}
+							}
+						}
+						if (!foundMatch) {
+							console.log('路径后缀匹配失败，所有状态键:', Object.keys(statuses));
 						}
 					}
 					
