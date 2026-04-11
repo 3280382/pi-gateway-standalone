@@ -13,8 +13,8 @@
       document.getElementById('log').textContent = log.join('\n');
     };
     
-    window.onerror = (msg, url, line, col, err) => {
-      addLog('ERROR: ' + msg + ' at ' + line + ':' + col);
+    window.onerror = (msg, _url, line, col, _err) => {
+      addLog(`ERROR: ${msg} at ${line}:${col}`);
       return true;
     };
     

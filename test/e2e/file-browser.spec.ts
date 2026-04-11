@@ -9,233 +9,223 @@ import { devices, expect, test } from "@playwright/test";
 const iPhone12 = devices["iPhone 12"];
 
 test.describe("文件浏览器端到端测试 - 桌面浏览器", () => {
-	test.beforeEach(async ({ page }) => {
-		// 导航到应用
-		await page.goto("http://127.0.0.1:5173");
+  test.beforeEach(async ({ page }) => {
+    // 导航到应用
+    await page.goto("http://127.0.0.1:5173");
 
-		// 等待应用加载
-		await page.waitForLoadState("networkidle");
+    // 等待应用加载
+    await page.waitForLoadState("networkidle");
 
-		// 切换到文件浏览器标签页
-		await page.click('[data-testid="files-tab"]');
+    // 切换到文件浏览器标签页
+    await page.click('[data-testid="files-tab"]');
 
-		// 等待文件浏览器加载
-		await page.waitForSelector('[data-testid="file-browser"]', {
-			timeout: 10000,
-		});
-	});
+    // 等待文件浏览器加载
+    await page.waitForSelector('[data-testid="file-browser"]', {
+      timeout: 10000,
+    });
+  });
 
-	test("应该正确加载文件浏览器界面", async ({ page }) => {
-		// 验证基本元素存在
-		await expect(page.locator('[data-testid="file-browser"]')).toBeVisible();
-		await expect(page.locator('[data-testid="file-toolbar"]')).toBeVisible();
-		await expect(page.locator('[data-testid="file-sidebar"]')).toBeVisible();
-		await expect(page.locator('[data-testid="file-list"]')).toBeVisible();
-	});
+  test("应该正确加载文件浏览器界面", async ({ page }) => {
+    // 验证基本元素存在
+    await expect(page.locator('[data-testid="file-browser"]')).toBeVisible();
+    await expect(page.locator('[data-testid="file-toolbar"]')).toBeVisible();
+    await expect(page.locator('[data-testid="file-sidebar"]')).toBeVisible();
+    await expect(page.locator('[data-testid="file-list"]')).toBeVisible();
+  });
 
-	test("应该显示当前目录的文件列表", async ({ page }) => {
-		// 等待文件加载
-		await page.waitForSelector('[data-testid^="file-item-"]', {
-			timeout: 5000,
-		});
+  test("应该显示当前目录的文件列表", async ({ page }) => {
+    // 等待文件加载
+    await page.waitForSelector('[data-testid^="file-item-"]', {
+      timeout: 5000,
+    });
 
-		// 验证至少有一个文件项
-		const fileItems = page.locator('[data-testid^="file-item-"]');
-		await expect(fileItems.first()).toBeVisible();
+    // 验证至少有一个文件项
+    const fileItems = page.locator('[data-testid^="file-item-"]');
+    await expect(fileItems.first()).toBeVisible();
 
-		// 验证文件项包含合理的信息
-		const firstItem = fileItems.first();
-		await expect(firstItem).toContainText(/./); // 至少有一个字符
-	});
+    // 验证文件项包含合理的信息
+    const firstItem = fileItems.first();
+    await expect(firstItem).toContainText(/./); // 至少有一个字符
+  });
 
-	test("应该能够点击文件进行选择", async ({ page }) => {
-		// 等待文件加载
-		await page.waitForSelector('[data-testid^="file-item-"]', {
-			timeout: 5000,
-		});
+  test("应该能够点击文件进行选择", async ({ page }) => {
+    // 等待文件加载
+    await page.waitForSelector('[data-testid^="file-item-"]', {
+      timeout: 5000,
+    });
 
-		// 点击第一个文件
-		const firstFile = page.locator('[data-testid^="file-item-"]').first();
-		await firstFile.click();
+    // 点击第一个文件
+    const firstFile = page.locator('[data-testid^="file-item-"]').first();
+    await firstFile.click();
 
-		// 验证文件被选中（应该有选中样式）
-		await expect(firstFile).toHaveClass(/selected/);
+    // 验证文件被选中（应该有选中样式）
+    await expect(firstFile).toHaveClass(/selected/);
 
-		// 验证操作栏出现
-		await expect(page.locator('[data-testid="file-actionbar"]')).toBeVisible();
-	});
+    // 验证操作栏出现
+    await expect(page.locator('[data-testid="file-actionbar"]')).toBeVisible();
+  });
 
-	test("应该能够双击文件打开查看器", async ({ page }) => {
-		// 等待文件加载
-		await page.waitForSelector('[data-testid^="file-item-"]', {
-			timeout: 5000,
-		});
+  test("应该能够双击文件打开查看器", async ({ page }) => {
+    // 等待文件加载
+    await page.waitForSelector('[data-testid^="file-item-"]', {
+      timeout: 5000,
+    });
 
-		// 双击第一个文件
-		const firstFile = page.locator('[data-testid^="file-item-"]').first();
-		await firstFile.dblclick();
+    // 双击第一个文件
+    const firstFile = page.locator('[data-testid^="file-item-"]').first();
+    await firstFile.dblclick();
 
-		// 验证文件查看器打开
-		await expect(page.locator('[data-testid="file-viewer"]')).toBeVisible({
-			timeout: 3000,
-		});
-	});
+    // 验证文件查看器打开
+    await expect(page.locator('[data-testid="file-viewer"]')).toBeVisible({
+      timeout: 3000,
+    });
+  });
 
-	test("应该能够使用工具栏刷新文件列表", async ({ page }) => {
-		// 点击刷新按钮
-		await page.click('[data-testid="refresh-btn"]');
+  test("应该能够使用工具栏刷新文件列表", async ({ page }) => {
+    // 点击刷新按钮
+    await page.click('[data-testid="refresh-btn"]');
 
-		// 等待刷新完成
-		await page.waitForTimeout(1000);
+    // 等待刷新完成
+    await page.waitForTimeout(1000);
 
-		// 验证文件列表仍然存在
-		await expect(
-			page.locator('[data-testid^="file-item-"]').first(),
-		).toBeVisible();
-	});
+    // 验证文件列表仍然存在
+    await expect(page.locator('[data-testid^="file-item-"]').first()).toBeVisible();
+  });
 
-	test("应该能够导航到上级目录", async ({ page }) => {
-		// 等待文件加载
-		await page.waitForSelector('[data-testid^="file-item-"]', {
-			timeout: 5000,
-		});
+  test("应该能够导航到上级目录", async ({ page }) => {
+    // 等待文件加载
+    await page.waitForSelector('[data-testid^="file-item-"]', {
+      timeout: 5000,
+    });
 
-		// 查找上级目录链接（通常是 ".."）
-		const parentDir = page.locator('[data-testid="file-item-.."]');
+    // 查找上级目录链接（通常是 ".."）
+    const parentDir = page.locator('[data-testid="file-item-.."]');
 
-		if (await parentDir.isVisible()) {
-			await parentDir.click();
+    if (await parentDir.isVisible()) {
+      await parentDir.click();
 
-			// 等待导航完成
-			await page.waitForTimeout(1000);
+      // 等待导航完成
+      await page.waitForTimeout(1000);
 
-			// 验证仍然有文件列表
-			await expect(
-				page.locator('[data-testid^="file-item-"]').first(),
-			).toBeVisible();
-		}
-	});
+      // 验证仍然有文件列表
+      await expect(page.locator('[data-testid^="file-item-"]').first()).toBeVisible();
+    }
+  });
 
-	test("应该能够切换视图模式", async ({ page }) => {
-		// 点击网格视图按钮
-		await page.click('[data-testid="grid-view-btn"]');
+  test("应该能够切换视图模式", async ({ page }) => {
+    // 点击网格视图按钮
+    await page.click('[data-testid="grid-view-btn"]');
 
-		// 等待视图切换
-		await page.waitForTimeout(500);
+    // 等待视图切换
+    await page.waitForTimeout(500);
 
-		// 验证网格视图激活
-		await expect(page.locator('[data-testid="grid-view-btn"]')).toHaveClass(
-			/active/,
-		);
+    // 验证网格视图激活
+    await expect(page.locator('[data-testid="grid-view-btn"]')).toHaveClass(/active/);
 
-		// 验证列表视图不激活
-		await expect(page.locator('[data-testid="list-view-btn"]')).not.toHaveClass(
-			/active/,
-		);
+    // 验证列表视图不激活
+    await expect(page.locator('[data-testid="list-view-btn"]')).not.toHaveClass(/active/);
 
-		// 验证显示网格视图
-		await expect(page.locator('[data-testid="file-grid"]')).toBeVisible();
+    // 验证显示网格视图
+    await expect(page.locator('[data-testid="file-grid"]')).toBeVisible();
 
-		// 切换回列表视图
-		await page.click('[data-testid="list-view-btn"]');
+    // 切换回列表视图
+    await page.click('[data-testid="list-view-btn"]');
 
-		// 等待视图切换
-		await page.waitForTimeout(500);
+    // 等待视图切换
+    await page.waitForTimeout(500);
 
-		// 验证列表视图激活
-		await expect(page.locator('[data-testid="list-view-btn"]')).toHaveClass(
-			/active/,
-		);
+    // 验证列表视图激活
+    await expect(page.locator('[data-testid="list-view-btn"]')).toHaveClass(/active/);
 
-		// 验证显示列表视图
-		await expect(page.locator('[data-testid="file-list"]')).toBeVisible();
-	});
+    // 验证显示列表视图
+    await expect(page.locator('[data-testid="file-list"]')).toBeVisible();
+  });
 
-	test("应该能够搜索文件", async ({ page }) => {
-		// 在搜索框中输入
-		await page.fill('[data-testid="search-input"]', "test");
+  test("应该能够搜索文件", async ({ page }) => {
+    // 在搜索框中输入
+    await page.fill('[data-testid="search-input"]', "test");
 
-		// 等待搜索过滤
-		await page.waitForTimeout(500);
+    // 等待搜索过滤
+    await page.waitForTimeout(500);
 
-		// 验证文件列表更新（可能为空或过滤后的结果）
-		const fileItems = page.locator('[data-testid^="file-item-"]');
-		await expect(fileItems.first()).toBeVisible();
-	});
+    // 验证文件列表更新（可能为空或过滤后的结果）
+    const fileItems = page.locator('[data-testid^="file-item-"]');
+    await expect(fileItems.first()).toBeVisible();
+  });
 
-	test("应该能够查看文件内容", async ({ page }) => {
-		// 等待文件加载
-		await page.waitForSelector('[data-testid^="file-item-"]', {
-			timeout: 5000,
-		});
+  test("应该能够查看文件内容", async ({ page }) => {
+    // 等待文件加载
+    await page.waitForSelector('[data-testid^="file-item-"]', {
+      timeout: 5000,
+    });
 
-		// 点击第一个文件
-		const firstFile = page.locator('[data-testid^="file-item-"]').first();
-		await firstFile.click();
+    // 点击第一个文件
+    const firstFile = page.locator('[data-testid^="file-item-"]').first();
+    await firstFile.click();
 
-		// 点击查看按钮
-		await page.click('[data-testid="view-btn"]');
+    // 点击查看按钮
+    await page.click('[data-testid="view-btn"]');
 
-		// 验证文件查看器打开
-		await expect(page.locator('[data-testid="file-viewer"]')).toBeVisible({
-			timeout: 3000,
-		});
+    // 验证文件查看器打开
+    await expect(page.locator('[data-testid="file-viewer"]')).toBeVisible({
+      timeout: 3000,
+    });
 
-		// 验证查看器内容区域存在
-		await expect(page.locator('[data-testid="viewer-content"]')).toBeVisible();
-	});
+    // 验证查看器内容区域存在
+    await expect(page.locator('[data-testid="viewer-content"]')).toBeVisible();
+  });
 
-	test("应该能够执行可执行文件", async ({ page }) => {
-		// 等待文件加载
-		await page.waitForSelector('[data-testid^="file-item-"]', {
-			timeout: 5000,
-		});
+  test("应该能够执行可执行文件", async ({ page }) => {
+    // 等待文件加载
+    await page.waitForSelector('[data-testid^="file-item-"]', {
+      timeout: 5000,
+    });
 
-		// 查找可执行文件（如.sh, .py等）
-		const executableFiles = page.locator(
-			'[data-testid*=".sh"], [data-testid*=".py"], [data-testid*=".js"]',
-		);
+    // 查找可执行文件（如.sh, .py等）
+    const executableFiles = page.locator(
+      '[data-testid*=".sh"], [data-testid*=".py"], [data-testid*=".js"]'
+    );
 
-		if ((await executableFiles.count()) > 0) {
-			const firstExecutable = executableFiles.first();
-			await firstExecutable.click();
+    if ((await executableFiles.count()) > 0) {
+      const firstExecutable = executableFiles.first();
+      await firstExecutable.click();
 
-			// 点击执行按钮
-			await page.click('[data-testid="execute-btn"]');
+      // 点击执行按钮
+      await page.click('[data-testid="execute-btn"]');
 
-			// 验证执行开始（可能有加载状态或输出面板）
-			await page.waitForTimeout(1000);
+      // 验证执行开始（可能有加载状态或输出面板）
+      await page.waitForTimeout(1000);
 
-			// 验证底部面板打开或显示输出
-			const bottomPanel = page.locator('[data-testid="bottom-panel"]');
-			if (await bottomPanel.isVisible()) {
-				await expect(bottomPanel).toBeVisible();
-			}
-		}
-	});
+      // 验证底部面板打开或显示输出
+      const bottomPanel = page.locator('[data-testid="bottom-panel"]');
+      if (await bottomPanel.isVisible()) {
+        await expect(bottomPanel).toBeVisible();
+      }
+    }
+  });
 
-	test("应该能够处理错误情况", async ({ page }) => {
-		// 测试错误处理：尝试导航到不存在的目录
-		// 这可能需要模拟API错误或测试错误边界
+  test("应该能够处理错误情况", async ({ page }) => {
+    // 测试错误处理：尝试导航到不存在的目录
+    // 这可能需要模拟API错误或测试错误边界
 
-		// 验证错误边界组件存在
-		await expect(page.locator('[data-testid^="error-boundary"]')).toBeVisible();
-	});
+    // 验证错误边界组件存在
+    await expect(page.locator('[data-testid^="error-boundary"]')).toBeVisible();
+  });
 
-	test("应该保持UI响应性", async ({ page }) => {
-		// 进行一系列快速操作测试响应性
-		await page.click('[data-testid="refresh-btn"]');
-		await page.waitForTimeout(200);
+  test("应该保持UI响应性", async ({ page }) => {
+    // 进行一系列快速操作测试响应性
+    await page.click('[data-testid="refresh-btn"]');
+    await page.waitForTimeout(200);
 
-		await page.click('[data-testid="grid-view-btn"]');
-		await page.waitForTimeout(200);
+    await page.click('[data-testid="grid-view-btn"]');
+    await page.waitForTimeout(200);
 
-		await page.click('[data-testid="list-view-btn"]');
-		await page.waitForTimeout(200);
+    await page.click('[data-testid="list-view-btn"]');
+    await page.waitForTimeout(200);
 
-		// 验证UI仍然正常
-		await expect(page.locator('[data-testid="file-browser"]')).toBeVisible();
-	});
+    // 验证UI仍然正常
+    await expect(page.locator('[data-testid="file-browser"]')).toBeVisible();
+  });
 });
 
 test.describe('文件浏览器端到端测试 - 手机浏览器', () => {

@@ -1,8 +1,8 @@
 // 动态Mock数据生成器 - 自动生成
 // 最后更新: 2026-03-26T16:40:45.190Z
 
-const os = require("os");
-const path = require("path");
+const os = require("node:os");
+const path = require("node:path");
 
 module.exports = {
   // 获取用户特定的路径映射
@@ -21,7 +21,7 @@ module.exports = {
     };
 
     for (const [mockPath, realPath] of Object.entries(mappings)) {
-      if (requestedPath === mockPath || requestedPath.startsWith(mockPath + "/")) {
+      if (requestedPath === mockPath || requestedPath.startsWith(`${mockPath}/`)) {
         const relativePath = requestedPath.substring(mockPath.length);
         return path.join(realPath, relativePath);
       }

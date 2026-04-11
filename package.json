@@ -32,7 +32,19 @@
     "fix": "biome check --write .",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.react.json --noEmit",
     "test": "vitest --run test/unit test/integration src/",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "biome check --write --no-errors-on-unmatched"
+    ],
+    "*.{css,scss}": [
+      "biome format --write"
+    ],
+    "*.{json,md}": [
+      "biome format --write"
+    ]
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.3",
@@ -96,7 +108,9 @@
     "@vitest/browser": "^1.2.0",
     "esbuild": "^0.27.4",
     "esbuild-plugin-ts": "^0.1.1-rev-1.0",
+    "husky": "^9.1.7",
     "jsdom": "^29.0.1",
+    "lint-staged": "^16.4.0",
     "playwright": "^1.41.0",
     "rollup": "^4.60.0",
     "tsx": "^4.7.0",

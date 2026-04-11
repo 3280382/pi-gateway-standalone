@@ -37,8 +37,8 @@
   
   <!-- Error handling -->
   <script>
-    window.onerror = (msg, url, line, col, error) => {
-      document.body.innerHTML += '<div style="color:red;padding:20px;">Error: ' + msg + ' at ' + line + ':' + col + '</div>';
+    window.onerror = (msg, _url, line, col, _error) => {
+      document.body.innerHTML += `<div style="color:red;padding:20px;">Error: ${msg} at ${line}:${col}</div>`;
       return false;
     };
     window.addEventListener('error', (e) => {
