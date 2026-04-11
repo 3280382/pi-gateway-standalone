@@ -301,21 +301,23 @@
 .compactList {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .compactItem {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 6px;
+  padding: 6px 10px;
   border: none;
   background: transparent;
   color: #c9d1d9;
   text-align: left;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 3px;
   transition: background 0.2s;
+  font-size: 12px;
+  line-height: 1.2;
 }
 
 .compactItem:hover {
@@ -328,7 +330,7 @@
 }
 
 .folderIcon {
-  font-size: 14px;
+  font-size: 12px;
   flex-shrink: 0;
 }
 
@@ -337,33 +339,36 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .compactName {
-  font-size: var(--font-sm);
+  font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .compactPath {
-  font-size: var(--font-xs);
+  font-size: 10px;
   color: #8b949e;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .moreButton {
-  font-size: var(--font-xs);
+  font-size: 10px;
   color: #58a6ff;
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 3px;
+  padding: 2px 5px;
+  border-radius: 2px;
+  line-height: 1.2;
 }
 
 .moreButton:hover {
@@ -373,24 +378,26 @@
 
 .clearButton {
   color: #f85149 !important;
+  font-size: 10px !important;
 }
 
 /* ===== 新增样式：会话下拉选择 ===== */
 .dropdownContainer {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .sessionDropdown {
   width: 100%;
-  padding: 8px 12px;
+  padding: 6px 10px;
   background: #0d1117;
   border: 1px solid #30363d;
-  border-radius: 6px;
+  border-radius: 4px;
   color: #c9d1d9;
-  font-size: var(--font-sm);
+  font-size: 12px;
   cursor: pointer;
+  line-height: 1.2;
 }
 
 .sessionDropdown:focus {
@@ -399,34 +406,36 @@
 }
 
 .sessionInfo {
-  padding: 8px 12px;
+  padding: 6px 10px;
   background: #0d1117;
-  border-radius: 6px;
+  border-radius: 4px;
   border: 1px solid #30363d;
+  font-size: 11px;
 }
 
 .sessionMeta {
   display: flex;
   justify-content: space-between;
-  font-size: var(--font-xs);
+  font-size: 10px;
   color: #8b949e;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .sessionDescription {
-  font-size: var(--font-xs);
+  font-size: 10px;
   color: #c9d1d9;
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 .newSessionButton {
-  font-size: var(--font-xs);
+  font-size: 10px;
   color: #58a6ff;
   background: transparent;
   border: 1px solid #30363d;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  line-height: 1.2;
 }
 
 .newSessionButton:hover {
@@ -439,13 +448,13 @@
 .paramsList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .paramItem {
-  padding: 8px 12px;
+  padding: 6px 10px;
   background: #0d1117;
-  border-radius: 6px;
+  border-radius: 4px;
   border: 1px solid #30363d;
 }
 
@@ -453,18 +462,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .paramLabel {
-  font-size: var(--font-sm);
+  font-size: 12px;
   font-weight: 500;
   color: #c9d1d9;
+  line-height: 1.2;
 }
 
 .paramDescription {
-  font-size: var(--font-xs);
+  font-size: 10px;
   color: #6e7681;
+  line-height: 1.2;
 }
 
 .paramValue {
@@ -476,22 +487,24 @@
 .valueDisplay {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .valueText {
-  font-size: var(--font-sm);
+  font-size: 12px;
   color: #8b949e;
+  line-height: 1.2;
 }
 
 .editButton {
-  font-size: var(--font-xs);
+  font-size: 10px;
   color: #58a6ff;
   background: transparent;
   border: 1px solid #30363d;
   cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 3px;
+  padding: 2px 5px;
+  border-radius: 2px;
+  line-height: 1.2;
 }
 
 .editButton:hover {
@@ -503,19 +516,20 @@
 .editContainer {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
 }
 
 .editInput,
 .editSelect {
   flex: 1;
-  padding: 4px 8px;
+  padding: 3px 6px;
   background: #161b22;
   border: 1px solid #30363d;
-  border-radius: 4px;
+  border-radius: 3px;
   color: #c9d1d9;
-  font-size: var(--font-sm);
+  font-size: 12px;
+  line-height: 1.2;
 }
 
 .editInput:focus,
@@ -526,16 +540,17 @@
 
 .editActions {
   display: flex;
-  gap: 4px;
+  gap: 3px;
 }
 
 .saveButton,
 .cancelButton {
-  font-size: var(--font-xs);
-  padding: 2px 6px;
-  border-radius: 3px;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 2px;
   cursor: pointer;
   border: none;
+  line-height: 1.2;
 }
 
 .saveButton {
@@ -558,7 +573,95 @@
 
 /* ===== 新增样式：节标题增强 ===== */
 .sectionSubtitle {
-  font-size: var(--font-xs);
+  font-size: 10px;
   color: #6e7681;
   margin-top: 2px;
+  line-height: 1.2;
+}
+
+/* ===== 新增样式：设置按钮 ===== */
+.settingsList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settingItem {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  color: #c9d1d9;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.2;
+  transition: all 0.2s;
+}
+
+.settingItem:hover {
+  background: #21262d;
+  border-color: #1f6feb;
+}
+
+.settingLabel {
+  flex: 1;
+}
+
+/* ===== 紧凑样式覆盖 ===== */
+.section {
+  padding: 8px 10px !important;
+}
+
+.sectionHeader {
+  margin-bottom: 6px !important;
+}
+
+.sectionTitle {
+  font-size: 11px !important;
+  letter-spacing: 0.3px !important;
+}
+
+.compactList,
+.paramsList,
+.settingsList {
+  gap: 4px !important;
+}
+
+.compactItem,
+.paramItem,
+.settingItem {
+  padding: 5px 8px !important;
+  font-size: 11px !important;
+}
+
+.sessionDropdown,
+.editInput,
+.editSelect {
+  padding: 4px 8px !important;
+  font-size: 11px !important;
+}
+
+.paramLabel,
+.valueText {
+  font-size: 11px !important;
+}
+
+.paramDescription,
+.sessionMeta,
+.sessionDescription,
+.compactPath,
+.sectionSubtitle {
+  font-size: 9px !important;
+}
+
+.editButton,
+.moreButton,
+.newSessionButton,
+.saveButton,
+.cancelButton {
+  font-size: 9px !important;
+  padding: 1px 4px !important;
 }
