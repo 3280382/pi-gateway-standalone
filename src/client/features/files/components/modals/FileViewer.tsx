@@ -31,11 +31,13 @@ export function FileViewer() {
 		error,
 		editedContent,
 		isSaving,
+		showInvisibleChars,
 		terminalOutput,
 		isExecuting,
 		closeViewer,
 		setMode,
 		setEditedContent,
+		toggleShowInvisibleChars,
 		clearTerminal,
 	} = useFileViewerStore();
 
@@ -212,6 +214,18 @@ export function FileViewer() {
 				? "javascript"
 				: language;
 
+	// 渲染带有非可视化符号的内容
+	const renderContentWithInvisibleChars = (text: string): string => {
+		if (!showInvisibleChars) return text;
+		
+		// 替换非可视化字符
+		return text
+			.replace(/\t/g, '→   ')  // 制表符
+			.replace(/ /g, '·')      // 空格
+			.replace(/\n/g, '¶\n')  // 换行符（在行尾添加）
+			.replace(/\r/g, '↵');    // 回车符
+	};
+
 	// ========== 5. Actions ==========
 	// 修复编辑器焦点问题
 	const focusEditor = useCallback(() => {
@@ -255,6 +269,15 @@ export function FileViewer() {
 						</button>
 					</div>
 					<div className={styles.actions}>
+						{mode === "view" && (
+							<button
+								className={`${styles.btnToggle} ${showInvisibleChars ? styles.active : ""}`}
+								onClick={toggleShowInvisibleChars}
+								title="Show invisible characters (spaces, tabs, line breaks)"
+							>
+								{showInvisibleChars ? "Hide" : "Show"} Invisible
+							</button>
+						)}
 						{mode === "view" && fileTypes.isExecutable && (
 							<button
 								className={styles.btnExecute}
@@ -310,9 +333,15 @@ export function FileViewer() {
 					) : (
 						<pre className={`${styles.code} language-${prismLanguage}`}>
 							<code data-prism-code className={`language-${prismLanguage}`}>
-								{typeof content === "string"
-									? content
-									: JSON.stringify(content, null, 2)}
+								{showInvisibleChars
+									? renderContentWithInvisibleChars(
+											typeof content === "string"
+												? content
+												: JSON.stringify(content, null, 2)
+										)
+									: typeof content === "string"
+										? content
+										: JSON.stringify(content, null, 2)}
 							</code>
 						</pre>
 					)}

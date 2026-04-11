@@ -31,6 +31,9 @@ export interface ViewerState {
 	editedContent: string;
 	isSaving: boolean;
 
+	// 显示非可视化符号
+	showInvisibleChars: boolean;
+
 	// 终端状态（原 terminalStore）
 	terminalOutput: string;
 	terminalCommand: string;
@@ -54,6 +57,10 @@ interface ViewerActions {
 	// 编辑器操作
 	setEditedContent: (content: string) => void;
 	setSaving: (saving: boolean) => void;
+
+	// 显示非可视化符号
+	toggleShowInvisibleChars: () => void;
+	setShowInvisibleChars: (show: boolean) => void;
 
 	// 终端操作（原 terminalStore + fileViewerStore）
 	setTerminalOutput: (output: string) => void;
@@ -81,6 +88,9 @@ export const useViewerStore = create<ViewerState & ViewerActions>()((set) => ({
 	// 编辑器初始状态
 	editedContent: "",
 	isSaving: false,
+
+	// 显示非可视化符号
+	showInvisibleChars: false,
 
 	// 终端初始状态
 	terminalOutput: "",
@@ -135,6 +145,7 @@ export const useViewerStore = create<ViewerState & ViewerActions>()((set) => ({
 			error: null,
 			editedContent: "",
 			isSaving: false,
+			showInvisibleChars: false,
 			terminalOutput: "",
 			terminalCommand: "",
 			isExecuting: false,
@@ -150,6 +161,11 @@ export const useViewerStore = create<ViewerState & ViewerActions>()((set) => ({
 	// 编辑器
 	setEditedContent: (content) => set({ editedContent: content }),
 	setSaving: (saving) => set({ isSaving: saving }),
+
+	// 显示非可视化符号
+	toggleShowInvisibleChars: () =>
+		set((state) => ({ showInvisibleChars: !state.showInvisibleChars })),
+	setShowInvisibleChars: (show) => set({ showInvisibleChars: show }),
 
 	// 终端（合并自 terminalStore）
 	setTerminalOutput: (output) => set({ terminalOutput: output }),

@@ -63,7 +63,8 @@
 .btnDanger,
 .btnEdit,
 .btnExecute,
-.btnClose {
+.btnClose,
+.btnToggle {
 	padding: 3px 8px;
 	border: none;
 	border-radius: 3px;
@@ -100,6 +101,18 @@
 .btnExecute {
 	background: var(--accent-warning);
 	color: white;
+}
+
+.btnToggle {
+	background: var(--bg-tertiary);
+	color: var(--text-primary);
+	border: 1px solid var(--border-subtle);
+}
+
+.btnToggle.active {
+	background: var(--accent-secondary);
+	color: white;
+	border-color: var(--accent-secondary);
 }
 
 .btnClose {
