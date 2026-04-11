@@ -3,7 +3,7 @@
  * 展示当前工作目录和会话使用的模型参数
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useWorkspaceStore } from "@/features/files/stores";
@@ -40,8 +40,14 @@ export function ModelParamsSection() {
   const chatController = useChatController();
 
   // ========== 2. Effects ==========
+  const hasFetchedRef = useRef(false);
+
   useEffect(() => {
+    // 防止重复请求
+    if (hasFetchedRef.current) return;
+
     const loadModels = async () => {
+      hasFetchedRef.current = true;
       setIsLoadingModels(true);
       try {
         const result = await chatController.listModels();
@@ -50,6 +56,7 @@ export function ModelParamsSection() {
         }
       } catch (error) {
         console.error("[ModelParamsSection] Failed to load models:", error);
+        hasFetchedRef.current = false; // 出错时允许重试
       } finally {
         setIsLoadingModels(false);
       }
@@ -62,58 +69,62 @@ export function ModelParamsSection() {
   // 获取当前模型信息
   const currentModelInfo = models.find((m) => m.id === currentModel) || models[0];
 
-  // 模拟模型参数（实际应从API获取）
-  const modelParams: ModelParam[] = [
-    {
-      key: "model",
-      label: "模型",
-      value: currentModelInfo?.name || currentModel || "未选择",
-      type: "select",
-      options: models.map((m) => m.id),
-      editable: true,
-      description: "当前使用的AI模型",
-    },
-    {
-      key: "temperature",
-      label: "温度",
-      value: 0.7,
-      type: "number",
-      editable: true,
-      description: "控制输出的随机性，0-1之间",
-    },
-    {
-      key: "maxTokens",
-      label: "最大令牌数",
-      value: currentModelInfo?.maxTokens || 4096,
-      type: "number",
-      editable: true,
-      description: "生成的最大令牌数",
-    },
-    {
-      key: "contextWindow",
-      label: "上下文窗口",
-      value: currentModelInfo?.contextWindow || 8192,
-      type: "readonly",
-      description: "模型支持的上下文长度",
-    },
-    {
-      key: "thinkingLevel",
-      label: "思考级别",
-      value: "medium",
-      type: "select",
-      options: ["none", "low", "medium", "high"],
-      editable: true,
-      description: "AI的思考深度",
-    },
-    {
-      key: "streaming",
-      label: "流式输出",
-      value: true,
-      type: "boolean",
-      editable: true,
-      description: "是否启用流式输出",
-    },
-  ];
+  // 使用 useMemo 缓存模型参数，避免不必要的重新计算
+  const modelParams = useMemo(() => {
+    return [
+      {
+        key: "model",
+        label: "模型",
+        value: currentModelInfo?.name || currentModel || "未选择",
+        type: "select" as const,
+        options: models.map((m) => m.id),
+        editable: true,
+        description: "当前使用的AI模型",
+      },
+      {
+        key: "temperature",
+        label: "温度",
+        value: 0.7,
+        type: "number" as const,
+        editable: true,
+        description: "控制输出的随机性，0-1之间",
+      },
+      {
+        key: "maxTokens",
+        label: "最大令牌数",
+        value: currentModelInfo?.maxTokens || 4096,
+        type: "number" as const,
+        editable: true,
+        description: "生成的最大令牌数",
+      },
+      {
+        key: "contextWindow",
+        label: "上下文窗口",
+        value: currentModelInfo?.contextWindow || 8192,
+        type: "readonly" as const,
+        description: "模型支持的上下文长度",
+      },
+      {
+        key: "thinkingLevel",
+        label: "思考级别",
+        value: "medium",
+        type: "select" as const,
+        options: ["none", "low", "medium", "high"],
+        editable: true,
+        description: "AI的思考深度",
+      },
+      {
+        key: "streaming",
+        label: "流式输出",
+        value: true,
+        type: "boolean" as const,
+        editable: true,
+        description: "是否启用流式输出",
+      },
+    ];
+  }, [models, currentModel, currentModelInfo]);
+
+
 
   // ========== 5. Actions ==========
   const handleEditClick = useCallback((param: ModelParam) => {
