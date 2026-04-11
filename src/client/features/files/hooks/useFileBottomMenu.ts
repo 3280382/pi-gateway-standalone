@@ -57,6 +57,11 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
   // ========== 2. Ref ==========
   // 无直接DOM引用
 
+  const handleCloseTree = useCallback(() => {
+    setIsTreeModalOpen(false);
+    setTreeData(null);
+  }, []);
+
   // ========== 3. Effects ==========
   // ESC 关闭树状视图
   useEffect(() => {
@@ -136,11 +141,6 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
     },
     [workingDir, openViewer]
   );
-
-  const handleCloseTree = useCallback(() => {
-    setIsTreeModalOpen(false);
-    setTreeData(null);
-  }, []);
 
   // ========== 6. Return ==========
   return {
