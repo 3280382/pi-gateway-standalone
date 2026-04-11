@@ -10,7 +10,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { browseDirectory } from "@/features/files/services/api/fileApi";
-import { useFileStore } from "@/features/files/stores/fileStore";
+import { useSessionStore } from "@/features/chat/stores/sessionStore";
 
 export interface FileItem {
 	name: string;
@@ -47,7 +47,7 @@ export function useFilePicker(
 	options: UseFilePickerOptions,
 ): UseFilePickerReturn {
 	const { value, onChange, onFocusInput } = options;
-	const { workingDir } = useFileStore();
+	const workingDir = useSessionStore((state) => state.workingDir);
 
 	// 状态
 	const [isOpen, setIsOpen] = useState(false);
