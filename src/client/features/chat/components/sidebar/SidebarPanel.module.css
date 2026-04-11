@@ -296,3 +296,269 @@
   outline: none;
   border-color: var(--accent-blue);
 }
+
+/* ===== 新增样式：紧凑工作目录 ===== */
+.compactList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.compactItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: #c9d1d9;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.compactItem:hover {
+  background: #21262d;
+}
+
+.compactItem.active {
+  background: #1f6feb;
+  color: white;
+}
+
+.folderIcon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.compactInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.compactName {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compactPath {
+  font-size: var(--font-xs);
+  color: #8b949e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.moreButton {
+  font-size: var(--font-xs);
+  color: #58a6ff;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.moreButton:hover {
+  background: #1f6feb;
+  color: white;
+}
+
+.clearButton {
+  color: #f85149 !important;
+}
+
+/* ===== 新增样式：会话下拉选择 ===== */
+.dropdownContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sessionDropdown {
+  width: 100%;
+  padding: 8px 12px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  font-size: var(--font-sm);
+  cursor: pointer;
+}
+
+.sessionDropdown:focus {
+  outline: none;
+  border-color: #1f6feb;
+}
+
+.sessionInfo {
+  padding: 8px 12px;
+  background: #0d1117;
+  border-radius: 6px;
+  border: 1px solid #30363d;
+}
+
+.sessionMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-xs);
+  color: #8b949e;
+  margin-bottom: 4px;
+}
+
+.sessionDescription {
+  font-size: var(--font-xs);
+  color: #c9d1d9;
+  line-height: 1.4;
+}
+
+.newSessionButton {
+  font-size: var(--font-xs);
+  color: #58a6ff;
+  background: transparent;
+  border: 1px solid #30363d;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.newSessionButton:hover {
+  background: #1f6feb;
+  color: white;
+  border-color: #1f6feb;
+}
+
+/* ===== 新增样式：模型参数 ===== */
+.paramsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.paramItem {
+  padding: 8px 12px;
+  background: #0d1117;
+  border-radius: 6px;
+  border: 1px solid #30363d;
+}
+
+.paramHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.paramLabel {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: #c9d1d9;
+}
+
+.paramDescription {
+  font-size: var(--font-xs);
+  color: #6e7681;
+}
+
+.paramValue {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.valueDisplay {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.valueText {
+  font-size: var(--font-sm);
+  color: #8b949e;
+}
+
+.editButton {
+  font-size: var(--font-xs);
+  color: #58a6ff;
+  background: transparent;
+  border: 1px solid #30363d;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.editButton:hover {
+  background: #1f6feb;
+  color: white;
+  border-color: #1f6feb;
+}
+
+.editContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.editInput,
+.editSelect {
+  flex: 1;
+  padding: 4px 8px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  color: #c9d1d9;
+  font-size: var(--font-sm);
+}
+
+.editInput:focus,
+.editSelect:focus {
+  outline: none;
+  border-color: #1f6feb;
+}
+
+.editActions {
+  display: flex;
+  gap: 4px;
+}
+
+.saveButton,
+.cancelButton {
+  font-size: var(--font-xs);
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  border: none;
+}
+
+.saveButton {
+  background: #238636;
+  color: white;
+}
+
+.saveButton:hover {
+  background: #2ea043;
+}
+
+.cancelButton {
+  background: #6e7681;
+  color: white;
+}
+
+.cancelButton:hover {
+  background: #8b949e;
+}
+
+/* ===== 新增样式：节标题增强 ===== */
+.sectionSubtitle {
+  font-size: var(--font-xs);
+  color: #6e7681;
+  margin-top: 2px;
+}

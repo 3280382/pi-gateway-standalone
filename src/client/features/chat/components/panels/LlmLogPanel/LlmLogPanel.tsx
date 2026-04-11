@@ -44,12 +44,7 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
   const isResizing = useRef(false);
   const resizeStartY = useRef(0);
   const resizeStartHeight = useRef(height);
-  const fetchLogsRef = useRef(fetchLogs);
-  
-  // 更新 ref 以保持最新的 fetchLogs
-  useEffect(() => {
-    fetchLogsRef.current = fetchLogs;
-  }, [fetchLogs]);
+  const fetchLogsRef = useRef<() => Promise<void>>(() => Promise.resolve());
 
   // Parse a log entry into structured format
   const parseLogEntry = (entry: any): LogEntry | null => {
@@ -92,7 +87,12 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
     }
   }, [parseLogEntry]);
 
-  
+  // 更新 ref 以保持最新的 fetchLogs
+  useEffect(() => {
+    fetchLogsRef.current = fetchLogs;
+  }, [fetchLogs]);
+
+
 
     // Initial fetch and polling
   useEffect(() => {
@@ -111,7 +111,7 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
         intervalRef.current = null;
       }
     };
-  }, []);  // 空依赖数组，只在挂载时运行
+  }, []);  // 空依赖数组,只在挂载时运行
 
   // Auto-scroll to bottom
   useEffect(() => {
