@@ -3,10 +3,11 @@
  * 展示当前工作目录和会话使用的模型参数
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useWorkspaceStore } from "@/features/files/stores";
+import { useChatController } from "@/features/chat/services/api/chatApi";
 import styles from "./SidebarPanel.module.css";
 
 interface ModelParam {
@@ -19,18 +20,59 @@ interface ModelParam {
   description?: string;
 }
 
+interface ModelInfo {
+  id: string;
+  name: string;
+  provider?: string;
+  maxTokens?: number;
+  contextWindow?: number;
+}
+
 export function ModelParamsSection() {
   // ========== 1. State ==========
   const workingDir = useSidebarStore((state) => state.workingDir);
   const currentSessionId = useSidebarStore((state) => state.currentSessionId);
   const currentModel = useSessionStore((state) => state.currentModel);
-  const models = useSessionStore((state) => state.models);
   const [editingParam, setEditingParam] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<any>("");
+  const [models, setModels] = useState<ModelInfo[]>([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const chatController = useChatController();
+
+  // ========== 2. Effects ==========
+  useEffect(() => {
+    const loadModels = async () => {
+      setIsLoadingModels(true);
+      try {
+        const result = await chatController.listModels();
+        if (result && result.models) {
+          setModels(result.models);
+        }
+      } catch (error) {
+        console.error("[ModelParamsSection] Failed to load models:", error);
+      } finally {
+        setIsLoadingModels(false);
+      }
+    };
+
+    loadModels();
+  }, [chatController]);
 
   // ========== 4. Computed ==========
   // 获取当前模型信息
   const currentModelInfo = models.find((m) => m.id === currentModel) || models[0];
+
+  // 如果正在加载模型，显示加载状态
+  if (isLoadingModels) {
+    return (
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h3 className={styles.sectionTitle}>模型参数</h3>
+        </div>
+        <div className={styles.loading}>加载模型中...</div>
+      </section>
+    );
+  }
 
   // 模拟模型参数（实际应从API获取）
   const modelParams: ModelParam[] = [
