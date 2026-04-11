@@ -268,7 +268,7 @@ export function InputArea({
             className={`${styles.toolbarBtn} ${shouldScrollToBottom ? styles.active : ""}`}
             onClick={onToggleScroll}
             title={shouldScrollToBottom ? "自动滚屏已启用 (点击关闭)" : "自动滚屏已关闭 (点击启用)"}
-            disabled={isStreaming}
+            // 滚屏按钮在AI处理时仍然可用，用户应该能控制滚屏状态
           >
             <ScrollIcon active={shouldScrollToBottom} />
           </button>
