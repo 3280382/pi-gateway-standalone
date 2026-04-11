@@ -64,21 +64,21 @@ export const FileItem = memo<FileItemProps>(
 		const icon = getFileIcon(item.extension, item.isDirectory);
 		const isGrid = viewMode === "grid";
 
-		// Git状态图标 - 使用更鲜艳的颜色和更明显的图标
+		// Git状态图标 - 简洁的圆形背景 + 白色SVG图标
 		console.log('FileItem渲染:', { 
 			name: item.name, 
 			gitStatus: item.gitStatus,
 			path: item.path 
 		});
 		const gitStatusIcon = item.gitStatus ? {
-			untracked: { symbol: "🆕", color: "#f97316", textColor: "#ffffff" }, // 鲜艳橙色，白色文字
-			modified: { symbol: "📝", color: "#eab308", textColor: "#000000" }, // 亮黄色，黑色文字
-			added: { symbol: "➕", color: "#22c55e", textColor: "#ffffff" }, // 鲜艳绿色，白色文字
-			deleted: { symbol: "🗑️", color: "#ef4444", textColor: "#ffffff" }, // 鲜艳红色，白色文字
-			renamed: { symbol: "🔀", color: "#8b5cf6", textColor: "#ffffff" }, // 鲜艳紫色，白色文字
-			copied: { symbol: "📋", color: "#0ea5e9", textColor: "#ffffff" }, // 鲜艳蓝色，白色文字
-			conflict: { symbol: "⚡", color: "#dc2626", textColor: "#ffffff" }, // 深红色，白色文字
-			other: { symbol: "❓", color: "#6b7280", textColor: "#ffffff" }, // 灰色，白色文字
+			untracked: { symbol: "U", color: "#f97316" }, // 橙色
+			modified: { symbol: "M", color: "#eab308" }, // 黄色
+			added: { symbol: "A", color: "#22c55e" }, // 绿色
+			deleted: { symbol: "D", color: "#ef4444" }, // 红色
+			renamed: { symbol: "R", color: "#8b5cf6" }, // 紫色
+			copied: { symbol: "C", color: "#0ea5e9" }, // 蓝色
+			conflict: { symbol: "!", color: "#dc2626" }, // 深红色
+			other: { symbol: "?", color: "#6b7280" }, // 灰色
 		}[item.gitStatus] : null;
 
 		// 组合样式
@@ -176,8 +176,6 @@ export const FileItem = memo<FileItemProps>(
 							className={styles.gitBadge}
 							style={{ 
 								backgroundColor: gitStatusIcon.color,
-								color: gitStatusIcon.textColor,
-								filter: 'saturate(1.2) brightness(1.1)'
 							}}
 							title={`Git: ${item.gitStatus}`}
 						>
@@ -213,3 +211,4 @@ export const FileItem = memo<FileItemProps>(
 );
 
 FileItem.displayName = "FileItem";
+// Test for git badge visibility
