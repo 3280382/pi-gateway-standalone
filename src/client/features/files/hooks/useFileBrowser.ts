@@ -2,10 +2,12 @@
  * useFileBrowser - 文件浏览器核心逻辑 Hook
  *
  * 职责：管理文件浏览器的业务逻辑
- * - 目录加载
+ * - 目录加载（仅在激活状态时）
  * - 错误处理
  * - 与 store 和 service 协调
  */
+
+// ===== [ANCHOR:IMPORTS] =====
 
 import { useCallback, useEffect, useRef } from "react";
 import {
@@ -14,14 +16,26 @@ import {
 } from "@/features/files/services/api/fileOperationsApi";
 import { initializeFilePath } from "@/features/files/services/initialization";
 import { useFileStore } from "@/features/files/stores/fileStore";
-import { fileBrowserDebug } from "@/lib/debug";
+
+// ===== [ANCHOR:TYPES] =====
+
+export interface UseFileBrowserOptions {
+	/** 是否处于激活状态 - 非激活时不加载数据 */
+	isActive?: boolean;
+}
 
 export interface UseFileBrowserResult {
 	loadDirectory: (path: string) => Promise<void>;
 	refresh: () => Promise<void>;
 }
 
-export function useFileBrowser(): UseFileBrowserResult {
+// ===== [ANCHOR:HOOK] =====
+
+export function useFileBrowser(
+	options: UseFileBrowserOptions = {},
+): UseFileBrowserResult {
+	const { isActive = true } = options;
+
 	const {
 		workingDir,
 		setItems,
@@ -32,18 +46,23 @@ export function useFileBrowser(): UseFileBrowserResult {
 	} = useFileStore();
 
 	const lastLoadedPathRef = useRef<string>("");
+	const isInitializedRef = useRef<boolean>(false);
 
 	/**
 	 * 初始化文件浏览器路径（只运行一次）
+	 * 仅在激活状态下执行
 	 */
 	useEffect(() => {
+		if (!isActive || isInitializedRef.current) return;
+
 		const init = async () => {
 			const path = await initializeFilePath();
+			isInitializedRef.current = true;
 			setWorkingDir(path);
 		};
 		init();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [isActive]);
 
 	/**
 	 * 加载目录内容
@@ -55,26 +74,16 @@ export function useFileBrowser(): UseFileBrowserResult {
 				return;
 			}
 
-			fileBrowserDebug.debug("开始加载目录", { path });
 			setLoading(true);
 			setError(null);
 
 			try {
 				const data = await loadDirectoryContent(path);
-
-				// 先标记已加载，避免状态更新后重复加载
 				lastLoadedPathRef.current = path;
-
 				setItems(data.items);
-				// 注意：不在这里调用 setWorkingDir，因为路径已由调用者设置
-				// 只更新 parentPath，因为 API 可能返回不同的父路径
 				setParentPath(data.parentPath);
 			} catch (err) {
 				const friendlyMessage = getFriendlyErrorMessage(err, path);
-				fileBrowserDebug.error("目录加载失败", {
-					path,
-					error: friendlyMessage,
-				});
 				setError(friendlyMessage);
 			} finally {
 				setLoading(false);
@@ -93,15 +102,14 @@ export function useFileBrowser(): UseFileBrowserResult {
 
 	/**
 	 * 路径变化时自动加载
+	 * 仅在激活状态下执行
 	 */
 	useEffect(() => {
-		if (workingDir === lastLoadedPathRef.current) {
+		if (!isActive || workingDir === lastLoadedPathRef.current) {
 			return;
 		}
-
-		fileBrowserDebug.debug("路径变化，自动加载", { workingDir });
 		loadDirectory(workingDir);
-	}, [workingDir, loadDirectory]);
+	}, [isActive, workingDir, loadDirectory]);
 
 	return {
 		loadDirectory,

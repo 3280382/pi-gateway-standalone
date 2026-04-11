@@ -4,11 +4,11 @@
  * 职责：UI 渲染
  * - 不包含业务逻辑
  * - 通过 hooks 获取数据和操作
+ * - 仅在激活状态时加载数据
  */
 
 // ===== [ANCHOR:IMPORTS] =====
 
-import React from "react";
 import styles from "@/features/files/components/FileBrowser/FileBrowser.module.css";
 import { FileBrowserErrorBoundary } from "@/features/files/components/FileBrowser/FileBrowserErrorBoundary";
 import { FileGrid } from "@/features/files/components/FileBrowser/FileGrid";
@@ -22,12 +22,12 @@ import {
 	useGitStatus,
 } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
-import { useFileViewerStore } from "@/features/files/stores/viewerStore";
-import { fileBrowserDebug } from "@/lib/debug";
 
 // ===== [ANCHOR:TYPES] =====
 
 interface FileBrowserProps {
+	/** 是否处于激活状态 - 控制数据加载 */
+	isActive?: boolean;
 	onExecuteOutput?: (output: string) => void;
 	onOpenBottomPanel?: (output: string) => void;
 }
@@ -35,26 +35,20 @@ interface FileBrowserProps {
 // ===== [ANCHOR:COMPONENT] =====
 
 export function FileBrowser({
+	isActive = true,
 	onExecuteOutput,
 	onOpenBottomPanel,
 }: FileBrowserProps) {
 	// ===== [ANCHOR:STATE] =====
-	const { viewMode, isLoading, error, items } = useFileStore();
-	const { isOpen: isViewerOpen } = useFileViewerStore();
+	const { viewMode, isLoading, error } = useFileStore();
 
 	// ===== [ANCHOR:HOOKS] =====
-	useFileBrowser();
-	useGitStatus();
+	// 仅在激活状态下获取数据
+	useFileBrowser({ isActive });
+	useGitStatus({ isActive });
 
 	// ===== [ANCHOR:COMPUTED] =====
 	const { filteredItems } = useFileFiltering();
-
-	fileBrowserDebug.debug("FileBrowser 渲染", {
-		isLoading,
-		error,
-		itemsCount: items.length,
-		filteredItemsCount: filteredItems.length,
-	});
 
 	// ===== [ANCHOR:RENDER] =====
 	return (
@@ -92,9 +86,7 @@ export function FileBrowser({
 			</div>
 
 			{/* 文件查看器模态框 */}
-			<FileBrowserErrorBoundary componentName="File Viewer">
-				<FileViewer />
-			</FileBrowserErrorBoundary>
+			<FileViewer />
 		</section>
 	);
 }
