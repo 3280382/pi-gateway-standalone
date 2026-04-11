@@ -45,6 +45,30 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
   const resizeStartY = useRef(0);
   const resizeStartHeight = useRef(height);
 
+  // Parse a log entry into structured format
+  const parseLogEntry = (entry: any): LogEntry | null => {
+    if (!entry?.type) return null;
+
+    try {
+      const parsedContent = JSON.parse(entry.content);
+      return {
+        timestamp: entry.timestamp || new Date().toISOString(),
+        type: entry.type,
+        model: entry.model,
+        content: entry.content,
+        parsed: parsedContent,
+      };
+    } catch {
+      return {
+        timestamp: entry.timestamp || new Date().toISOString(),
+        type: entry.type,
+        model: entry.model,
+        content: entry.content,
+        parsed: null,
+      };
+    }
+  };
+
   // Fetch logs from API
   const fetchLogs = useCallback(async () => {
     try {
@@ -62,9 +86,6 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
       console.error("[LlmLogPanel] Failed to fetch logs:", error);
     }
   }, [parseLogEntry]);
-
-  // Parse a log entry into structured format
-  const parseLogEntry = (entry: any): LogEntry | null => {
     if (!entry?.type) return null;
 
     try {
