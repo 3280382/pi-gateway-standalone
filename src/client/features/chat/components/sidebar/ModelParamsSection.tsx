@@ -18,14 +18,36 @@ interface ModelParam {
   options?: string[];
   editable?: boolean;
   description?: string;
+  min?: number;
+  max?: number;
+}
+
+// 格式化令牌数量为可读格式
+function formatTokenCount(tokens: number): string {
+  if (tokens >= 1000000) {
+    return `${(tokens / 1000000).toFixed(1)}M`;
+  } else if (tokens >= 1000) {
+    return `${(tokens / 1000).toFixed(1)}K`;
+  }
+  return tokens.toString();
 }
 
 interface ModelInfo {
   id: string;
   name: string;
   provider?: string;
+  description?: string;
   maxTokens?: number;
   contextWindow?: number;
+  reasoning?: boolean;
+  input?: ("text" | "image")[];
+  cost?: {
+    input: number;
+    output: number;
+    cacheRead: number;
+    cacheWrite: number;
+  };
+  compat?: any;
 }
 
 export function ModelParamsSection() {
@@ -37,6 +59,7 @@ export function ModelParamsSection() {
   const [editValue, setEditValue] = useState<any>("");
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const thinkingLevel = useSessionStore((state) => state.thinkingLevel);
   const chatController = useChatController();
 
   // ========== 2. Effects ==========
@@ -82,36 +105,51 @@ export function ModelParamsSection() {
         description: "当前使用的AI模型",
       },
       {
-        key: "temperature",
-        label: "温度",
-        value: 0.7,
-        type: "number" as const,
-        editable: true,
-        description: "控制输出的随机性，0-1之间",
-      },
-      {
-        key: "maxTokens",
-        label: "最大令牌数",
-        value: currentModelInfo?.maxTokens || 4096,
-        type: "number" as const,
-        editable: true,
-        description: "生成的最大令牌数",
+        key: "provider",
+        label: "提供商",
+        value: currentModelInfo?.provider || "未知",
+        type: "readonly" as const,
+        description: "模型服务提供商",
       },
       {
         key: "contextWindow",
         label: "上下文窗口",
         value: currentModelInfo?.contextWindow || 8192,
         type: "readonly" as const,
-        description: "模型支持的上下文长度",
+        description: `模型支持的上下文长度（${currentModelInfo?.contextWindow ? formatTokenCount(currentModelInfo.contextWindow) : "未知"}）`,
+      },
+      {
+        key: "maxTokens",
+        label: "最大输出",
+        value: currentModelInfo?.maxTokens || 4096,
+        type: "number" as const,
+        editable: true,
+        min: 1,
+        max: currentModelInfo?.contextWindow || 8192,
+        description: `生成的最大令牌数（最大: ${currentModelInfo?.maxTokens ? formatTokenCount(currentModelInfo.maxTokens) : "未知"}）`,
+      },
+      {
+        key: "reasoning",
+        label: "推理能力",
+        value: currentModelInfo?.reasoning ? "支持" : "不支持",
+        type: "readonly" as const,
+        description: "模型是否支持推理/思考",
+      },
+      {
+        key: "inputTypes",
+        label: "输入类型",
+        value: currentModelInfo?.input ? currentModelInfo.input.join(", ") : "文本",
+        type: "readonly" as const,
+        description: "模型支持的输入类型",
       },
       {
         key: "thinkingLevel",
         label: "思考级别",
-        value: "medium",
+        value: thinkingLevel || "medium",
         type: "select" as const,
-        options: ["none", "low", "medium", "high"],
+        options: ["off", "low", "medium", "high"],
         editable: true,
-        description: "AI的思考深度",
+        description: "AI的思考深度（仅支持推理的模型有效）",
       },
       {
         key: "streaming",
@@ -122,7 +160,7 @@ export function ModelParamsSection() {
         description: "是否启用流式输出",
       },
     ];
-  }, [models, currentModel, currentModelInfo]);
+  }, [models, currentModel, currentModelInfo, thinkingLevel]);
 
 
 
@@ -136,12 +174,36 @@ export function ModelParamsSection() {
 
   const handleSave = useCallback(
     (paramKey: string) => {
-      // 这里应该调用API保存参数
+      const param = modelParams.find((p) => p.key === paramKey);
+      if (!param) return;
+
       console.log(`保存参数 ${paramKey}: ${editValue}`);
+      
+      // 根据参数类型执行不同的保存操作
+      switch (paramKey) {
+        case "model":
+          // 切换模型
+          chatController.setModel(editValue);
+          break;
+        case "maxTokens":
+          // 设置最大令牌数（这里需要调用相应的API）
+          console.log(`设置最大令牌数为: ${editValue}`);
+          break;
+        case "thinkingLevel":
+          // 设置思考级别
+          chatController.setThinkingLevel(editValue);
+          break;
+        case "streaming":
+          // 设置流式输出（这里需要调用相应的API）
+          console.log(`设置流式输出为: ${editValue}`);
+          break;
+        default:
+          console.log(`参数 ${paramKey} 的保存逻辑未实现`);
+      }
+      
       setEditingParam(null);
-      // 实际应该更新状态或调用API
     },
-    [editValue]
+    [editValue, modelParams, chatController]
   );
 
   const handleCancel = useCallback(() => {
@@ -208,6 +270,8 @@ export function ModelParamsSection() {
                       type={param.type === "number" ? "number" : "text"}
                       className={styles.editInput}
                       value={editValue}
+                      min={param.min}
+                      max={param.max}
                       onChange={(e) =>
                         setEditValue(
                           param.type === "number" ? parseFloat(e.target.value) : e.target.value

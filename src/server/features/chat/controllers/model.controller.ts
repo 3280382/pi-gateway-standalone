@@ -30,6 +30,13 @@ export async function getModels(_req: Request, res: Response) {
       provider: m.provider,
       name: m.name ?? (typeof m.id === "object" ? String(m.id) : m.id),
       description: "",
+      // 完整的模型参数
+      contextWindow: m.contextWindow,
+      maxTokens: m.maxTokens,
+      reasoning: m.reasoning,
+      input: m.input,
+      cost: m.cost,
+      compat: m.compat,
     }));
     res.json({ models });
   } catch (error) {
