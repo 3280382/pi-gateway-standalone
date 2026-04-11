@@ -290,3 +290,4 @@ if (isMainModule) {
 // ============================================================================
 
 export { app, llmLogManager, PiAgentSession, server, wss };
+// Test git status for server.ts

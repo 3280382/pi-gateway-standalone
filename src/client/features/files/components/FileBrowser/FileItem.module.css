@@ -276,40 +276,54 @@
 	}
 }
 
-/* Git Status Badge */
+/* Git Status Badge - 美观紧凑的角标 */
 .gitBadge {
 	position: absolute;
-	top: -2px;
-	right: -2px;
-	width: 16px;
-	height: 16px;
+	top: -4px;
+	right: -4px;
+	width: 18px;
+	height: 18px;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 9px;
+	font-size: 10px;
 	line-height: 1;
-	z-index: 10;
-	border: 1px solid var(--bg-primary);
-	box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+	z-index: 50;
+	border: 2px solid var(--bg-primary);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2);
+	font-weight: bold;
+	transform: scale(0.95);
+	transition: transform 0.1s ease;
 }
 
-.gridItem .gitBadge {
-	top: 8px;
-	right: 8px;
-	width: 14px;
-	height: 14px;
-	font-size: 8px;
+.gitBadge:hover {
+	transform: scale(1.05);
+	box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.3);
 }
 
-.listItem .gitBadge {
+/* 网格视图 - 角标在图标右上角 */
+.gridIcon {
 	position: relative;
-	top: 0;
-	right: 0;
-	display: inline-flex;
-	margin-left: 6px;
-	width: 14px;
-	height: 14px;
-	font-size: 8px;
-	vertical-align: middle;
+}
+
+.gridIcon .gitBadge {
+	top: -6px;
+	right: -6px;
+	width: 16px;
+	height: 16px;
+	font-size: 9px;
+}
+
+/* 列表视图 - 角标在图标右上角 */
+.listIcon {
+	position: relative;
+}
+
+.listIcon .gitBadge {
+	top: -5px;
+	right: -5px;
+	width: 16px;
+	height: 16px;
+	font-size: 9px;
 }
