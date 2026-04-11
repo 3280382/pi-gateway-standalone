@@ -1,13 +1,13 @@
 /**
  * SidebarPanel - Main Sidebar Container
  *
- * 职责：
- * - 负责侧边栏的整体布局
- * - 包含所有sidebar子组件（CompactWorkspaces, SessionDropdown, ModelParams, ChatSettings）
- * - 显示错误信息
- * - 不包含业务逻辑，session加载由sessionManager统一处理
+ * Responsibilities:
+ * - Overall sidebar layout
+ * - Contains all sidebar sub-components (CompactWorkspaces, SessionDropdown, ModelParams, ChatSettings)
+ * - Displays error messages
+ * - No business logic, session loading handled by sessionManager
  *
- * 结构规范：State → Ref → Effects → Computed → Actions → Render
+ * Structure: State → Ref → Effects → Computed → Actions → Render
  */
 
 import { useCallback } from "react";
@@ -51,7 +51,9 @@ export function SidebarPanel({ currentView = "chat" }: SidebarPanelProps) {
         {error && (
           <div className={styles.error}>
             <span>{error}</span>
-            <button type="button" onClick={clearError}>×</button>
+            <button type="button" onClick={clearError}>
+              ×
+            </button>
           </div>
         )}
         <CompactWorkspacesSection maxItems={3} />
@@ -81,4 +83,3 @@ function SidebarHeader() {
     </div>
   );
 }
-

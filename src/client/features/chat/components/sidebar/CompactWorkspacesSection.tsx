@@ -1,6 +1,6 @@
 /**
- * CompactWorkspacesSection - 紧凑的工作目录展示
- * 最多显示3条，有"更多"按钮展开
+ * CompactWorkspacesSection - Compact workspace list display
+ * Show up to 3 items with "more" button to expand
  */
 
 import { useCallback, useState } from "react";
@@ -49,9 +49,9 @@ export function CompactWorkspacesSection({ maxItems = 3 }: CompactWorkspacesSect
     return (
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>工作目录</h3>
+          <h3 className={styles.sectionTitle}>Workspaces</h3>
         </div>
-        <div className={styles.loading}>加载中...</div>
+        <div className={styles.loading}>Loading...</div>
       </section>
     );
   }
@@ -60,9 +60,9 @@ export function CompactWorkspacesSection({ maxItems = 3 }: CompactWorkspacesSect
     return (
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>工作目录</h3>
+          <h3 className={styles.sectionTitle}>Workspaces</h3>
         </div>
-        <div className={styles.empty}>暂无工作目录</div>
+        <div className={styles.empty}>No workspaces</div>
       </section>
     );
   }
@@ -70,22 +70,22 @@ export function CompactWorkspacesSection({ maxItems = 3 }: CompactWorkspacesSect
   return (
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
-        <h3 className={styles.sectionTitle}>工作目录</h3>
+        <h3 className={styles.sectionTitle}>Workspaces</h3>
         <div className={styles.sectionActions}>
           {hasMore && (
             <button
               type="button"
               className={styles.moreButton}
               onClick={toggleExpand}
-              title={expanded ? "收起" : "展开更多"}
+              title={expanded ? "Collapse" : "Show more"}
             >
-              {expanded ? "收起" : "更多"}
+              {expanded ? "Collapse" : "More"}
             </button>
           )}
           <IconButton
             name="trash"
             onClick={handleClear}
-            title="清空历史"
+            title="Clear history"
             className={styles.clearButton}
           />
         </div>

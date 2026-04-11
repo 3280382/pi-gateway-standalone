@@ -2,14 +2,13 @@
  * AppHeader - Chat Top Menu (Two-Row Layout)
  *
  * 职责：
- * - Row 1: Working Directory, Thinking Level, PID/Status
- * - Row 2: Search Box, Model Selection
+ * - Row 1: Working Directory, PID/Status
+ * - Row 2: Search Box
  *
  * 结构规范：State → Ref → Effects → Computed → Actions → Render
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useChatController } from "@/features/chat/services/api/chatApi";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import {
   selectSearchFilters,
@@ -18,20 +17,7 @@ import {
 } from "@/features/chat/stores/chatStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
-import { websocketService } from "@/services/websocket.service";
 import styles from "./AppHeader.module.css";
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-const THINKING_LEVELS = [
-  { id: "off", name: "None" },
-  { id: "minimal", name: "Low" },
-  { id: "low", name: "Med" },
-  { id: "medium", name: "High" },
-  { id: "high", name: "XHigh" },
-] as const;
 
 // ============================================================================
 // Types
@@ -68,13 +54,9 @@ export function AppHeader({
 }: AppHeaderProps) {
   // ========== 1. State (Domain State from Zustand) ==========
   const sessionStore = useSessionStore();
-  const currentModel = sessionStore.currentModel ?? null;
   const workingDir = sessionStore.workingDir ?? "/root";
-  const thinkingLevel = sessionStore.thinkingLevel ?? "off";
-  const setThinkingLevel = sessionStore.setThinkingLevel;
   const serverPid = sessionStore.serverPid;
   const isConnected = sessionStore.isConnected;
-  const { isStreaming } = useChatStore();
 
   // Search state from store
   const chatStoreQuery = useChatStore(selectSearchQuery);
@@ -84,13 +66,6 @@ export function AppHeader({
 
   // UI State (Local)
   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
-  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
-  const [models, setModels] = useState<Array<{ id: string; name: string; provider: string }>>([]);
-  const [isModelsLoading, setIsModelsLoading] = useState(false);
-  const [isThinkingDropdownOpen, setIsThinkingDropdownOpen] = useState(false);
-
-  // Service instances
-  const chatController = useChatController();
 
   // ========== 2. Derived Values ==========
   const connectionStatus = isConnected ? "connected" : "disconnected";
@@ -99,11 +74,6 @@ export function AppHeader({
   const filters = externalSearchFilters ?? chatStoreFilters;
 
   // ========== 3. Computed ==========
-  const currentThinking = useMemo(
-    () => THINKING_LEVELS.find((t) => t.id === thinkingLevel) || THINKING_LEVELS[2],
-    [thinkingLevel]
-  );
-
   const hasActiveFilters = useMemo(
     () => filters.user || filters.assistant || filters.thinking || filters.tools,
     [filters]
@@ -113,12 +83,6 @@ export function AppHeader({
     () => [filters.user, filters.assistant, filters.thinking, filters.tools].filter(Boolean).length,
     [filters]
   );
-
-  const currentModelName = useMemo(() => {
-    if (!currentModel) return "Select Model";
-    const model = models.find((m) => m.id === currentModel);
-    return model?.name || currentModel.split("-")[0];
-  }, [currentModel, models]);
 
   // Directory browser modal
   const isDirectoryBrowserOpen = useModalStore((state) => state.isDirectoryBrowserOpen);
@@ -137,64 +101,16 @@ export function AppHeader({
     [filters, onSearchFiltersChange, chatStoreSetSearchFilters]
   );
 
-  const handleModelSelect = useCallback(
-    async (modelId: string) => {
-      const model = models.find((m) => m.id === modelId);
-      if (model) {
-        try {
-          await chatController.setModel(model.provider, model.id);
-        } catch (error) {
-          console.error("[AppHeader] Failed to set model:", error);
-        }
-      }
-      setIsModelDropdownOpen(false);
-    },
-    [models, chatController]
-  );
-
-  const handleThinkingSelect = useCallback(
-    (level: string) => {
-      websocketService.send("thinking_level_change", {
-        thinkingLevel: level,
-      });
-      setThinkingLevel(level as any);
-      setIsThinkingDropdownOpen(false);
-    },
-    [setThinkingLevel]
-  );
-
   // ========== 5. Effects ==========
-  // Load models when dropdown opens
-  useEffect(() => {
-    if (isModelDropdownOpen && models.length === 0 && !isModelsLoading) {
-      setIsModelsLoading(true);
-      fetch("/api/models")
-        .then((r) => r.json())
-        .then((data) => {
-          setModels(data.models || []);
-          setIsModelsLoading(false);
-        })
-        .catch(() => {
-          setIsModelsLoading(false);
-        });
-    }
-  }, [isModelDropdownOpen, models.length, isModelsLoading]);
-
   // Close dropdowns on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (
-        !target.closest(`.${styles.modelDropdown}`) &&
-        !target.closest(`.${styles.modelSelector}`)
+        !target.closest(`.${styles.filterDropdown}`) &&
+        !target.closest(`.${styles.filterToggle}`)
       ) {
-        setIsModelDropdownOpen(false);
-      }
-      if (
-        !target.closest(`.${styles.thinkingDropdown}`) &&
-        !target.closest(`.${styles.thinkingSelector}`)
-      ) {
-        setIsThinkingDropdownOpen(false);
+        setIsFiltersVisible(false);
       }
     };
     document.addEventListener("click", handleClickOutside);
@@ -204,56 +120,23 @@ export function AppHeader({
   // ========== 6. Render ==========
   return (
     <div className={styles.topBar}>
-      {/* Row 1: 工作目录、思考级别、PID/状态 */}
+      {/* Row 1: 工作目录（最大宽度） */}
       <div className={styles.topRow}>
-        {/* 工作目录按钮 */}
-        <button type="button"
-          className={styles.workingDirBtn}
+        {/* 工作目录按钮 - 宽度最大 */}
+        <button
+          type="button"
+          className={`${styles.workingDirBtn} ${styles.workingDirBtnFullWidth}`}
           onClick={() => openDirectoryBrowser()}
           title={`Working Directory: ${workingDir || "Click to select"}`}
         >
           <FolderIcon />
           <span className={styles.btnText}>{workingDir || "Select Directory"}</span>
         </button>
-
-        {/* 思考级别 - 移到第1行 */}
-        <div className={styles.thinkingSelector}>
-          <button type="button"
-            className={styles.selectorBtn}
-            onClick={() => setIsThinkingDropdownOpen(!isThinkingDropdownOpen)}
-            disabled={isStreaming}
-            title="Thinking Level"
-          >
-            <span className={styles.selectorValue}>{currentThinking.name}</span>
-            <DropdownIcon />
-          </button>
-          {isThinkingDropdownOpen && (
-            <div className={styles.thinkingDropdown}>
-              {THINKING_LEVELS.map((t) => (
-                <div
-                  key={t.id}
-                  className={`${styles.dropdownItem} ${t.id === thinkingLevel ? styles.active : ""}`}
-                  onClick={() => handleThinkingSelect(t.id)}
-                >
-                  <span className={styles.thinkingName}>{t.name}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className={styles.spacer} />
-
-        {/* 状态 + PID */}
-        <div className={styles.status} title={`${connectionStatus}${pid ? ` (PID: ${pid})` : ""}`}>
-          <span className={`${styles.statusDot} ${styles[connectionStatus]}`} />
-          {pid && <span className={styles.pid}>{pid}</span>}
-        </div>
       </div>
 
-      {/* Row 2: 搜索框、模型选择 */}
+      {/* Row 2: 搜索框 + PID */}
       <div className={styles.bottomRow}>
-        {/* 搜索 - 与工作目录同宽 */}
+        {/* 搜索 */}
         <div className={styles.searchWrapper}>
           <SearchIcon className={styles.searchIcon} />
           <input
@@ -270,7 +153,8 @@ export function AppHeader({
             }}
           />
           {searchQuery && (
-            <button type="button"
+            <button
+              type="button"
               className={styles.clearBtn}
               onClick={() => {
                 if (onSearchQueryChange) {
@@ -284,8 +168,9 @@ export function AppHeader({
               <XIcon />
             </button>
           )}
-          {/* 过滤按钮 - 在输入框最尾部 */}
-          <button type="button"
+          {/* 过滤按钮 */}
+          <button
+            type="button"
             className={`${styles.filterToggle} ${hasActiveFilters ? styles.active : ""}`}
             onClick={() => setIsFiltersVisible(!isFiltersVisible)}
             title="Filters"
@@ -323,35 +208,10 @@ export function AppHeader({
 
         <div className={styles.spacer} />
 
-        {/* 模型选择 */}
-        <div className={styles.modelSelector}>
-          <button type="button"
-            className={styles.selectorBtn}
-            onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
-            disabled={isStreaming}
-            title="Select Model"
-          >
-            <span className={styles.selectorValue}>{currentModelName}</span>
-            <DropdownIcon />
-          </button>
-          {isModelDropdownOpen && (
-            <div className={styles.modelDropdown}>
-              {isModelsLoading ? (
-                <div className={styles.dropdownLoading}>Loading...</div>
-              ) : (
-                models.map((m) => (
-                  <div
-                    key={m.id}
-                    className={`${styles.dropdownItem} ${m.id === currentModel ? styles.active : ""}`}
-                    onClick={() => handleModelSelect(m.id)}
-                  >
-                    <span className={styles.modelName}>{m.name}</span>
-                    <span className={styles.modelProvider}>{m.provider}</span>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
+        {/* 状态 + PID */}
+        <div className={styles.status} title={`${connectionStatus}${pid ? ` (PID: ${pid})` : ""}`}>
+          <span className={`${styles.statusDot} ${styles[connectionStatus]}`} />
+          {pid && <span className={styles.pid}>{pid}</span>}
         </div>
       </div>
 
@@ -374,7 +234,11 @@ function FilterChip({
   onChange: () => void;
 }) {
   return (
-    <button type="button" className={`${styles.filterChip} ${checked ? styles.checked : ""}`} onClick={onChange}>
+    <button
+      type="button"
+      className={`${styles.filterChip} ${checked ? styles.checked : ""}`}
+      onClick={onChange}
+    >
       {checked && <CheckIcon />}
       <span>{label}</span>
     </button>
@@ -490,7 +354,7 @@ function DirectoryPickerModal({
   const [loading, setLoading] = useState(false);
   const sidebarController = useSidebarController();
 
-  const loadDirectory = async (dirPath: string) => {
+  const loadDirectory = useCallback(async (dirPath: string) => {
     setLoading(true);
     try {
       const response = await fetch("/api/browse", {
@@ -522,7 +386,7 @@ function DirectoryPickerModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadDirectory(currentPath);

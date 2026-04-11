@@ -1,9 +1,9 @@
 /**
- * SessionDropdownSection - 会话下拉选择
- * 使用下拉列表选择会话，默认显示最近一个
+ * SessionDropdownSection - Session dropdown selector
+ * Uses custom dropdown menu, consistent with top model selector style
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
@@ -12,48 +12,50 @@ import styles from "./SidebarPanel.module.css";
 export function SessionDropdownSection() {
   // ========== 1. State ==========
   const sessions = useSidebarStore((state) => state.sessions);
-  const currentSessionId = useSidebarStore((state) => state.currentSessionId);
+  const currentSessionId = useSidebarStore((state) => state.selectedSessionId);
   const isLoading = useSidebarStore((state) => state.isLoading);
   const controller = useSidebarController();
-  const [selectedSessionId, setSelectedSessionId] = useState<string>("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // ========== 2. Effects ==========
+  // Click outside to close dropdown
   useEffect(() => {
-    // 设置默认选中的会话（最近一个或当前会话）
-    if (sessions.length > 0) {
-      if (currentSessionId) {
-        setSelectedSessionId(currentSessionId);
-      } else {
-        // 默认选择最近创建的会话（假设按时间排序，第一个是最新的）
-        setSelectedSessionId(sessions[0].id);
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
       }
-    }
-  }, [sessions, currentSessionId]);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // ========== 5. Actions ==========
-  const handleSessionChange = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      const sessionId = event.target.value;
-      setSelectedSessionId(sessionId);
-      if (sessionId) {
-        controller.switchSession(sessionId);
-      }
+  const handleSessionSelect = useCallback(
+    (sessionId: string) => {
+      controller.selectSession(sessionId);
+      setIsDropdownOpen(false);
     },
     [controller]
   );
 
   const handleNewSession = useCallback(() => {
     controller.createNewSession();
+    setIsDropdownOpen(false);
   }, [controller]);
+
+  // Get current selected session
+  const currentSession = sessions.find((s) => s.id === currentSessionId) || sessions[0];
+  const currentSessionName = currentSession?.name || "Select session";
 
   // ========== 6. Render ==========
   if (isLoading && sessions.length === 0) {
     return (
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>会话</h3>
+          <h3 className={styles.sectionTitle}>Sessions</h3>
         </div>
-        <div className={styles.loading}>加载中...</div>
+        <div className={styles.loading}>Loading...</div>
       </section>
     );
   }
@@ -62,50 +64,66 @@ export function SessionDropdownSection() {
     return (
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>会话</h3>
+          <h3 className={styles.sectionTitle}>Sessions</h3>
         </div>
         <button type="button" className={styles.newSessionButton} onClick={handleNewSession}>
-          新建会话
+          New Session
         </button>
       </section>
     );
   }
 
-  // 获取当前选中的会话
-  const currentSession = sessions.find((s) => s.id === selectedSessionId) || sessions[0];
-
   return (
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
-        <h3 className={styles.sectionTitle}>会话</h3>
+        <h3 className={styles.sectionTitle}>Sessions</h3>
         <button type="button" className={styles.newSessionButton} onClick={handleNewSession}>
-          新建
+          New
         </button>
       </div>
-      <div className={styles.dropdownContainer}>
-        <select
-          className={styles.sessionDropdown}
-          value={selectedSessionId}
-          onChange={handleSessionChange}
-          title="选择会话"
+
+      {/* Custom dropdown selector */}
+      <div className={styles.sessionSelector} ref={dropdownRef}>
+        <button
+          type="button"
+          className={styles.selectorBtn}
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          title="Select session"
         >
-          {sessions.map((session) => (
-            <option key={session.id} value={session.id}>
-              {session.name || `会话 ${session.id.slice(0, 8)}`}
-            </option>
-          ))}
-        </select>
-        {currentSession && (
-          <div className={styles.sessionInfo}>
-            <div className={styles.sessionMeta}>
-              <span className={styles.sessionDate}>
-                {new Date(currentSession.createdAt).toLocaleDateString()}
-              </span>
-              <span className={styles.sessionModel}>{currentSession.model || "默认模型"}</span>
-            </div>
-            {currentSession.description && (
-              <div className={styles.sessionDescription}>{currentSession.description}</div>
-            )}
+          <span className={styles.selectorValue}>
+            {currentSessionName.length > 20
+              ? `${currentSessionName.slice(0, 20)}...`
+              : currentSessionName}
+          </span>
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            className={styles.dropdownIcon}
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+
+        {isDropdownOpen && (
+          <div className={styles.sessionDropdown}>
+            {sessions.map((session) => (
+              <div
+                key={session.id}
+                className={`${styles.dropdownItem} ${session.id === currentSessionId ? styles.active : ""}`}
+                onClick={() => handleSessionSelect(session.id)}
+              >
+                <span className={styles.sessionName}>
+                  {session.name || `Session ${session.id.slice(0, 8)}`}
+                </span>
+                {session.messageCount !== undefined && (
+                  <span className={styles.sessionCount}>{session.messageCount} msgs</span>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>

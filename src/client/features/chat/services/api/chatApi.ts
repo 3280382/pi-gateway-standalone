@@ -43,7 +43,7 @@ export interface EnhancedChatController extends ChatController {
   createNewSession: () => Promise<void>;
   loadSession: (sessionPath: string) => Promise<void>;
   listSessions: (cwd: string) => Promise<any>;
-  setModel: (provider: string, modelId: string, thinkingLevel?: string) => Promise<void>;
+  setModel: (modelId: string, thinkingLevel?: string) => Promise<void>;
   listModels: () => Promise<any>;
   executeCommand: (command: string) => Promise<any>;
   setLlmLogEnabled: (enabled: boolean) => Promise<void>;
@@ -248,11 +248,21 @@ export function useChatController(): EnhancedChatController {
     },
 
     // 模型管理
-    setModel: async (provider: string, modelId: string, thinkingLevel?: string) => {
+    setModel: async (fullModelId: string, thinkingLevel?: string) => {
+      // Split fullModelId (format: "provider/modelId") into provider and modelId
+      const lastSlashIndex = fullModelId.lastIndexOf("/");
+      const provider = lastSlashIndex > 0 ? fullModelId.substring(0, lastSlashIndex) : "";
+      const modelId = lastSlashIndex > 0 ? fullModelId.substring(lastSlashIndex + 1) : fullModelId;
+
+      console.log("[ChatAPI] setModel:", { fullModelId, provider, modelId, thinkingLevel });
+
       await createPromiseWithTimeout<void>({
         timeoutMessage: "设置模型超时",
         eventName: "model_set",
-        onSuccess: () => sessionStore.setCurrentModel(modelId),
+        onSuccess: (data) => {
+          console.log("[ChatAPI] model_set success:", data);
+          sessionStore.setCurrentModel(fullModelId);
+        },
         sendAction: () => setChatModel(provider, modelId, thinkingLevel),
       });
     },

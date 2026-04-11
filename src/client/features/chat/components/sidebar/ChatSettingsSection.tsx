@@ -1,44 +1,115 @@
 /**
- * ChatSettingsSection - 聊天设置部分
- * 包含系统设置、LLM日志、调试工具等
+ * ChatSettingsSection - Chat settings section
+ * Contains LLM log configuration
  */
 
 import { useCallback } from "react";
 import { useLlmLogStore } from "@/features/chat/stores/llmLogStore";
-import { useModalStore } from "@/features/chat/stores/modalStore";
 import styles from "./SidebarPanel.module.css";
 
 export function ChatSettingsSection() {
-  const toggleLlmLog = useLlmLogStore((state) => state.toggleLlmLog);
-  const isLlmLogVisible = useLlmLogStore((state) => state.isVisible);
-  const openModal = useModalStore((state) => state.openModal);
+  // ========== 1. State ==========
+  const llmLogConfig = useLlmLogStore((state) => state.config);
+  const setLlmLogConfig = useLlmLogStore((state) => state.setConfig);
+  const openLlmLogModal = useLlmLogStore((state) => state.openModal);
 
-  const handleOpenSettings = useCallback(() => {
-    openModal("settings");
-  }, [openModal]);
+  // ========== 2. Actions ==========
+  const handleToggleLlmLog = useCallback(() => {
+    setLlmLogConfig({ enabled: !llmLogConfig.enabled });
+  }, [llmLogConfig.enabled, setLlmLogConfig]);
 
-  const handleOpenDebug = useCallback(() => {
-    openModal("debug");
-  }, [openModal]);
+  const handleRefreshIntervalChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setLlmLogConfig({ refreshInterval: Number(e.target.value) });
+    },
+    [setLlmLogConfig]
+  );
 
+  // ========== 3. Render ==========
   return (
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
-        <h3 className={styles.sectionTitle}>设置</h3>
+        <h3 className={styles.sectionTitle}>Settings</h3>
       </div>
-      <div className={styles.settingsList}>
-        <button type="button" className={styles.settingItem} onClick={handleOpenSettings}>
-          <span className={styles.settingLabel}>⚙️ 系统设置</span>
-        </button>
-        <button type="button" className={styles.settingItem} onClick={toggleLlmLog}>
-          <span className={styles.settingLabel}>
-            {isLlmLogVisible ? "📊 隐藏LLM日志" : "📊 显示LLM日志"}
-          </span>
-        </button>
-        <button type="button" className={styles.settingItem} onClick={handleOpenDebug}>
-          <span className={styles.settingLabel}>🐛 调试工具</span>
-        </button>
+
+      {/* LLM Log configuration */}
+      <div className={styles.setting}>
+        <span className={styles.label}>LLM Log</span>
+        <div className={styles.controls}>
+          <button
+            type="button"
+            className={`${styles.toggleBtn} ${llmLogConfig.enabled ? styles.enabled : ""}`}
+            onClick={handleToggleLlmLog}
+            title={llmLogConfig.enabled ? "Log enabled" : "Log disabled"}
+          >
+            <LogIcon />
+            <span>{llmLogConfig.enabled ? "On" : "Off"}</span>
+          </button>
+          <button
+            type="button"
+            className={styles.viewBtn}
+            onClick={openLlmLogModal}
+            title="View LLM Logs"
+          >
+            <ViewIcon />
+          </button>
+        </div>
       </div>
+
+      {/* Refresh interval - only shown when LLM Log is enabled */}
+      {llmLogConfig.enabled && (
+        <div className={styles.setting}>
+          <span className={styles.label}>Refresh</span>
+          <select
+            className={styles.select}
+            value={llmLogConfig.refreshInterval}
+            onChange={handleRefreshIntervalChange}
+          >
+            <option value={1}>1s</option>
+            <option value={5}>5s</option>
+            <option value={10}>10s</option>
+            <option value={30}>30s</option>
+            <option value={60}>1min</option>
+          </select>
+        </div>
+      )}
     </section>
+  );
+}
+
+// ============================================================================
+// Icons
+// ============================================================================
+
+function LogIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+    </svg>
+  );
+}
+
+function ViewIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
   );
 }

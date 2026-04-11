@@ -579,6 +579,97 @@
   line-height: 1.2;
 }
 
+/* ===== 会话下拉选择器样式 ===== */
+.sessionSelector {
+  position: relative;
+  width: 100%;
+}
+
+.selectorBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 10px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  color: #c9d1d9;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.selectorBtn:hover {
+  border-color: #1f6feb;
+}
+
+.selectorValue {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  text-align: left;
+}
+
+.dropdownIcon {
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: transform 0.15s;
+}
+
+.sessionDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid #21262d;
+}
+
+.dropdownItem:last-child {
+  border-bottom: none;
+}
+
+.dropdownItem:hover {
+  background: #21262d;
+}
+
+.dropdownItem.active {
+  background: rgba(31, 111, 235, 0.2);
+}
+
+.sessionName {
+  font-size: 12px;
+  color: #c9d1d9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.sessionCount {
+  font-size: 10px;
+  color: #7d8590;
+  flex-shrink: 0;
+}
+
 /* ===== 新增样式：设置按钮 ===== */
 .settingsList {
   display: flex;
@@ -608,6 +699,90 @@
 
 .settingLabel {
   flex: 1;
+}
+
+/* ===== 紧凑模型参数样式 ===== */
+.modelParamsCompact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.paramRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.paramRow .paramLabel {
+  font-size: 11px;
+  color: #8b949e;
+  min-width: 36px;
+  flex-shrink: 0;
+}
+
+.selectWrapper {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.paramSelect {
+  width: 100%;
+  max-width: 100%;
+  padding: 4px 20px 4px 8px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  color: #c9d1d9;
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.paramSelect:hover,
+.paramSelect:focus {
+  border-color: #1f6feb;
+  outline: none;
+}
+
+.paramSelect option {
+  background: #0d1117;
+  color: #c9d1d9;
+  font-size: 11px;
+}
+
+.modelInfoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 8px;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid #21262d;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.infoLabel {
+  font-size: 10px;
+  color: #6e7681;
+}
+
+.infoValue {
+  font-size: 10px;
+  color: #8b949e;
 }
 
 /* ===== 紧凑样式覆盖 ===== */

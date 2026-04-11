@@ -51,7 +51,7 @@ export function switchChatSession(sessionId: string): boolean {
 export function initChatWorkingDirectory(
   path: string,
   sessionId?: string,
-  timeoutMs = 1000
+  timeoutMs = 10000 // 增加到 10 秒，因为初始化可能需要加载模型和文件系统
 ): Promise<any> {
   return new Promise((resolve, reject) => {
     // 设置一次性监听器等待 initialized 响应

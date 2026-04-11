@@ -16,29 +16,7 @@ const logger = new Logger({ level: LogLevel.INFO });
 export async function handleListModels(ctx: WSContext, _payload: unknown): Promise<void> {
   logger.info("[WebSocket] Received list_models message");
 
-  try {
-    const available = await ctx.session.modelRegistry.getAvailable();
-
-    ctx.ws.send(
-      JSON.stringify({
-        type: "models_list",
-        models: available.map((m) => ({
-          id: m.id,
-          provider: m.provider,
-          name: m.name ?? m.id,
-          description: "",
-        })),
-      })
-    );
-
-    logger.info(`[WebSocket] list_models successful: ${available.length} models`);
-  } catch (error) {
-    logger.error("[WebSocket] list_models error:", {}, error instanceof Error ? error : undefined);
-    ctx.ws.send(
-      JSON.stringify({
-        type: "error",
-        error: error instanceof Error ? error.message : "Failed to list models",
-      })
-    );
-  }
+  // Delegate to PiAgentSession.listModels() which reads from /root/.pi/agent/models.json
+  await ctx.session.listModels();
+  logger.info("[WebSocket] list_models completed");
 }

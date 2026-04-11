@@ -8,7 +8,7 @@
  * 结构规范：State → Ref → Effects → Computed → Actions → Render
  */
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styles from "./AppHeader.module.css";
 
 // ============================================================================
@@ -38,7 +38,7 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
   const [isLoading, setIsLoading] = useState(false);
 
   // ========== 4. Actions ==========
-  const loadDirectory = async (dirPath: string) => {
+  const loadDirectory = useCallback(async (dirPath: string) => {
     setIsLoading(true);
     try {
       const response = await fetch("/api/browse", {
@@ -72,7 +72,7 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // ========== 3. Effects ==========
   useEffect(() => {

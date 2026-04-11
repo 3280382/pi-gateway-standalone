@@ -99,7 +99,7 @@ export class PiAgentSession {
     this.ws = ws;
     this.llmLogManager = llmLogManager;
     this.authStorage = AuthStorage.create();
-    this.modelRegistry = new ModelRegistry(this.authStorage);
+    this.modelRegistry = new ModelRegistry(this.authStorage, "/root/.pi/agent/models.json");
     this.settingsManager = SettingsManager.create();
   }
 
@@ -748,7 +748,7 @@ export class PiAgentSession {
       console.log(`[Gateway] Sending model_set response`);
       this.send({
         type: "model_set",
-        model: model.id,
+        model: `${model.provider}/${model.id}`,
         provider: model.provider,
         thinkingLevel: this.session.thinkingLevel,
       });
@@ -849,14 +849,42 @@ export class PiAgentSession {
    */
   async listModels() {
     try {
-      const available = await this.modelRegistry.getAvailable();
-      // Handle case where m.id might be an object
-      const models = available.map((m) => ({
-        id: typeof m.id === "object" ? (m as any).id?.id || String(m.id) : m.id,
-        provider: m.provider,
-        name: m.name ?? (typeof m.id === "object" ? String(m.id) : m.id),
-        description: "",
-      }));
+      // Read directly from /root/.pi/agent/models.json
+      const modelsJsonPath = "/root/.pi/agent/models.json";
+      let models: any[] = [];
+
+      if (existsSync(modelsJsonPath)) {
+        try {
+          const content = await readFile(modelsJsonPath, "utf-8");
+          const config = JSON.parse(content);
+
+          if (config.providers) {
+            for (const [providerName, providerConfig] of Object.entries(config.providers)) {
+              const provider = providerConfig as any;
+              if (provider.models && Array.isArray(provider.models)) {
+                for (const model of provider.models) {
+                  models.push({
+                    id: `${providerName}/${model.id}`,
+                    provider: providerName,
+                    name: model.name || model.id,
+                    contextWindow: model.contextWindow || 0,
+                    maxTokens: model.maxTokens || 0,
+                    reasoning: model.reasoning || false,
+                    input: model.input || ["text"],
+                  });
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.error("[PiAgentSession] Failed to read models.json:", err);
+        }
+      }
+
+      console.log(
+        `[PiAgentSession] listModels: returning ${models.length} models, first id: ${models[0]?.id}`
+      );
+
       this.send({
         type: "models_list",
         models,
