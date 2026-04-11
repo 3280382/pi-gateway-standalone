@@ -62,18 +62,6 @@ export function ModelParamsSection() {
   // 获取当前模型信息
   const currentModelInfo = models.find((m) => m.id === currentModel) || models[0];
 
-  // 如果正在加载模型，显示加载状态
-  if (isLoadingModels) {
-    return (
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>模型参数</h3>
-        </div>
-        <div className={styles.loading}>加载模型中...</div>
-      </section>
-    );
-  }
-
   // 模拟模型参数（实际应从API获取）
   const modelParams: ModelParam[] = [
     {
@@ -150,6 +138,18 @@ export function ModelParamsSection() {
   }, []);
 
   // ========== 6. Render ==========
+  // 如果正在加载模型，显示加载状态
+  if (isLoadingModels) {
+    return (
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h3 className={styles.sectionTitle}>模型参数</h3>
+        </div>
+        <div className={styles.loading}>加载模型中...</div>
+      </section>
+    );
+  }
+
   return (
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
