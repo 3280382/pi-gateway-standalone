@@ -48,7 +48,7 @@ function LlmLogModal({
       <div data-testid="log-content">
         {logs.length === 0 ? <p>No logs</p> : logs.map((log, i) => <div key={i}>{log}</div>)}
       </div>
-      <button data-testid="close-btn" onClick={onClose}>
+      <button type="button" data-testid="close-btn" onClick={onClose}>
         Close
       </button>
     </div>

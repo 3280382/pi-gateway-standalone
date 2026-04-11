@@ -151,7 +151,7 @@ export function GitHistoryModal({ isOpen, filePath, fileName, onClose }: GitHist
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <div className={styles.header}>
             <span className={styles.title}>📜 {fileName}</span>
-            <button className={styles.close} onClick={onClose}>
+            <button type="button" className={styles.close} onClick={onClose}>
               ✕
             </button>
           </div>
@@ -173,14 +173,14 @@ export function GitHistoryModal({ isOpen, filePath, fileName, onClose }: GitHist
                       <span className={styles.author}>{commit.author}</span>
                       <span className={styles.date}>{formatDate(commit.date)}</span>
                       <div className={styles.actions}>
-                        <button
+                        <button type="button"
                           className={`${styles.btn} ${styles.cBtn}`}
                           onClick={() => handleViewContent(commit)}
                           title="View content"
                         >
                           📄
                         </button>
-                        <button
+                        <button type="button"
                           className={`${styles.btn} ${styles.dBtn}`}
                           onClick={() => handleViewDiff(commit)}
                           title="View diff"
@@ -204,7 +204,7 @@ export function GitHistoryModal({ isOpen, filePath, fileName, onClose }: GitHist
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.header}>
               <span className={styles.title}>📊 Diff: {diffModal.commit?.shortHash} → HEAD</span>
-              <button className={styles.close} onClick={closeDiffModal}>
+              <button type="button" className={styles.close} onClick={closeDiffModal}>
                 ✕
               </button>
             </div>

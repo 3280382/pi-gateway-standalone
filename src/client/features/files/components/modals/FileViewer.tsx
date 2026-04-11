@@ -248,13 +248,13 @@ export function FileViewer() {
             <span>{fileName}</span>
             <span className={styles.type}>{mode.toUpperCase()}</span>
             {mode === "edit" && language && <span className={styles.lang}>{language}</span>}
-            <button className={styles.btnCopyPath} onClick={copyPath} title="Copy absolute path">
+            <button type="button" className={styles.btnCopyPath} onClick={copyPath} title="Copy absolute path">
               <CopyIcon />
             </button>
           </div>
           <div className={styles.actions}>
             {mode === "view" && (
-              <button
+              <button type="button"
                 className={`${styles.btnToggle} ${showInvisibleChars ? styles.active : ""}`}
                 onClick={toggleShowInvisibleChars}
                 title="Show invisible characters (spaces, tabs, line breaks)"
@@ -263,16 +263,16 @@ export function FileViewer() {
               </button>
             )}
             {mode === "view" && fileTypes.isExecutable && (
-              <button className={styles.btnExecute} onClick={() => setMode("execute")}>
+              <button type="button" className={styles.btnExecute} onClick={() => setMode("execute")}>
                 ▶ Execute
               </button>
             )}
             {mode === "view" && fileTypes.isEditable && (
-              <button className={styles.btnEdit} onClick={() => setMode("edit")}>
+              <button type="button" className={styles.btnEdit} onClick={() => setMode("edit")}>
                 ✎ Edit
               </button>
             )}
-            <button className={styles.btnClose} onClick={closeViewer}>
+            <button type="button" className={styles.btnClose} onClick={closeViewer}>
               ✕
             </button>
           </div>
@@ -322,10 +322,10 @@ export function FileViewer() {
         {/* 底部操作 */}
         {mode === "edit" && (
           <div className={styles.footer}>
-            <button className={styles.btnSecondary} onClick={() => setMode("view")}>
+            <button type="button" className={styles.btnSecondary} onClick={() => setMode("view")}>
               Cancel
             </button>
-            <button className={styles.btnPrimary} onClick={saveFile} disabled={isSaving}>
+            <button type="button" className={styles.btnPrimary} onClick={saveFile} disabled={isSaving}>
               {isSaving ? "Saving..." : "Save (Ctrl+S)"}
             </button>
           </div>
@@ -333,10 +333,10 @@ export function FileViewer() {
 
         {mode === "execute" && (
           <div className={styles.footer}>
-            <button className={styles.btnSecondary} onClick={clearTerminal}>
+            <button type="button" className={styles.btnSecondary} onClick={clearTerminal}>
               Clear
             </button>
-            <button className={styles.btnDanger} onClick={stopExecution} disabled={!isExecuting}>
+            <button type="button" className={styles.btnDanger} onClick={stopExecution} disabled={!isExecuting}>
               Stop
             </button>
           </div>

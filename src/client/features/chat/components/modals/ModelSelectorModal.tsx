@@ -60,7 +60,7 @@ export function ModelSelectorModal() {
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h3>Select Model</h3>
-          <button className={styles.closeBtn} onClick={closeModelSelector}>
+          <button type="button" className={styles.closeBtn} onClick={closeModelSelector}>
             ✕
           </button>
         </div>

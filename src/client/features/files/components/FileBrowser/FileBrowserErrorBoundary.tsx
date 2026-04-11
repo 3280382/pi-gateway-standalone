@@ -88,7 +88,7 @@ export class FileBrowserErrorBoundary extends Component<Props, State> {
             </ul>
           </div>
           <div className="error-actions">
-            <button className="retry-btn" onClick={this.handleRetry}>
+            <button type="button" className="retry-btn" onClick={this.handleRetry}>
               <svg
                 width="16"
                 height="16"
@@ -101,7 +101,7 @@ export class FileBrowserErrorBoundary extends Component<Props, State> {
               </svg>
               Retry
             </button>
-            <button className="refresh-btn" onClick={() => window.location.reload()}>
+            <button type="button" className="refresh-btn" onClick={() => window.location.reload()}>
               <svg
                 width="16"
                 height="16"

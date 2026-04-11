@@ -116,6 +116,7 @@ export function Icon({
       strokeLinejoin="round"
       className={`${styles.icon} ${className}`}
       style={iconStyle}
+      aria-label={name}
     >
       {iconContent}
     </svg>

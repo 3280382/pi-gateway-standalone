@@ -207,7 +207,7 @@ export function AppHeader({
       {/* Row 1: 工作目录、思考级别、PID/状态 */}
       <div className={styles.topRow}>
         {/* 工作目录按钮 */}
-        <button
+        <button type="button"
           className={styles.workingDirBtn}
           onClick={() => openDirectoryBrowser()}
           title={`Working Directory: ${workingDir || "Click to select"}`}
@@ -218,7 +218,7 @@ export function AppHeader({
 
         {/* 思考级别 - 移到第1行 */}
         <div className={styles.thinkingSelector}>
-          <button
+          <button type="button"
             className={styles.selectorBtn}
             onClick={() => setIsThinkingDropdownOpen(!isThinkingDropdownOpen)}
             disabled={isStreaming}
@@ -270,7 +270,7 @@ export function AppHeader({
             }}
           />
           {searchQuery && (
-            <button
+            <button type="button"
               className={styles.clearBtn}
               onClick={() => {
                 if (onSearchQueryChange) {
@@ -285,7 +285,7 @@ export function AppHeader({
             </button>
           )}
           {/* 过滤按钮 - 在输入框最尾部 */}
-          <button
+          <button type="button"
             className={`${styles.filterToggle} ${hasActiveFilters ? styles.active : ""}`}
             onClick={() => setIsFiltersVisible(!isFiltersVisible)}
             title="Filters"
@@ -325,7 +325,7 @@ export function AppHeader({
 
         {/* 模型选择 */}
         <div className={styles.modelSelector}>
-          <button
+          <button type="button"
             className={styles.selectorBtn}
             onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
             disabled={isStreaming}
@@ -374,7 +374,7 @@ function FilterChip({
   onChange: () => void;
 }) {
   return (
-    <button className={`${styles.filterChip} ${checked ? styles.checked : ""}`} onClick={onChange}>
+    <button type="button" className={`${styles.filterChip} ${checked ? styles.checked : ""}`} onClick={onChange}>
       {checked && <CheckIcon />}
       <span>{label}</span>
     </button>
@@ -540,13 +540,13 @@ function DirectoryPickerModal({
       <div className={styles.pickerModal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.pickerHeader}>
           <h4>Select Working Directory</h4>
-          <button className={styles.closeBtn} onClick={onClose}>
+          <button type="button" className={styles.closeBtn} onClick={onClose}>
             <XIcon />
           </button>
         </div>
         <div className={styles.currentPath}>{path}</div>
         <div className={styles.pickerActions}>
-          <button className={styles.selectBtn} onClick={handleSelect}>
+          <button type="button" className={styles.selectBtn} onClick={handleSelect}>
             Select This Directory
           </button>
         </div>

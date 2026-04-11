@@ -131,13 +131,13 @@ function DirectoryPicker({
       <div className={styles.picker} onClick={(e) => e.stopPropagation()}>
         <div className={styles.pickerHeader}>
           <h4>Select Working Directory</h4>
-          <button className={styles.closeBtn} onClick={onClose}>
+          <button type="button" className={styles.closeBtn} onClick={onClose}>
             ✕
           </button>
         </div>
         <div className={styles.currentPath}>{path}</div>
         <div className={styles.pickerActions}>
-          <button className={styles.selectBtn} onClick={() => onSelect(path)}>
+          <button type="button" className={styles.selectBtn} onClick={() => onSelect(path)}>
             Select This Directory
           </button>
         </div>

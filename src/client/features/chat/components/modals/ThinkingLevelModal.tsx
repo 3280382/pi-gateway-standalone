@@ -31,7 +31,7 @@ export function ThinkingLevelModal() {
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h3>Select Thinking Level</h3>
-          <button className={styles.closeBtn} onClick={closeThinkingLevel}>
+          <button type="button" className={styles.closeBtn} onClick={closeThinkingLevel}>
             ✕
           </button>
         </div>

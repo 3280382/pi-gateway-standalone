@@ -40,7 +40,7 @@ function SystemPromptModal({
           ))}
         </ul>
       </div>
-      <button data-testid="close-btn" onClick={onClose}>
+      <button type="button" data-testid="close-btn" onClick={onClose}>
         Close
       </button>
     </div>

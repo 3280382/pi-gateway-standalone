@@ -256,14 +256,14 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
           <span className={styles.logCount}>{logs.length}</span>
         </div>
         <div className={styles.actions}>
-          <button
+          <button type="button"
             className={`${styles.actionBtn} ${autoScroll ? styles.active : ""}`}
             onClick={() => setAutoScroll(!autoScroll)}
             title={autoScroll ? "Auto-scroll on" : "Auto-scroll off"}
           >
             <ScrollIcon />
           </button>
-          <button
+          <button type="button"
             className={styles.actionBtn}
             onClick={handleRefresh}
             title="Refresh"
@@ -271,14 +271,14 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
           >
             <RefreshIcon />
           </button>
-          <button
+          <button type="button"
             className={styles.actionBtn}
             onClick={() => setIsFullscreen(!isFullscreen)}
             title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
           >
             {isFullscreen ? <ExitFullscreenIcon /> : <FullscreenIcon />}
           </button>
-          <button className={styles.actionBtn} onClick={onClose} title="Close">
+          <button type="button" className={styles.actionBtn} onClick={onClose} title="Close">
             <CloseIcon />
           </button>
         </div>
@@ -346,7 +346,7 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
                 </span>
                 <span className={styles.modalTime}>{formatTimestamp(selectedLog.timestamp)}</span>
               </div>
-              <button
+              <button type="button"
                 className={styles.modalCloseBtn}
                 onClick={handleCloseFullscreen}
                 title="Close (Esc)"

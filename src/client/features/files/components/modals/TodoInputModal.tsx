@@ -58,7 +58,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
       <div className={styles.todoModal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.todoHeader}>
           <span className={styles.todoTitle}>📝 Add Todo</span>
-          <button className={styles.close} onClick={handleCancel}>
+          <button type="button" className={styles.close} onClick={handleCancel}>
             ✕
           </button>
         </div>
@@ -85,10 +85,10 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
         </div>
 
         <div className={styles.todoFooter}>
-          <button className={styles.todoCancelBtn} onClick={handleCancel} disabled={isSubmitting}>
+          <button type="button" className={styles.todoCancelBtn} onClick={handleCancel} disabled={isSubmitting}>
             Cancel
           </button>
-          <button
+          <button type="button"
             className={styles.todoSubmitBtn}
             onClick={handleSubmit}
             disabled={!todoText.trim() || isSubmitting}

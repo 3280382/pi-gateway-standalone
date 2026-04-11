@@ -293,37 +293,37 @@ export function SystemPromptModal() {
       <div className={`${styles.modal} ${styles.fullscreen}`} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h3>System Prompt & AGENTS.md</h3>
-          <button className={styles.closeBtn} onClick={closeSystemPrompt}>
+          <button type="button" className={styles.closeBtn} onClick={closeSystemPrompt}>
             ✕
           </button>
         </div>
 
         <div className={styles.tabs}>
-          <button
+          <button type="button"
             className={activeTab === "prompt" ? styles.activeTab : ""}
             onClick={() => setActiveTab("prompt")}
           >
             System Prompt
           </button>
-          <button
+          <button type="button"
             className={activeTab === "agents" ? styles.activeTab : ""}
             onClick={() => setActiveTab("agents")}
           >
             AGENTS.md ({data?.agentsFiles?.length || 0})
           </button>
-          <button
+          <button type="button"
             className={activeTab === "skills" ? styles.activeTab : ""}
             onClick={() => setActiveTab("skills")}
           >
             Skills ({data?.skills?.length || 0})
           </button>
-          <button
+          <button type="button"
             className={activeTab === "extensions" ? styles.activeTab : ""}
             onClick={() => setActiveTab("extensions")}
           >
             Extensions ({data?.extensions?.length || 0})
           </button>
-          <button
+          <button type="button"
             className={activeTab === "resources" ? styles.activeTab : ""}
             onClick={() => setActiveTab("resources")}
           >

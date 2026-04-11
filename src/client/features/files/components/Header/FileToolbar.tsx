@@ -102,7 +102,7 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
             onChange={(e) => handleFilterInputChange(e.target.value)}
             onClick={() => setIsFilterDropdownOpen(true)}
           />
-          <button
+          <button type="button"
             className={styles.filterComboBtn}
             onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
             title="Select filter"
@@ -133,7 +133,7 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
 
         {/* 排序 */}
         <div className={styles.sortCombo} ref={sortDropdownRef}>
-          <button
+          <button type="button"
             className={styles.sortComboBtn}
             onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
             title="Sort by"

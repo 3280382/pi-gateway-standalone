@@ -48,7 +48,7 @@ export function SidebarPanel({ currentView = "chat" }: SidebarPanelProps) {
         {error && (
           <div className={styles.error}>
             <span>{error}</span>
-            <button onClick={clearError}>×</button>
+            <button type="button" onClick={clearError}>×</button>
           </div>
         )}
         <RecentWorkspacesSection />
@@ -130,7 +130,7 @@ function RecentWorkspacesSection() {
           const isActive = currentPath === path || currentPath === safeWorkspace;
 
           return (
-            <button
+            <button type="button"
               key={path}
               className={`${styles.item} ${isActive ? styles.active : ""}`}
               onClick={() => handleSelect(path)}
@@ -213,7 +213,7 @@ function SessionItem({
   const timeStr = new Date(session.lastModified).toLocaleDateString();
 
   return (
-    <button
+    <button type="button"
       className={`${styles.item} ${isSelected ? styles.selected : ""}`}
       onClick={onClick}
       title={session.name}
@@ -248,7 +248,7 @@ function ChatSettingsSection() {
       <div className={styles.setting}>
         <span className={styles.label}>LLM Log</span>
         <div className={styles.controls}>
-          <button
+          <button type="button"
             className={`${styles.toggleBtn} ${llmLogConfig.enabled ? styles.enabled : ""}`}
             onClick={() => setLlmLogConfig({ enabled: !llmLogConfig.enabled })}
             title={llmLogConfig.enabled ? "Logging enabled" : "Logging disabled"}
@@ -256,7 +256,7 @@ function ChatSettingsSection() {
             <LogIcon />
             <span>{llmLogConfig.enabled ? "On" : "Off"}</span>
           </button>
-          <button className={styles.viewBtn} onClick={openLlmLog} title="View LLM Logs">
+          <button type="button" className={styles.viewBtn} onClick={openLlmLog} title="View LLM Logs">
             <ViewIcon />
           </button>
         </div>

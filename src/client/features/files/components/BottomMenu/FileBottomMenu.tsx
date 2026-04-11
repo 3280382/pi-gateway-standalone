@@ -48,17 +48,17 @@ export function FileBottomMenu() {
     <>
       <div className={styles.menu}>
         {/* 导航按钮组 */}
-        <button className={`${styles.btn} ${styles.navBtn}`} onClick={navigateHome} title="Home">
+        <button type="button" className={`${styles.btn} ${styles.navBtn}`} onClick={navigateHome} title="Home">
           <HomeIcon />
         </button>
-        <button
+        <button type="button"
           className={`${styles.btn} ${styles.navBtn}`}
           onClick={() => window.location.reload()}
           title="Refresh"
         >
           <RefreshIcon />
         </button>
-        <button
+        <button type="button"
           className={`${styles.btn} ${styles.navBtn}`}
           onClick={navigateUp}
           disabled={!canNavigateUp}
@@ -69,7 +69,7 @@ export function FileBottomMenu() {
         {/* 分隔 */}
         <div className={styles.divider} />
         {/* 视图切换 */}
-        <button
+        <button type="button"
           className={`${styles.btn} ${styles.viewBtn}`}
           onClick={toggleViewMode}
           title={viewMode === "grid" ? "List View" : "Grid View"}
@@ -79,21 +79,21 @@ export function FileBottomMenu() {
         {/* 分隔 */}
         <div className={styles.divider} />
         {/* 原有按钮 */}
-        <button
+        <button type="button"
           className={`${styles.btn} ${styles.newBtn}`}
           onClick={handleNewClick}
           title="New File"
         >
           <NewIcon />
         </button>
-        <button
+        <button type="button"
           className={`${styles.btn} ${styles.treeBtn}`}
           onClick={handleTreeClick}
           title="Tree View"
         >
           <TreeIcon />
         </button>
-        <button
+        <button type="button"
           className={`${styles.btn} ${styles.deleteBtn}`}
           onClick={handleDeleteClick}
           title="Delete"
@@ -103,7 +103,7 @@ export function FileBottomMenu() {
         {/* 分隔 */}
         <div className={styles.divider} />
         {/* Git 模式按钮 */}
-        <button
+        <button type="button"
           className={`${styles.btn} ${styles.gitBtn} ${isGitModeActive ? styles.active : ""}`}
           onClick={toggleGitMode}
           title={isGitModeActive ? "Git Mode (Active)" : "Git Mode"}
@@ -111,7 +111,7 @@ export function FileBottomMenu() {
           <GitIcon />
         </button>
         {/* Todo 按钮 */}
-        <button
+        <button type="button"
           className={`${styles.btn} ${styles.todoBtn} ${isTodoModeActive ? styles.active : ""}`}
           onClick={toggleTodoMode}
           title={isTodoModeActive ? "Todo Mode (Active)" : "Todo Mode"}
@@ -139,13 +139,13 @@ export function FileBottomMenu() {
               />
             </div>
             <div className={styles.modalActions}>
-              <button
+              <button type="button"
                 className={`${styles.modalBtn} ${styles.cancelBtn}`}
                 onClick={handleCancelNew}
               >
                 Cancel
               </button>
-              <button
+              <button type="button"
                 className={`${styles.modalBtn} ${styles.confirmBtn}`}
                 onClick={handleConfirmNew}
               >
@@ -165,13 +165,13 @@ export function FileBottomMenu() {
               Confirm Delete
             </div>
             <div className={styles.modalActions}>
-              <button
+              <button type="button"
                 className={`${styles.modalBtn} ${styles.cancelBtn}`}
                 onClick={handleCancelDelete}
               >
                 Cancel
               </button>
-              <button
+              <button type="button"
                 className={`${styles.modalBtn} ${styles.confirmBtn}`}
                 onClick={handleConfirmDelete}
                 style={{ background: "var(--accent-red)" }}

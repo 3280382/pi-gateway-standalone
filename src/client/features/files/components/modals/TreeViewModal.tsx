@@ -173,7 +173,7 @@ export function TreeViewModal({
         <div className={styles.header}>
           <div className={styles.headerRow}>
             <span className={styles.title}>{treeData?.path || "."}</span>
-            <button className={styles.closeBtn} onClick={onClose}>
+            <button type="button" className={styles.closeBtn} onClick={onClose}>
               ×
             </button>
           </div>
@@ -198,7 +198,7 @@ export function TreeViewModal({
                 onChange={(e) => setSearchText(e.target.value)}
               />
             )}
-            <button
+            <button type="button"
               className={`${styles.copyBtn} ${isCopySuccess ? styles.copied : ""}`}
               onClick={handleCopy}
               disabled={!filteredItems.length}
