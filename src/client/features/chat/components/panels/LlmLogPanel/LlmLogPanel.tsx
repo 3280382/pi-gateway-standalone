@@ -64,12 +64,11 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
         type: entry.type,
         model: entry.model,
         content: entry.content,
-        parsed: null,
       };
     }
   };
 
-  // Fetch logs from API
+// Fetch logs from API
   const fetchLogs = useCallback(async () => {
     try {
       const response = await fetch("/api/llm-log");
@@ -86,26 +85,8 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
       console.error("[LlmLogPanel] Failed to fetch logs:", error);
     }
   }, [parseLogEntry]);
-    if (!entry?.type) return null;
 
-    try {
-      const parsedContent = JSON.parse(entry.content);
-      return {
-        timestamp: entry.timestamp || new Date().toISOString(),
-        type: entry.type,
-        model: entry.model,
-        content: entry.content,
-        parsed: parsedContent,
-      };
-    } catch {
-      return {
-        timestamp: entry.timestamp || new Date().toISOString(),
-        type: entry.type,
-        model: entry.model,
-        content: entry.content,
-      };
-    }
-  };
+  
 
   // Initial fetch and polling
   useEffect(() => {
