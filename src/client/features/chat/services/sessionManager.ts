@@ -45,6 +45,8 @@ export interface SessionManagerAPI {
 	getLastSessionForDir: (dir: string) => string | undefined;
 	/** 检查 session 是否存在于当前列表 */
 	sessionExists: (sessionId: string) => boolean;
+	/** 加载指定目录的 sessions 列表 */
+	loadSessionsList: (dir: string) => Promise<Session[]>;
 }
 
 // ============================================================================
@@ -352,6 +354,30 @@ function sessionExists(sessionId: string): boolean {
 	return !!findSessionInList(sessions, sessionId);
 }
 
+/**
+ * 加载指定目录的 sessions 列表
+ */
+async function loadSessionsList(dir: string): Promise<Session[]> {
+	try {
+		const data = await fetchApi<{ sessions: any[] }>(
+			`/sessions?cwd=${encodeURIComponent(dir)}`,
+		);
+		const sessionsList = (data.sessions || []).map((s) => ({
+			id: s.path,
+			path: s.path,
+			name:
+				s.firstMessage?.slice(0, 35) || s.path.split("/").pop() || "Untitled",
+			messageCount: s.messageCount || 0,
+			lastModified: new Date(s.modified),
+			firstMessage: s.firstMessage,
+		}));
+		return sessionsList;
+	} catch (error) {
+		console.error("[SessionManager] 加载 sessions 列表失败:", error);
+		return [];
+	}
+}
+
 // ============================================================================
 // Public API
 // ============================================================================
@@ -362,6 +388,7 @@ export const sessionManager: SessionManagerAPI = {
 	createNewSession,
 	getLastSessionForDir,
 	sessionExists,
+	loadSessionsList,
 };
 
 // 为了兼容性，也提供 hook 版本
