@@ -79,10 +79,11 @@ export function useGitStatus() {
 			try {
 				console.log('调用getGitStatus API');
 				const statuses = await getGitStatus(workingDir);
-				console.log('获取到Git状态:', { 
+				console.log('获取到Git状态 - 完整数据:', { 
 					workingDir, 
 					statusCount: Object.keys(statuses).length,
-					statuses: Object.entries(statuses).slice(0, 5) // 只显示前5个
+					allStatusKeys: Object.keys(statuses),
+					allStatuses: statuses
 				});
 				fileBrowserDebug.debug("获取到Git状态", { 
 					workingDir, 
