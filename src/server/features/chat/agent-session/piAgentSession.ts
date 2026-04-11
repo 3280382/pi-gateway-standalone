@@ -81,7 +81,7 @@ export class PiAgentSession {
 
 	/** Current content block tracking for start/end events */
 	private currentContentBlock: {
-		type: 'thinking' | 'text' | 'tool' | null;
+		type: "thinking" | "text" | "tool" | null;
 		index: number;
 		toolCallId?: string;
 		toolName?: string;
@@ -111,22 +111,28 @@ export class PiAgentSession {
 	 */
 	async initialize(workingDir: string, sessionId?: string) {
 		console.log(`[PiAgentSession.initialize] ========== START ==========`);
-		console.log(`[PiAgentSession.initialize] Input: workingDir="${workingDir}", sessionId="${sessionId || 'not provided'}"`);
-		console.log(`[PiAgentSession.initialize] Current state: this.workingDir="${this.workingDir}", this.session exists: ${!!this.session}`);
-		
+		console.log(
+			`[PiAgentSession.initialize] Input: workingDir="${workingDir}", sessionId="${sessionId || "not provided"}"`,
+		);
+		console.log(
+			`[PiAgentSession.initialize] Current state: this.workingDir="${this.workingDir}", this.session exists: ${!!this.session}`,
+		);
+
 		// Check if we have an existing session with the same working directory
 		if (this.session && this.workingDir === workingDir) {
-			console.log(`[PiAgentSession.initialize] SAME DIRECTORY - Reconnecting to existing session`);
-			
+			console.log(
+				`[PiAgentSession.initialize] SAME DIRECTORY - Reconnecting to existing session`,
+			);
+
 			// Unsubscribe from old event handlers
 			if (this.unsubscribeFn) {
 				this.unsubscribeFn();
 				this.unsubscribeFn = null;
 			}
-			
+
 			// Re-setup event handlers (re-subscribe)
 			this.setupEventHandlers();
-			
+
 			// Return current session info
 			const loader = new DefaultResourceLoader({
 				cwd: workingDir,
@@ -134,7 +140,7 @@ export class PiAgentSession {
 				settingsManager: this.settingsManager,
 			});
 			await loader.reload();
-			
+
 			const result = {
 				sessionId: this.session.sessionId,
 				sessionFile: this.session.sessionFile,
@@ -152,13 +158,17 @@ export class PiAgentSession {
 					description: s.description,
 				})),
 			};
-			console.log(`[PiAgentSession.initialize] ========== END (same dir reconnect) ==========`);
+			console.log(
+				`[PiAgentSession.initialize] ========== END (same dir reconnect) ==========`,
+			);
 			return result;
 		}
 
 		// Different working directory or no existing session - use original logic
-		console.log(`[PiAgentSession.initialize] NEW DIRECTORY - Creating new session`);
-		
+		console.log(
+			`[PiAgentSession.initialize] NEW DIRECTORY - Creating new session`,
+		);
+
 		// Unsubscribe from old session events
 		if (this.unsubscribeFn) {
 			this.unsubscribeFn();
@@ -174,19 +184,31 @@ export class PiAgentSession {
 
 		this.workingDir = workingDir;
 		const localSessionsDir = getLocalSessionsDir(workingDir);
-		console.log(`[PiAgentSession.initialize] Set this.workingDir="${workingDir}"`);
-		console.log(`[PiAgentSession.initialize] localSessionsDir="${localSessionsDir}"`);
+		console.log(
+			`[PiAgentSession.initialize] Set this.workingDir="${workingDir}"`,
+		);
+		console.log(
+			`[PiAgentSession.initialize] localSessionsDir="${localSessionsDir}"`,
+		);
 
 		let sessionManager: ReturnType<typeof SessionManager.create> | undefined;
-		console.log(`[PiAgentSession.initialize] Looking for sessionId: "${sessionId || 'not provided'}"`);
+		console.log(
+			`[PiAgentSession.initialize] Looking for sessionId: "${sessionId || "not provided"}"`,
+		);
 
 		if (sessionId) {
 			// Try to find session by partial UUID in local sessions directory
-			console.log(`[PiAgentSession.initialize] Calling SessionManager.list("${workingDir}", "${localSessionsDir}")`);
+			console.log(
+				`[PiAgentSession.initialize] Calling SessionManager.list("${workingDir}", "${localSessionsDir}")`,
+			);
 			const sessions = await SessionManager.list(workingDir, localSessionsDir);
-			console.log(`[PiAgentSession.initialize] Found ${sessions.length} sessions in directory`);
+			console.log(
+				`[PiAgentSession.initialize] Found ${sessions.length} sessions in directory`,
+			);
 			sessions.forEach((s, i) =>
-				console.log(`[PiAgentSession.initialize]   [${i}] id=${s.id}, path=${s.path}`),
+				console.log(
+					`[PiAgentSession.initialize]   [${i}] id=${s.id}, path=${s.path}`,
+				),
 			);
 
 			const matching = sessions.find(
@@ -194,17 +216,23 @@ export class PiAgentSession {
 			);
 			console.log(
 				`[PiAgentSession.initialize] Matching result for sessionId "${sessionId}":`,
-				matching ? `FOUND id=${matching.id}, path=${matching.path}` : "NOT FOUND",
+				matching
+					? `FOUND id=${matching.id}, path=${matching.path}`
+					: "NOT FOUND",
 			);
 
 			if (matching) {
-				console.log(`[PiAgentSession.initialize] Opening existing session: ${matching.path}`);
+				console.log(
+					`[PiAgentSession.initialize] Opening existing session: ${matching.path}`,
+				);
 				sessionManager = SessionManager.open(matching.path, localSessionsDir);
 			}
 		}
 
 		if (!sessionManager) {
-			console.log(`[PiAgentSession.initialize] Creating NEW session for workingDir="${workingDir}"`);
+			console.log(
+				`[PiAgentSession.initialize] Creating NEW session for workingDir="${workingDir}"`,
+			);
 			sessionManager = SessionManager.create(workingDir, localSessionsDir);
 		}
 
@@ -374,7 +402,7 @@ export class PiAgentSession {
 		if (this.currentContentBlock.type === null) return;
 
 		switch (this.currentContentBlock.type) {
-			case 'thinking':
+			case "thinking":
 				console.log(`[${timestamp}] [SEND] thinking_end (implicit)`);
 				this.send({
 					type: "thinking_end",
@@ -382,7 +410,7 @@ export class PiAgentSession {
 					implicit: true,
 				});
 				break;
-			case 'text':
+			case "text":
 				console.log(`[${timestamp}] [SEND] text_end (implicit)`);
 				this.send({
 					type: "text_end",
@@ -390,8 +418,10 @@ export class PiAgentSession {
 					implicit: true,
 				});
 				break;
-			case 'tool':
-				console.log(`[${timestamp}] [SEND] toolcall_end (implicit): ${this.currentContentBlock.toolName}`);
+			case "tool":
+				console.log(
+					`[${timestamp}] [SEND] toolcall_end (implicit): ${this.currentContentBlock.toolName}`,
+				);
 				this.send({
 					type: "toolcall_end",
 					toolCallId: this.currentContentBlock.toolCallId,
@@ -406,10 +436,10 @@ export class PiAgentSession {
 
 	/**
 	 * Setup event handlers - 简化版本
-	 * 
+	 *
 	 * 核心事件流:
 	 * message_start (assistant) -> content blocks -> message_end
-	 * 
+	 *
 	 * Content blocks:
 	 * - thinking_start -> thinking_delta* -> thinking_end
 	 * - text_start -> text_delta* -> text_end
@@ -420,24 +450,26 @@ export class PiAgentSession {
 
 		this.unsubscribeFn = this.session.subscribe((event: AgentSessionEvent) => {
 			const timestamp = new Date().toISOString().split("T")[1].split(".")[0];
-			
+
 			switch (event.type) {
 				// Message 边界 - 只处理 assistant 消息
 				case "message_start": {
 					const startMsg = event.message;
-					if (startMsg.role === 'assistant') {
-						console.log(`[${timestamp}] [SEND] message_start: ${startMsg.id || 'new'}`);
+					if (startMsg.role === "assistant") {
+						console.log(
+							`[${timestamp}] [SEND] message_start: ${startMsg.id || "new"}`,
+						);
 						this.messageStarted = true;
 						this.send({ type: "message_start", message: startMsg });
 					}
 					break;
 				}
-				
+
 				case "message_end": {
 					const endMsg = event.message;
 					this.endCurrentContentBlock(timestamp);
-					
-					if (endMsg.role === 'assistant' && this.messageStarted) {
+
+					if (endMsg.role === "assistant" && this.messageStarted) {
 						console.log(`[${timestamp}] [SEND] message_end: ${endMsg.id}`);
 						this.send({ type: "message_end", message: endMsg });
 						this.messageStarted = false;
@@ -454,12 +486,19 @@ export class PiAgentSession {
 					switch (msgEvent.type) {
 						case "thinking_start": {
 							this.endCurrentContentBlock(timestamp);
-							this.currentContentBlock = { type: 'thinking', index: contentIndex };
+							this.currentContentBlock = {
+								type: "thinking",
+								index: contentIndex,
+							};
 							this.send({ type: "thinking_start", index: contentIndex });
 							break;
 						}
 						case "thinking_delta": {
-							this.send({ type: "thinking_delta", thinking: msgEvent.delta, index: contentIndex });
+							this.send({
+								type: "thinking_delta",
+								thinking: msgEvent.delta,
+								index: contentIndex,
+							});
 							break;
 						}
 						case "thinking_end": {
@@ -469,12 +508,16 @@ export class PiAgentSession {
 						}
 						case "text_start": {
 							this.endCurrentContentBlock(timestamp);
-							this.currentContentBlock = { type: 'text', index: contentIndex };
+							this.currentContentBlock = { type: "text", index: contentIndex };
 							this.send({ type: "text_start", index: contentIndex });
 							break;
 						}
 						case "text_delta": {
-							this.send({ type: "text_delta", text: msgEvent.delta, index: contentIndex });
+							this.send({
+								type: "text_delta",
+								text: msgEvent.delta,
+								index: contentIndex,
+							});
 							break;
 						}
 						case "text_end": {
@@ -487,7 +530,7 @@ export class PiAgentSession {
 							const toolCall = partial.content?.[contentIndex];
 							if (toolCall?.type === "toolCall") {
 								this.currentContentBlock = {
-									type: 'tool',
+									type: "tool",
 									index: contentIndex,
 									toolCallId: toolCall.id,
 									toolName: toolCall.name,
@@ -542,17 +585,20 @@ export class PiAgentSession {
 					});
 					break;
 				}
-				
+
 				case "tool_execution_end": {
 					const toolResult = event.result;
 					const toolName = event.toolName;
-					const isWriteOperation = toolName && writeFileTools.some(t => 
-						toolName.toLowerCase().includes(t.toLowerCase().replace('_', ''))
-					);
-					
+					const isWriteOperation =
+						toolName &&
+						writeFileTools.some((t) =>
+							toolName.toLowerCase().includes(t.toLowerCase().replace("_", "")),
+						);
+
 					if (isWriteOperation && !event.isError) {
 						const args = (event as any).args;
-						const filePath = args?.path || args?.file_path || args?.filepath || args?.filePath;
+						const filePath =
+							args?.path || args?.file_path || args?.filepath || args?.filePath;
 						if (typeof filePath === "string") {
 							this.sendToolEndWithFileContent(
 								event.toolCallId,
@@ -563,7 +609,7 @@ export class PiAgentSession {
 							break;
 						}
 					}
-					
+
 					this.send({
 						type: "tool_execution_end",
 						toolCallId: event.toolCallId,
@@ -668,13 +714,18 @@ export class PiAgentSession {
 			// Check if we need to reinitialize to ensure correct working directory
 			const currentSessionFile = this.session.sessionFile;
 			const expectedSessionsDir = getLocalSessionsDir(this.workingDir);
-			
+
 			// If current session file is not in the expected directory, reinitialize
-			if (currentSessionFile && !currentSessionFile.startsWith(expectedSessionsDir)) {
-				console.log(`[Gateway] Session directory mismatch, reinitializing with: ${this.workingDir}`);
+			if (
+				currentSessionFile &&
+				!currentSessionFile.startsWith(expectedSessionsDir)
+			) {
+				console.log(
+					`[Gateway] Session directory mismatch, reinitializing with: ${this.workingDir}`,
+				);
 				await this.initialize(this.workingDir);
 			}
-			
+
 			await this.session.newSession();
 			this.send({
 				type: "session_info",

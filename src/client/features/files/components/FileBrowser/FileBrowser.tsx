@@ -6,6 +6,8 @@
  * - 通过 hooks 获取数据和操作
  */
 
+// ===== [ANCHOR:IMPORTS] =====
+
 import React from "react";
 import styles from "@/features/files/components/FileBrowser/FileBrowser.module.css";
 import { FileBrowserErrorBoundary } from "@/features/files/components/FileBrowser/FileBrowserErrorBoundary";
@@ -14,40 +16,39 @@ import { FileList } from "@/features/files/components/FileBrowser/FileList";
 
 import { FileActionBar } from "@/features/files/components/Header/FileActionBar";
 import { FileViewer } from "@/features/files/components/modals/FileViewer";
-import { useFileBrowser, useFileFiltering, useGitStatus } from "@/features/files/hooks";
+import {
+	useFileBrowser,
+	useFileFiltering,
+	useGitStatus,
+} from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { fileBrowserDebug } from "@/lib/debug";
+
+// ===== [ANCHOR:TYPES] =====
 
 interface FileBrowserProps {
 	onExecuteOutput?: (output: string) => void;
 	onOpenBottomPanel?: (output: string) => void;
 }
 
+// ===== [ANCHOR:COMPONENT] =====
+
 export function FileBrowser({
 	onExecuteOutput,
 	onOpenBottomPanel,
 }: FileBrowserProps) {
-	// ========== 1. State ==========
+	// ===== [ANCHOR:STATE] =====
 	const { viewMode, isLoading, error, items } = useFileStore();
-	// FileViewer store - 用于打开文件查看器
 	const { isOpen: isViewerOpen } = useFileViewerStore();
 
-	// ========== 2. Ref ==========
-	// 无直接DOM引用
-
-	// ========== 3. Effects ==========
-	// 使用useFileBrowser hook管理副作用
-	// 使用useFileBrowser hook管理副作用和刷新
+	// ===== [ANCHOR:HOOKS] =====
 	useFileBrowser();
-	
-	// 管理Git状态
 	useGitStatus();
 
-	// ========== 4. Computed ==========
+	// ===== [ANCHOR:COMPUTED] =====
 	const { filteredItems } = useFileFiltering();
 
-	// 调试日志
 	fileBrowserDebug.debug("FileBrowser 渲染", {
 		isLoading,
 		error,
@@ -55,10 +56,7 @@ export function FileBrowser({
 		filteredItemsCount: filteredItems.length,
 	});
 
-	// ========== 5. Actions ==========
-	// 通过hooks获取
-
-	// ========== 6. Render ==========
+	// ===== [ANCHOR:RENDER] =====
 	return (
 		<section className={styles.fileBrowserSection}>
 			<div className={styles.container}>

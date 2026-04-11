@@ -3,8 +3,8 @@
  */
 
 import { useMemo } from "react";
-import type { Message, MessageContent } from "@/features/chat/types/chat";
 import { useChatStore } from "@/features/chat/stores/chatStore";
+import type { Message, MessageContent } from "@/features/chat/types/chat";
 import { MessageItem } from "./MessageItem";
 import styles from "./MessageList.module.css";
 
@@ -94,9 +94,11 @@ export function MessageList({
 	// 合并所有消息
 	const allMessages = useMemo(() => {
 		if (!streamingMessageWithContent) return messages;
-		
+
 		// 检查是否已存在
-		const exists = messages.some((m) => m.id === streamingMessageWithContent.id);
+		const exists = messages.some(
+			(m) => m.id === streamingMessageWithContent.id,
+		);
 		if (exists) return messages;
 
 		return [...messages, streamingMessageWithContent];

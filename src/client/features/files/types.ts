@@ -14,7 +14,8 @@ export interface FileItem {
 	path: string;
 	isDirectory: boolean;
 	size?: number;
-	modified?: string;	extension?: string;
+	modified?: string;
+	extension?: string;
 	gitStatus?: string;
 }
 

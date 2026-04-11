@@ -9,7 +9,6 @@
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { FILES_BROWSER_PERSIST, FILES_STORAGE_KEYS, FILES_STORAGE_VERSION } from "./persist.config";
 import type {
 	BottomPanelType,
 	FileItem,
@@ -17,6 +16,11 @@ import type {
 	SortMode,
 	ViewMode,
 } from "@/features/files/types";
+import {
+	FILES_BROWSER_PERSIST,
+	FILES_STORAGE_KEYS,
+	FILES_STORAGE_VERSION,
+} from "./persist.config";
 
 // ============================================================================
 // Store State & Actions Types (内联定义)
@@ -213,33 +217,32 @@ export const useFileStore = create<FileState & FileActions>()(
 				// Git 模式操作
 				toggleGitMode: () =>
 					set((state) => ({ isGitModeActive: !state.isGitModeActive })),
-				setGitModeActive: (active: boolean) =>
-					set({ isGitModeActive: active }),
-				setGitHistoryFile: (file) =>
-					set({ gitHistoryFile: file }),
+				setGitModeActive: (active: boolean) => set({ isGitModeActive: active }),
+				setGitHistoryFile: (file) => set({ gitHistoryFile: file }),
 				updateFileGitStatuses: (statusMap: Record<string, string>) =>
 					set((state) => {
 						let hasChanges = false;
 						const newItems = state.items.map((item) => {
-							const newGitStatus = statusMap[item.path] || statusMap[item.name] || undefined;
-							
+							const newGitStatus =
+								statusMap[item.path] || statusMap[item.name] || undefined;
+
 							// 检查状态是否变化
 							if (item.gitStatus === newGitStatus) {
 								return item; // 没有变化，返回原对象
 							}
-							
+
 							hasChanges = true;
 							return {
 								...item,
 								gitStatus: newGitStatus,
 							};
 						});
-						
+
 						// 只有在有变化时才返回新数组
 						if (!hasChanges) {
 							return state; // 返回原状态，表示没有变化
 						}
-						
+
 						return { items: newItems };
 					}),
 
@@ -248,8 +251,7 @@ export const useFileStore = create<FileState & FileActions>()(
 					set((state) => ({ isTodoModeActive: !state.isTodoModeActive })),
 				setTodoModeActive: (active: boolean) =>
 					set({ isTodoModeActive: active }),
-				setTodoInputFile: (file) =>
-					set({ todoInputFile: file }),
+				setTodoInputFile: (file) => set({ todoInputFile: file }),
 			}),
 			{
 				name: FILES_STORAGE_KEYS.FILES_BROWSER,

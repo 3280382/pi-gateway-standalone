@@ -41,9 +41,11 @@ export function FileBottomMenu() {
 	// 刷新功能
 	const { refresh, viewMode, toggleViewMode } = useFileStore();
 	// Git 模式
-	const { isGitModeActive, toggleGitMode, gitHistoryFile, setGitHistoryFile } = useFileStore();
+	const { isGitModeActive, toggleGitMode, gitHistoryFile, setGitHistoryFile } =
+		useFileStore();
 	// Todo 模式
-	const { isTodoModeActive, toggleTodoMode, todoInputFile, setTodoInputFile } = useFileStore();
+	const { isTodoModeActive, toggleTodoMode, todoInputFile, setTodoInputFile } =
+		useFileStore();
 
 	return (
 		<>

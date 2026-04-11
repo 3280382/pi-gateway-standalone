@@ -3,6 +3,8 @@
  * 职责：纯布局容器，根据当前视图操作对应 feature 的 sidebar/panel
  */
 
+// ===== [ANCHOR:IMPORTS] =====
+
 import styles from "@/app/Footer.module.css";
 import { ToolMenu } from "@/app/Tools";
 import { IconButton, IconToggle } from "@/components/Icon/Icon";
@@ -10,7 +12,10 @@ import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useFileStore } from "@/features/files/stores";
 import { useAppStore } from "@/stores/appStore";
 
+// ===== [ANCHOR:COMPONENT] =====
+
 export function Footer() {
+	// ===== [ANCHOR:STATE] =====
 	const { currentView, setCurrentView } = useAppStore();
 
 	// Chat sidebar 状态
@@ -25,7 +30,7 @@ export function Footer() {
 	const filesPanelOpen = useFileStore((state) => state.isBottomPanelOpen);
 	const toggleFilesPanel = useFileStore((state) => state.toggleBottomPanel);
 
-	// 根据当前视图决定使用哪个状态
+	// ===== [ANCHOR:COMPUTED] =====
 	const isSidebarVisible =
 		currentView === "chat" ? chatSidebarVisible : filesSidebarVisible;
 	const toggleSidebar = () => {
@@ -36,7 +41,6 @@ export function Footer() {
 		}
 	};
 
-	// Panel 状态也根据视图切换
 	const isPanelOpen = currentView === "chat" ? chatPanelOpen : filesPanelOpen;
 	const togglePanel = () => {
 		if (currentView === "chat") {
@@ -46,8 +50,7 @@ export function Footer() {
 		}
 	};
 
-
-
+	// ===== [ANCHOR:RENDER] =====
 	return (
 		<nav className={styles.footer}>
 			{/* 左侧：侧边栏和面板切换 */}

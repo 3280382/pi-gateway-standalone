@@ -163,7 +163,9 @@ export function createNewChatSession(): boolean {
  * 发送切换目录请求
  */
 export function changeChatDirectory(path: string): boolean {
-	console.log(`[changeChatDirectory] Sending change_dir request: path="${path}"`);
+	console.log(
+		`[changeChatDirectory] Sending change_dir request: path="${path}"`,
+	);
 	const sent = websocketService.send("change_dir", { path });
 	console.log(`[changeChatDirectory] WebSocket send result: ${sent}`);
 	return sent;

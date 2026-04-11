@@ -7,7 +7,11 @@
  * - Feature 特定方法请在各自 feature 中封装
  */
 
+// ===== [ANCHOR:IMPORTS] =====
+
 import { wsLog } from "@/lib/logger";
+
+// ===== [ANCHOR:TYPES] =====
 
 // ServiceError definition
 export class ServiceError extends Error {
@@ -20,6 +24,8 @@ export class ServiceError extends Error {
 		this.name = "ServiceError";
 	}
 }
+
+// ===== [ANCHOR:EVENTS] =====
 
 export type WebSocketEvent =
 	| "connected"
@@ -82,6 +88,8 @@ export interface ConnectionStatus {
 	latency?: number;
 	url?: string;
 }
+
+// ===== [ANCHOR:WEBSOCKET_SERVICE] =====
 
 export class WebSocketService {
 	private ws: WebSocket | null = null;
@@ -447,6 +455,8 @@ export class WebSocketService {
 		});
 	}
 }
+
+// ===== [ANCHOR:EXPORTS] =====
 
 // 导出单例
 export const websocketService = new WebSocketService();

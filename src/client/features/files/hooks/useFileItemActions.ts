@@ -94,14 +94,20 @@ export function useFileItemActions(): UseFileItemActionsResult {
 
 				// Git 模式下，点击文件触发 Git 历史弹窗
 				if (isGitModeActive && !item.isDirectory) {
-					console.log("[useFileItemActions] Git mode - selecting file:", item.path);
+					console.log(
+						"[useFileItemActions] Git mode - selecting file:",
+						item.path,
+					);
 					setGitHistoryFile({ path: item.path, name: item.name });
 					return;
 				}
 
 				// Todo 模式下，点击文件弹出 Todo 输入框
 				if (isTodoModeActive && !item.isDirectory) {
-					console.log("[useFileItemActions] Todo mode - selecting file:", item.path);
+					console.log(
+						"[useFileItemActions] Todo mode - selecting file:",
+						item.path,
+					);
 					setTodoInputFile({ path: item.path, name: item.name });
 					return;
 				}
@@ -117,7 +123,16 @@ export function useFileItemActions(): UseFileItemActionsResult {
 				console.error("[useFileItemActions] handleTap error:", err);
 			}
 		},
-		[isMultiSelectMode, isGitModeActive, isTodoModeActive, storeToggleSelection, setWorkingDir, openViewer, setGitHistoryFile, setTodoInputFile],
+		[
+			isMultiSelectMode,
+			isGitModeActive,
+			isTodoModeActive,
+			storeToggleSelection,
+			setWorkingDir,
+			openViewer,
+			setGitHistoryFile,
+			setTodoInputFile,
+		],
 	);
 
 	const handleDoubleTap = useCallback(

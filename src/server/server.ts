@@ -10,9 +10,7 @@
  * - Core business logic migrated to features/
  */
 
-// ============================================================================
-// Step 1: Setup fetch interceptors before importing any SDK
-// ============================================================================
+// ===== [ANCHOR:STEP1_IMPORTS_LLM] =====
 
 import { Config } from "./config";
 import { setupLlmInterceptors } from "./features/chat/llm";
@@ -31,32 +29,24 @@ setupLlmInterceptors(llmLogManager, {
 	truncateLimit: Config.getLlmLogConfig().truncateLimit,
 });
 
-// ============================================================================
-// Step 2: Import other modules
-// ============================================================================
+// ===== [ANCHOR:STEP2_IMPORTS_MODULES] =====
 
 import { WebSocket, WebSocketServer } from "ws";
 import { z } from "zod";
 import { registerRoutes } from "./app/routes";
 
-// ============================================================================
 // Register WebSocket handlers (must be imported before wsRouter usage to trigger auto-registration)
-// ============================================================================
 import "./features/chat/ws-handlers/session/index";
 import "./features/chat/ws-handlers/message/index";
 import { PiAgentSession } from "./features/chat/agent-session/piAgentSession";
 import { type WSContext, wsRouter } from "./features/chat/ws-router";
 import { AppFactory } from "./lib/app-factory";
 
-// ============================================================================
-// Server start time for reload detection
-// ============================================================================
+// ===== [ANCHOR:CONSTANTS] =====
 
 const SERVER_START_TIME = Date.now();
 
-// ============================================================================
-// Global error handlers to prevent crashes
-// ============================================================================
+// ===== [ANCHOR:ERROR_HANDLERS] =====
 
 process.on("uncaughtException", (error) => {
 	console.error("[FATAL] Uncaught exception:", error);
@@ -71,40 +61,30 @@ process.on("unhandledRejection", (reason, promise) => {
 	);
 });
 
-// ============================================================================
-// Logger
-// ============================================================================
+// ===== [ANCHOR:LOGGER] =====
 
 const logger = new Logger({ level: LogLevel.INFO });
 
-// ============================================================================
-// WebSocket message validation Schema
-// ============================================================================
+// ===== [ANCHOR:VALIDATION_SCHEMA] =====
 
 const _WebSocketMessageSchema = z.object({
 	type: z.string(),
 	payload: z.record(z.unknown()).optional(),
 });
 
-// ============================================================================
-// Create Express app and server
-// ============================================================================
+// ===== [ANCHOR:APP_SETUP] =====
 
 const appFactory = AppFactory.createDefault();
 const app = appFactory.getApp();
 const server = appFactory.getServer();
 
-// ============================================================================
-// Register API routes
-// ============================================================================
+// ===== [ANCHOR:REGISTER_ROUTES] =====
 
 await registerRoutes(app, llmLogManager, SERVER_START_TIME);
 appFactory.setupNotFoundHandler();
 logger.info("API routes registered, 404 handler set");
 
-// ============================================================================
-// Setup WebSocket server
-// ============================================================================
+// ===== [ANCHOR:WEBSOCKET_SETUP] =====
 
 const wss = new WebSocketServer({ server });
 
@@ -206,9 +186,7 @@ wss.on("connection", (ws) => {
 	});
 });
 
-// ============================================================================
-// Graceful shutdown handling
-// ============================================================================
+// ===== [ANCHOR:GRACEFUL_SHUTDOWN] =====
 
 function setupGracefulShutdown() {
 	const shutdownSignals = ["SIGINT", "SIGTERM", "SIGQUIT"];
@@ -254,9 +232,7 @@ function setupGracefulShutdown() {
 
 setupGracefulShutdown();
 
-// ============================================================================
-// Start server (only when run directly)
-// ============================================================================
+// ===== [ANCHOR:SERVER_START] =====
 
 const isMainModule =
 	import.meta.url.endsWith(process.argv[1]) ||
@@ -285,9 +261,6 @@ if (isMainModule) {
 		});
 }
 
-// ============================================================================
-// Exports (for testing)
-// ============================================================================
+// ===== [ANCHOR:EXPORTS] =====
 
 export { app, llmLogManager, PiAgentSession, server, wss };
-// Test git status for server.ts

@@ -65,21 +65,23 @@ export const FileItem = memo<FileItemProps>(
 		const isGrid = viewMode === "grid";
 
 		// Git状态图标 - 简洁的圆形背景 + 白色SVG图标
-		console.log('FileItem渲染:', { 
-			name: item.name, 
+		console.log("FileItem渲染:", {
+			name: item.name,
 			gitStatus: item.gitStatus,
-			path: item.path 
+			path: item.path,
 		});
-		const gitStatusIcon = item.gitStatus ? {
-			untracked: { symbol: "U", color: "#f97316" }, // 橙色 - 未跟踪
-			modified: { symbol: "M", color: "#eab308" }, // 黄色 - 已修改
-			added: { symbol: "A", color: "#22c55e" }, // 绿色 - 已添加
-			deleted: { symbol: "D", color: "#ef4444" }, // 红色 - 已删除
-			renamed: { symbol: "R", color: "#8b5cf6" }, // 紫色 - 已重命名
-			copied: { symbol: "C", color: "#0ea5e9" }, // 蓝色 - 已复制
-			conflict: { symbol: "!", color: "#dc2626" }, // 深红色 - 冲突
-			other: { symbol: "?", color: "#ec4899" }, // 粉色 - 其他状态
-		}[item.gitStatus] : null;
+		const gitStatusIcon = item.gitStatus
+			? {
+					untracked: { symbol: "U", color: "#f97316" }, // 橙色 - 未跟踪
+					modified: { symbol: "M", color: "#eab308" }, // 黄色 - 已修改
+					added: { symbol: "A", color: "#22c55e" }, // 绿色 - 已添加
+					deleted: { symbol: "D", color: "#ef4444" }, // 红色 - 已删除
+					renamed: { symbol: "R", color: "#8b5cf6" }, // 紫色 - 已重命名
+					copied: { symbol: "C", color: "#0ea5e9" }, // 蓝色 - 已复制
+					conflict: { symbol: "!", color: "#dc2626" }, // 深红色 - 冲突
+					other: { symbol: "?", color: "#ec4899" }, // 粉色 - 其他状态
+				}[item.gitStatus]
+			: null;
 
 		// 组合样式
 		const itemClassName = [
@@ -172,9 +174,9 @@ export const FileItem = memo<FileItemProps>(
 				<span className={isGrid ? styles.gridIcon : styles.listIcon}>
 					{icon}
 					{gitStatusIcon && (
-						<span 
+						<span
 							className={styles.gitBadge}
-							style={{ 
+							style={{
 								backgroundColor: gitStatusIcon.color,
 							}}
 							title={`Git: ${item.gitStatus}`}

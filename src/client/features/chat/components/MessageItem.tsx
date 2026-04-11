@@ -66,47 +66,52 @@ function safeString(val: unknown): string {
  * 解析工具参数，提取关键信息用于顶部显示
  */
 function parseToolSummary(toolName: string, args: string | undefined): string {
-	if (!args) return '';
-	
+	if (!args) return "";
+
 	try {
 		const parsed = JSON.parse(args);
-		
+
 		// 文件写入类工具 - 显示文件路径
-		if (['write_file', 'create_file', 'edit_file', 'apply_diff'].includes(toolName)) {
-			const path = parsed.path || parsed.file_path || parsed.filepath || parsed.filePath;
+		if (
+			["write_file", "create_file", "edit_file", "apply_diff"].includes(
+				toolName,
+			)
+		) {
+			const path =
+				parsed.path || parsed.file_path || parsed.filepath || parsed.filePath;
 			if (path) {
 				// 简化路径显示
-				const shortPath = path.split('/').pop() || path;
+				const shortPath = path.split("/").pop() || path;
 				return `→ ${shortPath}`;
 			}
 		}
-		
+
 		// bash 命令 - 显示命令前20字符
-		if (toolName === 'bash' && parsed.command) {
+		if (toolName === "bash" && parsed.command) {
 			const cmd = parsed.command.slice(0, 25);
 			return cmd.length < parsed.command.length ? `${cmd}...` : cmd;
 		}
-		
+
 		// read/grep 等 - 显示路径
-		if (['read', 'grep', 'find'].includes(toolName)) {
+		if (["read", "grep", "find"].includes(toolName)) {
 			const path = parsed.path || parsed.file || parsed.pattern;
 			if (path) {
-				const shortPath = String(path).split('/').pop() || String(path);
+				const shortPath = String(path).split("/").pop() || String(path);
 				return shortPath.slice(0, 25);
 			}
 		}
-		
+
 		// 其他工具 - 显示第一个字符串参数
 		for (const key of Object.keys(parsed)) {
-			if (typeof parsed[key] === 'string' && parsed[key].length > 0) {
-				return `${key}: ${parsed[key].slice(0, 25)}${parsed[key].length > 25 ? '...' : ''}`;
+			if (typeof parsed[key] === "string" && parsed[key].length > 0) {
+				return `${key}: ${parsed[key].slice(0, 25)}${parsed[key].length > 25 ? "..." : ""}`;
 			}
 		}
 	} catch (e) {
 		// 解析失败返回原始参数的前30字符
-		return args.slice(0, 30) + (args.length > 30 ? '...' : '');
+		return args.slice(0, 30) + (args.length > 30 ? "..." : "");
 	}
-	return '';
+	return "";
 }
 
 /**
@@ -143,10 +148,7 @@ function formatToolArgs(
 		["write_file", "create_file", "edit_file", "apply_diff"].includes(toolName)
 	) {
 		const path =
-			parsed.path ||
-			parsed.file_path ||
-			parsed.filepath ||
-			parsed.filePath;
+			parsed.path || parsed.file_path || parsed.filepath || parsed.filePath;
 		if (path) firstLine = `// File: ${path}`;
 	} else if (toolName === "bash" && parsed.command) {
 		firstLine = `$ ${parsed.command}`;
@@ -257,7 +259,7 @@ function GlassCard({
 	// - 历史消息：text 展开，thinking/tool 折叠
 	const getDefaultExpanded = () => {
 		if (isNewMessage) return true;
-		if (block.type === 'text') return true;
+		if (block.type === "text") return true;
 		return false; // thinking, tool_use, tool 默认折叠
 	};
 	const [isExpanded, setIsExpanded] = useState(getDefaultExpanded);
@@ -269,7 +271,7 @@ function GlassCard({
 	useEffect(() => {
 		const wasStreaming = wasStreamingRef.current;
 		wasStreamingRef.current = isStreaming;
-		
+
 		// 只对新消息：流式结束（true -> false）且不是 text 类型时才折叠
 		if (isNewMessage && wasStreaming && !isStreaming && block.type !== "text") {
 			setIsExpanded(false);
@@ -277,18 +279,24 @@ function GlassCard({
 	}, [isStreaming, block.type, isNewMessage]);
 
 	// ========== 3. Actions ==========
-	const toggleExpand = useCallback((e?: React.MouseEvent) => {
-		// 如果点击的是复制按钮或内容区域，不触发折叠
-		if (e) {
-			const target = e.target as HTMLElement;
-			if (target.closest(`.${styles.btnCopy}`) || target.closest(`.${styles.content}`)) {
-				return;
+	const toggleExpand = useCallback(
+		(e?: React.MouseEvent) => {
+			// 如果点击的是复制按钮或内容区域，不触发折叠
+			if (e) {
+				const target = e.target as HTMLElement;
+				if (
+					target.closest(`.${styles.btnCopy}`) ||
+					target.closest(`.${styles.content}`)
+				) {
+					return;
+				}
 			}
-		}
-		if (block.type !== "text") {
-			setIsExpanded((prev) => !prev);
-		}
-	}, [block.type]);
+			if (block.type !== "text") {
+				setIsExpanded((prev) => !prev);
+			}
+		},
+		[block.type],
+	);
 
 	const copyToClipboard = useCallback((text: string) => {
 		navigator.clipboard.writeText(text);
@@ -339,14 +347,14 @@ function GlassCard({
 		case "tool_use": {
 			// 流式中的工具调用 - 只显示参数，没有结果
 			if (!showTools) return null;
-			
+
 			const toolName = block.toolName || "unknown";
 			const toolArgs = block.partialArgs ?? block.args;
-			
+
 			// 解析参数摘要和格式化
 			const summary = parseToolSummary(toolName, toolArgs);
 			const formattedArgs = formatToolArgs(toolName, toolArgs);
-			
+
 			return (
 				<div
 					className={`${styles.card} ${styles.toolUse} ${isStreaming ? styles.streaming : ""} ${isExpanded ? styles.expanded : styles.collapsed}`}
@@ -382,7 +390,9 @@ function GlassCard({
 						>
 							<div className={styles.toolSection}>
 								<div className={styles.toolSectionLabel}>Arguments:</div>
-								<pre className={styles.toolCode}><code>{formattedArgs}</code></pre>
+								<pre className={styles.toolCode}>
+									<code>{formattedArgs}</code>
+								</pre>
 							</div>
 						</div>
 					)}
@@ -393,7 +403,7 @@ function GlassCard({
 		case "tool": {
 			// tool 类型包含已完成的工具调用（参数 + 结果）
 			if (!showTools) return null;
-			
+
 			const toolName = block.toolName || "unknown";
 			const toolArgs = block.args;
 			const status = block.error
@@ -401,20 +411,23 @@ function GlassCard({
 				: block.output
 					? "success"
 					: "pending";
-			
+
 			// 格式化参数和结果
 			const formattedArgs = formatToolArgs(toolName, toolArgs);
 			const resultOutput = block.output || block.error || "";
 			const hasResult = !!resultOutput;
-			
+
 			// 完整内容（复制用）
 			const fullContent = hasResult
 				? `${formattedArgs}\n\n// Result:\n${resultOutput}`
 				: formattedArgs;
-			
+
 			// 摘要显示在顶部
-			const summary = parseToolSummary(toolName, typeof toolArgs === 'string' ? toolArgs : JSON.stringify(toolArgs));
-			
+			const summary = parseToolSummary(
+				toolName,
+				typeof toolArgs === "string" ? toolArgs : JSON.stringify(toolArgs),
+			);
+
 			return (
 				<div
 					className={`${styles.card} ${styles.toolUse} ${isStreaming ? styles.streaming : ""} ${block.error ? styles.toolError : block.output ? styles.toolSuccess : ""} ${isExpanded ? styles.expanded : styles.collapsed}`}
@@ -451,12 +464,16 @@ function GlassCard({
 							{/* 参数部分 */}
 							<div className={styles.toolSection}>
 								<div className={styles.toolSectionLabel}>Arguments:</div>
-								<pre className={styles.toolCode}><code>{formattedArgs}</code></pre>
+								<pre className={styles.toolCode}>
+									<code>{formattedArgs}</code>
+								</pre>
 							</div>
-							
+
 							{/* 结果部分（如果有） */}
 							{hasResult && (
-								<div className={`${styles.toolSection} ${block.error ? styles.toolSectionError : styles.toolSectionSuccess}`}>
+								<div
+									className={`${styles.toolSection} ${block.error ? styles.toolSectionError : styles.toolSectionSuccess}`}
+								>
 									<div className={styles.toolSectionLabel}>Result:</div>
 									<code>{resultOutput}</code>
 								</div>

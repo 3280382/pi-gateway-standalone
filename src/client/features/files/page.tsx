@@ -29,7 +29,8 @@ export function FilesPage() {
 	} = useFileStore();
 
 	// 从viewer store获取终端状态
-	const { terminalOutput, terminalCommand, setTerminalCommand } = useViewerStore();
+	const { terminalOutput, terminalCommand, setTerminalCommand } =
+		useViewerStore();
 
 	// ========== 2. Ref ==========
 	// 不再需要hasMountedRef

@@ -9,8 +9,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { browseDirectory } from "@/features/files/services/api/fileApi";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
+import { browseDirectory } from "@/features/files/services/api/fileApi";
 
 export interface FileItem {
 	name: string;

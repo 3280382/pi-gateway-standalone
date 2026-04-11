@@ -5,9 +5,9 @@
  * - 负责聊天面板的整体布局
  * - 协调 MessageList 和 InputArea 组件
  * - 不包含业务逻辑，只负责视图组合
- *
- * 结构规范：State → Ref → Effects → Computed → Actions → Render
  */
+
+// ===== [ANCHOR:IMPORTS] =====
 
 import { useChatPanel } from "@/features/chat/hooks/useChatPanel";
 import { useChatController } from "@/features/chat/services/api/chatApi";
@@ -26,8 +26,10 @@ import styles from "./ChatPanel.module.css";
 import { InputArea } from "./InputArea";
 import { MessageList } from "./MessageList";
 
+// ===== [ANCHOR:COMPONENT] =====
+
 export function ChatPanel() {
-	// ========== 1. State (Domain State from Zustand) ==========
+	// ===== [ANCHOR:STATE] =====
 	const messages = useChatStore(selectMessages);
 	const currentStreamingMessage = useChatStore(selectCurrentStreamingMessage);
 	const inputText = useChatStore(selectInputText);
@@ -36,18 +38,17 @@ export function ChatPanel() {
 	const searchQuery = useChatStore(selectSearchQuery);
 	const searchFilters = useChatStore(selectSearchFilters);
 
-	// ========== 2. Hooks (Business Logic) ==========
+	// ===== [ANCHOR:HOOKS] =====
 	const chatPanel = useChatPanel();
 	const chatController = useChatController();
 
-	// ========== 3. Computed ==========
-	// 应用搜索过滤
+	// ===== [ANCHOR:COMPUTED] =====
 	const filteredMessages = filterMessages(messages, {
 		query: searchQuery,
 		filters: searchFilters,
 	});
 
-	// ========== 4. Render ==========
+	// ===== [ANCHOR:RENDER] =====
 	return (
 		<div className={styles.panel}>
 			<div

@@ -120,7 +120,9 @@
 .gitBtn.active {
 	background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
 	color: #ffffff;
-	box-shadow: 0 0 12px rgba(139, 92, 246, 0.6), 0 0 24px rgba(139, 92, 246, 0.3);
+	box-shadow:
+		0 0 12px rgba(139, 92, 246, 0.6),
+		0 0 24px rgba(139, 92, 246, 0.3);
 	font-weight: 600;
 }
 
@@ -444,6 +446,8 @@
 .todoBtn.active {
 	background: linear-gradient(135deg, #f9e2af 0%, #fae7b9 100%);
 	color: #1a1b26;
-	box-shadow: 0 0 12px rgba(249, 226, 175, 0.6), 0 0 24px rgba(249, 226, 175, 0.3);
+	box-shadow:
+		0 0 12px rgba(249, 226, 175, 0.6),
+		0 0 24px rgba(249, 226, 175, 0.3);
 	font-weight: 600;
 }

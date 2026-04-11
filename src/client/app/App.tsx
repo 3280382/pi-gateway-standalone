@@ -2,6 +2,8 @@
  * App - Gateway Main Application
  */
 
+// ===== [ANCHOR:IMPORTS] =====
+
 import React, { Suspense, useRef } from "react";
 import { ErrorBoundary } from "@/app/ErrorBoundary";
 import { Footer } from "@/app/Footer";
@@ -13,6 +15,8 @@ import styles from "@/app/App.module.css";
 // 懒加载页面
 const ChatPage = React.lazy(() => import("@/features/chat/page"));
 const FilesPage = React.lazy(() => import("@/features/files/page"));
+
+// ===== [ANCHOR:KEEP_ALIVE_COMPONENT] =====
 
 /**
  * KeepAlive - 页面缓存容器
@@ -43,12 +47,16 @@ function KeepAlive({
 		<div
 			style={{
 				display: active ? "flex" : "none",
-              height: "100%",width: "100%",
+				height: "100%",
+				width: "100%",
 			}}
 		>
 			{children}
 		</div>
-	);}
+	);
+}
+
+// ===== [ANCHOR:APP_CONTENT_COMPONENT] =====
 
 function AppContent() {
 	const { currentView } = useAppStore();
@@ -75,6 +83,8 @@ function AppContent() {
 		</div>
 	);
 }
+
+// ===== [ANCHOR:EXPORTS] =====
 
 export default function App() {
 	return (

@@ -5,18 +5,16 @@
  * - 负责消息输入区域的 UI 渲染
  * - 包含输入框、工具栏、命令菜单、文件选择器、图片预览
  * - 不包含业务逻辑，通过 useInputArea hook 处理
- *
- * 结构规范：State → Ref → Effects → Computed → Actions → Render
  */
+
+// ===== [ANCHOR:IMPORTS] =====
 
 import { useCallback, useEffect, useRef } from "react";
 import { useInputArea } from "@/features/chat/hooks/useInputArea";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import styles from "./InputArea.module.css";
 
-// ============================================================================
-// Types
-// ============================================================================
+// ===== [ANCHOR:TYPES] =====
 
 interface InputAreaProps {
 	value: string;
@@ -36,9 +34,7 @@ interface InputAreaProps {
 	onNewSession?: () => void;
 }
 
-// ============================================================================
-// Component
-// ============================================================================
+// ===== [ANCHOR:COMPONENT] =====
 
 export function InputArea({
 	value,
@@ -51,11 +47,11 @@ export function InputArea({
 	onSendWithImages,
 	onNewSession,
 }: InputAreaProps) {
-	// ========== 1. Refs ==========
+	// ===== [ANCHOR:REFS] =====
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-	// ========== 2. Hooks (Business Logic) ==========
+	// ===== [ANCHOR:HOOKS] =====
 	const inputArea = useInputArea({
 		value,
 		isStreaming,
@@ -67,15 +63,14 @@ export function InputArea({
 		onSendWithImages,
 	});
 
-	// ========== 3. Effects ==========
-	// Auto-resize textarea when value is cleared
+	// ===== [ANCHOR:EFFECTS] =====
 	useEffect(() => {
 		if (value === "" && textareaRef.current) {
 			textareaRef.current.style.height = "auto";
 		}
 	}, [value]);
 
-	// ========== 4. Actions ==========
+	// ===== [ANCHOR:HANDLERS] =====
 	const autoResizeTextarea = useCallback(() => {
 		const textarea = textareaRef.current;
 		if (textarea) {
@@ -85,7 +80,7 @@ export function InputArea({
 		}
 	}, []);
 
-	// ========== 5. Render ==========
+	// ===== [ANCHOR:RENDER] =====
 	return (
 		<div className={styles.container}>
 			<input
@@ -209,12 +204,10 @@ export function InputArea({
 					value={value}
 					onChange={(e) => {
 						inputArea.handleChange(e);
-						// 使用 setTimeout 确保在状态更新后调整高度
 						setTimeout(autoResizeTextarea, 0);
 					}}
 					onKeyDown={(e) => {
 						inputArea.handleKeyDown(e);
-						// 使用 setTimeout 确保在状态更新后调整高度
 						setTimeout(autoResizeTextarea, 0);
 					}}
 					rows={2}
@@ -281,7 +274,8 @@ export function InputArea({
 	);
 }
 
-// Icons
+// ===== [ANCHOR:ICONS] =====
+
 function SendIcon() {
 	return (
 		<svg viewBox="0 0 24 24" fill="currentColor">
@@ -369,7 +363,8 @@ function CloseIcon() {
 	);
 }
 
-// System Prompt Button Component
+// ===== [ANCHOR:SUB_COMPONENTS] =====
+
 function SystemPromptButton({ isStreaming }: { isStreaming: boolean }) {
 	const openSystemPrompt = useModalStore((state) => state.openSystemPrompt);
 

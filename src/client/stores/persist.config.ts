@@ -10,8 +10,14 @@
  * - 各 feature 引用自己的配置文件
  */
 
-import { CHAT_STORAGE_KEYS, CHAT_STORAGE_VERSION } from "@/features/chat/stores/persist.config";
-import { FILES_STORAGE_KEYS, FILES_STORAGE_VERSION } from "@/features/files/stores/persist.config";
+import {
+	CHAT_STORAGE_KEYS,
+	CHAT_STORAGE_VERSION,
+} from "@/features/chat/stores/persist.config";
+import {
+	FILES_STORAGE_KEYS,
+	FILES_STORAGE_VERSION,
+} from "@/features/files/stores/persist.config";
 
 // ============================================================================
 // App Storage Keys
@@ -33,11 +39,7 @@ export const APP_STORAGE_VERSION = {
 // App Persist Fields
 // ============================================================================
 
-export const APP_GLOBAL_PERSIST = [
-	"currentView",
-	"theme",
-	"fontSize",
-] as const;
+export const APP_GLOBAL_PERSIST = ["currentView", "theme", "fontSize"] as const;
 
 // ============================================================================
 // 聚合所有 Storage Keys（供调试使用）

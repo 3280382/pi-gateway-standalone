@@ -39,6 +39,4 @@ export const FILES_BROWSER_PERSIST = [
 ] as const;
 
 /** Files Workspace Store - 持久化字段 */
-export const FILES_WORKSPACE_PERSIST = [
-	"recentWorkspaces",
-] as const;
+export const FILES_WORKSPACE_PERSIST = ["recentWorkspaces"] as const;

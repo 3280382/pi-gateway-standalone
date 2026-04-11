@@ -8,14 +8,14 @@
  * - 管理新会话创建
  */
 
+// ===== [ANCHOR:IMPORTS] =====
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useChatController } from "@/features/chat/services/api/chatApi";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import type { Message } from "@/features/chat/types/chat";
 
-// ============================================================================
-// Message Helpers
-// ============================================================================
+// ===== [ANCHOR:HELPERS] =====
 
 function createUserMessage(text: string): Message {
 	return {
@@ -40,9 +40,7 @@ function createErrorMessage(error: unknown): Message {
 	return createSystemMessage(`命令执行失败: ${errorText}`);
 }
 
-// ============================================================================
-// Command Execution Helper
-// ============================================================================
+// ===== [ANCHOR:COMMAND_EXECUTION] =====
 
 async function executeCommandWithMessages(
 	command: string,
@@ -63,6 +61,8 @@ async function executeCommandWithMessages(
 	}
 }
 
+// ===== [ANCHOR:TYPES] =====
+
 export interface UseChatPanelReturn {
 	// Refs
 	messagesRef: React.RefObject<HTMLDivElement | null>;
@@ -79,25 +79,28 @@ export interface UseChatPanelReturn {
 	handleNewSession: () => Promise<void>;
 }
 
+// ===== [ANCHOR:HOOK] =====
+
 export function useChatPanel(): UseChatPanelReturn {
+	// ===== [ANCHOR:REFS] =====
 	const messagesRef = useRef<HTMLDivElement>(null);
 
-	// 使用 state 而不是 ref，这样可以在变化时触发重新渲染和 useEffect
+	// ===== [ANCHOR:STATE] =====
 	const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
 
+	// ===== [ANCHOR:STORE_SELECTORS] =====
 	const inputText = useChatStore((state) => state.inputText);
 	const messages = useChatStore((state) => state.messages);
 	const currentStreamingMessage = useChatStore(
 		(state) => state.currentStreamingMessage,
 	);
-	// 流式状态，用于触发自动滚动
 	const streamingContent = useChatStore((state) => state.streamingContent);
 	const streamingThinking = useChatStore((state) => state.streamingThinking);
 	const chatController = useChatController();
 
+	// ===== [ANCHOR:EFFECTS] =====
 	// 首次加载时滚动到底部
 	useEffect(() => {
-		// 使用 setTimeout 确保 DOM 已经渲染完成
 		const timer = setTimeout(() => {
 			if (messagesRef.current) {
 				messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
@@ -111,26 +114,27 @@ export function useChatPanel(): UseChatPanelReturn {
 		if (messagesRef.current && shouldScrollToBottom) {
 			messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
 		}
-	}, [messages.length, currentStreamingMessage, streamingContent, streamingThinking, shouldScrollToBottom]);
+	}, [
+		messages.length,
+		currentStreamingMessage,
+		streamingContent,
+		streamingThinking,
+		shouldScrollToBottom,
+	]);
 
-	// 处理滚动事件，检测用户是否手动向上滚动
-	// 使用更大的容差值，避免工具输出瞬间内容高度变化导致的误判
+	// ===== [ANCHOR:HANDLERS] =====
 	const handleScroll = useCallback(() => {
 		if (messagesRef.current) {
 			const { scrollTop, scrollHeight, clientHeight } = messagesRef.current;
-			// 增加容差值到 100px，避免内容高度突然变化导致的误判
 			const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
-			// 用户向上滚动时，暂停自动滚动
 			if (!isAtBottom && shouldScrollToBottom) {
 				setShouldScrollToBottom(false);
 			}
 		}
 	}, [shouldScrollToBottom]);
 
-	// 发送消息 - 重新启用自动滚动
 	const handleSend = useCallback(async () => {
 		if (inputText.trim()) {
-			// 先重置滚动标志，确保新消息会滚动到底部
 			setShouldScrollToBottom(true);
 			try {
 				await chatController.sendMessage(inputText);
@@ -140,7 +144,6 @@ export function useChatPanel(): UseChatPanelReturn {
 		}
 	}, [inputText, chatController]);
 
-	// 处理 bash 命令
 	const handleBashCommand = useCallback(
 		(command: string) => {
 			setShouldScrollToBottom(true);
@@ -153,18 +156,15 @@ export function useChatPanel(): UseChatPanelReturn {
 		[chatController],
 	);
 
-	// 处理 slash 命令
 	const handleSlashCommand = useCallback(
 		(command: string, args: string) => {
 			setShouldScrollToBottom(true);
 
-			// 简单命令处理
 			if (command === "clear" || command === "new") {
 				chatController.clearMessages();
 				return;
 			}
 
-			// 需要发送给 LLM 的命令
 			if (
 				command !== "bash" &&
 				command !== "read" &&
@@ -179,7 +179,6 @@ export function useChatPanel(): UseChatPanelReturn {
 				return;
 			}
 
-			// 需要执行系统命令的情况
 			const isNoArgsCommand = command === "ls" || command === "tree";
 			if (!args && !isNoArgsCommand) return;
 
@@ -195,12 +194,12 @@ export function useChatPanel(): UseChatPanelReturn {
 		[chatController],
 	);
 
-	// 创建新会话
 	const handleNewSession = useCallback(async () => {
 		setShouldScrollToBottom(true);
 		await chatController.createNewSession();
 	}, [chatController]);
 
+	// ===== [ANCHOR:RETURN] =====
 	return {
 		messagesRef,
 		shouldScrollToBottom,

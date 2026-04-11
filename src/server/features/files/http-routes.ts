@@ -46,11 +46,9 @@ export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
 	app.get("/api/git/status", getGitStatusHandler);
 
 	// Todo controller
-	const {
-		addTodoHandler,
-		getTodosHandler,
-		toggleTodoHandler,
-	} = await import("./todo-controller");
+	const { addTodoHandler, getTodosHandler, toggleTodoHandler } = await import(
+		"./todo-controller"
+	);
 
 	// Todo routes
 	app.post("/api/todo/add", addTodoHandler);

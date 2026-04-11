@@ -39,7 +39,11 @@ interface FileToolbarProps {
 	onNavigate?: (path: string) => void;
 }
 
-export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarProps) {
+export function FileToolbar({
+	workingDir,
+	onRefresh,
+	onNavigate,
+}: FileToolbarProps) {
 	// ========== 1. State ==========
 	const {
 		sortMode,

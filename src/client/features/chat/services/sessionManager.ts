@@ -113,15 +113,19 @@ async function switchDirectory(
 	console.log("[SessionManager.switchDirectory] ========== START ==========");
 	console.log(`[SessionManager.switchDirectory] 1. targetDir="${targetDir}"`);
 	console.log(`[SessionManager.switchDirectory] 2. options=`, options);
-	console.log(`[SessionManager.switchDirectory] 3. current workingDir="${stores.sidebar.workingDir?.path}"`);
+	console.log(
+		`[SessionManager.switchDirectory] 3. current workingDir="${stores.sidebar.workingDir?.path}"`,
+	);
 
 	// 1. 更新 loading 状态
 	stores.sidebar.setLoading(true);
 
 	try {
 		// 2. 发送 WebSocket 请求
-		console.log(`[SessionManager.switchDirectory] 4. Sending change_dir request...`);
-		
+		console.log(
+			`[SessionManager.switchDirectory] 4. Sending change_dir request...`,
+		);
+
 		const response = await new Promise<{
 			cwd: string;
 			sessionId?: string;
@@ -129,21 +133,28 @@ async function switchDirectory(
 			pid?: number;
 		}>((resolve, reject) => {
 			const timeout = setTimeout(() => {
-				console.error(`[SessionManager.switchDirectory] TIMEOUT: 5s passed without response`);
+				console.error(
+					`[SessionManager.switchDirectory] TIMEOUT: 5s passed without response`,
+				);
 				reject(new Error("切换目录超时"));
 			}, 5000);
 
 			changeChatDirectory(targetDir);
 
 			const unsub = websocketService.on("dir_changed", (data) => {
-				console.log(`[SessionManager.switchDirectory] 5. Received dir_changed event:`, data);
+				console.log(
+					`[SessionManager.switchDirectory] 5. Received dir_changed event:`,
+					data,
+				);
 				clearTimeout(timeout);
 				unsub();
 				resolve(data as any);
 			});
 		});
 
-		console.log(`[SessionManager.switchDirectory] 6. Response received: cwd="${response.cwd}", sessionId="${response.sessionId}", sessionFile="${response.sessionFile}"`);
+		console.log(
+			`[SessionManager.switchDirectory] 6. Response received: cwd="${response.cwd}", sessionId="${response.sessionId}", sessionFile="${response.sessionFile}"`,
+		);
 
 		// 3. 更新各 store 的工作目录和连接状态
 		stores.sidebar.setWorkingDir(response.cwd);

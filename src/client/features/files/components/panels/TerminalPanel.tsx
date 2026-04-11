@@ -286,10 +286,7 @@ export function TerminalPanel({
 		>
 			{/* Resize handle */}
 			{!isFullscreen && (
-				<div
-					className={styles.resizeHandle}
-					onMouseDown={handleResizeStart}
-				>
+				<div className={styles.resizeHandle} onMouseDown={handleResizeStart}>
 					<div className={styles.resizeGrip} />
 				</div>
 			)}
@@ -308,11 +305,7 @@ export function TerminalPanel({
 					>
 						{isFullscreen ? <ExitFullscreenIcon /> : <FullscreenIcon />}
 					</button>
-					<button
-						className={styles.actionBtn}
-						onClick={onClose}
-						title="Close"
-					>
+					<button className={styles.actionBtn} onClick={onClose} title="Close">
 						<CloseIcon />
 					</button>
 				</div>

@@ -13,11 +13,12 @@ export { FileList } from "./FileBrowser/FileList";
 export { FileActionBar } from "./Header/FileActionBar";
 // Header
 export { FileToolbar } from "./Header/FileToolbar";
+
 // Modals
 
+// Modals - FileViewer
+export { FileViewer } from "./modals/FileViewer";
 // Panels
 export { TerminalPanel } from "./panels/TerminalPanel";
 // Sidebar
 export { FileSidebar } from "./Sidebar/FileSidebar";
-// Modals - FileViewer
-export { FileViewer } from "./modals/FileViewer";

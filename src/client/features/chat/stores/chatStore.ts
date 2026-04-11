@@ -21,6 +21,8 @@
  * - 工具调用使用 Map 存储，支持快速查找
  */
 
+// ===== [ANCHOR:IMPORTS] =====
+
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type {
@@ -31,9 +33,7 @@ import type {
 	ToolExecution,
 } from "@/features/chat/types/chat";
 
-// ============================================================================
-// Types
-// ============================================================================
+// ===== [ANCHOR:TYPES] =====
 
 interface ContentPart {
 	type: "thinking" | "text" | "tool" | "tool_use" | "turn_marker";
@@ -48,9 +48,7 @@ interface ContentPart {
 	turnNumber?: number;
 }
 
-// ============================================================================
-// Initial State Factory
-// ============================================================================
+// ===== [ANCHOR:INITIAL_STATE] =====
 
 const createInitialState = () => ({
 	messages: [] as Message[],
@@ -85,17 +83,13 @@ const createInitialState = () => ({
 
 type State = ReturnType<typeof createInitialState>;
 
-// ============================================================================
-// Message ID Generator
-// ============================================================================
+// ===== [ANCHOR:HELPERS] =====
 
 function generateMessageId(): string {
 	return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-// ============================================================================
-// Content Builder Helpers
-// ============================================================================
+// ===== [ANCHOR:CONTENT_BUILDERS] =====
 
 interface ContentPartWithOrder extends ContentPart {
 	_order: number;
@@ -116,11 +110,13 @@ const ORDER = {
 function buildThinkingContent(singleThinking: string): ContentPartWithOrder[] {
 	if (!singleThinking) return [];
 
-	return [{
-		type: "thinking",
-		thinking: singleThinking,
-		_order: ORDER.THINKING_BASE,
-	}];
+	return [
+		{
+			type: "thinking",
+			thinking: singleThinking,
+			_order: ORDER.THINKING_BASE,
+		},
+	];
 }
 
 /**
@@ -218,9 +214,7 @@ function buildContentArray(state: State): ContentPart[] {
 		.map(({ _order, ...rest }) => rest as ContentPart);
 }
 
-// ============================================================================
-// RAF Batch Update System
-// ============================================================================
+// ===== [ANCHOR:RAF_SYSTEM] =====
 
 /** 待处理的 RAF 更新 */
 interface PendingUpdates {
@@ -238,11 +232,11 @@ let pendingContentUpdates: PendingUpdates = {};
  */
 function getPreservedContent(existingContent: any[]): any[] {
 	if (!existingContent || existingContent.length === 0) return [];
-	
+
 	// 保留所有已固化的内容（thinking, text, tool_use, tool, turn_marker）
 	// 这些是已经通过 endContentBlock 固化的内容
-	return existingContent.filter((c: any) => 
-		['thinking', 'text', 'tool_use', 'tool', 'turn_marker'].includes(c.type)
+	return existingContent.filter((c: any) =>
+		["thinking", "text", "tool_use", "tool", "turn_marker"].includes(c.type),
 	);
 }
 
@@ -280,14 +274,14 @@ function buildFinalMessage(
 
 	// 构建剩余的流式内容（endContentBlock 后可能还有未清空的）
 	const remainingContent: ContentPart[] = [];
-	
+
 	if (state.streamingThinking || finalThinkingToApply) {
 		remainingContent.push({
 			type: "thinking",
 			thinking: state.streamingThinking + finalThinkingToApply,
 		});
 	}
-	
+
 	state.streamingToolCalls.forEach((tool) => {
 		remainingContent.push({
 			type: "tool_use",
@@ -296,7 +290,7 @@ function buildFinalMessage(
 			partialArgs: tool.args,
 		});
 	});
-	
+
 	if (state.streamingContent || finalContentToApply) {
 		remainingContent.push({
 			type: "text",
@@ -521,9 +515,7 @@ function scheduleRafUpdate(
 	});
 }
 
-// ============================================================================
-// Store Creation
-// ============================================================================
+// ===== [ANCHOR:STORE] =====
 
 export const useChatStore = create<
 	State & {
@@ -540,8 +532,16 @@ export const useChatStore = create<
 		startStreaming: () => void;
 		createStreamingMessage: (messageId?: string) => void;
 		startNewTurn: () => void;
-		startContentBlock: (type: 'text' | 'thinking' | 'tool_use', index?: number, meta?: any) => void;
-		endContentBlock: (type: 'text' | 'thinking' | 'tool_use', index?: number, meta?: any) => void;
+		startContentBlock: (
+			type: "text" | "thinking" | "tool_use",
+			index?: number,
+			meta?: any,
+		) => void;
+		endContentBlock: (
+			type: "text" | "thinking" | "tool_use",
+			index?: number,
+			meta?: any,
+		) => void;
 		batchUpdateContent: (updates: {
 			content?: string;
 			thinking?: string;
@@ -666,21 +666,28 @@ export const useChatStore = create<
 			},
 
 			// 开始内容块
-			startContentBlock: (type: 'text' | 'thinking' | 'tool_use', index?: number, meta?: any) => {
-				console.log(`[ChatStore] startContentBlock: type=${type}, index=${index ?? '?'}`, meta);
+			startContentBlock: (
+				type: "text" | "thinking" | "tool_use",
+				index?: number,
+				meta?: any,
+			) => {
+				console.log(
+					`[ChatStore] startContentBlock: type=${type}, index=${index ?? "?"}`,
+					meta,
+				);
 				set(
 					(state) => {
 						if (!state.currentStreamingMessage) return {};
 
 						// 根据类型初始化相应的内容块
 						switch (type) {
-							case 'thinking':
+							case "thinking":
 								// 开始新的思考块
 								return { streamingThinking: "" };
-							case 'text':
+							case "text":
 								// 文本块在 content_delta 时处理
 								return {};
-							case 'tool_use':
+							case "tool_use":
 								// 工具调用块在 toolcall_delta 时初始化
 								if (meta?.toolCallId && meta?.toolName) {
 									const newToolCalls = new Map(state.streamingToolCalls);
@@ -701,36 +708,48 @@ export const useChatStore = create<
 			},
 
 			// 结束内容块 - 将流式内容固化到 currentStreamingMessage.content，然后清空流式状态
-			endContentBlock: (type: 'text' | 'thinking' | 'tool_use', index?: number, meta?: any) => {
-				console.log(`[ChatStore] endContentBlock: type=${type}, index=${index ?? '?'}`, meta);
-				
+			endContentBlock: (
+				type: "text" | "thinking" | "tool_use",
+				index?: number,
+				meta?: any,
+			) => {
+				console.log(
+					`[ChatStore] endContentBlock: type=${type}, index=${index ?? "?"}`,
+					meta,
+				);
+
 				set(
 					(state) => {
 						if (!state.currentStreamingMessage) return {};
-						
+
 						const existingContent = state.currentStreamingMessage.content || [];
 						let newBlock: ContentPart | null = null;
 						const updates: Partial<State> = {};
-						
+
 						switch (type) {
-							case 'thinking':
+							case "thinking":
 								if (state.streamingThinking) {
-									newBlock = { type: 'thinking', thinking: state.streamingThinking };
+									newBlock = {
+										type: "thinking",
+										thinking: state.streamingThinking,
+									};
 									updates.streamingThinking = "";
 								}
 								break;
-							case 'text':
+							case "text":
 								if (state.streamingContent) {
-									newBlock = { type: 'text', text: state.streamingContent };
+									newBlock = { type: "text", text: state.streamingContent };
 									updates.streamingContent = "";
 								}
 								break;
-							case 'tool_use':
+							case "tool_use":
 								if (meta?.toolCallId) {
-									const toolCall = state.streamingToolCalls.get(meta.toolCallId);
+									const toolCall = state.streamingToolCalls.get(
+										meta.toolCallId,
+									);
 									if (toolCall) {
 										newBlock = {
-											type: 'tool_use',
+											type: "tool_use",
 											toolCallId: toolCall.id,
 											toolName: toolCall.name,
 											partialArgs: toolCall.args,
@@ -742,14 +761,14 @@ export const useChatStore = create<
 								}
 								break;
 						}
-						
+
 						if (newBlock) {
 							updates.currentStreamingMessage = {
 								...state.currentStreamingMessage,
 								content: [...existingContent, newBlock],
 							};
 						}
-						
+
 						return updates;
 					},
 					false,
@@ -1008,7 +1027,10 @@ export const useChatStore = create<
 						const newToolCalls = new Map(state.streamingToolCalls);
 						const existing = newToolCalls.get(id);
 						if (existing) {
-							newToolCalls.set(id, { ...existing, args: existing.args + delta });
+							newToolCalls.set(id, {
+								...existing,
+								args: existing.args + delta,
+							});
 						} else {
 							newToolCalls.set(id, { id, name, args: delta });
 						}
@@ -1335,9 +1357,7 @@ export const useChatStore = create<
 	),
 );
 
-// ============================================================================
-// Selectors for Zustand - 优化重渲染性能
-// ============================================================================
+// ===== [ANCHOR:SELECTORS] =====
 
 export const selectMessages = (
 	state: ReturnType<typeof useChatStore.getState>,
@@ -1373,9 +1393,7 @@ export const selectIsSearching = (
 	state: ReturnType<typeof useChatStore.getState>,
 ) => state.isSearching;
 
-// ============================================================================
-// Message Filtering Helper
-// ============================================================================
+// ===== [ANCHOR:FILTER_HELPERS] =====
 
 export interface FilterOptions {
 	query: string;

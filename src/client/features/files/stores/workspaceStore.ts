@@ -5,7 +5,11 @@
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { FILES_WORKSPACE_PERSIST, FILES_STORAGE_KEYS, FILES_STORAGE_VERSION } from "./persist.config";
+import {
+	FILES_STORAGE_KEYS,
+	FILES_STORAGE_VERSION,
+	FILES_WORKSPACE_PERSIST,
+} from "./persist.config";
 
 export interface WorkspaceState {
 	recentWorkspaces: string[];
