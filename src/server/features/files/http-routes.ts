@@ -26,6 +26,7 @@ export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
 		getGitContentHandler,
 		getGitDiffHandler,
 		getGitHistoryHandler,
+		getGitStatusHandler,
 	} = await import("./git-controller");
 
 	app.post("/api/browse", browseDirectory);
@@ -42,6 +43,7 @@ export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
 	app.get("/api/git/content", getGitContentHandler);
 	app.get("/api/git/diff", getGitDiffHandler);
 	app.get("/api/git/check", checkGitRepoHandler);
+	app.get("/api/git/status", getGitStatusHandler);
 
 	// Todo controller
 	const {

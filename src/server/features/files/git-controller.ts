@@ -5,7 +5,7 @@
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import type { Request, Response } from "express";
-import { relative } from "node:path";
+import { relative, join } from "node:path";
 
 const execAsync = promisify(exec);
 
@@ -270,4 +270,96 @@ export async function checkGitRepoHandler(
 
   const isGit = await isGitRepo(workingDir);
   res.json({ isGitRepo: isGit });
+}
+
+/**
+ * GET /api/git/status - Get git status for files in a directory
+ */
+export async function getGitStatusHandler(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const { workingDir } = req.query as { workingDir: string };
+
+  if (!workingDir) {
+    res.status(400).json({
+      error: "Missing workingDir parameter",
+    });
+    return;
+  }
+
+  try {
+    // 检查是否为git仓库
+    const gitRoot = await getGitRoot(workingDir);
+    if (!gitRoot) {
+      res.json({ statuses: {} });
+      return;
+    }
+
+    // 获取git状态（简洁格式）
+    const { stdout } = await execAsync("git status --porcelain", { cwd: gitRoot });
+    
+    const statuses: Record<string, string> = {};
+    
+    // 解析porcelain格式的输出
+    // 格式: XY PATH
+    // 其中X为暂存区状态，Y为工作区状态
+    const lines = stdout.trim().split("\n");
+    for (const line of lines) {
+      if (line.trim() === "") continue;
+      
+      // 解析状态代码和文件路径
+      const status = line.substring(0, 2);
+      const path = line.substring(3);
+      
+      // 如果路径被引号包裹，去除引号
+      let filePath = path.trim();
+      if (filePath.startsWith('"') && filePath.endsWith('"')) {
+        filePath = filePath.slice(1, -1);
+      }
+      
+      // 将状态映射为更易读的格式
+      let displayStatus = "";
+      if (status === "??") {
+        displayStatus = "untracked";
+      } else if (status.startsWith("M")) {
+        displayStatus = "modified";
+      } else if (status.startsWith("A")) {
+        displayStatus = "added";
+      } else if (status.startsWith("D")) {
+        displayStatus = "deleted";
+      } else if (status.startsWith("R")) {
+        displayStatus = "renamed";
+      } else if (status.startsWith("C")) {
+        displayStatus = "copied";
+      } else if (status.startsWith("U")) {
+        displayStatus = "conflict";
+      } else {
+        displayStatus = "other";
+      }
+      
+      // 计算相对于 workingDir 的路径
+      let relativePath = filePath;
+      if (gitRoot !== workingDir) {
+        const absolutePath = join(gitRoot, filePath);
+        relativePath = relative(workingDir, absolutePath);
+        
+        // 如果相对路径以 ../ 开头，表示文件不在 workingDir 下
+        // 这种情况可能发生在子模块或特殊情况下
+        // 暂时保持原始路径
+        if (relativePath.startsWith("../")) {
+          relativePath = filePath;
+        }
+      }
+      
+      statuses[relativePath] = displayStatus;
+    }
+    
+    res.json({ statuses });
+  } catch (error) {
+    console.error("[Git] Failed to get git status:", error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "Failed to get git status",
+    });
+  }
 }

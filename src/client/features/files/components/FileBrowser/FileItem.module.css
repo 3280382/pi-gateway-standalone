@@ -129,6 +129,7 @@
 	font-size: 40px;
 	line-height: 1;
 	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+	position: relative;
 }
 
 .gridName {
@@ -209,6 +210,7 @@
 	width: 28px;
 	text-align: center;
 	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+	position: relative;
 }
 
 .listName {
@@ -272,4 +274,42 @@
 		min-width: 32px;
 		min-height: 32px;
 	}
+}
+
+/* Git Status Badge */
+.gitBadge {
+	position: absolute;
+	top: -2px;
+	right: -2px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 9px;
+	line-height: 1;
+	z-index: 10;
+	border: 1px solid var(--bg-primary);
+	box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
+.gridItem .gitBadge {
+	top: 8px;
+	right: 8px;
+	width: 14px;
+	height: 14px;
+	font-size: 8px;
+}
+
+.listItem .gitBadge {
+	position: relative;
+	top: 0;
+	right: 0;
+	display: inline-flex;
+	margin-left: 6px;
+	width: 14px;
+	height: 14px;
+	font-size: 8px;
+	vertical-align: middle;
 }

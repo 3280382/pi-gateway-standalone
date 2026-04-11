@@ -14,7 +14,7 @@ import { FileList } from "@/features/files/components/FileBrowser/FileList";
 
 import { FileActionBar } from "@/features/files/components/Header/FileActionBar";
 import { FileViewer } from "@/features/files/components/modals/FileViewer";
-import { useFileBrowser, useFileFiltering } from "@/features/files/hooks";
+import { useFileBrowser, useFileFiltering, useGitStatus } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { fileBrowserDebug } from "@/lib/debug";
@@ -40,6 +40,9 @@ export function FileBrowser({
 	// 使用useFileBrowser hook管理副作用
 	// 使用useFileBrowser hook管理副作用和刷新
 	useFileBrowser();
+	
+	// 管理Git状态
+	useGitStatus();
 
 	// ========== 4. Computed ==========
 	const { filteredItems } = useFileFiltering();

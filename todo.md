@@ -1,0 +1,2 @@
+- [x] /root/pi-gateway-standalone/src/client/app/App.tsx 查看这个文件的历史版本，它曾经有做过一个叫做keep alive的功能，就是为了可以。给chat和file有条件加载的功能，避免不必要的资源重复家长加载。把这个功能加回来。
+- [x] /root/pi-gateway-standalone/src/client/features/files/page.tsx 这个文件里面的某些组件默认如果是隐藏的话，其实也可以加上那个条件渲染，避免资源加载，就是前面是那个(条件 && <要轩辕的组件>)

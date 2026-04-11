@@ -15,6 +15,7 @@ export interface FileItem {
 	isDirectory: boolean;
 	size?: number;
 	modified?: string;	extension?: string;
+	gitStatus?: string;
 }
 
 export type ViewMode = "grid" | "list";

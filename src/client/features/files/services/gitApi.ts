@@ -29,6 +29,10 @@ export interface GitCheckResponse {
   isGitRepo: boolean;
 }
 
+export interface GitStatusResponse {
+  statuses: Record<string, string>;
+}
+
 /**
  * 获取文件的 Git 历史
  */
@@ -78,4 +82,14 @@ export async function checkGitRepo(workingDir: string): Promise<boolean> {
     `/git/check?workingDir=${encodeURIComponent(workingDir)}`,
   );
   return response.isGitRepo;
+}
+
+/**
+ * 获取工作目录下文件的 Git 状态
+ */
+export async function getGitStatus(workingDir: string): Promise<Record<string, string>> {
+  const response = await fetchApi<GitStatusResponse>(
+    `/git/status?workingDir=${encodeURIComponent(workingDir)}`,
+  );
+  return response.statuses;
 }

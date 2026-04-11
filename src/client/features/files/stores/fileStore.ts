@@ -93,6 +93,7 @@ export interface FileActions {
 	toggleGitMode: () => void;
 	setGitModeActive: (active: boolean) => void;
 	setGitHistoryFile: (file: { path: string; name: string } | null) => void;
+	updateFileGitStatuses: (statusMap: Record<string, string>) => void;
 
 	// Todo 模式操作
 	toggleTodoMode: () => void;
@@ -216,6 +217,13 @@ export const useFileStore = create<FileState & FileActions>()(
 					set({ isGitModeActive: active }),
 				setGitHistoryFile: (file) =>
 					set({ gitHistoryFile: file }),
+				updateFileGitStatuses: (statusMap: Record<string, string>) =>
+					set((state) => ({
+						items: state.items.map((item) => ({
+							...item,
+							gitStatus: statusMap[item.path] || statusMap[item.name] || undefined,
+						})),
+					})),
 
 				// Todo 模式操作
 				toggleTodoMode: () =>

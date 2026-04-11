@@ -64,6 +64,18 @@ export const FileItem = memo<FileItemProps>(
 		const icon = getFileIcon(item.extension, item.isDirectory);
 		const isGrid = viewMode === "grid";
 
+		// Git状态图标
+		const gitStatusIcon = item.gitStatus ? {
+			untracked: { symbol: "🆕", color: "#f97316" }, // 橙色
+			modified: { symbol: "📝", color: "#eab308" }, // 黄色
+			added: { symbol: "➕", color: "#22c55e" }, // 绿色
+			deleted: { symbol: "🗑️", color: "#ef4444" }, // 红色
+			renamed: { symbol: "🔀", color: "#8b5cf6" }, // 紫色
+			copied: { symbol: "📋", color: "#0ea5e9" }, // 蓝色
+			conflict: { symbol: "⚡", color: "#dc2626" }, // 深红色
+			other: { symbol: "❓", color: "#6b7280" }, // 灰色
+		}[item.gitStatus] : null;
+
 		// 组合样式
 		const itemClassName = [
 			isGrid ? styles.gridItem : styles.listItem,
@@ -154,6 +166,15 @@ export const FileItem = memo<FileItemProps>(
 				{/* Icon */}
 				<span className={isGrid ? styles.gridIcon : styles.listIcon}>
 					{icon}
+					{gitStatusIcon && (
+						<span 
+							className={styles.gitBadge}
+							style={{ backgroundColor: gitStatusIcon.color }}
+							title={`Git: ${item.gitStatus}`}
+						>
+							{gitStatusIcon.symbol}
+						</span>
+					)}
 				</span>
 
 				{/* Name */}
