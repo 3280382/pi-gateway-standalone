@@ -9,49 +9,50 @@ import type { Application } from "express";
  * 注册 Files Feature 的所有 HTTP 路由
  */
 export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
+  // File controller
   const {
-    batchDeleteFiles,
-    batchMoveFiles,
-    browseDirectory,
-    executeCommand,
-    getDirectoryTree,
-    getFileContent,
-    getRawFile,
-    writeFileContent,
-  } = await import("./controllers/file.controller");
+    browse,
+    tree,
+    content,
+    raw,
+    write,
+    batchDelete,
+    batchMove,
+    execute
+  } = await import("./file/file.controller");
 
   // Git controller
   const {
-    checkGitRepoHandler,
-    getGitContentHandler,
-    getGitDiffHandler,
-    getGitHistoryHandler,
-    getGitStatusHandler,
-  } = await import("./git-controller");
+    history,
+    content: gitContent,
+    diff,
+    check,
+    status
+  } = await import("./git/git.controller");
 
-  app.post("/api/browse", browseDirectory);
-  app.get("/api/files/tree", getDirectoryTree);
-  app.get("/api/files/content", getFileContent);
-  app.get("/api/files/raw", getRawFile);
-  app.post("/api/files/write", writeFileContent);
-  app.post("/api/files/batch-delete", batchDeleteFiles);
-  app.post("/api/files/batch-move", batchMoveFiles);
-  app.post("/api/execute", executeCommand);
+  app.post("/api/browse", browse);
+  app.get("/api/files/tree", tree);
+  app.get("/api/files/content", content);
+  app.get("/api/files/raw", raw);
+  app.post("/api/files/write", write);
+  app.post("/api/files/batch-delete", batchDelete);
+  app.post("/api/files/batch-move", batchMove);
+  app.post("/api/execute", execute);
 
   // Git routes
-  app.get("/api/git/history", getGitHistoryHandler);
-  app.get("/api/git/content", getGitContentHandler);
-  app.get("/api/git/diff", getGitDiffHandler);
-  app.get("/api/git/check", checkGitRepoHandler);
-  app.get("/api/git/status", getGitStatusHandler);
+  app.get("/api/git/history", history);
+  app.get("/api/git/content", gitContent);
+  app.get("/api/git/diff", diff);
+  app.get("/api/git/check", check);
+  app.get("/api/git/status", status);
 
   // Todo controller
-  const { addTodoHandler, getTodosHandler, toggleTodoHandler } = await import("./todo-controller");
+  const { add, list, toggle } = await import("./todo/todo.controller");
 
   // Todo routes
-  app.post("/api/todo/add", addTodoHandler);
-  app.get("/api/todo/list", getTodosHandler);
-  app.post("/api/todo/toggle", toggleTodoHandler);
+  app.post("/api/todo/add", add);
+  app.get("/api/todo/list", list);
+  app.post("/api/todo/toggle", toggle);
 }
 
 /**

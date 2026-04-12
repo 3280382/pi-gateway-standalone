@@ -1,5 +1,6 @@
 /**
  * Todo Controller - Todo 功能 API
+ * 对应 /api/todo/* 路由
  */
 
 import { appendFile, readFile, writeFile } from "node:fs/promises";
@@ -8,9 +9,9 @@ import type { Request, Response } from "express";
 const TODO_FILE = "todo.md";
 
 /**
- * 添加 todo 项
+ * 添加 todo 项 - 对应 /api/todo/add
  */
-export async function addTodoHandler(req: Request, res: Response): Promise<void> {
+export async function add(req: Request, res: Response): Promise<void> {
   const { workingDir, filePath, todoText } = req.body as {
     workingDir: string;
     filePath: string;
@@ -46,9 +47,9 @@ export async function addTodoHandler(req: Request, res: Response): Promise<void>
 }
 
 /**
- * 获取所有 todo
+ * 获取所有 todo - 对应 /api/todo/list
  */
-export async function getTodosHandler(req: Request, res: Response): Promise<void> {
+export async function list(req: Request, res: Response): Promise<void> {
   const { workingDir } = req.query as { workingDir: string };
 
   if (!workingDir) {
@@ -92,9 +93,9 @@ export async function getTodosHandler(req: Request, res: Response): Promise<void
 }
 
 /**
- * 切换 todo 状态
+ * 切换 todo 状态 - 对应 /api/todo/toggle
  */
-export async function toggleTodoHandler(req: Request, res: Response): Promise<void> {
+export async function toggle(req: Request, res: Response): Promise<void> {
   const { workingDir, todoId } = req.body as {
     workingDir: string;
     todoId: number;

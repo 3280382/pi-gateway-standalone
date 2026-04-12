@@ -1,5 +1,6 @@
 /**
- * Git Controller - Git History API
+ * Git Controller - Git API控制器
+ * 对应 /api/git/* 路由
  */
 
 import { exec } from "node:child_process";
@@ -53,7 +54,7 @@ function getRelativePath(gitRoot: string, filePath: string): string {
 }
 
 /**
- * Get git history for a file
+ * Get git history for a file - 对应 /api/git/history
  */
 async function getGitHistory(workingDir: string, filePath: string): Promise<GitCommit[]> {
   const gitRoot = await getGitRoot(workingDir);
@@ -95,7 +96,7 @@ async function getGitHistory(workingDir: string, filePath: string): Promise<GitC
 }
 
 /**
- * Get file content at specific commit
+ * Get file content at specific commit - 对应 /api/git/content
  */
 async function getFileContent(
   workingDir: string,
@@ -129,7 +130,7 @@ async function getFileContent(
 }
 
 /**
- * Get diff between commit and current
+ * Get diff between commit and current - 对应 /api/git/diff
  */
 async function getFileDiff(
   workingDir: string,
@@ -160,7 +161,7 @@ async function getFileDiff(
 /**
  * GET /api/git/history - Get git history for a file
  */
-export async function getGitHistoryHandler(req: Request, res: Response): Promise<void> {
+export async function history(req: Request, res: Response): Promise<void> {
   const { filePath, workingDir } = req.query as {
     filePath: string;
     workingDir: string;
@@ -190,7 +191,7 @@ export async function getGitHistoryHandler(req: Request, res: Response): Promise
 /**
  * GET /api/git/content - Get file content at specific commit
  */
-export async function getGitContentHandler(req: Request, res: Response): Promise<void> {
+export async function content(req: Request, res: Response): Promise<void> {
   const { filePath, commitHash, workingDir } = req.query as {
     filePath: string;
     commitHash: string;
@@ -227,7 +228,7 @@ export async function getGitContentHandler(req: Request, res: Response): Promise
 /**
  * GET /api/git/diff - Get diff between commit and current
  */
-export async function getGitDiffHandler(req: Request, res: Response): Promise<void> {
+export async function diff(req: Request, res: Response): Promise<void> {
   const { filePath, commitHash, workingDir } = req.query as {
     filePath: string;
     commitHash: string;
@@ -264,7 +265,7 @@ export async function getGitDiffHandler(req: Request, res: Response): Promise<vo
 /**
  * GET /api/git/check - Check if directory is git repo
  */
-export async function checkGitRepoHandler(req: Request, res: Response): Promise<void> {
+export async function check(req: Request, res: Response): Promise<void> {
   const { workingDir } = req.query as { workingDir: string };
 
   if (!workingDir) {
@@ -281,7 +282,7 @@ export async function checkGitRepoHandler(req: Request, res: Response): Promise<
 /**
  * GET /api/git/status - Get git status for files in a directory
  */
-export async function getGitStatusHandler(req: Request, res: Response): Promise<void> {
+export async function status(req: Request, res: Response): Promise<void> {
   const { workingDir } = req.query as { workingDir: string };
 
   if (!workingDir) {
@@ -355,11 +356,11 @@ export async function getGitStatusHandler(req: Request, res: Response): Promise<
       let displayStatus = "";
       if (status === "??") {
         displayStatus = "untracked";
-      } else if (status.startsWith("M")) {
+      } else if (status === " M" || status === "M ") {
         displayStatus = "modified";
-      } else if (status.startsWith("A")) {
+      } else if (status === "A " || status === " A") {
         displayStatus = "added";
-      } else if (status.startsWith("D")) {
+      } else if (status === "D " || status === " D") {
         displayStatus = "deleted";
       } else if (status.startsWith("R")) {
         displayStatus = "renamed";

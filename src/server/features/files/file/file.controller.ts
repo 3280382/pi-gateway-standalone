@@ -1,6 +1,6 @@
 /**
- * 文件控制器
- * 处理文件系统API请求
+ * File Controller - 文件系统API控制器
+ * 对应 /api/file/* 路由
  */
 
 import { homedir } from "node:os";
@@ -12,22 +12,22 @@ import { expandPath, getMimeType, isBinaryFile, isHighlightable, isPathAllowed }
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 浏览目录
+ * 浏览目录 - 对应 /api/browse
  */
-export async function browseDirectory(req: Request, res: Response) {
+export async function browse(req: Request, res: Response) {
   const { path: browsePath } = req.body;
   const targetPath = browsePath || homedir();
 
   // 记录请求来源信息
   const clientInfo = req.headers["user-agent"]?.substring(0, 50) || "unknown";
-  logger.info(`[browseDirectory] 收到请求: path="${targetPath}", client="${clientInfo}"`);
+  logger.info(`[browse] 收到请求: path="${targetPath}", client="${clientInfo}"`);
 
   try {
     const startTime = Date.now();
     const { readdir, stat } = await import("node:fs/promises");
     const entries = await readdir(targetPath, { withFileTypes: true });
 
-    logger.info(`[browseDirectory] 读取目录成功: ${entries.length} 个条目`);
+    logger.info(`[browse] 读取目录成功: ${entries.length} 个条目`);
 
     // 并行获取文件状态（限制并发数）
     const concurrencyLimit = 10;
@@ -76,7 +76,7 @@ export async function browseDirectory(req: Request, res: Response) {
     };
 
     logger.info(
-      `[browseDirectory] 响应成功: ${targetPath}, ${items.length} 个项目 (${items.filter((i) => i.isDirectory).length} 目录, ${items.filter((i) => !i.isDirectory).length} 文件), 耗时: ${Date.now() - startTime}ms`
+      `[browse] 响应成功: ${targetPath}, ${items.length} 个项目 (${items.filter((i) => i.isDirectory).length} 目录, ${items.filter((i) => !i.isDirectory).length} 文件), 耗时: ${Date.now() - startTime}ms`
     );
     res.json(response);
   } catch (error) {
@@ -93,9 +93,9 @@ export async function browseDirectory(req: Request, res: Response) {
 }
 
 /**
- * 获取目录树
+ * 获取目录树 - 对应 /api/files/tree
  */
-export async function getDirectoryTree(req: Request, res: Response) {
+export async function tree(req: Request, res: Response) {
   const rawPath = req.query.path as string;
 
   if (!rawPath) {
@@ -179,9 +179,9 @@ export async function getDirectoryTree(req: Request, res: Response) {
 }
 
 /**
- * 获取文件内容
+ * 获取文件内容 - 对应 /api/files/content
  */
-export async function getFileContent(req: Request, res: Response) {
+export async function content(req: Request, res: Response) {
   const rawPath = req.query.path as string;
 
   if (!rawPath) {
@@ -232,9 +232,9 @@ export async function getFileContent(req: Request, res: Response) {
 }
 
 /**
- * 获取原始文件（图片、HTML等）
+ * 获取原始文件 - 对应 /api/files/raw
  */
-export async function getRawFile(req: Request, res: Response) {
+export async function raw(req: Request, res: Response) {
   const rawPath = req.query.path as string;
 
   if (!rawPath) {
@@ -276,9 +276,9 @@ export async function getRawFile(req: Request, res: Response) {
 }
 
 /**
- * 写入文件内容
+ * 写入文件内容 - 对应 /api/files/write
  */
-export async function writeFileContent(req: Request, res: Response) {
+export async function write(req: Request, res: Response) {
   const { path: filePath, content } = req.body;
 
   if (!filePath || content === undefined) {
@@ -315,14 +315,8 @@ export async function writeFileContent(req: Request, res: Response) {
 }
 
 /**
- * 批量删除文件
- * 安全限制：
- * 1. 最多删除 100 个文件
- * 2. 禁止删除系统关键目录
- * 3. 所有路径必须通过 isPathAllowed 检查
- * 4. 记录详细日志
+ * 批量删除文件 - 对应 /api/files/batch-delete
  */
-
 // 禁止删除的系统关键目录（仅系统目录，不包括用户目录）
 const PROTECTED_PATHS = [
   "/",
@@ -344,7 +338,7 @@ const PROTECTED_PATHS = [
 
 const MAX_DELETE_COUNT = 100;
 
-export async function batchDeleteFiles(req: Request, res: Response) {
+export async function batchDelete(req: Request, res: Response) {
   const { paths } = req.body;
 
   // 参数校验
@@ -478,9 +472,9 @@ export async function batchDeleteFiles(req: Request, res: Response) {
 }
 
 /**
- * 批量移动文件
+ * 批量移动文件 - 对应 /api/files/batch-move
  */
-export async function batchMoveFiles(req: Request, res: Response) {
+export async function batchMove(req: Request, res: Response) {
   const { paths, targetPath } = req.body;
 
   if (!paths || !Array.isArray(paths) || paths.length === 0) {
@@ -587,9 +581,9 @@ export async function batchMoveFiles(req: Request, res: Response) {
 }
 
 /**
- * 执行命令（用于文件执行）
+ * 执行命令 - 对应 /api/execute
  */
-export async function executeCommand(req: Request, res: Response) {
+export async function execute(req: Request, res: Response) {
   const { command, cwd, streaming } = req.body;
 
   if (!command) {
