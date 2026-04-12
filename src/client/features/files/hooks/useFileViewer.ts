@@ -201,7 +201,7 @@ export function useFileViewer(): UseFileViewerResult {
       isEditable,
       extension: ext,
       language: LANG_MAP[ext] || "text",
-      fileApi.raw,
+      getRawFileUrl: fileApi.raw,
     };
   }, [ext]);
 
