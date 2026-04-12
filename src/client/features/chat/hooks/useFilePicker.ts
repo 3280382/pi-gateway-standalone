@@ -10,7 +10,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
-import { browseDirectory } from "@/features/files/services/api/fileApi";
+import * as fileApi from "@/features/files/services/api/fileApi";
 
 export interface FileItem {
   name: string;
@@ -58,7 +58,7 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
   const loadFileList = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     try {
-      const data = await browseDirectory(workingDir);
+      const data = await fileApi.browse(workingDir);
       const items: FileItem[] = [
         ...(data.parentPath !== data.workingDir
           ? [{ name: "..", path: data.parentPath, isDirectory: true }]

@@ -15,10 +15,7 @@ export {
   useSidebarController,
 } from "@/features/chat/services/api/sidebarApi";
 export { systemPromptApi } from "@/features/chat/services/api/systemPromptApi";
-export {
-  fileApi,
-  useFileController,
-} from "@/features/files/services/api/fileApi";
+export * as fileApi from "@/features/files/services/api/fileApi";
 
 // API Client
 export { fetchApi } from "./client";

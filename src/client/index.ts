@@ -21,10 +21,7 @@ export type {
   ToolExecution,
 } from "@/features/chat/types";
 // Files Feature
-export {
-  fileApi,
-  useFileController,
-} from "@/features/files/services/api/fileApi";
+export * as fileApi from "@/features/files/services/api/fileApi";
 export { useWorkspaceStore } from "@/features/files/stores";
 // Hooks
 export { useAppInitialization } from "@/hooks/useAppInitialization";

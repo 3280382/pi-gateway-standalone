@@ -2,56 +2,46 @@
  * Files Feature Services
  */
 
-// API 层（直接 HTTP 调用）
+// 命名空间导出 - 避免命名冲突
+export * as fileApi from "./api/fileApi";
+export * as fileOperationsApi from "./api/fileOperationsApi";
+export * as gitApi from "./api/gitApi";
+export * as todoApi from "./api/todoApi";
+
+// 类型导出
+export type {
+  BrowseResponse,
+  FileContentResponse,
+  TreeNode,
+  TreeResponse,
+} from "./api/fileApi";
+
+export type {
+  DirectoryData,
+} from "./api/fileOperationsApi";
+
+export type {
+  GitCommit,
+  GitHistoryResponse,
+  GitContentResponse,
+  GitDiffResponse,
+  GitCheckResponse,
+  GitStatusResponse,
+} from "./api/gitApi";
+
+export type {
+  TodoItem,
+  AddTodoParams,
+} from "./api/todoApi";
+
+// 工具函数保持直接导出（这些不会冲突）
 export {
-  type BrowseResponse,
-  browse,
-  checkPathExists,
-  execute,
-  type FileContentResponse,
   formatFileSize,
   getFileExtension,
   getFileIcon,
-  tree,
-  raw,
   getServerWorkingDir,
-  content,
-  type TreeNode,
-  type TreeResponse,
-  write,
+  checkPathExists,
 } from "./api/fileApi";
-
-export {
-  batchDeleteFiles,
-  batchMoveFiles,
-  createFile,
-  type DirectoryData,
-  executeFileByPath,
-  getFriendlyErrorMessage,
-  loadDirectoryContent,
-} from "./api/fileOperationsApi";
-
-export {
-  history,
-  content as gitContent,
-  diff,
-  check,
-  status,
-  type GitCommit,
-  type GitHistoryResponse,
-  type GitContentResponse,
-  type GitDiffResponse,
-  type GitCheckResponse,
-  type GitStatusResponse,
-} from "./api/gitApi";
-
-export {
-  add,
-  list,
-  toggle,
-  type TodoItem,
-  type AddTodoParams,
-} from "./api/todoApi";
 
 // Service 层（业务逻辑组合）
 export {
