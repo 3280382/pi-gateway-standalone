@@ -58,21 +58,19 @@ export function useChatInit(): { isConnecting: boolean } {
       const savedWorkingDir = useSessionStore.getState().workingDir;
       const currentSessionId = useSessionStore.getState().currentSessionId;
 
-      // 先尝试 init 获取服务器当前状态
-      const initResponse = await new Promise<InitResponse | null>((resolve) => {
-        const timeout = setTimeout(() => {
-          console.log("[ChatInit] init timeout, no active session on server");
-          resolve(null);
-        }, 3000);
+      console.log("[ChatInit] Saved state from localStorage:", {
+        savedWorkingDir,
+        currentSessionId,
+      });
 
-        const unsub = websocketService.on("initialized", (data: unknown) => {
-          clearTimeout(timeout);
-          unsub();
-          resolve(data as InitResponse);
-        });
-
-        // 发送 init 请求，带上当前 sessionId 以便服务器恢复现有 session
-        initChatWorkingDirectory(savedWorkingDir || "/root", currentSessionId || undefined);
+      // 发送 init 请求，带上当前 sessionId 以便服务器恢复现有 session
+      const initResponse = await initChatWorkingDirectory(
+        savedWorkingDir || "/root",
+        currentSessionId || undefined,
+        5000 // 5秒超时
+      ).catch((err) => {
+        console.log("[ChatInit] init error or timeout:", err);
+        return null;
       });
 
       // 3. 如果服务器返回 active session，恢复 UI
