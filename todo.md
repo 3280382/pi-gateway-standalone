@@ -1,5 +1,5 @@
 - [ ] /root/pi-gateway-standalone/src/server/features/files 重构服务器这个features的代码。不要修改或者新增任何业务逻辑功能。
-- [ ] /root/pi-gateway-standalone/src/server/features/files/http-routes.ts 进行一个命名尽量一致的重构。api/features/controller/function,比如说api/file/file/tree这个url对应的就是file文件夹的file代码文件的tree函数,把所有的文件夹文件名和函数名称都和这个API的url名名称直接对应起来。把所有不符合规范都移动到对应的文件夹，并且把它们重命名。
+- [ ] /root/pi-gateway-standalone/src/server/features/files/http-routes.ts 进行一个命名必一致的重构。api/features/controller/function,比如说api/file/file/tree这个url对应的就是file文件夹的file代码文件的tree函数,把所有的文件夹文件名和函数名称都和这个API的url名名称直接对应起来。把所有不符合规范都移动到对应的文件夹，并且把它们重命名。
 - [ ] /root/pi-gateway-standalone/src/server/features/files/todo-controller.ts 按照上面重构这个文件
 - [ ] /root/pi-gateway-standalone/src/server/features/files/git-controller.ts 按照上面通过这个文件
 - [ ] /root/pi-gateway-standalone/src/server/routes/git.routes.ts 应该移到file的文件夹，并按上面重构这个文件。

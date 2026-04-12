@@ -15,7 +15,7 @@ import type {
 
 // 浏览目录
 export async function browseDirectory(path: string): Promise<BrowseResponse> {
-  const response = await fetch("/api/browse", {
+  const response = await fetch("/api/files/file/browse", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ path }),
@@ -30,7 +30,7 @@ export async function browseDirectory(path: string): Promise<BrowseResponse> {
 
 // 获取文件树
 export async function getFileTree(path: string): Promise<TreeResponse> {
-  const response = await fetch(`/api/files/tree?path=${encodeURIComponent(path)}`);
+  const response = await fetch(`/api/files/file/tree?path=${encodeURIComponent(path)}`);
 
   if (!response.ok) {
     throw new Error(`Failed to load file tree: ${response.statusText}`);
@@ -111,7 +111,7 @@ export async function getFileTree(path: string): Promise<TreeResponse> {
 
 // 读取文件内容
 export async function readFile(path: string): Promise<FileContentResponse> {
-  const response = await fetch(`/api/files/content?path=${encodeURIComponent(path)}`);
+  const response = await fetch(`/api/files/file/content?path=${encodeURIComponent(path)}`);
 
   if (!response.ok) {
     throw new Error(`Failed to read file: ${response.statusText}`);
@@ -122,7 +122,7 @@ export async function readFile(path: string): Promise<FileContentResponse> {
 
 // 写入文件
 export async function writeFile(path: string, content: string): Promise<void> {
-  const response = await fetch("/api/files/write", {
+  const response = await fetch("/api/files/file/write", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ path, content }),
@@ -135,7 +135,7 @@ export async function writeFile(path: string, content: string): Promise<void> {
 
 // 获取原始文件（图片等）
 export function getRawFileUrl(path: string): string {
-  return `/api/files/raw?path=${encodeURIComponent(path)}`;
+  return `/api/files/file/raw?path=${encodeURIComponent(path)}`;
 }
 
 // 执行文件
@@ -156,7 +156,7 @@ export async function executeFile(path: string): Promise<ReadableStream<Uint8Arr
     command = `bash "${path}"`;
   }
 
-  const response = await fetch("/api/execute", {
+  const response = await fetch("/api/files/file/execute", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -233,7 +233,7 @@ export function getFileExtension(filename: string): string {
 // 检查路径是否存在
 export async function checkPathExists(path: string): Promise<boolean> {
   try {
-    const response = await fetch("/api/browse", {
+    const response = await fetch("/api/files/file/browse", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ path }),
@@ -247,7 +247,7 @@ export async function checkPathExists(path: string): Promise<boolean> {
 // 获取服务器当前工作目录
 export async function getServerWorkingDir(): Promise<string> {
   try {
-    const response = await fetch("/api/working-dir");
+    const response = await fetch("/api/workspace/workspace/working-dir");
     if (response.ok) {
       const data = await response.json();
       if (data.cwd) return data.cwd;

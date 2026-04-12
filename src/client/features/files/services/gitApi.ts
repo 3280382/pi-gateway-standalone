@@ -38,7 +38,7 @@ export interface GitStatusResponse {
  */
 export async function getGitHistory(filePath: string, workingDir: string): Promise<GitCommit[]> {
   const response = await fetchApi<GitHistoryResponse>(
-    `/git/history?filePath=${encodeURIComponent(filePath)}&workingDir=${encodeURIComponent(workingDir)}`
+    `/files/git/history?filePath=${encodeURIComponent(filePath)}&workingDir=${encodeURIComponent(workingDir)}`
   );
   return response.history;
 }
@@ -52,7 +52,7 @@ export async function getGitContent(
   workingDir: string
 ): Promise<string> {
   const response = await fetchApi<GitContentResponse>(
-    `/git/content?filePath=${encodeURIComponent(filePath)}&commitHash=${encodeURIComponent(commitHash)}&workingDir=${encodeURIComponent(workingDir)}`
+    `/files/git/content?filePath=${encodeURIComponent(filePath)}&commitHash=${encodeURIComponent(commitHash)}&workingDir=${encodeURIComponent(workingDir)}`
   );
   return response.content;
 }
@@ -66,7 +66,7 @@ export async function getGitDiff(
   workingDir: string
 ): Promise<string> {
   const response = await fetchApi<GitDiffResponse>(
-    `/git/diff?filePath=${encodeURIComponent(filePath)}&commitHash=${encodeURIComponent(commitHash)}&workingDir=${encodeURIComponent(workingDir)}`
+    `/files/git/diff?filePath=${encodeURIComponent(filePath)}&commitHash=${encodeURIComponent(commitHash)}&workingDir=${encodeURIComponent(workingDir)}`
   );
   return response.diff;
 }
@@ -76,7 +76,7 @@ export async function getGitDiff(
  */
 export async function checkGitRepo(workingDir: string): Promise<boolean> {
   const response = await fetchApi<GitCheckResponse>(
-    `/git/check?workingDir=${encodeURIComponent(workingDir)}`
+    `/files/git/check?workingDir=${encodeURIComponent(workingDir)}`
   );
   return response.isGitRepo;
 }
@@ -86,7 +86,7 @@ export async function checkGitRepo(workingDir: string): Promise<boolean> {
  */
 export async function getGitStatus(workingDir: string): Promise<Record<string, string>> {
   const response = await fetchApi<GitStatusResponse>(
-    `/git/status?workingDir=${encodeURIComponent(workingDir)}`
+    `/files/git/status?workingDir=${encodeURIComponent(workingDir)}`
   );
   return response.statuses;
 }

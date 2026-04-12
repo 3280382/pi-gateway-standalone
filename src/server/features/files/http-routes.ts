@@ -30,29 +30,30 @@ export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
     status
   } = await import("./git/git.controller");
 
-  app.post("/api/browse", browse);
-  app.get("/api/files/tree", tree);
-  app.get("/api/files/content", content);
-  app.get("/api/files/raw", raw);
-  app.post("/api/files/write", write);
-  app.post("/api/files/batch-delete", batchDelete);
-  app.post("/api/files/batch-move", batchMove);
-  app.post("/api/execute", execute);
-
-  // Git routes
-  app.get("/api/git/history", history);
-  app.get("/api/git/content", gitContent);
-  app.get("/api/git/diff", diff);
-  app.get("/api/git/check", check);
-  app.get("/api/git/status", status);
-
   // Todo controller
   const { add, list, toggle } = await import("./todo/todo.controller");
 
-  // Todo routes
-  app.post("/api/todo/add", add);
-  app.get("/api/todo/list", list);
-  app.post("/api/todo/toggle", toggle);
+  // File routes - /api/files/file/*
+  app.post("/api/files/file/browse", browse);
+  app.get("/api/files/file/tree", tree);
+  app.get("/api/files/file/content", content);
+  app.get("/api/files/file/raw", raw);
+  app.post("/api/files/file/write", write);
+  app.post("/api/files/file/batch-delete", batchDelete);
+  app.post("/api/files/file/batch-move", batchMove);
+  app.post("/api/files/file/execute", execute);
+
+  // Git routes - /api/files/git/*
+  app.get("/api/files/git/history", history);
+  app.get("/api/files/git/content", gitContent);
+  app.get("/api/files/git/diff", diff);
+  app.get("/api/files/git/check", check);
+  app.get("/api/files/git/status", status);
+
+  // Todo routes - /api/files/todo/*
+  app.post("/api/files/todo/add", add);
+  app.get("/api/files/todo/list", list);
+  app.post("/api/files/todo/toggle", toggle);
 }
 
 /**

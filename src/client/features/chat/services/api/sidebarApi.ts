@@ -48,7 +48,7 @@ export function useSidebarController(): SidebarController {
     loadWorkingDir: useCallback(async () => {
       store.setLoading(true);
       try {
-        const { cwd } = await fetchApi<WorkingDirResponse>("/working-dir");
+        const { cwd } = await fetchApi<WorkingDirResponse>("/workspace/workspace/working-dir");
         store.setWorkingDir(cwd);
       } catch (error) {
         const message = error instanceof Error ? error.message : "Failed to load working directory";
@@ -107,7 +107,7 @@ export function createSidebarController(): SidebarController {
     loadWorkingDir: async () => {
       store.setLoading(true);
       try {
-        const { cwd } = await fetchApi<WorkingDirResponse>("/working-dir");
+        const { cwd } = await fetchApi<WorkingDirResponse>("/workspace/workspace/working-dir");
         store.setWorkingDir(cwd);
       } catch (error) {
         const message = error instanceof Error ? error.message : "Failed to load working directory";
