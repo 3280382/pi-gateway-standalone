@@ -10,7 +10,7 @@
 // ===== [ANCHOR:IMPORTS] =====
 
 import { useEffect, useRef } from "react";
-import { status } from "@/features/files/services/api/gitApi";
+import * as gitApi from "@/features/files/services/api/gitApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { fileBrowserDebug } from "@/lib/debug";
 
@@ -63,7 +63,7 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
       fileBrowserDebug.debug("获取Git状态", { workingDir });
 
       try {
-        const statuses = await status(workingDir);
+        const statuses = await gitApi.status(workingDir);
 
         // 将状态映射转换为与文件项路径匹配的格式
         const itemStatusMap: Record<string, string> = {};

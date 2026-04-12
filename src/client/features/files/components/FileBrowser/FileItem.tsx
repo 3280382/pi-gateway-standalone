@@ -8,7 +8,7 @@
 
 import type React from "react";
 import { memo, useCallback, useRef, useState } from "react";
-import { getFileIcon } from "@/features/files/services/api/fileApi";
+import * as fileApi from "@/features/files/services/api/fileApi";
 import type { FileItem as FileItemType } from "@/features/files/stores/fileStore";
 import { formatDate, formatFileSize } from "@/lib/formatters";
 import styles from "./FileItem.module.css";
@@ -61,7 +61,7 @@ export const FileItem = memo<FileItemProps>(
     // 无外部副作用，使用事件处理器管理计时器
 
     // ========== 4. Computed ==========
-    const icon = getFileIcon(item.extension, item.isDirectory);
+    const icon = fileApi.getFileIcon(item.extension, item.isDirectory);
     const isGrid = viewMode === "grid";
 
     // Git状态图标 - 简洁的圆形背景 + 白色SVG图标

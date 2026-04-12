@@ -3,7 +3,7 @@
  */
 
 import { useState } from "react";
-import { add } from "@/features/files/services/api/todoApi";
+import * as todoApi from "@/features/files/services/api/todoApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import styles from "./Modals.module.css";
 
@@ -27,7 +27,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
 
     setIsSubmitting(true);
     try {
-      await add({
+      await todoApi.add({
         workingDir: PROJECT_ROOT,
         filePath,
         todoText: todoText.trim(),

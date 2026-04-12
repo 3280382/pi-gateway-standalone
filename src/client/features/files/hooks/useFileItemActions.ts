@@ -7,7 +7,7 @@
  */
 
 import { useCallback, useRef, useState } from "react";
-import { batchMoveFiles } from "@/features/files/services/api/fileOperationsApi";
+import * as fileOperationsApi from "@/features/files/services/api/fileOperationsApi";
 import type { FileItem } from "@/features/files/stores/fileStore";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
@@ -192,7 +192,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
       setDraggingItem(null);
 
       try {
-        await batchMoveFiles(selectedItems, targetItem.path);
+        await fileOperationsApi.batchMoveFiles(selectedItems, targetItem.path);
       } catch (error) {
         console.error("Move failed:", error);
       }

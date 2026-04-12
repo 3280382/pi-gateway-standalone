@@ -9,13 +9,7 @@
  */
 
 import { useCallback } from "react";
-import {
-  batchDeleteFiles,
-  batchMoveFiles,
-  createFile,
-  executeFileByPath,
-  loadDirectoryContent,
-} from "@/features/files/services/api/fileOperationsApi";
+import * as fileOperationsApi from "@/features/files/services/api/fileOperationsApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { fileBrowserDebug } from "@/lib/debug";
 
@@ -44,7 +38,7 @@ export function useFileOperations(): UseFileOperationsResult {
    */
   const refreshAfterOperation = useCallback(async () => {
     try {
-      const data = await loadDirectoryContent(workingDir);
+      const data = await fileOperationsApi.loadDirectoryContent(workingDir);
       setItems(data.items);
       setWorkingDir(data.workingDir);
       setParentPath(data.parentPath);
@@ -62,7 +56,7 @@ export function useFileOperations(): UseFileOperationsResult {
 
     try {
       fileBrowserDebug.info("批量删除文件", { paths: selectedItems });
-      await batchDeleteFiles(selectedItems);
+      await fileOperationsApi.batchDeleteFiles(selectedItems);
 
       // 刷新目录
       await refreshAfterOperation();
@@ -91,7 +85,7 @@ export function useFileOperations(): UseFileOperationsResult {
           paths: selectedItems,
           targetPath,
         });
-        await batchMoveFiles(selectedItems, targetPath);
+        await fileOperationsApi.batchMoveFiles(selectedItems, targetPath);
 
         // 刷新目录
         await refreshAfterOperation();
@@ -117,7 +111,7 @@ export function useFileOperations(): UseFileOperationsResult {
     async (fileName: string) => {
       try {
         fileBrowserDebug.info("创建新文件", { fileName, workingDir });
-        await createFile(workingDir, fileName);
+        await fileOperationsApi.createFile(workingDir, fileName);
 
         // 刷新目录
         await refreshAfterOperation();
@@ -139,7 +133,7 @@ export function useFileOperations(): UseFileOperationsResult {
     async (path: string, onOutput?: (output: string) => void) => {
       try {
         fileBrowserDebug.info("执行文件", { path });
-        const output = await executeFileByPath(path, onOutput);
+        const output = await fileOperationsApi.executeFileByPath(path, onOutput);
         fileBrowserDebug.info("执行文件成功", { path });
         return output;
       } catch (error) {

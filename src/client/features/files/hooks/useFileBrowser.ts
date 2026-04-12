@@ -10,10 +10,7 @@
 // ===== [ANCHOR:IMPORTS] =====
 
 import { useCallback, useEffect, useRef } from "react";
-import {
-  getFriendlyErrorMessage,
-  loadDirectoryContent,
-} from "@/features/files/services/api/fileOperationsApi";
+import * as fileOperationsApi from "@/features/files/services/api/fileOperationsApi";
 import { initializeFilePath } from "@/features/files/services/initialization";
 import { useFileStore } from "@/features/files/stores/fileStore";
 
@@ -70,12 +67,12 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
       setError(null);
 
       try {
-        const data = await loadDirectoryContent(path);
+        const data = await fileOperationsApi.loadDirectoryContent(path);
         lastLoadedPathRef.current = path;
         setItems(data.items);
         setParentPath(data.parentPath);
       } catch (err) {
-        const friendlyMessage = getFriendlyErrorMessage(err, path);
+        const friendlyMessage = fileOperationsApi.getFriendlyErrorMessage(err, path);
         setError(friendlyMessage);
       } finally {
         setLoading(false);

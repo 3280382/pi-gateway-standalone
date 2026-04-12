@@ -8,7 +8,8 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { tree, type TreeResponse } from "@/features/files/services/api/fileApi";
+import * as fileApi from "@/features/files/services/api/fileApi";
+import type { TreeResponse } from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { useFileOperations } from "./useFileOperations";
@@ -125,7 +126,7 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
     setIsTreeModalOpen(true);
     setIsTreeLoading(true);
     try {
-      const data = await tree(workingDir);
+      const data = await fileApi.tree(workingDir);
       setTreeData(data);
     } catch (error) {
       console.error("[TreeView] Failed to load file tree:", error);

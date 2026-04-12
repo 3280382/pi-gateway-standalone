@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { browse } from "@/features/files/services/api/fileApi";
+import * as fileApi from "@/features/files/services/api/fileApi";
 import { fileSidebarDebug } from "@/lib/debug";
 
 export interface TreeNode {
@@ -42,7 +42,7 @@ export function useFileTree(): UseFileTreeResult {
     fileSidebarDebug.info("加载目录", { path });
 
     try {
-      const data = await browse(path);
+      const data = await fileApi.browse(path);
 
       // 只保留子目录路径
       const childDirs = data.items.filter((item) => item.isDirectory).map((item) => item.path);

@@ -6,13 +6,8 @@
  */
 
 import { useEffect, useState } from "react";
-import {
-  check,
-  type GitCommit,
-  content as gitContent,
-  diff,
-  history,
-} from "@/features/files/services/api/gitApi";
+import * as gitApi from "@/features/files/services/api/gitApi";
+import type { GitCommit } from "@/features/files/services/api/gitApi";
 import { useViewerStore } from "@/features/files/stores/viewerStore";
 import styles from "./Modals.module.css";
 
@@ -55,14 +50,14 @@ export function GitHistoryModal({ isOpen, filePath, fileName, onClose }: GitHist
       setError(null);
 
       try {
-        const isGit = await check(GIT_ROOT);
+        const isGit = await gitApi.check(GIT_ROOT);
         if (!isGit) {
           setError("Not a git repository");
           setLoading(false);
           return;
         }
 
-        const historyData = await history(filePath, GIT_ROOT);
+        const historyData = await gitApi.history(filePath, GIT_ROOT);
         setHistory(historyData);
 
         if (historyData.length === 0) {
@@ -81,7 +76,7 @@ export function GitHistoryModal({ isOpen, filePath, fileName, onClose }: GitHist
   // Content 使用 FileViewer
   const handleViewContent = async (commit: GitCommit) => {
     try {
-      const content = await gitContent(filePath, commit.hash, GIT_ROOT);
+      const content = await gitApi.content(filePath, commit.hash, GIT_ROOT);
       // fileName 保持纯净（带扩展名），FileViewer 用它来判断语言
       openViewerWithContent(
         fileName,
@@ -102,7 +97,7 @@ export function GitHistoryModal({ isOpen, filePath, fileName, onClose }: GitHist
   const handleViewDiff = async (commit: GitCommit) => {
     setDiffModal({ isOpen: true, commit, diff: "", loading: true });
     try {
-      const diff = await diff(filePath, commit.hash, GIT_ROOT);
+      const diff = await gitApi.diff(filePath, commit.hash, GIT_ROOT);
       setDiffModal({ isOpen: true, commit, diff, loading: false });
     } catch (err: any) {
       console.error("[GitHistory] Diff error:", err);
