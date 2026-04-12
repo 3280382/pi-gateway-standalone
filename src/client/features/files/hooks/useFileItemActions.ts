@@ -99,9 +99,9 @@ export function useFileItemActions(): UseFileItemActionsResult {
           return;
         }
 
-        // Todo 模式下，点击文件弹出 Todo 输入框
-        if (isTodoModeActive && !item.isDirectory) {
-          console.log("[useFileItemActions] Todo mode - selecting file:", item.path);
+        // Todo 模式下，点击文件或目录都弹出 Todo 输入框
+        if (isTodoModeActive) {
+          console.log("[useFileItemActions] Todo mode - selecting item:", item.path);
           setTodoInputFile({ path: item.path, name: item.name });
           return;
         }
