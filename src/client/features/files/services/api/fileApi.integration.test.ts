@@ -11,7 +11,7 @@ import type { BrowseResponse, FileExecuteResponse, FileReadResponse } from "./fi
 global.fetch = vi.fn();
 
 // File API functions to test
-async function browseDirectory(path: string): Promise<FileItem[]> {
+async function browse(path: string): Promise<FileItem[]> {
   const encodedPath = encodeURIComponent(path);
   const response = await fetch(`/api/browse?path=${encodedPath}`);
 
@@ -29,7 +29,7 @@ async function browseDirectory(path: string): Promise<FileItem[]> {
   }));
 }
 
-async function readFile(path: string): Promise<{ content: string; language?: string }> {
+async function content(path: string): Promise<{ content: string; language?: string }> {
   const encodedPath = encodeURIComponent(path);
   const response = await fetch(`/api/file/read?path=${encodedPath}`);
 
@@ -41,7 +41,7 @@ async function readFile(path: string): Promise<{ content: string; language?: str
   return { content: data.content };
 }
 
-async function writeFile(path: string, content: string): Promise<void> {
+async function write(path: string, content: string): Promise<void> {
   const response = await fetch("/api/file/write", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -53,7 +53,7 @@ async function writeFile(path: string, content: string): Promise<void> {
   }
 }
 
-async function executeFile(path: string): Promise<FileExecuteResponse> {
+async function execute(path: string): Promise<FileExecuteResponse> {
   const encodedPath = encodeURIComponent(path);
   const response = await fetch(`/api/file/execute?path=${encodedPath}`);
 
@@ -69,7 +69,7 @@ describe("FileApi Integration", () => {
     vi.resetAllMocks();
   });
 
-  describe("browseDirectory", () => {
+  describe("browse", () => {
     it("should return file list on success", async () => {
       const mockFiles = [
         {
@@ -92,7 +92,7 @@ describe("FileApi Integration", () => {
         json: async () => ({ files: mockFiles }),
       });
 
-      const result = await browseDirectory("/test");
+      const result = await browse("/test");
 
       expect(result).toHaveLength(2);
       expect(result[0].name).toBe("file1.txt");
@@ -106,7 +106,7 @@ describe("FileApi Integration", () => {
         statusText: "Not Found",
       });
 
-      await expect(browseDirectory("/invalid")).rejects.toThrow("Failed to browse: Not Found");
+      await expect(browse("/invalid")).rejects.toThrow("Failed to browse: Not Found");
     });
 
     it("should encode path parameter", async () => {
@@ -115,7 +115,7 @@ describe("FileApi Integration", () => {
         json: async () => ({ files: [] }),
       });
 
-      await browseDirectory("/path with spaces");
+      await browse("/path with spaces");
 
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining(encodeURIComponent("/path with spaces"))
@@ -123,14 +123,14 @@ describe("FileApi Integration", () => {
     });
   });
 
-  describe("readFile", () => {
+  describe("content", () => {
     it("should return file content", async () => {
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ content: "Hello World" }),
       });
 
-      const result = await readFile("/test/file.txt");
+      const result = await content("/test/file.txt");
 
       expect(result.content).toBe("Hello World");
     });
@@ -141,18 +141,18 @@ describe("FileApi Integration", () => {
         statusText: "File not found",
       });
 
-      await expect(readFile("/missing.txt")).rejects.toThrow("Failed to read file: File not found");
+      await expect(content("/missing.txt")).rejects.toThrow("Failed to read file: File not found");
     });
   });
 
-  describe("writeFile", () => {
+  describe("write", () => {
     it("should write file content", async () => {
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ success: true }),
       });
 
-      await writeFile("/test/file.txt", "New content");
+      await write("/test/file.txt", "New content");
 
       expect(global.fetch).toHaveBeenCalledWith("/api/file/write", {
         method: "POST",
@@ -170,11 +170,11 @@ describe("FileApi Integration", () => {
         statusText: "Permission denied",
       });
 
-      await expect(writeFile("/readonly.txt", "content")).rejects.toThrow("Permission denied");
+      await expect(write("/readonly.txt", "content")).rejects.toThrow("Permission denied");
     });
   });
 
-  describe("executeFile", () => {
+  describe("execute", () => {
     it("should execute script and return output", async () => {
       const mockResponse = {
         stdout: "Hello",
@@ -187,7 +187,7 @@ describe("FileApi Integration", () => {
         json: async () => mockResponse,
       });
 
-      const result = await executeFile("/test/script.sh");
+      const result = await execute("/test/script.sh");
 
       expect(result.stdout).toBe("Hello");
       expect(result.exitCode).toBe(0);
@@ -205,7 +205,7 @@ describe("FileApi Integration", () => {
         json: async () => mockResponse,
       });
 
-      const result = await executeFile("/test/invalid.sh");
+      const result = await execute("/test/invalid.sh");
 
       expect(result.stderr).toBe("Command not found");
       expect(result.exitCode).toBe(127);

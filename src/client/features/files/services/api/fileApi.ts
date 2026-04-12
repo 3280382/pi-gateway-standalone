@@ -14,7 +14,7 @@ import type {
 } from "@/features/files/types";
 
 // 浏览目录
-export async function browseDirectory(path: string): Promise<BrowseResponse> {
+export async function browse(path: string): Promise<BrowseResponse> {
   const response = await fetch("/api/files/file/browse", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -29,7 +29,7 @@ export async function browseDirectory(path: string): Promise<BrowseResponse> {
 }
 
 // 获取文件树
-export async function getFileTree(path: string): Promise<TreeResponse> {
+export async function tree(path: string): Promise<TreeResponse> {
   const response = await fetch(`/api/files/file/tree?path=${encodeURIComponent(path)}`);
 
   if (!response.ok) {
@@ -110,7 +110,7 @@ export async function getFileTree(path: string): Promise<TreeResponse> {
 }
 
 // 读取文件内容
-export async function readFile(path: string): Promise<FileContentResponse> {
+export async function content(path: string): Promise<FileContentResponse> {
   const response = await fetch(`/api/files/file/content?path=${encodeURIComponent(path)}`);
 
   if (!response.ok) {
@@ -121,7 +121,7 @@ export async function readFile(path: string): Promise<FileContentResponse> {
 }
 
 // 写入文件
-export async function writeFile(path: string, content: string): Promise<void> {
+export async function write(path: string, content: string): Promise<void> {
   const response = await fetch("/api/files/file/write", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -134,12 +134,12 @@ export async function writeFile(path: string, content: string): Promise<void> {
 }
 
 // 获取原始文件（图片等）
-export function getRawFileUrl(path: string): string {
+export function raw(path: string): string {
   return `/api/files/file/raw?path=${encodeURIComponent(path)}`;
 }
 
 // 执行文件
-export async function executeFile(path: string): Promise<ReadableStream<Uint8Array>> {
+export async function execute(path: string): Promise<ReadableStream<Uint8Array>> {
   // 获取文件所在目录作为工作目录
   const dir = path.split("/").slice(0, -1).join("/") || "/";
   const fileName = path.split("/").pop() || "";

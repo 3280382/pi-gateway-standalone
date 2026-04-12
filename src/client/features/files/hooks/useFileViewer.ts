@@ -11,10 +11,10 @@
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
-  executeFile,
-  getRawFileUrl,
-  readFile,
-  writeFile,
+  execute,
+  raw,
+  content,
+  write,
 } from "@/features/files/services/api/fileApi";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { fileViewerDebug } from "@/lib/debug";
@@ -206,7 +206,7 @@ export function useFileViewer(): UseFileViewerResult {
       isEditable,
       extension: ext,
       language: LANG_MAP[ext] || "text",
-      getRawFileUrl,
+      raw,
     };
   }, [ext]);
 
@@ -219,7 +219,7 @@ export function useFileViewer(): UseFileViewerResult {
     setError(null);
 
     try {
-      const data = await readFile(filePath);
+      const data = await content(filePath);
       fileViewerDebug.info("文件加载成功", {
         filePath,
         contentLength: data.content?.length,
@@ -242,7 +242,7 @@ export function useFileViewer(): UseFileViewerResult {
 
     setSaving(true);
     try {
-      await writeFile(filePath, editedContent);
+      await write(filePath, editedContent);
       setContent(editedContent);
       setMode("view");
     } catch (err) {
@@ -261,7 +261,7 @@ export function useFileViewer(): UseFileViewerResult {
     abortRef.current = new AbortController();
 
     try {
-      const stream = await executeFile(filePath);
+      const stream = await execute(filePath);
       const reader = stream.getReader();
       const decoder = new TextDecoder();
 

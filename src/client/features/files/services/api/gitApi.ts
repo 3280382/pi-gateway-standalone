@@ -36,7 +36,7 @@ export interface GitStatusResponse {
 /**
  * 获取文件的 Git 历史
  */
-export async function getGitHistory(filePath: string, workingDir: string): Promise<GitCommit[]> {
+export async function history(filePath: string, workingDir: string): Promise<GitCommit[]> {
   const response = await fetchApi<GitHistoryResponse>(
     `/files/git/history?filePath=${encodeURIComponent(filePath)}&workingDir=${encodeURIComponent(workingDir)}`
   );
@@ -46,7 +46,7 @@ export async function getGitHistory(filePath: string, workingDir: string): Promi
 /**
  * 获取指定版本的文件内容
  */
-export async function getGitContent(
+export async function content(
   filePath: string,
   commitHash: string,
   workingDir: string
@@ -60,7 +60,7 @@ export async function getGitContent(
 /**
  * 获取指定版本与当前版本的 diff
  */
-export async function getGitDiff(
+export async function diff(
   filePath: string,
   commitHash: string,
   workingDir: string
@@ -74,7 +74,7 @@ export async function getGitDiff(
 /**
  * 检查目录是否是 Git 仓库
  */
-export async function checkGitRepo(workingDir: string): Promise<boolean> {
+export async function check(workingDir: string): Promise<boolean> {
   const response = await fetchApi<GitCheckResponse>(
     `/files/git/check?workingDir=${encodeURIComponent(workingDir)}`
   );
@@ -84,7 +84,7 @@ export async function checkGitRepo(workingDir: string): Promise<boolean> {
 /**
  * 获取工作目录下文件的 Git 状态
  */
-export async function getGitStatus(workingDir: string): Promise<Record<string, string>> {
+export async function status(workingDir: string): Promise<Record<string, string>> {
   const response = await fetchApi<GitStatusResponse>(
     `/files/git/status?workingDir=${encodeURIComponent(workingDir)}`
   );

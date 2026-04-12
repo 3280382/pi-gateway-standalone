@@ -14,7 +14,7 @@ vi.mock("@/stores/fileStore", () => ({
 
 // Mock API
 vi.mock("@/services/api/fileApi", () => ({
-  browseDirectory: vi.fn(),
+  browse: vi.fn(),
 }));
 
 describe("FileSidebar", () => {

@@ -5,20 +5,20 @@
 // API 层（直接 HTTP 调用）
 export {
   type BrowseResponse,
-  browseDirectory,
+  browse,
   checkPathExists,
-  executeFile,
+  execute,
   type FileContentResponse,
   formatFileSize,
   getFileExtension,
   getFileIcon,
-  getFileTree,
-  getRawFileUrl,
+  tree,
+  raw,
   getServerWorkingDir,
-  readFile,
+  content,
   type TreeNode,
   type TreeResponse,
-  writeFile,
+  write,
 } from "./api/fileApi";
 
 export {
@@ -30,6 +30,28 @@ export {
   getFriendlyErrorMessage,
   loadDirectoryContent,
 } from "./api/fileOperationsApi";
+
+export {
+  history,
+  content as gitContent,
+  diff,
+  check,
+  status,
+  type GitCommit,
+  type GitHistoryResponse,
+  type GitContentResponse,
+  type GitDiffResponse,
+  type GitCheckResponse,
+  type GitStatusResponse,
+} from "./api/gitApi";
+
+export {
+  add,
+  list,
+  toggle,
+  type TodoItem,
+  type AddTodoParams,
+} from "./api/todoApi";
 
 // Service 层（业务逻辑组合）
 export {

@@ -6,7 +6,7 @@
  */
 
 import type { FileItem } from "@/features/files/stores/fileStore";
-import { browseDirectory } from "./fileApi";
+import { browse } from "./fileApi";
 
 export interface DirectoryData {
   workingDir: string;
@@ -18,7 +18,7 @@ export interface DirectoryData {
  * 加载目录内容
  */
 export async function loadDirectoryContent(path: string): Promise<DirectoryData> {
-  const data = await browseDirectory(path);
+  const data = await browse(path);
 
   const itemsToSet = [
     ...(data.parentPath !== data.workingDir

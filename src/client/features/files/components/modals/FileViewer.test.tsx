@@ -14,10 +14,10 @@ vi.mock("@/stores/viewerStore", () => ({
 
 // Mock API
 vi.mock("@/services/api/fileApi", () => ({
-  readFile: vi.fn(),
-  writeFile: vi.fn(),
-  executeFile: vi.fn(),
-  getRawFileUrl: vi.fn((path: string) => `/api/raw?path=${encodeURIComponent(path)}`),
+  content: vi.fn(),
+  write: vi.fn(),
+  execute: vi.fn(),
+  raw: vi.fn((path: string) => `/api/raw?path=${encodeURIComponent(path)}`),
 }));
 
 // Mock Prism

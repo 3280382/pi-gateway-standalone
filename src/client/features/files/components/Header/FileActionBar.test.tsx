@@ -19,7 +19,7 @@ vi.mock("@/stores/viewerStore", () => ({
 
 // Mock API
 vi.mock("@/services/api/fileApi", () => ({
-  executeFile: vi.fn(),
+  execute: vi.fn(),
 }));
 
 describe("FileActionBar", () => {

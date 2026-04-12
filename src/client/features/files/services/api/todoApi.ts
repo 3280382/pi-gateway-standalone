@@ -20,7 +20,7 @@ export interface AddTodoParams {
 /**
  * 添加 todo 项
  */
-export async function addTodo(params: AddTodoParams): Promise<void> {
+export async function add(params: AddTodoParams): Promise<void> {
   await fetchApi("/files/todo/add", {
     method: "POST",
     body: JSON.stringify(params),
@@ -30,7 +30,7 @@ export async function addTodo(params: AddTodoParams): Promise<void> {
 /**
  * 获取所有 todo
  */
-export async function getTodos(workingDir: string): Promise<TodoItem[]> {
+export async function list(workingDir: string): Promise<TodoItem[]> {
   const response = await fetchApi<{ todos: TodoItem[] }>(
     `/files/todo/list?workingDir=${encodeURIComponent(workingDir)}`
   );
@@ -40,7 +40,7 @@ export async function getTodos(workingDir: string): Promise<TodoItem[]> {
 /**
  * 切换 todo 状态
  */
-export async function toggleTodo(workingDir: string, todoId: number): Promise<void> {
+export async function toggle(workingDir: string, todoId: number): Promise<void> {
   await fetchApi("/files/todo/toggle", {
     method: "POST",
     body: JSON.stringify({ workingDir, todoId }),
