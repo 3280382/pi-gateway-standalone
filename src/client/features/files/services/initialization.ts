@@ -4,14 +4,14 @@
  * 职责：处理文件功能的初始化逻辑
  * 
  * 注意：工作目录现在由全局 workspaceStore 统一管理
- * currentBrowsePath 由 useFileBrowser hook 初始化
+ * currentBrowsePath 由 FileStore 管理并持久化到 pi:files:browser
  */
 
 import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { useFileStore } from "@/features/files/stores";
 
 /**
- * 获取初始路径（同步版本，用于 SSR 兼容）
+ * 获取初始工作目录（同步版本，用于 SSR 兼容）
  */
 export function getInitialPath(): string {
   if (typeof window === "undefined") return "/root";
@@ -30,6 +30,4 @@ export function getCurrentBrowsePath(): string {
  */
 export function setBrowsePath(path: string): void {
   useFileStore.getState().setCurrentBrowsePath(path);
-  useWorkspaceStore.getState().setFileBrowsePath(path);
-  useWorkspaceStore.getState().setCurrentBrowsePath(path); // 同步持久化
 }

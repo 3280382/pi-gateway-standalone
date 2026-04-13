@@ -11,7 +11,6 @@ import * as fileOperationsApi from "@/features/files/services/api/fileOperations
 import type { FileItem } from "@/features/files/stores/fileStore";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
-import { useWorkspaceStore } from "@/stores/workspaceStore";
 
 interface PinchState {
   startDistance: number;
@@ -123,9 +122,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
         if (item.isDirectory) {
           console.log("[useFileItemActions] Navigating to:", item.path);
           // 在文件浏览器中导航只改变 currentBrowsePath，不改变全局 workingDir
-          // 同时更新 FileStore 和 WorkspaceStore，保持两者同步
           setCurrentBrowsePath(item.path);
-          useWorkspaceStore.getState().setCurrentBrowsePath(item.path);
         } else {
           console.log("[useFileItemActions] Opening viewer:", item.path);
           openViewer(item.path, item.name, "view");
@@ -152,7 +149,6 @@ export function useFileItemActions(): UseFileItemActionsResult {
       if (item.isDirectory) {
         // 在文件浏览器中导航只改变 currentBrowsePath，不改变全局 workingDir
         setCurrentBrowsePath(item.path);
-        useWorkspaceStore.getState().setCurrentBrowsePath(item.path);
       }
     },
     [isMultiSelectMode, setCurrentBrowsePath]

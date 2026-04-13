@@ -37,25 +37,20 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
   const { currentBrowsePath, setItems, setCurrentBrowsePath, setParentPath, setLoading, setError } =
     useFileStore();
 
-  const { workingDir, setFileBrowsePath } = useWorkspaceStore();
+  const { workingDir } = useWorkspaceStore();
 
   const lastLoadedPathRef = useRef<string>("");
   const isInitializedRef = useRef(false);
 
-  // 从全局 workspaceStore 获取持久化的 currentBrowsePath
-  const { currentBrowsePath: savedBrowsePath } = useWorkspaceStore();
-
-  // 初始化：如果 FileStore 的 currentBrowsePath 为空，使用 workspaceStore 的值
+  // 初始化：如果 FileStore 的 currentBrowsePath 为空，使用 workingDir
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!isActive || isInitializedRef.current) return;
 
-    // 如果 FileStore 的 currentBrowsePath 为空，使用 workspaceStore 的值
+    // 如果 FileStore 的 currentBrowsePath 为空，使用 workingDir
     if (!currentBrowsePath || currentBrowsePath === "/") {
-      // 优先级：workspaceStore.currentBrowsePath > workspaceStore.workingDir > /root
-      const path = savedBrowsePath || workingDir || "/root";
+      const path = workingDir || "/root";
       setCurrentBrowsePath(path);
-      setFileBrowsePath(path);
     }
     isInitializedRef.current = true;
   }, [isActive]); // 只在 isActive 变化时执行一次

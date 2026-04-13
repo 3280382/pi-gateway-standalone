@@ -38,7 +38,9 @@ export const APP_STORAGE_VERSION = {
 export const APP_GLOBAL_PERSIST = ["currentView", "theme", "fontSize"] as const;
 
 /** App Workspace Store - 持久化字段（全局工作目录） */
-export const APP_WORKSPACE_PERSIST = ["workingDir", "fileBrowsePath", "currentBrowsePath"] as const;
+// 注意：currentBrowsePath 现在由 FileStore (pi:files:browser) 持久化
+// workspaceStore 只保留 workingDir
+export const APP_WORKSPACE_PERSIST = ["workingDir"] as const;
 
 // ============================================================================
 // 聚合所有 Storage Keys（供调试使用）

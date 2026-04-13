@@ -31,32 +31,20 @@ function getSessionStore() {
 }
 
 export interface WorkspaceState {
-  // 当前工作目录（项目根目录）
+  // 当前工作目录（项目根目录）- 这是真正持久化的工作目录
   workingDir: string;
-
-  // File 浏览器当前浏览路径（相对于 workingDir 的浏览位置）
-  fileBrowsePath: string;
-
-  // 文件浏览器最后浏览位置（持久化，下次打开时恢复）
-  currentBrowsePath: string;
 }
 
 export interface WorkspaceActions {
   setWorkingDir: (path: string) => void;
-  setFileBrowsePath: (path: string) => void;
-  setCurrentBrowsePath: (path: string) => void;
-  // 获取完整浏览路径
-  getFullBrowsePath: () => string;
 }
 
 export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
   devtools(
     persist(
-      (set, get) => ({
+      (set) => ({
         // 初始状态
         workingDir: "/root",
-        fileBrowsePath: "/root",
-        currentBrowsePath: "/root",
 
         // 设置工作目录（同时同步到 sidebarStore 和 sessionStore）
         setWorkingDir: (workingDir) => {
@@ -95,24 +83,7 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
             // sessionStore 可能尚未初始化，忽略错误
           }
 
-          set({
-            workingDir,
-            // 切换工作目录时，浏览路径也重置到根
-            fileBrowsePath: workingDir,
-            currentBrowsePath: workingDir,
-          });
-        },
-
-        // 设置文件浏览路径（在 file 中导航不改变 workingDir）
-        setFileBrowsePath: (fileBrowsePath) => set({ fileBrowsePath }),
-
-        // 设置当前浏览路径（持久化）
-        setCurrentBrowsePath: (currentBrowsePath) => set({ currentBrowsePath }),
-
-        // 获取完整浏览路径
-        getFullBrowsePath: () => {
-          const { fileBrowsePath } = get();
-          return fileBrowsePath;
+          set({ workingDir });
         },
       }),
       {
