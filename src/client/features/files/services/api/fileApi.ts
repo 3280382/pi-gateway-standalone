@@ -52,20 +52,21 @@ export async function tree(path: string): Promise<TreeResponse> {
   ) {
     // Skip the root node itself, only include children
     if (depth > 0) {
-      // Get relative path from root
-      const relativePath = node.path.replace(rootPath, "").replace(/^\//, "");
+      // 保留完整绝对路径，与其他视图（grid/list）保持一致
+      const fullPath = node.path;
 
       // 计算是否是最后一个兄弟节点
       const isLast = myIndex === siblingsCount - 1;
 
-      // 计算父节点路径
+      // 计算相对路径仅用于显示层级关系
+      const relativePath = node.path.replace(rootPath, "").replace(/^\//, "");
       const parentPath = relativePath.includes("/")
         ? relativePath.substring(0, relativePath.lastIndexOf("/"))
         : "";
 
       items.push({
         name: node.name,
-        path: relativePath || node.name,
+        path: fullPath,  // 使用完整绝对路径
         isDirectory: node.isDirectory,
         // 新增计算字段
         level: depth - 1, // level 从 0 开始（相对于根的直接子节点）
