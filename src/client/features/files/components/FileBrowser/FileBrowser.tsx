@@ -38,15 +38,16 @@ export function FileBrowser({
   onOpenBottomPanel,
 }: FileBrowserProps) {
   // ===== [ANCHOR:STATE] =====
-  const { viewMode, isLoading, error } = useFileStore();
+  const { viewMode, isLoading, error, currentBrowsePath } = useFileStore();
   
-  // 使用全局 workspace store
-  const { workingDir, fileBrowsePath } = useWorkspaceStore();
+  // 使用全局 workspace store 的 workingDir（用于 todo）
+  const { workingDir } = useWorkspaceStore();
 
   // ===== [ANCHOR:HOOKS] =====
   // 仅在激活状态下获取数据
   useFileBrowser({ isActive });
   useGitStatus({ isActive });
+  // 只有在 workingDir 真正改变时才重新加载 todos
   useTodos(workingDir);
 
   // ===== [ANCHOR:COMPUTED] =====
@@ -70,7 +71,7 @@ export function FileBrowser({
           {/* 当前浏览路径显示 */}
           <div className={styles.browsePathBar}>
             <span className={styles.pathLabel}>📁</span>
-            <span className={styles.pathText}>{fileBrowsePath}</span>
+            <span className={styles.pathText}>{currentBrowsePath || workingDir}</span>
           </div>
 
           {/* 文件列表区域 */}

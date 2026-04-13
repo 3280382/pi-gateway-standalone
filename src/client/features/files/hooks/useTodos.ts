@@ -7,7 +7,7 @@
  * - 提供刷新功能
  */
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import * as todoApi from "@/features/files/services/api/todoApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 
@@ -17,9 +17,11 @@ export interface UseTodosResult {
 
 export function useTodos(workingDir: string): UseTodosResult {
   const { setTodoList, setTodoMap } = useFileStore();
+  const lastLoadedDirRef = useRef<string>("");
 
   const refresh = useCallback(async () => {
-    if (!workingDir) return;
+    // 防止重复加载同一目录
+    if (!workingDir || workingDir === lastLoadedDirRef.current) return;
 
     try {
       const todos = await todoApi.list(workingDir);
@@ -33,15 +35,18 @@ export function useTodos(workingDir: string): UseTodosResult {
         map.set(todo.filePath, existing);
       }
       setTodoMap(map);
+      lastLoadedDirRef.current = workingDir;
     } catch (err) {
       console.error("[useTodos] Failed to load todos:", err);
     }
   }, [workingDir, setTodoList, setTodoMap]);
 
-  // 初始加载
+  // 初始加载，使用 ref 防止重复
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    if (workingDir && workingDir !== lastLoadedDirRef.current) {
+      refresh();
+    }
+  }, [workingDir, refresh]);
 
   return { refresh };
 }

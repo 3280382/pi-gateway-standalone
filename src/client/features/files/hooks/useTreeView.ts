@@ -6,7 +6,7 @@
  * 过滤状态从FileStore读取
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as fileApi from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
@@ -68,23 +68,21 @@ export function useTreeView(): UseTreeViewResult {
   const [rawTreeData, setRawTreeData] = useState<TreeNode[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // currentBrowsePath: 当前浏览路径（用于加载树形数据）
   const { currentBrowsePath, treeFilterMode, treeFilterText } = useFileStore();
-  const { workingDir } = useWorkspaceStore();
+  
+  const lastPathRef = useRef<string>("");
 
   // 加载全量树数据（一次性静态加载）
-  const refresh = useCallback(async () => {
-    // 使用当前浏览路径加载树，如果未设置则使用全局工作目录
-    const path = currentBrowsePath || workingDir;
-    if (!path) return;
+  const refresh = useCallback(async (pathToLoad: string) => {
+    if (!pathToLoad || pathToLoad === lastPathRef.current) return;
     
     setIsLoading(true);
     setError(null);
 
     try {
-      // 使用tree API加载全量静态树
-      const response = await fileApi.tree(path);
+      const response = await fileApi.tree(pathToLoad);
       setRawTreeData(response.items);
+      lastPathRef.current = pathToLoad;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to load tree";
       setError(errorMsg);
@@ -92,12 +90,15 @@ export function useTreeView(): UseTreeViewResult {
     } finally {
       setIsLoading(false);
     }
-  }, [currentBrowsePath, workingDir]);
+  }, []);
 
-  // 当浏览路径变化时自动刷新
+  // 当浏览路径变化时自动刷新，使用 ref 防止重复加载
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    const path = currentBrowsePath;
+    if (path && path !== lastPathRef.current) {
+      refresh(path);
+    }
+  }, [currentBrowsePath, refresh]);
 
   // 应用过滤
   const treeData = useMemo(() => {
@@ -106,9 +107,9 @@ export function useTreeView(): UseTreeViewResult {
 
   return {
     treeData,
-    browsePath: currentBrowsePath || workingDir,
+    browsePath: currentBrowsePath,
     isLoading,
     error,
-    refresh,
+    refresh: () => refresh(currentBrowsePath),
   };
 }
