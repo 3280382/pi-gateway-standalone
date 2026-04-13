@@ -10,7 +10,7 @@
  * - On init with different workingDir: end old session, create new one
  */
 
-import type { WebSocket } from "ws";
+import { WebSocket } from "ws";
 import type { LlmLogManager } from "../llm/log-manager";
 import { PiAgentSession } from "./piAgentSession";
 

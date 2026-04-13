@@ -5,9 +5,10 @@
  */
 
 import type React from "react";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback } from "react";
 import { useFileItemActions } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
+import { useTreeGitStatus } from "@/features/files/hooks/useTreeGitStatus";
 import * as todoApi from "@/features/files/services/api/todoApi";
 import type { TreeNode } from "@/features/files/types";
 import styles from "./TreeView.module.css";
@@ -71,19 +72,16 @@ export const TreeView = memo<TreeViewProps>(({ items }) => {
     setEditingTodo,
     treeFilterText,
     todoMap,
-    items: fileItems, // 从 FileStore 获取带有 gitStatus 的 items
+    treeGitStatusMap, // TreeView 专用 Git 状态映射
   } = useFileStore();
 
-  // 构建 gitStatus 映射表（path -> gitStatus）
-  const gitStatusMap = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const item of fileItems) {
-      if (item.gitStatus) {
-        map.set(item.path, item.gitStatus);
-      }
-    }
-    return map;
-  }, [fileItems]);
+  // 使用 TreeView 专用的 Git 状态 hook，获取整棵树的 Git 状态
+  const { currentBrowsePath } = useFileStore();
+  useTreeGitStatus({
+    isActive: true,
+    treeData: items,
+    workingDir: currentBrowsePath,
+  });
 
   // ========== 2. Actions ==========
   const handleFileClick = useCallback(
@@ -132,8 +130,8 @@ export const TreeView = memo<TreeViewProps>(({ items }) => {
               );
             }
 
-            // Git状态 - 从 FileStore 的 gitStatusMap 获取
-            const gitStatus = gitStatusMap.get(node.path);
+            // Git状态 - 从 treeGitStatusMap 获取（整棵树的 Git 状态）
+            const gitStatus = treeGitStatusMap.get(node.path);
             const gitStatusIcon = gitStatus
               ? {
                   untracked: { symbol: "U", color: "#f97316" },

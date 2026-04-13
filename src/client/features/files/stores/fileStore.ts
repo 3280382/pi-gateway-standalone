@@ -52,6 +52,7 @@ export interface FileState {
   // Git 模式状态
   isGitModeActive: boolean;
   gitHistoryFile: { path: string; name: string } | null;
+  treeGitStatusMap: Map<string, string>; // path -> gitStatus (for TreeView)
 
   // Todo 模式状态
   isTodoModeActive: boolean;
@@ -103,6 +104,7 @@ export interface FileActions {
   setGitModeActive: (active: boolean) => void;
   setGitHistoryFile: (file: { path: string; name: string } | null) => void;
   updateFileGitStatuses: (statusMap: Record<string, string>) => void;
+  setTreeGitStatusMap: (map: Map<string, string>) => void;
 
   // Todo 模式操作
   toggleTodoMode: () => void;
@@ -156,6 +158,7 @@ export const useFileStore = create<FileState & FileActions>()(
         // Git 模式状态
         isGitModeActive: false,
         gitHistoryFile: null,
+        treeGitStatusMap: new Map(),
 
         // Todo 模式状态
         isTodoModeActive: false,
@@ -238,6 +241,7 @@ export const useFileStore = create<FileState & FileActions>()(
         toggleGitMode: () => set((state) => ({ isGitModeActive: !state.isGitModeActive })),
         setGitModeActive: (active: boolean) => set({ isGitModeActive: active }),
         setGitHistoryFile: (file) => set({ gitHistoryFile: file }),
+        setTreeGitStatusMap: (map) => set({ treeGitStatusMap: map }),
         updateFileGitStatuses: (statusMap: Record<string, string>) =>
           set((state) => {
             let hasChanges = false;

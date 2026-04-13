@@ -274,4 +274,4 @@ if (isMainModule) {
 
 // ===== [ANCHOR:EXPORTS] =====
 
-export { app, llmLogManager, PiAgentSession, server, wss };
+export { app, llmLogManager, server, wss };
