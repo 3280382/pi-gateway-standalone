@@ -5,10 +5,10 @@
  * - 显示当前模型信息
  * - 提供模型下拉框选择
  * - 支持切换模型
- * - 从 WebSocket init 获取模型列表和当前模型
+ * - 紧凑的自定义下拉框样式
  */
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useChatController } from "@/features/chat/services/api/chatApi";
 import styles from "./SidebarPanel.module.css";
@@ -19,15 +19,27 @@ export function ModelParamsSection() {
   const thinkingLevel = useSessionStore((state) => state.thinkingLevel);
   const availableModels = useSessionStore((state) => state.availableModels);
   const chatController = useChatController();
+  const [isModelOpen, setIsModelOpen] = useState(false);
+  const modelDropdownRef = useRef<HTMLDivElement>(null);
 
-  // ========== 2. Actions ==========
-  const handleModelChange = useCallback(
-    async (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const newModelId = e.target.value;
-      console.log("[ModelParamsSection] Switching model to:", newModelId);
+  // ========== 2. Effects ==========
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(e.target as Node)) {
+        setIsModelOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // ========== 3. Actions ==========
+  const handleModelSelect = useCallback(
+    async (modelId: string) => {
+      console.log("[ModelParamsSection] Switching model to:", modelId);
       try {
-        await chatController.setModel(newModelId, thinkingLevel || "medium");
-        console.log("[ModelParamsSection] Model switched successfully");
+        await chatController.setModel(modelId, thinkingLevel || "medium");
+        setIsModelOpen(false);
       } catch (error) {
         console.error("[ModelParamsSection] Failed to switch model:", error);
       }
@@ -42,46 +54,25 @@ export function ModelParamsSection() {
     [chatController]
   );
 
-  // ========== 3. Render ==========
-  // 如果没有模型列表，显示加载中
+  // ========== 4. Computed ==========
+  const currentModelInfo = availableModels.find((m) => {
+    if (!currentModel) return false;
+    return m.id === currentModel || m.id.endsWith(`/${currentModel}`) || currentModel.endsWith(m.id);
+  });
+
+  const displayModelName = currentModelInfo?.name || currentModel?.split("/").pop() || "Select";
+
+  // ========== 5. Render ==========
   if (availableModels.length === 0) {
     return (
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <h3 className={styles.sectionTitle}>Model</h3>
         </div>
-        <div className={styles.loading}>Loading models...</div>
+        <div className={styles.loading}>Loading...</div>
       </section>
     );
   }
-
-  // 找到当前模型的详细信息（支持完整 ID 或短 ID 匹配）
-  const findModelById = (id: string | null) => {
-    if (!id) return undefined;
-    // 首先尝试完整匹配
-    let model = availableModels.find((m) => m.id === id);
-    if (model) return model;
-    // 然后尝试短 ID 匹配（如 "deepseek-reasoner" 匹配 "deepseek/deepseek-reasoner"）
-    model = availableModels.find((m) => m.id.endsWith(`/${id}`) || m.id === id);
-    if (model) return model;
-    // 最后尝试只匹配模型名称部分
-    return availableModels.find((m) => {
-      const shortId = m.id.split("/").pop();
-      return shortId === id || m.id.includes(id);
-    });
-  };
-
-  const currentModelInfo = findModelById(currentModel);
-
-  // 获取用于下拉框的当前模型 ID（确保格式匹配）
-  const effectiveCurrentModel = currentModelInfo?.id || currentModel || availableModels[0]?.id || "";
-
-  console.log("[ModelParamsSection] Debug:", {
-    currentModel,
-    effectiveCurrentModel,
-    foundModelInfo: !!currentModelInfo,
-    availableModelsCount: availableModels.length,
-  });
 
   return (
     <section className={styles.section}>
@@ -93,17 +84,42 @@ export function ModelParamsSection() {
         {/* Model selection dropdown */}
         <div className={styles.paramRow}>
           <label className={styles.paramLabel}>Model</label>
-          <select
-            className={styles.paramSelect}
-            value={effectiveCurrentModel}
-            onChange={handleModelChange}
-          >
-            {availableModels.map((model) => (
-              <option key={model.id} value={model.id}>
-                {model.name}
-              </option>
-            ))}
-          </select>
+          <div className={styles.sessionSelector} ref={modelDropdownRef}>
+            <button
+              type="button"
+              className={styles.selectorBtn}
+              onClick={() => setIsModelOpen(!isModelOpen)}
+            >
+              <span className={styles.selectorValue}>{displayModelName}</span>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                className={styles.dropdownIcon}
+                style={{ transform: isModelOpen ? "rotate(180deg)" : "none" }}
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+
+            {isModelOpen && (
+              <div className={styles.sessionDropdown}>
+                {availableModels.map((model) => (
+                  <div
+                    key={model.id}
+                    className={`${styles.dropdownItem} ${model.id === currentModelInfo?.id ? styles.active : ""}`}
+                    onClick={() => handleModelSelect(model.id)}
+                  >
+                    <span className={styles.sessionName}>{model.name}</span>
+                    <span className={styles.sessionCount}>{model.provider}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Provider display */}
