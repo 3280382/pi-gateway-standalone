@@ -52,7 +52,8 @@ export function FileBrowser({
   // ===== [ANCHOR:HOOKS] =====
   // 仅在激活状态下获取数据
   useFileBrowser({ isActive });
-  useGitStatus({ isActive });
+  // 使用当前浏览路径获取 git 状态
+  useGitStatus({ isActive, currentBrowsePath: currentBrowsePath || workingDir });
   // 使用当前浏览路径加载 todos（todo.md 保存在当前浏览目录）
   useTodos(currentBrowsePath || workingDir);
 

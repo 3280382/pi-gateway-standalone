@@ -20,15 +20,20 @@ import { fileBrowserDebug } from "@/lib/debug";
 export interface UseGitStatusOptions {
   /** 是否处于激活状态 - 非激活时不获取数据 */
   isActive?: boolean;
+  /** 当前浏览路径 - 用于获取正确的 git 状态 */
+  currentBrowsePath?: string;
 }
 
 // ===== [ANCHOR:HOOK] =====
 
 export function useGitStatus(options: UseGitStatusOptions = {}) {
-  const { isActive = true } = options;
+  const { isActive = true, currentBrowsePath } = options;
 
   const { isGitModeActive, items, updateFileGitStatuses } = useFileStore();
-  const { workingDir } = useWorkspaceStore();
+  const { workingDir: globalWorkingDir } = useWorkspaceStore();
+  
+  // 使用当前浏览路径优先，回退到全局 workingDir
+  const workingDir = currentBrowsePath || globalWorkingDir;
 
   const lastFetchedPathRef = useRef<string>("");
   const itemsLengthRef = useRef<number>(0);
@@ -58,6 +63,14 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
       workingDir !== lastFetchedPathRef.current ||
       items.length !== itemsLengthRef.current ||
       isInitialMount.current;
+    
+    fileBrowserDebug.debug("Git状态检查", {
+      workingDir,
+      lastFetched: lastFetchedPathRef.current,
+      shouldFetch: shouldFetchGitStatus,
+      isGitModeActive,
+      itemCount: items.length
+    });
 
     if (!shouldFetchGitStatus) return;
 
