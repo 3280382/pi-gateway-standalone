@@ -132,14 +132,29 @@ export function useChatInit(): { isConnecting: boolean } {
       if (currentSession?.messages?.length > 0) {
         // 转换服务器返回的消息格式为客户端格式
         const formattedMessages = currentSession.messages
-          .filter((entry: any) => entry.type === "message")
-          .map((entry: any) => ({
-            id: entry.message?.id || `${Date.now()}-${Math.random()}`,
-            role: entry.message?.role || "user",
-            content: entry.message?.content || "",
-            timestamp: entry.timestamp || new Date().toISOString(),
-          }));
+          .filter((entry: any) => entry.type === "message" && entry.message)
+          .map((entry: any) => {
+            const msg = entry.message;
+            // 处理 content 数组，提取文本内容
+            let contentText = "";
+            if (Array.isArray(msg.content)) {
+              contentText = msg.content
+                .filter((c: any) => c.type === "text")
+                .map((c: any) => c.text)
+                .join("\n");
+            } else if (typeof msg.content === "string") {
+              contentText = msg.content;
+            }
 
+            return {
+              id: entry.id || msg.id || `${Date.now()}-${Math.random()}`,
+              role: msg.role || "user",
+              content: contentText,
+              timestamp: entry.timestamp || new Date().toISOString(),
+            };
+          });
+
+        console.log("[ChatInit] Restored messages:", formattedMessages.length);
         useChatStore.getState().setMessages(formattedMessages);
       }
 
