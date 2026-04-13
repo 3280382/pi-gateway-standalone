@@ -38,4 +38,4 @@ export const CHAT_SESSION_PERSIST = [
 ] as const;
 
 /** Chat Sidebar Store - 持久化字段 */
-export const CHAT_SIDEBAR_PERSIST = ["lastSessionByDir"] as const;
+export const CHAT_SIDEBAR_PERSIST = ["lastSessionByDir", "sessions"] as const;

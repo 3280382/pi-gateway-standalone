@@ -11,7 +11,7 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
 import type { Session, SidebarState } from "@/features/chat/types/sidebar";
-import { CHAT_STORAGE_KEYS, CHAT_STORAGE_VERSION } from "./persist.config";
+import { CHAT_SIDEBAR_PERSIST, CHAT_STORAGE_KEYS, CHAT_STORAGE_VERSION } from "./persist.config";
 
 // ============================================================================
 // Initial State Factory
@@ -161,9 +161,8 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
       {
         name: CHAT_STORAGE_KEYS.CHAT_SIDEBAR,
         version: CHAT_STORAGE_VERSION.CHAT_SIDEBAR,
-        partialize: (state) => ({
-          lastSessionByDir: state.lastSessionByDir,
-        }),
+        partialize: (state) =>
+          Object.fromEntries(CHAT_SIDEBAR_PERSIST.map((key) => [key, state[key]])),
       }
     ),
     { name: "SidebarStore" }

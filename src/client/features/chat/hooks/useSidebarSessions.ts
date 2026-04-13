@@ -1,13 +1,13 @@
 /**
- * useSidebarSessions - Sidebar Sessions 加载 Hook
+ * useSidebarSessions - Sidebar Sessions 管理 Hook
  *
  * 职责：
- * - 当 sidebar 可见且处于 chat 视图时，加载当前工作目录的所有 sessions
- * - 支持手动刷新
+ * - 从 localStorage 恢复 sessions（不再自动从服务器获取）
+ * - 提供手动刷新功能（从服务器获取最新 sessions）
  * - 处理加载状态和错误
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { fetchApi } from "@/services/client";
@@ -34,17 +34,15 @@ function mapSession(s: any): Session {
   };
 }
 
-export function useSidebarSessions(
-  isVisible: boolean,
-  currentView: "chat" | "files"
-): UseSidebarSessionsResult {
+export function useSidebarSessions(): UseSidebarSessionsResult {
   const { workingDir } = useWorkspaceStore();
   const storeSessions = useSidebarStore((state) => state.sessions);
   const setStoreSessions = useSidebarStore((state) => state.setSessions);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadSessions = useCallback(async () => {
+  // 手动刷新 - 从服务器获取最新 sessions
+  const refresh = useCallback(async () => {
     if (!workingDir) return;
 
     setIsLoading(true);
@@ -65,17 +63,13 @@ export function useSidebarSessions(
     }
   }, [workingDir, setStoreSessions]);
 
-  // 当 sidebar 可见且处于 chat 视图时自动加载
-  useEffect(() => {
-    if (isVisible && currentView === "chat" && workingDir) {
-      loadSessions();
-    }
-  }, [isVisible, currentView, workingDir, loadSessions]);
+  // 不再自动加载 - 从 localStorage 恢复
+  // sessions 由 sidebarStore 的 persist 配置自动恢复
 
   return {
     sessions: storeSessions,
     isLoading,
     error,
-    refresh: loadSessions,
+    refresh,
   };
 }
