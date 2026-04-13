@@ -31,7 +31,7 @@ export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
   } = await import("./git/git.controller");
 
   // Todo controller
-  const { add, list, toggle } = await import("./todo/todo.controller");
+  const { add, list, toggle, getByFile } = await import("./todo/todo.controller");
 
   // File routes - /api/files/file/*
   app.post("/api/files/file/browse", browse);
@@ -53,6 +53,7 @@ export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
   // Todo routes - /api/files/todo/*
   app.post("/api/files/todo/add", add);
   app.get("/api/files/todo/list", list);
+  app.get("/api/files/todo/file", getByFile);
   app.post("/api/files/todo/toggle", toggle);
 }
 

@@ -15,6 +15,7 @@ import type {
   FilterType,
   SortMode,
   ViewMode,
+  TodoItem,
 } from "@/features/files/types";
 import { FILES_BROWSER_PERSIST, FILES_STORAGE_KEYS, FILES_STORAGE_VERSION } from "./persist.config";
 
@@ -58,6 +59,10 @@ export interface FileState {
   // TreeView 过滤状态
   treeFilterMode: "normal" | "all" | "search";
   treeFilterText: string;
+
+  // Todo 列表缓存
+  todoList: TodoItem[];
+  todoMap: Map<string, TodoItem[]>; // filePath -> todos
 }
 
 export interface FileActions {
@@ -105,6 +110,11 @@ export interface FileActions {
   // TreeView 过滤操作
   setTreeFilterMode: (mode: "normal" | "all" | "search") => void;
   setTreeFilterText: (text: string) => void;
+
+  // Todo 操作
+  setTodoList: (todos: TodoItem[]) => void;
+  setTodoMap: (map: Map<string, TodoItem[]>) => void;
+  getTodosByPath: (path: string) => TodoItem[];
 }
 
 // ============================================================================
@@ -150,6 +160,10 @@ export const useFileStore = create<FileState & FileActions>()(
         // TreeView 过滤状态 - 默认排除隐藏
         treeFilterMode: "normal",
         treeFilterText: "",
+
+        // Todo 列表缓存
+        todoList: [],
+        todoMap: new Map(),
 
         // 基本设置方法
         setWorkingDir: (path) => set({ workingDir: path }),
@@ -253,6 +267,14 @@ export const useFileStore = create<FileState & FileActions>()(
         // TreeView 过滤操作
         setTreeFilterMode: (mode) => set({ treeFilterMode: mode }),
         setTreeFilterText: (text) => set({ treeFilterText: text }),
+
+        // Todo 操作
+        setTodoList: (todoList) => set({ todoList }),
+        setTodoMap: (todoMap) => set({ todoMap }),
+        getTodosByPath: (path) => {
+          const state = get();
+          return state.todoMap.get(path) || [];
+        },
       }),
       {
         name: FILES_STORAGE_KEYS.FILES_BROWSER,

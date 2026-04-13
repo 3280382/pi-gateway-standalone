@@ -9,7 +9,9 @@
 import type React from "react";
 import { memo, useCallback, useRef, useState } from "react";
 import * as fileApi from "@/features/files/services/api/fileApi";
+import * as todoApi from "@/features/files/services/api/todoApi";
 import type { FileItem as FileItemType } from "@/features/files/stores/fileStore";
+import { useFileStore } from "@/features/files/stores/fileStore";
 import { formatDate, formatFileSize } from "@/lib/formatters";
 import styles from "./FileItem.module.css";
 
@@ -64,24 +66,28 @@ export const FileItem = memo<FileItemProps>(
     const icon = fileApi.getFileIcon(item.extension, item.isDirectory);
     const isGrid = viewMode === "grid";
 
-    // Git状态图标 - 简洁的圆形背景 + 白色SVG图标
-    console.log("FileItem渲染:", {
-      name: item.name,
-      gitStatus: item.gitStatus,
-      path: item.path,
-    });
+    // Git状态图标
     const gitStatusIcon = item.gitStatus
       ? {
-          untracked: { symbol: "U", color: "#f97316" }, // 橙色 - 未跟踪
-          modified: { symbol: "M", color: "#eab308" }, // 黄色 - 已修改
-          added: { symbol: "A", color: "#22c55e" }, // 绿色 - 已添加
-          deleted: { symbol: "D", color: "#ef4444" }, // 红色 - 已删除
-          renamed: { symbol: "R", color: "#8b5cf6" }, // 紫色 - 已重命名
-          copied: { symbol: "C", color: "#0ea5e9" }, // 蓝色 - 已复制
-          conflict: { symbol: "!", color: "#dc2626" }, // 深红色 - 冲突
-          other: { symbol: "?", color: "#ec4899" }, // 粉色 - 其他状态
+          untracked: { symbol: "U", color: "#f97316" },
+          modified: { symbol: "M", color: "#eab308" },
+          added: { symbol: "A", color: "#22c55e" },
+          deleted: { symbol: "D", color: "#ef4444" },
+          renamed: { symbol: "R", color: "#8b5cf6" },
+          copied: { symbol: "C", color: "#0ea5e9" },
+          conflict: { symbol: "!", color: "#dc2626" },
+          other: { symbol: "?", color: "#ec4899" },
         }[item.gitStatus]
       : null;
+
+    // Todo状态
+    const { isTodoModeActive, todoMap } = useFileStore();
+    const todos = todoMap.get(item.path) || [];
+    const pendingTodos = todos.filter(t => !t.checked);
+    const hasTodos = todos.length > 0;
+    const todoPriorityColor = pendingTodos.length > 0 
+      ? todoApi.getPriorityColor(pendingTodos[0].tags)
+      : "#8b949e";
 
     // 组合样式
     const itemClassName = [
@@ -184,7 +190,19 @@ export const FileItem = memo<FileItemProps>(
         </span>
 
         {/* Name */}
-        <span className={isGrid ? styles.gridName : styles.listName}>{item.name}</span>
+        <span className={isGrid ? styles.gridName : styles.listName}>
+          {item.name}
+          {/* Todo角标 */}
+          {isTodoModeActive && hasTodos && (
+            <span
+              className={styles.todoBadge}
+              style={{ color: todoPriorityColor }}
+              title={pendingTodos.map(t => t.text).join("\n")}
+            >
+              {pendingTodos.length > 0 ? `○${pendingTodos.length}` : `✓${todos.length}`}
+            </span>
+          )}
+        </span>
 
         {/* List view extra info */}
         {!isGrid && (

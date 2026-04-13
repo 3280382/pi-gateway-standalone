@@ -103,3 +103,18 @@ export interface TreeResponse {
   path: string;
   items: TreeNode[];
 }
+
+// ============================================================================
+// Todo Types
+// ============================================================================
+
+export interface TodoItem {
+  id: number;
+  checked: boolean;
+  filePath: string;
+  text: string;
+  tags: string[];
+  assignee?: string;
+  dueDate?: string;
+  raw: string;
+}

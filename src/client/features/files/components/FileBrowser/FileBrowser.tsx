@@ -17,7 +17,7 @@ import { TreeView } from "@/features/files/components/FileBrowser/TreeView";
 
 import { FileActionBar } from "@/features/files/components/Header/FileActionBar";
 import { FileViewer } from "@/features/files/components/modals/FileViewer";
-import { useFileBrowser, useFileFiltering, useGitStatus, useTreeView } from "@/features/files/hooks";
+import { useFileBrowser, useFileFiltering, useGitStatus, useTreeView, useTodos } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
 
 // ===== [ANCHOR:TYPES] =====
@@ -43,6 +43,7 @@ export function FileBrowser({
   // 仅在激活状态下获取数据
   useFileBrowser({ isActive });
   useGitStatus({ isActive });
+  useTodos(workingDir);
 
   // ===== [ANCHOR:COMPUTED] =====
   const { filteredItems } = useFileFiltering();

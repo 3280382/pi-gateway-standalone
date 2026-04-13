@@ -29,19 +29,24 @@
 
 .node {
   display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+.nodeMain {
+  display: flex;
   align-items: center;
   padding: 2px 8px;
   cursor: pointer;
   transition: background-color 0.1s ease;
-  user-select: none;
   white-space: nowrap;
 }
 
-.node:hover {
+.nodeMain:hover {
   background-color: var(--hover-bg, rgba(88, 166, 255, 0.08));
 }
 
-.node.selected {
+.node.selected .nodeMain {
   background-color: var(--selected-bg, rgba(88, 166, 255, 0.15));
 }
 
@@ -94,28 +99,86 @@
   flex-shrink: 0;
 }
 
-/* Todo按钮 */
-.todoBtn {
+/* Todo标识 */
+.todoIndicator {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
   margin-left: 6px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
   font-size: 11px;
-  opacity: 0.5;
-  transition: opacity 0.1s ease, background-color 0.1s ease;
+  font-weight: 600;
   flex-shrink: 0;
 }
 
-.todoBtn:hover {
-  opacity: 1;
+/* 添加Todo按钮 */
+.todoAddBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border-color, #30363d);
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text-secondary, #8b949e);
+  opacity: 0;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.nodeMain:hover .todoAddBtn {
+  opacity: 0.6;
+}
+
+.todoAddBtn:hover {
+  opacity: 1 !important;
   background-color: var(--hover-bg, rgba(88, 166, 255, 0.1));
+  border-color: var(--accent-blue, #58a6ff);
+  color: var(--accent-blue, #58a6ff);
+}
+
+/* Todo列表 */
+.todoList {
+  display: flex;
+  flex-direction: column;
+  margin-left: 48px;
+  padding: 2px 0 4px 8px;
+  border-left: 1px dashed var(--border-color, #30363d);
+}
+
+.todoItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 1px 0;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.todoDone {
+  opacity: 0.6;
+}
+
+.todoStatus {
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.todoText {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.todoTags {
+  color: var(--text-muted, #6e7681);
+  font-size: 9px;
+  flex-shrink: 0;
 }
 
 /* 滚动条样式 */

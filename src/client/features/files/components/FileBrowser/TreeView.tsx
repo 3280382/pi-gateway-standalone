@@ -5,9 +5,10 @@
  */
 
 import type React from "react";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback } from "react";
 import { useFileItemActions } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
+import * as todoApi from "@/features/files/services/api/todoApi";
 import type { TreeNode } from "@/features/files/types";
 import styles from "./TreeView.module.css";
 
@@ -68,7 +69,8 @@ export const TreeView = memo<TreeViewProps>(
       isGitModeActive, 
       isTodoModeActive, 
       setTodoInputFile,
-      treeFilterText 
+      treeFilterText,
+      todoMap,
     } = useFileStore();
 
     // ========== 2. Actions ==========
@@ -133,50 +135,99 @@ export const TreeView = memo<TreeViewProps>(
                   }[node.gitStatus]
                 : null;
 
+              // 获取该文件的todos
+              const todos = todoMap.get(node.path) || [];
+              const pendingTodos = todos.filter(t => !t.checked);
+              const hasTodos = todos.length > 0;
+              const showTodos = isTodoModeActive && hasTodos;
+
               return (
                 <div
                   key={node.path}
                   className={`${styles.node} ${isSelected ? styles.selected : ""}`}
                   style={{ paddingLeft: `${level * 16}px` }}
-                  onClick={() => handleFileClick(node)}
                 >
-                  {/* 连接线 */}
-                  <span className={styles.connector}>
-                    {isLast ? "└── " : "├── "}
-                  </span>
-
-                  {/* 文件图标 */}
-                  <span className={styles.icon}>{icon}</span>
-
-                  {/* 文件名 */}
-                  <span className={node.isDirectory ? styles.dirName : styles.fileName}>
-                    {displayName}
-                  </span>
-
-                  {/* Git状态 */}
-                  {isGitModeActive && gitStatusIcon && (
-                    <span
-                      className={styles.gitBadge}
-                      style={{ backgroundColor: gitStatusIcon.color }}
-                      title={`Git: ${node.gitStatus}`}
-                    >
-                      {gitStatusIcon.symbol}
+                  {/* 主行 */}
+                  <div className={styles.nodeMain} onClick={() => handleFileClick(node)}>
+                    {/* 连接线 */}
+                    <span className={styles.connector}>
+                      {isLast ? "└── " : "├── "}
                     </span>
-                  )}
 
-                  {/* Todo按钮 */}
-                  {isTodoModeActive && !node.isDirectory && (
-                    <button
-                      type="button"
-                      className={styles.todoBtn}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setTodoInputFile({ path: node.path, name: node.name });
-                      }}
-                      title="Add todo"
-                    >
-                      📝
-                    </button>
+                    {/* 文件图标 */}
+                    <span className={styles.icon}>{icon}</span>
+
+                    {/* 文件名 */}
+                    <span className={node.isDirectory ? styles.dirName : styles.fileName}>
+                      {displayName}
+                    </span>
+
+                    {/* Git状态 */}
+                    {isGitModeActive && gitStatusIcon && (
+                      <span
+                        className={styles.gitBadge}
+                        style={{ backgroundColor: gitStatusIcon.color }}
+                        title={`Git: ${node.gitStatus}`}
+                      >
+                        {gitStatusIcon.symbol}
+                      </span>
+                    )}
+
+                    {/* Todo标识 */}
+                    {isTodoModeActive && hasTodos && (
+                      <span
+                        className={styles.todoIndicator}
+                        style={{ 
+                          color: pendingTodos.length > 0 
+                            ? todoApi.getPriorityColor(pendingTodos[0].tags)
+                            : "#22c55e"
+                        }}
+                        title={`${pendingTodos.length} pending, ${todos.length - pendingTodos.length} done`}
+                      >
+                        {pendingTodos.length > 0 ? `○${pendingTodos.length}` : `✓${todos.length}`}
+                      </span>
+                    )}
+
+                    {/* 添加Todo按钮 */}
+                    {isTodoModeActive && (
+                      <button
+                        type="button"
+                        className={styles.todoAddBtn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTodoInputFile({ path: node.path, name: node.name });
+                        }}
+                        title="Add todo"
+                      >
+                        +
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Todo内容显示 */}
+                  {showTodos && (
+                    <div className={styles.todoList}>
+                      {todos.map((todo, idx) => (
+                        <div
+                          key={idx}
+                          className={`${styles.todoItem} ${todo.checked ? styles.todoDone : ""}`}
+                          style={{ 
+                            color: todo.checked ? "#6e7681" : todoApi.getPriorityColor(todo.tags),
+                            textDecoration: todo.checked ? "line-through" : "none"
+                          }}
+                        >
+                          <span className={styles.todoStatus}>
+                            {todo.checked ? "✓" : "○"}
+                          </span>
+                          <span className={styles.todoText}>{todo.text}</span>
+                          {todo.tags.length > 0 && (
+                            <span className={styles.todoTags}>
+                              {todo.tags.map(t => `#${t}`).join(" ")}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
               );
