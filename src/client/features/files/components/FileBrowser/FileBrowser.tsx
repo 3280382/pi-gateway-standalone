@@ -46,15 +46,15 @@ export function FileBrowser({
   // ===== [ANCHOR:STATE] =====
   const { viewMode, isLoading, error, currentBrowsePath } = useFileStore();
 
-  // 使用全局 workspace store 的 workingDir（用于 todo）
+  // 使用全局 workspace store 的 workingDir（用于 todo 根目录）
   const { workingDir } = useWorkspaceStore();
 
   // ===== [ANCHOR:HOOKS] =====
   // 仅在激活状态下获取数据
   useFileBrowser({ isActive });
   useGitStatus({ isActive });
-  // 只有在 workingDir 真正改变时才重新加载 todos
-  useTodos(workingDir);
+  // 使用当前浏览路径加载 todos（todo.md 保存在当前浏览目录）
+  useTodos(currentBrowsePath || workingDir);
 
   // ===== [ANCHOR:COMPUTED] =====
   const { filteredItems } = useFileFiltering();

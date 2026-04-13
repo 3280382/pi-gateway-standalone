@@ -11,15 +11,19 @@ import * as todoApi from "@/features/files/services/api/todoApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import styles from "./Modals.module.css";
 
+// 从文件路径中提取工作目录
+function getWorkingDir(filePath: string): string {
+  const lastSlashIndex = filePath.lastIndexOf('/');
+  if (lastSlashIndex <= 0) return filePath;
+  return filePath.substring(0, lastSlashIndex);
+}
+
 interface TodoInputModalProps {
   isOpen: boolean;
   filePath: string;
   fileName: string;
   onClose: () => void;
 }
-
-// 固定的项目根目录
-const PROJECT_ROOT = "/root/pi-gateway-standalone";
 
 export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInputModalProps) {
   const [todoText, setTodoText] = useState("");
@@ -30,6 +34,8 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
   const setTodoInputFile = useFileStore((state) => state.setTodoInputFile);
   const setEditingTodo = useFileStore((state) => state.setEditingTodo);
   const editingTodo = useFileStore((state) => state.editingTodo);
+  const setTodoList = useFileStore((state) => state.setTodoList);
+  const setTodoMap = useFileStore((state) => state.setTodoMap);
 
   const isEditing = !!editingTodo;
 
@@ -50,11 +56,13 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
     if (!todoText.trim()) return;
 
     setIsSubmitting(true);
+    const workingDir = getWorkingDir(filePath);
+    
     try {
       if (isEditing && editingTodo) {
         // 更新现有 todo
         await todoApi.update({
-          workingDir: PROJECT_ROOT,
+          workingDir,
           todoId: editingTodo.id,
           todoText: todoText.trim(),
           tags,
@@ -64,11 +72,29 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
       } else {
         // 新建 todo
         await todoApi.add({
-          workingDir: PROJECT_ROOT,
+          workingDir,
           filePath,
           todoText: todoText.trim(),
           tags,
         });
+      }
+
+      // 重新加载 todo 列表以更新角标显示
+      const workingDir = getWorkingDir(filePath);
+      try {
+        const todos = await todoApi.list(workingDir);
+        setTodoList(todos);
+        
+        // 按文件路径分组
+        const map = new Map<string, typeof todos>();
+        for (const todo of todos) {
+          const existing = map.get(todo.filePath) || [];
+          existing.push(todo);
+          map.set(todo.filePath, existing);
+        }
+        setTodoMap(map);
+      } catch (err) {
+        console.error("[TodoInput] Failed to refresh todos:", err);
       }
 
       // 清空输入并关闭

@@ -1,15 +1,15 @@
 # Todo List
 
 ## Project: Current Directory
-Generated: 2026-04-13T06:12:49.552Z
+Generated: 2026-04-13T06:36:17.046Z
 
 ---
 
 ## TODO
-### [/root/pi-gateway-standalone/src/client]
-- [ ] hi2
-### [/root/pi-gateway-standalone/src/server]
-- [ ] hi1
+### [/root/pi-gateway-standalone/scripts]
+- [ ] h2
+### [/root/pi-gateway-standalone/README.md]
+- [ ] h1
 
 ---
 
