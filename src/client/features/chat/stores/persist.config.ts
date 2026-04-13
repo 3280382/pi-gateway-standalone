@@ -2,6 +2,11 @@
  * Persist Config - Chat Feature
  *
  * Chat 功能相关的持久化配置
+ * 
+ * 架构原则：
+ * - LocalStorage 只保留当前工作目录（由全局 workspaceStore 管理）
+ * - 其他所有数据（sessions、currentSession、models、currentModel）都从服务器获取
+ * - 工作目录初始化时（init），服务器返回所有相关参数
  */
 
 // ============================================================================
@@ -27,15 +32,29 @@ export const CHAT_STORAGE_VERSION = {
 // ============================================================================
 
 /** Chat Session Store - 持久化字段
- * 注意：workingDir 已从全局 workspaceStore 管理，不再在此处持久化
+ * 
+ * 注意：
+ * - workingDir 已由全局 workspaceStore 管理
+ * - currentSessionId 从服务器获取（init 响应）
+ * - currentModel 从服务器获取（init 响应）
+ * - availableModels 从服务器获取（list_models）
+ * - thinkingLevel 从服务器获取（init 响应）
+ * 
+ * Chat Session Store 不再持久化任何字段，所有数据从服务器获取
  */
-export const CHAT_SESSION_PERSIST = [
-  // "currentSessionId", // 不再持久化，从服务器获取
-  // "workingDir", // 已由全局 workspaceStore 管理
-  "currentModel",
-  "thinkingLevel",
-  "availableModels", // 缓存的模型列表
+export const CHAT_SESSION_PERSIST: string[] = [
+  // 所有数据都从服务器获取，不持久化到 localStorage
 ] as const;
 
-/** Chat Sidebar Store - 持久化字段 */
-export const CHAT_SIDEBAR_PERSIST = ["lastSessionByDir", "sessions"] as const;
+/** Chat Sidebar Store - 持久化字段
+ * 
+ * 注意：
+ * - sessions 从服务器获取（以当前工作目录为参数）
+ * - selectedSessionId 从服务器获取（init 响应）
+ * - workingDir 已由全局 workspaceStore 管理
+ * 
+ * Chat Sidebar Store 不再持久化任何字段，所有数据从服务器获取
+ */
+export const CHAT_SIDEBAR_PERSIST: string[] = [
+  // 所有数据都从服务器获取，不持久化到 localStorage
+] as const;

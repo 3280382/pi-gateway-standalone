@@ -4,9 +4,8 @@
  */
 
 import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
+import { devtools } from "zustand/middleware";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
-import { CHAT_SESSION_PERSIST, CHAT_STORAGE_KEYS, CHAT_STORAGE_VERSION } from "./persist.config";
 
 export type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
 
@@ -80,10 +79,9 @@ export interface ChatSessionState {
   // 当前工作目录
   workingDir: string;
 
-  // 模型设置
+  // 模型设置（从服务器获取，不持久化）
   currentModel: string | null;
   thinkingLevel: ThinkingLevel;
-  availableModels: ModelInfo[]; // 缓存的模型列表
 
   // 服务器状态
   serverPid: number | null;
@@ -106,7 +104,6 @@ interface ChatSessionActions {
   // 模型设置
   setCurrentModel: (model: string | null) => void;
   setThinkingLevel: (level: ThinkingLevel) => void;
-  setAvailableModels: (models: ModelInfo[]) => void;
 
   // 服务器状态
   setServerPid: (pid: number | null) => void;
@@ -118,15 +115,13 @@ interface ChatSessionActions {
 
 export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
   devtools(
-    persist(
-      (set) => ({
+    (set) => ({
         // 初始状态
         currentSessionId: null,
         sessions: [],
         workingDir: "/root",
         currentModel: null,
         thinkingLevel: "off",
-        availableModels: [], // 缓存的模型列表
         serverPid: null,
         isConnected: false,
         resourceFiles: null,
@@ -151,7 +146,6 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
         // 模型设置
         setCurrentModel: (model) => set({ currentModel: model }),
         setThinkingLevel: (level) => set({ thinkingLevel: level }),
-        setAvailableModels: (models) => set({ availableModels: models }),
 
         // 服务器状态
         setServerPid: (pid) => set({ serverPid: pid }),
@@ -160,13 +154,6 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
         // 资源文件
         setResourceFiles: (files) => set({ resourceFiles: files }),
       }),
-      {
-        name: CHAT_STORAGE_KEYS.CHAT_SESSION,
-        version: CHAT_STORAGE_VERSION.CHAT_SESSION,
-        partialize: (state) =>
-          Object.fromEntries(CHAT_SESSION_PERSIST.map((key) => [key, state[key]])),
-      }
-    ),
     { name: "ChatSessionStore" }
   )
 );

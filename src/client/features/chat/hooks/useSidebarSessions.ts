@@ -2,12 +2,16 @@
  * useSidebarSessions - Sidebar Sessions 管理 Hook
  *
  * 职责：
- * - 从 localStorage 恢复 sessions（不再自动从服务器获取）
- * - 提供手动刷新功能（从服务器获取最新 sessions）
+ * - 以当前工作目录为参数，从服务器获取所有历史 session 文件
+ * - 当工作目录变化时自动重新获取
  * - 处理加载状态和错误
+ *
+ * 架构：
+ * - sessions 不保存在 localStorage，每次从服务器获取
+ * - 只有 workingDir 保存在 localStorage（由 workspaceStore 管理）
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { fetchApi } from "@/services/client";
@@ -41,8 +45,8 @@ export function useSidebarSessions(): UseSidebarSessionsResult {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 手动刷新 - 从服务器获取最新 sessions
-  const refresh = useCallback(async () => {
+  // 从服务器获取 sessions
+  const loadSessions = useCallback(async () => {
     if (!workingDir) return;
 
     setIsLoading(true);
@@ -58,18 +62,24 @@ export function useSidebarSessions(): UseSidebarSessionsResult {
       const message = err instanceof Error ? err.message : "Failed to load sessions";
       setError(message);
       console.error("[useSidebarSessions] Failed to load sessions:", err);
+      // 出错时清空 sessions
+      setStoreSessions([]);
     } finally {
       setIsLoading(false);
     }
   }, [workingDir, setStoreSessions]);
 
-  // 不再自动加载 - 从 localStorage 恢复
-  // sessions 由 sidebarStore 的 persist 配置自动恢复
+  // 当工作目录变化时自动重新获取
+  useEffect(() => {
+    if (workingDir) {
+      loadSessions();
+    }
+  }, [workingDir, loadSessions]);
 
   return {
     sessions: storeSessions,
     isLoading,
     error,
-    refresh,
+    refresh: loadSessions,
   };
 }
