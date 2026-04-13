@@ -189,12 +189,14 @@ export const FileItem = memo<FileItemProps>(
               {gitStatusIcon.symbol}
             </span>
           )}
-          {/* Todo 角标 */}
+          {/* Todo 角标 - 鲜明绿色 */}
           {hasTodos && (
             <span
               className={styles.todoBadge}
               style={{
-                backgroundColor: hasPendingTodos ? todoPriorityColor : '#22c55e',
+                backgroundColor: hasPendingTodos ? '#22c55e' : '#16a34a',
+                color: '#ffffff',
+                fontWeight: 700,
               }}
               title={pendingTodos.map(t => t.text).join("\n")}
             >

@@ -216,7 +216,7 @@ export const TreeView = memo<TreeViewProps>(({ items }) => {
                   </span>
                 </div>
 
-                {/* Todo内容显示 */}
+                {/* Todo内容显示 - 鲜明绿色 */}
                 {showTodos && (
                   <div className={styles.todoList}>
                     {todos.map((todo, idx) => (
@@ -224,8 +224,9 @@ export const TreeView = memo<TreeViewProps>(({ items }) => {
                         key={idx}
                         className={`${styles.todoItem} ${todo.checked ? styles.todoDone : ""}`}
                         style={{
-                          color: todo.checked ? "#6e7681" : todoApi.getPriorityColor(todo.tags),
+                          color: todo.checked ? "#22c55e" : "#16a34a",
                           textDecoration: todo.checked ? "line-through" : "none",
+                          fontWeight: todo.checked ? "normal" : 600,
                         }}
                       >
                         <span className={styles.todoStatus}>{todo.checked ? "✓" : "○"}</span>
