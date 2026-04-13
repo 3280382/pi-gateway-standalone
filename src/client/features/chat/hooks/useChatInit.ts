@@ -122,13 +122,20 @@ export function useChatInit(): { isConnecting: boolean } {
       useSessionStore.getState().setServerPid(pid);
       useSessionStore.getState().setCurrentModel(currentModel);
       useSessionStore.getState().setThinkingLevel(thinkingLevel as any);
+      useSessionStore.getState().setAvailableModels(allModels || []);
 
       // 5.3 Sidebar 状态
+      console.log("[ChatInit] Setting sidebar state:", {
+        workingDir,
+        allSessionsCount: allSessions?.length,
+        currentSessionFile: currentSession?.sessionFile,
+      });
       useSidebarStore.getState().setWorkingDir(workingDir);
       useSidebarStore.getState().setSessions(allSessions || []);
       useSidebarStore.getState().setSelectedSessionId(currentSession?.sessionFile || null);
 
       // 5.4 聊天历史消息
+      console.log("[ChatInit] Messages from server:", currentSession?.messages?.length || 0);
       if (currentSession?.messages?.length > 0) {
         // 转换服务器返回的消息格式为客户端格式
         const formattedMessages = currentSession.messages
