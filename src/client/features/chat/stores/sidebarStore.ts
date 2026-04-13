@@ -9,6 +9,7 @@
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import type { Session, SidebarState } from "@/features/chat/types/sidebar";
 import { CHAT_STORAGE_KEYS, CHAT_STORAGE_VERSION } from "./persist.config";
 
@@ -98,6 +99,8 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
           const safePath = path || "";
           const displayName = safePath.split("/").pop() || safePath;
           set({ workingDir: { path: safePath, displayName } }, false, "setWorkingDir");
+          // 同步更新全局 workspaceStore
+          useWorkspaceStore.getState().setWorkingDir(safePath);
         },
 
         setSessions: (sessions: Session[]) => {

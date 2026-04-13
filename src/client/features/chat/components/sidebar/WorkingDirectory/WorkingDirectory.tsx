@@ -3,7 +3,7 @@
  * 使用系统API获取和设置工作目录
  */
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { SectionHeader } from "@/features/chat/components/SectionHeader/SectionHeader";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
@@ -85,10 +85,10 @@ function DirectoryPicker({
   const [loading, setLoading] = useState(false);
 
   // 加载目录内容
-  const loadDirectory = async (dirPath: string) => {
+  const loadDirectory = useCallback(async (dirPath: string) => {
     setLoading(true);
     try {
-      const response = await fetch("/api/browse", {
+      const response = await fetch("/api/files/file/browse", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path: dirPath }),
@@ -124,7 +124,8 @@ function DirectoryPicker({
 
   useEffect(() => {
     loadDirectory(currentPath);
-  }, [currentPath, loadDirectory]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPath]);
 
   return (
     <div className={styles.pickerOverlay} onClick={onClose}>

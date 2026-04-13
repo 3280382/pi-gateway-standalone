@@ -24,7 +24,7 @@ import { checkPathExists, getServerWorkingDir } from "./api/fileApi";
  */
 export async function initializeFilePath(): Promise<string> {
   // 从全局 workspaceStore 获取工作目录
-  const { workingDir, setWorkingDir } = useWorkspaceStore.getState();
+  const { workingDir, setFileBrowsePath } = useWorkspaceStore.getState();
   const { setCurrentBrowsePath } = useFileStore.getState();
 
   // 如果有持久化的路径，检查是否还存在
@@ -34,6 +34,7 @@ export async function initializeFilePath(): Promise<string> {
       console.log("[Init] Using persisted working dir:", workingDir);
       // 同步设置浏览路径
       setCurrentBrowsePath(workingDir);
+      setFileBrowsePath(workingDir);
       return workingDir;
     }
     console.log("[Init] Persisted path no longer exists:", workingDir);
@@ -42,11 +43,12 @@ export async function initializeFilePath(): Promise<string> {
   // 使用服务器当前目录
   const serverDir = await getServerWorkingDir();
   console.log("[Init] Using server working dir:", serverDir);
-  
+
   // 更新全局工作目录和浏览路径
-  setWorkingDir(serverDir);
+  useWorkspaceStore.getState().setWorkingDir(serverDir);
+  setFileBrowsePath(serverDir);
   setCurrentBrowsePath(serverDir);
-  
+
   return serverDir;
 }
 
@@ -72,4 +74,5 @@ export function getCurrentBrowsePath(): string {
  */
 export function setBrowsePath(path: string): void {
   useFileStore.getState().setCurrentBrowsePath(path);
+  useWorkspaceStore.getState().setFileBrowsePath(path);
 }
