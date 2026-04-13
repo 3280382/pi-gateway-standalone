@@ -138,25 +138,36 @@ export function useChatInit(): { isConnecting: boolean } {
       console.log("[ChatInit] Messages from server:", currentSession?.messages?.length || 0);
       if (currentSession?.messages?.length > 0) {
         // 转换服务器返回的消息格式为客户端格式
+        // 保持 content 为数组格式 (MessageContent[])
         const formattedMessages = currentSession.messages
           .filter((entry: any) => entry.type === "message" && entry.message)
           .map((entry: any) => {
             const msg = entry.message;
-            // 处理 content 数组，提取文本内容
-            let contentText = "";
+            
+            // 转换 content 为 MessageContent[] 格式
+            let contentArray: any[] = [];
             if (Array.isArray(msg.content)) {
-              contentText = msg.content
-                .filter((c: any) => c.type === "text")
-                .map((c: any) => c.text)
-                .join("\n");
+              // 已经是数组，直接使用
+              contentArray = msg.content.map((c: any) => ({
+                type: c.type || "text",
+                text: c.text,
+                thinking: c.thinking,
+                signature: c.thinkingSignature || c.signature,
+                toolCallId: c.toolCallId || c.id,
+                toolName: c.name || c.toolName,
+                args: c.arguments || c.args,
+                output: c.output,
+                error: c.error,
+              }));
             } else if (typeof msg.content === "string") {
-              contentText = msg.content;
+              // 字符串转数组
+              contentArray = [{ type: "text", text: msg.content }];
             }
 
             return {
               id: entry.id || msg.id || `${Date.now()}-${Math.random()}`,
               role: msg.role || "user",
-              content: contentText,
+              content: contentArray,
               timestamp: entry.timestamp || new Date().toISOString(),
             };
           });

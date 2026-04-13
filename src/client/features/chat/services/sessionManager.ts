@@ -198,19 +198,27 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
         .filter((entry: any) => entry.type === "message" && entry.message)
         .map((entry: any) => {
           const msg = entry.message;
-          let contentText = "";
+          // 转换 content 为 MessageContent[] 格式
+          let contentArray: any[] = [];
           if (Array.isArray(msg.content)) {
-            contentText = msg.content
-              .filter((c: any) => c.type === "text")
-              .map((c: any) => c.text)
-              .join("\n");
+            contentArray = msg.content.map((c: any) => ({
+              type: c.type || "text",
+              text: c.text,
+              thinking: c.thinking,
+              signature: c.thinkingSignature || c.signature,
+              toolCallId: c.toolCallId || c.id,
+              toolName: c.name || c.toolName,
+              args: c.arguments || c.args,
+              output: c.output,
+              error: c.error,
+            }));
           } else if (typeof msg.content === "string") {
-            contentText = msg.content;
+            contentArray = [{ type: "text", text: msg.content }];
           }
           return {
             id: entry.id || msg.id || `${Date.now()}-${Math.random()}`,
             role: msg.role || "user",
-            content: contentText,
+            content: contentArray,
             timestamp: entry.timestamp || new Date().toISOString(),
           };
         });
