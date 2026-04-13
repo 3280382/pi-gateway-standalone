@@ -8,7 +8,7 @@
   height: 100%;
   overflow: auto;
   padding: 0;
-  font-family: var(--font-mono, 'Fira Code', 'Consolas', monospace);
+  font-family: var(--font-mono, "Fira Code", "Consolas", monospace);
   font-size: 13px;
   line-height: 1.4;
 }
@@ -84,30 +84,47 @@
   border-radius: 2px;
 }
 
-/* Git状态图标 */
+/* Git状态图标 - 紧凑但鲜明 */
 .gitBadge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 3px;
   font-size: 9px;
   font-weight: bold;
   color: white;
-  margin-left: 6px;
+  margin-left: 4px;
+  padding: 0 3px;
   flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Todo标识 */
+/* Todo标识 - 紧凑但鲜明 */
 .todoIndicator {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 6px;
-  font-size: 11px;
-  font-weight: 600;
+  min-width: 18px;
+  height: 16px;
+  border-radius: 3px;
+  margin-left: 4px;
+  font-size: 10px;
+  font-weight: 700;
   flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 角标容器 - 保持角标不重叠 */
+.badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  padding-left: 8px;
 }
 
 /* 添加Todo按钮 */
