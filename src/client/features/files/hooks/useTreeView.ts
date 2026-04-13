@@ -12,11 +12,16 @@ import { useFileStore } from "@/features/files/stores/fileStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
 import type { TreeNode } from "@/features/files/types";
 
+export interface UseTreeViewOptions {
+  /** 是否处于激活状态 - 非激活时不加载数据 */
+  isActive?: boolean;
+}
+
 export interface UseTreeViewResult {
   // 数据
   treeData: TreeNode[];
   browsePath: string;
-  
+
   // 加载状态
   isLoading: boolean;
   error: string | null;
@@ -64,41 +69,51 @@ function filterTreeNodes(
   });
 }
 
-export function useTreeView(): UseTreeViewResult {
+export function useTreeView(options: UseTreeViewOptions = {}): UseTreeViewResult {
+  const { isActive = true } = options;
+
   const [rawTreeData, setRawTreeData] = useState<TreeNode[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { currentBrowsePath, treeFilterMode, treeFilterText } = useFileStore();
-  
-  const lastPathRef = useRef<string>("");
+
+  const lastPathRef = useRef<string>(currentBrowsePath || "");
 
   // 加载全量树数据（一次性静态加载）
   const refresh = useCallback(async (pathToLoad: string) => {
-    if (!pathToLoad || pathToLoad === lastPathRef.current) return;
-    
+    if (!pathToLoad) return;
+
+    // 使用 ref 防止重复加载相同路径
+    if (pathToLoad === lastPathRef.current) return;
+
+    // 立即更新 ref，防止并发请求
+    lastPathRef.current = pathToLoad;
+
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await fileApi.tree(pathToLoad);
       setRawTreeData(response.items);
-      lastPathRef.current = pathToLoad;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to load tree";
       setError(errorMsg);
       console.error("[useTreeView] Error:", err);
+      // 出错时重置 ref，允许重试
+      lastPathRef.current = "";
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // 当浏览路径变化时自动刷新，使用 ref 防止重复加载
+  // 当浏览路径变化时自动刷新（仅在激活状态下）
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    const path = currentBrowsePath;
-    if (path && path !== lastPathRef.current) {
-      refresh(path);
+    if (!isActive || !currentBrowsePath) {
+      return;
     }
-  }, [currentBrowsePath, refresh]);
+    refresh(currentBrowsePath);
+  }, [isActive, currentBrowsePath]);
 
   // 应用过滤
   const treeData = useMemo(() => {

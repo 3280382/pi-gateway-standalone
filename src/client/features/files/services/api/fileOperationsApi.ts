@@ -47,7 +47,7 @@ export async function loadDirectoryContent(path: string): Promise<DirectoryData>
 export async function batchDeleteFiles(paths: string[]): Promise<void> {
   if (paths.length === 0) return;
 
-  const response = await fetch("/api/files/batch-delete", {
+  const response = await fetch("/api/files/file/batch-delete", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ paths }),
@@ -64,7 +64,7 @@ export async function batchDeleteFiles(paths: string[]): Promise<void> {
 export async function batchMoveFiles(paths: string[], targetPath: string): Promise<void> {
   if (paths.length === 0) return;
 
-  const response = await fetch("/api/files/batch-move", {
+  const response = await fetch("/api/files/file/batch-move", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ paths, targetPath }),
@@ -81,7 +81,7 @@ export async function batchMoveFiles(paths: string[], targetPath: string): Promi
 export async function createFile(workingDir: string, fileName: string): Promise<void> {
   const filePath = `${workingDir}/${fileName}`.replace(/\/+/g, "/");
 
-  const response = await fetch("/api/files/write", {
+  const response = await fetch("/api/files/file/write", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ path: filePath, content: "" }),
@@ -99,7 +99,7 @@ export async function executeFileByPath(
   path: string,
   onOutput?: (output: string) => void
 ): Promise<string> {
-  const response = await fetch("/api/execute", {
+  const response = await fetch("/api/files/file/execute", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ path }),

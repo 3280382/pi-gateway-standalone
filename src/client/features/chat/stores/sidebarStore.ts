@@ -95,12 +95,12 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
         },
 
         // Data Actions
+        // 注意：此方法仅更新本地状态，全局 workspaceStore 的同步由调用方负责
+        // 或通过全局 workspaceStore.setWorkingDir 触发反向同步
         setWorkingDir: (path: string) => {
           const safePath = path || "";
           const displayName = safePath.split("/").pop() || safePath;
           set({ workingDir: { path: safePath, displayName } }, false, "setWorkingDir");
-          // 同步更新全局 workspaceStore
-          useWorkspaceStore.getState().setWorkingDir(safePath);
         },
 
         setSessions: (sessions: Session[]) => {

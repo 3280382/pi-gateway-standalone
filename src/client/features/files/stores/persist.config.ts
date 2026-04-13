@@ -26,9 +26,11 @@ export const FILES_STORAGE_VERSION = {
 // Persist Fields
 // ============================================================================
 
-/** Files Browser Store - 持久化字段 */
+/** Files Browser Store - 持久化字段
+ * 注意：workingDir 已由全局 workspaceStore (pi:app:workspace) 管理，不再在此处持久化
+ */
 export const FILES_BROWSER_PERSIST = [
-  "workingDir",
+  // "workingDir", // 已由全局 workspaceStore (pi:app:workspace) 管理
   "viewMode",
   "sortMode",
   "filterType",

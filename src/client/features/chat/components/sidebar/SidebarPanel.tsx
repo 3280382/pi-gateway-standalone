@@ -17,7 +17,6 @@ import { sessionManager } from "@/features/chat/services/sessionManager";
 import { useLlmLogStore } from "@/features/chat/stores/llmLogStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import { useWorkspaceStore } from "@/features/files/stores";
 import { CompactWorkspacesSection } from "./CompactWorkspacesSection";
 import { SessionDropdownSection } from "./SessionDropdownSection";
 import { ModelParamsSection } from "./ModelParamsSection";

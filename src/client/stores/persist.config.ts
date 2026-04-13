@@ -19,6 +19,7 @@ import { FILES_STORAGE_KEYS } from "@/features/files/stores/persist.config";
 
 export const APP_STORAGE_KEYS = {
   APP_GLOBAL: "pi:app:global",
+  APP_WORKSPACE: "pi:app:workspace", // 全局工作目录（Chat & File 共享）
 } as const;
 
 // ============================================================================
@@ -27,6 +28,7 @@ export const APP_STORAGE_KEYS = {
 
 export const APP_STORAGE_VERSION = {
   APP_GLOBAL: 1,
+  APP_WORKSPACE: 1,
 } as const;
 
 // ============================================================================
@@ -34,6 +36,9 @@ export const APP_STORAGE_VERSION = {
 // ============================================================================
 
 export const APP_GLOBAL_PERSIST = ["currentView", "theme", "fontSize"] as const;
+
+/** App Workspace Store - 持久化字段（全局工作目录） */
+export const APP_WORKSPACE_PERSIST = ["workingDir", "fileBrowsePath"] as const;
 
 // ============================================================================
 // 聚合所有 Storage Keys（供调试使用）

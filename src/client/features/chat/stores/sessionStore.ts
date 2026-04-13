@@ -130,12 +130,10 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
             sessions: state.sessions.filter((s) => s.id !== id),
           })),
 
-        // 工作目录（同时同步到全局 workspaceStore）
-        setWorkingDir: (dir) => {
-          // 同步更新全局 workspaceStore
-          useWorkspaceStore.getState().setWorkingDir(dir);
-          return set({ workingDir: dir });
-        },
+        // 工作目录
+        // 注意：此方法仅更新本地状态，全局 workspaceStore 的同步由调用方负责
+        // 或通过全局 workspaceStore.setWorkingDir 触发反向同步
+        setWorkingDir: (dir) => set({ workingDir: dir }),
 
         // 模型设置
         setCurrentModel: (model) => set({ currentModel: model }),

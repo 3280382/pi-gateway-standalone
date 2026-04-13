@@ -11,6 +11,7 @@ import * as fileOperationsApi from "@/features/files/services/api/fileOperations
 import type { FileItem } from "@/features/files/stores/fileStore";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 
 interface PinchState {
   startDistance: number;
@@ -61,7 +62,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
     isTodoModeActive,
     setGitHistoryFile,
     setTodoInputFile,
-    setWorkingDir,
+    setCurrentBrowsePath,
     setSelectedActionFile,
     toggleSelection: storeToggleSelection,
     setIsMultiSelectMode,
@@ -108,7 +109,8 @@ export function useFileItemActions(): UseFileItemActionsResult {
 
         if (item.isDirectory) {
           console.log("[useFileItemActions] Navigating to:", item.path);
-          setWorkingDir(item.path);
+          // 在文件浏览器中导航只改变 currentBrowsePath，不改变全局 workingDir
+          setCurrentBrowsePath(item.path);
         } else {
           console.log("[useFileItemActions] Opening viewer:", item.path);
           openViewer(item.path, item.name, "view");
@@ -122,7 +124,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
       isGitModeActive,
       isTodoModeActive,
       storeToggleSelection,
-      setWorkingDir,
+      setCurrentBrowsePath,
       openViewer,
       setGitHistoryFile,
       setTodoInputFile,
@@ -133,10 +135,11 @@ export function useFileItemActions(): UseFileItemActionsResult {
     (item: FileItem) => {
       if (isMultiSelectMode) return;
       if (item.isDirectory) {
-        setWorkingDir(item.path);
+        // 在文件浏览器中导航只改变 currentBrowsePath，不改变全局 workingDir
+        setCurrentBrowsePath(item.path);
       }
     },
-    [isMultiSelectMode, setWorkingDir]
+    [isMultiSelectMode, setCurrentBrowsePath]
   );
 
   const handleLongPress = useCallback(

@@ -17,7 +17,13 @@ import { TreeView } from "@/features/files/components/FileBrowser/TreeView";
 
 import { FileActionBar } from "@/features/files/components/Header/FileActionBar";
 import { FileViewer } from "@/features/files/components/modals/FileViewer";
-import { useFileBrowser, useFileFiltering, useGitStatus, useTreeView, useTodos } from "@/features/files/hooks";
+import {
+  useFileBrowser,
+  useFileFiltering,
+  useGitStatus,
+  useTreeView,
+  useTodos,
+} from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
 
@@ -39,7 +45,7 @@ export function FileBrowser({
 }: FileBrowserProps) {
   // ===== [ANCHOR:STATE] =====
   const { viewMode, isLoading, error, currentBrowsePath } = useFileStore();
-  
+
   // 使用全局 workspace store 的 workingDir（用于 todo）
   const { workingDir } = useWorkspaceStore();
 
@@ -54,8 +60,10 @@ export function FileBrowser({
   const { filteredItems } = useFileFiltering();
 
   // ===== [ANCHOR:TREEVIEW] =====
-  // 树形视图数据（过滤状态从store读取）
-  const { treeData, isLoading: treeLoading } = useTreeView();
+  // 树形视图数据 - 仅在 tree 视图模式下才加载
+  const { treeData, isLoading: treeLoading } = useTreeView({
+    isActive: isActive && viewMode === "tree",
+  });
 
   // ===== [ANCHOR:RENDER] =====
   return (
@@ -76,7 +84,7 @@ export function FileBrowser({
 
           {/* 文件列表区域 */}
           <div className={styles.contentArea}>
-            {isLoading || treeLoading ? (
+            {isLoading || (viewMode === "tree" && treeLoading) ? (
               <div className={styles.loading}>Loading...</div>
             ) : error ? (
               <div className={styles.error}>{error}</div>

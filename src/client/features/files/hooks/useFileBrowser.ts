@@ -5,7 +5,7 @@
  * - 目录加载（仅在激活状态时）
  * - 错误处理
  * - 与 store 和 service 协调
- * 
+ *
  * 注意：使用 currentBrowsePath 进行目录浏览，不改变全局 workingDir
  */
 
@@ -36,24 +36,25 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
   // currentBrowsePath: 当前浏览的目录（在文件浏览器中导航不改变全局 workingDir）
   const { currentBrowsePath, setItems, setCurrentBrowsePath, setParentPath, setLoading, setError } =
     useFileStore();
-  
+
   const { workingDir, setFileBrowsePath } = useWorkspaceStore();
 
   const lastLoadedPathRef = useRef<string>("");
-  const [isInitialized, setIsInitialized] = useState(false);
+  const isInitializedRef = useRef(false);
 
   // 初始化：如果没有设置 currentBrowsePath，则使用 workingDir
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (!isActive) return;
-    
+    if (!isActive || isInitializedRef.current) return;
+
     // 如果 currentBrowsePath 为空或初始值，使用 workingDir
     if (!currentBrowsePath || currentBrowsePath === "/") {
       const path = workingDir || "/root";
       setCurrentBrowsePath(path);
       setFileBrowsePath(path);
     }
-    setIsInitialized(true);
-  }, [isActive, workingDir, currentBrowsePath, setCurrentBrowsePath, setFileBrowsePath]);
+    isInitializedRef.current = true;
+  }, [isActive]); // 只在 isActive 变化时执行一次
 
   /**
    * 加载目录内容
@@ -95,15 +96,16 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
    * 路径变化时自动加载
    * 仅在激活状态下执行
    */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (!isActive || !isInitialized || !currentBrowsePath) {
+    if (!isActive || !currentBrowsePath) {
       return;
     }
     // 只有当路径真正改变时才加载
     if (currentBrowsePath !== lastLoadedPathRef.current) {
       loadDirectory(currentBrowsePath);
     }
-  }, [isActive, isInitialized, currentBrowsePath, loadDirectory]);
+  }, [isActive, currentBrowsePath]);
 
   return {
     loadDirectory,
