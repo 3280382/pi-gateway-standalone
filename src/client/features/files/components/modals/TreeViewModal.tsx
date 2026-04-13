@@ -245,7 +245,7 @@ export function TreeViewModal({
                     onClick={() => !node.isDirectory && onFileClick(node.path, node.name)}
                   >
                     {/* 连接线 */}
-                    <span className={styles.connector}>{isLast ? "└── " : "├── "}</span>
+                    <span className={styles.connector}>{isLast ? " " : " "}</span>
 
                     {/* 文件图标 */}
                     <span className={styles.icon}>{icon}</span>
