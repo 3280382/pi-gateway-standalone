@@ -58,6 +58,9 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
     setTreeFilterText,
   } = useFileStore();
 
+  // 判断是否是TreeView模式
+  const isTreeView = viewMode === "tree";
+
   // UI状态
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
@@ -82,13 +85,14 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
   }, []);
 
   // ========== 4. Computed ==========
-  // 判断是否是TreeView模式
-  const isTreeView = viewMode === "tree";
-  
   // 获取当前选中的选项
-  const selectedFilterOption = isTreeView
-    ? TREE_FILTER_OPTIONS.find((opt) => opt.value === treeFilterMode) || TREE_FILTER_OPTIONS[0]
-    : FILTER_OPTIONS.find((opt) => opt.value === filterType) || FILTER_OPTIONS[0];
+  const selectedFilterOption =
+    FILTER_OPTIONS.find((opt) => opt.value === filterType) || FILTER_OPTIONS[0];
+
+  // TreeView过滤选项显示文本
+  const selectedTreeFilter = 
+    treeFilterMode === "normal" ? "🙈 Exclude Hidden" :
+    treeFilterMode === "all" ? "👁️ Show All" : "🔍 Search...";
 
   // ========== 5. Actions ==========
   // 处理输入框变化
@@ -130,8 +134,11 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
           <input
             type="text"
             className={styles.filterComboInput}
-            placeholder={isTreeView ? "Search..." : "Filter..."}
-            value={isTreeView ? treeFilterText : (filterType === "custom" ? filterText : selectedFilterOption.label)}
+            placeholder="Filter..."
+            value={isTreeView 
+              ? (treeFilterMode === "search" ? treeFilterText : selectedTreeFilter)
+              : (filterType === "custom" ? filterText : selectedFilterOption.label)
+            }
             onChange={(e) => handleFilterInputChange(e.target.value)}
             onClick={() => setIsFilterDropdownOpen(true)}
           />
