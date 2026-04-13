@@ -1,21 +1,16 @@
 /**
- * ModelParamsSection - Model parameters display and settings (compact version)
+ * ModelParamsSection - Model parameters display (compact readonly version)
+ * 
+ * 职责：
+ * - 显示当前模型信息（只读）
+ * - 允许调整思考级别
+ * - 从 WebSocket init 获取 currentModel 和 thinkingLevel
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback } from "react";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useChatController } from "@/features/chat/services/api/chatApi";
 import styles from "./SidebarPanel.module.css";
-
-interface ModelInfo {
-  id: string;
-  name: string;
-  provider?: string;
-  maxTokens?: number;
-  contextWindow?: number;
-  reasoning?: boolean;
-  input?: ("text" | "image")[];
-}
 
 export function ModelParamsSection() {
   // ========== 1. State ==========
@@ -25,36 +20,23 @@ export function ModelParamsSection() {
   const chatController = useChatController();
 
   // ========== 2. Computed ==========
-  // 模型列表由 init 响应提供，不需要单独加载
-  const models = availableModels;
-  const isLoading = models.length === 0;
+  // 找到当前模型的完整信息
+  const currentModelInfo = availableModels.find((m) => 
+    m.id === currentModel || currentModel?.endsWith(m.id)
+  );
 
-  // Migrate old format model ID to new format
-  const migratedCurrentModel = currentModel?.includes("/")
-    ? currentModel
-    : models.find((m) => m.id.endsWith(`/${currentModel}`))?.id;
+  // 提取模型名称（去掉 provider 前缀）
+  const modelName = currentModel?.split("/").pop() || currentModel || "Unknown";
+  const provider = currentModel?.split("/")[0] || "-";
 
-  // Get valid model value for select
-  const validModelValue = migratedCurrentModel || models[0]?.id || currentModel || "";
-
-  console.log("[ModelParamsSection] Debug:", {
+  console.log("[ModelParamsSection] Current model:", {
     currentModel,
-    migratedCurrentModel,
-    validModelValue,
-    modelsCount: models.length,
-    firstModelId: models[0]?.id,
-    source: "server",
+    modelName,
+    provider,
+    hasInfo: !!currentModelInfo,
   });
 
   // ========== 3. Actions ==========
-  const handleModelChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      console.log("[ModelParamsSection] Model selected:", e.target.value);
-      chatController.setModel(e.target.value, thinkingLevel || "medium");
-    },
-    [chatController, thinkingLevel]
-  );
-
   const handleThinkingLevelChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       chatController.setThinkingLevel(e.target.value);
@@ -62,33 +44,7 @@ export function ModelParamsSection() {
     [chatController]
   );
 
-  // ========== 4. Computed ==========
-  const currentModelInfo = models.find((m) => m.id === validModelValue);
-
-  const thinkingOptions = [
-    { value: "off", label: "Off" },
-    { value: "low", label: "Low" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
-  ];
-
-  // Input types display
-  const inputTypes = currentModelInfo?.input
-    ? currentModelInfo.input.map((t) => (t === "text" ? "Text" : "Image")).join(", ")
-    : "Text";
-
-  // ========== 5. Render ==========
-  if (isLoading) {
-    return (
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>Model</h3>
-        </div>
-        <div className={styles.loading}>Loading...</div>
-      </section>
-    );
-  }
-
+  // ========== 4. Render ==========
   return (
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
@@ -96,23 +52,18 @@ export function ModelParamsSection() {
       </div>
 
       <div className={styles.modelParamsCompact}>
-        {/* Model selection */}
+        {/* Current Model Display (Readonly) */}
         <div className={styles.paramRow}>
           <label className={styles.paramLabel}>Model</label>
-          <div className={styles.selectWrapper}>
-            <select
-              className={styles.paramSelect}
-              value={validModelValue}
-              onChange={handleModelChange}
-              disabled={models.length === 0}
-            >
-              {models.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
+          <div className={styles.modelValue} title={currentModel || undefined}>
+            {modelName}
           </div>
+        </div>
+
+        {/* Provider */}
+        <div className={styles.paramRow}>
+          <label className={styles.paramLabel}>Provider</label>
+          <div className={styles.paramValue}>{provider}</div>
         </div>
 
         {/* Thinking level */}
@@ -123,43 +74,36 @@ export function ModelParamsSection() {
             value={thinkingLevel || "medium"}
             onChange={handleThinkingLevelChange}
           >
-            {thinkingOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
+            <option value="off">Off</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
           </select>
         </div>
 
-        {/* Model info (read-only) */}
+        {/* Model Info Grid */}
         <div className={styles.modelInfoGrid}>
-          <div className={styles.infoItem}>
-            <span className={styles.infoLabel}>Provider</span>
-            <span className={styles.infoValue}>{currentModelInfo?.provider || "-"}</span>
-          </div>
           <div className={styles.infoItem}>
             <span className={styles.infoLabel}>Context</span>
             <span className={styles.infoValue}>
-              {currentModelInfo?.contextWindow ? formatNumber(currentModelInfo.contextWindow) : "-"}
+              {currentModelInfo?.contextWindow 
+                ? formatNumber(currentModelInfo.contextWindow) 
+                : "-"}
             </span>
           </div>
           <div className={styles.infoItem}>
             <span className={styles.infoLabel}>Max Out</span>
             <span className={styles.infoValue}>
-              {currentModelInfo?.maxTokens ? formatNumber(currentModelInfo.maxTokens) : "-"}
+              {currentModelInfo?.maxTokens 
+                ? formatNumber(currentModelInfo.maxTokens) 
+                : "-"}
             </span>
           </div>
           <div className={styles.infoItem}>
-            <span className={styles.infoLabel}>Input</span>
-            <span className={styles.infoValue}>{inputTypes}</span>
-          </div>
-          <div className={styles.infoItem}>
-            <span className={styles.infoLabel}>Stream</span>
-            <span className={styles.infoValue}>On</span>
-          </div>
-          <div className={styles.infoItem}>
             <span className={styles.infoLabel}>Reasoning</span>
-            <span className={styles.infoValue}>{currentModelInfo?.reasoning ? "Yes" : "No"}</span>
+            <span className={styles.infoValue}>
+              {currentModelInfo?.reasoning ? "Yes" : "No"}
+            </span>
           </div>
         </div>
       </div>

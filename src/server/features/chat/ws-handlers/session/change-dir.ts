@@ -28,8 +28,11 @@ async function getAllSessions(workingDir: string): Promise<Array<{
   lastModified: string;
 }>> {
   try {
-    const localSessionsDir = `${workingDir}/.pi/agent/sessions`;
-    const sessions = await SessionManager.list(workingDir, localSessionsDir);
+    // 使用全局的 sessions 目录 /root/.pi/agent/sessions/
+    const globalSessionsDir = "/root/.pi/agent/sessions";
+    const sessions = await SessionManager.list(workingDir, globalSessionsDir);
+    
+    logger.info(`[ChangeDir] Found ${sessions.length} sessions for ${workingDir}`);
     
     return sessions.map(s => ({
       id: s.path,
