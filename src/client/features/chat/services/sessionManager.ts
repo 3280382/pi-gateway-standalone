@@ -265,14 +265,6 @@ async function selectSession(sessionId: string): Promise<void> {
   stores.sidebar.setSelectedSessionId(session.id);
   stores.session.setCurrentSession(session.id);
   
-  // 保存到 lastSessionByDir
-  const currentDir = stores.sidebar.workingDir?.path;
-  if (currentDir) {
-    const lastSessionByDir = { ...stores.sidebar.lastSessionByDir };
-    lastSessionByDir[currentDir] = session.id;
-    useSidebarStore.setState({ lastSessionByDir }, false, "selectSession");
-  }
-  
   // 加载 session 消息
   if (session.path) {
     await stores.chat.loadSession(session.path);
@@ -330,14 +322,6 @@ async function createNewSession(): Promise<void> {
     // 设置连接状态
     stores.session.setIsConnected(true);
 
-    // 保存到 lastSessionByDir
-    const currentDir = stores.sidebar.workingDir?.path;
-    if (currentDir) {
-      const lastSessionByDir = { ...stores.sidebar.lastSessionByDir };
-      lastSessionByDir[currentDir] = newSession.id;
-      useSidebarStore.setState({ lastSessionByDir }, false, "createNewSession");
-    }
-
     console.log("[SessionManager] 新 session 创建完成:", response.sessionId);
   } finally {
     stores.sidebar.setLoading(false);
@@ -346,9 +330,11 @@ async function createNewSession(): Promise<void> {
 
 /**
  * 获取指定目录上次使用的 session ID
+ * 注意：不再从 localStorage 获取，服务器决定使用哪个 session
  */
-function getLastSessionForDir(dir: string): string | undefined {
-  return useSidebarStore.getState().lastSessionByDir[dir];
+function getLastSessionForDir(_dir: string): string | undefined {
+  // 服务器决定使用哪个 session，客户端不保存
+  return undefined;
 }
 
 /**

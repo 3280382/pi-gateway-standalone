@@ -19,6 +19,14 @@ export function SessionDropdownSection() {
   const isLoading = useSidebarStore((state) => state.isLoading);
   const controller = useSidebarController();
 
+  // Debug
+  console.log("[SessionDropdownSection] Render:", {
+    sessionsCount: sessions.length,
+    currentSessionId,
+    isLoading,
+    sessions: sessions.map(s => ({ id: s.id.slice(-8), name: s.name })),
+  });
+
   // ========== 2. Actions ==========
   const handleSessionChange = useCallback(
     async (e: React.ChangeEvent<HTMLSelectElement>) => {
