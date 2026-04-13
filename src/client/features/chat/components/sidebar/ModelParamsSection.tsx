@@ -20,13 +20,18 @@ export function ModelParamsSection() {
   const availableModels = useSessionStore((state) => state.availableModels);
   const chatController = useChatController();
   const [isModelOpen, setIsModelOpen] = useState(false);
+  const [isThinkingOpen, setIsThinkingOpen] = useState(false);
   const modelDropdownRef = useRef<HTMLDivElement>(null);
+  const thinkingDropdownRef = useRef<HTMLDivElement>(null);
 
   // ========== 2. Effects ==========
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (modelDropdownRef.current && !modelDropdownRef.current.contains(e.target as Node)) {
         setIsModelOpen(false);
+      }
+      if (thinkingDropdownRef.current && !thinkingDropdownRef.current.contains(e.target as Node)) {
+        setIsThinkingOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -47,9 +52,15 @@ export function ModelParamsSection() {
     [chatController, thinkingLevel]
   );
 
-  const handleThinkingLevelChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      chatController.setThinkingLevel(e.target.value);
+  const handleThinkingSelect = useCallback(
+    async (level: string) => {
+      console.log("[ModelParamsSection] Switching thinking level to:", level);
+      try {
+        await chatController.setThinkingLevel(level);
+        setIsThinkingOpen(false);
+      } catch (error) {
+        console.error("[ModelParamsSection] Failed to switch thinking level:", error);
+      }
     },
     [chatController]
   );
@@ -61,6 +72,15 @@ export function ModelParamsSection() {
   });
 
   const displayModelName = currentModelInfo?.name || currentModel?.split("/").pop() || "Select";
+
+  const thinkingOptions = [
+    { value: "off", label: "Off" },
+    { value: "low", label: "Low" },
+    { value: "medium", label: "Medium" },
+    { value: "high", label: "High" },
+  ];
+
+  const currentThinkingLabel = thinkingOptions.find(t => t.value === (thinkingLevel || "medium"))?.label || "Medium";
 
   // ========== 5. Render ==========
   if (availableModels.length === 0) {
@@ -130,19 +150,44 @@ export function ModelParamsSection() {
           </div>
         </div>
 
-        {/* Thinking level */}
+        {/* Thinking level - 紧凑下拉框 */}
         <div className={styles.paramRow}>
           <label className={styles.paramLabel}>Thinking</label>
-          <select
-            className={styles.paramSelect}
-            value={thinkingLevel || "medium"}
-            onChange={handleThinkingLevelChange}
-          >
-            <option value="off">Off</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
+          <div className={styles.sessionSelector} ref={thinkingDropdownRef}>
+            <button
+              type="button"
+              className={styles.selectorBtn}
+              onClick={() => setIsThinkingOpen(!isThinkingOpen)}
+            >
+              <span className={styles.selectorValue}>{currentThinkingLabel}</span>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                className={styles.dropdownIcon}
+                style={{ transform: isThinkingOpen ? "rotate(180deg)" : "none" }}
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+
+            {isThinkingOpen && (
+              <div className={styles.sessionDropdown}>
+                {thinkingOptions.map((option) => (
+                  <div
+                    key={option.value}
+                    className={`${styles.dropdownItem} ${option.value === (thinkingLevel || "medium") ? styles.active : ""}`}
+                    onClick={() => handleThinkingSelect(option.value)}
+                  >
+                    <span className={styles.sessionName}>{option.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Model Info Grid */}
