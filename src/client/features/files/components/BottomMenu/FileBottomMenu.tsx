@@ -4,9 +4,9 @@
  * 职责：纯 UI 渲染
  * - 不包含业务逻辑
  * - 通过 useFileBottomMenu hook 获取所有逻辑
- * - TreeView 已抽离到 modals/TreeViewModal
  */
 
+import { useState } from "react";
 import styles from "@/features/files/components/BottomMenu/FileBottomMenu.module.css";
 import { GitHistoryModal } from "@/features/files/components/modals/GitHistoryModal";
 import { TodoInputModal } from "@/features/files/components/modals/TodoInputModal";
@@ -34,17 +34,51 @@ export function FileBottomMenu() {
   // 视图和刷新功能
   const { viewMode, setViewMode } = useFileStore();
 
-  // 循环切换视图: grid -> list -> tree -> grid
-  const cycleViewMode = () => {
-    const modes: ViewMode[] = ["grid", "list", "tree"];
-    const currentIndex = modes.indexOf(viewMode);
-    const nextMode = modes[(currentIndex + 1) % modes.length];
-    setViewMode(nextMode);
-  };
+  // 视图选择弹窗状态
+  const [isViewSelectorOpen, setIsViewSelectorOpen] = useState(false);
+  // LocalStorage 查看弹窗状态
+  const [isStorageViewerOpen, setIsStorageViewerOpen] = useState(false);
+  const [storageData, setStorageData] = useState<Record<string, unknown>>({});
+
   // Git 模式
   const { isGitModeActive, toggleGitMode, gitHistoryFile, setGitHistoryFile } = useFileStore();
   // Todo 模式
   const { isTodoModeActive, toggleTodoMode, todoInputFile, setTodoInputFile } = useFileStore();
+
+  // 打开视图选择器
+  const openViewSelector = () => {
+    setIsViewSelectorOpen(true);
+  };
+
+  // 选择视图模式
+  const selectViewMode = (mode: ViewMode) => {
+    setViewMode(mode);
+    setIsViewSelectorOpen(false);
+  };
+
+  // 查看 LocalStorage
+  const viewLocalStorage = () => {
+    const data: Record<string, unknown> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) {
+        try {
+          const value = localStorage.getItem(key);
+          if (value) {
+            // 尝试解析 JSON
+            data[key] = JSON.parse(value);
+          } else {
+            data[key] = null;
+          }
+        } catch {
+          // 如果不是 JSON，直接存储字符串
+          data[key] = localStorage.getItem(key);
+        }
+      }
+    }
+    setStorageData(data);
+    setIsStorageViewerOpen(true);
+  };
 
   return (
     <>
@@ -70,11 +104,11 @@ export function FileBottomMenu() {
         </button>
         {/* 分隔 */}
         <div className={styles.divider} />
-        {/* 视图切换 */}
+        {/* 视图切换 - 点击弹出选择 */}
         <button type="button"
           className={`${styles.btn} ${styles.viewBtn}`}
-          onClick={cycleViewMode}
-          title={`Current: ${viewMode} (click to switch)`}
+          onClick={openViewSelector}
+          title={`Current: ${viewMode} (click to select)`}
         >
           {viewMode === "grid" ? <GridIcon /> : viewMode === "list" ? <ListIcon /> : <TreeIcon />}
         </button>
@@ -114,7 +148,73 @@ export function FileBottomMenu() {
         >
           <TodoIcon />
         </button>
+        {/* 分隔 */}
+        <div className={styles.divider} />
+        {/* LocalStorage 查看按钮 */}
+        <button type="button"
+          className={`${styles.btn} ${styles.storageBtn}`}
+          onClick={viewLocalStorage}
+          title="View LocalStorage"
+        >
+          <StorageIcon />
+        </button>
       </div>
+
+      {/* 视图选择弹窗 */}
+      {isViewSelectorOpen && (
+        <div className={styles.modalOverlay} onClick={() => setIsViewSelectorOpen(false)}>
+          <div className={styles.viewSelector} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.viewSelectorTitle}>Select View</div>
+            <div className={styles.viewOptions}>
+              <button
+                type="button"
+                className={`${styles.viewOption} ${viewMode === "grid" ? styles.active : ""}`}
+                onClick={() => selectViewMode("grid")}
+              >
+                <GridIcon />
+                <span>Grid</span>
+              </button>
+              <button
+                type="button"
+                className={`${styles.viewOption} ${viewMode === "list" ? styles.active : ""}`}
+                onClick={() => selectViewMode("list")}
+              >
+                <ListIcon />
+                <span>List</span>
+              </button>
+              <button
+                type="button"
+                className={`${styles.viewOption} ${viewMode === "tree" ? styles.active : ""}`}
+                onClick={() => selectViewMode("tree")}
+              >
+                <TreeIcon />
+                <span>Tree</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LocalStorage 查看弹窗 */}
+      {isStorageViewerOpen && (
+        <div className={styles.modalOverlay} onClick={() => setIsStorageViewerOpen(false)}>
+          <div className={styles.storageViewer} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.storageViewerHeader}>
+              <span className={styles.storageViewerTitle}>LocalStorage</span>
+              <button
+                type="button"
+                className={styles.closeBtn}
+                onClick={() => setIsStorageViewerOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className={styles.storageViewerContent}>
+              <pre>{JSON.stringify(storageData, null, 2)}</pre>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 新建文件对话框 */}
       {isNewModalOpen && (
@@ -178,8 +278,6 @@ export function FileBottomMenu() {
           </div>
         </div>
       )}
-
-
 
       {/* Git 历史弹窗 */}
       {gitHistoryFile && (
@@ -319,6 +417,17 @@ function TodoIcon() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
       <path d="M9 11l3 3L22 4" />
       <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+    </svg>
+  );
+}
+
+function StorageIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+      <rect x="2" y="3" width="20" height="7" rx="2" />
+      <rect x="2" y="14" width="20" height="7" rx="2" />
+      <line x1="6" y1="6" x2="6.01" y2="6" />
+      <line x1="6" y1="17" x2="6.01" y2="17" />
     </svg>
   );
 }

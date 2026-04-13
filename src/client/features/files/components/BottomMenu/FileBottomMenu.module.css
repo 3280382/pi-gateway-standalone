@@ -451,3 +451,115 @@
     0 0 24px rgba(249, 226, 175, 0.3);
   font-weight: 600;
 }
+
+/* ===== Storage Button ===== */
+.storageBtn {
+  background: rgba(139, 148, 158, 0.15);
+  color: #8b949e;
+}
+
+.storageBtn:hover:not(:disabled) {
+  background: rgba(139, 148, 158, 0.25);
+  color: #b0b8c0;
+}
+
+/* ===== View Selector Popup ===== */
+.viewSelector {
+  background: linear-gradient(145deg, #1a1b26 0%, #16161e 100%);
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 200px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.viewSelectorTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #cdd6f4;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.viewOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.viewOption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #a8a2c8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 13px;
+}
+
+.viewOption:hover {
+  background: rgba(168, 162, 200, 0.15);
+  color: #c4bfe9;
+}
+
+.viewOption.active {
+  background: rgba(168, 162, 200, 0.25);
+  color: #c4bfe9;
+  font-weight: 500;
+}
+
+.viewOption svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ===== Storage Viewer Popup ===== */
+.storageViewer {
+  background: linear-gradient(145deg, #1a1b26 0%, #16161e 100%);
+  border-radius: 12px;
+  width: 600px;
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.storageViewerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px 12px 0 0;
+}
+
+.storageViewerTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #cdd6f4;
+}
+
+.storageViewerContent {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+}
+
+.storageViewerContent pre {
+  margin: 0;
+  font-family: "JetBrains Mono", "SF Mono", Monaco, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #a5b4fc;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
