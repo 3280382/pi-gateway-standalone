@@ -39,13 +39,12 @@ describe("handleInit", () => {
     expect(mockSession.initialize).toHaveBeenCalledWith("/test/dir", undefined);
   });
 
-  it("should initialize session with sessionId", async () => {
+  it("should initialize session with only workingDir", async () => {
     await handleInit(mockCtx, {
       workingDir: "/test/dir",
-      sessionId: "existing-session",
     });
 
-    expect(mockSession.initialize).toHaveBeenCalledWith("/test/dir", "existing-session");
+    expect(mockSession.initialize).toHaveBeenCalledWith("/test/dir", undefined);
   });
 
   it("should send initialized response on success", async () => {

@@ -1,11 +1,20 @@
 /**
  * useChatInit - Chat 页面初始化 Hook
  *
- * 职责：WebSocket 连接、session 恢复
- * 仅在 Chat 页面加载时执行
+ * 职责：
+ * 1. WebSocket 连接
+ * 2. 发送 init 请求（带 workingDir）
+ * 3. 处理服务器返回的完整数据，恢复界面
+ *
+ * 服务器返回数据：
+ * - pid: 顶部菜单显示
+ * - workingDir: 当前工作目录
+ * - currentSession: { sessionId, sessionFile, messages } - 聊天界面历史消息
+ * - allSessions: 左侧面板所有 session 列表
+ * - currentModel: 当前模型
+ * - allModels: 左侧面板所有模型列表
+ * - thinkingLevel: 思考级别
  */
-
-// ===== [ANCHOR:IMPORTS] =====
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useChatStore } from "@/features/chat/stores/chatStore";
@@ -15,19 +24,29 @@ import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { websocketService } from "@/services/websocket.service";
 import { setupWebSocketListeners } from "../services/api/chatApi";
 import { initChatWorkingDirectory } from "../services/chatWebSocket";
-
-// ===== [ANCHOR:TYPES] =====
+import type { Session } from "@/features/chat/types/sidebar";
 
 interface InitResponse {
-  cwd: string;
-  sessionId?: string;
-  sessionFile?: string;
-  pid?: number;
-  model?: string;
-  thinkingLevel?: string;
+  pid: number;
+  workingDir: string;
+  currentSession: {
+    sessionId: string;
+    sessionFile: string;
+    messages: any[];
+  };
+  allSessions: Session[];
+  currentModel: string | null;
+  allModels: Array<{
+    id: string;
+    name: string;
+    provider?: string;
+    maxTokens?: number;
+    contextWindow?: number;
+    reasoning?: boolean;
+    input?: string[];
+  }>;
+  thinkingLevel: string;
 }
-
-// ===== [ANCHOR:HOOK] =====
 
 export function useChatInit(): { isConnecting: boolean } {
   const [isConnecting, setIsConnecting] = useState(true);
@@ -54,61 +73,80 @@ export function useChatInit(): { isConnecting: boolean } {
         return;
       }
 
-      // 2. 发送 init 请求，不带任何参数，让服务器完全自己决定当前 session
-      // 服务器根据当前工作目录返回 session 状态，客户端不再从 localStorage 恢复
-      console.log("[ChatInit] Sending init request to server (no params)...");
+      // 2. 从 localStorage 获取当前工作目录
+      const savedWorkingDir = useWorkspaceStore.getState().workingDir;
+      console.log("[ChatInit] Sending init with workingDir:", savedWorkingDir);
 
+      // 3. 发送 init 请求，传入当前工作目录
       const initResponse = await initChatWorkingDirectory(
-        undefined, // 不传 workingDir，让服务器决定
-        undefined, // 不传 sessionId，让服务器决定
-        5000 // 5秒超时
+        savedWorkingDir,
+        undefined,
+        10000 // 10秒超时，因为需要加载文件
       ).catch((err) => {
-        console.log("[ChatInit] init error or timeout:", err);
+        console.error("[ChatInit] init error:", err);
         return null;
       });
 
-      // 3. 如果服务器返回 active session，恢复 UI
-      if (initResponse?.sessionId && initResponse?.sessionFile && initResponse?.cwd) {
-        console.log("[ChatInit] 服务器返回 session，同步 UI:", {
-          sessionId: initResponse.sessionId,
-          cwd: initResponse.cwd,
-        });
-
-        // 更新所有 store 状态（以服务器返回的为准）
-        useSessionStore.getState().setCurrentSession(initResponse.sessionFile);
-        // 更新全局 workspaceStore 的 workingDir
-        useWorkspaceStore.getState().setWorkingDir(initResponse.cwd);
-        useSidebarStore.getState().setWorkingDir(initResponse.cwd);
-        useSessionStore.getState().setIsConnected(true);
-
-        if (initResponse.pid) {
-          useSessionStore.getState().setServerPid(initResponse.pid);
-        }
-        if (initResponse.model) {
-          useSessionStore.getState().setCurrentModel(initResponse.model);
-        }
-        if (initResponse.thinkingLevel) {
-          useSessionStore.getState().setThinkingLevel(initResponse.thinkingLevel as any);
-        }
-
-        // 加载 session 消息历史
-        try {
-          await useChatStore.getState().loadSession(initResponse.sessionFile);
-        } catch (e) {
-          console.warn("[ChatInit] 加载 session 消息失败:", e);
-        }
-
-        // 选中当前 session
-        useSidebarStore.getState().setSelectedSessionId(initResponse.sessionFile);
+      if (!initResponse) {
+        setIsConnecting(false);
+        return;
       }
-      // 4. 服务器没有 active session，使用默认工作目录
-      else {
-        console.log("[ChatInit] 服务器没有 active session，使用默认配置");
-        useWorkspaceStore.getState().setWorkingDir("/root");
-        useSidebarStore.getState().setWorkingDir("/root");
-        useSessionStore.getState().setWorkingDir("/root");
-        useSessionStore.getState().setIsConnected(true);
+
+      // 4. 处理服务器返回的完整数据
+      console.log("[ChatInit] Server returned full init data:", {
+        pid: initResponse.pid,
+        workingDir: initResponse.workingDir,
+        sessionsCount: initResponse.allSessions?.length,
+        modelsCount: initResponse.allModels?.length,
+        currentSessionId: initResponse.currentSession?.sessionId,
+      });
+
+      const {
+        pid,
+        workingDir,
+        currentSession,
+        allSessions,
+        currentModel,
+        allModels,
+        thinkingLevel,
+      } = initResponse as InitResponse;
+
+      // 5. 恢复所有状态
+
+      // 5.1 全局工作目录
+      useWorkspaceStore.getState().setWorkingDir(workingDir);
+
+      // 5.2 Session 状态
+      useSessionStore.getState().setWorkingDir(workingDir);
+      useSessionStore.getState().setIsConnected(true);
+      useSessionStore.getState().setServerPid(pid);
+      useSessionStore.getState().setCurrentModel(currentModel);
+      useSessionStore.getState().setThinkingLevel(thinkingLevel as any);
+
+      // 5.3 Sidebar 状态
+      useSidebarStore.getState().setWorkingDir(workingDir);
+      useSidebarStore.getState().setSessions(allSessions || []);
+      useSidebarStore.getState().setSelectedSessionId(currentSession?.sessionFile || null);
+
+      // 5.4 聊天历史消息
+      if (currentSession?.messages?.length > 0) {
+        // 转换服务器返回的消息格式为客户端格式
+        const formattedMessages = currentSession.messages
+          .filter((entry: any) => entry.type === "message")
+          .map((entry: any) => ({
+            id: entry.message?.id || `${Date.now()}-${Math.random()}`,
+            role: entry.message?.role || "user",
+            content: entry.message?.content || "",
+            timestamp: entry.timestamp || new Date().toISOString(),
+          }));
+
+        useChatStore.getState().setMessages(formattedMessages);
       }
+
+      // 5.5 保存模型列表到 sessionStore（用于 ModelParamsSection）
+      useSessionStore.setState({ availableModels: allModels || [] });
+
+      console.log("[ChatInit] UI fully restored from server data");
     } catch (err) {
       console.error("[ChatInit] 初始化错误:", err);
     } finally {

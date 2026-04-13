@@ -21,45 +21,13 @@ export function ModelParamsSection() {
   // ========== 1. State ==========
   const currentModel = useSessionStore((state) => state.currentModel);
   const thinkingLevel = useSessionStore((state) => state.thinkingLevel);
-  const setCurrentModel = useSessionStore((state) => state.setCurrentModel);
-  const setThinkingLevel = useSessionStore((state) => state.setThinkingLevel);
-  const [models, setModels] = useState<ModelInfo[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const availableModels = useSessionStore((state) => state.availableModels);
   const chatController = useChatController();
 
-  // ========== 2. Effects ==========
-  // 从服务器获取模型列表（不缓存到 localStorage）
-  useEffect(() => {
-    let mounted = true;
-
-    const loadModels = async () => {
-      if (!mounted) return;
-      setIsLoading(true);
-      try {
-        const result = await chatController.listModels();
-        console.log(
-          "[ModelParamsSection] Models loaded from server:",
-          result?.models?.length
-        );
-        if (mounted && result?.models) {
-          setModels(result.models);
-        }
-      } catch (error) {
-        console.error("[ModelParamsSection] Failed to load models:", error);
-      } finally {
-        if (mounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadModels();
-
-    return () => {
-      mounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // 只执行一次
+  // ========== 2. Computed ==========
+  // 模型列表由 init 响应提供，不需要单独加载
+  const models = availableModels;
+  const isLoading = models.length === 0;
 
   // Migrate old format model ID to new format
   const migratedCurrentModel = currentModel?.includes("/")

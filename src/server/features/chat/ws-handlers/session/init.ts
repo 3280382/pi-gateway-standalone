@@ -1,64 +1,149 @@
 /**
  * Init Message Handler
- * Handles session initialization requests using server-level session management
  * 
- * Architecture:
- * - PiAgentSession lifecycle is server-level, not WebSocket connection-level
- * - Multiple WebSocket connections can share the same PiAgentSession
- * - Init message compares workingDir with existing server-level session
- *   - If same: reuse existing session, resubscribe to events
- *   - If different: end old session, create new one with provided workingDir
+ * 架构：
+ * - 客户端发送 workingDir（从 localStorage 获取）
+ * - 服务器根据 workingDir 决定：
+ *   1. 如果服务器已有相同 workingDir 的 session → 重新关联，重新监听事件
+ *   2. 如果服务器没有该 workingDir 的 session → 创建新的
+ *   3. 如果服务器有 session 但 workingDir 不同 → 结束旧的，创建新的
+ * - 服务器返回完整数据供客户端恢复界面
+ * 
+ * 返回数据：
+ * - pid: 服务器 PID
+ * - workingDir: 当前工作目录
+ * - currentSession: { sessionId, sessionFile, messages }
+ * - allSessions: 该工作目录下的所有 session 文件列表
+ * - currentModel: 当前模型
+ * - allModels: 所有可用模型列表
+ * - thinkingLevel: 思考级别
  */
 
 import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
 import { serverSessionManager } from "../../agent-session/session-manager";
+import { SessionManager } from "@mariozechner/pi-coding-agent";
 import type { WSContext } from "../../ws-router";
 
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
+ * 获取工作目录下的所有 session 文件列表
+ */
+async function getAllSessions(workingDir: string): Promise<Array<{
+  id: string;
+  path: string;
+  name: string;
+  messageCount: number;
+  lastModified: string;
+}>> {
+  try {
+    const localSessionsDir = `${workingDir}/.pi/agent/sessions`;
+    const sessions = await SessionManager.list(workingDir, localSessionsDir);
+    
+    return sessions.map(s => ({
+      id: s.path,
+      path: s.path,
+      name: s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
+      messageCount: s.messageCount || 0,
+      lastModified: s.modified.toISOString(),
+    }));
+  } catch (e) {
+    logger.error(`[Init] Failed to list sessions: ${e}`);
+    return [];
+  }
+}
+
+/**
+ * 获取模型列表
+ */
+async function getAllModels(): Promise<Array<{
+  id: string;
+  name: string;
+  provider?: string;
+  maxTokens?: number;
+  contextWindow?: number;
+  reasoning?: boolean;
+  input?: string[];
+}>> {
+  try {
+    const modelsJsonPath = "/root/.pi/agent/models.json";
+    const content = await readFile(modelsJsonPath, "utf-8").catch(() => "{}");
+    const config = JSON.parse(content);
+    
+    const models: any[] = [];
+    if (config.providers) {
+      for (const [providerName, providerConfig] of Object.entries(config.providers)) {
+        const provider = providerConfig as any;
+        if (provider.models && Array.isArray(provider.models)) {
+          for (const model of provider.models) {
+            models.push({
+              id: `${providerName}/${model.id}`,
+              provider: providerName,
+              name: model.name || model.id,
+              contextWindow: model.contextWindow || 0,
+              maxTokens: model.maxTokens || 0,
+              reasoning: model.reasoning || false,
+              input: model.input || ["text"],
+            });
+          }
+        }
+      }
+    }
+    return models;
+  } catch (e) {
+    logger.error(`[Init] Failed to load models: ${e}`);
+    return [];
+  }
+}
+
+/**
+ * 读取 session 文件内容（JSONL）
+ */
+async function getSessionMessages(sessionFile: string): Promise<any[]> {
+  try {
+    if (!existsSync(sessionFile)) {
+      return [];
+    }
+    const content = await readFile(sessionFile, "utf-8");
+    const lines = content.split("\n").filter(line => line.trim());
+    return lines.map(line => {
+      try {
+        return JSON.parse(line);
+      } catch {
+        return null;
+      }
+    }).filter(Boolean);
+  } catch (e) {
+    logger.error(`[Init] Failed to read session file: ${e}`);
+    return [];
+  }
+}
+
+/**
  * Handle init message
- * @param ctx WebSocket context
- * @param payload Message payload
  */
 export async function handleInit(
   ctx: WSContext,
   payload: {
     workingDir?: string;
-    sessionId?: string;
   }
 ): Promise<void> {
-  let { workingDir, sessionId } = payload;
+  const { workingDir: clientWorkingDir } = payload;
 
-  // 如果没有提供 workingDir，尝试从现有 session 获取，或使用默认目录
-  if (!workingDir) {
-    // 1. 如果提供了 sessionId，尝试找到对应的 session
-    if (sessionId) {
-      const allSessions = serverSessionManager.getAllSessions();
-      const existingSession = allSessions.find(s => 
-        s.workingDir.includes(sessionId) || 
-        serverSessionManager.getSession(s.workingDir)?.session?.session?.sessionId?.startsWith(sessionId)
-      );
-      if (existingSession) {
-        workingDir = existingSession.workingDir;
-        logger.info(`[WebSocket] Found existing session for sessionId=${sessionId}, using workingDir=${workingDir}`);
-      }
-    }
-    
-    // 2. 如果还是没找到，使用服务器当前工作目录
-    if (!workingDir) {
-      workingDir = process.cwd();
-      logger.info(`[WebSocket] No workingDir provided, using default: ${workingDir}`);
-    }
-  }
-
-  logger.info(
-    `[WebSocket] Received init message: workingDir=${workingDir}, sessionId=${sessionId || "not specified"}`
-  );
+  logger.info(`[WebSocket] Received init message: clientWorkingDir=${clientWorkingDir || "not provided"}`);
 
   try {
-    // 检查路径是否存在，如果不存在则直接报错
+    // 1. 确定要使用的工作目录
+    let workingDir: string = clientWorkingDir || process.cwd();
+    
+    // 如果客户端没有提供，使用服务器当前工作目录
+    if (!clientWorkingDir) {
+      logger.info(`[WebSocket] No workingDir provided, using default: ${workingDir}`);
+    }
+
+    // 检查路径是否存在
     if (!existsSync(workingDir)) {
       logger.error(`[WebSocket] Path does not exist: ${workingDir}`);
       ctx.ws.send(
@@ -70,39 +155,56 @@ export async function handleInit(
       return;
     }
 
-    // Use server-level session manager to get or create session
-    // This ensures session lifecycle is independent of WebSocket connection
+    // 2. 获取或创建 session
+    // serverSessionManager 会自动处理：
+    // - 如果已有相同 workingDir 的 session → 复用
+    // - 如果没有 → 创建新的
+    // - 后来的客户端会踢掉之前的
     const session = await serverSessionManager.getOrCreateSession(
       workingDir,
-      ctx.ws,
-      sessionId
+      ctx.ws
     );
 
-    // Update context with the server-level session
+    // Update context
     ctx.session = session;
 
-    // Get session info to return to client
-    const info = {
-      sessionId: session.session!.sessionId,
-      sessionFile: session.session!.sessionFile,
-      workingDir: session.workingDir,
-      model: session.session!.model?.id || null,
-      modelProvider: session.session!.model?.provider || null,
+    // 检查 session 是否有效
+    if (!session.session) {
+      throw new Error("Failed to create or get session");
+    }
+
+    // 3. 收集所有需要返回的数据
+    const targetDir = workingDir as string;
+    const sessionFile = session.session.sessionFile as string;
+    const [
+      allSessions,
+      allModels,
+      sessionMessages,
+    ] = await Promise.all([
+      getAllSessions(targetDir),
+      getAllModels(),
+      getSessionMessages(sessionFile),
+    ]);
+
+    // 4. 构建响应
+    const response = {
+      type: "initialized",
+      pid: process.pid,
+      workingDir,
+      currentSession: {
+        sessionId: session.session!.sessionId,
+        sessionFile: session.session!.sessionFile,
+        messages: sessionMessages,
+      },
+      allSessions,
+      currentModel: session.session!.model?.id || null,
+      allModels,
       thinkingLevel: session.session!.thinkingLevel,
-      systemPrompt: "", // TODO: Get from resource loader if needed
-      agentsFiles: [] as any[],
-      skills: [] as any[],
     };
 
-    ctx.ws.send(
-      JSON.stringify({
-        type: "initialized",
-        ...info,
-        pid: process.pid,
-      })
-    );
+    ctx.ws.send(JSON.stringify(response));
 
-    logger.info(`[WebSocket] init successful: sessionId=${info.sessionId}, workingDir=${workingDir}`);
+    logger.info(`[WebSocket] init successful: pid=${process.pid}, sessionId=${session.session!.sessionId}, sessions=${allSessions.length}, models=${allModels.length}`);
   } catch (error) {
     logger.error("[WebSocket] init error:", {}, error instanceof Error ? error : undefined);
     ctx.ws.send(
