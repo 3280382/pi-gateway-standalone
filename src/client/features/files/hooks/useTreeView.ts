@@ -9,12 +9,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import * as fileApi from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import type { TreeNode } from "@/features/files/types";
 
 export interface UseTreeViewResult {
   // 数据
   treeData: TreeNode[];
-  workingDir: string;
+  browsePath: string;
   
   // 加载状态
   isLoading: boolean;
@@ -67,18 +68,22 @@ export function useTreeView(): UseTreeViewResult {
   const [rawTreeData, setRawTreeData] = useState<TreeNode[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { workingDir, treeFilterMode, treeFilterText } = useFileStore();
+  // currentBrowsePath: 当前浏览路径（用于加载树形数据）
+  const { currentBrowsePath, treeFilterMode, treeFilterText } = useFileStore();
+  const { workingDir } = useWorkspaceStore();
 
   // 加载全量树数据（一次性静态加载）
   const refresh = useCallback(async () => {
-    if (!workingDir) return;
+    // 使用当前浏览路径加载树，如果未设置则使用全局工作目录
+    const path = currentBrowsePath || workingDir;
+    if (!path) return;
     
     setIsLoading(true);
     setError(null);
 
     try {
       // 使用tree API加载全量静态树
-      const response = await fileApi.tree(workingDir);
+      const response = await fileApi.tree(path);
       setRawTreeData(response.items);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to load tree";
@@ -87,9 +92,9 @@ export function useTreeView(): UseTreeViewResult {
     } finally {
       setIsLoading(false);
     }
-  }, [workingDir]);
+  }, [currentBrowsePath, workingDir]);
 
-  // 当workingDir变化时自动刷新
+  // 当浏览路径变化时自动刷新
   useEffect(() => {
     refresh();
   }, [refresh]);
@@ -101,7 +106,7 @@ export function useTreeView(): UseTreeViewResult {
 
   return {
     treeData,
-    workingDir,
+    browsePath: currentBrowsePath || workingDir,
     isLoading,
     error,
     refresh,
