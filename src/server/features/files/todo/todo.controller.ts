@@ -157,6 +157,40 @@ Generated: ${new Date().toISOString()}
 }
 
 /**
+ * 检查并修复todo.md格式（如果缺少必要的section）
+ */
+async function ensureValidTodoFormat(todoFilePath: string, content: string): Promise<string> {
+  // 检查是否有必要的section
+  if (!content.includes("## TODO")) {
+    // 旧格式或损坏的文件，重新初始化并保留旧的todos
+    const oldLines = content.split("\n").filter(line => line.trim().startsWith("- ["));
+    
+    await initTodoFile(todoFilePath);
+    let newContent = await readFile(todoFilePath, "utf-8");
+    
+    // 将旧的todos添加到TODO section
+    if (oldLines.length > 0) {
+      const todoSectionEnd = newContent.indexOf("## Completed");
+      const oldTodosFormatted = oldLines.map(line => {
+        // 转换旧格式到新格式
+        const match = line.match(/^- \[([ x])\] (.+)$/);
+        if (match) {
+          const [, checked, text] = match;
+          return `- [${checked}] ${text}`;
+        }
+        return line;
+      }).join("\n");
+      
+      newContent = newContent.slice(0, todoSectionEnd) + oldTodosFormatted + "\n" + newContent.slice(todoSectionEnd);
+      await writeFile(todoFilePath, newContent, "utf-8");
+    }
+    
+    return newContent;
+  }
+  return content;
+}
+
+/**
  * 添加 todo 项 - 对应 /api/files/todo/add
  */
 export async function add(req: Request, res: Response): Promise<void> {
@@ -188,6 +222,8 @@ export async function add(req: Request, res: Response): Promise<void> {
     let content = "";
     try {
       content = await readFile(todoFilePath, "utf-8");
+      // 确保格式正确（处理旧格式文件）
+      content = await ensureValidTodoFormat(todoFilePath, content);
     } catch {
       await initTodoFile(todoFilePath);
       content = await readFile(todoFilePath, "utf-8");
