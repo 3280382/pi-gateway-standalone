@@ -359,7 +359,7 @@ function DirectoryPickerModal({
   const loadDirectory = useCallback(async (dirPath: string) => {
     setLoading(true);
     try {
-      const response = await fetch("/api/browse", {
+      const response = await fetch("/api/files/file/browse", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path: dirPath }),

@@ -46,7 +46,7 @@ export function useDirectoryPicker(options: UseDirectoryPickerOptions): UseDirec
   const loadDirectory = useCallback(async (path: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/browse", {
+      const response = await fetch("/api/files/file/browse", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path }),
