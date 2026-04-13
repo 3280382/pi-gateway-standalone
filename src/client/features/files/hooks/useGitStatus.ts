@@ -43,12 +43,15 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
     // 非激活状态不执行任何操作
     if (!isActive) return;
 
-    // Git模式关闭时，清空状态
+    // Git模式关闭时，清空状态并重置 ref
     if (!isGitModeActive) {
       const hasGitStatus = items.some((item) => item.gitStatus);
       if (hasGitStatus) {
         updateFileGitStatuses({});
       }
+      // 重置 ref，这样下次打开 Git 模式时会重新获取
+      lastFetchedPathRef.current = "";
+      itemsLengthRef.current = 0;
       return;
     }
 
