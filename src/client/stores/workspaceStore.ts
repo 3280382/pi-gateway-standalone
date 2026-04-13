@@ -48,6 +48,8 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
 
         // 设置工作目录（同时同步到 sidebarStore 和 sessionStore）
         setWorkingDir: (workingDir) => {
+          console.log("[WorkspaceStore] setWorkingDir called:", workingDir);
+          
           // 同步更新 sidebarStore 的 workingDir（包含 path 和 displayName 的对象）
           try {
             const { useSidebarStore } = getSidebarStore();
@@ -64,6 +66,7 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
             }
           } catch (e) {
             // sidebarStore 可能尚未初始化，忽略错误
+            console.log("[WorkspaceStore] sidebarStore not ready:", e);
           }
 
           // 同步更新 sessionStore 的 workingDir（字符串）
@@ -81,9 +84,12 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
             }
           } catch (e) {
             // sessionStore 可能尚未初始化，忽略错误
+            console.log("[WorkspaceStore] sessionStore not ready:", e);
           }
 
-          set({ workingDir });
+          const result = set({ workingDir });
+          console.log("[WorkspaceStore] set({ workingDir }) result:", result);
+          return result;
         },
       }),
       {
