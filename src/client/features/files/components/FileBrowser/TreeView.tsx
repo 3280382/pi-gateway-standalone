@@ -184,15 +184,14 @@ export const TreeView = memo<TreeViewProps>(({ items }) => {
                       </span>
                     )}
 
-                    {/* Todo标识 */}
+                    {/* Todo标识 - 鲜明绿色背景 */}
                     {isTodoModeActive && hasTodos && (
                       <span
                         className={styles.todoIndicator}
                         style={{
-                          color:
-                            pendingTodos.length > 0
-                              ? todoApi.getPriorityColor(pendingTodos[0].tags)
-                              : "#22c55e",
+                          backgroundColor: pendingTodos.length > 0 ? "#22c55e" : "#16a34a",
+                          color: "#ffffff",
+                          fontWeight: 700,
                         }}
                         title={`${pendingTodos.length} pending, ${todos.length - pendingTodos.length} done`}
                       >

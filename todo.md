@@ -6,8 +6,10 @@ Generated: 2026-04-13T09:24:33.423Z
 ---
 
 ## TODO
+### [/root/pi-gateway-standalone/docs]
+- [ ] test
 ### [/root/pi-gateway-standalone/package.json]
-- [ ] hi
+- [ ] test
 
 ---
 
