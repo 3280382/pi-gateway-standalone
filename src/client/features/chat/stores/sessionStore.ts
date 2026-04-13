@@ -5,6 +5,7 @@
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { CHAT_SESSION_PERSIST, CHAT_STORAGE_KEYS, CHAT_STORAGE_VERSION } from "./persist.config";
 
 export type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
@@ -129,8 +130,12 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
             sessions: state.sessions.filter((s) => s.id !== id),
           })),
 
-        // 工作目录
-        setWorkingDir: (dir) => set({ workingDir: dir }),
+        // 工作目录（同时同步到全局 workspaceStore）
+        setWorkingDir: (dir) => {
+          // 同步更新全局 workspaceStore
+          useWorkspaceStore.getState().setWorkingDir(dir);
+          return set({ workingDir: dir });
+        },
 
         // 模型设置
         setCurrentModel: (model) => set({ currentModel: model }),

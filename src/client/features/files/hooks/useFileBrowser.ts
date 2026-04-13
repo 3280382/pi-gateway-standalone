@@ -5,14 +5,17 @@
  * - 目录加载（仅在激活状态时）
  * - 错误处理
  * - 与 store 和 service 协调
+ * 
+ * 注意：使用 currentBrowsePath 进行目录浏览，不改变全局 workingDir
  */
 
 // ===== [ANCHOR:IMPORTS] =====
 
 import { useCallback, useEffect, useRef } from "react";
 import * as fileOperationsApi from "@/features/files/services/api/fileOperationsApi";
-import { initializeFilePath } from "@/features/files/services/initialization";
+import { initializeFilePath, setBrowsePath } from "@/features/files/services/initialization";
 import { useFileStore } from "@/features/files/stores/fileStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 
 // ===== [ANCHOR:TYPES] =====
 
@@ -31,8 +34,11 @@ export interface UseFileBrowserResult {
 export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrowserResult {
   const { isActive = true } = options;
 
-  const { workingDir, setItems, setWorkingDir, setParentPath, setLoading, setError } =
+  // currentBrowsePath: 当前浏览的目录（在文件浏览器中导航不改变全局 workingDir）
+  const { currentBrowsePath, setItems, setCurrentBrowsePath, setParentPath, setLoading, setError } =
     useFileStore();
+  
+  const { workingDir, setFileBrowsePath } = useWorkspaceStore();
 
   const lastLoadedPathRef = useRef<string>("");
   const isInitializedRef = useRef<boolean>(false);
@@ -47,11 +53,13 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
     const init = async () => {
       const path = await initializeFilePath();
       isInitializedRef.current = true;
-      setWorkingDir(path);
+      // 设置浏览路径为工作目录
+      setCurrentBrowsePath(path);
+      setFileBrowsePath(path);
     };
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActive, setWorkingDir]);
+  }, [isActive, setCurrentBrowsePath, setFileBrowsePath]);
 
   /**
    * 加载目录内容
@@ -71,6 +79,10 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
         lastLoadedPathRef.current = path;
         setItems(data.items);
         setParentPath(data.parentPath);
+        // 更新浏览路径
+        setCurrentBrowsePath(path);
+        setFileBrowsePath(path);
+        setBrowsePath(path);
       } catch (err) {
         const friendlyMessage = fileOperationsApi.getFriendlyErrorMessage(err, path);
         setError(friendlyMessage);
@@ -78,7 +90,7 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
         setLoading(false);
       }
     },
-    [setItems, setParentPath, setLoading, setError]
+    [setItems, setParentPath, setLoading, setError, setCurrentBrowsePath, setFileBrowsePath]
   );
 
   /**
@@ -86,19 +98,19 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
    */
   const refresh = useCallback(async () => {
     lastLoadedPathRef.current = "";
-    await loadDirectory(workingDir);
-  }, [workingDir, loadDirectory]);
+    await loadDirectory(currentBrowsePath);
+  }, [currentBrowsePath, loadDirectory]);
 
   /**
    * 路径变化时自动加载
    * 仅在激活状态下执行
    */
   useEffect(() => {
-    if (!isActive || workingDir === lastLoadedPathRef.current) {
+    if (!isActive || currentBrowsePath === lastLoadedPathRef.current) {
       return;
     }
-    loadDirectory(workingDir);
-  }, [isActive, workingDir, loadDirectory]);
+    loadDirectory(currentBrowsePath);
+  }, [isActive, currentBrowsePath, loadDirectory]);
 
   return {
     loadDirectory,

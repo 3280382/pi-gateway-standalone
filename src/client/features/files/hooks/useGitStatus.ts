@@ -12,6 +12,7 @@
 import { useEffect, useRef } from "react";
 import * as gitApi from "@/features/files/services/api/gitApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { fileBrowserDebug } from "@/lib/debug";
 
 // ===== [ANCHOR:TYPES] =====
@@ -26,7 +27,8 @@ export interface UseGitStatusOptions {
 export function useGitStatus(options: UseGitStatusOptions = {}) {
   const { isActive = true } = options;
 
-  const { isGitModeActive, workingDir, items, updateFileGitStatuses } = useFileStore();
+  const { isGitModeActive, items, updateFileGitStatuses } = useFileStore();
+  const { workingDir } = useWorkspaceStore();
 
   const lastFetchedPathRef = useRef<string>("");
   const itemsLengthRef = useRef<number>(0);

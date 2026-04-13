@@ -24,8 +24,9 @@ import { FILES_BROWSER_PERSIST, FILES_STORAGE_KEYS, FILES_STORAGE_VERSION } from
 // ============================================================================
 
 export interface FileState {
-  // 文件浏览状态
-  workingDir: string;
+  // 文件浏览状态（注意：workingDir 已从全局 workspaceStore 获取）
+  // currentBrowsePath: 当前浏览的绝对路径（用于 grid/list/tree 显示）
+  currentBrowsePath: string;
   parentPath: string;
   items: FileItem[];
   selectedItems: string[];
@@ -67,7 +68,7 @@ export interface FileState {
 
 export interface FileActions {
   // 文件操作
-  setWorkingDir: (path: string) => void;
+  setCurrentBrowsePath: (path: string) => void;
   setParentPath: (path: string) => void;
   setItems: (items: FileItem[]) => void;
   setSelectedItems: (items: string[]) => void;
@@ -126,7 +127,8 @@ export const useFileStore = create<FileState & FileActions>()(
     persist(
       (set, get) => ({
         // 初始状态
-        workingDir: "/root",
+        // workingDir 已从全局 workspaceStore 获取
+        currentBrowsePath: "/root",
         parentPath: "/",
         items: [],
         selectedItems: [],
@@ -166,7 +168,7 @@ export const useFileStore = create<FileState & FileActions>()(
         todoMap: new Map(),
 
         // 基本设置方法
-        setWorkingDir: (path) => set({ workingDir: path }),
+        setCurrentBrowsePath: (path) => set({ currentBrowsePath: path }),
         setParentPath: (path) => set({ parentPath: path }),
         setItems: (items) => set({ items }),
         setSelectedItems: (selectedItems) => set({ selectedItems }),

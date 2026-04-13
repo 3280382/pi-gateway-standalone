@@ -6,8 +6,10 @@
  * - 服务器工作目录获取
  *
  * 注意：持久化状态通过 Zustand store 自动管理，不再直接读取 localStorage
+ * 工作目录现在由全局 workspaceStore 统一管理
  */
 
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { useFileStore } from "@/features/files/stores";
 import { checkPathExists, getServerWorkingDir } from "./api/fileApi";
 
@@ -15,19 +17,23 @@ import { checkPathExists, getServerWorkingDir } from "./api/fileApi";
  * 初始化文件浏览器路径
  *
  * 流程：
- * 1. 从 fileStore 获取已恢复的路径（Zustand persist 自动从 localStorage 恢复）
+ * 1. 从 workspaceStore 获取已恢复的工作目录（Zustand persist 自动从 localStorage 恢复）
  * 2. 检查路径是否仍然有效
  * 3. 如果无效，使用服务器当前目录
+ * 4. 同时设置 fileStore 的 currentBrowsePath
  */
 export async function initializeFilePath(): Promise<string> {
-  // 从 fileStore 获取当前路径（已经由 Zustand persist 从 localStorage 恢复）
-  const { workingDir } = useFileStore.getState();
+  // 从全局 workspaceStore 获取工作目录
+  const { workingDir, setWorkingDir } = useWorkspaceStore.getState();
+  const { setCurrentBrowsePath } = useFileStore.getState();
 
   // 如果有持久化的路径，检查是否还存在
   if (workingDir && workingDir !== "/root") {
     const exists = await checkPathExists(workingDir);
     if (exists) {
-      console.log("[Init] Using persisted path:", workingDir);
+      console.log("[Init] Using persisted working dir:", workingDir);
+      // 同步设置浏览路径
+      setCurrentBrowsePath(workingDir);
       return workingDir;
     }
     console.log("[Init] Persisted path no longer exists:", workingDir);
@@ -36,6 +42,11 @@ export async function initializeFilePath(): Promise<string> {
   // 使用服务器当前目录
   const serverDir = await getServerWorkingDir();
   console.log("[Init] Using server working dir:", serverDir);
+  
+  // 更新全局工作目录和浏览路径
+  setWorkingDir(serverDir);
+  setCurrentBrowsePath(serverDir);
+  
   return serverDir;
 }
 
@@ -46,5 +57,19 @@ export async function initializeFilePath(): Promise<string> {
  */
 export function getInitialPath(): string {
   if (typeof window === "undefined") return "/root";
-  return useFileStore.getState().workingDir;
+  return useWorkspaceStore.getState().workingDir;
+}
+
+/**
+ * 获取当前浏览路径（用于文件浏览器显示）
+ */
+export function getCurrentBrowsePath(): string {
+  return useFileStore.getState().currentBrowsePath;
+}
+
+/**
+ * 设置当前浏览路径（在文件浏览器中导航，不改变全局工作目录）
+ */
+export function setBrowsePath(path: string): void {
+  useFileStore.getState().setCurrentBrowsePath(path);
 }

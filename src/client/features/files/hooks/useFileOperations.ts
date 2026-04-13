@@ -11,6 +11,7 @@
 import { useCallback } from "react";
 import * as fileOperationsApi from "@/features/files/services/api/fileOperationsApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { fileBrowserDebug } from "@/lib/debug";
 
 export interface UseFileOperationsResult {
@@ -24,29 +25,31 @@ export interface UseFileOperationsResult {
 export function useFileOperations(): UseFileOperationsResult {
   const {
     selectedItems,
-    workingDir,
+    currentBrowsePath,
     setItems,
-    setWorkingDir,
+    setCurrentBrowsePath,
     setParentPath,
     setError,
     setSelectedItems,
     setIsMultiSelectMode,
   } = useFileStore();
+  
+  const { workingDir } = useWorkspaceStore();
 
   /**
    * 操作后刷新目录
    */
   const refreshAfterOperation = useCallback(async () => {
     try {
-      const data = await fileOperationsApi.loadDirectoryContent(workingDir);
+      const data = await fileOperationsApi.loadDirectoryContent(currentBrowsePath);
       setItems(data.items);
-      setWorkingDir(data.workingDir);
+      setCurrentBrowsePath(data.workingDir);
       setParentPath(data.parentPath);
     } catch (error) {
       fileBrowserDebug.error("刷新目录失败", { error });
       setError("Failed to refresh directory");
     }
-  }, [workingDir, setItems, setWorkingDir, setParentPath, setError]);
+  }, [currentBrowsePath, setItems, setCurrentBrowsePath, setParentPath, setError]);
 
   /**
    * 批量删除选中的文件
@@ -110,8 +113,8 @@ export function useFileOperations(): UseFileOperationsResult {
   const createNewFile = useCallback(
     async (fileName: string) => {
       try {
-        fileBrowserDebug.info("创建新文件", { fileName, workingDir });
-        await fileOperationsApi.createFile(workingDir, fileName);
+        fileBrowserDebug.info("创建新文件", { fileName, currentBrowsePath });
+        await fileOperationsApi.createFile(currentBrowsePath, fileName);
 
         // 刷新目录
         await refreshAfterOperation();
@@ -123,7 +126,7 @@ export function useFileOperations(): UseFileOperationsResult {
         throw error;
       }
     },
-    [workingDir, refreshAfterOperation, setError]
+    [currentBrowsePath, refreshAfterOperation, setError]
   );
 
   /**

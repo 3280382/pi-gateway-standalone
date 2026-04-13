@@ -930,3 +930,28 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* 浏览路径栏 */
+.browsePathBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg-tertiary, #161b22);
+  border-bottom: 1px solid var(--border-subtle, #30363d);
+  font-family: var(--font-mono, 'Fira Code', 'Consolas', monospace);
+  font-size: 12px;
+  color: var(--text-secondary, #8b949e);
+  flex-shrink: 0;
+}
+
+.pathLabel {
+  font-size: 14px;
+}
+
+.pathText {
+  color: var(--text-primary, #c9d1d9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

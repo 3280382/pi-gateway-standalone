@@ -13,6 +13,7 @@ import type { FitAddon } from "@xterm/addon-fit";
 import type { Terminal } from "@xterm/xterm";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFileStore } from "@/features/files/stores";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import "@xterm/xterm/css/xterm.css";
 import styles from "./TerminalPanel.module.css";
 
@@ -40,7 +41,7 @@ export function TerminalPanel({
   initialCommand,
 }: TerminalPanelProps) {
   // ========== 1. State ==========
-  const workingDir = useFileStore((state) => state.workingDir);
+  const workingDir = useWorkspaceStore((state) => state.workingDir);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // ========== 2. Refs ==========

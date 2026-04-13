@@ -19,6 +19,7 @@ import { FileActionBar } from "@/features/files/components/Header/FileActionBar"
 import { FileViewer } from "@/features/files/components/modals/FileViewer";
 import { useFileBrowser, useFileFiltering, useGitStatus, useTreeView, useTodos } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 
 // ===== [ANCHOR:TYPES] =====
 
@@ -38,6 +39,9 @@ export function FileBrowser({
 }: FileBrowserProps) {
   // ===== [ANCHOR:STATE] =====
   const { viewMode, isLoading, error } = useFileStore();
+  
+  // 使用全局 workspace store
+  const { workingDir, fileBrowsePath } = useWorkspaceStore();
 
   // ===== [ANCHOR:HOOKS] =====
   // 仅在激活状态下获取数据
@@ -62,6 +66,12 @@ export function FileBrowser({
           <FileBrowserErrorBoundary componentName="File Action Bar">
             <FileActionBar onExecute={onExecuteOutput} onOpenBottomPanel={onOpenBottomPanel} />
           </FileBrowserErrorBoundary>
+
+          {/* 当前浏览路径显示 */}
+          <div className={styles.browsePathBar}>
+            <span className={styles.pathLabel}>📁</span>
+            <span className={styles.pathText}>{fileBrowsePath}</span>
+          </div>
 
           {/* 文件列表区域 */}
           <div className={styles.contentArea}>
