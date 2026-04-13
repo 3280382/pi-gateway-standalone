@@ -1,1 +1,4 @@
 - [ ] /root/pi-gateway-standalone/src/client/features/files/services 按照严格命名的规则，对这个目录也进行重构,把所有对应的API都移到这个目录下面的API目录。分别是fileApi.ts,todoApi,gitApi,他们里面的。函数的名称也要跟服务器最终的还是名称完全一致。
+- [ ] /root/pi-gateway-standalone/src/client/features/files/components/modals/TreeViewModal.tsx 将该对话框里面的树状浏览也作为文件浏览区域的一个子窗口,类似grid和list。其中这个对话框顶部的那个隐藏排除选项文件浏览区域顶部的搜索过滤下拉框,隐藏排除是默认选项。
+- [ ] /root/pi-gateway-standalone/src/client/features/files/components/FileBrowser/FileBrowser.tsx Tree view移到这搞文件。，作为他的一个类似grid list的子空间。
+- [ ] /root/pi-gateway-standalone/src/client/features/files/components/FileBrowser/FileItem.tsx Treview的也有类似。Grid和list的item。在。会显示的git状态或者todo填写。

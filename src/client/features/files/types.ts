@@ -19,7 +19,7 @@ export interface FileItem {
   gitStatus?: string;
 }
 
-export type ViewMode = "grid" | "list";
+export type ViewMode = "grid" | "list" | "tree";
 
 // ============================================================================
 // 前端特有类型

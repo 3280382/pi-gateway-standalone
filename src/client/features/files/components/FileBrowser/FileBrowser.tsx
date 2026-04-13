@@ -13,10 +13,11 @@ import styles from "@/features/files/components/FileBrowser/FileBrowser.module.c
 import { FileBrowserErrorBoundary } from "@/features/files/components/FileBrowser/FileBrowserErrorBoundary";
 import { FileGrid } from "@/features/files/components/FileBrowser/FileGrid";
 import { FileList } from "@/features/files/components/FileBrowser/FileList";
+import { TreeView } from "@/features/files/components/FileBrowser/TreeView";
 
 import { FileActionBar } from "@/features/files/components/Header/FileActionBar";
 import { FileViewer } from "@/features/files/components/modals/FileViewer";
-import { useFileBrowser, useFileFiltering, useGitStatus } from "@/features/files/hooks";
+import { useFileBrowser, useFileFiltering, useGitStatus, useTreeView } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
 
 // ===== [ANCHOR:TYPES] =====
@@ -36,7 +37,7 @@ export function FileBrowser({
   onOpenBottomPanel,
 }: FileBrowserProps) {
   // ===== [ANCHOR:STATE] =====
-  const { viewMode, isLoading, error } = useFileStore();
+  const { viewMode, isLoading, error, workingDir } = useFileStore();
 
   // ===== [ANCHOR:HOOKS] =====
   // 仅在激活状态下获取数据
@@ -45,6 +46,12 @@ export function FileBrowser({
 
   // ===== [ANCHOR:COMPUTED] =====
   const { filteredItems } = useFileFiltering();
+
+  // ===== [ANCHOR:TREEVIEW] =====
+  // 树形视图数据（仅在tree模式下加载）
+  const { treeData, isLoading: treeLoading } = useTreeView(
+    viewMode === "tree" ? workingDir : ""
+  );
 
   // ===== [ANCHOR:RENDER] =====
   return (
@@ -63,15 +70,23 @@ export function FileBrowser({
               <div className={styles.loading}>Loading...</div>
             ) : error ? (
               <div className={styles.error}>{error}</div>
-            ) : filteredItems.length === 0 ? (
+            ) : filteredItems.length === 0 && viewMode !== "tree" ? (
               <div className={styles.empty}>No files found</div>
             ) : viewMode === "grid" ? (
               <FileBrowserErrorBoundary componentName="File Grid">
                 <FileGrid items={filteredItems} />
               </FileBrowserErrorBoundary>
-            ) : (
+            ) : viewMode === "list" ? (
               <FileBrowserErrorBoundary componentName="File List">
                 <FileList items={filteredItems} />
+              </FileBrowserErrorBoundary>
+            ) : (
+              <FileBrowserErrorBoundary componentName="Tree View">
+                <TreeView
+                  items={treeData}
+                  filterMode="normal"
+                  searchText=""
+                />
               </FileBrowserErrorBoundary>
             )}
           </div>

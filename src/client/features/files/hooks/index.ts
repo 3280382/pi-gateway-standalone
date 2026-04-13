@@ -13,3 +13,4 @@ export { useFileOperations } from "@/features/files/hooks/useFileOperations";
 export { useFileTree } from "@/features/files/hooks/useFileTree";
 export { useFileViewer } from "@/features/files/hooks/useFileViewer";
 export { useGitStatus } from "@/features/files/hooks/useGitStatus";
+export { useTreeView } from "@/features/files/hooks/useTreeView";

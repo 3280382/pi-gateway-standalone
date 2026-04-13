@@ -10,19 +10,16 @@
 import styles from "@/features/files/components/BottomMenu/FileBottomMenu.module.css";
 import { GitHistoryModal } from "@/features/files/components/modals/GitHistoryModal";
 import { TodoInputModal } from "@/features/files/components/modals/TodoInputModal";
-import { TreeViewModal } from "@/features/files/components/modals/TreeViewModal";
 import { useFileBottomMenu } from "@/features/files/hooks";
 import { useFileNavigation } from "@/features/files/hooks/useFileNavigation";
 import { useFileStore } from "@/features/files/stores/fileStore";
+import type { ViewMode } from "@/features/files/types";
 
 export function FileBottomMenu() {
   const {
     isNewModalOpen,
     isDeleteModalOpen,
-    isTreeModalOpen,
     newFileName,
-    treeData,
-    treeLoading,
     setNewFileName,
     handleNewClick,
     handleConfirmNew,
@@ -30,15 +27,20 @@ export function FileBottomMenu() {
     handleDeleteClick,
     handleConfirmDelete,
     handleCancelDelete,
-    handleTreeClick,
-    handleTreeFileClick,
-    handleCloseTree,
   } = useFileBottomMenu();
 
   // 导航功能
   const { navigateUp, navigateHome, canNavigateUp } = useFileNavigation();
-  // 刷新功能
-  const { refresh, viewMode, toggleViewMode } = useFileStore();
+  // 视图和刷新功能
+  const { viewMode, setViewMode } = useFileStore();
+
+  // 循环切换视图: grid -> list -> tree -> grid
+  const cycleViewMode = () => {
+    const modes: ViewMode[] = ["grid", "list", "tree"];
+    const currentIndex = modes.indexOf(viewMode);
+    const nextMode = modes[(currentIndex + 1) % modes.length];
+    setViewMode(nextMode);
+  };
   // Git 模式
   const { isGitModeActive, toggleGitMode, gitHistoryFile, setGitHistoryFile } = useFileStore();
   // Todo 模式
@@ -71,10 +73,10 @@ export function FileBottomMenu() {
         {/* 视图切换 */}
         <button type="button"
           className={`${styles.btn} ${styles.viewBtn}`}
-          onClick={toggleViewMode}
-          title={viewMode === "grid" ? "List View" : "Grid View"}
+          onClick={cycleViewMode}
+          title={`Current: ${viewMode} (click to switch)`}
         >
-          {viewMode === "grid" ? <ListIcon /> : <GridIcon />}
+          {viewMode === "grid" ? <GridIcon /> : viewMode === "list" ? <ListIcon /> : <TreeIcon />}
         </button>
         {/* 分隔 */}
         <div className={styles.divider} />
@@ -86,13 +88,7 @@ export function FileBottomMenu() {
         >
           <NewIcon />
         </button>
-        <button type="button"
-          className={`${styles.btn} ${styles.treeBtn}`}
-          onClick={handleTreeClick}
-          title="Tree View"
-        >
-          <TreeIcon />
-        </button>
+
         <button type="button"
           className={`${styles.btn} ${styles.deleteBtn}`}
           onClick={handleDeleteClick}
@@ -183,14 +179,7 @@ export function FileBottomMenu() {
         </div>
       )}
 
-      {/* 树状视图 - 使用抽离的 TreeViewModal 组件 */}
-      <TreeViewModal
-        isOpen={isTreeModalOpen}
-        treeData={treeData}
-        treeLoading={treeLoading}
-        onClose={handleCloseTree}
-        onFileClick={handleTreeFileClick}
-      />
+
 
       {/* Git 历史弹窗 */}
       {gitHistoryFile && (
