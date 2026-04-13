@@ -38,7 +38,7 @@ import { registerRoutes } from "./app/routes";
 // Register WebSocket handlers (must be imported before wsRouter usage to trigger auto-registration)
 import "./features/chat/ws-handlers/session/index";
 import "./features/chat/ws-handlers/message/index";
-import { PiAgentSession } from "./features/chat/agent-session/piAgentSession";
+import { serverSessionManager } from "./features/chat/agent-session/session-manager";
 import { type WSContext, wsRouter } from "./features/chat/ws-router";
 import { AppFactory } from "./lib/app-factory";
 
@@ -79,6 +79,10 @@ await registerRoutes(app, llmLogManager, SERVER_START_TIME);
 appFactory.setupNotFoundHandler();
 logger.info("API routes registered, 404 handler set");
 
+// Initialize server-level session manager
+serverSessionManager.initialize(llmLogManager);
+logger.info("Server session manager initialized");
+
 // ===== [ANCHOR:WEBSOCKET_SETUP] =====
 
 const wss = new WebSocketServer({ server });
@@ -90,16 +94,16 @@ wss.on("connection", (ws) => {
   const connectionId = `conn_${++connectionCounter}_${Date.now()}`;
   logger.info(`[WebSocket] New connection established: ${connectionId}`);
 
-  // Create PiAgentSession instance
-  const piAgentSession = new PiAgentSession(ws, llmLogManager);
-
-  // Create WebSocket context
+  // Create WebSocket context (session will be set on init)
   const ctx: WSContext = {
     ws,
-    session: piAgentSession,
+    session: null as any, // Will be set when init message is received
     connectionId,
     connectedAt: new Date(),
   };
+
+  // Track current working directory for this connection
+  let currentWorkingDir: string | null = null;
 
   // WebSocket message handling - using Router dispatch
   ws.on("message", async (data) => {
@@ -140,6 +144,15 @@ wss.on("connection", (ws) => {
     // 3. Use Router to dispatch message
     try {
       await wsRouter.dispatch(type, ctx, payload);
+      
+      // Update currentWorkingDir after successful init or change_dir
+      if (type === "init" && payload.workingDir) {
+        currentWorkingDir = payload.workingDir;
+        logger.info(`[WebSocket] Connection ${connectionId} workingDir set to: ${currentWorkingDir}`);
+      } else if (type === "change_dir" && payload.path) {
+        currentWorkingDir = payload.path;
+        logger.info(`[WebSocket] Connection ${connectionId} workingDir changed to: ${currentWorkingDir}`);
+      }
     } catch (error) {
       logger.error(
         `[WebSocket] Error processing message "${type}":`,
@@ -168,13 +181,19 @@ wss.on("connection", (ws) => {
   // Connection close handling
   ws.on("close", () => {
     logger.info(`[WebSocket] Connection closed: ${connectionId}`);
-    piAgentSession.dispose();
+    // Disconnect from server-level session (don't dispose - session persists)
+    if (currentWorkingDir) {
+      serverSessionManager.disconnectClient(currentWorkingDir, ws);
+    }
   });
 
   // Error handling
   ws.on("error", (error) => {
     logger.error(`[WebSocket] Connection error: ${connectionId}`, {}, error);
-    piAgentSession.dispose();
+    // Disconnect from server-level session (don't dispose - session persists)
+    if (currentWorkingDir) {
+      serverSessionManager.disconnectClient(currentWorkingDir, ws);
+    }
   });
 });
 

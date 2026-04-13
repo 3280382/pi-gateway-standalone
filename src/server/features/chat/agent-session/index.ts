@@ -1,6 +1,7 @@
 /**
  * Pi Agent Session Module
- * Exports PiAgentSession core class
+ * Exports PiAgentSession core class and server-level session manager
  */
 
 export { PiAgentSession, type ServerMessage } from "./piAgentSession";
+export { ServerSessionManager, serverSessionManager } from "./session-manager";

@@ -1,10 +1,18 @@
 /**
  * Init Message Handler
- * Handles session initialization requests
+ * Handles session initialization requests using server-level session management
+ * 
+ * Architecture:
+ * - PiAgentSession lifecycle is server-level, not WebSocket connection-level
+ * - Multiple WebSocket connections can share the same PiAgentSession
+ * - Init message compares workingDir with existing server-level session
+ *   - If same: reuse existing session, resubscribe to events
+ *   - If different: end old session, create new one with provided workingDir
  */
 
 import { existsSync } from "node:fs";
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
+import { serverSessionManager } from "../../agent-session/session-manager";
 import type { WSContext } from "../../ws-router";
 
 const logger = new Logger({ level: LogLevel.INFO });
@@ -40,7 +48,29 @@ export async function handleInit(
       return;
     }
 
-    const info = await ctx.session.initialize(workingDir, sessionId);
+    // Use server-level session manager to get or create session
+    // This ensures session lifecycle is independent of WebSocket connection
+    const session = await serverSessionManager.getOrCreateSession(
+      workingDir,
+      ctx.ws,
+      sessionId
+    );
+
+    // Update context with the server-level session
+    ctx.session = session;
+
+    // Get session info to return to client
+    const info = {
+      sessionId: session.session!.sessionId,
+      sessionFile: session.session!.sessionFile,
+      workingDir: session.workingDir,
+      model: session.session!.model?.id || null,
+      modelProvider: session.session!.model?.provider || null,
+      thinkingLevel: session.session!.thinkingLevel,
+      systemPrompt: "", // TODO: Get from resource loader if needed
+      agentsFiles: [] as any[],
+      skills: [] as any[],
+    };
 
     ctx.ws.send(
       JSON.stringify({
@@ -50,7 +80,7 @@ export async function handleInit(
       })
     );
 
-    logger.info(`[WebSocket] init successful: sessionId=${info.sessionId}`);
+    logger.info(`[WebSocket] init successful: sessionId=${info.sessionId}, workingDir=${workingDir}`);
   } catch (error) {
     logger.error("[WebSocket] init error:", {}, error instanceof Error ? error : undefined);
     ctx.ws.send(
