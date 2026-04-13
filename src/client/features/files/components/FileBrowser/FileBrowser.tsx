@@ -54,8 +54,8 @@ export function FileBrowser({
   useFileBrowser({ isActive });
   // 使用当前浏览路径获取 git 状态
   useGitStatus({ isActive, currentBrowsePath: currentBrowsePath || workingDir });
-  // 使用当前浏览路径加载 todos（todo.md 保存在当前浏览目录）
-  useTodos(currentBrowsePath || workingDir);
+  // 使用当前浏览路径加载 todos（todo.md 保存在当前浏览目录，只在 Todo 模式激活时加载）
+  useTodos({ isActive, workingDir: currentBrowsePath || workingDir });
 
   // ===== [ANCHOR:COMPUTED] =====
   const { filteredItems } = useFileFiltering();

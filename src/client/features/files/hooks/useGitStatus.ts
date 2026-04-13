@@ -29,7 +29,7 @@ export interface UseGitStatusOptions {
 export function useGitStatus(options: UseGitStatusOptions = {}) {
   const { isActive = true, currentBrowsePath } = options;
 
-  const { items, updateFileGitStatuses } = useFileStore();
+  const { isGitModeActive, items, updateFileGitStatuses } = useFileStore();
   const { workingDir: globalWorkingDir } = useWorkspaceStore();
   
   // 使用当前浏览路径优先，回退到全局 workingDir
@@ -42,6 +42,15 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
   useEffect(() => {
     // 非激活状态不执行任何操作
     if (!isActive) return;
+
+    // Git模式关闭时，清空状态
+    if (!isGitModeActive) {
+      const hasGitStatus = items.some((item) => item.gitStatus);
+      if (hasGitStatus) {
+        updateFileGitStatuses({});
+      }
+      return;
+    }
 
     // 无文件项时不执行操作
     if (items.length === 0) return;
@@ -56,7 +65,7 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
       workingDir,
       lastFetched: lastFetchedPathRef.current,
       shouldFetch: shouldFetchGitStatus,
-      isGitModeActive,
+      isGitModeActive: isGitModeActive,
       itemCount: items.length
     });
 
@@ -128,5 +137,5 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
     };
 
     fetchGitStatus();
-  }, [isActive, workingDir, items, updateFileGitStatuses]);
+  }, [isActive, isGitModeActive, workingDir, items, updateFileGitStatuses]);
 }

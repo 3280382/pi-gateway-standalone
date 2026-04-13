@@ -11,12 +11,20 @@ import { useCallback, useEffect, useRef } from "react";
 import * as todoApi from "@/features/files/services/api/todoApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 
+export interface UseTodosOptions {
+  /** 是否处于激活状态 */
+  isActive?: boolean;
+  /** 当前浏览路径 */
+  workingDir: string;
+}
+
 export interface UseTodosResult {
   refresh: () => Promise<void>;
 }
 
-export function useTodos(workingDir: string): UseTodosResult {
-  const { setTodoList, setTodoMap } = useFileStore();
+export function useTodos(options: UseTodosOptions): UseTodosResult {
+  const { isActive = true, workingDir } = options;
+  const { isTodoModeActive, setTodoList, setTodoMap } = useFileStore();
   const lastLoadedDirRef = useRef<string>("");
 
   const refresh = useCallback(async () => {
@@ -43,10 +51,21 @@ export function useTodos(workingDir: string): UseTodosResult {
 
   // 初始加载，使用 ref 防止重复
   useEffect(() => {
+    // 非激活状态或 Todo 模式关闭时不加载
+    if (!isActive || !isTodoModeActive) {
+      // 清空状态
+      if (lastLoadedDirRef.current) {
+        setTodoList([]);
+        setTodoMap(new Map());
+        lastLoadedDirRef.current = "";
+      }
+      return;
+    }
+    
     if (workingDir && workingDir !== lastLoadedDirRef.current) {
       refresh();
     }
-  }, [workingDir, refresh]);
+  }, [isActive, isTodoModeActive, workingDir, refresh, setTodoList, setTodoMap]);
 
   return { refresh };
 }
