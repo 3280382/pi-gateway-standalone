@@ -177,6 +177,7 @@ export const FileItem = memo<FileItemProps>(
         {/* Icon */}
         <span className={isGrid ? styles.gridIcon : styles.listIcon}>
           {icon}
+          {/* Git 角标 */}
           {gitStatusIcon && (
             <span
               className={styles.gitBadge}
@@ -188,27 +189,23 @@ export const FileItem = memo<FileItemProps>(
               {gitStatusIcon.symbol}
             </span>
           )}
+          {/* Todo 角标 */}
+          {hasTodos && (
+            <span
+              className={styles.todoBadge}
+              style={{
+                backgroundColor: hasPendingTodos ? todoPriorityColor : '#22c55e',
+              }}
+              title={pendingTodos.map(t => t.text).join("\n")}
+            >
+              {hasPendingTodos ? pendingTodos.length : todos.length}
+            </span>
+          )}
         </span>
 
         {/* Name */}
         <span className={isGrid ? styles.gridName : styles.listName}>
           {item.name}
-          {/* Todo角标 - 始终显示，有 todo 时显示 */}
-          {hasTodos && (
-            <span
-              className={styles.todoBadge}
-              style={{ 
-                color: todoPriorityColor,
-                backgroundColor: hasPendingTodos ? `${todoPriorityColor}20` : 'transparent',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                fontWeight: hasPendingTodos ? 'bold' : 'normal'
-              }}
-              title={pendingTodos.map(t => t.text).join("\n")}
-            >
-              {hasPendingTodos ? `○${pendingTodos.length}` : `✓${todos.length}`}
-            </span>
-          )}
         </span>
 
         {/* List view extra info */}

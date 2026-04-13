@@ -296,7 +296,27 @@
   pointer-events: none;
 }
 
-/* 网格视图 - 角标在图标右上角 */
+/* Todo Badge - 圆形角标，左下角 */
+.todoBadge {
+  position: absolute;
+  bottom: -4px;
+  left: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: bold;
+  line-height: 1;
+  color: white;
+  z-index: 51;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* 网格视图 - 角标在图标 */
 .gridIcon {
   position: relative;
 }
@@ -309,7 +329,15 @@
   font-size: 8px;
 }
 
-/* 列表视图 - 角标在图标右上角 */
+.gridIcon .todoBadge {
+  bottom: -2px;
+  left: -2px;
+  width: 14px;
+  height: 14px;
+  font-size: 8px;
+}
+
+/* 列表视图 - 角标在图标 */
 .listIcon {
   position: relative;
 }
@@ -322,20 +350,10 @@
   font-size: 8px;
 }
 
-
-/* Todo Badge */
-.todoBadge {
-  margin-left: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  opacity: 0.9;
-}
-
-.gridName .todoBadge {
-  display: inline-block;
-  margin-top: 4px;
-  padding: 2px 6px;
-  background: var(--bg-secondary);
-  border-radius: 10px;
-  font-size: 10px;
+.listIcon .todoBadge {
+  bottom: -2px;
+  left: -2px;
+  width: 14px;
+  height: 14px;
+  font-size: 8px;
 }
