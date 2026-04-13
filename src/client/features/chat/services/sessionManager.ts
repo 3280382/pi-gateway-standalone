@@ -136,14 +136,15 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
       });
     });
 
+    const workingDir = response.workingDir || response.cwd; // 兼容两种格式
     console.log(
-      `[SessionManager.switchDirectory] 5. Response received: cwd="${response.cwd}", sessionId="${response.sessionId}"`
+      `[SessionManager.switchDirectory] 5. Response received: workingDir="${workingDir}", sessionId="${response.sessionId}"`
     );
 
     // 3. 更新各 store 的工作目录和连接状态
-    stores.globalWorkspace.setWorkingDir(response.cwd);
-    stores.sidebar.setWorkingDir(response.cwd);
-    stores.session.setWorkingDir(response.cwd);
+    stores.globalWorkspace.setWorkingDir(workingDir);
+    stores.sidebar.setWorkingDir(workingDir);
+    stores.session.setWorkingDir(workingDir);
     stores.session.setIsConnected(true);
     
     if (response.pid) {
@@ -174,27 +175,29 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
     let sessionToUse: Session | undefined;
 
     // 优先使用服务器返回的当前 session
-    if (response.sessionId && response.sessionFile) {
+    const currentSession = response.currentSession;
+    if (currentSession?.sessionId && currentSession?.sessionFile) {
       sessionToUse = {
-        id: response.sessionFile,
-        path: response.sessionFile,
+        id: currentSession.sessionFile,
+        path: currentSession.sessionFile,
         name: "Current Session",
-        messageCount: response.messages?.length || 0,
+        messageCount: currentSession.messages?.length || 0,
         lastModified: new Date(),
       };
       
       // 添加到 sessions 列表（如果不存在）
       const existingSessions = stores.sidebar.sessions;
-      if (!existingSessions.find(s => s.path === response.sessionFile)) {
+      if (!existingSessions.find(s => s.path === currentSession.sessionFile)) {
         stores.sidebar.setSessions([sessionToUse, ...existingSessions]);
       }
       
-      console.log("[SessionManager] 使用服务端当前 session:", response.sessionId);
+      console.log("[SessionManager] 使用服务端当前 session:", currentSession.sessionId);
     }
 
     // 6. 加载消息历史（如果服务器返回了）
-    if (response.messages && response.messages.length > 0) {
-      const formattedMessages = response.messages
+    const sessionMessages = currentSession?.messages;
+    if (sessionMessages && sessionMessages.length > 0) {
+      const formattedMessages = sessionMessages
         .filter((entry: any) => entry.type === "message" && entry.message)
         .map((entry: any) => {
           const msg = entry.message;
@@ -233,8 +236,9 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
       stores.session.setCurrentSession(sessionToUse.id);
     }
 
+    const finalWorkingDir = response.workingDir || response.cwd;
     console.log("[SessionManager] 目录切换完成:", {
-      dir: response.cwd,
+      dir: finalWorkingDir,
       session: sessionToUse?.id,
     });
   } finally {
