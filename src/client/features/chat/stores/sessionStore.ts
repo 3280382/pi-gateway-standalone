@@ -82,17 +82,13 @@ export interface ModelInfo {
 }
 
 export interface ChatSessionState {
-  // 当前会话
-  currentSessionId: string | null;
-  sessions: Session[];
-
   // 当前工作目录
   workingDir: string;
 
-  // 模型设置（从服务器获取，不持久化）
+  // 模型设置（从服务器获取，不持久化到 localStorage）
   currentModel: string | null;
   thinkingLevel: ThinkingLevel;
-  availableModels: ModelInfo[]; // 从服务器获取的模型列表
+  availableModels: ModelInfo[];
 
   // 服务器状态
   serverPid: number | null;
@@ -103,12 +99,6 @@ export interface ChatSessionState {
 }
 
 interface ChatSessionActions {
-  // 会话
-  setCurrentSession: (id: string | null) => void;
-  setSessions: (sessions: Session[]) => void;
-  addSession: (session: Session) => void;
-  removeSession: (id: string) => void;
-
   // 工作目录
   setWorkingDir: (dir: string) => void;
 
@@ -129,8 +119,6 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
   devtools(
     (set) => ({
         // 初始状态
-        currentSessionId: null,
-        sessions: [],
         workingDir: "/root",
         currentModel: null,
         thinkingLevel: "off",
@@ -138,18 +126,6 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
         serverPid: null,
         isConnected: false,
         resourceFiles: null,
-
-        // 会话
-        setCurrentSession: (id) => set({ currentSessionId: id }),
-        setSessions: (sessions) => set({ sessions }),
-        addSession: (session) =>
-          set((state) => ({
-            sessions: [session, ...state.sessions],
-          })),
-        removeSession: (id) =>
-          set((state) => ({
-            sessions: state.sessions.filter((s) => s.id !== id),
-          })),
 
         // 工作目录
         // 注意：此方法仅更新本地状态，全局 workspaceStore 的同步由调用方负责

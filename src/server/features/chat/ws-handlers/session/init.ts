@@ -179,15 +179,35 @@ export async function handleInit(
 
     // 3. 收集所有需要返回的数据
     const targetDir = workingDir as string;
-    const sessionFile = session.session.sessionFile as string;
+    let sessionFile = session.session.sessionFile as string;
+    let sessionId = session.session.sessionId as string;
+    let sessionMessages = await getSessionMessages(sessionFile);
+    
+    // 如果当前 session 没有消息，尝试加载最近的有消息的 session
+    if (sessionMessages.length === 0) {
+      logger.info(`[Init] Current session has no messages, trying to find recent session with messages`);
+      const allSessionsList = await getAllSessions(targetDir);
+      // 按最后修改时间排序，找最近的有消息的 session
+      for (const s of allSessionsList.sort((a, b) => 
+        new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime()
+      )) {
+        const msgs = await getSessionMessages(s.path);
+        if (msgs.length > 0) {
+          logger.info(`[Init] Found session with messages: ${s.path} (${msgs.length} messages)`);
+          sessionFile = s.path;
+          sessionId = s.path.split('/').pop()?.replace('.jsonl', '').split('_').pop() || sessionId;
+          sessionMessages = msgs;
+          break;
+        }
+      }
+    }
+    
     const [
       allSessions,
       allModels,
-      sessionMessages,
     ] = await Promise.all([
       getAllSessions(targetDir),
       getAllModels(),
-      getSessionMessages(sessionFile),
     ]);
 
     // 4. 构建响应
@@ -196,8 +216,8 @@ export async function handleInit(
       pid: process.pid,
       workingDir,
       currentSession: {
-        sessionId: session.session!.sessionId,
-        sessionFile: session.session!.sessionFile,
+        sessionId: sessionId,
+        sessionFile: sessionFile,
         messages: sessionMessages,
       },
       allSessions,

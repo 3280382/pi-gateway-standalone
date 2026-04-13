@@ -109,10 +109,10 @@ export class PiAgentSession {
    * @param sessionId Optional session ID (partial UUID)
    * @returns Session information
    */
-  async initialize(workingDir: string, sessionId?: string) {
+  async initialize(workingDir: string) {
     console.log(`[PiAgentSession.initialize] ========== START ==========`);
     console.log(
-      `[PiAgentSession.initialize] Input: workingDir="${workingDir}", sessionId="${sessionId || "not provided"}"`
+      `[PiAgentSession.initialize] Input: workingDir="${workingDir}"`
     );
     console.log(
       `[PiAgentSession.initialize] Current state: this.workingDir="${this.workingDir}", this.session exists: ${!!this.session}`
@@ -182,33 +182,27 @@ export class PiAgentSession {
     console.log(`[PiAgentSession.initialize] localSessionsDir="${localSessionsDir}"`);
 
     let sessionManager: ReturnType<typeof SessionManager.create> | undefined;
+
+    // 获取所有 sessions 列表
     console.log(
-      `[PiAgentSession.initialize] Looking for sessionId: "${sessionId || "not provided"}"`
+      `[PiAgentSession.initialize] Calling SessionManager.list("${workingDir}", "${localSessionsDir}")`
+    );
+    const sessions = await SessionManager.list(workingDir, localSessionsDir);
+    console.log(`[PiAgentSession.initialize] Found ${sessions.length} sessions in directory`);
+    sessions.forEach((s, i) =>
+      console.log(`[PiAgentSession.initialize]   [${i}] id=${s.id}, path=${s.path}, modified=${s.modified}`)
     );
 
-    if (sessionId) {
-      // Try to find session by partial UUID in local sessions directory
+    // 总是使用最近的一个 session（按修改时间排序）
+    if (sessions.length > 0) {
+      // 没有提供 sessionId，使用最近的一个 session（按修改时间排序）
+      const mostRecent = sessions.sort((a, b) => 
+        b.modified.getTime() - a.modified.getTime()
+      )[0];
       console.log(
-        `[PiAgentSession.initialize] Calling SessionManager.list("${workingDir}", "${localSessionsDir}")`
+        `[PiAgentSession.initialize] No sessionId provided, using most recent session: ${mostRecent.path}`
       );
-      const sessions = await SessionManager.list(workingDir, localSessionsDir);
-      console.log(`[PiAgentSession.initialize] Found ${sessions.length} sessions in directory`);
-      sessions.forEach((s, i) =>
-        console.log(`[PiAgentSession.initialize]   [${i}] id=${s.id}, path=${s.path}`)
-      );
-
-      const matching = sessions.find(
-        (s) => s.id.startsWith(sessionId) || s.path.includes(sessionId)
-      );
-      console.log(
-        `[PiAgentSession.initialize] Matching result for sessionId "${sessionId}":`,
-        matching ? `FOUND id=${matching.id}, path=${matching.path}` : "NOT FOUND"
-      );
-
-      if (matching) {
-        console.log(`[PiAgentSession.initialize] Opening existing session: ${matching.path}`);
-        sessionManager = SessionManager.open(matching.path, localSessionsDir);
-      }
+      sessionManager = SessionManager.open(mostRecent.path, localSessionsDir);
     }
 
     if (!sessionManager) {
@@ -943,7 +937,7 @@ export class PiAgentSession {
         console.log(
           `[Gateway] Session cwd mismatch: ${this.workingDir} -> ${targetCwd}, reinitializing...`
         );
-        const info = await this.initialize(targetCwd, targetSessionManager.getSessionId());
+        const info = await this.initialize(targetCwd);
         this.send({
           type: "session_loaded",
           success: true,

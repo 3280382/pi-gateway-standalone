@@ -40,15 +40,12 @@ export interface SidebarState {
   isBottomPanelOpen: boolean;
   bottomPanelHeight: number;
 
-  // 运行时状态（不持久化）
+  // 运行时状态（全部来自 WebSocket，不持久化到 localStorage）
   workingDir: WorkingDirectory | null;
   sessions: Session[];
   isLoading: boolean;
   error: string | null;
   selectedSessionId: string | null;
-
-  // 持久化状态（唯一存储）
-  lastSessionByDir: Record<string, string>;
 }
 
 // ============================================================================

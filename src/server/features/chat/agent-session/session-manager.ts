@@ -74,8 +74,7 @@ export class ServerSessionManager {
    */
   async getOrCreateSession(
     workingDir: string,
-    client: WebSocket,
-    sessionId?: string
+    client: WebSocket
   ): Promise<PiAgentSession> {
     const existingEntry = this.sessions.get(workingDir);
 
@@ -118,8 +117,8 @@ export class ServerSessionManager {
 
     const session = new PiAgentSession(client, this.llmLogManager);
     
-    // Initialize the session
-    await session.initialize(workingDir, sessionId);
+    // Initialize the session (no sessionId, server decides which session to use)
+    await session.initialize(workingDir);
 
     // Register session
     this.sessions.set(workingDir, {
