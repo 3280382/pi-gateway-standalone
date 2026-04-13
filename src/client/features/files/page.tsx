@@ -19,6 +19,7 @@ import styles from "@/features/files/FilesLayout.module.css";
 import { useFileBrowser, useFileNavigation } from "@/features/files/hooks";
 import { useFileStore, useViewerStore } from "@/features/files/stores";
 import { useAppStore } from "@/stores/appStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 
 // ===== [ANCHOR:COMPONENT] =====
 
@@ -28,13 +29,15 @@ export function FilesPage() {
   const isActive = currentView === "files";
 
   const {
-    workingDir,
     isSidebarVisible,
     isBottomPanelOpen,
     bottomPanelHeight,
     closeBottomPanel,
     setBottomPanelHeight,
   } = useFileStore();
+  
+  // 使用全局 workspaceStore 的 fileBrowsePath 显示当前浏览路径
+  const { fileBrowsePath } = useWorkspaceStore();
 
   const { terminalCommand, setTerminalCommand } = useViewerStore();
 
@@ -48,7 +51,7 @@ export function FilesPage() {
     <div className={styles.layout}>
       {/* FileToolbar */}
       <header className={styles.header}>
-        <FileToolbar workingDir={workingDir} onRefresh={refresh} onNavigate={navigateTo} />
+        <FileToolbar workingDir={fileBrowsePath} onRefresh={refresh} onNavigate={navigateTo} />
       </header>
 
       {/* Body: FileSidebar + Content */}
