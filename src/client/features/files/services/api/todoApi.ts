@@ -30,7 +30,7 @@ export interface AddTodoParams {
  * 添加 todo 项
  */
 export async function add(params: AddTodoParams): Promise<void> {
-  await fetchApi("/api/files/todo/add", {
+  await fetchApi("/files/todo/add", {
     method: "POST",
     body: JSON.stringify(params),
   });
@@ -41,7 +41,7 @@ export async function add(params: AddTodoParams): Promise<void> {
  */
 export async function list(workingDir: string): Promise<TodoItem[]> {
   const response = await fetchApi<{ todos: TodoItem[] }>(
-    `/api/files/todo/list?workingDir=${encodeURIComponent(workingDir)}`
+    `/files/todo/list?workingDir=${encodeURIComponent(workingDir)}`
   );
   return response.todos;
 }
@@ -51,7 +51,7 @@ export async function list(workingDir: string): Promise<TodoItem[]> {
  */
 export async function getByFile(workingDir: string, filePath: string): Promise<TodoItem[]> {
   const response = await fetchApi<{ todos: TodoItem[] }>(
-    `/api/files/todo/file?workingDir=${encodeURIComponent(workingDir)}&filePath=${encodeURIComponent(filePath)}`
+    `/files/todo/file?workingDir=${encodeURIComponent(workingDir)}&filePath=${encodeURIComponent(filePath)}`
   );
   return response.todos;
 }
@@ -60,7 +60,7 @@ export async function getByFile(workingDir: string, filePath: string): Promise<T
  * 切换 todo 状态
  */
 export async function toggle(workingDir: string, todoId: number): Promise<void> {
-  await fetchApi("/api/files/todo/toggle", {
+  await fetchApi("/files/todo/toggle", {
     method: "POST",
     body: JSON.stringify({ workingDir, todoId }),
   });
@@ -79,7 +79,7 @@ export interface UpdateTodoParams {
  * 更新 todo 项
  */
 export async function update(params: UpdateTodoParams): Promise<void> {
-  await fetchApi("/api/files/todo/update", {
+  await fetchApi("/files/todo/update", {
     method: "POST",
     body: JSON.stringify(params),
   });
