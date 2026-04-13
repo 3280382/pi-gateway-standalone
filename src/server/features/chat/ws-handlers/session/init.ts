@@ -25,11 +25,13 @@ const logger = new Logger({ level: LogLevel.INFO });
 export async function handleInit(
   ctx: WSContext,
   payload: {
-    workingDir: string;
+    workingDir?: string;
     sessionId?: string;
   }
 ): Promise<void> {
-  const { workingDir, sessionId } = payload;
+  // 如果没有提供 workingDir，使用服务器当前工作目录
+  const workingDir = payload.workingDir || process.cwd();
+  const { sessionId } = payload;
 
   logger.info(
     `[WebSocket] Received init message: workingDir=${workingDir}, sessionId=${sessionId || "not specified"}`

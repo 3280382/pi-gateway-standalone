@@ -54,12 +54,12 @@ export function useChatInit(): { isConnecting: boolean } {
         return;
       }
 
-      // 2. 发送 init 请求，不带参数，让服务器根据当前工作目录决定
-      // 服务器会返回当前 session 状态，客户端不再从 localStorage 恢复 session
-      console.log("[ChatInit] Sending init request to server...");
+      // 2. 发送 init 请求，不带任何参数，让服务器完全自己决定当前 session
+      // 服务器根据当前工作目录返回 session 状态，客户端不再从 localStorage 恢复
+      console.log("[ChatInit] Sending init request to server (no params)...");
 
       const initResponse = await initChatWorkingDirectory(
-        "/root", // 默认根目录，服务器会根据实际情况返回
+        undefined, // 不传 workingDir，让服务器决定
         undefined, // 不传 sessionId，让服务器决定
         5000 // 5秒超时
       ).catch((err) => {

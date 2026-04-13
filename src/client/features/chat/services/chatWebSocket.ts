@@ -49,7 +49,7 @@ export function switchChatSession(sessionId: string): boolean {
  * 返回 Promise 等待 initialized 响应
  */
 export function initChatWorkingDirectory(
-  path: string,
+  path?: string,
   sessionId?: string,
   timeoutMs = 10000 // 增加到 10 秒，因为初始化可能需要加载模型和文件系统
 ): Promise<any> {
@@ -75,11 +75,12 @@ export function initChatWorkingDirectory(
       reject(new Error(`Timeout waiting for initialization (${timeoutMs}ms)`));
     }, timeoutMs);
 
-    // 发送 init 消息
-    const sent = websocketService.send("init", {
-      workingDir: path,
-      sessionId,
-    });
+    // 发送 init 消息 - 不传递任何参数，让服务器完全自己决定
+    const payload: { workingDir?: string; sessionId?: string } = {};
+    if (path) payload.workingDir = path;
+    if (sessionId) payload.sessionId = sessionId;
+
+    const sent = websocketService.send("init", payload);
 
     if (!sent) {
       unsubscribeInitialized();
