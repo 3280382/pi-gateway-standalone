@@ -10,6 +10,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import * as fileApi from "@/features/files/services/api/fileApi";
 
 export interface FileItem {
@@ -45,7 +46,8 @@ interface UseFilePickerOptions {
 
 export function useFilePicker(options: UseFilePickerOptions): UseFilePickerReturn {
   const { value, onChange, onFocusInput } = options;
-  const workingDir = useSessionStore((state) => state.workingDir);
+  // 使用全局 workspaceStore 的 workingDir
+  const workingDir = useWorkspaceStore((state) => state.workingDir);
 
   // 状态
   const [isOpen, setIsOpen] = useState(false);

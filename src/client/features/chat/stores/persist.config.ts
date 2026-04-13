@@ -26,10 +26,12 @@ export const CHAT_STORAGE_VERSION = {
 // Persist Fields
 // ============================================================================
 
-/** Chat Session Store - 持久化字段 */
+/** Chat Session Store - 持久化字段
+ * 注意：workingDir 已从全局 workspaceStore 管理，不再在此处持久化
+ */
 export const CHAT_SESSION_PERSIST = [
   "currentSessionId",
-  "workingDir",
+  // "workingDir", // 已由全局 workspaceStore 管理
   "currentModel",
   "thinkingLevel",
 ] as const;

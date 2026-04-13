@@ -41,7 +41,7 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
   const loadDirectory = useCallback(async (dirPath: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/browse", {
+      const response = await fetch("/api/files/file/browse", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path: dirPath }),
@@ -77,7 +77,8 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
   // ========== 3. Effects ==========
   useEffect(() => {
     loadDirectory(currentPath);
-  }, [currentPath, loadDirectory]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPath]);
 
   // ========== 6. Render ==========
   return (

@@ -17,6 +17,7 @@ import {
 } from "@/features/chat/stores/chatStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import styles from "./AppHeader.module.css";
 
 // ============================================================================
@@ -54,7 +55,8 @@ export function AppHeader({
 }: AppHeaderProps) {
   // ========== 1. State (Domain State from Zustand) ==========
   const sessionStore = useSessionStore();
-  const workingDir = sessionStore.workingDir ?? "/root";
+  // 使用全局 workspaceStore 的 workingDir
+  const workingDir = useWorkspaceStore((state) => state.workingDir) ?? "/root";
   const serverPid = sessionStore.serverPid;
   const isConnected = sessionStore.isConnected;
 

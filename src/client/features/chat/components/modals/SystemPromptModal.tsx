@@ -11,6 +11,7 @@
 import { useEffect, useState } from "react";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import styles from "./Modals.module.css";
 
 // ============================================================================
@@ -42,7 +43,8 @@ export function SystemPromptModal() {
   // Domain State
   const { isSystemPromptOpen, closeSystemPrompt } = useModalStore();
   const resourceFiles = useSessionStore((state) => state.resourceFiles);
-  const workingDir = useSessionStore((state) => state.workingDir);
+  // 使用全局 workspaceStore 的 workingDir
+  const workingDir = useWorkspaceStore((state) => state.workingDir);
 
   // UI State
   const [data, setData] = useState<SystemPromptData | null>(null);

@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { websocketService } from "@/services/websocket.service";
 import { setupWebSocketListeners } from "../services/api/chatApi";
 import { initChatWorkingDirectory } from "../services/chatWebSocket";
@@ -55,7 +56,8 @@ export function useChatInit(): { isConnecting: boolean } {
       }
 
       // 2. 尝试获取服务器当前状态（reconnect 场景）
-      const savedWorkingDir = useSessionStore.getState().workingDir;
+      // 从全局 workspaceStore 获取 workingDir
+      const savedWorkingDir = useWorkspaceStore.getState().workingDir;
       const currentSessionId = useSessionStore.getState().currentSessionId;
 
       console.log("[ChatInit] Saved state from localStorage:", {
@@ -82,7 +84,8 @@ export function useChatInit(): { isConnecting: boolean } {
 
         // 更新所有 store 状态
         useSessionStore.getState().setCurrentSession(initResponse.sessionId);
-        useSessionStore.getState().setWorkingDir(initResponse.cwd);
+        // 同时更新全局 workspaceStore 的 workingDir
+        useWorkspaceStore.getState().setWorkingDir(initResponse.cwd);
         useSidebarStore.getState().setWorkingDir(initResponse.cwd);
         useSessionStore.getState().setIsConnected(true);
 
