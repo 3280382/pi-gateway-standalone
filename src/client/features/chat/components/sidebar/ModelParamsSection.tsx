@@ -1,10 +1,11 @@
 /**
- * ModelParamsSection - Model parameters display (compact readonly version)
- * 
+ * ModelParamsSection - Model parameters display and selection
+ *
  * 职责：
- * - 显示当前模型信息（只读）
- * - 允许调整思考级别
- * - 从 WebSocket init 获取 currentModel 和 thinkingLevel
+ * - 显示当前模型信息
+ * - 提供模型下拉框选择
+ * - 支持切换模型
+ * - 从 WebSocket init 获取模型列表和当前模型
  */
 
 import { useCallback } from "react";
@@ -19,24 +20,21 @@ export function ModelParamsSection() {
   const availableModels = useSessionStore((state) => state.availableModels);
   const chatController = useChatController();
 
-  // ========== 2. Computed ==========
-  // 找到当前模型的完整信息
-  const currentModelInfo = availableModels.find((m) => 
-    m.id === currentModel || currentModel?.endsWith(m.id)
+  // ========== 2. Actions ==========
+  const handleModelChange = useCallback(
+    async (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const newModelId = e.target.value;
+      console.log("[ModelParamsSection] Switching model to:", newModelId);
+      try {
+        await chatController.setModel(newModelId, thinkingLevel || "medium");
+        console.log("[ModelParamsSection] Model switched successfully");
+      } catch (error) {
+        console.error("[ModelParamsSection] Failed to switch model:", error);
+      }
+    },
+    [chatController, thinkingLevel]
   );
 
-  // 提取模型名称（去掉 provider 前缀）
-  const modelName = currentModel?.split("/").pop() || currentModel || "Unknown";
-  const provider = currentModel?.split("/")[0] || "-";
-
-  console.log("[ModelParamsSection] Current model:", {
-    currentModel,
-    modelName,
-    provider,
-    hasInfo: !!currentModelInfo,
-  });
-
-  // ========== 3. Actions ==========
   const handleThinkingLevelChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       chatController.setThinkingLevel(e.target.value);
@@ -44,7 +42,22 @@ export function ModelParamsSection() {
     [chatController]
   );
 
-  // ========== 4. Render ==========
+  // ========== 3. Render ==========
+  // 如果没有模型列表，显示加载中
+  if (availableModels.length === 0) {
+    return (
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h3 className={styles.sectionTitle}>Model</h3>
+        </div>
+        <div className={styles.loading}>Loading models...</div>
+      </section>
+    );
+  }
+
+  // 找到当前模型的详细信息
+  const currentModelInfo = availableModels.find((m) => m.id === currentModel);
+
   return (
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
@@ -52,18 +65,28 @@ export function ModelParamsSection() {
       </div>
 
       <div className={styles.modelParamsCompact}>
-        {/* Current Model Display (Readonly) */}
+        {/* Model selection dropdown */}
         <div className={styles.paramRow}>
           <label className={styles.paramLabel}>Model</label>
-          <div className={styles.modelValue} title={currentModel || undefined}>
-            {modelName}
-          </div>
+          <select
+            className={styles.paramSelect}
+            value={currentModel || availableModels[0]?.id || ""}
+            onChange={handleModelChange}
+          >
+            {availableModels.map((model) => (
+              <option key={model.id} value={model.id}>
+                {model.name}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* Provider */}
+        {/* Provider display */}
         <div className={styles.paramRow}>
           <label className={styles.paramLabel}>Provider</label>
-          <div className={styles.paramValue}>{provider}</div>
+          <div className={styles.paramValue}>
+            {currentModelInfo?.provider || "-"}
+          </div>
         </div>
 
         {/* Thinking level */}
@@ -86,16 +109,16 @@ export function ModelParamsSection() {
           <div className={styles.infoItem}>
             <span className={styles.infoLabel}>Context</span>
             <span className={styles.infoValue}>
-              {currentModelInfo?.contextWindow 
-                ? formatNumber(currentModelInfo.contextWindow) 
+              {currentModelInfo?.contextWindow
+                ? formatNumber(currentModelInfo.contextWindow)
                 : "-"}
             </span>
           </div>
           <div className={styles.infoItem}>
             <span className={styles.infoLabel}>Max Out</span>
             <span className={styles.infoValue}>
-              {currentModelInfo?.maxTokens 
-                ? formatNumber(currentModelInfo.maxTokens) 
+              {currentModelInfo?.maxTokens
+                ? formatNumber(currentModelInfo.maxTokens)
                 : "-"}
             </span>
           </div>
