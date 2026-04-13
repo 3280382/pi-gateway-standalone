@@ -126,6 +126,9 @@ export async function tree(req: Request, res: Response) {
     ".coverage",
     ".idea",
     ".vscode",
+    "log",
+    "logs",
+    "fonts",
   ];
 
   try {
