@@ -55,8 +55,33 @@ export function ModelParamsSection() {
     );
   }
 
-  // 找到当前模型的详细信息
-  const currentModelInfo = availableModels.find((m) => m.id === currentModel);
+  // 找到当前模型的详细信息（支持完整 ID 或短 ID 匹配）
+  const findModelById = (id: string | null) => {
+    if (!id) return undefined;
+    // 首先尝试完整匹配
+    let model = availableModels.find((m) => m.id === id);
+    if (model) return model;
+    // 然后尝试短 ID 匹配（如 "deepseek-reasoner" 匹配 "deepseek/deepseek-reasoner"）
+    model = availableModels.find((m) => m.id.endsWith(`/${id}`) || m.id === id);
+    if (model) return model;
+    // 最后尝试只匹配模型名称部分
+    return availableModels.find((m) => {
+      const shortId = m.id.split("/").pop();
+      return shortId === id || m.id.includes(id);
+    });
+  };
+
+  const currentModelInfo = findModelById(currentModel);
+
+  // 获取用于下拉框的当前模型 ID（确保格式匹配）
+  const effectiveCurrentModel = currentModelInfo?.id || currentModel || availableModels[0]?.id || "";
+
+  console.log("[ModelParamsSection] Debug:", {
+    currentModel,
+    effectiveCurrentModel,
+    foundModelInfo: !!currentModelInfo,
+    availableModelsCount: availableModels.length,
+  });
 
   return (
     <section className={styles.section}>
@@ -70,7 +95,7 @@ export function ModelParamsSection() {
           <label className={styles.paramLabel}>Model</label>
           <select
             className={styles.paramSelect}
-            value={currentModel || availableModels[0]?.id || ""}
+            value={effectiveCurrentModel}
             onChange={handleModelChange}
           >
             {availableModels.map((model) => (

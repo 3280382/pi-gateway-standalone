@@ -52,6 +52,7 @@ export function ChatPage() {
           flexDirection: "column",
           gap: "16px",
           height: "100%",
+          width: "100%",
         }}
       >
         <div
@@ -65,7 +66,7 @@ export function ChatPage() {
             animation: "spin 1s linear infinite",
           }}
         />
-        <p style={{ color: "var(--text-muted)", textAlign: "center" }}>连接中...</p>
+        <p style={{ color: "var(--text-muted)", textAlign: "center", width: "100%" }}>连接中...</p>
       </div>
     );
   }
