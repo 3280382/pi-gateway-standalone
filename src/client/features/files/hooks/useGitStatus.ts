@@ -29,7 +29,7 @@ export interface UseGitStatusOptions {
 export function useGitStatus(options: UseGitStatusOptions = {}) {
   const { isActive = true, currentBrowsePath } = options;
 
-  const { isGitModeActive, items, updateFileGitStatuses } = useFileStore();
+  const { items, updateFileGitStatuses } = useFileStore();
   const { workingDir: globalWorkingDir } = useWorkspaceStore();
   
   // 使用当前浏览路径优先，回退到全局 workingDir
@@ -43,19 +43,7 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
     // 非激活状态不执行任何操作
     if (!isActive) return;
 
-    // Git模式关闭时，清空所有文件的git状态
-    if (!isGitModeActive) {
-      const hasGitStatus = items.some((item) => item.gitStatus);
-      if (hasGitStatus) {
-        updateFileGitStatuses({});
-      }
-      lastFetchedPathRef.current = "";
-      itemsLengthRef.current = 0;
-      isInitialMount.current = true;
-      return;
-    }
-
-    // Git模式激活但无文件项，不执行操作
+    // 无文件项时不执行操作
     if (items.length === 0) return;
 
     // 检查是否需要获取git状态
@@ -140,5 +128,5 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
     };
 
     fetchGitStatus();
-  }, [isActive, isGitModeActive, workingDir, items, updateFileGitStatuses]);
+  }, [isActive, workingDir, items, updateFileGitStatuses]);
 }
