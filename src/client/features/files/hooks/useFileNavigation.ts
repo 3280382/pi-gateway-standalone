@@ -20,7 +20,7 @@ export function useFileNavigation(): UseFileNavigationResult {
   // currentBrowsePath: 当前浏览路径（在文件浏览器中导航不改变全局 workingDir）
   const { currentBrowsePath, parentPath, setCurrentBrowsePath } = useFileStore();
   // workingDir: 全局工作目录（项目根目录）
-  const { workingDir, setFileBrowsePath } = useWorkspaceStore();
+  const { workingDir, setFileBrowsePath, setCurrentBrowsePath: setWorkspaceBrowsePath } = useWorkspaceStore();
 
   /**
    * 导航到指定路径
@@ -30,9 +30,10 @@ export function useFileNavigation(): UseFileNavigationResult {
       if (path !== currentBrowsePath) {
         setCurrentBrowsePath(path);
         setFileBrowsePath(path);
+        setWorkspaceBrowsePath(path); // 同步到 workspaceStore 用于持久化
       }
     },
-    [currentBrowsePath, setCurrentBrowsePath, setFileBrowsePath]
+    [currentBrowsePath, setCurrentBrowsePath, setFileBrowsePath, setWorkspaceBrowsePath]
   );
 
   /**
@@ -45,8 +46,9 @@ export function useFileNavigation(): UseFileNavigationResult {
     if (parent !== currentBrowsePath) {
       setCurrentBrowsePath(parent);
       setFileBrowsePath(parent);
+      setWorkspaceBrowsePath(parent); // 同步到 workspaceStore 用于持久化
     }
-  }, [currentBrowsePath, parentPath, setCurrentBrowsePath, setFileBrowsePath]);
+  }, [currentBrowsePath, parentPath, setCurrentBrowsePath, setFileBrowsePath, setWorkspaceBrowsePath]);
 
   /**
    * 导航到主页（全局工作目录）
@@ -54,7 +56,8 @@ export function useFileNavigation(): UseFileNavigationResult {
   const navigateHome = useCallback(() => {
     setCurrentBrowsePath(workingDir);
     setFileBrowsePath(workingDir);
-  }, [workingDir, setCurrentBrowsePath, setFileBrowsePath]);
+    setWorkspaceBrowsePath(workingDir); // 同步到 workspaceStore 用于持久化
+  }, [workingDir, setCurrentBrowsePath, setFileBrowsePath, setWorkspaceBrowsePath]);
 
   /**
    * 是否可以向上导航

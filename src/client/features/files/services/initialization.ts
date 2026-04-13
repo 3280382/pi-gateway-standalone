@@ -31,4 +31,5 @@ export function getCurrentBrowsePath(): string {
 export function setBrowsePath(path: string): void {
   useFileStore.getState().setCurrentBrowsePath(path);
   useWorkspaceStore.getState().setFileBrowsePath(path);
+  useWorkspaceStore.getState().setCurrentBrowsePath(path); // 同步持久化
 }
