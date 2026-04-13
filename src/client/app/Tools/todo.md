@@ -1,13 +1,13 @@
 # Todo List
 
 ## Project: Current Directory
-Generated: 2026-04-13T12:08:15.373Z
+Generated: 2026-04-13T12:02:48.142Z
 
 ---
 
 ## TODO
-### [/root/pi-gateway-standalone/test.txt]
-- [ ] updated todo text
+### [/root/pi-gateway-standalone/src/client/app/Tools/DebugTool.tsx]
+- [ ] u
 
 ---
 

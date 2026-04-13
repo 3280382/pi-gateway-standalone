@@ -68,6 +68,7 @@ export const TreeView = memo<TreeViewProps>(({ items }) => {
     isGitModeActive,
     isTodoModeActive,
     setTodoInputFile,
+    setEditingTodo,
     treeFilterText,
     todoMap,
     items: fileItems, // 从 FileStore 获取带有 gitStatus 的 items
@@ -227,7 +228,14 @@ export const TreeView = memo<TreeViewProps>(({ items }) => {
                           color: todo.checked ? "#22c55e" : "#16a34a",
                           textDecoration: todo.checked ? "line-through" : "none",
                           fontWeight: todo.checked ? "normal" : 600,
+                          cursor: "pointer",
                         }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingTodo(todo);
+                          setTodoInputFile({ path: node.path, name: node.name });
+                        }}
+                        title="点击编辑"
                       >
                         <span className={styles.todoStatus}>{todo.checked ? "✓" : "○"}</span>
                         <span className={styles.todoText}>{todo.text}</span>

@@ -82,7 +82,7 @@ function parseTodoContent(content: string): TodoItem[] {
   const lines = content.split("\n");
   const todos: TodoItem[] = [];
   let currentFilePath = "";
-  let lineIndex = 0;
+  let todoId = 0;
 
   for (const line of lines) {
     // 检测文件路径标题 ### [/path/to/file]
@@ -93,11 +93,14 @@ function parseTodoContent(content: string): TodoItem[] {
     }
 
     // 解析todo行
-    const todo = parseTodoLine(line, currentFilePath, lineIndex);
-    if (todo) {
-      todos.push(todo);
+    const todoMatch = line.match(/^- \[([ x])\] /);
+    if (todoMatch) {
+      const todo = parseTodoLine(line, currentFilePath, todoId);
+      if (todo) {
+        todos.push(todo);
+        todoId++;
+      }
     }
-    lineIndex++;
   }
 
   return todos;
