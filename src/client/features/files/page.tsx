@@ -19,6 +19,7 @@ import styles from "@/features/files/FilesLayout.module.css";
 import { useFileBrowser, useFileNavigation } from "@/features/files/hooks";
 import { useFileStore, useViewerStore } from "@/features/files/stores";
 import { useAppStore } from "@/stores/appStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 
 // ===== [ANCHOR:COMPONENT] =====
 
@@ -33,8 +34,10 @@ export function FilesPage() {
     bottomPanelHeight,
     closeBottomPanel,
     setBottomPanelHeight,
-    currentBrowsePath,
   } = useFileStore();
+
+  // 全局工作目录（用于 FileToolbar 显示）
+  const { workingDir } = useWorkspaceStore();
 
   const { terminalCommand, setTerminalCommand } = useViewerStore();
 
@@ -48,7 +51,7 @@ export function FilesPage() {
     <div className={styles.layout}>
       {/* FileToolbar */}
       <header className={styles.header}>
-        <FileToolbar workingDir={currentBrowsePath} onRefresh={refresh} onNavigate={navigateTo} />
+        <FileToolbar workingDir={workingDir} onRefresh={refresh} onNavigate={navigateTo} />
       </header>
 
       {/* Body: FileSidebar + Content */}
