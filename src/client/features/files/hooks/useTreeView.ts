@@ -44,7 +44,9 @@ const DEFAULT_EXCLUDES = [
   ".vscode",
 ];
 
-/** 过滤树节点 */
+/** 过滤树节点
+ * 注意：如果父文件夹被排除，其所有子文件/文件夹也应被排除
+ */
 function filterTreeNodes(
   items: TreeNode[],
   mode: "normal" | "all" | "search",
@@ -52,21 +54,43 @@ function filterTreeNodes(
 ): TreeNode[] {
   if (mode === "all" && !search) return items;
 
-  return items.filter((item) => {
-    // 搜索模式
-    if (search) {
-      return item.name.toLowerCase().includes(search.toLowerCase());
+  const result: TreeNode[] = [];
+  // 跟踪被排除的父路径
+  const excludedParents: string[] = [];
+
+  for (const item of items) {
+    // 检查是否在被排除的父目录下
+    const isUnderExcludedParent = excludedParents.some(
+      (excludedPath) => item.path.startsWith(excludedPath + "/") || item.path === excludedPath
+    );
+    if (isUnderExcludedParent) {
+      continue; // 跳过此项目（它在被排除的目录下）
     }
 
-    // 正常模式 - 排除隐藏文件
+    // 搜索模式
+    if (search) {
+      if (item.name.toLowerCase().includes(search.toLowerCase())) {
+        result.push(item);
+      }
+      continue;
+    }
+
+    // 正常模式 - 排除隐藏文件和默认排除项
     if (mode === "normal") {
-      if (item.name.startsWith(".") || DEFAULT_EXCLUDES.includes(item.name)) {
-        return false;
+      const shouldExclude = item.name.startsWith(".") || DEFAULT_EXCLUDES.includes(item.name);
+      if (shouldExclude) {
+        // 如果是目录，记录为被排除的父路径
+        if (item.isDirectory) {
+          excludedParents.push(item.path);
+        }
+        continue; // 跳过此项目
       }
     }
 
-    return true;
-  });
+    result.push(item);
+  }
+
+  return result;
 }
 
 export function useTreeView(options: UseTreeViewOptions = {}): UseTreeViewResult {

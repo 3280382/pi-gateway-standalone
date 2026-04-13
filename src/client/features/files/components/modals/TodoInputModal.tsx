@@ -80,7 +80,6 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
       }
 
       // 重新加载 todo 列表以更新角标显示
-      const workingDir = getWorkingDir(filePath);
       try {
         const todos = await todoApi.list(workingDir);
         setTodoList(todos);
