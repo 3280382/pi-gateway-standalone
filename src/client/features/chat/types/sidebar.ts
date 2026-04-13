@@ -56,11 +56,11 @@ export interface SidebarState {
 // ============================================================================
 
 export interface SidebarController {
-  // Data Loading
+  // Data Loading - 数据来自 WebSocket init，不再需要 HTTP 加载
   loadWorkingDir: () => Promise<void>;
   loadSessions: (cwd: string) => Promise<void>;
 
-  // Actions
+  // Actions - WebSocket
   changeWorkingDir: (path: string) => Promise<void>;
   selectSession: (id: string) => void;
   createNewSession: () => Promise<void>;

@@ -6,6 +6,8 @@
  * 2. 协调 sidebarStore、sessionStore、workspaceStore、chatStore 的更新
  * 3. 提供类型安全的 session 操作方法
  * 4. 隐藏 WebSocket 通信细节
+ * 
+ * 注意：所有数据通过 WebSocket 获取，不使用 HTTP API
  */
 
 import { useChatStore } from "@/features/chat/stores/chatStore";
@@ -13,7 +15,6 @@ import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
 import { useWorkspaceStore as useGlobalWorkspaceStore } from "@/stores/workspaceStore";
-import { fetchApi } from "@/services/client";
 import { websocketService } from "@/services/websocket.service";
 import { changeChatDirectory, createNewChatSession } from "./chatWebSocket";
 
@@ -41,8 +42,6 @@ export interface SessionManagerAPI {
   getLastSessionForDir: (dir: string) => string | undefined;
   /** 检查 session 是否存在于当前列表 */
   sessionExists: (sessionId: string) => boolean;
-  /** 加载指定目录的 sessions 列表 */
-  loadSessionsList: (dir: string) => Promise<Session[]>;
 }
 
 // ============================================================================
@@ -97,28 +96,30 @@ function getStores() {
  * 切换工作目录
  */
 async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}): Promise<void> {
-  const { clearSessions = true, loadSessions = true, restoreLastSession = true } = options;
+  const { clearSessions = true } = options;
   const stores = getStores();
 
   console.log("[SessionManager.switchDirectory] ========== START ==========");
   console.log(`[SessionManager.switchDirectory] 1. targetDir="${targetDir}"`);
-  console.log(`[SessionManager.switchDirectory] 2. options=`, options);
-  console.log(
-    `[SessionManager.switchDirectory] 3. current workingDir="${stores.sidebar.workingDir?.path}"`
-  );
+  console.log(`[SessionManager.switchDirectory] 2. current workingDir="${stores.sidebar.workingDir?.path}"`);
 
   // 1. 更新 loading 状态
   stores.sidebar.setLoading(true);
 
   try {
     // 2. 发送 WebSocket 请求
-    console.log(`[SessionManager.switchDirectory] 4. Sending change_dir request...`);
+    console.log(`[SessionManager.switchDirectory] 3. Sending change_dir request...`);
 
     const response = await new Promise<{
       cwd: string;
       sessionId?: string;
       sessionFile?: string;
       pid?: number;
+      allSessions?: Session[];
+      currentModel?: string;
+      allModels?: any[];
+      thinkingLevel?: string;
+      messages?: any[];
     }>((resolve, reject) => {
       const timeout = setTimeout(() => {
         console.error(`[SessionManager.switchDirectory] TIMEOUT: 5s passed without response`);
@@ -128,7 +129,7 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
       changeChatDirectory(targetDir);
 
       const unsub = websocketService.on("dir_changed", (data) => {
-        console.log(`[SessionManager.switchDirectory] 5. Received dir_changed event:`, data);
+        console.log(`[SessionManager.switchDirectory] 4. Received dir_changed event:`, data);
         clearTimeout(timeout);
         unsub();
         resolve(data as any);
@@ -136,18 +137,26 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
     });
 
     console.log(
-      `[SessionManager.switchDirectory] 6. Response received: cwd="${response.cwd}", sessionId="${response.sessionId}", sessionFile="${response.sessionFile}"`
+      `[SessionManager.switchDirectory] 5. Response received: cwd="${response.cwd}", sessionId="${response.sessionId}"`
     );
 
     // 3. 更新各 store 的工作目录和连接状态
-    // 注意：顺序很重要 - 先更新全局 workspaceStore，它会同步到其他 store
     stores.globalWorkspace.setWorkingDir(response.cwd);
-    // sidebar 和 session 的 setWorkingDir 已由全局 store 同步，这里为保险起见再调用一次
     stores.sidebar.setWorkingDir(response.cwd);
     stores.session.setWorkingDir(response.cwd);
     stores.session.setIsConnected(true);
+    
     if (response.pid) {
       stores.session.setServerPid(response.pid);
+    }
+    if (response.currentModel) {
+      stores.session.setCurrentModel(response.currentModel);
+    }
+    if (response.thinkingLevel) {
+      stores.session.setThinkingLevel(response.thinkingLevel as any);
+    }
+    if (response.allModels) {
+      stores.session.setAvailableModels(response.allModels);
     }
 
     // 4. 处理 sessions 列表
@@ -156,97 +165,73 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
       stores.sidebar.setSelectedSessionId(null);
     }
 
-    let sessionsList: Session[] = [];
-    if (loadSessions) {
-      const data = await fetchApi<{ sessions: any[] }>(
-        `/sessions?cwd=${encodeURIComponent(response.cwd)}`
-      );
-      sessionsList = (data.sessions || []).map((s) => ({
-        id: s.path,
-        path: s.path,
-        name: s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
-        messageCount: s.messageCount || 0,
-        lastModified: new Date(s.modified),
-        firstMessage: s.firstMessage,
-      }));
-      stores.sidebar.setSessions(sessionsList);
+    // 使用服务器返回的 sessions 列表
+    if (response.allSessions && response.allSessions.length > 0) {
+      stores.sidebar.setSessions(response.allSessions);
     }
 
     // 5. 确定要使用的 session
     let sessionToUse: Session | undefined;
-    let sessionSource: "last" | "server" | "new" = "new";
 
-    if (restoreLastSession) {
-      // 优先从 lastSessionByDir 恢复
-      const lastSessionId = stores.sidebar.lastSessionByDir[response.cwd];
-      if (lastSessionId) {
-        sessionToUse = findSessionInList(sessionsList, lastSessionId);
-        if (sessionToUse) {
-          sessionSource = "last";
-          console.log("[SessionManager] 恢复上次 session:", lastSessionId);
-        }
-      }
-    }
-
-    // 如果没有恢复的 session，使用服务端返回的新 session
-    if (!sessionToUse && response.sessionId && response.sessionFile) {
+    // 优先使用服务器返回的当前 session
+    if (response.sessionId && response.sessionFile) {
       sessionToUse = {
         id: response.sessionFile,
         path: response.sessionFile,
-        name: "New Session",
-        messageCount: 0,
+        name: "Current Session",
+        messageCount: response.messages?.length || 0,
         lastModified: new Date(),
       };
-      sessionSource = "server";
-      // 添加到 sessions 列表
-      stores.sidebar.addSession?.(sessionToUse) ||
-        stores.sidebar.setSessions([sessionToUse, ...sessionsList]);
-      console.log("[SessionManager] 使用服务端新 session:", response.sessionId);
+      
+      // 添加到 sessions 列表（如果不存在）
+      const existingSessions = stores.sidebar.sessions;
+      if (!existingSessions.find(s => s.path === response.sessionFile)) {
+        stores.sidebar.setSessions([sessionToUse, ...existingSessions]);
+      }
+      
+      console.log("[SessionManager] 使用服务端当前 session:", response.sessionId);
     }
 
-    // 6. 加载选中的 session
+    // 6. 加载消息历史（如果服务器返回了）
+    if (response.messages && response.messages.length > 0) {
+      const formattedMessages = response.messages
+        .filter((entry: any) => entry.type === "message" && entry.message)
+        .map((entry: any) => {
+          const msg = entry.message;
+          let contentText = "";
+          if (Array.isArray(msg.content)) {
+            contentText = msg.content
+              .filter((c: any) => c.type === "text")
+              .map((c: any) => c.text)
+              .join("\n");
+          } else if (typeof msg.content === "string") {
+            contentText = msg.content;
+          }
+          return {
+            id: entry.id || msg.id || `${Date.now()}-${Math.random()}`,
+            role: msg.role || "user",
+            content: contentText,
+            timestamp: entry.timestamp || new Date().toISOString(),
+          };
+        });
+      
+      stores.chat.setMessages(formattedMessages);
+      console.log("[SessionManager] 已加载消息历史:", formattedMessages.length);
+    }
+
+    // 7. 选中当前 session
     if (sessionToUse) {
-      await activateSession(sessionToUse);
+      stores.sidebar.setSelectedSessionId(sessionToUse.id);
+      stores.session.setCurrentSession(sessionToUse.id);
     }
 
     console.log("[SessionManager] 目录切换完成:", {
       dir: response.cwd,
       session: sessionToUse?.id,
-      source: sessionSource,
     });
   } finally {
     stores.sidebar.setLoading(false);
   }
-}
-
-/**
- * 激活指定 session（加载消息等）
- */
-async function activateSession(session: Session): Promise<void> {
-  const stores = getStores();
-
-  // 1. 更新 store 状态
-  stores.sidebar.setSelectedSessionId(session.id);
-  stores.session.setCurrentSession(session.id);
-
-  // 2. 保存到 lastSessionByDir（通过 selectSession 间接实现）
-  // 这里需要直接更新，避免重复触发
-  const currentDir = stores.sidebar.workingDir?.path;
-  if (currentDir) {
-    const lastSessionByDir = { ...stores.sidebar.lastSessionByDir };
-    lastSessionByDir[currentDir] = session.id;
-    // 使用 patch 方式更新，避免触发 selectSession 的副作用
-    useSidebarStore.setState({ lastSessionByDir }, false, "activateSession");
-  }
-
-  // 3. 加载 session 消息
-  if (session.path) {
-    console.log("[SessionManager] 加载 session 消息:", session.path);
-    await stores.chat.loadSession(session.path);
-  }
-
-  // 4. 通知服务端加载 session
-  websocketService.send("load_session", { sessionPath: session.path });
 }
 
 /**
@@ -263,7 +248,26 @@ async function selectSession(sessionId: string): Promise<void> {
   }
 
   console.log("[SessionManager] 用户选择 session:", sessionId);
-  await activateSession(session);
+  
+  // 更新选中状态
+  stores.sidebar.setSelectedSessionId(session.id);
+  stores.session.setCurrentSession(session.id);
+  
+  // 保存到 lastSessionByDir
+  const currentDir = stores.sidebar.workingDir?.path;
+  if (currentDir) {
+    const lastSessionByDir = { ...stores.sidebar.lastSessionByDir };
+    lastSessionByDir[currentDir] = session.id;
+    useSidebarStore.setState({ lastSessionByDir }, false, "selectSession");
+  }
+  
+  // 加载 session 消息
+  if (session.path) {
+    await stores.chat.loadSession(session.path);
+  }
+  
+  // 通知服务端
+  websocketService.send("load_session", { sessionPath: session.path });
 }
 
 /**
@@ -301,16 +305,26 @@ async function createNewSession(): Promise<void> {
     };
 
     // 添加到列表并激活
-    stores.sidebar.addSession?.(newSession) ||
-      stores.sidebar.setSessions([newSession, ...stores.sidebar.sessions]);
-
-    await activateSession(newSession);
+    const existingSessions = stores.sidebar.sessions;
+    stores.sidebar.setSessions([newSession, ...existingSessions]);
+    
+    stores.sidebar.setSelectedSessionId(newSession.id);
+    stores.session.setCurrentSession(newSession.id);
 
     // 清空消息列表（新 session）
     stores.chat.setMessages([]);
+    stores.chat.clearMessages();
 
     // 设置连接状态
     stores.session.setIsConnected(true);
+
+    // 保存到 lastSessionByDir
+    const currentDir = stores.sidebar.workingDir?.path;
+    if (currentDir) {
+      const lastSessionByDir = { ...stores.sidebar.lastSessionByDir };
+      lastSessionByDir[currentDir] = newSession.id;
+      useSidebarStore.setState({ lastSessionByDir }, false, "createNewSession");
+    }
 
     console.log("[SessionManager] 新 session 创建完成:", response.sessionId);
   } finally {
@@ -333,27 +347,6 @@ function sessionExists(sessionId: string): boolean {
   return !!findSessionInList(sessions, sessionId);
 }
 
-/**
- * 加载指定目录的 sessions 列表
- */
-async function loadSessionsList(dir: string): Promise<Session[]> {
-  try {
-    const data = await fetchApi<{ sessions: any[] }>(`/sessions?cwd=${encodeURIComponent(dir)}`);
-    const sessionsList = (data.sessions || []).map((s) => ({
-      id: s.path,
-      path: s.path,
-      name: s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
-      messageCount: s.messageCount || 0,
-      lastModified: new Date(s.modified),
-      firstMessage: s.firstMessage,
-    }));
-    return sessionsList;
-  } catch (error) {
-    console.error("[SessionManager] 加载 sessions 列表失败:", error);
-    return [];
-  }
-}
-
 // ============================================================================
 // Public API
 // ============================================================================
@@ -364,7 +357,6 @@ export const sessionManager: SessionManagerAPI = {
   createNewSession,
   getLastSessionForDir,
   sessionExists,
-  loadSessionsList,
 };
 
 // 为了兼容性，也提供 hook 版本

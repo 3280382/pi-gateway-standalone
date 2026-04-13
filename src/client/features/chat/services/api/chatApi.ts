@@ -42,7 +42,7 @@ export interface EnhancedChatController extends ChatController {
   steer: (text: string) => void;
   createNewSession: () => Promise<void>;
   loadSession: (sessionPath: string) => Promise<void>;
-  listSessions: (cwd: string) => Promise<any>;
+
   setModel: (modelId: string, thinkingLevel?: string) => Promise<void>;
   listModels: () => Promise<any>;
   executeCommand: (command: string) => Promise<any>;
@@ -238,14 +238,7 @@ export function useChatController(): EnhancedChatController {
       return data;
     },
 
-    listSessions: async (cwd: string) => {
-      return createPromiseWithTimeout({
-        timeoutMessage: "列出会话超时",
-        eventName: "sessions_list",
-        onSuccess: () => {},
-        sendAction: () => listChatSessions(cwd),
-      });
-    },
+
 
     // 模型管理
     setModel: async (fullModelId: string, thinkingLevel?: string) => {

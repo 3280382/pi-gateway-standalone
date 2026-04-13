@@ -4,37 +4,13 @@
  * 重构后职责：
  * - 提供 React Hook 接口
  * - 委托给 sessionManager 处理 session 逻辑
- * - 保持向后兼容
+ * - 所有数据来自 WebSocket，不使用 HTTP API
  */
 
 import { useCallback } from "react";
 import { sessionManager } from "@/features/chat/services/sessionManager";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import type {
-  Session,
-  SessionsResponse,
-  SidebarController,
-  WorkingDirResponse,
-} from "@/features/chat/types/sidebar";
-import { fetchApi } from "@/services/client";
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * 将 API 返回的 session 数据转换为 Session 对象
- */
-function mapSession(s: SessionsResponse["sessions"][number]): Session {
-  return {
-    id: s.path,
-    path: s.path,
-    name: s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
-    messageCount: s.messageCount || 0,
-    lastModified: new Date(s.modified),
-    firstMessage: s.firstMessage,
-  };
-}
+import type { SidebarController } from "@/features/chat/types/sidebar";
 
 // ============================================================================
 // Controller Hook
@@ -44,39 +20,21 @@ export function useSidebarController(): SidebarController {
   const store = useSidebarStore();
 
   return {
-    // Data Loading
+    // Data Loading - 不再需要，数据来自 WebSocket init
     loadWorkingDir: useCallback(async () => {
-      store.setLoading(true);
-      try {
-        const { cwd } = await fetchApi<WorkingDirResponse>("/workspace/workspace/working-dir");
-        store.setWorkingDir(cwd);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to load working directory";
-        store.setError(message);
-        throw error;
-      } finally {
-        store.setLoading(false);
-      }
-    }, [store]),
+      // 工作目录来自 WebSocket init 响应，不需要 HTTP 获取
+      console.log("[SidebarController] loadWorkingDir: data comes from WebSocket init");
+    }, []),
 
     loadSessions: useCallback(
-      async (cwd: string) => {
-        store.setLoading(true);
-        try {
-          const data = await fetchApi<SessionsResponse>(`/sessions?cwd=${encodeURIComponent(cwd)}`);
-          store.setSessions((data.sessions || []).map(mapSession));
-        } catch (error) {
-          const message = error instanceof Error ? error.message : "Failed to load sessions";
-          store.setError(message);
-          throw error;
-        } finally {
-          store.setLoading(false);
-        }
+      async (_cwd: string) => {
+        // Sessions 来自 WebSocket init 响应，不需要 HTTP 获取
+        console.log("[SidebarController] loadSessions: data comes from WebSocket init");
       },
-      [store]
+      []
     ),
 
-    // Actions - 委托给 sessionManager
+    // Actions - 委托给 sessionManager (WebSocket)
     changeWorkingDir: useCallback(
       (path: string) =>
         sessionManager.switchDirectory(path, {
@@ -105,31 +63,13 @@ export function createSidebarController(): SidebarController {
 
   return {
     loadWorkingDir: async () => {
-      store.setLoading(true);
-      try {
-        const { cwd } = await fetchApi<WorkingDirResponse>("/workspace/workspace/working-dir");
-        store.setWorkingDir(cwd);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to load working directory";
-        store.setError(message);
-        throw error;
-      } finally {
-        store.setLoading(false);
-      }
+      // 工作目录来自 WebSocket init 响应
+      console.log("[SidebarController] loadWorkingDir: data comes from WebSocket init");
     },
 
-    loadSessions: async (cwd: string) => {
-      store.setLoading(true);
-      try {
-        const data = await fetchApi<SessionsResponse>(`/sessions?cwd=${encodeURIComponent(cwd)}`);
-        store.setSessions((data.sessions || []).map(mapSession));
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "Failed to load sessions";
-        store.setError(message);
-        throw error;
-      } finally {
-        store.setLoading(false);
-      }
+    loadSessions: async (_cwd: string) => {
+      // Sessions 来自 WebSocket init 响应
+      console.log("[SidebarController] loadSessions: data comes from WebSocket init");
     },
 
     changeWorkingDir: (path: string) =>
