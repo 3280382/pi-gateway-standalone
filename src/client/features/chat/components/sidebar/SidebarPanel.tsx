@@ -13,6 +13,7 @@
 import { useCallback } from "react";
 import { IconButton } from "@/components/Icon/Icon";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
+import { useSidebarSessions } from "@/features/chat/hooks/useSidebarSessions";
 import { sessionManager } from "@/features/chat/services/sessionManager";
 import { useLlmLogStore } from "@/features/chat/stores/llmLogStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
@@ -41,6 +42,9 @@ export function SidebarPanel({ currentView = "chat" }: SidebarPanelProps) {
   const isVisible = useSidebarStore((state) => state.isVisible);
   const error = useSidebarStore((state) => state.error);
   const clearError = useSidebarStore((state) => state.clearError);
+
+  // 加载当前工作目录的 sessions（用于 SessionDropdownSection）
+  useSidebarSessions(isVisible, currentView);
 
   // ========== 5. Render ==========
   return (
@@ -82,3 +86,4 @@ function SidebarHeader() {
     </div>
   );
 }
+
