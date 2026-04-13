@@ -1,68 +1,35 @@
 /**
- * CompactWorkspacesSection - Compact workspace list display
- * Show up to 3 items with "more" button to expand
+ * CompactWorkspacesSection - 当前工作目录显示
+ *
+ * 简化版：只显示当前工作目录
+ * （recentWorkspaces 功能已移除）
  */
 
-import { useCallback, useState } from "react";
-import { IconButton } from "@/components/Icon/Icon";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import { useWorkspaceStore } from "@/features/files/stores";
 import styles from "./SidebarPanel.module.css";
 
-interface CompactWorkspacesSectionProps {
-  maxItems?: number;
-}
-
-export function CompactWorkspacesSection({ maxItems = 3 }: CompactWorkspacesSectionProps) {
-  // ========== 1. State ==========
-  const recentWorkspaces = useWorkspaceStore((state) => state.recentWorkspaces);
-  const clearRecentWorkspaces = useWorkspaceStore((state) => state.clearRecentWorkspaces);
+export function CompactWorkspacesSection() {
   const workingDir = useSidebarStore((state) => state.workingDir);
   const isLoading = useSidebarStore((state) => state.isLoading);
   const controller = useSidebarController();
-  const [expanded, setExpanded] = useState(false);
 
-  // ========== 4. Computed ==========
   const currentPath = workingDir?.path || "";
-  const displayWorkspaces = expanded ? recentWorkspaces : recentWorkspaces.slice(0, maxItems);
-  const hasMore = recentWorkspaces.length > maxItems;
+  const displayName = workingDir?.displayName || currentPath.split("/").pop() || "~";
 
-  // ========== 5. Actions ==========
-  const handleClear = useCallback(() => {
-    clearRecentWorkspaces();
-  }, [clearRecentWorkspaces]);
+  const handleClick = () => {
+    if (currentPath) {
+      controller.changeWorkingDir(currentPath);
+    }
+  };
 
-  const handleSelect = useCallback(
-    (path: string) => {
-      controller.changeWorkingDir(path);
-    },
-    [controller]
-  );
-
-  const toggleExpand = useCallback(() => {
-    setExpanded(!expanded);
-  }, [expanded]);
-
-  // ========== 6. Render ==========
-  if (isLoading && recentWorkspaces.length === 0) {
+  if (isLoading) {
     return (
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>Workspaces</h3>
+          <h3 className={styles.sectionTitle}>Workspace</h3>
         </div>
         <div className={styles.loading}>Loading...</div>
-      </section>
-    );
-  }
-
-  if (recentWorkspaces.length === 0) {
-    return (
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>Workspaces</h3>
-        </div>
-        <div className={styles.empty}>No workspaces</div>
       </section>
     );
   }
@@ -70,48 +37,21 @@ export function CompactWorkspacesSection({ maxItems = 3 }: CompactWorkspacesSect
   return (
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
-        <h3 className={styles.sectionTitle}>Workspaces</h3>
-        <div className={styles.sectionActions}>
-          {hasMore && (
-            <button
-              type="button"
-              className={styles.moreButton}
-              onClick={toggleExpand}
-              title={expanded ? "Collapse" : "Show more"}
-            >
-              {expanded ? "Collapse" : "More"}
-            </button>
-          )}
-          <IconButton
-            name="trash"
-            onClick={handleClear}
-            title="Clear history"
-            className={styles.clearButton}
-          />
-        </div>
+        <h3 className={styles.sectionTitle}>Workspace</h3>
       </div>
       <div className={styles.compactList}>
-        {displayWorkspaces.map((safeWorkspace) => {
-          const path = safeWorkspace.replace(/\/$/, "");
-          const name = path.split("/").pop() || path;
-          const isActive = currentPath === path || currentPath === safeWorkspace;
-
-          return (
-            <button
-              type="button"
-              key={path}
-              className={`${styles.compactItem} ${isActive ? styles.active : ""}`}
-              onClick={() => handleSelect(path)}
-              title={path}
-            >
-              <div className={styles.folderIcon}>📁</div>
-              <div className={styles.compactInfo}>
-                <span className={styles.compactName}>{name}</span>
-                <span className={styles.compactPath}>{path}</span>
-              </div>
-            </button>
-          );
-        })}
+        <button
+          type="button"
+          className={`${styles.compactItem} ${styles.active}`}
+          onClick={handleClick}
+          title={currentPath}
+        >
+          <div className={styles.folderIcon}>📁</div>
+          <div className={styles.compactInfo}>
+            <span className={styles.compactName}>{displayName}</span>
+            <span className={styles.compactPath}>{currentPath}</span>
+          </div>
+        </button>
       </div>
     </section>
   );

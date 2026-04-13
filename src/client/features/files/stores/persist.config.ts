@@ -10,7 +10,7 @@
 
 export const FILES_STORAGE_KEYS = {
   FILES_BROWSER: "pi:files:browser",
-  FILES_WORKSPACE: "pi:files:workspace",
+  // FILES_WORKSPACE 已移除 - recentWorkspaces 功能未使用
 } as const;
 
 // ============================================================================
@@ -19,7 +19,6 @@ export const FILES_STORAGE_KEYS = {
 
 export const FILES_STORAGE_VERSION = {
   FILES_BROWSER: 1,
-  FILES_WORKSPACE: 1,
 } as const;
 
 // ============================================================================
@@ -27,7 +26,9 @@ export const FILES_STORAGE_VERSION = {
 // ============================================================================
 
 /** Files Browser Store - 持久化字段
- * 注意：workingDir 已由全局 workspaceStore (pi:app:workspace) 管理，不再在此处持久化
+ * 注意：
+ * - workingDir 已由全局 workspaceStore (pi:app:workspace) 管理
+ * - isGitModeActive/isTodoModeActive 是临时状态，不持久化
  */
 export const FILES_BROWSER_PERSIST = [
   // "workingDir", // 已由全局 workspaceStore (pi:app:workspace) 管理
@@ -36,9 +37,9 @@ export const FILES_BROWSER_PERSIST = [
   "filterType",
   "isSidebarVisible",
   "bottomPanelHeight",
-  "isGitModeActive",
-  "isTodoModeActive",
+  // "isGitModeActive", // 临时状态，每次启动重置
+  // "isTodoModeActive", // 临时状态，每次启动重置
 ] as const;
 
-/** Files Workspace Store - 持久化字段 */
-export const FILES_WORKSPACE_PERSIST = ["recentWorkspaces"] as const;
+// FILES_WORKSPACE 已移除 - recentWorkspaces 功能未使用
+export const FILES_WORKSPACE_PERSIST = [] as const;

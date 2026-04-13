@@ -38,7 +38,7 @@ export const APP_STORAGE_VERSION = {
 export const APP_GLOBAL_PERSIST = ["currentView", "theme", "fontSize"] as const;
 
 /** App Workspace Store - 持久化字段（全局工作目录） */
-export const APP_WORKSPACE_PERSIST = ["workingDir", "fileBrowsePath"] as const;
+export const APP_WORKSPACE_PERSIST = ["workingDir", "fileBrowsePath", "currentBrowsePath"] as const;
 
 // ============================================================================
 // 聚合所有 Storage Keys（供调试使用）

@@ -13,7 +13,6 @@ import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
 import { useWorkspaceStore as useGlobalWorkspaceStore } from "@/stores/workspaceStore";
-import { useWorkspaceStore as useFilesWorkspaceStore } from "@/features/files/stores";
 import { fetchApi } from "@/services/client";
 import { websocketService } from "@/services/websocket.service";
 import { changeChatDirectory, createNewChatSession } from "./chatWebSocket";
@@ -86,7 +85,6 @@ function getStores() {
     sidebar: useSidebarStore.getState(),
     session: useSessionStore.getState(),
     globalWorkspace: useGlobalWorkspaceStore.getState(),
-    filesWorkspace: useFilesWorkspaceStore.getState(),
     chat: useChatStore.getState(),
   };
 }
@@ -147,8 +145,6 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
     // sidebar 和 session 的 setWorkingDir 已由全局 store 同步，这里为保险起见再调用一次
     stores.sidebar.setWorkingDir(response.cwd);
     stores.session.setWorkingDir(response.cwd);
-    // 添加到最近工作区列表
-    stores.filesWorkspace.addRecentWorkspace(response.cwd);
     stores.session.setIsConnected(true);
     if (response.pid) {
       stores.session.setServerPid(response.pid);

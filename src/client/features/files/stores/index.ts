@@ -13,4 +13,4 @@ export {
   useViewerStore,
   type ViewerMode,
 } from "@/features/files/stores/viewerStore";
-export { useWorkspaceStore } from "@/features/files/stores/workspaceStore";
+// workspaceStore 已移除 - recentWorkspaces 功能未使用
