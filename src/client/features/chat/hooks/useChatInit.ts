@@ -15,7 +15,6 @@ import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { websocketService } from "@/services/websocket.service";
 import { setupWebSocketListeners } from "../services/api/chatApi";
 import { initChatWorkingDirectory } from "../services/chatWebSocket";
-import { sessionManager } from "../services/sessionManager";
 
 // ===== [ANCHOR:TYPES] =====
 
@@ -55,20 +54,13 @@ export function useChatInit(): { isConnecting: boolean } {
         return;
       }
 
-      // 2. 尝试获取服务器当前状态（reconnect 场景）
-      // 从全局 workspaceStore 获取 workingDir
-      const savedWorkingDir = useWorkspaceStore.getState().workingDir;
-      const currentSessionId = useSessionStore.getState().currentSessionId;
+      // 2. 发送 init 请求，不带参数，让服务器根据当前工作目录决定
+      // 服务器会返回当前 session 状态，客户端不再从 localStorage 恢复 session
+      console.log("[ChatInit] Sending init request to server...");
 
-      console.log("[ChatInit] Saved state from localStorage:", {
-        savedWorkingDir,
-        currentSessionId,
-      });
-
-      // 发送 init 请求，带上当前 sessionId 以便服务器恢复现有 session
       const initResponse = await initChatWorkingDirectory(
-        savedWorkingDir || "/root",
-        currentSessionId || undefined,
+        "/root", // 默认根目录，服务器会根据实际情况返回
+        undefined, // 不传 sessionId，让服务器决定
         5000 // 5秒超时
       ).catch((err) => {
         console.log("[ChatInit] init error or timeout:", err);
@@ -77,14 +69,14 @@ export function useChatInit(): { isConnecting: boolean } {
 
       // 3. 如果服务器返回 active session，恢复 UI
       if (initResponse?.sessionId && initResponse?.sessionFile && initResponse?.cwd) {
-        console.log("[ChatInit] 服务器已有 session，恢复 UI:", {
+        console.log("[ChatInit] 服务器返回 session，同步 UI:", {
           sessionId: initResponse.sessionId,
           cwd: initResponse.cwd,
         });
 
-        // 更新所有 store 状态
-        useSessionStore.getState().setCurrentSession(initResponse.sessionId);
-        // 同时更新全局 workspaceStore 的 workingDir
+        // 更新所有 store 状态（以服务器返回的为准）
+        useSessionStore.getState().setCurrentSession(initResponse.sessionFile);
+        // 更新全局 workspaceStore 的 workingDir
         useWorkspaceStore.getState().setWorkingDir(initResponse.cwd);
         useSidebarStore.getState().setWorkingDir(initResponse.cwd);
         useSessionStore.getState().setIsConnected(true);
@@ -106,29 +98,15 @@ export function useChatInit(): { isConnecting: boolean } {
           console.warn("[ChatInit] 加载 session 消息失败:", e);
         }
 
-        // 加载 sessions 列表
-        try {
-          const sessions = await sessionManager.loadSessionsList(initResponse.cwd);
-          useSidebarStore.getState().setSessions(sessions);
-        } catch (e) {
-          console.warn("[ChatInit] 加载 sessions 列表失败:", e);
-        }
-
         // 选中当前 session
         useSidebarStore.getState().setSelectedSessionId(initResponse.sessionFile);
       }
-      // 4. 如果没有 active session，但有保存的工作目录，恢复它
-      else if (savedWorkingDir && !currentSessionId) {
-        console.log("[ChatInit] 恢复上次工作目录:", savedWorkingDir);
-        await sessionManager.switchDirectory(savedWorkingDir, {
-          clearSessions: true,
-          loadSessions: true,
-          restoreLastSession: true,
-        });
-      }
-      // 5. 如果已有 currentSessionId，只需确保连接状态
-      else if (currentSessionId) {
-        console.log("[ChatInit] 已有 active session，更新连接状态");
+      // 4. 服务器没有 active session，使用默认工作目录
+      else {
+        console.log("[ChatInit] 服务器没有 active session，使用默认配置");
+        useWorkspaceStore.getState().setWorkingDir("/root");
+        useSidebarStore.getState().setWorkingDir("/root");
+        useSessionStore.getState().setWorkingDir("/root");
         useSessionStore.getState().setIsConnected(true);
       }
     } catch (err) {

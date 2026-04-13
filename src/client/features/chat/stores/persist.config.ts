@@ -30,10 +30,11 @@ export const CHAT_STORAGE_VERSION = {
  * 注意：workingDir 已从全局 workspaceStore 管理，不再在此处持久化
  */
 export const CHAT_SESSION_PERSIST = [
-  "currentSessionId",
+  // "currentSessionId", // 不再持久化，从服务器获取
   // "workingDir", // 已由全局 workspaceStore 管理
   "currentModel",
   "thinkingLevel",
+  "availableModels", // 缓存的模型列表
 ] as const;
 
 /** Chat Sidebar Store - 持久化字段 */

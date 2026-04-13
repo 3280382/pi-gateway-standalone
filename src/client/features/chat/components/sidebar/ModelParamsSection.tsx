@@ -21,26 +21,33 @@ export function ModelParamsSection() {
   // ========== 1. State ==========
   const currentModel = useSessionStore((state) => state.currentModel);
   const thinkingLevel = useSessionStore((state) => state.thinkingLevel);
-  const [models, setModels] = useState<ModelInfo[]>([]);
+  const availableModels = useSessionStore((state) => state.availableModels);
+  const setAvailableModels = useSessionStore((state) => state.setAvailableModels);
   const [isLoading, setIsLoading] = useState(false);
   const chatController = useChatController();
 
   // ========== 2. Effects ==========
+  // 使用 localStorage 缓存的模型列表，只在列表为空时从服务器加载
   useEffect(() => {
     let mounted = true;
 
     const loadModels = async () => {
+      // 如果 localStorage 已有模型列表，直接使用
+      if (availableModels.length > 0) {
+        console.log("[ModelParamsSection] Using cached models from localStorage:", availableModels.length);
+        return;
+      }
+
       if (!mounted) return;
       setIsLoading(true);
       try {
         const result = await chatController.listModels();
         console.log(
-          "[ModelParamsSection] Models loaded:",
-          result?.models?.length,
-          result?.models?.[0]
+          "[ModelParamsSection] Models loaded from server:",
+          result?.models?.length
         );
         if (mounted && result?.models) {
-          setModels(result.models);
+          setAvailableModels(result.models);
         }
       } catch (error) {
         console.error("[ModelParamsSection] Failed to load models:", error);
@@ -59,6 +66,9 @@ export function ModelParamsSection() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 只执行一次
 
+  // 使用 localStorage 缓存的模型列表
+  const models = availableModels;
+
   // Migrate old format model ID to new format
   const migratedCurrentModel = currentModel?.includes("/")
     ? currentModel
@@ -73,6 +83,7 @@ export function ModelParamsSection() {
     validModelValue,
     modelsCount: models.length,
     firstModelId: models[0]?.id,
+    source: availableModels.length > 0 ? "localStorage" : "server",
   });
 
   // ========== 3. Actions ==========
