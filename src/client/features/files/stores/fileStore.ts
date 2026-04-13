@@ -56,6 +56,7 @@ export interface FileState {
   // Todo 模式状态
   isTodoModeActive: boolean;
   todoInputFile: { path: string; name: string } | null;
+  editingTodo: TodoItem | null; // 当前正在编辑的 todo
 
   // TreeView 过滤状态
   treeFilterMode: "normal" | "all" | "search";
@@ -107,6 +108,7 @@ export interface FileActions {
   toggleTodoMode: () => void;
   setTodoModeActive: (active: boolean) => void;
   setTodoInputFile: (file: { path: string; name: string } | null) => void;
+  setEditingTodo: (todo: TodoItem | null) => void;
 
   // TreeView 过滤操作
   setTreeFilterMode: (mode: "normal" | "all" | "search") => void;
@@ -158,6 +160,7 @@ export const useFileStore = create<FileState & FileActions>()(
         // Todo 模式状态
         isTodoModeActive: false,
         todoInputFile: null,
+        editingTodo: null,
 
         // TreeView 过滤状态 - 默认排除隐藏
         treeFilterMode: "normal",
@@ -265,6 +268,7 @@ export const useFileStore = create<FileState & FileActions>()(
         toggleTodoMode: () => set((state) => ({ isTodoModeActive: !state.isTodoModeActive })),
         setTodoModeActive: (active: boolean) => set({ isTodoModeActive: active }),
         setTodoInputFile: (file) => set({ todoInputFile: file }),
+        setEditingTodo: (todo) => set({ editingTodo: todo }),
 
         // TreeView 过滤操作
         setTreeFilterMode: (mode) => set({ treeFilterMode: mode }),

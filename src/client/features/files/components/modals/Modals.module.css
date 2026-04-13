@@ -400,3 +400,88 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ===== Tag Input Styles ===== */
+.tagSection {
+  margin-top: 12px;
+}
+
+.tagInputRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tagInput {
+  flex: 1;
+  padding: 8px 12px;
+  background: #0d0e15;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #cdd6f4;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.tagInput:focus {
+  border-color: #f9e2af;
+}
+
+.tagAddBtn {
+  padding: 8px 14px;
+  font-size: 12px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(249, 226, 175, 0.15);
+  color: #f9e2af;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tagAddBtn:hover:not(:disabled) {
+  background: rgba(249, 226, 175, 0.25);
+}
+
+.tagAddBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tagItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.tagRemoveBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  margin-left: 4px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tagRemoveBtn:hover {
+  background: rgba(0, 0, 0, 0.5);
+}

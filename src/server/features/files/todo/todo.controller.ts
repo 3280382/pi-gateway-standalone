@@ -410,3 +410,99 @@ export async function getByFile(req: Request, res: Response): Promise<void> {
     });
   }
 }
+
+/**
+ * 更新 todo 项 - 对应 /api/files/todo/update
+ */
+export async function update(req: Request, res: Response): Promise<void> {
+  const { workingDir, todoId, todoText, tags, assignee, dueDate } = req.body as {
+    workingDir: string;
+    todoId: number;
+    todoText: string;
+    tags?: string[];
+    assignee?: string;
+    dueDate?: string;
+  };
+
+  if (!workingDir || todoId === undefined || !todoText) {
+    res.status(400).json({
+      error: "Missing required parameters",
+      details: {
+        workingDir: !!workingDir,
+        todoId: todoId !== undefined,
+        todoText: !!todoText,
+      },
+    });
+    return;
+  }
+
+  try {
+    const todoFilePath = `${workingDir}/${TODO_FILE}`;
+    let content = await readFile(todoFilePath, "utf-8").catch(() => "");
+
+    if (!content) {
+      res.status(404).json({ error: "Todo file not found" });
+      return;
+    }
+
+    // 解析所有 todos 找到要更新的行
+    const lines = content.split("\n");
+    let currentId = 0;
+    let targetLineIndex = -1;
+    let currentFilePath = "";
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      // 检测文件路径标题
+      const pathMatch = line.match(/^### \[(.+)\]$/);
+      if (pathMatch) {
+        currentFilePath = pathMatch[1];
+        continue;
+      }
+
+      // 解析todo行
+      const todoMatch = line.match(/^- \[([ x])\] (.+)$/);
+      if (todoMatch) {
+        if (currentId === todoId) {
+          targetLineIndex = i;
+          break;
+        }
+        currentId++;
+      }
+    }
+
+    if (targetLineIndex === -1) {
+      res.status(404).json({ error: "Todo not found" });
+      return;
+    }
+
+    // 保留原来的 checked 状态
+    const originalMatch = lines[targetLineIndex].match(/^- \[([ x])\] /);
+    const checked = originalMatch ? originalMatch[1] === "x" : false;
+
+    // 构建更新后的 todo
+    const updatedTodo: TodoItem = {
+      id: todoId,
+      checked,
+      filePath: currentFilePath,
+      text: todoText,
+      tags: tags || [],
+      assignee,
+      dueDate,
+      raw: "",
+    };
+
+    lines[targetLineIndex] = generateTodoLine(updatedTodo);
+
+    await writeFile(todoFilePath, lines.join("\n"), "utf-8");
+
+    console.log(`[TodoController] Updated todo ${todoId}: ${todoText}`);
+    res.json({ success: true, message: "Todo updated" });
+  } catch (error: any) {
+    console.error(`[TodoController] Error updating todo: ${error.message}`);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "Failed to update todo",
+    });
+  }
+}

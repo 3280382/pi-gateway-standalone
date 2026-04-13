@@ -66,6 +66,25 @@ export async function toggle(workingDir: string, todoId: number): Promise<void> 
   });
 }
 
+export interface UpdateTodoParams {
+  workingDir: string;
+  todoId: number;
+  todoText: string;
+  tags?: string[];
+  assignee?: string;
+  dueDate?: string;
+}
+
+/**
+ * 更新 todo 项
+ */
+export async function update(params: UpdateTodoParams): Promise<void> {
+  await fetchApi("/files/todo/update", {
+    method: "POST",
+    body: JSON.stringify(params),
+  });
+}
+
 /**
  * 获取优先级颜色
  */

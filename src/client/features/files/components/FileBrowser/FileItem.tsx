@@ -80,12 +80,13 @@ export const FileItem = memo<FileItemProps>(
         }[item.gitStatus]
       : null;
 
-    // Todo状态
-    const { isTodoModeActive, todoMap } = useFileStore();
+    // Todo状态 - 始终显示，不限于 Todo 模式
+    const { todoMap } = useFileStore();
     const todos = todoMap.get(item.path) || [];
     const pendingTodos = todos.filter(t => !t.checked);
     const hasTodos = todos.length > 0;
-    const todoPriorityColor = pendingTodos.length > 0 
+    const hasPendingTodos = pendingTodos.length > 0;
+    const todoPriorityColor = hasPendingTodos 
       ? todoApi.getPriorityColor(pendingTodos[0].tags)
       : "#8b949e";
 
@@ -192,14 +193,20 @@ export const FileItem = memo<FileItemProps>(
         {/* Name */}
         <span className={isGrid ? styles.gridName : styles.listName}>
           {item.name}
-          {/* Todo角标 */}
-          {isTodoModeActive && hasTodos && (
+          {/* Todo角标 - 始终显示，有 todo 时显示 */}
+          {hasTodos && (
             <span
               className={styles.todoBadge}
-              style={{ color: todoPriorityColor }}
+              style={{ 
+                color: todoPriorityColor,
+                backgroundColor: hasPendingTodos ? `${todoPriorityColor}20` : 'transparent',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                fontWeight: hasPendingTodos ? 'bold' : 'normal'
+              }}
               title={pendingTodos.map(t => t.text).join("\n")}
             >
-              {pendingTodos.length > 0 ? `○${pendingTodos.length}` : `✓${todos.length}`}
+              {hasPendingTodos ? `○${pendingTodos.length}` : `✓${todos.length}`}
             </span>
           )}
         </span>
