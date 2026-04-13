@@ -2,14 +2,12 @@
  * useTreeView - 树形视图数据获取 Hook
  *
  * 职责：为TreeView组件提供全量静态树形数据
- * 一次性加载完整目录树，非异步按需加载
- * 过滤状态从FileStore读取
+ * 服务端过滤（normal模式），客户端搜索过滤
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as fileApi from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
-import { useWorkspaceStore } from "@/stores/workspaceStore";
 import type { TreeNode } from "@/features/files/types";
 
 export interface UseTreeViewOptions {
@@ -28,69 +26,13 @@ export interface UseTreeViewResult {
   refresh: () => Promise<void>;
 }
 
-const DEFAULT_EXCLUDES = [
-  "node_modules",
-  "__pycache__",
-  ".git",
-  ".svn",
-  ".hg",
-  "dist",
-  "build",
-  ".next",
-  ".nuxt",
-  "coverage",
-  ".coverage",
-  ".idea",
-  ".vscode",
-];
+/** 客户端搜索过滤（服务端已完成排除项过滤） */
+function filterTreeNodes(items: TreeNode[], search: string): TreeNode[] {
+  if (!search) return items;
 
-/** 过滤树节点
- * 注意：如果父文件夹被排除，其所有子文件/文件夹也应被排除
- */
-function filterTreeNodes(
-  items: TreeNode[],
-  mode: "normal" | "all" | "search",
-  search: string
-): TreeNode[] {
-  if (mode === "all" && !search) return items;
-
-  const result: TreeNode[] = [];
-  // 跟踪被排除的父路径
-  const excludedParents: string[] = [];
-
-  for (const item of items) {
-    // 检查是否在被排除的父目录下
-    const isUnderExcludedParent = excludedParents.some(
-      (excludedPath) => item.path.startsWith(excludedPath + "/") || item.path === excludedPath
-    );
-    if (isUnderExcludedParent) {
-      continue; // 跳过此项目（它在被排除的目录下）
-    }
-
-    // 搜索模式
-    if (search) {
-      if (item.name.toLowerCase().includes(search.toLowerCase())) {
-        result.push(item);
-      }
-      continue;
-    }
-
-    // 正常模式 - 排除隐藏文件和默认排除项
-    if (mode === "normal") {
-      const shouldExclude = item.name.startsWith(".") || DEFAULT_EXCLUDES.includes(item.name);
-      if (shouldExclude) {
-        // 如果是目录，记录为被排除的父路径
-        if (item.isDirectory) {
-          excludedParents.push(item.path);
-        }
-        continue; // 跳过此项目
-      }
-    }
-
-    result.push(item);
-  }
-
-  return result;
+  return items.filter((item) => {
+    return item.name.toLowerCase().includes(search.toLowerCase());
+  });
 }
 
 export function useTreeView(options: UseTreeViewOptions = {}): UseTreeViewResult {
@@ -102,22 +44,25 @@ export function useTreeView(options: UseTreeViewOptions = {}): UseTreeViewResult
   const { currentBrowsePath, treeFilterMode, treeFilterText } = useFileStore();
 
   const lastPathRef = useRef<string>(currentBrowsePath || "");
+  const lastFilterRef = useRef<string>("all");
 
-  // 加载全量树数据（一次性静态加载）
-  const refresh = useCallback(async (pathToLoad: string) => {
+  // 加载树数据（一次性静态加载，服务端过滤）
+  const refresh = useCallback(async (pathToLoad: string, filter: "all" | "normal") => {
     if (!pathToLoad) return;
 
-    // 使用 ref 防止重复加载相同路径
-    if (pathToLoad === lastPathRef.current) return;
+    // 使用 ref 防止重复加载相同路径和过滤条件
+    if (pathToLoad === lastPathRef.current && filter === lastFilterRef.current) return;
 
     // 立即更新 ref，防止并发请求
     lastPathRef.current = pathToLoad;
+    lastFilterRef.current = filter;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fileApi.tree(pathToLoad);
+      // 传递 filter 参数给服务端，在服务端进行过滤
+      const response = await fileApi.tree(pathToLoad, filter);
       setRawTreeData(response.items);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to load tree";
@@ -125,30 +70,33 @@ export function useTreeView(options: UseTreeViewOptions = {}): UseTreeViewResult
       console.error("[useTreeView] Error:", err);
       // 出错时重置 ref，允许重试
       lastPathRef.current = "";
+      lastFilterRef.current = "all";
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // 当浏览路径变化时自动刷新（仅在激活状态下）
+  // 当浏览路径或过滤模式变化时自动刷新（仅在激活状态下）
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!isActive || !currentBrowsePath) {
       return;
     }
-    refresh(currentBrowsePath);
-  }, [isActive, currentBrowsePath]);
+    // 根据 treeFilterMode 决定 filter 参数
+    const filter = treeFilterMode === "normal" ? "normal" : "all";
+    refresh(currentBrowsePath, filter);
+  }, [isActive, currentBrowsePath, treeFilterMode]);
 
-  // 应用过滤
+  // 应用客户端搜索过滤（服务端已完成排除项过滤）
   const treeData = useMemo(() => {
-    return filterTreeNodes(rawTreeData, treeFilterMode, treeFilterText);
-  }, [rawTreeData, treeFilterMode, treeFilterText]);
+    return filterTreeNodes(rawTreeData, treeFilterText);
+  }, [rawTreeData, treeFilterText]);
 
   return {
     treeData,
     browsePath: currentBrowsePath,
     isLoading,
     error,
-    refresh: () => refresh(currentBrowsePath),
+    refresh: () => refresh(currentBrowsePath, treeFilterMode === "normal" ? "normal" : "all"),
   };
 }

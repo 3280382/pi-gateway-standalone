@@ -29,8 +29,11 @@ export async function browse(path: string): Promise<BrowseResponse> {
 }
 
 // 获取文件树
-export async function tree(path: string): Promise<TreeResponse> {
-  const response = await fetch(`/api/files/file/tree?path=${encodeURIComponent(path)}`);
+// filter: "all" - 返回所有文件, "normal" - 排除隐藏文件和默认排除项
+export async function tree(path: string, filter: "all" | "normal" = "all"): Promise<TreeResponse> {
+  const response = await fetch(
+    `/api/files/file/tree?path=${encodeURIComponent(path)}&filter=${filter}`
+  );
 
   if (!response.ok) {
     throw new Error(`Failed to load file tree: ${response.statusText}`);
@@ -66,7 +69,7 @@ export async function tree(path: string): Promise<TreeResponse> {
 
       items.push({
         name: node.name,
-        path: fullPath,  // 使用完整绝对路径
+        path: fullPath, // 使用完整绝对路径
         isDirectory: node.isDirectory,
         // 新增计算字段
         level: depth - 1, // level 从 0 开始（相对于根的直接子节点）

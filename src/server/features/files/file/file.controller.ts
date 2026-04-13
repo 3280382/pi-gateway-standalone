@@ -97,6 +97,7 @@ export async function browse(req: Request, res: Response) {
  */
 export async function tree(req: Request, res: Response) {
   const rawPath = req.query.path as string;
+  const filterMode = (req.query.filter as string) || "all"; // "all" | "normal"
 
   if (!rawPath) {
     res.status(400).json({ error: "path参数必填" });
@@ -109,6 +110,23 @@ export async function tree(req: Request, res: Response) {
     res.status(403).json({ error: "访问被拒绝" });
     return;
   }
+
+  // 默认排除的目录和文件
+  const DEFAULT_EXCLUDES = [
+    "node_modules",
+    "__pycache__",
+    ".git",
+    ".svn",
+    ".hg",
+    "dist",
+    "build",
+    ".next",
+    ".nuxt",
+    "coverage",
+    ".coverage",
+    ".idea",
+    ".vscode",
+  ];
 
   try {
     const { stat, readdir } = await import("node:fs/promises");
@@ -138,6 +156,14 @@ export async function tree(req: Request, res: Response) {
 
       for (const entry of entries) {
         const fullPath = path.join(dirPath, entry.name);
+
+        // 服务端过滤：排除隐藏文件和默认排除项
+        if (filterMode === "normal") {
+          if (entry.name.startsWith(".") || DEFAULT_EXCLUDES.includes(entry.name)) {
+            continue;
+          }
+        }
+
         const childStats = await stat(fullPath).catch(() => null);
 
         if (!childStats) continue;
@@ -168,7 +194,7 @@ export async function tree(req: Request, res: Response) {
     };
 
     const tree = await buildTree(targetPath, 0);
-    logger.info(`获取目录树: ${targetPath}`);
+    logger.info(`获取目录树: ${targetPath}, filter: ${filterMode}`);
     res.json(tree);
   } catch (error) {
     logger.error(`获取目录树错误: ${error instanceof Error ? error.message : String(error)}`, {
