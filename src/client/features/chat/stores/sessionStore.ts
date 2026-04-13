@@ -102,6 +102,9 @@ interface ChatSessionActions {
   // 工作目录
   setWorkingDir: (dir: string) => void;
 
+  // 当前会话（用于 UI 显示当前选中的 session）
+  setCurrentSession: (id: string | null) => void;
+
   // 模型设置
   setCurrentModel: (model: string | null) => void;
   setThinkingLevel: (level: ThinkingLevel) => void;
@@ -120,6 +123,7 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
     (set) => ({
         // 初始状态
         workingDir: "/root",
+        currentSessionId: null,
         currentModel: null,
         thinkingLevel: "off",
         availableModels: [],
@@ -131,6 +135,9 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
         // 注意：此方法仅更新本地状态，全局 workspaceStore 的同步由调用方负责
         // 或通过全局 workspaceStore.setWorkingDir 触发反向同步
         setWorkingDir: (dir) => set({ workingDir: dir }),
+
+        // 当前会话
+        setCurrentSession: (id) => set({ currentSessionId: id }),
 
         // 模型设置
         setCurrentModel: (model) => set({ currentModel: model }),
