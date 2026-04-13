@@ -13,6 +13,7 @@ import { readFile } from "node:fs/promises";
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
 import { serverSessionManager } from "../../agent-session/session-manager";
 import { SessionManager } from "@mariozechner/pi-coding-agent";
+import { getLocalSessionsDir } from "../../agent-session/utils";
 import type { WSContext } from "../../ws-router";
 
 const logger = new Logger({ level: LogLevel.INFO });
@@ -28,11 +29,11 @@ async function getAllSessions(workingDir: string): Promise<Array<{
   lastModified: string;
 }>> {
   try {
-    // 使用全局的 sessions 目录 /root/.pi/agent/sessions/
-    const globalSessionsDir = "/root/.pi/agent/sessions";
-    const sessions = await SessionManager.list(workingDir, globalSessionsDir);
+    // 使用 getLocalSessionsDir 获取编码后的目录路径
+    const localSessionsDir = getLocalSessionsDir(workingDir);
+    const sessions = await SessionManager.list(workingDir, localSessionsDir);
     
-    logger.info(`[ChangeDir] Found ${sessions.length} sessions for ${workingDir}`);
+    logger.info(`[ChangeDir] Found ${sessions.length} sessions for ${workingDir} in ${localSessionsDir}`);
     
     return sessions.map(s => ({
       id: s.path,
