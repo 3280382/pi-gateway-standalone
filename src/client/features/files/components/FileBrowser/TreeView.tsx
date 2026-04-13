@@ -13,8 +13,6 @@ import styles from "./TreeView.module.css";
 
 interface TreeViewProps {
   items: TreeNode[];
-  filterMode?: "normal" | "all" | "search";
-  searchText?: string;
 }
 
 /** 转义正则表达式特殊字符 */
@@ -63,10 +61,15 @@ function getFileIcon(name: string, isDirectory: boolean): string {
 }
 
 export const TreeView = memo<TreeViewProps>(
-  ({ items, filterMode = "normal", searchText = "" }) => {
+  ({ items }) => {
     // ========== 1. Hooks ==========
     const { selectedItems, getItemHandlers } = useFileItemActions();
-    const { isGitModeActive, isTodoModeActive, setTodoInputFile } = useFileStore();
+    const { 
+      isGitModeActive, 
+      isTodoModeActive, 
+      setTodoInputFile,
+      treeFilterText 
+    } = useFileStore();
 
     // ========== 2. Actions ==========
     const handleFileClick = useCallback(
@@ -102,11 +105,11 @@ export const TreeView = memo<TreeViewProps>(
 
               // 搜索高亮
               let displayName: React.ReactNode = node.name;
-              if (searchText) {
-                const escaped = escapeRegExp(searchText);
+              if (treeFilterText) {
+                const escaped = escapeRegExp(treeFilterText);
                 const parts = node.name.split(new RegExp(`(${escaped})`, "gi"));
                 displayName = parts.map((p, i) =>
-                  p.toLowerCase() === searchText.toLowerCase() ? (
+                  p.toLowerCase() === treeFilterText.toLowerCase() ? (
                     <mark key={i} className={styles.highlight}>
                       {p}
                     </mark>

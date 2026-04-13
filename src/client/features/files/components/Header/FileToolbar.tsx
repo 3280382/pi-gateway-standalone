@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import styles from "@/features/files/components/FileBrowser/FileBrowser.module.css";
 import { type FilterType, type SortMode, useFileStore } from "@/features/files/stores/fileStore";
 
-// 过滤选项定义
+// Grid/List 过滤选项定义
 const FILTER_OPTIONS: { value: FilterType; icon: string; label: string }[] = [
   { value: "all", icon: "📁", label: "All Files" },
   { value: "dir", icon: "📂", label: "Directories" },
@@ -16,6 +16,13 @@ const FILTER_OPTIONS: { value: FilterType; icon: string; label: string }[] = [
   { value: "md", icon: "📝", label: "Markdown" },
   { value: "image", icon: "🖼️", label: "Images" },
   { value: "code", icon: "💻", label: "All Code" },
+];
+
+// TreeView 过滤选项定义
+const TREE_FILTER_OPTIONS: { value: "normal" | "all" | "search"; icon: string; label: string }[] = [
+  { value: "normal", icon: "🙈", label: "Exclude Hidden" },
+  { value: "all", icon: "👁️", label: "Show All" },
+  { value: "search", icon: "🔍", label: "Search..." },
 ];
 
 // 排序选项定义
@@ -37,8 +44,19 @@ interface FileToolbarProps {
 
 export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarProps) {
   // ========== 1. State ==========
-  const { sortMode, filterType, filterText, setSortMode, setFilterType, setFilterText } =
-    useFileStore();
+  const { 
+    viewMode,
+    sortMode, 
+    filterType, 
+    filterText, 
+    treeFilterMode,
+    treeFilterText,
+    setSortMode, 
+    setFilterType, 
+    setFilterText,
+    setTreeFilterMode,
+    setTreeFilterText,
+  } = useFileStore();
 
   // UI状态
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
@@ -64,20 +82,35 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
   }, []);
 
   // ========== 4. Computed ==========
+  // 判断是否是TreeView模式
+  const isTreeView = viewMode === "tree";
+  
   // 获取当前选中的选项
-  const selectedFilterOption =
-    FILTER_OPTIONS.find((opt) => opt.value === filterType) || FILTER_OPTIONS[0];
+  const selectedFilterOption = isTreeView
+    ? TREE_FILTER_OPTIONS.find((opt) => opt.value === treeFilterMode) || TREE_FILTER_OPTIONS[0]
+    : FILTER_OPTIONS.find((opt) => opt.value === filterType) || FILTER_OPTIONS[0];
 
   // ========== 5. Actions ==========
   // 处理输入框变化
   const handleFilterInputChange = (value: string) => {
-    const option = FILTER_OPTIONS.find((opt) => opt.label.toLowerCase() === value.toLowerCase());
-    if (option) {
-      setFilterType(option.value);
-      setFilterText("");
+    if (isTreeView) {
+      // TreeView模式：搜索文本
+      setTreeFilterText(value);
+      if (value) {
+        setTreeFilterMode("search");
+      } else {
+        setTreeFilterMode("normal");
+      }
     } else {
-      setFilterType("custom");
-      setFilterText(value);
+      // Grid/List模式
+      const option = FILTER_OPTIONS.find((opt) => opt.label.toLowerCase() === value.toLowerCase());
+      if (option) {
+        setFilterType(option.value);
+        setFilterText("");
+      } else {
+        setFilterType("custom");
+        setFilterText(value);
+      }
     }
   };
 
@@ -97,8 +130,8 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
           <input
             type="text"
             className={styles.filterComboInput}
-            placeholder="Filter..."
-            value={filterType === "custom" ? filterText : selectedFilterOption.label}
+            placeholder={isTreeView ? "Search..." : "Filter..."}
+            value={isTreeView ? treeFilterText : (filterType === "custom" ? filterText : selectedFilterOption.label)}
             onChange={(e) => handleFilterInputChange(e.target.value)}
             onClick={() => setIsFilterDropdownOpen(true)}
           />
@@ -111,22 +144,43 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
           </button>
           {isFilterDropdownOpen && (
             <div className={styles.filterDropdown}>
-              {FILTER_OPTIONS.map((option) => (
-                <div
-                  key={option.value}
-                  className={`${styles.filterDropdownItem} ${filterType === option.value ? styles.active : ""}`}
-                  onClick={() => {
-                    setFilterType(option.value);
-                    if (option.value !== "custom") {
-                      setFilterText("");
-                    }
-                    setIsFilterDropdownOpen(false);
-                  }}
-                >
-                  <span className={styles.filterIcon}>{option.icon}</span>
-                  <span className={styles.filterLabel}>{option.label}</span>
-                </div>
-              ))}
+              {isTreeView ? (
+                // TreeView 过滤选项
+                TREE_FILTER_OPTIONS.map((option) => (
+                  <div
+                    key={option.value}
+                    className={`${styles.filterDropdownItem} ${treeFilterMode === option.value ? styles.active : ""}`}
+                    onClick={() => {
+                      setTreeFilterMode(option.value);
+                      if (option.value !== "search") {
+                        setTreeFilterText("");
+                      }
+                      setIsFilterDropdownOpen(false);
+                    }}
+                  >
+                    <span className={styles.filterIcon}>{option.icon}</span>
+                    <span className={styles.filterLabel}>{option.label}</span>
+                  </div>
+                ))
+              ) : (
+                // Grid/List 过滤选项
+                FILTER_OPTIONS.map((option) => (
+                  <div
+                    key={option.value}
+                    className={`${styles.filterDropdownItem} ${filterType === option.value ? styles.active : ""}`}
+                    onClick={() => {
+                      setFilterType(option.value);
+                      if (option.value !== "custom") {
+                        setFilterText("");
+                      }
+                      setIsFilterDropdownOpen(false);
+                    }}
+                  >
+                    <span className={styles.filterIcon}>{option.icon}</span>
+                    <span className={styles.filterLabel}>{option.label}</span>
+                  </div>
+                ))
+              )}
             </div>
           )}
         </div>

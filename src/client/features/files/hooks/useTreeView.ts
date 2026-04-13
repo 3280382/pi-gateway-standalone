@@ -3,25 +3,18 @@
  *
  * 职责：为TreeView组件提供全量静态树形数据
  * 一次性加载完整目录树，非异步按需加载
+ * 过滤状态从FileStore读取
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import * as fileApi from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import type { TreeNode } from "@/features/files/types";
-
-export type FilterMode = "normal" | "all" | "search";
 
 export interface UseTreeViewResult {
   // 数据
   treeData: TreeNode[];
   workingDir: string;
-  
-  // 过滤
-  filterMode: FilterMode;
-  searchText: string;
-  setFilterMode: (mode: FilterMode) => void;
-  setSearchText: (text: string) => void;
   
   // 加载状态
   isLoading: boolean;
@@ -48,7 +41,7 @@ const DEFAULT_EXCLUDES = [
 /** 过滤树节点 */
 function filterTreeNodes(
   items: TreeNode[],
-  mode: FilterMode,
+  mode: "normal" | "all" | "search",
   search: string
 ): TreeNode[] {
   if (mode === "all" && !search) return items;
@@ -74,9 +67,7 @@ export function useTreeView(): UseTreeViewResult {
   const [rawTreeData, setRawTreeData] = useState<TreeNode[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filterMode, setFilterMode] = useState<FilterMode>("normal");
-  const [searchText, setSearchText] = useState("");
-  const { workingDir, items } = useFileStore();
+  const { workingDir, treeFilterMode, treeFilterText } = useFileStore();
 
   // 加载全量树数据（一次性静态加载）
   const refresh = useCallback(async () => {
@@ -104,15 +95,13 @@ export function useTreeView(): UseTreeViewResult {
   }, [refresh]);
 
   // 应用过滤
-  const treeData = filterTreeNodes(rawTreeData, filterMode, searchText);
+  const treeData = useMemo(() => {
+    return filterTreeNodes(rawTreeData, treeFilterMode, treeFilterText);
+  }, [rawTreeData, treeFilterMode, treeFilterText]);
 
   return {
     treeData,
     workingDir,
-    filterMode,
-    searchText,
-    setFilterMode,
-    setSearchText,
     isLoading,
     error,
     refresh,

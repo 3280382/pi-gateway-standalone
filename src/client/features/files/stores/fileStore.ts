@@ -54,6 +54,10 @@ export interface FileState {
   // Todo 模式状态
   isTodoModeActive: boolean;
   todoInputFile: { path: string; name: string } | null;
+
+  // TreeView 过滤状态
+  treeFilterMode: "normal" | "all" | "search";
+  treeFilterText: string;
 }
 
 export interface FileActions {
@@ -97,6 +101,10 @@ export interface FileActions {
   toggleTodoMode: () => void;
   setTodoModeActive: (active: boolean) => void;
   setTodoInputFile: (file: { path: string; name: string } | null) => void;
+
+  // TreeView 过滤操作
+  setTreeFilterMode: (mode: "normal" | "all" | "search") => void;
+  setTreeFilterText: (text: string) => void;
 }
 
 // ============================================================================
@@ -138,6 +146,10 @@ export const useFileStore = create<FileState & FileActions>()(
         // Todo 模式状态
         isTodoModeActive: false,
         todoInputFile: null,
+
+        // TreeView 过滤状态 - 默认排除隐藏
+        treeFilterMode: "normal",
+        treeFilterText: "",
 
         // 基本设置方法
         setWorkingDir: (path) => set({ workingDir: path }),
@@ -237,6 +249,10 @@ export const useFileStore = create<FileState & FileActions>()(
         toggleTodoMode: () => set((state) => ({ isTodoModeActive: !state.isTodoModeActive })),
         setTodoModeActive: (active: boolean) => set({ isTodoModeActive: active }),
         setTodoInputFile: (file) => set({ todoInputFile: file }),
+
+        // TreeView 过滤操作
+        setTreeFilterMode: (mode) => set({ treeFilterMode: mode }),
+        setTreeFilterText: (text) => set({ treeFilterText: text }),
       }),
       {
         name: FILES_STORAGE_KEYS.FILES_BROWSER,

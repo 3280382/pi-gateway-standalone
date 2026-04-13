@@ -48,15 +48,8 @@ export function FileBrowser({
   const { filteredItems } = useFileFiltering();
 
   // ===== [ANCHOR:TREEVIEW] =====
-  // 树形视图数据和过滤状态
-  const {
-    treeData,
-    isLoading: treeLoading,
-    filterMode,
-    searchText,
-    setFilterMode,
-    setSearchText,
-  } = useTreeView();
+  // 树形视图数据（过滤状态从store读取）
+  const { treeData, isLoading: treeLoading } = useTreeView();
 
   // ===== [ANCHOR:RENDER] =====
   return (
@@ -68,32 +61,6 @@ export function FileBrowser({
           <FileBrowserErrorBoundary componentName="File Action Bar">
             <FileActionBar onExecute={onExecuteOutput} onOpenBottomPanel={onOpenBottomPanel} />
           </FileBrowserErrorBoundary>
-
-          {/* TreeView过滤栏（仅在tree视图显示） */}
-          {viewMode === "tree" && (
-            <div className={styles.treeFilterBar}>
-              <select
-                className={styles.filterSelect}
-                value={filterMode}
-                onChange={(e) => {
-                  setFilterMode(e.target.value as "normal" | "all" | "search");
-                  if (e.target.value !== "search") setSearchText("");
-                }}
-              >
-                <option value="normal">隐藏排除</option>
-                <option value="all">显示所有</option>
-                <option value="search">搜索过滤...</option>
-              </select>
-              {filterMode === "search" && (
-                <input
-                  className={styles.searchInput}
-                  placeholder="输入过滤文字..."
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                />
-              )}
-            </div>
-          )}
 
           {/* 文件列表区域 */}
           <div className={styles.contentArea}>
@@ -111,11 +78,7 @@ export function FileBrowser({
               </FileBrowserErrorBoundary>
             ) : (
               <FileBrowserErrorBoundary componentName="Tree View">
-                <TreeView
-                  items={treeData}
-                  filterMode={filterMode}
-                  searchText={searchText}
-                />
+                <TreeView items={treeData} />
               </FileBrowserErrorBoundary>
             )}
           </div>
