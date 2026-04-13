@@ -91,6 +91,7 @@ export interface TreeNode {
   isDirectory: boolean;
   children?: TreeNode[];
   truncated?: boolean;
+  gitStatus?: string; // Git状态
   // 新增计算字段，供前端直接使用
   level?: number; // 层级深度
   isLast?: boolean; // 是否是兄弟节点中的最后一个

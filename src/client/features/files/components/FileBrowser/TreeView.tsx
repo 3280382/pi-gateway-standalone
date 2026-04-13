@@ -6,6 +6,7 @@
 import type React from "react";
 import { memo, useCallback, useMemo, useState } from "react";
 import { useFileItemActions } from "@/features/files/hooks";
+import { useFileStore } from "@/features/files/stores/fileStore";
 import type { TreeNode } from "@/features/files/types";
 import styles from "./TreeView.module.css";
 
@@ -112,6 +113,7 @@ export const TreeView = memo<TreeViewProps>(
       isMultiSelectMode,
       getItemHandlers,
     } = useFileItemActions();
+    const { isGitModeActive, isTodoModeActive, setTodoInputFile } = useFileStore();
 
     // ========== 3. Computed ==========
     const filteredItems = useMemo(() => {
@@ -165,6 +167,20 @@ export const TreeView = memo<TreeViewProps>(
                 );
               }
 
+              // Git状态图标
+              const gitStatusIcon = node.gitStatus
+                ? {
+                    untracked: { symbol: "U", color: "#f97316" },
+                    modified: { symbol: "M", color: "#eab308" },
+                    added: { symbol: "A", color: "#22c55e" },
+                    deleted: { symbol: "D", color: "#ef4444" },
+                    renamed: { symbol: "R", color: "#8b5cf6" },
+                    copied: { symbol: "C", color: "#0ea5e9" },
+                    conflict: { symbol: "!", color: "#dc2626" },
+                    other: { symbol: "?", color: "#ec4899" },
+                  }[node.gitStatus]
+                : null;
+
               return (
                 <div
                   key={node.path}
@@ -205,6 +221,32 @@ export const TreeView = memo<TreeViewProps>(
                   >
                     {displayName}
                   </span>
+
+                  {/* Git状态 */}
+                  {isGitModeActive && gitStatusIcon && (
+                    <span
+                      className={styles.gitBadge}
+                      style={{ backgroundColor: gitStatusIcon.color }}
+                      title={`Git: ${node.gitStatus}`}
+                    >
+                      {gitStatusIcon.symbol}
+                    </span>
+                  )}
+
+                  {/* Todo按钮 */}
+                  {isTodoModeActive && (
+                    <button
+                      type="button"
+                      className={styles.todoBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setTodoInputFile({ path: node.path, name: node.name });
+                      }}
+                      title="Add todo"
+                    >
+                      📝
+                    </button>
+                  )}
                 </div>
               );
             })}
