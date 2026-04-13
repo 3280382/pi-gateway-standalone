@@ -29,9 +29,29 @@ export async function handleInit(
     sessionId?: string;
   }
 ): Promise<void> {
-  // 如果没有提供 workingDir，使用服务器当前工作目录
-  const workingDir = payload.workingDir || process.cwd();
-  const { sessionId } = payload;
+  let { workingDir, sessionId } = payload;
+
+  // 如果没有提供 workingDir，尝试从现有 session 获取，或使用默认目录
+  if (!workingDir) {
+    // 1. 如果提供了 sessionId，尝试找到对应的 session
+    if (sessionId) {
+      const allSessions = serverSessionManager.getAllSessions();
+      const existingSession = allSessions.find(s => 
+        s.workingDir.includes(sessionId) || 
+        serverSessionManager.getSession(s.workingDir)?.session?.session?.sessionId?.startsWith(sessionId)
+      );
+      if (existingSession) {
+        workingDir = existingSession.workingDir;
+        logger.info(`[WebSocket] Found existing session for sessionId=${sessionId}, using workingDir=${workingDir}`);
+      }
+    }
+    
+    // 2. 如果还是没找到，使用服务器当前工作目录
+    if (!workingDir) {
+      workingDir = process.cwd();
+      logger.info(`[WebSocket] No workingDir provided, using default: ${workingDir}`);
+    }
+  }
 
   logger.info(
     `[WebSocket] Received init message: workingDir=${workingDir}, sessionId=${sessionId || "not specified"}`
