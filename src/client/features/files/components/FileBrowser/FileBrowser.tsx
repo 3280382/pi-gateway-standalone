@@ -37,7 +37,7 @@ export function FileBrowser({
   onOpenBottomPanel,
 }: FileBrowserProps) {
   // ===== [ANCHOR:STATE] =====
-  const { viewMode, isLoading, error, workingDir } = useFileStore();
+  const { viewMode, isLoading, error } = useFileStore();
 
   // ===== [ANCHOR:HOOKS] =====
   // 仅在激活状态下获取数据
@@ -48,10 +48,15 @@ export function FileBrowser({
   const { filteredItems } = useFileFiltering();
 
   // ===== [ANCHOR:TREEVIEW] =====
-  // 树形视图数据（仅在tree模式下加载）
-  const { treeData, isLoading: treeLoading } = useTreeView(
-    viewMode === "tree" ? workingDir : ""
-  );
+  // 树形视图数据和过滤状态
+  const {
+    treeData,
+    isLoading: treeLoading,
+    filterMode,
+    searchText,
+    setFilterMode,
+    setSearchText,
+  } = useTreeView();
 
   // ===== [ANCHOR:RENDER] =====
   return (
@@ -64,14 +69,38 @@ export function FileBrowser({
             <FileActionBar onExecute={onExecuteOutput} onOpenBottomPanel={onOpenBottomPanel} />
           </FileBrowserErrorBoundary>
 
+          {/* TreeView过滤栏（仅在tree视图显示） */}
+          {viewMode === "tree" && (
+            <div className={styles.treeFilterBar}>
+              <select
+                className={styles.filterSelect}
+                value={filterMode}
+                onChange={(e) => {
+                  setFilterMode(e.target.value as "normal" | "all" | "search");
+                  if (e.target.value !== "search") setSearchText("");
+                }}
+              >
+                <option value="normal">隐藏排除</option>
+                <option value="all">显示所有</option>
+                <option value="search">搜索过滤...</option>
+              </select>
+              {filterMode === "search" && (
+                <input
+                  className={styles.searchInput}
+                  placeholder="输入过滤文字..."
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                />
+              )}
+            </div>
+          )}
+
           {/* 文件列表区域 */}
           <div className={styles.contentArea}>
-            {isLoading ? (
+            {isLoading || treeLoading ? (
               <div className={styles.loading}>Loading...</div>
             ) : error ? (
               <div className={styles.error}>{error}</div>
-            ) : filteredItems.length === 0 && viewMode !== "tree" ? (
-              <div className={styles.empty}>No files found</div>
             ) : viewMode === "grid" ? (
               <FileBrowserErrorBoundary componentName="File Grid">
                 <FileGrid items={filteredItems} />
@@ -84,8 +113,8 @@ export function FileBrowser({
               <FileBrowserErrorBoundary componentName="Tree View">
                 <TreeView
                   items={treeData}
-                  filterMode="normal"
-                  searchText=""
+                  filterMode={filterMode}
+                  searchText={searchText}
                 />
               </FileBrowserErrorBoundary>
             )}

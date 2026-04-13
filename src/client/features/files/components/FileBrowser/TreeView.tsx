@@ -1,10 +1,11 @@
 /**
  * TreeView - 树形目录浏览组件
  * 作为文件浏览器的一个视图模式（类似grid和list）
+ * 显示紧凑的全量静态树，支持过滤
  */
 
 import type React from "react";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { useFileItemActions } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import type { TreeNode } from "@/features/files/types";
@@ -15,22 +16,6 @@ interface TreeViewProps {
   filterMode?: "normal" | "all" | "search";
   searchText?: string;
 }
-
-const DEFAULT_EXCLUDES = [
-  "node_modules",
-  "__pycache__",
-  ".git",
-  ".svn",
-  ".hg",
-  "dist",
-  "build",
-  ".next",
-  ".nuxt",
-  "coverage",
-  ".coverage",
-  ".idea",
-  ".vscode",
-];
 
 /** 转义正则表达式特殊字符 */
 function escapeRegExp(string: string): string {
@@ -77,79 +62,43 @@ function getFileIcon(name: string, isDirectory: boolean): string {
   return icons[ext] || "📄";
 }
 
-/** 过滤树节点 */
-function filterNodes(
-  items: TreeNode[],
-  mode: "normal" | "all" | "search",
-  search: string
-): TreeNode[] {
-  if (mode === "all" && !search) return items;
-
-  return items.filter((item) => {
-    // 搜索模式
-    if (search) {
-      return item.name.toLowerCase().includes(search.toLowerCase());
-    }
-
-    // 正常模式 - 排除隐藏文件
-    if (mode === "normal") {
-      if (item.name.startsWith(".") || DEFAULT_EXCLUDES.includes(item.name)) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-}
-
 export const TreeView = memo<TreeViewProps>(
   ({ items, filterMode = "normal", searchText = "" }) => {
-    // ========== 1. State ==========
-    const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
-
-    // ========== 2. Hooks ==========
-    const {
-      selectedItems,
-      isMultiSelectMode,
-      getItemHandlers,
-    } = useFileItemActions();
+    // ========== 1. Hooks ==========
+    const { selectedItems, getItemHandlers } = useFileItemActions();
     const { isGitModeActive, isTodoModeActive, setTodoInputFile } = useFileStore();
 
-    // ========== 3. Computed ==========
-    const filteredItems = useMemo(() => {
-      return filterNodes(items, filterMode, searchText);
-    }, [items, filterMode, searchText]);
-
-    // ========== 4. Actions ==========
-    const toggleNode = useCallback((path: string) => {
-      setExpandedNodes((prev) => {
-        const next = new Set(prev);
-        if (next.has(path)) {
-          next.delete(path);
-        } else {
-          next.add(path);
+    // ========== 2. Actions ==========
+    const handleFileClick = useCallback(
+      (node: TreeNode) => {
+        if (!node.isDirectory) {
+          const handlers = getItemHandlers({
+            name: node.name,
+            path: node.path,
+            isDirectory: node.isDirectory,
+            size: 0,
+            modified: "",
+            extension: node.path.split(".").pop(),
+            gitStatus: node.gitStatus,
+          });
+          handlers.onTap();
         }
-        return next;
-      });
-    }, []);
+      },
+      [getItemHandlers]
+    );
 
-    // ========== 5. Render ==========
+    // ========== 3. Render ==========
     return (
       <div className={styles.treeView}>
-        {filteredItems.length === 0 ? (
+        {items.length === 0 ? (
           <div className={styles.empty}>No files found</div>
         ) : (
           <div className={styles.tree}>
-            {filteredItems.map((node) => {
+            {items.map((node) => {
               const icon = getFileIcon(node.name, node.isDirectory);
               const level = node.level || 0;
               const isLast = node.isLast || false;
               const isSelected = selectedItems.includes(node.path);
-              const handlers = getItemHandlers({
-                ...node,
-                size: 0,
-                modified: "",
-              } as any);
 
               // 搜索高亮
               let displayName: React.ReactNode = node.name;
@@ -167,7 +116,7 @@ export const TreeView = memo<TreeViewProps>(
                 );
               }
 
-              // Git状态图标
+              // Git状态
               const gitStatusIcon = node.gitStatus
                 ? {
                     untracked: { symbol: "U", color: "#f97316" },
@@ -184,27 +133,10 @@ export const TreeView = memo<TreeViewProps>(
               return (
                 <div
                   key={node.path}
-                  className={`${styles.node} ${isSelected ? styles.selected : ""} ${
-                    node.isDirectory ? styles.directory : ""
-                  }`}
-                  style={{ paddingLeft: `${level * 24 + 16}px` }}
-                  onClick={() => {
-                    if (node.isDirectory) {
-                      toggleNode(node.path);
-                      handlers.onTap();
-                    } else {
-                      handlers.onTap();
-                    }
-                  }}
-                  onDoubleClick={handlers.onDoubleTap}
+                  className={`${styles.node} ${isSelected ? styles.selected : ""}`}
+                  style={{ paddingLeft: `${level * 16}px` }}
+                  onClick={() => handleFileClick(node)}
                 >
-                  {/* 展开/折叠指示器 */}
-                  {node.isDirectory && (
-                    <span className={styles.expandIcon}>
-                      {expandedNodes.has(node.path) ? "▼" : "▶"}
-                    </span>
-                  )}
-
                   {/* 连接线 */}
                   <span className={styles.connector}>
                     {isLast ? "└── " : "├── "}
@@ -214,11 +146,7 @@ export const TreeView = memo<TreeViewProps>(
                   <span className={styles.icon}>{icon}</span>
 
                   {/* 文件名 */}
-                  <span
-                    className={
-                      node.isDirectory ? styles.dirName : styles.fileName
-                    }
-                  >
+                  <span className={node.isDirectory ? styles.dirName : styles.fileName}>
                     {displayName}
                   </span>
 
@@ -234,7 +162,7 @@ export const TreeView = memo<TreeViewProps>(
                   )}
 
                   {/* Todo按钮 */}
-                  {isTodoModeActive && (
+                  {isTodoModeActive && !node.isDirectory && (
                     <button
                       type="button"
                       className={styles.todoBtn}

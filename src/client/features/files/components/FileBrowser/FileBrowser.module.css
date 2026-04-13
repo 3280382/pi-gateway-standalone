@@ -696,6 +696,56 @@
   cursor: not-allowed;
 }
 
+/* ====== TreeView 过滤栏 ====== */
+.treeFilterBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  height: 38px;
+  min-height: 38px;
+  box-sizing: border-box;
+}
+
+.filterSelect {
+  height: 26px;
+  padding: 0 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  outline: none;
+}
+
+.filterSelect:focus {
+  border-color: var(--accent-blue);
+}
+
+.searchInput {
+  flex: 1;
+  height: 26px;
+  padding: 0 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: var(--font-sm);
+  outline: none;
+}
+
+.searchInput:focus {
+  border-color: var(--accent-blue);
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+}
+
 /* ====== 选中文件操作栏 ====== */
 .actionBar {
   display: flex;
