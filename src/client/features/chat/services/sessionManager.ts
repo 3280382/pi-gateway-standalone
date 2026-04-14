@@ -217,6 +217,14 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
             }));
           } else if (typeof msg.content === "string") {
             contentArray = [{ type: "text", text: msg.content }];
+          } else if (msg.content && typeof msg.content === "object") {
+            // 如果是单个对象，包装成数组
+            contentArray = [{ type: "text", text: JSON.stringify(msg.content) }];
+          }
+          
+          // 确保 content 是数组，防止渲染错误
+          if (!Array.isArray(contentArray) || contentArray.length === 0) {
+            contentArray = [{ type: "text", text: "" }];
           }
           return {
             id: entry.id || msg.id || `${Date.now()}-${Math.random()}`,

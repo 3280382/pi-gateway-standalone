@@ -1,0 +1,1235 @@
+{
+  "totalSessions": 570,
+  "totalMessages": 66856,
+  "toolCalls": {
+    "bash": {
+      "count": 16062,
+      "failures": 0
+    },
+    "read": {
+      "count": 7626,
+      "failures": 0
+    },
+    "write": {
+      "count": 2370,
+      "failures": 0
+    },
+    "edit": {
+      "count": 4942,
+      "failures": 0
+    },
+    "web_admin_start": {
+      "count": 5,
+      "failures": 0
+    },
+    "coordinator": {
+      "count": 28,
+      "failures": 0
+    },
+    "subagent": {
+      "count": 6,
+      "failures": 0
+    },
+    "tavily-search": {
+      "count": 2,
+      "failures": 0
+    }
+  },
+  "bashCommands": {
+    "ls": {
+      "count": 743,
+      "failures": 0,
+      "examples": [
+        "ls -la",
+        "ls -la ~/.pi/ && cat ~/.pi/config.json 2>/dev/null || echo \"No config.json found\"",
+        "ls -la pi-mono/ | head -20"
+      ]
+    },
+    "grep": {
+      "count": 1878,
+      "failures": 0,
+      "examples": [
+        "grep -r \"kimi\" ~/.pi 2>/dev/null | head -20",
+        "grep -r \"PI_\" ~/.bashrc 2>/dev/null | head -20",
+        "grep -r \"context_window\" /data/data/com.termux/files/usr/lib/python3.13/site-packages/aider/ 2>/dev/"
+      ]
+    },
+    "cat": {
+      "count": 282,
+      "failures": 0,
+      "examples": [
+        "cat ~/.pi/agent/settings.json 2>/dev/null || echo \"No settings.json found\"",
+        "cat /tmp/server.log 2>/dev/null && echo \"---\" && ps aux | grep node",
+        "cat /data/data/com.termux/files/home/test.py"
+      ]
+    },
+    "pi": {
+      "count": 29,
+      "failures": 0,
+      "examples": [
+        "pi --version 2>/dev/null || npm list -g @mariozechner/pi-coding-agent 2>/dev/null",
+        "pi --version",
+        "pi /changelog 2>/dev/null || cat /usr/local/lib/node_modules/@mariozechner/pi-coding-agent/CHANGELOG"
+      ]
+    },
+    "npm": {
+      "count": 31,
+      "failures": 0,
+      "examples": [
+        "npm view @mariozechner/pi-coding-agent version 2>/dev/null",
+        "npm install -g @mariozechner/pi-coding-agent@latest 2>&1",
+        "npm install -g typescript 2>&1 | tail -10"
+      ]
+    },
+    "find": {
+      "count": 428,
+      "failures": 0,
+      "examples": [
+        "find / -maxdepth 4 -name \"*proot*\" 2>/dev/null | head -50",
+        "find / -name \"*proot*\" -type f 2>/dev/null | head -20; find / -name \"*proot*\" -type d 2>/dev/null | ",
+        "find /data/data/com.termux/files -name \"android.jar\" 2>/dev/null || echo \"android.jar not found\""
+      ]
+    },
+    "which": {
+      "count": 70,
+      "failures": 0,
+      "examples": [
+        "which proot 2>/dev/null && echo \"---\" && proot --version 2>/dev/null || echo \"proot 未安装或不在 PATH 中\"",
+        "which proot-distro 2>/dev/null && echo \"proot-distro 已安装\" || echo \"proot-distro 也未安装\"",
+        "which tsc 2>/dev/null && tsc --version || echo \"tsc not found\"\necho \"---\"\necho \"Checking node and np"
+      ]
+    },
+    "git": {
+      "count": 46,
+      "failures": 0,
+      "examples": [
+        "git clone https://github.com/badlogic/pi-mono.git",
+        "git clone https://github.com/pi-base/pi-mono.git 2>/dev/null || echo \"尝试克隆失败，尝试其他方式\"",
+        "git clone https://github.com/pi-apps/pi-mono.git 2>/dev/null || echo \"克隆失败\""
+      ]
+    },
+    "cd": {
+      "count": 8957,
+      "failures": 0,
+      "examples": [
+        "cd pi-mono && git log --oneline -5 && echo \"---\" && git remote -v",
+        "cd file-server && node server.js .. &",
+        "cd file-server && timeout 5 node server.js .. 2>&1 || true"
+      ]
+    },
+    "chmod": {
+      "count": 82,
+      "failures": 0,
+      "examples": [
+        "chmod +x file-server/server.js && mkdir -p file-server/public",
+        "chmod +x create_tmp_files.sh",
+        "chmod +x /data/data/com.termux/files/home/create_tmp_file.sh && /data/data/com.termux/files/home/cre"
+      ]
+    },
+    "pkill": {
+      "count": 201,
+      "failures": 0,
+      "examples": [
+        "pkill -f \"node server.js\" 2>/dev/null; sleep 1; cd file-server && node server.js .. &",
+        "pkill -f \"node server.js\" 2>/dev/null\nsleep 1\ncd file-server && nohup node server.js .. > /tmp/serve",
+        "pkill -f \"node server.js\" 2>/dev/null; sleep 1"
+      ]
+    },
+    "sleep": {
+      "count": 278,
+      "failures": 0,
+      "examples": [
+        "sleep 2 && ps aux | grep \"node server.js\" | grep -v grep && echo \"---\" && ss -tlnp | grep 3000 || ne",
+        "sleep 1 && curl -s http://127.0.0.1:3000/ 2>&1 | head -10",
+        "sleep 3 && ps aux | grep ollama | grep -v grep"
+      ]
+    },
+    "curl": {
+      "count": 351,
+      "failures": 0,
+      "examples": [
+        "curl -s http://localhost:3000/ | head -20",
+        "curl -I https://github.com 2>/dev/null | head -1",
+        "curl -s \"https://pypi.org/pypi/openclaw/json\" 2>/dev/null | head -20"
+      ]
+    },
+    "ps": {
+      "count": 178,
+      "failures": 0,
+      "examples": [
+        "ps aux | grep node | grep -v grep",
+        "ps aux | grep \"node server.js\" | grep -v grep || echo \"No server running\"",
+        "ps -ef | head -50"
+      ]
+    },
+    "env": {
+      "count": 12,
+      "failures": 0,
+      "examples": [
+        "env | head -30",
+        "env | grep -i \"api\\|key\\|moonshot\\|kimi\" | head -20",
+        "env | grep -i \"openai\""
+      ]
+    },
+    "#": {
+      "count": 174,
+      "failures": 0,
+      "examples": [
+        "# 演示脚本使用方法\n./create_tmp_files.sh --help",
+        "# 检查并创建 /tmp 目录\nmkdir -p /tmp && chmod 777 /tmp 2>/dev/null || echo \"使用 $PREFIX/tmp 替代\"\nls -ld /tmp ",
+        "# 使用 --help 查看脚本用法\n./create_tmp_files.sh --help"
+      ]
+    },
+    "pwd": {
+      "count": 37,
+      "failures": 0,
+      "examples": [
+        "pwd && ls -la",
+        "pwd && ls -la",
+        "pwd && ls -la"
+      ]
+    },
+    "termux-info": {
+      "count": 3,
+      "failures": 0,
+      "examples": [
+        "termux-info",
+        "termux-info",
+        "termux-info 2>&1 | head -20"
+      ]
+    },
+    "df": {
+      "count": 4,
+      "failures": 0,
+      "examples": [
+        "df -h",
+        "df -h 2>/dev/null || echo \"df not available\"",
+        "df -h"
+      ]
+    },
+    "free": {
+      "count": 7,
+      "failures": 0,
+      "examples": [
+        "free -h",
+        "free -h 2>/dev/null || cat /proc/meminfo | head -5",
+        "free -h"
+      ]
+    },
+    "apt": {
+      "count": 25,
+      "failures": 0,
+      "examples": [
+        "apt list --installed | grep -E \"(java|python|node|gcc|clang|android|sdk|ndk|gradle|kotlin)\" | head -",
+        "apt search \"android-sdk|android-ndk|gradle|kotlin|java\" | head -30",
+        "apt search \"sdk|ndk|gradle\" | head -50"
+      ]
+    },
+    "command": {
+      "count": 9,
+      "failures": 0,
+      "examples": [
+        "command -v java && java -version 2>&1",
+        "command -v aapt && aapt version && command -v d8 && d8 --version && command -v apksigner && apksigne",
+        "command -v python3 && python3 --version"
+      ]
+    },
+    "pkg": {
+      "count": 35,
+      "failures": 0,
+      "examples": [
+        "pkg show gradle d8 apksigner",
+        "pkg install python git",
+        "pkg search ttyd 2>/dev/null || echo \"pkg not available\""
+      ]
+    },
+    "dpkg": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "dpkg -l | grep -E \"(java|jdk|gradle|android)\" || echo \"No Java/Android packages found\"",
+        "dpkg -L android-tools | grep -E \"bin/\" | head -20"
+      ]
+    },
+    "java": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "java -version && javac -version"
+      ]
+    },
+    "jar": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "jar tf /data/data/com.termux/files/usr/share/aapt/android.jar | grep -E \"(Activity|Bundle)\" | head -"
+      ]
+    },
+    "file": {
+      "count": 8,
+      "failures": 0,
+      "examples": [
+        "file /data/data/com.termux/files/usr/share/aapt/android.jar && jar tf /data/data/com.termux/files/us",
+        "file ~/flutter/bin/cache/dart-sdk/bin/dart",
+        "file ~/android-sdk/cmdline-tools/latest/bin/sdkmanager"
+      ]
+    },
+    "adb": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "adb shell \"find /system -name '*.jar' | grep -i framework\" 2>/dev/null | head -5",
+        "adb devices"
+      ]
+    },
+    "wget": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "wget --version 2>&1 | head -1"
+      ]
+    },
+    "python3": {
+      "count": 58,
+      "failures": 0,
+      "examples": [
+        "python3 --version",
+        "python3 -c \"\nimport socket\nimport sys\ntry:\n    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)",
+        "python3 send_all_sms_to_email.py"
+      ]
+    },
+    "ping": {
+      "count": 3,
+      "failures": 0,
+      "examples": [
+        "ping -c 3 123.456.78.90",
+        "ping -c 4 8.8.8.8",
+        "ping -c 2 github.com 2>&1 || echo \"ping failed\""
+      ]
+    },
+    "pip": {
+      "count": 42,
+      "failures": 0,
+      "examples": [
+        "pip install openclaw",
+        "pip install aider-chat",
+        "pip install setuptools"
+      ]
+    },
+    "export": {
+      "count": 12,
+      "failures": 0,
+      "examples": [
+        "export ANDROID_API_LEVEL=30 && pip install openclaw",
+        "export ANTHROPIC_API_KEY=\"sk-zvOjJFqKzbt9vPCz7aSCZKH52hD5zBwXAXXzcOC8ua66bdFB\" && export ANTHROPIC_A",
+        "export ANDROID_API_LEVEL=34 && pip install codex --timeout 60 2>&1 | tail -50"
+      ]
+    },
+    "aider": {
+      "count": 14,
+      "failures": 0,
+      "examples": [
+        "aider --help",
+        "aider --help",
+        "aider --help"
+      ]
+    },
+    "python": {
+      "count": 18,
+      "failures": 0,
+      "examples": [
+        "python -m aider --help",
+        "python -m venv aider_env",
+        "python -m pip --version 2>/dev/null || echo \"pip not found, installing...\""
+      ]
+    },
+    "source": {
+      "count": 19,
+      "failures": 0,
+      "examples": [
+        "source aider_env/bin/activate && pip install aider-chat",
+        "source ~/.bashrc",
+        "source ~/.bashrc && which tvly"
+      ]
+    },
+    "rm": {
+      "count": 112,
+      "failures": 0,
+      "examples": [
+        "rm -rf aider_env",
+        "rm -rf pi-python",
+        "rm -f /data/data/com.termux/files/home/check_email_skill.sh"
+      ]
+    },
+    "cp": {
+      "count": 28,
+      "failures": 0,
+      "examples": [
+        "cp /data/data/com.termux/files/usr/lib/python3.13/site-packages/aider/models/openai.py /data/data/co",
+        "cp ~/.bashrc ~/.bashrc.backup",
+        "cp -a ~/android-sdk/platform-tools $PREFIX/var/lib/proot-distro/installed-rootfs/ubuntu/root/android"
+      ]
+    },
+    "tmux": {
+      "count": 50,
+      "failures": 0,
+      "examples": [
+        "tmux list-sessions 2>&1",
+        "tmux new-session -d -s multiagent -n hello1 \"cd /data/data/com.termux/files/home/mulagent/project-he",
+        "tmux new-window -t multiagent -n hello2 \"cd /data/data/com.termux/files/home/mulagent/project-hello2"
+      ]
+    },
+    "echo": {
+      "count": 293,
+      "failures": 0,
+      "examples": [
+        "echo \"当前tmpdir: $(node -e \"console.log(require('os').tmpdir())\")\" && echo \"HOME: $HOME\" && echo \"TMP",
+        "echo \"当前用户: $(whoami)\" && echo \"检查僵尸ttyd进程...\" && ps aux | grep ttyd | grep -v grep",
+        "echo \"1. 获取僵尸进程父PID:\" && ps -o ppid= -p 16061 2>/dev/null | tr -d ' ' && echo \"\" && echo \"2. 检查端口768"
+      ]
+    },
+    "ttyd": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "ttyd --version && echo \"安装成功！\" && mkdir -p ~/tmp"
+      ]
+    },
+    "whoami": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "whoami && id && echo \"HOME: $HOME\" && echo \"UID: $(id -u)\" && echo \"GID: $(id -g)\"",
+        "whoami && ps aux | grep tmux"
+      ]
+    },
+    "pgrep": {
+      "count": 3,
+      "failures": 0,
+      "examples": [
+        "pgrep -x \"ttyd\" && echo \"ttyd进程正在运行\" || echo \"没有ttyd进程在运行\"",
+        "pgrep -x \"ttyd\" && echo \"✅ ttyd进程运行中 (PID: $(pgrep -x ttyd))\" || echo \"❌ ttyd进程未运行\"",
+        "pgrep -a -f \"pi|coding-agent\" 2>/dev/null || echo \"No matching processes found with pgrep\""
+      ]
+    },
+    "kill": {
+      "count": 4,
+      "failures": 0,
+      "examples": [
+        "kill -9 16061 2>/dev/null; sleep 1; pgrep -x ttyd && echo \"仍有ttyd进程\" || echo \"ttyd进程已全部停止\"",
+        "kill -15 19198 19226 21833 21844 23854 23867 24439 24452 2>&1 | grep -v \"No such process\" && echo \"已",
+        "kill -9 9754 2>/dev/null || true\nsleep 2\ncd /root/pi-gateway-standalone && npx tsx src/server/server"
+      ]
+    },
+    "netstat": {
+      "count": 14,
+      "failures": 0,
+      "examples": [
+        "netstat -tulpn 2>/dev/null | grep :7681 || ss -tulpn 2>/dev/null | grep :7681 || echo \"无法检查端口，尝试其他方法",
+        "netstat -tlnp 2>/dev/null | grep -E \"(5173|3000|8080|80|443)\" || ss -tlnp 2>/dev/null | grep -E \"(51",
+        "netstat -tulpn 2>/dev/null | head -20"
+      ]
+    },
+    "timeout": {
+      "count": 19,
+      "failures": 0,
+      "examples": [
+        "timeout 2 curl -s -o /dev/null -w \"%{http_code}\" http://localhost:7681 2>/dev/null || echo \"curl失败或超",
+        "timeout 5 termux-sms-list --message-limit=1 2>&1 || echo \"Command timed out or failed\"",
+        "timeout 2 termux-sms-list --message-limit=1 2>&1 || echo \"需要权限或超时\""
+      ]
+    },
+    "tail": {
+      "count": 137,
+      "failures": 0,
+      "examples": [
+        "tail -20 ~/ttyd.log 2>/dev/null || echo \"日志文件不存在\"",
+        "tail -100 /root/pi-mono/pi-session-2026-03-19T19-25-53-371Z_621077a9-76c1-4524-9fe2-9605a0b6c87e.htm",
+        "tail -20 /root/pi-gateway-standalone/logs/backend_current.log 2>/dev/null || echo \"No current backen"
+      ]
+    },
+    "apt-cache": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "apt-cache search --repo root 2>/dev/null | head -30 || echo \"尝试其他方法...\" && grep \"^Package:\" /data/da"
+      ]
+    },
+    "npm_config_platform=linux": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "npm_config_platform=linux npm install -g @kilocode/cli-linux-arm64 2>&1 | tail -20"
+      ]
+    },
+    "kilo": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "kilo --version 2>&1 | head -10"
+      ]
+    },
+    "KILO_BIN_PATH=$PREFIX/lib/node_modules/@kilocode/cli-linux-arm64/bin/kilo": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "KILO_BIN_PATH=$PREFIX/lib/node_modules/@kilocode/cli-linux-arm64/bin/kilo kilo --version 2>&1 | head"
+      ]
+    },
+    "head": {
+      "count": 80,
+      "failures": 0,
+      "examples": [
+        "head -20 tui_interactive_test.py",
+        "head -50 sms_master.sh",
+        "head -20 ~/android-sdk/cmdline-tools/latest/bin/sdkmanager"
+      ]
+    },
+    "script": {
+      "count": 4,
+      "failures": 0,
+      "examples": [
+        "script -q -c \"python3 test_pi_input.py\" /dev/null",
+        "script -q -c \"python3 simple_input_test.py\" /dev/null",
+        "script --help 2>&1 | head -20"
+      ]
+    },
+    "./run_interactive.sh": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "./run_interactive.sh simple_input_test.py"
+      ]
+    },
+    "./sms_master.sh": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "./sms_master.sh"
+      ]
+    },
+    "uname": {
+      "count": 11,
+      "failures": 0,
+      "examples": [
+        "uname -a && cat /etc/os-release 2>/dev/null || echo \"Not a standard Linux system\"",
+        "uname -a && which python3 && python3 --version",
+        "uname -a"
+      ]
+    },
+    "mkdir": {
+      "count": 69,
+      "failures": 0,
+      "examples": [
+        "mkdir -p ~/.pip",
+        "mkdir -p ~/.m2",
+        "mkdir -p simple_cli && cd simple_cli"
+      ]
+    },
+    "go": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "go env GOPROXY 2>/dev/null || echo \"Go not properly installed or configured\"",
+        "go env -w GOPROXY=https://goproxy.cn,direct"
+      ]
+    },
+    "udocker": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "udocker version 2>/dev/null || echo \"udocker not properly installed\""
+      ]
+    },
+    "termux-sms-list": {
+      "count": 6,
+      "failures": 0,
+      "examples": [
+        "termux-sms-list --help 2>/dev/null || echo \"termux-sms-list not available\"",
+        "termux-sms-list --message-limit=5 2>&1 | head -50",
+        "termux-sms-list --help | head -5"
+      ]
+    },
+    "node": {
+      "count": 81,
+      "failures": 0,
+      "examples": [
+        "node --version && npm --version",
+        "node --version && npm --version",
+        "node /data/data/com.termux/files/home/test_kimi_config.js"
+      ]
+    },
+    "./test_all_browsers.sh": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "./test_all_browsers.sh"
+      ]
+    },
+    "qqsend_mail": {
+      "count": 11,
+      "failures": 0,
+      "examples": [
+        "qqsend_mail \"手机的pi\" \"手机的可爱发的\"",
+        "qqsend_mail",
+        "qqsend_mail \"手机的pi\" \"手机的可爱发的\""
+      ]
+    },
+    "claude-code": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "claude-code --version || echo \"Checking installation...\""
+      ]
+    },
+    "claude": {
+      "count": 7,
+      "failures": 0,
+      "examples": [
+        "claude --help",
+        "claude auth --help",
+        "claude plugin --help"
+      ]
+    },
+    "ccr": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "ccr --help 2>/dev/null || echo \"Checking ccr command...\""
+      ]
+    },
+    "./test_claude_kimi.sh": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "./test_claude_kimi.sh"
+      ]
+    },
+    "./demo_usage.sh": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "./demo_usage.sh"
+      ]
+    },
+    "./kimi_claude_config.sh": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "./kimi_claude_config.sh"
+      ]
+    },
+    "~/.pi/agent/skills/free-search/search.sh": {
+      "count": 24,
+      "failures": 0,
+      "examples": [
+        "~/.pi/agent/skills/free-search/search.sh \"anyclaw\" 5",
+        "~/.pi/agent/skills/free-search/search.sh \"anyclaw github\" 5",
+        "~/.pi/agent/skills/free-search/search.sh \"anyclaw 项目\" 5"
+      ]
+    },
+    "search-engine": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "search-engine \"anyclaw\" --backends free-search,searx-search --timeout 30",
+        "search-engine \"anyclaw 是什么\" --backends free-search,searx-search --timeout 30"
+      ]
+    },
+    "~/flutter/bin/cache/dart-sdk/bin/dart": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "~/flutter/bin/cache/dart-sdk/bin/dart --version 2>&1"
+      ]
+    },
+    "ldd": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "ldd ~/flutter/bin/cache/dart-sdk/bin/dart 2>&1"
+      ]
+    },
+    "readelf": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "readelf -d ~/flutter/bin/cache/dart-sdk/bin/dart | grep NEEDED",
+        "readelf -l ~/flutter/bin/cache/dart-sdk/bin/dart | grep interpreter"
+      ]
+    },
+    "yes": {
+      "count": 3,
+      "failures": 0,
+      "examples": [
+        "yes | sdkmanager \"platform-tools\" \"platforms;android-34\" 2>&1 | tail -20",
+        "yes | sdkmanager \"platform-tools\" \"platforms;android-34\" 2>&1 | tail -30",
+        "yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses 2>&1 | tail -20"
+      ]
+    },
+    "~/android-sdk/cmdline-tools/latest/bin/sdkmanager": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "~/android-sdk/cmdline-tools/latest/bin/sdkmanager \"platform-tools\" \"platforms;android-34\" 2>&1 | tai",
+        "~/android-sdk/cmdline-tools/latest/bin/sdkmanager \"build-tools;34.0.0\" 2>&1 | tail -10"
+      ]
+    },
+    "proot-distro": {
+      "count": 19,
+      "failures": 0,
+      "examples": [
+        "proot-distro list",
+        "proot-distro list --installed",
+        "proot-distro login ubuntu -- bash -c \"lsb_release -a 2>/dev/null || cat /etc/os-release\""
+      ]
+    },
+    "du": {
+      "count": 3,
+      "failures": 0,
+      "examples": [
+        "du -sh ~/flutter 2>/dev/null | head -5",
+        "du -sh venv/",
+        "du -sh /root/pi-gateway-standalone/public/vendor/prism/*.js 2>/dev/null | head -10"
+      ]
+    },
+    "readlink": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "readlink -f /root/.pi/agent/skills/tavily",
+        "readlink -f /root/.pi/agent/skills/brave-search"
+      ]
+    },
+    "apt-get": {
+      "count": 4,
+      "failures": 0,
+      "examples": [
+        "apt-get update && apt-get install -y pipx 2>&1 | tail -10",
+        "apt-get install -y chromium-browser 2>&1 | tail -10",
+        "apt-get update && apt-get install -y python3-pil python3-numpy 2>&1 | tail -30"
+      ]
+    },
+    "pipx": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "pipx install tavily-cli 2>&1 | tail -20",
+        "pipx ensurepath 2>&1 | tail -10"
+      ]
+    },
+    "for": {
+      "count": 12,
+      "failures": 0,
+      "examples": [
+        "for skill in tavily-search tavily-cli tavily-crawl tavily-extract tavily-map tavily-research tavily-",
+        "for skill in /root/.pi/agent/skills/*; do if [ -L \"$skill\" ]; then echo \"SYMLINK: $(basename $skill)",
+        "for i in $(seq 1 100); do echo \"这是第 $i 行内容\"; done > 100lines.txt && wc -l 100lines.txt"
+      ]
+    },
+    "tvly": {
+      "count": 7,
+      "failures": 0,
+      "examples": [
+        "tvly search \"test\" --max-results 1 --json 2>&1 | head -5",
+        "tvly search \"tsx watch mode test synchronization best practice node.js\" --json --max-results 5 2>&1",
+        "tvly search \"web file browser code viewer syntax highlight best practice 2024\" --json --max-results "
+      ]
+    },
+    "lscpu": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "lscpu 2>/dev/null || echo \"lscpu not available\"",
+        "lscpu 2>/dev/null || echo \"lscpu not available\""
+      ]
+    },
+    "lsb_release": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "lsb_release -a 2>/dev/null || echo \"lsb_release not available\""
+      ]
+    },
+    "uptime": {
+      "count": 3,
+      "failures": 0,
+      "examples": [
+        "uptime",
+        "uptime && echo \"--- 测试通过 ---\"",
+        "uptime"
+      ]
+    },
+    "tavily": {
+      "count": 4,
+      "failures": 0,
+      "examples": [
+        "tavily search \"world population 2024 2025 current statistics\" --max-results 5",
+        "tavily search \"China population 2024 2025 current\" --max-results 3",
+        "tavily search \"India population 2024 2025 current\" --max-results 3"
+      ]
+    },
+    "lsof": {
+      "count": 10,
+      "failures": 0,
+      "examples": [
+        "lsof -i :3000 2>/dev/null || netstat -tlnp 2>/dev/null | grep 3000 || ss -tlnp | grep 3000",
+        "lsof -i :5173 2>/dev/null || echo \"Cannot check port 5173\"",
+        "lsof -i :5173 2>/dev/null || netstat -tlnp 2>/dev/null | grep 5173 || ss -tlnp | grep 5173"
+      ]
+    },
+    "#!/bin/bash": {
+      "count": 5,
+      "failures": 0,
+      "examples": [
+        "#!/bin/bash\n\necho \"正在检查每个仓库的 Releases...\"\necho \"==============================\"\necho \"\"\n\n# 仓库列表\nrepo",
+        "#!/bin/bash\n\necho \"📋 GitHub Releases 清理方案\"\necho \"==============================\"\necho \"\"\necho \"👤 账",
+        "#!/bin/bash\n\n# 创建删除操作的备份记录\nlog_file=\"/root/github_releases_delete_$(date +%Y%m%d_%H%M%S).log\"\n\necho "
+      ]
+    },
+    "wc": {
+      "count": 54,
+      "failures": 0,
+      "examples": [
+        "wc -l /root/pi-mono/pi-session-2026-03-19T19-25-53-371Z_621077a9-76c1-4524-9fe2-9605a0b6c87e.html",
+        "wc -l /root/lines_100.txt && tail -5 /root/lines_100.txt",
+        "wc -l 100lines.txt"
+      ]
+    },
+    "sed": {
+      "count": 345,
+      "failures": 0,
+      "examples": [
+        "sed -n '1060,1070p' /root/pi-mono/pi-session-2026-03-19T19-25-53-371Z_621077a9-76c1-4524-9fe2-9605a0",
+        "sed -n '3800,3879p' /root/pi-mono/pi-session-2026-03-19T19-25-53-371Z_621077a9-76c1-4524-9fe2-9605a0",
+        "sed -n '3700,3750p' /root/pi-mono/pi-session-2026-03-19T19-25-53-371Z_621077a9-76c1-4524-9fe2-9605a0"
+      ]
+    },
+    "awk": {
+      "count": 12,
+      "failures": 0,
+      "examples": [
+        "awk '/entries = \\[/,/^\\];/' /root/pi-mono/pi-session-2026-03-19T19-25-53-371Z_621077a9-76c1-4524-9fe",
+        "awk '/^export function useAppInitialization/,/^}/' /root/pi-gateway-standalone/src/client/shared/hoo",
+        "awk '/^export function useSidebarController/,/^}$/' /root/pi-gateway-standalone/src/client/features/"
+      ]
+    },
+    "pip3": {
+      "count": 5,
+      "failures": 0,
+      "examples": [
+        "pip3 --version",
+        "pip3 install Pillow numpy 2>&1 | tail -20",
+        "pip3 install easyocr pillow numpy --break-system-packages 2>&1 | tail -10"
+      ]
+    },
+    "seq": {
+      "count": 22,
+      "failures": 0,
+      "examples": [
+        "seq 1 100 > numbers.txt",
+        "seq 1 100 > numbers.txt",
+        "seq 1 100 > numbers.txt"
+      ]
+    },
+    "w": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "w && echo \"---\" && top -bn1 | head -20"
+      ]
+    },
+    "speedtest-cli": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "speedtest-cli --simple"
+      ]
+    },
+    "ifconfig": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "ifconfig || ip addr show"
+      ]
+    },
+    "date": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "date"
+      ]
+    },
+    "cal": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "cal -3",
+        "cal"
+      ]
+    },
+    "ollama": {
+      "count": 6,
+      "failures": 0,
+      "examples": [
+        "ollama --version",
+        "ollama pull gemma4:e2b",
+        "ollama list"
+      ]
+    },
+    "nohup": {
+      "count": 5,
+      "failures": 0,
+      "examples": [
+        "nohup ollama serve > /tmp/ollama.log 2>&1 &",
+        "nohup ollama serve > /tmp/ollama2.log 2>&1 &",
+        "nohup ollama serve > /tmp/ollama_new.log 2>&1 &"
+      ]
+    },
+    "ss": {
+      "count": 8,
+      "failures": 0,
+      "examples": [
+        "ss -tulpn | grep 11434",
+        "ss -tlnp | grep :3000 || echo \"端口3000未使用\"",
+        "ss -tlnp 2>/dev/null | grep 3000 || echo \"端口 3000 未使用\""
+      ]
+    },
+    "fuser": {
+      "count": 8,
+      "failures": 0,
+      "examples": [
+        "fuser 11434/tcp 2>/dev/null || echo \"No process found on port 11434\"",
+        "fuser -k 5173/tcp 2>/dev/null; sleep 3; ss -tlnp | grep 5173 || echo \"端口已释放\"",
+        "fuser -k 3000/tcp 2>/dev/null; sleep 2; cd /root/pi-mono/packages/gateway && npx tsx src/server.ts &"
+      ]
+    },
+    "aapt": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "aapt dump badging ./build_direct/apk/simple-app.apk | head -20",
+        "aapt dump badging ./build_simple_fixed/apk/simple-app-signed.apk 2>&1"
+      ]
+    },
+    "./build_final.sh": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "./build_final.sh 2>&1 | tail -50"
+      ]
+    },
+    "unzip": {
+      "count": 4,
+      "failures": 0,
+      "examples": [
+        "unzip -l ./build_direct/apk/simple-app.apk",
+        "unzip -l ./build_simple/apk/hello-world-signed.apk",
+        "unzip -p ./build_simple/apk/hello-world-signed.apk manifest.xml | head -20"
+      ]
+    },
+    "./build_fixed.sh": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "./build_fixed.sh 2>&1 | tail -100"
+      ]
+    },
+    "password=\"a6631384.\"": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "password=\"a6631384.\" && echo \"Password: $password\" && echo \"Length: ${#password}\""
+      ]
+    },
+    "zip": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "zip -r bankflow_project.zip . -x \"venv/*\" \".git/*\" \"*.zip\" \"*.doc\"",
+        "zip -e -P 123456 bankflow_project_encrypted.zip bankflow_project.doc"
+      ]
+    },
+    "mv": {
+      "count": 21,
+      "failures": 0,
+      "examples": [
+        "mv bankflow_project.zip bankflow_project.doc",
+        "mv /root/pi-mono/packages/gateway/public/js/tools/search.js /root/pi-mono/packages/gateway/public/js",
+        "mv /root/pi-mono/packages/gateway/public/js/tools/update.js /root/pi-mono/packages/gateway/public/js"
+      ]
+    },
+    "base64": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "base64 bankflow_project_encrypted.zip > attachment_base64.txt"
+      ]
+    },
+    "tree": {
+      "count": 7,
+      "failures": 0,
+      "examples": [
+        "tree -I \"venv|__pycache__|*.pyc\" -L 3",
+        "tree -L 3 /root/pi-gateway-standalone/src/client/ | head -80",
+        "tree -L 3 /root/pi-gateway-standalone/src/client/app/"
+      ]
+    },
+    "TOKEN=$(cat": {
+      "count": 15,
+      "failures": 0,
+      "examples": [
+        "TOKEN=$(cat ~/.config/gh/hosts.yml | grep \"oauth_token:\" | head -1 | sed 's/.*oauth_token: //')\n\n# 获",
+        "TOKEN=$(cat ~/.config/gh/hosts.yml | grep \"oauth_token:\" | head -1 | sed 's/.*oauth_token: //')\n\n# 获",
+        "TOKEN=$(cat ~/.config/gh/hosts.yml | grep \"oauth_token:\" | head -1 | sed 's/.*oauth_token: //')\n\n# 获"
+      ]
+    },
+    "RUN_ID=22996521491": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "RUN_ID=22996521491 && echo \"下载APK...\" && cd ~/flutterall/downloads && \n\n# 尝试下载\ngh run download $RUN_"
+      ]
+    },
+    "RUN_ID=22996689716": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "RUN_ID=22996689716 && echo \"正在下载APK...\" && cd ~/flutterall/downloads && \n\n# 尝试下载APK artifact\ngh run "
+      ]
+    },
+    "RUN_ID=22997157873": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "RUN_ID=22997157873 && echo \"获取失败详情...\" && \n\nTOKEN=$(cat ~/.config/gh/hosts.yml | grep \"oauth_token:\""
+      ]
+    },
+    "gh": {
+      "count": 4,
+      "failures": 0,
+      "examples": [
+        "gh repo view --json name,owner,url",
+        "gh auth status",
+        "gh repo list --limit 10"
+      ]
+    },
+    "termux-open-url": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "termux-open-url https://github.com/3280382/multi_platform_app/actions/runs/23018129930 2>/dev/null |",
+        "termux-open-url https://github.com/3280382/multi_platform_app/releases/tag/v1.2.1 2>/dev/null || ech"
+      ]
+    },
+    "termux-open": {
+      "count": 3,
+      "failures": 0,
+      "examples": [
+        "termux-open /data/data/com.termux/files/home/flutterall/fixed_apk/app-release.apk",
+        "termux-open /data/data/com.termux/files/home/flutterall/v140/app-release.apk",
+        "termux-open /root/file-server/architecture_diagram.png 2>/dev/null || echo \"termux-open not availabl"
+      ]
+    },
+    "bash": {
+      "count": 7,
+      "failures": 0,
+      "examples": [
+        "bash /data/data/com.termux/files/home/.pi/pi-session-backup.sh info 5d05cffa",
+        "bash /data/data/com.termux/files/home/.pi/pi-session-backup.sh summary 5d05cffa",
+        "bash /data/data/com.termux/files/home/.pi/pi-session-backup.sh backup 5d05cffa"
+      ]
+    },
+    "pi-compact-status": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "pi-compact-status"
+      ]
+    },
+    "termux-setup-storage": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "termux-setup-storage"
+      ]
+    },
+    "ln": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "ln -sf ~/storage/shared/projects ~/projects"
+      ]
+    },
+    "rg": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "rg \"toolCall|toolUse\" /root/.pi/agent/sessions --type jsonl -l | head -5"
+      ]
+    },
+    ">": {
+      "count": 319,
+      "failures": 0,
+      "examples": [
+        "> /tmp/test_session.jsonl cat << 'EOF'\n{\"type\":\"message\",\"id\":\"test1\",\"timestamp\":\"2026-03-23T10:00:",
+        "> /tmp/gateway.log cd /root/pi-mono/packages/gateway && npm run check && npm run build 2>&1 | tail -",
+        "> /tmp/build.log cd /root/pi-mono/packages/gateway && npm run check && npm run build 2>&1 | tail -5"
+      ]
+    },
+    "diff": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "diff /root/pi-mono/packages/gateway/dist/index.html /root/pi-mono/packages/gateway/dist/public/index",
+        "diff ~/pi-mono/packages/gateway/src/server/llm/interceptor.ts /root/pi-gateway-standalone/src/server"
+      ]
+    },
+    "/root/.pi/agent/skills/browser-tools/browser-start.js": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "/root/.pi/agent/skills/browser-tools/browser-start.js 2>&1 &\nsleep 5\necho \"Chrome 启动状态检查...\" && curl",
+        "/root/.pi/agent/skills/browser-tools/browser-start.js &\nsleep 3\necho \"Chrome started\""
+      ]
+    },
+    "/usr/bin/chromium-browser": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "/usr/bin/chromium-browser --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-profile --no-firs",
+        "/usr/bin/chromium-browser --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-profile --no-firs"
+      ]
+    },
+    "touch": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "touch /root/pi-mono/packages/gateway/src/main.tsx && sleep 3 && curl -s http://127.0.0.1:5173 2>&1 |",
+        "touch /root/pi-mono/packages/gateway/src/main.tsx && sleep 3 && curl -s http://127.0.0.1:5173/src/Ap"
+      ]
+    },
+    "kimisearch": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "kimisearch \"Talent OS platform what is\" --format json"
+      ]
+    },
+    "~/.pi/agent/skills/kimi-search/search.sh": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "~/.pi/agent/skills/kimi-search/search.sh \"Talent OS platform\""
+      ]
+    },
+    "timg": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "timg /sdcard/Download/architecture_diagram.png 2>&1"
+      ]
+    },
+    "chafa": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "chafa /sdcard/Download/architecture_diagram.png --size=80x40 2>&1"
+      ]
+    },
+    "dot": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        "dot -Tpng -Gdpi=300 /root/file-server/architecture.dot -o /root/file-server/architecture_graphviz.pn",
+        "dot -Tpng -Gdpi=300 /root/file-server/architecture.dot -o /root/file-server/architecture_graphviz.pn"
+      ]
+    },
+    "d2": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "d2 --help 2>&1 | head -20"
+      ]
+    },
+    "sudo": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "sudo -u aid_u0_+ tmux attach -t gateway-dev 2>&1 || echo \"附加失败\""
+      ]
+    },
+    "rmdir": {
+      "count": 3,
+      "failures": 0,
+      "examples": [
+        "rmdir /root/pi-gateway-standalone/src/server/controllers/ 2>/dev/null && echo \"✓ 已删除空的 controllers 目",
+        "rmdir /root/pi-gateway-standalone/src/server/shared/ && echo \"✓ 已删除空的 shared 目录\"",
+        "rmdir /root/pi-gateway-standalone/src/client/shared/ui && rmdir /root/pi-gateway-standalone/src/clie"
+      ]
+    },
+    "hexdump": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        "hexdump -C /root/pi-gateway-standalone/src/client/features/files/stores/fileStore.ts | grep -A2 \"cre"
+      ]
+    },
+    "npx": {
+      "count": 18,
+      "failures": 0,
+      "examples": [
+        "npx tsc --noEmit --skipLibCheck 2>&1 | head -50",
+        "npx tsc --noEmit --skipLibCheck src/shared/types/websocket.types.ts src/shared/types/chat.types.ts s",
+        "npx tsc --noEmit --skipLibCheck src/shared/types/websocket.types.ts src/shared/types/chat.types.ts s"
+      ]
+    },
+    ".footer": {
+      "count": 2,
+      "failures": 0,
+      "examples": [
+        ".footer {\n\theight: 44px;\n\t/* ... */\n}",
+        ".footer {\n  height: 44px;\n  background: var(--bg-tertiary);\n  display: flex;\n  align-items: center;\n"
+      ]
+    },
+    ".exports.*chatInit\\|from.*chatInit\"": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        ".exports.*chatInit\\|from.*chatInit\" /root/pi-gateway-standalone/src/client/features/chat/services/in"
+      ]
+    },
+    ".*setTheme\\|setFontSize\\|theme\\|fontSize\"": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        ".*setTheme\\|setFontSize\\|theme\\|fontSize\" /root/pi-gateway-standalone/src/client/features/chat/servi"
+      ]
+    },
+    ".*setTheme.*\\|.*setFontSize.*\\|theme\\|fontSize\"": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        ".*setTheme.*\\|.*setFontSize.*\\|theme\\|fontSize\" /root/pi-gateway-standalone/src/client/features/chat"
+      ]
+    },
+    ".Settings\\.(tsx|module\\.css)$\"": {
+      "count": 1,
+      "failures": 0,
+      "examples": [
+        ".Settings\\.(tsx|module\\.css)$\" /root/pi-gateway-standalone/src/client/features/chat/components/sideb"
+      ]
+    },
+    ".": {
+      "count": 49,
+      "failures": 0,
+      "examples": [
+        ". /root/pi-gateway-standalone/src/client/features/chat/components/sidebar/Settings",
+        ". \"error\\|Error\\|Failed\" /root/pi-gateway-standalone/logs/frontend_current.log | tail -10",
+        ". \"error\\|Error\" /root/pi-gateway-standalone/logs/frontend_current.log | head -5"
+      ]
+    }
+  },
+  "failures": {},
+  "bashFailures": {}
+}
