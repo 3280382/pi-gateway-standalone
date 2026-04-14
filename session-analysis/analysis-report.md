@@ -1,119 +1,171 @@
 # Pi Session 工具调用分析报告
 
+生成时间: 2026-04-14 02:44:55
+
 ## 📊 统计概览
 
 | 指标 | 数值 |
 |------|------|
 | Session 文件总数 | 570 |
-| 消息总数 | 66856 |
+| 消息总数 | 66864 |
+| 工具调用总数 | 31043 |
+| 失败次数 | 0 |
+| 整体成功率 | 100.0% |
 
 ## 🛠️ 工具调用统计
 
-| 工具名称 | 调用次数 | 失败次数 | 成功率 |
-|---------|---------|---------|--------|
-
-| bash | 16062 | 0 | 100.0% |
-| read | 7626 | 0 | 100.0% |
-| edit | 4942 | 0 | 100.0% |
-| write | 2370 | 0 | 100.0% |
-| coordinator | 28 | 0 | 100.0% |
-| subagent | 6 | 0 | 100.0% |
-| web_admin_start | 5 | 0 | 100.0% |
-| tavily-search | 2 | 0 | 100.0% |
+| 工具名称 | 调用次数 | 失败次数 | 成功率 | 占比 |
+|---------|---------|---------|--------|------|
+| bash | 16064 | 0 | 100.0% | 51.7% |
+| read | 7626 | 0 | 100.0% | 24.6% |
+| edit | 4942 | 0 | 100.0% | 15.9% |
+| write | 2370 | 0 | 100.0% | 7.6% |
+| coordinator | 28 | 0 | 100.0% | 0.1% |
+| subagent | 6 | 0 | 100.0% | 0.0% |
+| web_admin_start | 5 | 0 | 100.0% | 0.0% |
+| tavily-search | 2 | 0 | 100.0% | 0.0% |
 
 ## 🔧 Bash 命令详细统计
 
 > Bash 工具按具体命令统计（而非单一工具）
 
-| 命令 | 调用次数 | 占比 | 示例 |
-|------|---------|------|------|
-| cd | 8957 | 55.8% | `cd pi-mono && git log --oneline -5 && echo "---" && git remote -v` |
-| grep | 1878 | 11.7% | `grep -r "kimi" ~/.pi 2>/dev/null \| head -20` |
-| ls | 743 | 4.6% | `ls -la` |
-| find | 428 | 2.7% | `find / -maxdepth 4 -name "*proot*" 2>/dev/null \| head -50` |
-| curl | 351 | 2.2% | `curl -s http://localhost:3000/ \| head -20` |
-| sed | 345 | 2.1% | `sed -n '1060,1070p' /root/pi-mono/pi-session-2026-03-19T19-25-53-371Z_621077a9-76c1-4524-9fe2-9605a0` |
-| > | 319 | 2.0% | `> /tmp/test_session.jsonl cat << 'EOF'
-{"type":"message","id":"test1","timestamp":"2026-03-23T10:00:` |
-| echo | 293 | 1.8% | `echo "当前tmpdir: $(node -e "console.log(require('os').tmpdir())")" && echo "HOME: $HOME" && echo "TMP` |
-| cat | 282 | 1.8% | `cat ~/.pi/agent/settings.json 2>/dev/null \|\| echo "No settings.json found"` |
-| sleep | 278 | 1.7% | `sleep 2 && ps aux \| grep "node server.js" \| grep -v grep && echo "---" && ss -tlnp \| grep 3000 \|\| ne` |
-| pkill | 201 | 1.3% | `pkill -f "node server.js" 2>/dev/null; sleep 1; cd file-server && node server.js .. &` |
-| ps | 178 | 1.1% | `ps aux \| grep node \| grep -v grep` |
-| # | 174 | 1.1% | `# 演示脚本使用方法
-./create_tmp_files.sh --help` |
-| tail | 137 | 0.9% | `tail -20 ~/ttyd.log 2>/dev/null \|\| echo "日志文件不存在"` |
-| rm | 112 | 0.7% | `rm -rf aider_env` |
-| chmod | 82 | 0.5% | `chmod +x file-server/server.js && mkdir -p file-server/public` |
-| node | 81 | 0.5% | `node --version && npm --version` |
-| head | 80 | 0.5% | `head -20 tui_interactive_test.py` |
-| which | 70 | 0.4% | `which proot 2>/dev/null && echo "---" && proot --version 2>/dev/null \|\| echo "proot 未安装或不在 PATH 中"` |
-| mkdir | 69 | 0.4% | `mkdir -p ~/.pip` |
-| python3 | 58 | 0.4% | `python3 --version` |
-| wc | 54 | 0.3% | `wc -l /root/pi-mono/pi-session-2026-03-19T19-25-53-371Z_621077a9-76c1-4524-9fe2-9605a0b6c87e.html` |
-| tmux | 50 | 0.3% | `tmux list-sessions 2>&1` |
-| . | 49 | 0.3% | `. /root/pi-gateway-standalone/src/client/features/chat/components/sidebar/Settings` |
-| git | 46 | 0.3% | `git clone https://github.com/badlogic/pi-mono.git` |
-| pip | 42 | 0.3% | `pip install openclaw` |
-| pwd | 37 | 0.2% | `pwd && ls -la` |
-| pkg | 35 | 0.2% | `pkg show gradle d8 apksigner` |
-| npm | 31 | 0.2% | `npm view @mariozechner/pi-coding-agent version 2>/dev/null` |
-| pi | 29 | 0.2% | `pi --version 2>/dev/null \|\| npm list -g @mariozechner/pi-coding-agent 2>/dev/null` |
+| 命令 | 调用次数 | 失败次数 | 占比 | 成功率 | 示例 |
+|------|---------|---------|------|--------|------|
+| `cd` | 8958 | 0 | 55.8% | 100.0% | `cd pi-mono && git log --oneline -5 && echo "---" && git remo` |
+| `grep` | 1878 | 0 | 11.7% | 100.0% | `grep -r "kimi" ~/.pi 2>/dev/null \| head -20` |
+| `ls` | 743 | 0 | 4.6% | 100.0% | `ls -la` |
+| `find` | 428 | 0 | 2.7% | 100.0% | `find / -maxdepth 4 -name "*proot*" 2>/dev/null \| head -50` |
+| `curl` | 351 | 0 | 2.2% | 100.0% | `curl -s http://localhost:3000/ \| head -20` |
+| `sed` | 345 | 0 | 2.1% | 100.0% | `sed -n '1060,1070p' /root/pi-mono/pi-session-2026-03-19T19-2` |
+| `echo` | 293 | 0 | 1.8% | 100.0% | `echo "=== OS Information ===" && cat /etc/os-release 2>/dev/` |
+| `cat` | 282 | 0 | 1.8% | 100.0% | `cat ~/.pi/agent/settings.json 2>/dev/null \|\| echo "No sett` |
+| `sleep` | 278 | 0 | 1.7% | 100.0% | `sleep 2 && ps aux \| grep "node server.js" \| grep -v grep &` |
+| `unknown` | 273 | 0 | 1.7% | 100.0% | `password="a6631384." && echo "Password: $password" && echo "` |
+| `pkill` | 201 | 0 | 1.3% | 100.0% | `pkill -f "node server.js" 2>/dev/null; sleep 1; cd file-serv` |
+| `ps` | 178 | 0 | 1.1% | 100.0% | `ps aux \| grep node \| grep -v grep` |
+| `#` | 174 | 0 | 1.1% | 100.0% | `# List all processes with their PIDs and filter for pi-relat` |
+| `tail` | 137 | 0 | 0.9% | 100.0% | `tail -100 /root/pi-mono/pi-session-2026-03-19T19-25-53-371Z_` |
+| `rm` | 112 | 0 | 0.7% | 100.0% | `rm -f /root/.pi/agent/skills/tavily` |
+| `chmod` | 82 | 0 | 0.5% | 100.0% | `chmod +x file-server/server.js && mkdir -p file-server/publi` |
+| `head` | 81 | 0 | 0.5% | 100.0% | `head -30 /tmp/tavily-skills-new/tavily_cli/README.md` |
+| `node` | 81 | 0 | 0.5% | 100.0% | `node scripts/tmux-controller.js status` |
+| `which` | 70 | 0 | 0.4% | 100.0% | `which proot 2>/dev/null && echo "---" && proot --version 2>/` |
+| `mkdir` | 69 | 0 | 0.4% | 100.0% | `mkdir -p /root/.pi/agent/git/github.com/tavily-ai && cd /roo` |
+| `python3` | 58 | 0 | 0.4% | 100.0% | `python3 --version` |
+| `wc` | 54 | 0 | 0.3% | 100.0% | `wc -l /root/pi-mono/pi-session-2026-03-19T19-25-53-371Z_6210` |
+| `>` | 54 | 0 | 0.3% | 100.0% | `> /tmp/test_session.jsonl cat << 'EOF'
+{"type":"message","id` |
+| `tmux` | 50 | 0 | 0.3% | 100.0% | `tmux new-session -d -s multiagent -n hello1 "cd /data/data/c` |
+| `.` | 49 | 0 | 0.3% | 100.0% | `. /root/pi-gateway-standalone/src/client/features/chat/compo` |
+| `git` | 46 | 0 | 0.3% | 100.0% | `git clone https://github.com/badlogic/pi-mono.git` |
+| `pip` | 42 | 0 | 0.3% | 100.0% | `pip install speedtest-cli 2>/dev/null \|\| pip3 install spee` |
+| `pwd` | 37 | 0 | 0.2% | 100.0% | `pwd && ls -la` |
+| `pkg` | 35 | 0 | 0.2% | 100.0% | `pkg install -y dart flutter 2>&1 \| tail -30` |
+| `npm` | 32 | 0 | 0.2% | 100.0% | `npm view @mariozechner/pi-coding-agent version 2>/dev/null` |
+| `pi` | 29 | 0 | 0.2% | 100.0% | `pi --version 2>/dev/null \|\| npm list -g @mariozechner/pi-c` |
+| `cp` | 28 | 0 | 0.2% | 100.0% | `cp /root/.pi/agent/git/github.com/tavily-ai/skills/skills/ta` |
+| `apt` | 25 | 0 | 0.2% | 100.0% | `apt update -y` |
+| `~/.pi/agent/skills/free-search/search.sh` | 24 | 0 | 0.1% | 100.0% | `~/.pi/agent/skills/free-search/search.sh "world population 2` |
+| `seq` | 22 | 0 | 0.1% | 100.0% | `seq 1 100 > numbers.txt` |
+| `mv` | 21 | 0 | 0.1% | 100.0% | `mv bankflow_project.zip bankflow_project.doc` |
+| `source` | 19 | 0 | 0.1% | 100.0% | `source ~/.bashrc && which tvly` |
+| `timeout` | 19 | 0 | 0.1% | 100.0% | `timeout 30 ollama run gemma4:e2b "你好！你是谁？请用中文简单回答。" 2>&1 \| ` |
+| `proot-distro` | 19 | 0 | 0.1% | 100.0% | `proot-distro list` |
+| `python` | 18 | 0 | 0.1% | 100.0% | `python hello.py` |
+| `npx` | 18 | 0 | 0.1% | 100.0% | `npx tsc --noEmit --skipLibCheck 2>&1 \| head -50` |
+| `~/.config/gh/hosts.yml` | 15 | 0 | 0.1% | 100.0% | `TOKEN=$(cat ~/.config/gh/hosts.yml \| grep "oauth_token:" \|` |
+| `netstat` | 14 | 0 | 0.1% | 100.0% | `netstat -tlnp 2>/dev/null \| grep -E "(5173\|3000\|8080\|80\` |
+| `aider` | 14 | 0 | 0.1% | 100.0% | `aider --help` |
+| `env` | 12 | 0 | 0.1% | 100.0% | `env \| head -30` |
+| `export` | 12 | 0 | 0.1% | 100.0% | `export PATH="/root/.local/bin:$PATH" && which tvly` |
+| `for` | 12 | 0 | 0.1% | 100.0% | `for skill in tavily-search tavily-cli tavily-crawl tavily-ex` |
+| `awk` | 12 | 0 | 0.1% | 100.0% | `awk '/entries = \[/,/^\];/' /root/pi-mono/pi-session-2026-03` |
+| `uname` | 11 | 0 | 0.1% | 100.0% | `uname -a` |
+| `qqsend_mail` | 11 | 0 | 0.1% | 100.0% | `qqsend_mail "bankflow项目打包文件" "$(cat email_content.txt)" "rec` |
+
+### Bash 命令失败详情
+
+✅ 所有 Bash 命令都执行成功！
 
 ## ❌ 失败分析
 
-### 按工具统计失败
+✅ 没有发现工具调用失败！
 
-| 工具 | 失败次数 | 常见错误 |
-|------|---------|---------|
+## 📈 使用趋势（最近30天）
 
-### 详细错误信息
-
+| 日期 | 调用次数 |
+|------|---------|
+| 2026-04-14 | 69 |
+| 2026-04-13 | 1197 |
+| 2026-04-12 | 210 |
+| 2026-04-11 | 1754 |
+| 2026-04-10 | 1337 |
+| 2026-04-09 | 1038 |
+| 2026-04-08 | 632 |
+| 2026-04-07 | 454 |
+| 2026-04-06 | 1290 |
+| 2026-04-05 | 1870 |
+| 2026-04-04 | 111 |
+| 2026-04-03 | 1426 |
+| 2026-04-02 | 2266 |
+| 2026-04-01 | 42 |
+| 2026-03-31 | 2954 |
+| 2026-03-30 | 962 |
+| 2026-03-29 | 2075 |
+| 2026-03-28 | 1493 |
+| 2026-03-27 | 629 |
+| 2026-03-26 | 1318 |
+| 2026-03-25 | 1625 |
+| 2026-03-24 | 1418 |
+| 2026-03-23 | 181 |
+| 2026-03-22 | 21 |
+| 2026-03-21 | 432 |
+| 2026-03-20 | 675 |
+| 2026-03-19 | 180 |
+| 2026-03-18 | 105 |
+| 2026-03-17 | 201 |
+| 2026-03-16 | 172 |
 
 ## 💡 改善建议
 
 ### 1. 高频工具优化
 
 **read**: 文件读取是最常用的工具
-- 建议：增加文件缓存机制，避免重复读取
+- 建议：增加文件缓存机制，避免重复读取相同文件
 - 建议：大文件分片读取，减少内存占用
+- 建议：监控频繁读取的文件，可能需要常驻内存
 
 **bash**: 命令执行工具
-- 建议：常用命令（ls, cat, grep）可封装为专用工具
-- 建议：命令执行超时机制
-- 建议：危险命令（rm -rf）二次确认
+- 建议：高频命令（如 cd, grep, ls）可封装为专用工具
+- 建议：命令执行超时机制，防止长时间挂起
+- 建议：危险命令（rm -rf, > 等）二次确认或限制
+- 建议：命令结果缓存，相同命令短时间内复用
 
-**write**: 文件写入
-- 建议：批量写入支持，减少IO次数
-- 建议：自动备份机制
+**edit**: 文件编辑
+- 建议：增加编辑预览功能，确认后再应用
+- 建议：支持批量编辑，减少多次调用
 
-### 2. 失败率高的工具
+### 2. Bash 命令优化建议
 
-根据失败统计，针对性改进：
-- **路径不存在错误**: 提前验证路径
-- **权限错误**: 自动尝试 sudo 或提示用户
-- **命令不存在**: 检查命令可用性
+根据统计，最常用的 bash 命令是: cd, grep, ls, find, curl
 
-### 3. Bash 命令优化
+建议将这些高频命令封装为专用工具:
 
-高频 bash 命令可以封装为独立工具：
-- `ls` → listDirectory 工具
-- `cat` → readFile 工具
-- `grep` → searchInFiles 工具
-- `find` → findFiles 工具
-- `cd` + `pwd` → 工作目录管理
+- `cd` → **changeDirectory**: 工作目录管理，支持历史记录
+- `grep` → **searchInFiles**: 文件内容搜索，支持正则
+- `ls` → **listDirectory**: 目录列表，支持过滤和排序
+- `find` → **findFiles**: 文件查找，支持复杂条件
+- `curl` → **httpRequest**: HTTP 请求，支持多种方法
 
-### 4. 会话分析洞察
+### 4. 系统架构建议
 
-- 平均每个 session 的消息数：可评估用户活跃度
-- 工具调用成功率：系统稳定性指标
-- 高频失败场景：优先改进点
+- **工具调用追踪**: 实现调用链追踪，便于问题定位
+- **性能监控**: 监控工具调用耗时，识别性能瓶颈
+- **智能重试**: 对失败工具实现智能重试机制
+- **结果缓存**: 对幂等操作实现结果缓存
+- **批量操作**: 支持批量工具调用，减少往返次数
+- **沙箱执行**: bash 命令在沙箱中执行，提高安全性
 
 ---
 
-## 📈 数据导出
-
-详细数据已保存到：
-- JSON: `stats.json`
-- 报告: `analysis-report.md`
-
+📊 详细数据已导出到 `stats.json`

@@ -9,6 +9,7 @@
 
 import { Logger, LogLevel } from "../../../../lib/utils/logger";
 import { serverSessionManager } from "../../agent-session/session-manager";
+import { PiAgentSession } from "../../agent-session/piAgentSession";
 import type { WSContext } from "../../ws-router";
 
 const logger = new Logger({ level: LogLevel.INFO });
@@ -43,25 +44,32 @@ export async function handleNewSession(
     serverSessionManager.endSession(workingDir);
     logger.info(`[WebSocket] Ended current session for: ${workingDir}`);
 
-    // Create new session with the same working directory
-    const session = await serverSessionManager.getOrCreateSession(
-      workingDir,
-      ctx.ws
+    // Create completely new PiAgentSession (don't reuse existing)
+    // This ensures a fresh session is created, not associated with old one
+    const newSession = new PiAgentSession(
+      ctx.ws,
+      serverSessionManager["llmLogManager"]!
     );
+    
+    // Initialize with working directory (no sessionId, so it creates new)
+    await newSession.initialize(workingDir);
 
     // Update context with new session
-    ctx.session = session;
+    ctx.session = newSession;
+    
+    // Register in server session manager
+    serverSessionManager["registerNewSession"](workingDir, ctx.ws, newSession);
 
     ctx.ws.send(
       JSON.stringify({
         type: "session_created",
-        sessionId: session.session!.sessionId,
-        sessionFile: session.session!.sessionFile,
-        workingDir: session.workingDir,
+        sessionId: newSession.session!.sessionId,
+        sessionFile: newSession.session!.sessionFile,
+        workingDir: newSession.workingDir,
       })
     );
 
-    logger.info(`[WebSocket] new_session successful: sessionId=${session.session!.sessionId}, workingDir=${workingDir}`);
+    logger.info(`[WebSocket] new_session successful: sessionId=${newSession.session!.sessionId}, workingDir=${workingDir}`);
   } catch (error) {
     logger.error("[WebSocket] new_session error:", {}, error instanceof Error ? error : undefined);
     ctx.ws.send(

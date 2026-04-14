@@ -252,6 +252,40 @@ export class ServerSessionManager {
   }
 
   /**
+   * Register a newly created session (used by new-session handler)
+   * This is different from getOrCreateSession as it always registers a fresh session
+   * 
+   * @param workingDir Working directory
+   * @param client WebSocket client
+   * @param session PiAgentSession instance
+   */
+  registerNewSession(
+    workingDir: string,
+    client: WebSocket,
+    session: PiAgentSession
+  ): void {
+    console.log(`[ServerSessionManager] Registering new session: ${workingDir}`);
+    
+    // Remove any existing entry first
+    if (this.sessions.has(workingDir)) {
+      this.disposeSession(workingDir);
+    }
+    
+    // Register new session
+    this.sessions.set(workingDir, {
+      session,
+      workingDir,
+      client,
+      lastActivity: new Date(),
+    });
+    
+    // Update reverse mapping
+    this.clientToWorkingDir.set(client, workingDir);
+    
+    console.log(`[ServerSessionManager] New session registered: ${workingDir}`);
+  }
+
+  /**
    * Get working directory for a client
    * 
    * @param client WebSocket client
