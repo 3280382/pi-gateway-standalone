@@ -53,6 +53,13 @@ export function SessionDropdownSection() {
   const currentSession = sessions.find((s) => s.id === currentSessionId);
   const displayName = currentSession?.name || currentSessionId?.slice(-8) || "Select";
 
+  // Debug: log sessions data
+  console.log("[SessionDropdownSection] Sessions:", {
+    count: sessions.length,
+    currentSessionId: currentSessionId?.slice(-8),
+    sessions: sessions.map(s => ({ id: s.id.slice(-8), name: s.name, msgCount: s.messageCount })),
+  });
+
   // ========== 5. Render ==========
   if (isLoading && sessions.length === 0) {
     return (
