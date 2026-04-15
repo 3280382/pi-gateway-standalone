@@ -840,3 +840,56 @@
   font-size: 9px !important;
   padding: 1px 4px !important;
 }
+
+/* -------- Loading Overlay -------- */
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(22, 27, 34, 0.85);
+  backdrop-filter: blur(2px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 100;
+  border-radius: 8px;
+}
+
+.loadingSpinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(88, 166, 255, 0.2);
+  border-top-color: #58a6ff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  font-size: 12px;
+  color: #8b949e;
+}
+
+/* Disabled button styles */
+.newSessionButton:disabled,
+.selectorBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Empty state text */
+.emptyText {
+  padding: 12px 16px;
+  font-size: 12px;
+  color: #6e7681;
+  text-align: center;
+}

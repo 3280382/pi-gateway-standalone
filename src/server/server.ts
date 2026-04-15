@@ -35,9 +35,7 @@ import { WebSocket, WebSocketServer } from "ws";
 import { z } from "zod";
 import { registerRoutes } from "./app/routes";
 
-// Register WebSocket handlers (must be imported before wsRouter usage to trigger auto-registration)
-import "./features/chat/ws-handlers/session/index";
-import "./features/chat/ws-handlers/message/index";
+// WebSocket handlers are auto-registered when ws-router.ts is imported
 import { serverSessionManager } from "./features/chat/agent-session/session-manager";
 import { type WSContext, wsRouter } from "./features/chat/ws-router";
 import { AppFactory } from "./lib/app-factory";
@@ -144,14 +142,18 @@ wss.on("connection", (ws) => {
     // 3. Use Router to dispatch message
     try {
       await wsRouter.dispatch(type, ctx, payload);
-      
+
       // Update currentWorkingDir after successful init or change_dir
       if (type === "init" && payload.workingDir) {
         currentWorkingDir = payload.workingDir;
-        logger.info(`[WebSocket] Connection ${connectionId} workingDir set to: ${currentWorkingDir}`);
+        logger.info(
+          `[WebSocket] Connection ${connectionId} workingDir set to: ${currentWorkingDir}`
+        );
       } else if (type === "change_dir" && payload.path) {
         currentWorkingDir = payload.path;
-        logger.info(`[WebSocket] Connection ${connectionId} workingDir changed to: ${currentWorkingDir}`);
+        logger.info(
+          `[WebSocket] Connection ${connectionId} workingDir changed to: ${currentWorkingDir}`
+        );
       }
     } catch (error) {
       logger.error(

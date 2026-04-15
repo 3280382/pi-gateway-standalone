@@ -125,7 +125,7 @@ export class AppFactory {
     this.app.use((req: Request, res: Response, next: NextFunction) => {
       res.setHeader("X-Content-Type-Options", "nosniff");
       // Allow iframe embedding for raw file API (for HTML preview)
-      if (req.path === "/api/files/raw") {
+      if (req.path === "/api/files/file/raw" || req.path === "/api/files/raw") {
         res.setHeader("X-Frame-Options", "SAMEORIGIN");
       } else {
         res.setHeader("X-Frame-Options", "DENY");

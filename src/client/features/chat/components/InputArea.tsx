@@ -106,7 +106,8 @@ export function InputArea({
         <div className={styles.commandMenu}>
           {inputArea.slashCommands.filteredCommands.length > 0 ? (
             inputArea.slashCommands.filteredCommands.map((cmd, index) => (
-              <button type="button"
+              <button
+                type="button"
                 key={cmd.name}
                 className={`${styles.commandItem} ${
                   index === inputArea.slashCommands.selectedIndex ? styles.selected : ""
@@ -135,7 +136,8 @@ export function InputArea({
             <div className={styles.loadingItem}>Loading files...</div>
           ) : inputArea.filePicker.filteredFiles.length > 0 ? (
             inputArea.filePicker.filteredFiles.map((file, index) => (
-              <button type="button"
+              <button
+                type="button"
                 key={file.path}
                 className={`${styles.fileItem} ${
                   index === inputArea.filePicker.selectedIndex ? styles.selected : ""
@@ -164,7 +166,8 @@ export function InputArea({
               <img src={img.preview} alt="Upload" />
               {img.isProcessingOCR && <div className={styles.ocrIndicator}>⋯</div>}
               {img.ocrText && <div className={styles.ocrBadge}>T</div>}
-              <button type="button"
+              <button
+                type="button"
                 className={styles.removeImageBtn}
                 onClick={() => inputArea.imageUpload.removeImage(img.id)}
               >
@@ -172,7 +175,8 @@ export function InputArea({
               </button>
             </div>
           ))}
-          <button type="button"
+          <button
+            type="button"
             className={styles.togglePreviewBtn}
             onClick={() => inputArea.imageUpload.togglePreview()}
           >
@@ -183,7 +187,9 @@ export function InputArea({
       {inputArea.imageUpload.images.length > 0 && !inputArea.imageUpload.showPreview && (
         <div className={styles.imageCountBar}>
           <span>{inputArea.imageUpload.images.length} image(s)</span>
-          <button type="button" onClick={() => inputArea.imageUpload.togglePreview()}>Show</button>
+          <button type="button" onClick={() => inputArea.imageUpload.togglePreview()}>
+            Show
+          </button>
         </div>
       )}
 
@@ -206,7 +212,8 @@ export function InputArea({
           disabled={isStreaming}
         />
         <div className={styles.buttonColumn}>
-          <button type="button"
+          <button
+            type="button"
             className={`${styles.sendButton} ${isStreaming ? styles.stopButton : ""}`}
             onClick={inputArea.handleSend}
             title={isStreaming ? "Stop" : "Send (Ctrl+Enter)"}
@@ -214,7 +221,8 @@ export function InputArea({
             {isStreaming ? <StopIcon /> : <SendIcon />}
           </button>
           {onNewSession && (
-            <button type="button"
+            <button
+              type="button"
               className={styles.newSessionButton}
               onClick={onNewSession}
               title="New Session"
@@ -229,7 +237,8 @@ export function InputArea({
       {/* Toolbar */}
       <div className={styles.toolbar}>
         <SystemPromptButton isStreaming={isStreaming} />
-        <button type="button"
+        <button
+          type="button"
           className={styles.toolbarBtn}
           onClick={() => inputArea.filePicker.open()}
           title="Mention file (@)"
@@ -237,7 +246,8 @@ export function InputArea({
         >
           <span className={styles.btnIcon}>@</span>
         </button>
-        <button type="button"
+        <button
+          type="button"
           className={styles.toolbarBtn}
           onClick={() => inputArea.slashCommands.open()}
           title="Slash command (/)"
@@ -245,7 +255,8 @@ export function InputArea({
         >
           <span className={styles.btnIcon}>/</span>
         </button>
-        <button type="button"
+        <button
+          type="button"
           className={styles.toolbarBtn}
           onClick={() => inputArea.insertTextAtCursor("!", "bash")}
           title="Bash command (!)"
@@ -253,7 +264,8 @@ export function InputArea({
         >
           <span className={styles.btnIcon}>!</span>
         </button>
-        <button type="button"
+        <button
+          type="button"
           className={styles.toolbarBtn}
           onClick={() => fileInputRef.current?.click()}
           title="Upload image/file"
@@ -261,10 +273,11 @@ export function InputArea({
         >
           <ImageIcon />
         </button>
-        
+
         {/* 自动滚屏按钮 */}
         {onToggleScroll && (
-          <button type="button"
+          <button
+            type="button"
             className={`${styles.toolbarBtn} ${shouldScrollToBottom ? styles.active : ""}`}
             onClick={onToggleScroll}
             title={shouldScrollToBottom ? "自动滚屏已启用 (点击关闭)" : "自动滚屏已关闭 (点击启用)"}
@@ -371,7 +384,8 @@ function SystemPromptButton({ isStreaming }: { isStreaming: boolean }) {
   const openSystemPrompt = useModalStore((state) => state.openSystemPrompt);
 
   return (
-    <button type="button"
+    <button
+      type="button"
       className={styles.toolbarBtn}
       onClick={() => openSystemPrompt()}
       title="System Prompt"

@@ -44,15 +44,15 @@ interface FileToolbarProps {
 
 export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarProps) {
   // ========== 1. State ==========
-  const { 
+  const {
     viewMode,
-    sortMode, 
-    filterType, 
-    filterText, 
+    sortMode,
+    filterType,
+    filterText,
     treeFilterMode,
     treeFilterText,
-    setSortMode, 
-    setFilterType, 
+    setSortMode,
+    setFilterType,
     setFilterText,
     setTreeFilterMode,
     setTreeFilterText,
@@ -90,9 +90,12 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
     FILTER_OPTIONS.find((opt) => opt.value === filterType) || FILTER_OPTIONS[0];
 
   // TreeView过滤选项显示文本
-  const selectedTreeFilter = 
-    treeFilterMode === "normal" ? "🙈 Exclude Hidden" :
-    treeFilterMode === "all" ? "👁️ Show All" : "🔍 Search...";
+  const selectedTreeFilter =
+    treeFilterMode === "normal"
+      ? "🙈 Exclude Hidden"
+      : treeFilterMode === "all"
+        ? "👁️ Show All"
+        : "🔍 Search...";
 
   // ========== 5. Actions ==========
   // 处理输入框变化
@@ -135,14 +138,20 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
             type="text"
             className={styles.filterComboInput}
             placeholder="Filter..."
-            value={isTreeView 
-              ? (treeFilterMode === "search" ? treeFilterText : selectedTreeFilter)
-              : (filterType === "custom" ? filterText : selectedFilterOption.label)
+            value={
+              isTreeView
+                ? treeFilterMode === "search"
+                  ? treeFilterText
+                  : selectedTreeFilter
+                : filterType === "custom"
+                  ? filterText
+                  : selectedFilterOption.label
             }
             onChange={(e) => handleFilterInputChange(e.target.value)}
             onClick={() => setIsFilterDropdownOpen(true)}
           />
-          <button type="button"
+          <button
+            type="button"
             className={styles.filterComboBtn}
             onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
             title="Select filter"
@@ -151,50 +160,49 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
           </button>
           {isFilterDropdownOpen && (
             <div className={styles.filterDropdown}>
-              {isTreeView ? (
-                // TreeView 过滤选项
-                TREE_FILTER_OPTIONS.map((option) => (
-                  <div
-                    key={option.value}
-                    className={`${styles.filterDropdownItem} ${treeFilterMode === option.value ? styles.active : ""}`}
-                    onClick={() => {
-                      setTreeFilterMode(option.value);
-                      if (option.value !== "search") {
-                        setTreeFilterText("");
-                      }
-                      setIsFilterDropdownOpen(false);
-                    }}
-                  >
-                    <span className={styles.filterIcon}>{option.icon}</span>
-                    <span className={styles.filterLabel}>{option.label}</span>
-                  </div>
-                ))
-              ) : (
-                // Grid/List 过滤选项
-                FILTER_OPTIONS.map((option) => (
-                  <div
-                    key={option.value}
-                    className={`${styles.filterDropdownItem} ${filterType === option.value ? styles.active : ""}`}
-                    onClick={() => {
-                      setFilterType(option.value);
-                      if (option.value !== "custom") {
-                        setFilterText("");
-                      }
-                      setIsFilterDropdownOpen(false);
-                    }}
-                  >
-                    <span className={styles.filterIcon}>{option.icon}</span>
-                    <span className={styles.filterLabel}>{option.label}</span>
-                  </div>
-                ))
-              )}
+              {isTreeView
+                ? // TreeView 过滤选项
+                  TREE_FILTER_OPTIONS.map((option) => (
+                    <div
+                      key={option.value}
+                      className={`${styles.filterDropdownItem} ${treeFilterMode === option.value ? styles.active : ""}`}
+                      onClick={() => {
+                        setTreeFilterMode(option.value);
+                        if (option.value !== "search") {
+                          setTreeFilterText("");
+                        }
+                        setIsFilterDropdownOpen(false);
+                      }}
+                    >
+                      <span className={styles.filterIcon}>{option.icon}</span>
+                      <span className={styles.filterLabel}>{option.label}</span>
+                    </div>
+                  ))
+                : // Grid/List 过滤选项
+                  FILTER_OPTIONS.map((option) => (
+                    <div
+                      key={option.value}
+                      className={`${styles.filterDropdownItem} ${filterType === option.value ? styles.active : ""}`}
+                      onClick={() => {
+                        setFilterType(option.value);
+                        if (option.value !== "custom") {
+                          setFilterText("");
+                        }
+                        setIsFilterDropdownOpen(false);
+                      }}
+                    >
+                      <span className={styles.filterIcon}>{option.icon}</span>
+                      <span className={styles.filterLabel}>{option.label}</span>
+                    </div>
+                  ))}
             </div>
           )}
         </div>
 
         {/* 排序 */}
         <div className={styles.sortCombo} ref={sortDropdownRef}>
-          <button type="button"
+          <button
+            type="button"
             className={styles.sortComboBtn}
             onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
             title="Sort by"

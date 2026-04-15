@@ -44,7 +44,9 @@ function MessageList({
       {allMessages.map((message) => (
         <div key={message.id} data-testid={`message-${message.id}`}>
           <span>{message.role}</span>
-          <button type="button" onClick={() => onToggleMessageCollapse(message.id)}>Toggle</button>
+          <button type="button" onClick={() => onToggleMessageCollapse(message.id)}>
+            Toggle
+          </button>
         </div>
       ))}
     </div>

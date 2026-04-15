@@ -6,8 +6,6 @@
 export { useChat } from "@/features/chat/hooks/useChat";
 export { useChatInit } from "@/features/chat/hooks/useChatInit";
 export { useChatMessages } from "@/features/chat/hooks/useChatMessages";
-export { useSidebarSessions } from "@/features/chat/hooks/useSidebarSessions";
-
 // ChatPanel 相关 Hooks
 export { useChatPanel } from "@/features/chat/hooks/useChatPanel";
 // AppHeader 相关 Hooks
@@ -19,6 +17,7 @@ export { useInputArea } from "@/features/chat/hooks/useInputArea";
 export { useModelSelector } from "@/features/chat/hooks/useModelSelector";
 export type { SearchFilters } from "@/features/chat/hooks/useSearchFilters";
 export { useSearchFilters } from "@/features/chat/hooks/useSearchFilters";
+export { useSidebarSessions } from "@/features/chat/hooks/useSidebarSessions";
 export { useSlashCommands } from "@/features/chat/hooks/useSlashCommands";
 export {
   THINKING_LEVELS,

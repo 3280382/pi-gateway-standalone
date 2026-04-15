@@ -248,10 +248,7 @@
     "pipx": {
       "count": 2,
       "failures": 0,
-      "examples": [
-        "pipx install tavily-cli 2>&1 | tail -20",
-        "pipx ensurepath 2>&1 | tail -10"
-      ],
+      "examples": ["pipx install tavily-cli 2>&1 | tail -20", "pipx ensurepath 2>&1 | tail -10"],
       "error_examples": []
     },
     "source": {
@@ -307,11 +304,7 @@
     "python3": {
       "count": 58,
       "failures": 0,
-      "examples": [
-        "python3 --version",
-        "python3 hello.py",
-        "python3 --version"
-      ],
+      "examples": ["python3 --version", "python3 hello.py", "python3 --version"],
       "error_examples": []
     },
     "uname": {
@@ -346,39 +339,25 @@
     "df": {
       "count": 4,
       "failures": 0,
-      "examples": [
-        "df -h 2>/dev/null || echo \"df not available\"",
-        "df -h",
-        "df -h"
-      ],
+      "examples": ["df -h 2>/dev/null || echo \"df not available\"", "df -h", "df -h"],
       "error_examples": []
     },
     "pwd": {
       "count": 37,
       "failures": 0,
-      "examples": [
-        "pwd && ls -la",
-        "pwd && ls -la",
-        "pwd && ls -la"
-      ],
+      "examples": ["pwd && ls -la", "pwd && ls -la", "pwd && ls -la"],
       "error_examples": []
     },
     "lsb_release": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "lsb_release -a 2>/dev/null || echo \"lsb_release not available\""
-      ],
+      "examples": ["lsb_release -a 2>/dev/null || echo \"lsb_release not available\""],
       "error_examples": []
     },
     "uptime": {
       "count": 3,
       "failures": 0,
-      "examples": [
-        "uptime",
-        "uptime && echo \"--- \u6d4b\u8bd5\u901a\u8fc7 ---\"",
-        "uptime"
-      ],
+      "examples": ["uptime", "uptime && echo \"--- \u6d4b\u8bd5\u901a\u8fc7 ---\"", "uptime"],
       "error_examples": []
     },
     "python": {
@@ -504,11 +483,7 @@
     "seq": {
       "count": 22,
       "failures": 0,
-      "examples": [
-        "seq 1 100 > numbers.txt",
-        "seq 1 100 > numbers.txt",
-        "seq 1 100 > numbers.txt"
-      ],
+      "examples": ["seq 1 100 > numbers.txt", "seq 1 100 > numbers.txt", "seq 1 100 > numbers.txt"],
       "error_examples": []
     },
     "netstat": {
@@ -524,9 +499,7 @@
     "w": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "w && echo \"---\" && top -bn1 | head -20"
-      ],
+      "examples": ["w && echo \"---\" && top -bn1 | head -20"],
       "error_examples": []
     },
     "ping": {
@@ -542,9 +515,7 @@
     "speedtest-cli": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "speedtest-cli --simple"
-      ],
+      "examples": ["speedtest-cli --simple"],
       "error_examples": []
     },
     "pip": {
@@ -560,46 +531,31 @@
     "ifconfig": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "ifconfig || ip addr show"
-      ],
+      "examples": ["ifconfig || ip addr show"],
       "error_examples": []
     },
     "date": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "date"
-      ],
+      "examples": ["date"],
       "error_examples": []
     },
     "cal": {
       "count": 2,
       "failures": 0,
-      "examples": [
-        "cal -3",
-        "cal"
-      ],
+      "examples": ["cal -3", "cal"],
       "error_examples": []
     },
     "apt": {
       "count": 25,
       "failures": 0,
-      "examples": [
-        "apt update -y",
-        "apt install -y curl wget",
-        "apt install -y zstd"
-      ],
+      "examples": ["apt update -y", "apt install -y curl wget", "apt install -y zstd"],
       "error_examples": []
     },
     "ollama": {
       "count": 6,
       "failures": 0,
-      "examples": [
-        "ollama --version",
-        "ollama pull gemma4:e2b",
-        "ollama list"
-      ],
+      "examples": ["ollama --version", "ollama pull gemma4:e2b", "ollama list"],
       "error_examples": []
     },
     "nohup": {
@@ -733,9 +689,7 @@
     "base64": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "base64 bankflow_project_encrypted.zip > attachment_base64.txt"
-      ],
+      "examples": ["base64 bankflow_project_encrypted.zip > attachment_base64.txt"],
       "error_examples": []
     },
     "tree": {
@@ -820,35 +774,25 @@
     "pi-compact-status": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "pi-compact-status"
-      ],
+      "examples": ["pi-compact-status"],
       "error_examples": []
     },
     "termux-setup-storage": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "termux-setup-storage"
-      ],
+      "examples": ["termux-setup-storage"],
       "error_examples": []
     },
     "ln": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "ln -sf ~/storage/shared/projects ~/projects"
-      ],
+      "examples": ["ln -sf ~/storage/shared/projects ~/projects"],
       "error_examples": []
     },
     "proot-distro": {
       "count": 19,
       "failures": 0,
-      "examples": [
-        "proot-distro list",
-        "proot-distro install ubuntu",
-        "proot-distro list"
-      ],
+      "examples": ["proot-distro list", "proot-distro install ubuntu", "proot-distro list"],
       "error_examples": []
     },
     "tmux": {
@@ -874,9 +818,7 @@
     "rg": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "rg \"toolCall|toolUse\" /root/.pi/agent/sessions --type jsonl -l | head -5"
-      ],
+      "examples": ["rg \"toolCall|toolUse\" /root/.pi/agent/sessions --type jsonl -l | head -5"],
       "error_examples": []
     },
     ">": {
@@ -938,33 +880,25 @@
     "kimisearch": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "kimisearch \"Talent OS platform what is\" --format json"
-      ],
+      "examples": ["kimisearch \"Talent OS platform what is\" --format json"],
       "error_examples": []
     },
     "~/.pi/agent/skills/kimi-search/search.sh": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "~/.pi/agent/skills/kimi-search/search.sh \"Talent OS platform\""
-      ],
+      "examples": ["~/.pi/agent/skills/kimi-search/search.sh \"Talent OS platform\""],
       "error_examples": []
     },
     "timg": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "timg /sdcard/Download/architecture_diagram.png 2>&1"
-      ],
+      "examples": ["timg /sdcard/Download/architecture_diagram.png 2>&1"],
       "error_examples": []
     },
     "chafa": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "chafa /sdcard/Download/architecture_diagram.png --size=80x40 2>&1"
-      ],
+      "examples": ["chafa /sdcard/Download/architecture_diagram.png --size=80x40 2>&1"],
       "error_examples": []
     },
     "dot": {
@@ -979,9 +913,7 @@
     "d2": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "d2 --help 2>&1 | head -20"
-      ],
+      "examples": ["d2 --help 2>&1 | head -20"],
       "error_examples": []
     },
     "whoami": {
@@ -1083,11 +1015,7 @@
     "termux-info": {
       "count": 3,
       "failures": 0,
-      "examples": [
-        "termux-info",
-        "termux-info",
-        "termux-info 2>&1 | head -20"
-      ],
+      "examples": ["termux-info", "termux-info", "termux-info 2>&1 | head -20"],
       "error_examples": []
     },
     "dpkg": {
@@ -1102,9 +1030,7 @@
     "java": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "java -version && javac -version"
-      ],
+      "examples": ["java -version && javac -version"],
       "error_examples": []
     },
     "jar": {
@@ -1127,27 +1053,19 @@
     "wget": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "wget --version 2>&1 | head -1"
-      ],
+      "examples": ["wget --version 2>&1 | head -1"],
       "error_examples": []
     },
     "aider": {
       "count": 14,
       "failures": 0,
-      "examples": [
-        "aider --help",
-        "aider --help",
-        "aider --help"
-      ],
+      "examples": ["aider --help", "aider --help", "aider --help"],
       "error_examples": []
     },
     "ttyd": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "ttyd --version && echo \"\u5b89\u88c5\u6210\u529f\uff01\" && mkdir -p ~/tmp"
-      ],
+      "examples": ["ttyd --version && echo \"\u5b89\u88c5\u6210\u529f\uff01\" && mkdir -p ~/tmp"],
       "error_examples": []
     },
     "apt-cache": {
@@ -1189,9 +1107,7 @@
     "udocker": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "udocker version 2>/dev/null || echo \"udocker not properly installed\""
-      ],
+      "examples": ["udocker version 2>/dev/null || echo \"udocker not properly installed\""],
       "error_examples": []
     },
     "termux-sms-list": {
@@ -1207,27 +1123,19 @@
     "claude-code": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "claude-code --version || echo \"Checking installation...\""
-      ],
+      "examples": ["claude-code --version || echo \"Checking installation...\""],
       "error_examples": []
     },
     "claude": {
       "count": 7,
       "failures": 0,
-      "examples": [
-        "claude --help",
-        "claude auth --help",
-        "claude plugin --help"
-      ],
+      "examples": ["claude --help", "claude auth --help", "claude plugin --help"],
       "error_examples": []
     },
     "ccr": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "ccr --help 2>/dev/null || echo \"Checking ccr command...\""
-      ],
+      "examples": ["ccr --help 2>/dev/null || echo \"Checking ccr command...\""],
       "error_examples": []
     },
     "search-engine": {
@@ -1242,17 +1150,13 @@
     "~/flutter/bin/cache/dart-sdk/bin/dart": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "~/flutter/bin/cache/dart-sdk/bin/dart --version 2>&1"
-      ],
+      "examples": ["~/flutter/bin/cache/dart-sdk/bin/dart --version 2>&1"],
       "error_examples": []
     },
     "ldd": {
       "count": 1,
       "failures": 0,
-      "examples": [
-        "ldd ~/flutter/bin/cache/dart-sdk/bin/dart 2>&1"
-      ],
+      "examples": ["ldd ~/flutter/bin/cache/dart-sdk/bin/dart 2>&1"],
       "error_examples": []
     },
     "readelf": {

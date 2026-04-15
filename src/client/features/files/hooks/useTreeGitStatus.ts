@@ -26,7 +26,7 @@ export interface UseTreeGitStatusOptions {
  */
 function extractAllPaths(nodes: TreeNode[]): string[] {
   const paths: string[] = [];
-  
+
   function traverse(node: TreeNode) {
     paths.push(node.path);
     if (node.children) {
@@ -35,11 +35,11 @@ function extractAllPaths(nodes: TreeNode[]): string[] {
       }
     }
   }
-  
+
   for (const node of nodes) {
     traverse(node);
   }
-  
+
   return paths;
 }
 
@@ -147,11 +147,5 @@ export function useTreeGitStatus(options: UseTreeGitStatusOptions) {
     };
 
     fetchGitStatus();
-  }, [
-    isActive,
-    isGitModeActive,
-    workingDir,
-    treeData,
-    setTreeGitStatusMap,
-  ]);
+  }, [isActive, isGitModeActive, workingDir, treeData, setTreeGitStatusMap]);
 }

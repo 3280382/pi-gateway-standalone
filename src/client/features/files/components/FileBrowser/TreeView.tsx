@@ -7,9 +7,9 @@
 import type React from "react";
 import { memo, useCallback } from "react";
 import { useFileItemActions } from "@/features/files/hooks";
-import { useFileStore } from "@/features/files/stores/fileStore";
 import { useTreeGitStatus } from "@/features/files/hooks/useTreeGitStatus";
 import * as todoApi from "@/features/files/services/api/todoApi";
+import { useFileStore } from "@/features/files/stores/fileStore";
 import type { TreeNode } from "@/features/files/types";
 import styles from "./TreeView.module.css";
 

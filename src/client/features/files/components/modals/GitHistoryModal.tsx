@@ -6,8 +6,8 @@
  */
 
 import { useEffect, useState } from "react";
-import * as gitApi from "@/features/files/services/api/gitApi";
 import type { GitCommit } from "@/features/files/services/api/gitApi";
+import * as gitApi from "@/features/files/services/api/gitApi";
 import { useViewerStore } from "@/features/files/stores/viewerStore";
 import styles from "./Modals.module.css";
 
@@ -157,36 +157,48 @@ export function GitHistoryModal({ isOpen, filePath, fileName, onClose }: GitHist
 
             {!loading && !error && history.length > 0 && (
               <div className={styles.list}>
-                {history.map((commit, index) => (
-                  <div
-                    key={commit.hash}
-                    className={`${styles.item} ${index % 2 === 0 ? styles.even : styles.odd}`}
-                  >
-                    <div className={styles.row1}>
-                      <span className={styles.num}>#{history.length - index}</span>
-                      <code className={styles.hash}>{commit.shortHash}</code>
-                      <span className={styles.author}>{commit.author}</span>
-                      <span className={styles.date}>{formatDate(commit.date)}</span>
-                      <div className={styles.actions}>
-                        <button type="button"
-                          className={`${styles.btn} ${styles.cBtn}`}
-                          onClick={() => handleViewContent(commit)}
-                          title="View content"
-                        >
-                          📄
-                        </button>
-                        <button type="button"
-                          className={`${styles.btn} ${styles.dBtn}`}
-                          onClick={() => handleViewDiff(commit)}
-                          title="View diff"
-                        >
-                          📊
-                        </button>
+                {history.map((commit, index) => {
+                  const isWorking = commit.hash === "WORKING";
+                  return (
+                    <div
+                      key={commit.hash}
+                      className={`${styles.item} ${index % 2 === 0 ? styles.even : styles.odd} ${isWorking ? styles.working : ""}`}
+                    >
+                      <div className={styles.row1}>
+                        <span className={styles.num}>#{history.length - index}</span>
+                        <code className={`${styles.hash} ${isWorking ? styles.workingHash : ""}`}>
+                          {isWorking ? "💾 WORKING" : commit.shortHash}
+                        </code>
+                        <span className={styles.author}>{commit.author}</span>
+                        <span className={styles.date}>{formatDate(commit.date)}</span>
+                        <div className={styles.actions}>
+                          {/* 工作区不显示查看内容按钮，因为文件已在编辑器中打开 */}
+                          {!isWorking && (
+                            <button
+                              type="button"
+                              className={`${styles.btn} ${styles.cBtn}`}
+                              onClick={() => handleViewContent(commit)}
+                              title="View content"
+                            >
+                              📄
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className={`${styles.btn} ${styles.dBtn}`}
+                            onClick={() => handleViewDiff(commit)}
+                            title={isWorking ? "View changes vs HEAD" : "View diff vs working tree"}
+                          >
+                            📊
+                          </button>
+                        </div>
+                      </div>
+                      <div className={`${styles.msg} ${isWorking ? styles.workingMsg : ""}`}>
+                        {commit.message}
                       </div>
                     </div>
-                    <div className={styles.msg}>{commit.message}</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -198,7 +210,12 @@ export function GitHistoryModal({ isOpen, filePath, fileName, onClose }: GitHist
         <div className={styles.overlay} onClick={closeDiffModal}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.header}>
-              <span className={styles.title}>📊 Diff: {diffModal.commit?.shortHash} → HEAD</span>
+              <span className={styles.title}>
+                📊 Diff:{" "}
+                {diffModal.commit?.hash === "WORKING"
+                  ? "HEAD → WORKING"
+                  : `${diffModal.commit?.shortHash} → WORKING`}
+              </span>
               <button type="button" className={styles.close} onClick={closeDiffModal}>
                 ✕
               </button>

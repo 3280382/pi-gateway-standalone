@@ -160,7 +160,14 @@ export function IconButton({
   const iconSize = size === "sm" ? "sm" : size === "lg" ? "lg" : "md";
 
   return (
-    <button type="button" className={buttonClass} onClick={onClick} disabled={disabled} title={title} {...props}>
+    <button
+      type="button"
+      className={buttonClass}
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      {...props}
+    >
       {iconPosition === "left" && <Icon name={name} size={iconSize} />}
 
       {label && <span className={styles.label}>{label}</span>}

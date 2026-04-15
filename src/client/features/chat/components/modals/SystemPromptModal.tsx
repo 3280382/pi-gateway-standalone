@@ -301,31 +301,36 @@ export function SystemPromptModal() {
         </div>
 
         <div className={styles.tabs}>
-          <button type="button"
+          <button
+            type="button"
             className={activeTab === "prompt" ? styles.activeTab : ""}
             onClick={() => setActiveTab("prompt")}
           >
             System Prompt
           </button>
-          <button type="button"
+          <button
+            type="button"
             className={activeTab === "agents" ? styles.activeTab : ""}
             onClick={() => setActiveTab("agents")}
           >
             AGENTS.md ({data?.agentsFiles?.length || 0})
           </button>
-          <button type="button"
+          <button
+            type="button"
             className={activeTab === "skills" ? styles.activeTab : ""}
             onClick={() => setActiveTab("skills")}
           >
             Skills ({data?.skills?.length || 0})
           </button>
-          <button type="button"
+          <button
+            type="button"
             className={activeTab === "extensions" ? styles.activeTab : ""}
             onClick={() => setActiveTab("extensions")}
           >
             Extensions ({data?.extensions?.length || 0})
           </button>
-          <button type="button"
+          <button
+            type="button"
             className={activeTab === "resources" ? styles.activeTab : ""}
             onClick={() => setActiveTab("resources")}
           >

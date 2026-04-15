@@ -2,13 +2,13 @@
  * Initialization Service - 文件功能初始化
  *
  * 职责：处理文件功能的初始化逻辑
- * 
+ *
  * 注意：工作目录现在由全局 workspaceStore 统一管理
  * currentBrowsePath 由 FileStore 管理并持久化到 pi:files:browser
  */
 
-import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { useFileStore } from "@/features/files/stores";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 
 /**
  * 获取初始工作目录（同步版本，用于 SSR 兼容）

@@ -54,7 +54,31 @@ function getRelativePath(gitRoot: string, filePath: string): string {
 }
 
 /**
+ * 检查文件在工作区是否有未提交的修改
+ */
+async function hasWorkingTreeChanges(gitRoot: string, relativePath: string): Promise<boolean> {
+  try {
+    // 检查工作区是否有修改（未暂存的修改）
+    const { stdout } = await execAsync(`git diff --quiet "${relativePath}" || echo "modified"`, {
+      cwd: gitRoot,
+    });
+    if (stdout.trim() === "modified") {
+      return true;
+    }
+    // 检查暂存区是否有修改
+    const { stdout: stagedStdout } = await execAsync(
+      `git diff --cached --quiet "${relativePath}" || echo "staged"`,
+      { cwd: gitRoot }
+    );
+    return stagedStdout.trim() === "staged";
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Get git history for a file - 对应 /api/git/history
+ * 如果有未提交的修改，在历史列表顶部添加"工作区"条目
  */
 async function getGitHistory(workingDir: string, filePath: string): Promise<GitCommit[]> {
   const gitRoot = await getGitRoot(workingDir);
@@ -71,11 +95,27 @@ async function getGitHistory(workingDir: string, filePath: string): Promise<GitC
       { cwd: gitRoot }
     );
 
-    if (!stdout.trim()) {
-      return [];
+    const commits: GitCommit[] = [];
+
+    // 检查是否有未提交的修改
+    const hasChanges = await hasWorkingTreeChanges(gitRoot, relativePath);
+    if (hasChanges) {
+      // 添加"工作区"条目到历史列表顶部
+      commits.push({
+        hash: "WORKING",
+        shortHash: "WORKING",
+        message: "Current changes (not committed)",
+        author: "Working Tree",
+        date: new Date().toISOString(),
+        timestamp: Math.floor(Date.now() / 1000),
+      });
     }
 
-    return stdout
+    if (!stdout.trim()) {
+      return commits;
+    }
+
+    const historyCommits = stdout
       .trim()
       .split("\n")
       .map((line) => {
@@ -89,6 +129,8 @@ async function getGitHistory(workingDir: string, filePath: string): Promise<GitC
           timestamp: parseInt(parts[3], 10),
         };
       });
+
+    return [...commits, ...historyCommits];
   } catch (error) {
     console.error("[GitController] Error getting history:", error);
     return [];
@@ -96,7 +138,7 @@ async function getGitHistory(workingDir: string, filePath: string): Promise<GitC
 }
 
 /**
- * Get file content at specific commit - 对应 /api/git/content
+ * Get file content at specific commit or working tree - 对应 /api/git/content
  */
 async function getFileContent(
   workingDir: string,
@@ -114,6 +156,13 @@ async function getFileContent(
   );
 
   try {
+    // 如果是工作区，读取实际文件
+    if (commitHash === "WORKING") {
+      const fullPath = join(gitRoot, relativePath);
+      const { stdout } = await execAsync(`cat "${fullPath}"`);
+      return stdout;
+    }
+    // 否则从 git 读取
     const { stdout } = await execAsync(`git show "${commitHash}:${relativePath}"`, {
       cwd: gitRoot,
     });
@@ -130,7 +179,8 @@ async function getFileContent(
 }
 
 /**
- * Get diff between commit and current - 对应 /api/git/diff
+ * Get diff between commit and working tree - 对应 /api/git/diff
+ * 如果 commitHash 是 "WORKING"，则比较前一个提交与工作区
  */
 async function getFileDiff(
   workingDir: string,
@@ -148,9 +198,20 @@ async function getFileDiff(
   );
 
   try {
-    const { stdout } = await execAsync(`git diff "${commitHash}" HEAD -- "${relativePath}"`, {
-      cwd: gitRoot,
-    });
+    let stdout = "";
+    if (commitHash === "WORKING") {
+      // 工作区 vs HEAD（最新提交）
+      const result = await execAsync(`git diff HEAD -- "${relativePath}"`, {
+        cwd: gitRoot,
+      });
+      stdout = result.stdout;
+    } else {
+      // commit vs 工作区（而不是 HEAD）
+      const result = await execAsync(`git diff "${commitHash}" -- "${relativePath}"`, {
+        cwd: gitRoot,
+      });
+      stdout = result.stdout;
+    }
     return stdout || "No differences";
   } catch (error: any) {
     console.error("[GitController] Error getting diff:", error?.stderr || error?.message || error);

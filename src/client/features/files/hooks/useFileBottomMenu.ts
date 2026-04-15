@@ -8,8 +8,8 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import * as fileApi from "@/features/files/services/api/fileApi";
 import type { TreeResponse } from "@/features/files/services/api/fileApi";
+import * as fileApi from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { useFileOperations } from "./useFileOperations";

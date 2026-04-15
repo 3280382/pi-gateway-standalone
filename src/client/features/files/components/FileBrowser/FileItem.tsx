@@ -83,10 +83,10 @@ export const FileItem = memo<FileItemProps>(
     // Todo状态 - 始终显示，不限于 Todo 模式
     const { todoMap } = useFileStore();
     const todos = todoMap.get(item.path) || [];
-    const pendingTodos = todos.filter(t => !t.checked);
+    const pendingTodos = todos.filter((t) => !t.checked);
     const hasTodos = todos.length > 0;
     const hasPendingTodos = pendingTodos.length > 0;
-    const todoPriorityColor = hasPendingTodos 
+    const todoPriorityColor = hasPendingTodos
       ? todoApi.getPriorityColor(pendingTodos[0].tags)
       : "#8b949e";
 
@@ -194,11 +194,11 @@ export const FileItem = memo<FileItemProps>(
             <span
               className={styles.todoBadge}
               style={{
-                backgroundColor: hasPendingTodos ? '#22c55e' : '#16a34a',
-                color: '#ffffff',
+                backgroundColor: hasPendingTodos ? "#22c55e" : "#16a34a",
+                color: "#ffffff",
                 fontWeight: 700,
               }}
-              title={pendingTodos.map(t => t.text).join("\n")}
+              title={pendingTodos.map((t) => t.text).join("\n")}
             >
               {hasPendingTodos ? pendingTodos.length : todos.length}
             </span>
@@ -206,9 +206,7 @@ export const FileItem = memo<FileItemProps>(
         </span>
 
         {/* Name */}
-        <span className={isGrid ? styles.gridName : styles.listName}>
-          {item.name}
-        </span>
+        <span className={isGrid ? styles.gridName : styles.listName}>{item.name}</span>
 
         {/* List view extra info */}
         {!isGrid && (

@@ -186,6 +186,27 @@
   word-break: break-word;
 }
 
+/* 工作区条目特殊样式 */
+.item.working {
+  background: rgba(249, 226, 175, 0.12) !important;
+  border: 1px solid rgba(249, 226, 175, 0.25);
+}
+
+.item.working:hover {
+  background: rgba(249, 226, 175, 0.18) !important;
+}
+
+.workingHash {
+  color: #f9e2af !important;
+  background: rgba(249, 226, 175, 0.2) !important;
+  font-weight: 600;
+}
+
+.workingMsg {
+  color: #f9e2af !important;
+  font-style: italic;
+}
+
 /* Code View */
 .code {
   margin: 0;

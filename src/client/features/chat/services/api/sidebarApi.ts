@@ -26,13 +26,10 @@ export function useSidebarController(): SidebarController {
       console.log("[SidebarController] loadWorkingDir: data comes from WebSocket init");
     }, []),
 
-    loadSessions: useCallback(
-      async (_cwd: string) => {
-        // Sessions 来自 WebSocket init 响应，不需要 HTTP 获取
-        console.log("[SidebarController] loadSessions: data comes from WebSocket init");
-      },
-      []
-    ),
+    loadSessions: useCallback(async (_cwd: string) => {
+      // Sessions 来自 WebSocket init 响应，不需要 HTTP 获取
+      console.log("[SidebarController] loadSessions: data comes from WebSocket init");
+    }, []),
 
     // Actions - 委托给 sessionManager (WebSocket)
     changeWorkingDir: useCallback(

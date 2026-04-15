@@ -1005,9 +1005,10 @@ export const useChatStore = create<
         );
       },
 
-      // Load session messages from server
+      // Load session messages from server via HTTP (fallback method)
+      // Note: Main loading is now done via WebSocket init for consistency
       loadSession: async (sessionPath: string) => {
-        console.log("[ChatStore] loadSession called with path:", sessionPath);
+        console.log("[ChatStore] loadSession (HTTP fallback) called with path:", sessionPath);
         try {
           const response = await fetch("/api/session/load", {
             method: "POST",
@@ -1033,213 +1034,15 @@ export const useChatStore = create<
             return 0;
           }
 
-          // Helper: normalize content to array
-          const normalizeContent = (rawContent: any): any[] => {
-            if (!rawContent) return [];
-            if (Array.isArray(rawContent)) return rawContent;
-            if (typeof rawContent === "string") return [{ type: "text", text: rawContent }];
-            if (typeof rawContent === "object") return [rawContent];
-            return [{ type: "text", text: String(rawContent) }];
-          };
+          // 使用统一的消息转换函数（与 WebSocket init 一致）
+          const { normalizeSessionMessages } = await import("@/features/chat/utils/messageUtils");
+          const loadedMessages = normalizeSessionMessages(data.entries);
 
-          // Helper: normalize single content item
-          const normalizeContentItem = (item: any): any => {
-            if (!item || typeof item !== "object") {
-              return { type: "text", text: String(item || "") };
-            }
-
-            const type = item.type || "text";
-            switch (type) {
-              case "thinking":
-                return {
-                  type: "thinking" as const,
-                  thinking: item.thinking || item.text || "",
-                  signature: item.thinkingSignature || item.signature,
-                };
-              case "text":
-                return { type: "text" as const, text: item.text || "" };
-              case "toolCall":
-              case "tool_use":
-                return {
-                  type: "tool_use" as const,
-                  toolCallId: item.id || item.toolCallId || `tool-${Date.now()}`,
-                  toolName: item.name || item.toolName || "unknown",
-                  args: item.arguments || item.args || {},
-                  partialArgs: item.partialArgs,
-                };
-              case "toolResult":
-              case "tool_result":
-              case "tool": {
-                // 处理 content 数组格式，提取文本
-                let contentText = "";
-                if (Array.isArray(item.content)) {
-                  contentText = item.content
-                    .filter((c: any) => c.type === "text")
-                    .map((c: any) => c.text)
-                    .join("");
-                } else if (typeof item.content === "string") {
-                  contentText = item.content;
-                }
-
-                console.log("[normalize] toolResult:", {
-                  toolCallId: item.toolCallId,
-                  toolName: item.toolName,
-                  contentLength: contentText.length,
-                  isError: item.isError,
-                });
-
-                return {
-                  type: "tool" as const,
-                  toolCallId: item.toolCallId || item.id,
-                  toolName: item.toolName || item.name || "unknown",
-                  output: item.isError ? undefined : contentText || item.output,
-                  error: item.isError ? contentText || item.error : undefined,
-                  args: item.args,
-                };
-              }
-              case "image":
-                return {
-                  type: "image" as const,
-                  imageUrl: item.imageUrl || item.url || item.source?.data,
-                };
-              default:
-                return {
-                  type: "text" as const,
-                  text: item.text || String(item),
-                };
-            }
-          };
-
-          // 调试：查看所有 entry 类型
-          console.log(
-            "[loadSession] All entries:",
-            data.entries.map((e: any) => ({
-              type: e.type,
-              role: e.message?.role,
-            }))
-          );
-
-          // 第一遍：收集所有 toolCall 的参数
-          const toolCallArgsMap = new Map<string, any>();
-          data.entries.forEach((entry: any) => {
-            if (
-              entry.type === "message" &&
-              entry.message?.role === "assistant" &&
-              Array.isArray(entry.message.content)
-            ) {
-              entry.message.content.forEach((item: any) => {
-                if (item.type === "toolCall" && item.id) {
-                  toolCallArgsMap.set(item.id, item.arguments || {});
-                  console.log("[loadSession] Found toolCall:", item.id, item.name, item.arguments);
-                }
-              });
-            }
-          });
-
-          const loadedMessages = data.entries
-            .filter((entry: any) => entry.type === "message" && entry.message)
-            .map((entry: any) => {
-              const msg = entry.message;
-
-              // 调试
-              console.log("[loadSession] Processing message:", {
-                role: msg.role,
-                id: entry.id,
-              });
-
-              // 特殊处理 toolResult 消息
-              if (msg.role === "toolResult") {
-                // 从 toolResult 创建 tool 类型的 content
-                let contentText = "";
-                if (Array.isArray(msg.content)) {
-                  contentText = msg.content
-                    .filter((c: any) => c.type === "text")
-                    .map((c: any) => c.text)
-                    .join("");
-                } else if (typeof msg.content === "string") {
-                  contentText = msg.content;
-                }
-
-                // 查找对应的 toolCall 参数
-                const args = toolCallArgsMap.get(msg.toolCallId) || {};
-                console.log("[loadSession] toolResult message:", {
-                  toolCallId: msg.toolCallId,
-                  toolName: msg.toolName,
-                  contentLength: contentText.length,
-                  hasArgs: Object.keys(args).length > 0,
-                });
-
-                return {
-                  id: entry.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                  role: "assistant" as const, // toolResult 转为 assistant
-                  content: [
-                    {
-                      type: "tool" as const,
-                      toolCallId: msg.toolCallId,
-                      toolName: msg.toolName,
-                      output: msg.isError ? undefined : contentText,
-                      error: msg.isError ? contentText : undefined,
-                      args: args,
-                    },
-                  ],
-                  timestamp: new Date(msg.timestamp || entry.timestamp || Date.now()),
-                  isStreaming: false,
-                  isThinkingCollapsed: true,
-                  isToolsCollapsed: true, // 默认折叠工具内容
-                  isMessageCollapsed: false,
-                };
-              }
-
-              // 普通消息处理
-              const rawContent = msg.content;
-              const contentArray = normalizeContent(rawContent);
-
-              // 过滤掉 toolCall，避免重复显示（toolResult 已经单独处理了）
-              const filteredContent = contentArray.filter((item: any) => {
-                // 跳过 toolCall 类型，避免和 toolResult 重复
-                if (item.type === "toolCall") {
-                  console.log(
-                    "[loadSession] Filtering out toolCall from assistant message:",
-                    item.id
-                  );
-                  return false;
-                }
-                return true;
-              });
-
-              const normalizedContent = filteredContent.map(normalizeContentItem);
-
-              return {
-                id: entry.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                role: msg.role || "assistant",
-                content: normalizedContent,
-                timestamp: new Date(msg.timestamp || entry.timestamp || Date.now()),
-                isStreaming: false,
-                isThinkingCollapsed: true,
-                isToolsCollapsed: true, // 默认折叠工具内容
-                isMessageCollapsed: false,
-              };
-            });
-
-          console.log(`[ChatStore] Loaded ${loadedMessages.length} messages`);
-
-          // 调试：检查工具消息
-          loadedMessages.forEach((msg, idx) => {
-            const toolContent = msg.content.filter((c: any) => c.type === "tool");
-            if (toolContent.length > 0) {
-              console.log(`[ChatStore] Message ${idx} has ${toolContent.length} tool blocks:`);
-              toolContent.forEach((t: any, i: number) => {
-                console.log(
-                  `  Tool[${i}]: name=${t.toolName}, hasOutput=${!!t.output}, hasError=${!!t.error}`
-                );
-              });
-            }
-          });
-
+          console.log("[loadSession] Loaded messages:", loadedMessages.length);
           set({ messages: loadedMessages, currentStreamingMessage: null }, false, "loadSession");
           return loadedMessages.length;
-        } catch (err) {
-          console.error("[ChatStore] Failed to load session:", err);
+        } catch (error) {
+          console.error("[ChatStore] Error loading session:", error);
           set({ messages: [] }, false, "loadSession/error");
           return 0;
         }

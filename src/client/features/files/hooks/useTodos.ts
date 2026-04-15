@@ -61,7 +61,7 @@ export function useTodos(options: UseTodosOptions): UseTodosResult {
       }
       return;
     }
-    
+
     if (workingDir && workingDir !== lastLoadedDirRef.current) {
       refresh();
     }

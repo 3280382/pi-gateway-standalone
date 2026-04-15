@@ -248,13 +248,19 @@ export function FileViewer() {
             <span>{fileName}</span>
             <span className={styles.type}>{mode.toUpperCase()}</span>
             {mode === "edit" && language && <span className={styles.lang}>{language}</span>}
-            <button type="button" className={styles.btnCopyPath} onClick={copyPath} title="Copy absolute path">
+            <button
+              type="button"
+              className={styles.btnCopyPath}
+              onClick={copyPath}
+              title="Copy absolute path"
+            >
               <CopyIcon />
             </button>
           </div>
           <div className={styles.actions}>
             {mode === "view" && (
-              <button type="button"
+              <button
+                type="button"
                 className={`${styles.btnToggle} ${showInvisibleChars ? styles.active : ""}`}
                 onClick={toggleShowInvisibleChars}
                 title="Show invisible characters (spaces, tabs, line breaks)"
@@ -263,7 +269,11 @@ export function FileViewer() {
               </button>
             )}
             {mode === "view" && fileTypes.isExecutable && (
-              <button type="button" className={styles.btnExecute} onClick={() => setMode("execute")}>
+              <button
+                type="button"
+                className={styles.btnExecute}
+                onClick={() => setMode("execute")}
+              >
                 ▶ Execute
               </button>
             )}
@@ -325,7 +335,12 @@ export function FileViewer() {
             <button type="button" className={styles.btnSecondary} onClick={() => setMode("view")}>
               Cancel
             </button>
-            <button type="button" className={styles.btnPrimary} onClick={saveFile} disabled={isSaving}>
+            <button
+              type="button"
+              className={styles.btnPrimary}
+              onClick={saveFile}
+              disabled={isSaving}
+            >
               {isSaving ? "Saving..." : "Save (Ctrl+S)"}
             </button>
           </div>
@@ -336,7 +351,12 @@ export function FileViewer() {
             <button type="button" className={styles.btnSecondary} onClick={clearTerminal}>
               Clear
             </button>
-            <button type="button" className={styles.btnDanger} onClick={stopExecution} disabled={!isExecuting}>
+            <button
+              type="button"
+              className={styles.btnDanger}
+              onClick={stopExecution}
+              disabled={!isExecuting}
+            >
               Stop
             </button>
           </div>

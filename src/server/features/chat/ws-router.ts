@@ -266,3 +266,64 @@ export const loggingMiddleware: WSMiddleware = async (_ctx, payload, next) => {
   logger.debug(`[WS] Received message: ${type}`);
   await next();
 };
+
+// ============================================================================
+// Handler Registration
+// ============================================================================
+
+import {
+  handleAbortWrapped,
+  handleCommandWrapped,
+  handleListModelsWrapped,
+  handleModelChangeWrapped,
+  handlePromptWrapped,
+  handleSetLlmLogWrapped,
+  handleSetModelWrapped,
+  handleSteerWrapped,
+  handleThinkingLevelChangeWrapped,
+  handleToolRequestWrapped,
+} from "./ws-handlers/message-handlers";
+import {
+  handleChangeDirWrapped,
+  handleInitWrapped,
+  handleListSessionsWrapped,
+  handleLoadSessionWrapped,
+  handleNewSessionWrapped,
+} from "./ws-handlers/session-handlers";
+
+/**
+ * Register all WebSocket handlers
+ */
+export function registerAllWSHandlers(): void {
+  // Chat core functionality
+  wsRouter.register("prompt", handlePromptWrapped);
+  wsRouter.register("abort", handleAbortWrapped);
+  wsRouter.register("steer", handleSteerWrapped);
+
+  // Model related
+  wsRouter.register("set_model", handleSetModelWrapped);
+  wsRouter.register("model_change", handleModelChangeWrapped);
+  wsRouter.register("list_models", handleListModelsWrapped);
+  wsRouter.register("thinking_level_change", handleThinkingLevelChangeWrapped);
+
+  // Tool related
+  wsRouter.register("tool_request", handleToolRequestWrapped);
+
+  // Command execution
+  wsRouter.register("command", handleCommandWrapped);
+
+  // LLM logs
+  wsRouter.register("set_llm_log", handleSetLlmLogWrapped);
+
+  // Session management
+  wsRouter.register("init", handleInitWrapped);
+  wsRouter.register("new_session", handleNewSessionWrapped);
+  wsRouter.register("list_sessions", handleListSessionsWrapped);
+  wsRouter.register("load_session", handleLoadSessionWrapped);
+  wsRouter.register("change_dir", handleChangeDirWrapped);
+
+  logger.info(`[WSRouter] Registered ${wsRouter.getRegisteredTypes().length} handlers`);
+}
+
+// Auto-register handlers
+registerAllWSHandlers();

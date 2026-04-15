@@ -101,8 +101,8 @@ export function useFileItemActions(): UseFileItemActionsResult {
 
         // 检查是否有待办的 todo，如果有则打开编辑模式
         const todos = useFileStore.getState().todoMap.get(item.path) || [];
-        const pendingTodos = todos.filter(t => !t.checked);
-        
+        const pendingTodos = todos.filter((t) => !t.checked);
+
         if (pendingTodos.length > 0) {
           // 有未完成的 todo，打开编辑模式（编辑第一个未完成的）
           console.log("[useFileItemActions] Editing existing todo:", item.path);
@@ -110,7 +110,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
           setTodoInputFile({ path: item.path, name: item.name });
           return;
         }
-        
+
         // Todo 模式下，点击文件或目录都弹出 Todo 输入框（新建）
         if (isTodoModeActive) {
           console.log("[useFileItemActions] Todo mode - selecting item:", item.path);

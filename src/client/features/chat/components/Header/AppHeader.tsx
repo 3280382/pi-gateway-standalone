@@ -342,6 +342,46 @@ function DropdownIcon() {
 }
 
 // Directory Picker Modal
+// 默认排除的目录（与 TreeView 保持一致）
+const DEFAULT_EXCLUDED_DIRS = [
+  "node_modules",
+  "__pycache__",
+  ".git",
+  ".svn",
+  ".hg",
+  "dist",
+  "build",
+  ".next",
+  ".nuxt",
+  "coverage",
+  ".coverage",
+  ".idea",
+  ".vscode",
+  "log",
+  "logs",
+  "fonts",
+  ".pi",
+  ".cache",
+  "out",
+  "target", // Rust/Java build
+  "bin",
+  "obj",
+  "vendor", // PHP/Go dependencies
+  "tmp",
+  "temp",
+];
+
+// 检查是否应该排除某个目录
+function shouldExcludeDir(name: string): boolean {
+  // 排除隐藏目录（以.开头）
+  if (name.startsWith(".")) {
+    // 但允许 .pi（特殊目录）
+    return name !== ".pi";
+  }
+  // 排除默认列表中的目录
+  return DEFAULT_EXCLUDED_DIRS.includes(name.toLowerCase());
+}
+
 function DirectoryPickerModal({
   currentPath,
   onClose,
@@ -349,7 +389,8 @@ function DirectoryPickerModal({
   currentPath: string;
   onClose: () => void;
 }) {
-  const [path, setPath] = useState(currentPath);
+  const homeDir = "/root";
+  const [path, setPath] = useState(homeDir);
   const [entries, setEntries] = useState<
     Array<{ name: string; path: string; isDirectory: boolean }>
   >([]);
@@ -366,14 +407,15 @@ function DirectoryPickerModal({
       });
       const data = await response.json();
       const dirs = data.items
-        .filter((item: any) => item.isDirectory)
+        .filter((item: any) => item.isDirectory && !shouldExcludeDir(item.name))
         .map((item: any) => ({
           name: item.name,
           path: item.path,
           isDirectory: true,
         }));
 
-      if (data.parentPath !== data.currentPath) {
+      // 添加上级目录按钮（如果不在根目录）
+      if (data.parentPath !== data.currentPath && data.currentPath !== "/") {
         dirs.unshift({
           name: "..",
           path: data.parentPath,
@@ -381,6 +423,23 @@ function DirectoryPickerModal({
         });
       }
 
+      // 添加快速导航到 home 目录按钮（如果当前不在 home）
+      if (data.currentPath !== homeDir && homeDir !== "/") {
+        dirs.unshift({
+          name: "🏠 ~ (home)",
+          path: homeDir,
+          isDirectory: true,
+        });
+      }
+
+      // 排序：.. 在最前面，然后是 home 按钮，其他按字母排序
+      dirs.sort((a: any, b: any) => {
+        if (a.name === "..") return -1;
+        if (b.name === "..") return 1;
+        if (a.name.includes("🏠")) return -1;
+        if (b.name.includes("🏠")) return 1;
+        return a.name.localeCompare(b.name);
+      });
       setEntries(dirs);
       setPath(data.currentPath);
     } catch (error) {
@@ -390,9 +449,10 @@ function DirectoryPickerModal({
     }
   }, []);
 
+  // 每次打开时从 home 目录开始
   useEffect(() => {
-    loadDirectory(currentPath);
-  }, [currentPath, loadDirectory]);
+    loadDirectory(homeDir);
+  }, [loadDirectory]);
 
   const handleSelect = async () => {
     if (path && path !== currentPath) {

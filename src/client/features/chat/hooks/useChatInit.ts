@@ -20,11 +20,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import { useWorkspaceStore } from "@/stores/workspaceStore";
+import type { Session } from "@/features/chat/types/sidebar";
+import { normalizeSessionMessages } from "@/features/chat/utils/messageUtils";
 import { websocketService } from "@/services/websocket.service";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { setupWebSocketListeners } from "../services/api/chatApi";
 import { initChatWorkingDirectory } from "../services/chatWebSocket";
-import type { Session } from "@/features/chat/types/sidebar";
 
 interface InitResponse {
   pid: number;
@@ -77,10 +78,17 @@ export function useChatInit(): { isConnecting: boolean } {
       const savedWorkingDir = useWorkspaceStore.getState().workingDir;
       console.log("[ChatInit] Sending init with workingDir:", savedWorkingDir);
 
-      // 3. 发送 init 请求，传入当前工作目录
+      // 3. 发送 init 请求，传入当前工作目录和 sessionFile
+      // 从 localStorage 获取上次使用的 sessionFile
+      const savedSessionFile = useSessionStore.getState().currentSessionFile;
+      console.log("[ChatInit] Sending init with:", {
+        workingDir: savedWorkingDir,
+        sessionFile: savedSessionFile,
+      });
+
       const initResponse = await initChatWorkingDirectory(
         savedWorkingDir,
-        undefined,
+        savedSessionFile, // 传递 sessionFile 用于精确匹配
         10000 // 10秒超时，因为需要加载文件
       ).catch((err) => {
         console.error("[ChatInit] init error:", err);
@@ -123,6 +131,7 @@ export function useChatInit(): { isConnecting: boolean } {
       useSessionStore.getState().setCurrentModel(currentModel);
       useSessionStore.getState().setThinkingLevel(thinkingLevel as any);
       useSessionStore.getState().setAvailableModels(allModels || []);
+      useSessionStore.getState().setCurrentSessionFile(currentSession?.sessionFile || null);
 
       // 5.3 Sidebar 状态
       console.log("[ChatInit] Setting sidebar state:", {
@@ -134,52 +143,11 @@ export function useChatInit(): { isConnecting: boolean } {
       useSidebarStore.getState().setSessions(allSessions || []);
       useSidebarStore.getState().setSelectedSessionId(currentSession?.sessionFile || null);
 
-      // 5.4 聊天历史消息
+      // 5.4 聊天历史消息 - 使用统一的加载逻辑（参考 HTTP loadSession 的工具处理方式）
       console.log("[ChatInit] Messages from server:", currentSession?.messages?.length || 0);
       if (currentSession?.messages?.length > 0) {
-        // 转换服务器返回的消息格式为客户端格式
-        // 保持 content 为数组格式 (MessageContent[])
-        const formattedMessages = currentSession.messages
-          .filter((entry: any) => entry.type === "message" && entry.message)
-          .map((entry: any) => {
-            const msg = entry.message;
-            
-            // 转换 content 为 MessageContent[] 格式
-            let contentArray: any[] = [];
-            if (Array.isArray(msg.content)) {
-              // 已经是数组，直接使用
-              contentArray = msg.content.map((c: any) => ({
-                type: c.type || "text",
-                text: c.text,
-                thinking: c.thinking,
-                signature: c.thinkingSignature || c.signature,
-                toolCallId: c.toolCallId || c.id,
-                toolName: c.name || c.toolName,
-                args: c.arguments || c.args,
-                output: c.output,
-                error: c.error,
-              }));
-            } else if (typeof msg.content === "string") {
-              // 字符串转数组
-              contentArray = [{ type: "text", text: msg.content }];
-            } else if (msg.content && typeof msg.content === "object") {
-              // 如果是单个对象，包装成数组
-              contentArray = [{ type: "text", text: JSON.stringify(msg.content) }];
-            }
-            
-            // 确保 content 是数组，防止渲染错误
-            if (!Array.isArray(contentArray) || contentArray.length === 0) {
-              contentArray = [{ type: "text", text: "" }];
-            }
-
-            return {
-              id: entry.id || msg.id || `${Date.now()}-${Math.random()}`,
-              role: msg.role || "user",
-              content: contentArray,
-              timestamp: entry.timestamp || new Date().toISOString(),
-            };
-          });
-
+        // 使用统一的 message 转换逻辑（与 loadSession 一致）
+        const formattedMessages = normalizeSessionMessages(currentSession.messages);
         console.log("[ChatInit] Restored messages:", formattedMessages.length);
         useChatStore.getState().setMessages(formattedMessages);
       }

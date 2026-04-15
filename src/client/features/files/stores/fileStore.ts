@@ -14,8 +14,8 @@ import type {
   FileItem,
   FilterType,
   SortMode,
-  ViewMode,
   TodoItem,
+  ViewMode,
 } from "@/features/files/types";
 import { FILES_BROWSER_PERSIST, FILES_STORAGE_KEYS, FILES_STORAGE_VERSION } from "./persist.config";
 

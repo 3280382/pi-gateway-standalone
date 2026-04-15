@@ -4,12 +4,61 @@
  * 职责：
  * - 显示目录列表供用户选择
  * - 支持进入子目录和返回上级
+ * - 过滤不必要的目录（node_modules, .git 等）
+ * - 每次打开从 home 目录开始
  *
  * 结构规范：State → Ref → Effects → Computed → Actions → Render
  */
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./AppHeader.module.css";
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+// 默认排除的目录（与 TreeView 保持一致）
+const DEFAULT_EXCLUDED_DIRS = [
+  "node_modules",
+  "__pycache__",
+  ".git",
+  ".svn",
+  ".hg",
+  "dist",
+  "build",
+  ".next",
+  ".nuxt",
+  "coverage",
+  ".coverage",
+  ".idea",
+  ".vscode",
+  "log",
+  "logs",
+  "fonts",
+  ".pi",
+  ".cache",
+  "out",
+  "target", // Rust/Java build
+  "bin",
+  "obj",
+  "vendor", // PHP/Go dependencies
+  "tmp",
+  "temp",
+];
+
+// Home 目录
+const HOME_DIR = "/root";
+
+// 检查是否应该排除某个目录
+function shouldExcludeDir(name: string): boolean {
+  // 排除隐藏目录（以.开头）
+  if (name.startsWith(".")) {
+    // 但允许 .pi（特殊目录）
+    return name !== ".pi";
+  }
+  // 排除默认列表中的目录
+  return DEFAULT_EXCLUDED_DIRS.includes(name.toLowerCase());
+}
 
 // ============================================================================
 // Types
@@ -33,7 +82,8 @@ interface DirectoryPickerProps {
 
 export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPickerProps) {
   // ========== 1. State ==========
-  const [path, setPath] = useState(currentPath);
+  // 每次打开都从 home 目录开始
+  const [path, setPath] = useState(HOME_DIR);
   const [entries, setEntries] = useState<DirectoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -48,21 +98,41 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
       });
       const data = await response.json();
 
+      // 过滤目录：只显示非排除的目录
       const dirs = data.items
-        .filter((item: any) => item.isDirectory)
+        .filter((item: any) => item.isDirectory && !shouldExcludeDir(item.name))
         .map((item: any) => ({
           name: item.name,
           path: item.path,
           isDirectory: true,
         }));
 
-      if (data.parentPath !== data.currentPath) {
+      // 添加上级目录按钮（如果不在根目录）
+      if (data.parentPath !== data.currentPath && data.currentPath !== "/") {
         dirs.unshift({
           name: "..",
           path: data.parentPath,
           isDirectory: true,
         });
       }
+
+      // 添加快速导航到 home 目录按钮（如果当前不在 home）
+      if (data.currentPath !== HOME_DIR && HOME_DIR !== "/") {
+        dirs.unshift({
+          name: "🏠 ~ (home)",
+          path: HOME_DIR,
+          isDirectory: true,
+        });
+      }
+
+      // 排序：.. 在最前面，然后是 home 按钮，其他按字母排序
+      dirs.sort((a: any, b: any) => {
+        if (a.name === "..") return -1;
+        if (b.name === "..") return 1;
+        if (a.name.includes("🏠")) return -1;
+        if (b.name.includes("🏠")) return 1;
+        return a.name.localeCompare(b.name);
+      });
 
       setEntries(dirs);
       setPath(data.currentPath);
@@ -75,10 +145,10 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
   }, []);
 
   // ========== 3. Effects ==========
+  // 每次打开都从 home 目录开始
   useEffect(() => {
-    loadDirectory(currentPath);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPath]);
+    loadDirectory(HOME_DIR);
+  }, [loadDirectory]);
 
   // ========== 6. Render ==========
   return (
@@ -91,6 +161,25 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
           </button>
         </div>
         <div className={styles.currentPath}>{path}</div>
+
+        {/* 快速导航按钮 */}
+        <div className={styles.quickNav}>
+          {path !== HOME_DIR && (
+            <button
+              type="button"
+              className={styles.quickNavBtn}
+              onClick={() => loadDirectory(HOME_DIR)}
+            >
+              🏠 Home
+            </button>
+          )}
+          {path !== "/" && (
+            <button type="button" className={styles.quickNavBtn} onClick={() => loadDirectory("/")}>
+              / Root
+            </button>
+          )}
+        </div>
+
         <div className={styles.pickerActions}>
           <button type="button" className={styles.selectBtn} onClick={() => onSelect(path)}>
             Select This Directory

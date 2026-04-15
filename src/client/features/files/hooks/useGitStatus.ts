@@ -12,8 +12,8 @@
 import { useEffect, useRef } from "react";
 import * as gitApi from "@/features/files/services/api/gitApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
-import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { fileBrowserDebug } from "@/lib/debug";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 
 // ===== [ANCHOR:TYPES] =====
 
@@ -31,7 +31,7 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
 
   const { isGitModeActive, items, updateFileGitStatuses } = useFileStore();
   const { workingDir: globalWorkingDir } = useWorkspaceStore();
-  
+
   // 使用当前浏览路径优先，回退到全局 workingDir
   const workingDir = currentBrowsePath || globalWorkingDir;
 
@@ -63,13 +63,13 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
       workingDir !== lastFetchedPathRef.current ||
       items.length !== itemsLengthRef.current ||
       isInitialMount.current;
-    
+
     fileBrowserDebug.debug("Git状态检查", {
       workingDir,
       lastFetched: lastFetchedPathRef.current,
       shouldFetch: shouldFetchGitStatus,
       isGitModeActive: isGitModeActive,
-      itemCount: items.length
+      itemCount: items.length,
     });
 
     if (!shouldFetchGitStatus) return;

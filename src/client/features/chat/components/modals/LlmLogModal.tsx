@@ -62,7 +62,12 @@ export function LlmLogModal() {
           <h3>LLM Model Log</h3>
           <div className={styles.headerActions}>
             <span className={styles.status}>Auto-refresh: {enabled ? "ON" : "OFF"}</span>
-            <button type="button" className={styles.actionBtn} onClick={loadLogs} title="Refresh Now">
+            <button
+              type="button"
+              className={styles.actionBtn}
+              onClick={loadLogs}
+              title="Refresh Now"
+            >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <polyline points="23 4 23 10 17 10" />
                 <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />

@@ -1,6 +1,6 @@
 /**
  * TodoInputModal - Todo 文本输入弹窗
- * 
+ *
  * 支持：
  * - 新建 todo
  * - 编辑现有 todo（如果 editingTodo 存在）
@@ -9,14 +9,8 @@
 import { useEffect, useState } from "react";
 import * as todoApi from "@/features/files/services/api/todoApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import styles from "./Modals.module.css";
-
-// 从文件路径中提取工作目录
-function getWorkingDir(filePath: string): string {
-  const lastSlashIndex = filePath.lastIndexOf('/');
-  if (lastSlashIndex <= 0) return filePath;
-  return filePath.substring(0, lastSlashIndex);
-}
 
 interface TodoInputModalProps {
   isOpen: boolean;
@@ -30,12 +24,15 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const setTodoInputFile = useFileStore((state) => state.setTodoInputFile);
   const setEditingTodo = useFileStore((state) => state.setEditingTodo);
   const editingTodo = useFileStore((state) => state.editingTodo);
   const setTodoList = useFileStore((state) => state.setTodoList);
   const setTodoMap = useFileStore((state) => state.setTodoMap);
+
+  // 使用全局工作目录，确保所有 todo 都写在同一个文件
+  const workingDir = useWorkspaceStore((state) => state.workingDir);
 
   const isEditing = !!editingTodo;
 
@@ -56,8 +53,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
     if (!todoText.trim()) return;
 
     setIsSubmitting(true);
-    const workingDir = getWorkingDir(filePath);
-    
+
     try {
       if (isEditing && editingTodo) {
         // 更新现有 todo
@@ -83,7 +79,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
       try {
         const todos = await todoApi.list(workingDir);
         setTodoList(todos);
-        
+
         // 按文件路径分组
         const map = new Map<string, typeof todos>();
         for (const todo of todos) {
@@ -126,7 +122,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(t => t !== tagToRemove));
+    setTags(tags.filter((t) => t !== tagToRemove));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -141,9 +137,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
     <div className={styles.overlay} onClick={handleCancel}>
       <div className={styles.todoModal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.todoHeader}>
-          <span className={styles.todoTitle}>
-            {isEditing ? "📝 Edit Todo" : "📝 Add Todo"}
-          </span>
+          <span className={styles.todoTitle}>{isEditing ? "📝 Edit Todo" : "📝 Add Todo"}</span>
           <button type="button" className={styles.close} onClick={handleCancel}>
             ✕
           </button>
@@ -189,7 +183,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
                 Add
               </button>
             </div>
-            
+
             {/* 标签列表 */}
             {tags.length > 0 && (
               <div className={styles.tagList}>
@@ -216,15 +210,15 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
           </div>
 
           <div className={styles.todoHint}>
-            Press {navigator.platform.includes('Mac') ? 'Cmd' : 'Ctrl'}+Enter to save
+            Press {navigator.platform.includes("Mac") ? "Cmd" : "Ctrl"}+Enter to save
           </div>
         </div>
 
         <div className={styles.todoFooter}>
-          <button 
-            type="button" 
-            className={styles.todoCancelBtn} 
-            onClick={handleCancel} 
+          <button
+            type="button"
+            className={styles.todoCancelBtn}
+            onClick={handleCancel}
             disabled={isSubmitting}
           >
             Cancel

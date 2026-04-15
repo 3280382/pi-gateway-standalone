@@ -11,8 +11,8 @@
 import { useCallback } from "react";
 import * as fileOperationsApi from "@/features/files/services/api/fileOperationsApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
-import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { fileBrowserDebug } from "@/lib/debug";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 
 export interface UseFileOperationsResult {
   deleteSelected: () => Promise<void>;
@@ -33,7 +33,7 @@ export function useFileOperations(): UseFileOperationsResult {
     setSelectedItems,
     setIsMultiSelectMode,
   } = useFileStore();
-  
+
   const { workingDir } = useWorkspaceStore();
 
   /**

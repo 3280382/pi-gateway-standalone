@@ -290,7 +290,8 @@ export function TerminalPanel({
           <span>Terminal</span>
         </div>
         <div className={styles.actions}>
-          <button type="button"
+          <button
+            type="button"
             className={styles.actionBtn}
             onClick={toggleFullscreen}
             title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}

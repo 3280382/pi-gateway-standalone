@@ -1,6 +1,15 @@
 /**
  * PiAgentSession Class
- * Manages WebSocket connections, pi-coding-agent sessions, and message delivery
+ * Manages a single pi-coding-agent session instance and its WebSocket message delivery
+ *
+ * Lifecycle:
+ * - constructor(): Create instance with WebSocket and LLM log manager
+ * - initialize(workingDir): Create NEW AgentSession (called once per workingDir)
+ * - reconnect(ws): Reuse existing session with new WebSocket (re-subscribes events)
+ * - dispose(): Cleanup resources
+ *
+ * Note: Session reuse decisions are made by ServerSessionManager, not this class.
+ * This class focuses on managing one AgentSession instance and its event handling.
  */
 
 import { existsSync } from "node:fs";
@@ -104,64 +113,33 @@ export class PiAgentSession {
   }
 
   /**
-   * Initialize session
+   * Initialize a NEW session for the given working directory
+   *
+   * IMPORTANT: This method always creates a NEW AgentSession.
+   * For reusing existing session with same workingDir, use reconnect() instead.
+   *
+   * The session reuse decision is made by ServerSessionManager.getOrCreateSession().
+   *
    * @param workingDir Working directory
-   * @param sessionId Optional session ID (partial UUID)
+   * @param sessionFile Optional specific session file to open/create
    * @returns Session information
    */
-  async initialize(workingDir: string) {
+  async initialize(workingDir: string, sessionFile?: string) {
     console.log(`[PiAgentSession.initialize] ========== START ==========`);
     console.log(
-      `[PiAgentSession.initialize] Input: workingDir="${workingDir}"`
+      `[PiAgentSession.initialize] Input: workingDir="${workingDir}", sessionFile="${sessionFile || "auto"}"`
     );
     console.log(
       `[PiAgentSession.initialize] Current state: this.workingDir="${this.workingDir}", this.session exists: ${!!this.session}`
     );
 
-    // Check if we have an existing session with the same working directory
-    if (this.session && this.workingDir === workingDir) {
-      console.log(`[PiAgentSession.initialize] SAME DIRECTORY - Reconnecting to existing session`);
+    // Note: Session reuse check is now handled by ServerSessionManager.getOrCreateSession()
+    // This method should only be called when creating a NEW session
+    // For reconnecting, use reconnect() instead
 
-      // Unsubscribe from old event handlers
-      if (this.unsubscribeFn) {
-        this.unsubscribeFn();
-        this.unsubscribeFn = null;
-      }
-
-      // Re-setup event handlers (re-subscribe)
-      this.setupEventHandlers();
-
-      // Return current session info
-      const loader = new DefaultResourceLoader({
-        cwd: workingDir,
-        agentDir: AGENT_DIR,
-        settingsManager: this.settingsManager,
-      });
-      await loader.reload();
-
-      const result = {
-        sessionId: this.session.sessionId,
-        sessionFile: this.session.sessionFile,
-        workingDir: this.workingDir,
-        model: this.session.model?.id || null,
-        modelProvider: this.session.model?.provider || null,
-        thinkingLevel: this.session.thinkingLevel,
-        systemPrompt: loader.getSystemPrompt() || "",
-        agentsFiles: loader.getAgentsFiles().agentsFiles.map((f: any) => ({
-          path: f.path,
-          content: f.content,
-        })),
-        skills: loader.getSkills().skills.map((s: any) => ({
-          name: s.name,
-          description: s.description,
-        })),
-      };
-      console.log(`[PiAgentSession.initialize] ========== END (same dir reconnect) ==========`);
-      return result;
-    }
-
-    // Different working directory or no existing session - use original logic
-    console.log(`[PiAgentSession.initialize] NEW DIRECTORY - Creating new session`);
+    console.log(
+      `[PiAgentSession.initialize] Creating new AgentSession for workingDir: ${workingDir}`
+    );
 
     // Unsubscribe from old session events
     if (this.unsubscribeFn) {
@@ -183,26 +161,43 @@ export class PiAgentSession {
 
     let sessionManager: ReturnType<typeof SessionManager.create> | undefined;
 
-    // 获取所有 sessions 列表
-    console.log(
-      `[PiAgentSession.initialize] Calling SessionManager.list("${workingDir}", "${localSessionsDir}")`
-    );
-    const sessions = await SessionManager.list(workingDir, localSessionsDir);
-    console.log(`[PiAgentSession.initialize] Found ${sessions.length} sessions in directory`);
-    sessions.forEach((s, i) =>
-      console.log(`[PiAgentSession.initialize]   [${i}] id=${s.id}, path=${s.path}, modified=${s.modified}`)
-    );
+    // If specific sessionFile provided, use it directly
+    if (sessionFile) {
+      console.log(`[PiAgentSession.initialize] Using provided sessionFile: ${sessionFile}`);
+      try {
+        sessionManager = SessionManager.open(sessionFile, localSessionsDir);
+        console.log(`[PiAgentSession.initialize] Successfully opened session file`);
+      } catch (error) {
+        console.warn(
+          `[PiAgentSession.initialize] Failed to open session file: ${sessionFile}, error:`,
+          error
+        );
+        // 如果明确指定了 sessionFile 但打开失败，抛出错误
+        // 不应该回退到最近使用的 session，因为用户明确选择了特定的 session
+        throw new Error(`Failed to open specified session file: ${sessionFile}. Error: ${error}`);
+      }
+    }
 
-    // 总是使用最近的一个 session（按修改时间排序）
-    if (sessions.length > 0) {
-      // 没有提供 sessionId，使用最近的一个 session（按修改时间排序）
-      const mostRecent = sessions.sort((a, b) => 
-        b.modified.getTime() - a.modified.getTime()
-      )[0];
+    // 如果没有指定 sessionFile 或打开失败，查找最近使用的 session
+    if (!sessionManager) {
+      // 获取所有 sessions 列表
       console.log(
-        `[PiAgentSession.initialize] No sessionId provided, using most recent session: ${mostRecent.path}`
+        `[PiAgentSession.initialize] Calling SessionManager.list("${workingDir}", "${localSessionsDir}")`
       );
-      sessionManager = SessionManager.open(mostRecent.path, localSessionsDir);
+      const sessions = await SessionManager.list(workingDir, localSessionsDir);
+      console.log(`[PiAgentSession.initialize] Found ${sessions.length} sessions in directory`);
+      sessions.forEach((s, i) =>
+        console.log(
+          `[PiAgentSession.initialize]   [${i}] id=${s.id}, path=${s.path}, modified=${s.modified}`
+        )
+      );
+
+      // 总是使用最近的一个 session（按修改时间排序）
+      if (sessions.length > 0) {
+        const mostRecent = sessions.sort((a, b) => b.modified.getTime() - a.modified.getTime())[0];
+        console.log(`[PiAgentSession.initialize] Using most recent session: ${mostRecent.path}`);
+        sessionManager = SessionManager.open(mostRecent.path, localSessionsDir);
+      }
     }
 
     if (!sessionManager) {
@@ -845,7 +840,7 @@ export class PiAgentSession {
     try {
       // Read directly from /root/.pi/agent/models.json
       const modelsJsonPath = "/root/.pi/agent/models.json";
-      let models: any[] = [];
+      const models: any[] = [];
 
       if (existsSync(modelsJsonPath)) {
         try {
@@ -1053,14 +1048,56 @@ export class PiAgentSession {
     return this.session.messages;
   }
 
+  /** WebSocket connection state */
+  private wsConnected: boolean = false;
+
+  /** Message buffer for offline mode (optional, for critical messages) */
+  private offlineBuffer: ServerMessage[] = [];
+
   /**
    * Send message to WebSocket client
+   * Fail-safe: any WebSocket error is caught and logged, never throws
    * @param message Message object
    */
   send(message: ServerMessage) {
-    if (this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(message));
+    try {
+      // Check if WebSocket exists and is open
+      if (!this.ws) {
+        console.log(
+          `[PiAgentSession.send] WebSocket not available, message dropped: ${message.type}`
+        );
+        return;
+      }
+
+      if (this.ws.readyState === WebSocket.OPEN) {
+        this.ws.send(JSON.stringify(message));
+        this.wsConnected = true;
+      } else {
+        // WebSocket not open, just log and continue (don't throw)
+        console.log(
+          `[PiAgentSession.send] WebSocket not OPEN (state=${this.ws.readyState}), message dropped: ${message.type}`
+        );
+        this.wsConnected = false;
+      }
+    } catch (error) {
+      // Catch ANY error to ensure Pi execution continues
+      console.error(`[PiAgentSession.send] Error sending message (type=${message.type}):`, error);
+      this.wsConnected = false;
     }
+  }
+
+  /**
+   * Check if WebSocket is currently connected
+   */
+  isWebSocketConnected(): boolean {
+    return this.wsConnected && this.ws?.readyState === WebSocket.OPEN;
+  }
+
+  /**
+   * Get current WebSocket instance (for reconnect checking)
+   */
+  getWebSocket(): WebSocket | null {
+    return this.ws;
   }
 
   /**
@@ -1114,6 +1151,50 @@ export class PiAgentSession {
         isError,
       });
     }
+  }
+
+  /**
+   * Reconnect session with new WebSocket
+   * Called when reusing existing session with same workingDir but different WebSocket
+   * This is the complete reconnection logic that replaces updateWebSocket
+   *
+   * @param ws New WebSocket connection
+   */
+  reconnect(ws: WebSocket) {
+    console.log(`[PiAgentSession.reconnect] ========== START ==========`);
+    console.log(`[PiAgentSession.reconnect] Updating WebSocket and re-subscribing events`);
+
+    // Update WebSocket reference
+    this.ws = ws;
+    this.wsConnected = true;
+
+    // Unsubscribe from old event handlers (cleanup old subscriptions)
+    if (this.unsubscribeFn) {
+      this.unsubscribeFn();
+      this.unsubscribeFn = null;
+    }
+
+    // Re-setup event handlers (re-subscribe to AgentSession events)
+    this.setupEventHandlers();
+
+    // Notify client that session is reconnected (optional)
+    this.send({
+      type: "session_reconnected",
+      message: "Session reconnected, resuming...",
+      workingDir: this.workingDir,
+    });
+
+    console.log(`[PiAgentSession.reconnect] ========== END ==========`);
+  }
+
+  /**
+   * Update WebSocket connection only (legacy method, use reconnect instead)
+   * @param ws New WebSocket connection
+   * @deprecated Use reconnect() instead
+   */
+  updateWebSocket(ws: WebSocket) {
+    console.log(`[PiAgentSession] Updating WebSocket connection (legacy)`);
+    this.ws = ws;
   }
 
   /**

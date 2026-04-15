@@ -102,7 +102,11 @@ export function FileActionBar({ onExecute, onOpenBottomPanel }: FileActionBarPro
         </button>
       )}
       {isExecutable && (
-        <button type="button" className={`${styles.actionBtn} ${styles.execute}`} onClick={handleExecute}>
+        <button
+          type="button"
+          className={`${styles.actionBtn} ${styles.execute}`}
+          onClick={handleExecute}
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
             <polygon points="5 3 19 12 5 21 5 3" />
           </svg>

@@ -1,6 +1,6 @@
 /**
  * Workspace Controller - 工作区API控制器
- * 对应 /api/workspace/workspace/* 路由
+ * 对应 /api/workspace/* 路由
  */
 
 import type { Request, Response } from "express";
@@ -9,7 +9,7 @@ import type { Request, Response } from "express";
 const recentWorkspaces = new Map<string, { path: string; name: string; lastAccessed: string }>();
 
 /**
- * 获取当前工作区 - 对应 /api/workspace/workspace/current
+ * 获取当前工作区 - 对应 /api/workspace/current
  */
 export async function current(_req: Request, res: Response) {
   res.json({
@@ -22,7 +22,7 @@ export async function current(_req: Request, res: Response) {
 }
 
 /**
- * 获取工作目录 - 对应 /api/workspace/workspace/working-dir
+ * 获取工作目录 - 对应 /api/workspace/working-dir
  */
 export async function workingDir(_req: Request, res: Response) {
   res.json({
@@ -31,7 +31,7 @@ export async function workingDir(_req: Request, res: Response) {
 }
 
 /**
- * 获取最近工作区 - 对应 /api/workspace/workspace/recent
+ * 获取最近工作区 - 对应 /api/workspace/recent
  */
 export async function recent(_req: Request, res: Response) {
   const workspaces = Array.from(recentWorkspaces.values())
@@ -41,7 +41,7 @@ export async function recent(_req: Request, res: Response) {
 }
 
 /**
- * 添加最近工作区 - 对应 /api/workspace/workspace/add-recent
+ * 添加最近工作区 - 对应 /api/workspace/add-recent
  */
 export async function addRecent(req: Request, res: Response) {
   const { path } = req.body;
@@ -58,7 +58,7 @@ export async function addRecent(req: Request, res: Response) {
 }
 
 /**
- * 清除最近工作区 - 对应 /api/workspace/workspace/clear-recent
+ * 清除最近工作区 - 对应 /api/workspace/clear-recent
  */
 export async function clearRecent(_req: Request, res: Response) {
   recentWorkspaces.clear();

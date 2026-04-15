@@ -21,8 +21,8 @@ import {
   useFileBrowser,
   useFileFiltering,
   useGitStatus,
-  useTreeView,
   useTodos,
+  useTreeView,
 } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
@@ -54,8 +54,8 @@ export function FileBrowser({
   useFileBrowser({ isActive });
   // 使用当前浏览路径获取 git 状态
   useGitStatus({ isActive, currentBrowsePath: currentBrowsePath || workingDir });
-  // 使用当前浏览路径加载 todos（todo.md 保存在当前浏览目录，只在 Todo 模式激活时加载）
-  useTodos({ isActive, workingDir: currentBrowsePath || workingDir });
+  // 使用全局工作目录加载 todos（所有 todo 都保存在项目根目录的 todo.md）
+  useTodos({ isActive, workingDir });
 
   // ===== [ANCHOR:COMPUTED] =====
   const { filteredItems } = useFileFiltering();

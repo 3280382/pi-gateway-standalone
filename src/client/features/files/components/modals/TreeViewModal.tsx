@@ -198,7 +198,8 @@ export function TreeViewModal({
                 onChange={(e) => setSearchText(e.target.value)}
               />
             )}
-            <button type="button"
+            <button
+              type="button"
               className={`${styles.copyBtn} ${isCopySuccess ? styles.copied : ""}`}
               onClick={handleCopy}
               disabled={!filteredItems.length}

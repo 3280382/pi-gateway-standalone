@@ -291,7 +291,8 @@ function GlassCard({
             <span className={styles.dot} />
             <span className={styles.label}>Thinking</span>
             <div className={styles.actions}>
-              <button type="button"
+              <button
+                type="button"
                 className={styles.btnCopy}
                 style={{ visibility: isCopyVisible ? "visible" : "hidden" }}
                 onClick={(e) => {
@@ -337,7 +338,8 @@ function GlassCard({
             {summary && <span className={styles.summary}>{summary}</span>}
             <span className={`${styles.chip} ${styles.running}`}>running</span>
             <div className={styles.actions}>
-              <button type="button"
+              <button
+                type="button"
                 className={styles.btnCopy}
                 style={{ visibility: isCopyVisible ? "visible" : "hidden" }}
                 onClick={(e) => {
@@ -401,7 +403,8 @@ function GlassCard({
             {summary && <span className={styles.summary}>{summary}</span>}
             <span className={`${styles.chip} ${styles[status]}`}>{status}</span>
             <div className={styles.actions}>
-              <button type="button"
+              <button
+                type="button"
                 className={styles.btnCopy}
                 style={{ visibility: isCopyVisible ? "visible" : "hidden" }}
                 onClick={(e) => {
@@ -451,7 +454,8 @@ function GlassCard({
             <span className={styles.dot} />
             <span className={styles.label}>Assistant</span>
             <div className={styles.actions}>
-              <button type="button"
+              <button
+                type="button"
                 className={styles.btnCopy}
                 style={{ visibility: isCopyVisible ? "visible" : "hidden" }}
                 onClick={(e) => {

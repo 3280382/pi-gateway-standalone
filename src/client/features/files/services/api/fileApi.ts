@@ -251,7 +251,7 @@ export async function checkPathExists(path: string): Promise<boolean> {
 // 获取服务器当前工作目录
 export async function getServerWorkingDir(): Promise<string> {
   try {
-    const response = await fetch("/api/workspace/workspace/working-dir");
+    const response = await fetch("/api/workspace/working-dir");
     if (response.ok) {
       const data = await response.json();
       if (data.cwd) return data.cwd;

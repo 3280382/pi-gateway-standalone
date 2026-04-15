@@ -9,8 +9,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useChatController } from "@/features/chat/services/api/chatApi";
+import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import styles from "./SidebarPanel.module.css";
 
 export function ModelParamsSection() {
@@ -68,7 +68,9 @@ export function ModelParamsSection() {
   // ========== 4. Computed ==========
   const currentModelInfo = availableModels.find((m) => {
     if (!currentModel) return false;
-    return m.id === currentModel || m.id.endsWith(`/${currentModel}`) || currentModel.endsWith(m.id);
+    return (
+      m.id === currentModel || m.id.endsWith(`/${currentModel}`) || currentModel.endsWith(m.id)
+    );
   });
 
   const displayModelName = currentModelInfo?.name || currentModel?.split("/").pop() || "Select";
@@ -80,7 +82,8 @@ export function ModelParamsSection() {
     { value: "high", label: "High" },
   ];
 
-  const currentThinkingLabel = thinkingOptions.find(t => t.value === (thinkingLevel || "medium"))?.label || "Medium";
+  const currentThinkingLabel =
+    thinkingOptions.find((t) => t.value === (thinkingLevel || "medium"))?.label || "Medium";
 
   // ========== 5. Render ==========
   if (availableModels.length === 0) {
@@ -145,9 +148,7 @@ export function ModelParamsSection() {
         {/* Provider display */}
         <div className={styles.paramRow}>
           <label className={styles.paramLabel}>Provider</label>
-          <div className={styles.paramValue}>
-            {currentModelInfo?.provider || "-"}
-          </div>
+          <div className={styles.paramValue}>{currentModelInfo?.provider || "-"}</div>
         </div>
 
         {/* Thinking level - 紧凑下拉框 */}
@@ -195,24 +196,18 @@ export function ModelParamsSection() {
           <div className={styles.infoItem}>
             <span className={styles.infoLabel}>Context</span>
             <span className={styles.infoValue}>
-              {currentModelInfo?.contextWindow
-                ? formatNumber(currentModelInfo.contextWindow)
-                : "-"}
+              {currentModelInfo?.contextWindow ? formatNumber(currentModelInfo.contextWindow) : "-"}
             </span>
           </div>
           <div className={styles.infoItem}>
             <span className={styles.infoLabel}>Max Out</span>
             <span className={styles.infoValue}>
-              {currentModelInfo?.maxTokens
-                ? formatNumber(currentModelInfo.maxTokens)
-                : "-"}
+              {currentModelInfo?.maxTokens ? formatNumber(currentModelInfo.maxTokens) : "-"}
             </span>
           </div>
           <div className={styles.infoItem}>
             <span className={styles.infoLabel}>Reasoning</span>
-            <span className={styles.infoValue}>
-              {currentModelInfo?.reasoning ? "Yes" : "No"}
-            </span>
+            <span className={styles.infoValue}>{currentModelInfo?.reasoning ? "Yes" : "No"}</span>
           </div>
         </div>
       </div>

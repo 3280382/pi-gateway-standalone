@@ -123,7 +123,7 @@ export function useChatPanel(): UseChatPanelReturn {
       // 防抖滚动：避免在短时间内频繁滚动
       const now = Date.now();
       const timeSinceLastScroll = now - lastScrollTimeRef.current;
-      
+
       // 如果距离上次滚动超过100ms，立即滚动；否则延迟滚动
       if (timeSinceLastScroll > 100) {
         // 立即滚动
@@ -143,7 +143,7 @@ export function useChatPanel(): UseChatPanelReturn {
         }, 50); // 50ms延迟，足够合并快速更新
       }
     }
-    
+
     return () => {
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);

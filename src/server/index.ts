@@ -25,6 +25,4 @@ export type {
 } from "./features/chat/ws-router";
 export { AppFactory } from "./lib/app-factory";
 
-// WebSocket handler registration (import to trigger auto-registration)
-import "./features/chat/ws-handlers/session/index";
-import "./features/chat/ws-handlers/message/index";
+// WebSocket handlers are auto-registered when ws-router.ts is imported

@@ -12,16 +12,16 @@
 
 import { useCallback } from "react";
 import { IconButton } from "@/components/Icon/Icon";
-import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useSidebarSessions } from "@/features/chat/hooks/useSidebarSessions";
+import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { sessionManager } from "@/features/chat/services/sessionManager";
 import { useLlmLogStore } from "@/features/chat/stores/llmLogStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import { CompactWorkspacesSection } from "./CompactWorkspacesSection";
-import { SessionDropdownSection } from "./SessionDropdownSection";
-import { ModelParamsSection } from "./ModelParamsSection";
 import { ChatSettingsSection } from "./ChatSettingsSection";
+import { CompactWorkspacesSection } from "./CompactWorkspacesSection";
+import { ModelParamsSection } from "./ModelParamsSection";
+import { SessionDropdownSection } from "./SessionDropdownSection";
 import styles from "./SidebarPanel.module.css";
 
 // ============================================================================
@@ -86,4 +86,3 @@ function SidebarHeader() {
     </div>
   );
 }
-

@@ -69,7 +69,7 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
     }
   };
 
-// Fetch logs from API
+  // Fetch logs from API
   const fetchLogs = useCallback(async () => {
     try {
       const response = await fetch("/api/llm-log");
@@ -92,11 +92,9 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
     fetchLogsRef.current = fetchLogs;
   }, [fetchLogs]);
 
-
-
-    // Initial fetch and polling
+  // Initial fetch and polling
   useEffect(() => {
-    console.log('[LlmLogPanel] useEffect running, setting up polling');
+    console.log("[LlmLogPanel] useEffect running, setting up polling");
     setIsLoading(true);
     fetchLogsRef.current().finally(() => setIsLoading(false));
 
@@ -105,13 +103,13 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
     }, 2000);
 
     return () => {
-      console.log('[LlmLogPanel] Cleaning up polling interval');
+      console.log("[LlmLogPanel] Cleaning up polling interval");
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
     };
-  }, []);  // 空依赖数组,只在挂载时运行
+  }, []); // 空依赖数组,只在挂载时运行
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -269,14 +267,16 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
           <span className={styles.logCount}>{logs.length}</span>
         </div>
         <div className={styles.actions}>
-          <button type="button"
+          <button
+            type="button"
             className={`${styles.actionBtn} ${autoScroll ? styles.active : ""}`}
             onClick={() => setAutoScroll(!autoScroll)}
             title={autoScroll ? "Auto-scroll on" : "Auto-scroll off"}
           >
             <ScrollIcon />
           </button>
-          <button type="button"
+          <button
+            type="button"
             className={styles.actionBtn}
             onClick={handleRefresh}
             title="Refresh"
@@ -284,7 +284,8 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
           >
             <RefreshIcon />
           </button>
-          <button type="button"
+          <button
+            type="button"
             className={styles.actionBtn}
             onClick={() => setIsFullscreen(!isFullscreen)}
             title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
@@ -359,7 +360,8 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
                 </span>
                 <span className={styles.modalTime}>{formatTimestamp(selectedLog.timestamp)}</span>
               </div>
-              <button type="button"
+              <button
+                type="button"
                 className={styles.modalCloseBtn}
                 onClick={handleCloseFullscreen}
                 title="Close (Esc)"

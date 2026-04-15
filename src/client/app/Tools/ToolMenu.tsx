@@ -56,15 +56,15 @@ export function ToolMenu() {
 
       {/* Settings Modal - 独立于菜单生命周期 */}
       {isSettingsOpen && (
-        <div 
-          className={styles.overlay} 
+        <div
+          className={styles.overlay}
           onClick={() => setIsSettingsOpen(false)}
-          onKeyDown={(e) => e.key === 'Escape' && setIsSettingsOpen(false)}
+          onKeyDown={(e) => e.key === "Escape" && setIsSettingsOpen(false)}
           role="button"
           tabIndex={0}
         >
-          <div 
-            className={styles.popup} 
+          <div
+            className={styles.popup}
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
             role="button"

@@ -13,6 +13,7 @@ import {
   sendChatMessage,
   setChatLlmLogEnabled,
   setChatModel,
+  setChatThinkingLevel,
   steerChat,
   switchChatSession,
 } from "@/features/chat/services/chatWebSocket";
@@ -20,6 +21,7 @@ import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import type { ChatController, Message, ToolExecution } from "@/features/chat/types/chat";
 import { websocketService } from "@/services/websocket.service";
+import { sessionManager } from "@/features/chat/services/sessionManager";
 
 // ============================================================================
 // Message ID Generator
@@ -44,6 +46,7 @@ export interface EnhancedChatController extends ChatController {
   loadSession: (sessionPath: string) => Promise<void>;
 
   setModel: (modelId: string, thinkingLevel?: string) => Promise<void>;
+  setThinkingLevel: (level: string) => Promise<void>;
   listModels: () => Promise<any>;
   executeCommand: (command: string) => Promise<any>;
   setLlmLogEnabled: (enabled: boolean) => Promise<void>;
@@ -208,17 +211,10 @@ export function useChatController(): EnhancedChatController {
       // 工具输出折叠在组件状态中处理
     },
 
-    // 会话管理
+    // 会话管理 - 使用 sessionManager 统一处理（包含 loading 和界面重建）
     createNewSession: async () => {
-      await createPromiseWithTimeout<void>({
-        timeoutMessage: "创建新会话超时",
-        eventName: "session_created",
-        onSuccess: (data) => {
-          chatStore.clearMessages();
-          chatStore.setSessionId(data.sessionId);
-        },
-        sendAction: createNewChatSession,
-      });
+      // 调用 sessionManager 的方法，它会处理 loading、等待服务器返回和重建界面
+      await sessionManager.createNewSession();
     },
 
     loadSession: async (sessionPath: string) => {
@@ -238,8 +234,6 @@ export function useChatController(): EnhancedChatController {
       return data;
     },
 
-
-
     // 模型管理
     setModel: async (fullModelId: string, thinkingLevel?: string) => {
       // Split fullModelId (format: "provider/modelId") into provider and modelId
@@ -257,6 +251,20 @@ export function useChatController(): EnhancedChatController {
           sessionStore.setCurrentModel(fullModelId);
         },
         sendAction: () => setChatModel(provider, modelId, thinkingLevel),
+      });
+    },
+
+    setThinkingLevel: async (level: string) => {
+      console.log("[ChatAPI] setThinkingLevel:", { level });
+
+      await createPromiseWithTimeout<void>({
+        timeoutMessage: "设置思考级别超时",
+        eventName: "thinking_set",
+        onSuccess: (data) => {
+          console.log("[ChatAPI] thinking_set success:", data);
+          sessionStore.setThinkingLevel(level as any);
+        },
+        sendAction: () => setChatThinkingLevel(level),
       });
     },
 

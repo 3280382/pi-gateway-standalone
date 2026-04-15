@@ -4,8 +4,8 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebSocket } from "ws";
-import type { WSContext } from "../../ws-router";
-import { handleAbort } from "./abort";
+import type { WSContext } from "../ws-router";
+import { handleAbort } from "./message-handlers";
 
 describe("handleAbort", () => {
   let mockCtx: WSContext;

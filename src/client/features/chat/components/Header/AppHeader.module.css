@@ -482,3 +482,29 @@
   max-width: none;
   width: 100%;
 }
+
+/* Quick Navigation Buttons */
+.quickNav {
+  display: flex;
+  gap: 8px;
+  padding: 8px 20px;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  background: rgba(13, 17, 23, 0.5);
+}
+
+.quickNavBtn {
+  padding: 4px 12px;
+  background: rgba(48, 54, 61, 0.5);
+  border: 1px solid rgba(48, 54, 61, 0.8);
+  border-radius: 4px;
+  color: #8b949e;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quickNavBtn:hover {
+  background: rgba(88, 166, 255, 0.1);
+  border-color: rgba(88, 166, 255, 0.3);
+  color: #58a6ff;
+}

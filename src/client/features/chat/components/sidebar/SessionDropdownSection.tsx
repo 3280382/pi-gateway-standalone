@@ -1,11 +1,13 @@
 /**
  * SessionDropdownSection - Session dropdown selector
- * 
+ *
  * 职责：
  * - 显示所有历史 session 文件列表
  * - 当前选中的 session 是服务器正在使用的 session
  * - 支持切换 session
  * - 紧凑的自定义下拉框样式
+ *
+ * 注意：新建会话的唯一入口是聊天输入框右侧的新建按钮
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -44,11 +46,6 @@ export function SessionDropdownSection() {
     [controller]
   );
 
-  const handleNewSession = useCallback(async () => {
-    await controller.createNewSession();
-    setIsOpen(false);
-  }, [controller]);
-
   // ========== 4. Computed ==========
   const currentSession = sessions.find((s) => s.id === currentSessionId);
   const displayName = currentSession?.name || currentSessionId?.slice(-8) || "Select";
@@ -57,7 +54,7 @@ export function SessionDropdownSection() {
   console.log("[SessionDropdownSection] Sessions:", {
     count: sessions.length,
     currentSessionId: currentSessionId?.slice(-8),
-    sessions: sessions.map(s => ({ id: s.id.slice(-8), name: s.name, msgCount: s.messageCount })),
+    sessions: sessions.map((s) => ({ id: s.id.slice(-8), name: s.name, msgCount: s.messageCount })),
   });
 
   // ========== 5. Render ==========
@@ -78,20 +75,23 @@ export function SessionDropdownSection() {
         <div className={styles.sectionHeader}>
           <h3 className={styles.sectionTitle}>Session</h3>
         </div>
-        <button type="button" className={styles.newSessionButton} onClick={handleNewSession}>
-          + New
-        </button>
+        <div className={styles.emptyText}>No sessions</div>
       </section>
     );
   }
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} style={{ position: "relative" }}>
+      {/* 覆盖式 Loading 遮罩 */}
+      {isLoading && (
+        <div className={styles.loadingOverlay}>
+          <div className={styles.loadingSpinner} />
+          <span className={styles.loadingText}>Loading...</span>
+        </div>
+      )}
+
       <div className={styles.sectionHeader}>
         <h3 className={styles.sectionTitle}>Session</h3>
-        <button type="button" className={styles.newSessionButton} onClick={handleNewSession}>
-          + New
-        </button>
       </div>
 
       <div className={styles.sessionSelector} ref={dropdownRef}>
@@ -99,6 +99,7 @@ export function SessionDropdownSection() {
           type="button"
           className={styles.selectorBtn}
           onClick={() => setIsOpen(!isOpen)}
+          disabled={isLoading}
         >
           <span className={styles.selectorValue}>{displayName}</span>
           <svg

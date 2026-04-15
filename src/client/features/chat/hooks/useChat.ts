@@ -10,7 +10,7 @@
  * 3. 全局处理器在应用初始化时设置，确保不丢消息
  *
  * 【架构关系】
- * - 发送消息: useChat → websocketService.send()
+ * - 发送消息: useChat → chatWebSocket.sendChatMessage()
  * - 接收消息: WebSocket → setupWebSocketListeners() → chatStore
  * - 状态读取: useChat → chatStore (React 响应式)
  *
@@ -22,6 +22,7 @@ import { useCallback } from "react";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import type { Message, ToolExecution } from "@/features/chat/types/chat";
 import { websocketService } from "@/services/websocket.service";
+import { sendChatMessage, abortChatGeneration } from "@/features/chat/services/chatWebSocket";
 
 // ============================================================================
 // Types
@@ -122,19 +123,17 @@ export function useChat(): UseChatReturn {
     store.clearInput();
     store.startStreaming();
 
-    // Send via WebSocket
+    // Send via WebSocket (使用统一的 chatWebSocket API)
     if (isBash) {
-      websocketService.send("prompt", {
-        text: `Execute this bash command: ${processed}`,
-      });
+      sendChatMessage(`Execute this bash command: ${processed}`);
     } else {
-      websocketService.send("prompt", { text: processed });
+      sendChatMessage(processed);
     }
   }, [store, processInput]);
 
   // Abort generation
   const abortGeneration = useCallback(() => {
-    websocketService.send("abort", {});
+    abortChatGeneration();
     store.abortStreaming();
   }, [store]);
 

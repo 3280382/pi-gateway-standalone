@@ -102,7 +102,7 @@ describe("SidebarController", () => {
       const controller = createSidebarController();
       await controller.loadWorkingDir();
 
-      expect(client.fetchApi).toHaveBeenCalledWith("/workspace/workspace/working-dir");
+      expect(client.fetchApi).toHaveBeenCalledWith("/api/workspace/working-dir");
       expect(mockStore.setLoading).toHaveBeenCalledWith(true);
       expect(mockStore.setWorkingDir).toHaveBeenCalledWith("/test/project");
     });

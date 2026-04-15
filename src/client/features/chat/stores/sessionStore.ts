@@ -4,8 +4,9 @@
  */
 
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
+import { CHAT_SESSION_PERSIST, CHAT_STORAGE_KEYS } from "./persist.config";
 
 export type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
 
@@ -85,6 +86,10 @@ export interface ChatSessionState {
   // 当前工作目录
   workingDir: string;
 
+  // 当前会话
+  currentSessionId: string | null;
+  currentSessionFile: string | null; // session 文件路径，用于 init 时的精确匹配
+
   // 模型设置（从服务器获取，不持久化到 localStorage）
   currentModel: string | null;
   thinkingLevel: ThinkingLevel;
@@ -104,6 +109,7 @@ interface ChatSessionActions {
 
   // 当前会话（用于 UI 显示当前选中的 session）
   setCurrentSession: (id: string | null) => void;
+  setCurrentSessionFile: (path: string | null) => void; // 设置 session 文件路径
 
   // 模型设置
   setCurrentModel: (model: string | null) => void;
@@ -119,11 +125,13 @@ interface ChatSessionActions {
 }
 
 export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
-  devtools(
-    (set) => ({
+  persist(
+    devtools(
+      (set) => ({
         // 初始状态
         workingDir: "/root",
         currentSessionId: null,
+        currentSessionFile: null,
         currentModel: null,
         thinkingLevel: "off",
         availableModels: [],
@@ -138,6 +146,7 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
 
         // 当前会话
         setCurrentSession: (id) => set({ currentSessionId: id }),
+        setCurrentSessionFile: (path) => set({ currentSessionFile: path }),
 
         // 模型设置
         setCurrentModel: (model) => set({ currentModel: model }),
@@ -151,6 +160,14 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
         // 资源文件
         setResourceFiles: (files) => set({ resourceFiles: files }),
       }),
-    { name: "ChatSessionStore" }
+      { name: "ChatSessionStore" }
+    ),
+    {
+      name: CHAT_STORAGE_KEYS.CHAT_SESSION,
+      partialize: (state) =>
+        Object.fromEntries(
+          Object.entries(state).filter(([key]) => CHAT_SESSION_PERSIST.includes(key))
+        ) as Partial<ChatSessionState & ChatSessionActions>,
+    }
   )
 );

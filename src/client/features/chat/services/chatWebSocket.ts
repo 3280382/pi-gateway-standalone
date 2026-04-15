@@ -47,10 +47,14 @@ export function switchChatSession(sessionId: string): boolean {
 /**
  * 初始化工作目录（对应后端的 init 类型）
  * 返回 Promise 等待 initialized 响应
+ *
+ * @param path 工作目录路径
+ * @param sessionFile Session 文件路径（可选，用于精确匹配 session）
+ * @param timeoutMs 超时时间
  */
 export function initChatWorkingDirectory(
   path?: string,
-  sessionId?: string,
+  sessionFile?: string,
   timeoutMs = 10000 // 增加到 10 秒，因为初始化可能需要加载模型和文件系统
 ): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -75,10 +79,10 @@ export function initChatWorkingDirectory(
       reject(new Error(`Timeout waiting for initialization (${timeoutMs}ms)`));
     }, timeoutMs);
 
-    // 发送 init 消息 - 不传递任何参数，让服务器完全自己决定
-    const payload: { workingDir?: string; sessionId?: string } = {};
+    // 发送 init 消息
+    const payload: { workingDir?: string; sessionFile?: string } = {};
     if (path) payload.workingDir = path;
-    if (sessionId) payload.sessionId = sessionId;
+    if (sessionFile) payload.sessionFile = sessionFile;
 
     const sent = websocketService.send("init", payload);
 
@@ -154,7 +158,7 @@ export function setChatModel(provider: string, modelId: string, thinkingLevel?: 
  * 发送思考级别变更
  */
 export function setChatThinkingLevel(level: string): boolean {
-  return websocketService.send("thinking_level_change", { level });
+  return websocketService.send("thinking_level_change", { thinkingLevel: level });
 }
 
 /**

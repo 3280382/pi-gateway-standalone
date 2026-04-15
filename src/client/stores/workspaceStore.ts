@@ -49,7 +49,7 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
         // 设置工作目录（同时同步到 sidebarStore 和 sessionStore）
         setWorkingDir: (workingDir) => {
           console.log("[WorkspaceStore] setWorkingDir called:", workingDir);
-          
+
           // 同步更新 sidebarStore 的 workingDir（包含 path 和 displayName 的对象）
           try {
             const { useSidebarStore } = getSidebarStore();

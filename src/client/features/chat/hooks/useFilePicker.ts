@@ -10,8 +10,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
-import { useWorkspaceStore } from "@/stores/workspaceStore";
 import * as fileApi from "@/features/files/services/api/fileApi";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 
 export interface FileItem {
   name: string;
