@@ -91,7 +91,8 @@ export interface ChatSessionState {
   currentSessionFile: string | null; // session 文件路径，用于 init 时的精确匹配
 
   // 模型设置（从服务器获取，不持久化到 localStorage）
-  currentModel: string | null;
+  currentModel: string | null;  // 当前实际使用的模型（优先 session 级别）
+  defaultModel: string | null;  // settings.json 中的默认模型
   thinkingLevel: ThinkingLevel;
   availableModels: ModelInfo[];
 
@@ -113,6 +114,7 @@ interface ChatSessionActions {
 
   // 模型设置
   setCurrentModel: (model: string | null) => void;
+  setDefaultModel: (model: string | null) => void;
   setThinkingLevel: (level: ThinkingLevel) => void;
   setAvailableModels: (models: ModelInfo[]) => void;
 
@@ -133,6 +135,7 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
         currentSessionId: null,
         currentSessionFile: null,
         currentModel: null,
+        defaultModel: null,
         thinkingLevel: "off",
         availableModels: [],
         serverPid: null,
@@ -150,6 +153,7 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
 
         // 模型设置
         setCurrentModel: (model) => set({ currentModel: model }),
+        setDefaultModel: (model) => set({ defaultModel: model }),
         setThinkingLevel: (level) => set({ thinkingLevel: level }),
         setAvailableModels: (models) => set({ availableModels: models }),
 

@@ -96,6 +96,8 @@ export function setupGlobalFetchInterceptor(
     // Chinese providers
     "baidu.com", // qianfan.baidubce.com, aip.baidubce.com (Ernie)
     "aliyun.com", // dashscope.aliyuncs.com (Tongyi)
+    "aliyuncs.com", // dashscope.aliyuncs.com (Tongyi/Qwen)
+    "dashscope.aliyuncs.com",
     "volces.com", // ark.cn-beijing.volces.com (Doubao)
     "stepfun.com", // api.stepfun.com (Stepfun)
     "zhipuai.cn", // open.bigmodel.cn (GLM)
@@ -2181,7 +2183,10 @@ export function setupHttpInterceptor(
       host?.includes("moonshot.cn") ||
       host?.includes("kimi.com") ||
       host?.includes("mistral.ai") ||
-      host?.includes("groq.com");
+      host?.includes("groq.com") ||
+      host?.includes("aliyun.com") || // Qwen/Dashscope
+      host?.includes("aliyuncs.com") || // Qwen/Dashscope
+      host?.includes("dashscope.aliyuncs.com");
 
     if (!isLlmApi) {
       return originalRequest(options, callback);

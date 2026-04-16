@@ -164,6 +164,10 @@ describe("ChatStore", () => {
     store.setSearchFilters({ user: false });
     expect(useChatStore.getState().searchFilters.user).toBe(false);
     expect(useChatStore.getState().searchFilters.assistant).toBe(true);
+    expect(useChatStore.getState().searchFilters.system).toBe(true);
+    expect(useChatStore.getState().searchFilters.compaction).toBe(true);
+    expect(useChatStore.getState().searchFilters.modelChange).toBe(true);
+    expect(useChatStore.getState().searchFilters.thinkingLevelChange).toBe(true);
 
     store.setSearching(true);
     expect(useChatStore.getState().isSearching).toBe(true);

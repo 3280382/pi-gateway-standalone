@@ -18,6 +18,7 @@ import {
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
+import type { ChatSearchFilters } from "@/features/chat/types/chat";
 import styles from "./AppHeader.module.css";
 
 // ============================================================================
@@ -30,15 +31,23 @@ interface AppHeaderProps {
   searchFilters?: {
     user: boolean;
     assistant: boolean;
+    system: boolean;
     thinking: boolean;
     tools: boolean;
+    compaction: boolean;
+    modelChange: boolean;
+    thinkingLevelChange: boolean;
   };
   onSearchQueryChange?: (query: string) => void;
   onSearchFiltersChange?: (filters: {
     user: boolean;
     assistant: boolean;
+    system: boolean;
     thinking: boolean;
     tools: boolean;
+    compaction: boolean;
+    modelChange: boolean;
+    thinkingLevelChange: boolean;
   }) => void;
 }
 
@@ -77,12 +86,30 @@ export function AppHeader({
 
   // ========== 3. Computed ==========
   const hasActiveFilters = useMemo(
-    () => filters.user || filters.assistant || filters.thinking || filters.tools,
+    () =>
+      filters.user ||
+      filters.assistant ||
+      filters.system ||
+      filters.thinking ||
+      filters.tools ||
+      filters.compaction ||
+      filters.modelChange ||
+      filters.thinkingLevelChange,
     [filters]
   );
 
   const activeFilterCount = useMemo(
-    () => [filters.user, filters.assistant, filters.thinking, filters.tools].filter(Boolean).length,
+    () =>
+      [
+        filters.user,
+        filters.assistant,
+        filters.system,
+        filters.thinking,
+        filters.tools,
+        filters.compaction,
+        filters.modelChange,
+        filters.thinkingLevelChange,
+      ].filter(Boolean).length,
     [filters]
   );
 
@@ -93,7 +120,7 @@ export function AppHeader({
 
   // ========== 4. Actions ==========
   const handleFilterChange = useCallback(
-    (key: keyof typeof filters) => {
+    (key: keyof ChatSearchFilters) => {
       if (onSearchFiltersChange) {
         onSearchFiltersChange({ ...filters, [key]: !filters[key] });
       } else {
@@ -195,6 +222,11 @@ export function AppHeader({
                 onChange={() => handleFilterChange("assistant")}
               />
               <FilterChip
+                label="System"
+                checked={filters.system}
+                onChange={() => handleFilterChange("system")}
+              />
+              <FilterChip
                 label="Thinking"
                 checked={filters.thinking}
                 onChange={() => handleFilterChange("thinking")}
@@ -203,6 +235,21 @@ export function AppHeader({
                 label="Tools"
                 checked={filters.tools}
                 onChange={() => handleFilterChange("tools")}
+              />
+              <FilterChip
+                label="Compaction"
+                checked={filters.compaction}
+                onChange={() => handleFilterChange("compaction")}
+              />
+              <FilterChip
+                label="Model Change"
+                checked={filters.modelChange}
+                onChange={() => handleFilterChange("modelChange")}
+              />
+              <FilterChip
+                label="Thinking Level"
+                checked={filters.thinkingLevelChange}
+                onChange={() => handleFilterChange("thinkingLevelChange")}
               />
             </div>
           )}

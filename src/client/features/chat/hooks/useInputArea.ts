@@ -16,9 +16,11 @@ import { useSlashCommands } from "./useSlashCommands";
 export interface UseInputAreaOptions {
   value: string;
   isStreaming: boolean;
+  isRunning?: boolean;
   onChange: (text: string) => void;
   onSend: () => void;
   onAbort: () => void;
+  onSteer?: (text: string) => void;
   onBashCommand?: (command: string) => void;
   onSlashCommand?: (command: string, args: string) => void;
   onSendWithImages?: (
@@ -84,9 +86,11 @@ export function useInputArea(options: UseInputAreaOptions): UseInputAreaReturn {
   const {
     value,
     isStreaming,
+    isRunning = false,
     onChange,
     onSend,
     onAbort,
+    onSteer,
     onBashCommand,
     onSlashCommand,
     onSendWithImages,
@@ -166,6 +170,13 @@ export function useInputArea(options: UseInputAreaOptions): UseInputAreaReturn {
       return;
     }
 
+    // isRunning为true时，发送steer消息
+    if (isRunning && onSteer) {
+      onSteer(trimmedValue);
+      onChange("");
+      return;
+    }
+
     // 带图片的消息
     if (imageUpload.images.length > 0 && onSendWithImages) {
       onSendWithImages(trimmedValue, imageUpload.getImagesForUpload());
@@ -179,10 +190,12 @@ export function useInputArea(options: UseInputAreaOptions): UseInputAreaReturn {
   }, [
     value,
     isStreaming,
+    isRunning,
     isBashMode,
     imageUpload,
     onSend,
     onAbort,
+    onSteer,
     onBashCommand,
     onSlashCommand,
     onSendWithImages,

@@ -55,6 +55,7 @@ const createInitialState = () => ({
   inputText: "",
   isInputFocused: false,
   isStreaming: false,
+  isRunning: false, // Pi coding agent turn运行状态
   streamingContent: "",
   streamingThinking: "",
   streamingThinkings: [] as Array<{ id: string; content: string }>, // 多轮思考支持
@@ -67,8 +68,12 @@ const createInitialState = () => ({
   searchFilters: {
     user: true,
     assistant: true,
+    system: true,
     thinking: true,
     tools: true,
+    compaction: true,
+    modelChange: true,
+    thinkingLevelChange: true,
   },
   searchResults: [] as SearchResult[],
   isSearching: false,
@@ -495,6 +500,9 @@ export const useChatStore = create<
     setMessages: (messages: Message[]) => void;
     clearMessages: () => void;
 
+    // Running State (Pi coding agent turn)
+    setIsRunning: (isRunning: boolean) => void;
+
     // Streaming Actions - Batch Updates
     startStreaming: () => void;
     createStreamingMessage: (messageId?: string) => void;
@@ -566,6 +574,11 @@ export const useChatStore = create<
 
       clearMessages: () => {
         set({ messages: [] }, false, "clearMessages");
+      },
+
+      // Running State (Pi coding agent turn)
+      setIsRunning: (isRunning: boolean) => {
+        set({ isRunning }, false, "setIsRunning");
       },
 
       // Streaming Actions - Optimized with batch updates
@@ -1065,6 +1078,8 @@ export const selectCurrentStreamingMessage = (state: ReturnType<typeof useChatSt
 export const selectInputText = (state: ReturnType<typeof useChatStore.getState>) => state.inputText;
 export const selectIsStreaming = (state: ReturnType<typeof useChatStore.getState>) =>
   state.isStreaming;
+export const selectIsRunning = (state: ReturnType<typeof useChatStore.getState>) =>
+  state.isRunning;
 export const selectShowThinking = (state: ReturnType<typeof useChatStore.getState>) =>
   state.showThinking;
 export const selectShowTools = (state: ReturnType<typeof useChatStore.getState>) => state.showTools;
@@ -1083,11 +1098,30 @@ export const selectIsSearching = (state: ReturnType<typeof useChatStore.getState
 
 export interface FilterOptions {
   query: string;
-  filters: {
-    user: boolean;
-    assistant: boolean;
-    thinking: boolean;
-    tools: boolean;
+  filters: ChatSearchFilters;
+}
+
+/**
+ * 检测消息内容类型
+ */
+function detectMessageTypes(message: Message): {
+  hasThinking: boolean;
+  hasTools: boolean;
+  isModelChange: boolean;
+  isCompaction: boolean;
+  isThinkingLevelChange: boolean;
+} {
+  const text = message.content
+    .filter((c) => c.type === "text")
+    .map((c) => c.text || "")
+    .join(" ");
+
+  return {
+    hasThinking: message.content.some((c) => c.type === "thinking"),
+    hasTools: message.content.some((c) => c.type === "tool" || c.type === "tool_use"),
+    isModelChange: message.role === "system" && text.includes("模型已切换为"),
+    isCompaction: message.role === "system" && text.includes("上下文压缩"),
+    isThinkingLevelChange: message.role === "system" && text.includes("思考级别已设置"),
   };
 }
 
@@ -1102,27 +1136,37 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
   const lowerQuery = query.toLowerCase().trim();
 
   return messages.filter((message) => {
-    // 1. 按消息类型过滤
+    const { hasThinking, hasTools, isModelChange, isCompaction, isThinkingLevelChange } =
+      detectMessageTypes(message);
+
+    // 1. 按消息 role 过滤
     if (message.role === "user" && !filters.user) return false;
     if (message.role === "assistant" && !filters.assistant) return false;
+    if (message.role === "system" && !filters.system) return false;
 
-    // 2. 对于 assistant 消息，检查内容类型
-    if (message.role === "assistant") {
-      const hasThinking = message.content.some((c) => c.type === "thinking");
-      const hasTools = message.content.some((c) => c.type === "tool" || c.type === "tool_use");
+    // 2. 按内容类型过滤（独立判断，无依赖关系）
+    // 如果消息包含 thinking 但 filters.thinking 为 false，过滤掉
+    if (hasThinking && !filters.thinking) return false;
 
-      // 如果消息包含 thinking 但 filters.thinking 为 false，且没有文本内容，则过滤掉
-      if (hasThinking && !filters.thinking && !message.content.some((c) => c.type === "text")) {
-        return false;
-      }
+    // 如果消息包含 tools 但 filters.tools 为 false，过滤掉
+    if (hasTools && !filters.tools) return false;
 
-      // 如果消息包含 tools 但 filters.tools 为 false，且没有文本内容，则过滤掉
-      if (hasTools && !filters.tools && !message.content.some((c) => c.type === "text")) {
-        return false;
-      }
+    // 3. 按特殊系统消息类型过滤
+    if (isModelChange && !filters.modelChange) return false;
+    if (isCompaction && !filters.compaction) return false;
+    if (isThinkingLevelChange && !filters.thinkingLevelChange) return false;
+
+    // 4. 普通系统消息（非特殊类型）如果 system 为 false 已经被过滤
+    // 但如果 system 为 true，但特殊类型为 false，需要检查
+    if (message.role === "system") {
+      // 如果是特殊类型且都被关闭了，或者不是特殊类型
+      const isSpecialType = isModelChange || isCompaction || isThinkingLevelChange;
+      // 特殊类型已经被上面的检查过滤了
+      // 如果不是特殊类型，但 system 为 false，已经在 role 检查中过滤
+      // 所以这里不需要额外处理
     }
 
-    // 3. 按搜索关键词过滤（如果有关键词）
+    // 5. 按搜索关键词过滤（如果有关键词）
     if (lowerQuery) {
       const messageText = message.content
         .map((c) => {

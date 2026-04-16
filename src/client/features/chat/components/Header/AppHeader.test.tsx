@@ -14,8 +14,12 @@ vi.mock("@/features/chat/stores/sidebarStore", () => ({
       searchFilters: {
         user: true,
         assistant: true,
+        system: true,
         thinking: true,
         tools: true,
+        compaction: true,
+        modelChange: true,
+        thinkingLevelChange: true,
       },
     };
     return selector ? selector(state) : state;

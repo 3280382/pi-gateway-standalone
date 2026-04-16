@@ -160,6 +160,17 @@ export function useChatController(): EnhancedChatController {
 
     steer: (text: string) => {
       if (!text.trim()) return;
+      
+      // 添加用户消息到列表（类似 sendMessage）
+      const userMessage: Message = {
+        id: generateMessageId(),
+        role: "user",
+        content: [{ type: "text", text: text.trim() }],
+        timestamp: new Date(),
+      };
+      chatStore.addMessage(userMessage);
+      chatStore.clearInput();
+      
       steerChat(text);
     },
 
@@ -568,11 +579,55 @@ export function setupWebSocketListeners(): void {
     }
   });
 
-  // Initialized handler - 保存 resourceFiles
+  // Turn start/end handlers - 控制isRunning状态
+  websocketService.on("turn_start", () => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] turn_start`);
+    store.setIsRunning(true);
+  });
+
+  websocketService.on("turn_end", () => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] turn_end`);
+    store.setIsRunning(false);
+  });
+
+  // Initialized handler - 保存 resourceFiles 和模型信息
   websocketService.on("initialized", (data: any) => {
     console.log("[setupWebSocketListeners] initialized:", data);
+    const sessionStore = useSessionStore.getState();
+    
     if (data?.resourceFiles) {
-      useSessionStore.getState().setResourceFiles(data.resourceFiles);
+      sessionStore.setResourceFiles(data.resourceFiles);
+    }
+    
+    // 使用后端返回的 currentModel（已考虑 session 优先级）
+    if (data?.currentModel) {
+      sessionStore.setCurrentModel(data.currentModel);
+      console.log("[initialized] Current model:", data.currentModel);
+    }
+    
+    // 保存默认模型信息（用于显示）
+    if (data?.defaultModel) {
+      sessionStore.setDefaultModel(data.defaultModel);
+    }
+  });
+
+  // Dir changed handler - 同样处理模型信息
+  websocketService.on("dir_changed", (data: any) => {
+    console.log("[setupWebSocketListeners] dir_changed:", data);
+    const sessionStore = useSessionStore.getState();
+    
+    if (data?.resourceFiles) {
+      sessionStore.setResourceFiles(data.resourceFiles);
+    }
+    
+    if (data?.currentModel) {
+      sessionStore.setCurrentModel(data.currentModel);
+    }
+    
+    if (data?.defaultModel) {
+      sessionStore.setDefaultModel(data.defaultModel);
     }
   });
 

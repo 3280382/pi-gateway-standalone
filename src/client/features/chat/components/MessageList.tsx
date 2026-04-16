@@ -43,9 +43,19 @@ export function MessageList({
 
     const content: MessageContent[] = [];
 
-    // 已固化的内容
+    // 获取已完成的工具 ID 集合
+    const completedToolIds = new Set(activeTools.keys());
+
+    // 已固化的内容（过滤掉已完成的工具调用，避免重复显示）
     if (currentStreamingMessage.content?.length) {
-      content.push(...currentStreamingMessage.content);
+      const filteredContent = currentStreamingMessage.content.filter((c) => {
+        // 如果 content 中的 tool_use 已经在 activeTools 中完成，则过滤掉
+        if (c.type === "tool_use" && completedToolIds.has(c.toolCallId || "")) {
+          return false;
+        }
+        return true;
+      });
+      content.push(...filteredContent);
     }
 
     // 当前流式内容
@@ -53,14 +63,16 @@ export function MessageList({
       content.push({ type: "thinking", thinking: streamingThinking });
     }
 
-    // 流式中的工具调用
+    // 流式中的工具调用（过滤掉已完成的）
     streamingToolCalls.forEach((tool) => {
-      content.push({
-        type: "tool_use",
-        toolCallId: tool.id,
-        toolName: tool.name,
-        partialArgs: tool.args,
-      });
+      if (!completedToolIds.has(tool.id)) {
+        content.push({
+          type: "tool_use",
+          toolCallId: tool.id,
+          toolName: tool.name,
+          partialArgs: tool.args,
+        });
+      }
     });
 
     // 已完成的工具调用（包含结果）

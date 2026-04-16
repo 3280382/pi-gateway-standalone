@@ -60,8 +60,12 @@ export interface ToolExecution {
 export interface ChatSearchFilters {
   user: boolean;
   assistant: boolean;
+  system: boolean;
   thinking: boolean;
   tools: boolean;
+  compaction: boolean;
+  modelChange: boolean;
+  thinkingLevelChange: boolean;
   dates?: {
     from?: Date;
     to?: Date;

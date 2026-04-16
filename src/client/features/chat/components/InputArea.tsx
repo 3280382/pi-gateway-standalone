@@ -19,9 +19,11 @@ import styles from "./InputArea.module.css";
 interface InputAreaProps {
   value: string;
   isStreaming: boolean;
+  isRunning?: boolean; // Pi coding agent turn运行状态
   onChange: (text: string) => void;
   onSend: () => void;
   onAbort: () => void;
+  onSteer?: (text: string) => void; // steer模式发送
   onBashCommand?: (command: string) => void;
   onSlashCommand?: (command: string, args: string) => void;
   onSendWithImages?: (
@@ -42,9 +44,11 @@ interface InputAreaProps {
 export function InputArea({
   value,
   isStreaming,
+  isRunning = false,
   onChange,
   onSend,
   onAbort,
+  onSteer,
   onBashCommand,
   onSlashCommand,
   onSendWithImages,
@@ -61,9 +65,11 @@ export function InputArea({
   const inputArea = useInputArea({
     value,
     isStreaming,
+    isRunning,
     onChange,
     onSend,
     onAbort,
+    onSteer,
     onBashCommand,
     onSlashCommand,
     onSendWithImages,
@@ -209,28 +215,28 @@ export function InputArea({
             setTimeout(autoResizeTextarea, 0);
           }}
           rows={2}
-          disabled={isStreaming}
+          disabled={false} /* isRunning时也可以输入 */
         />
         <div className={styles.buttonColumn}>
+          {/* Send按钮 - isRunning时绿色(steer)，否则蓝色(prompt) */}
           <button
             type="button"
-            className={`${styles.sendButton} ${isStreaming ? styles.stopButton : ""}`}
+            className={`${styles.sendButton} ${isRunning ? styles.steerButton : styles.promptButton}`}
             onClick={inputArea.handleSend}
-            title={isStreaming ? "Stop" : "Send (Ctrl+Enter)"}
+            title={isRunning ? "Steer (Ctrl+Enter)" : "Send (Ctrl+Enter)"}
           >
-            {isStreaming ? <StopIcon /> : <SendIcon />}
+            <SendIcon />
           </button>
-          {onNewSession && (
-            <button
-              type="button"
-              className={styles.newSessionButton}
-              onClick={onNewSession}
-              title="New Session"
-              disabled={isStreaming}
-            >
-              <PlusIcon />
-            </button>
-          )}
+          {/* Abort按钮 - isRunning时激活(红色)，否则disabled(灰色) */}
+          <button
+            type="button"
+            className={`${styles.abortButton} ${isRunning ? styles.active : styles.disabled}`}
+            onClick={onAbort}
+            title="Abort Generation"
+            disabled={!isRunning}
+          >
+            <AbortIcon />
+          </button>
         </div>
       </div>
 
@@ -286,6 +292,19 @@ export function InputArea({
             <ScrollIcon active={shouldScrollToBottom} />
           </button>
         )}
+
+        {/* New Session按钮 - 放到底部最右侧，与其他toolbar按钮同宽 */}
+        {onNewSession && (
+          <button
+            type="button"
+            className={`${styles.toolbarBtn} ${styles.newSessionBtn}`}
+            onClick={onNewSession}
+            title="New Session"
+            disabled={isStreaming}
+          >
+            <PlusIcon />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -305,6 +324,15 @@ function StopIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
       <rect x="6" y="6" width="12" height="12" rx="2" />
+    </svg>
+  );
+}
+
+function AbortIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="8" y1="12" x2="16" y2="12" />
     </svg>
   );
 }

@@ -185,6 +185,7 @@ export async function handleSetLlmLog(
 
 /**
  * Handle set_model message
+ * 同时更新 session 模型和 settings.json 默认模型
  */
 export async function handleSetModel(
   ctx: WSContext,
@@ -197,9 +198,23 @@ export async function handleSetModel(
   const { provider, modelId, thinkingLevel } = payload;
 
   try {
+    // 1. 更新 session 模型（追加 model_change entry）
     await ctx.session.setModel(provider, modelId, thinkingLevel);
+    logger.info(`[handleSetModel] Session model set to: ${provider}/${modelId}`);
+
+    // 2. 同时更新 settings.json 的默认模型
+    try {
+      const { SettingsManager } = await import("@mariozechner/pi-coding-agent");
+      const settings = SettingsManager.create();
+      const fullModelId = `${provider}/${modelId}`;
+      settings.setDefaultModel(fullModelId);
+      logger.info(`[handleSetModel] Settings.json default model updated to: ${fullModelId}`);
+    } catch (settingsError) {
+      logger.warn("[handleSetModel] Failed to update settings.json:", settingsError);
+      // 不影响主流程，继续执行
+    }
+
     // setModel already sends response internally
-    logger.info(`[handleSetModel] Model set to: ${provider}/${modelId}`);
   } catch (error) {
     logger.error("[handleSetModel] Error:", {}, error instanceof Error ? error : undefined);
     sendError(ctx, error instanceof Error ? error.message : "Failed to set model");

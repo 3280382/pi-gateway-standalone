@@ -228,8 +228,10 @@
   border-radius: 6px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
   z-index: 100;
+  max-width: 280px;
 }
 
 .filterChip {

@@ -87,11 +87,59 @@ export function normalizeContentItem(item: any): any {
 }
 
 /**
+ * 生成系统消息
+ */
+function createSystemMessage(text: string, id?: string): Message {
+  return {
+    id: id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    role: "system",
+    content: [{ type: "text", text }],
+    timestamp: new Date(),
+    isStreaming: false,
+    isThinkingCollapsed: true,
+    isToolsCollapsed: true,
+    isMessageCollapsed: false,
+  };
+}
+
+/**
+ * 将特殊 entry 类型转换为系统消息文本
+ */
+function convertSpecialEntryToMessage(entry: any): Message | null {
+  switch (entry.type) {
+    case "model_change": {
+      const provider = entry.provider || "unknown";
+      const modelId = entry.modelId || "unknown";
+      return createSystemMessage(`🤖 模型已切换为: ${provider}/${modelId}`, entry.id);
+    }
+    case "compaction": {
+      const summary = entry.summary || "上下文已压缩";
+      const tokensBefore = entry.tokensBefore || 0;
+      return createSystemMessage(
+        `🗜️ 上下文压缩: ${summary}${tokensBefore > 0 ? ` (释放约 ${tokensBefore} tokens)` : ""}`,
+        entry.id
+      );
+    }
+    case "thinking_level_change": {
+      const level = entry.thinkingLevel || "unknown";
+      return createSystemMessage(`🧠 思考级别已设置为: ${level}`, entry.id);
+    }
+    case "custom": {
+      const customType = entry.customType || "custom";
+      const data = entry.data ? JSON.stringify(entry.data).slice(0, 100) : "";
+      return createSystemMessage(`📌 ${customType}${data ? `: ${data}` : ""}`, entry.id);
+    }
+    default:
+      return null;
+  }
+}
+
+/**
  * 统一的 Session 消息转换函数
  *
  * 处理流程：
  * 1. 第一遍遍历：收集所有 toolCall 的参数
- * 2. 第二遍遍历：转换消息，处理 toolResult
+ * 2. 第二遍遍历：转换消息，处理 toolResult 和特殊 entry 类型
  *
  * @param entries Session 文件中的 entries 数组（JSONL 解析后的）
  * @returns 转换后的 Message 数组
@@ -113,70 +161,83 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
     }
   });
 
-  return entries
-    .filter((entry: any) => entry.type === "message" && entry.message)
-    .map((entry: any) => {
-      const msg = entry.message;
+  const messages: Message[] = [];
 
-      // 特殊处理 toolResult 消息
-      if (msg.role === "toolResult") {
-        let contentText = "";
-        if (Array.isArray(msg.content)) {
-          contentText = msg.content
-            .filter((c: any) => c.type === "text")
-            .map((c: any) => c.text)
-            .join("");
-        } else if (typeof msg.content === "string") {
-          contentText = msg.content;
-        }
+  entries.forEach((entry: any) => {
+    // 处理特殊 entry 类型（model_change, compaction 等）
+    if (entry.type !== "message") {
+      const specialMessage = convertSpecialEntryToMessage(entry);
+      if (specialMessage) {
+        messages.push(specialMessage);
+      }
+      return;
+    }
 
-        const args = toolCallArgsMap.get(msg.toolCallId) || {};
+    const msg = entry.message;
+    if (!msg) return;
 
-        return {
-          id: entry.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          role: "assistant" as const,
-          content: [
-            {
-              type: "tool" as const,
-              toolCallId: msg.toolCallId,
-              toolName: msg.toolName,
-              output: msg.isError ? undefined : contentText,
-              error: msg.isError ? contentText : undefined,
-              args: args,
-            },
-          ],
-          timestamp: new Date(msg.timestamp || entry.timestamp || Date.now()),
-          isStreaming: false,
-          isThinkingCollapsed: true,
-          isToolsCollapsed: true,
-          isMessageCollapsed: false,
-        };
+    // 特殊处理 toolResult 消息
+    if (msg.role === "toolResult") {
+      let contentText = "";
+      if (Array.isArray(msg.content)) {
+        contentText = msg.content
+          .filter((c: any) => c.type === "text")
+          .map((c: any) => c.text)
+          .join("");
+      } else if (typeof msg.content === "string") {
+        contentText = msg.content;
       }
 
-      // 普通消息处理
-      const rawContent = msg.content;
-      const contentArray = normalizeContent(rawContent);
+      const args = toolCallArgsMap.get(msg.toolCallId) || {};
 
-      // 过滤掉 toolCall，避免重复显示（toolResult 已经单独处理了）
-      const filteredContent = contentArray.filter((item: any) => {
-        if (item.type === "toolCall") {
-          return false;
-        }
-        return true;
-      });
-
-      // 转换 content items
-      const normalizedContent = filteredContent.map(normalizeContentItem);
-
-      return {
+      messages.push({
         id: entry.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        role: msg.role || "user",
-        content: normalizedContent,
+        role: "assistant" as const,
+        content: [
+          {
+            type: "tool" as const,
+            toolCallId: msg.toolCallId,
+            toolName: msg.toolName,
+            output: msg.isError ? undefined : contentText,
+            error: msg.isError ? contentText : undefined,
+            args: args,
+          },
+        ],
         timestamp: new Date(msg.timestamp || entry.timestamp || Date.now()),
         isStreaming: false,
         isThinkingCollapsed: true,
         isToolsCollapsed: true,
         isMessageCollapsed: false,
-      };
+      });
+      return;
+    }
+
+    // 普通消息处理
+    const rawContent = msg.content;
+    const contentArray = normalizeContent(rawContent);
+
+    // 过滤掉 toolCall，避免重复显示（toolResult 已经单独处理了）
+    const filteredContent = contentArray.filter((item: any) => {
+      if (item.type === "toolCall") {
+        return false;
+      }
+      return true;
     });
+
+    // 转换 content items
+    const normalizedContent = filteredContent.map(normalizeContentItem);
+
+    messages.push({
+      id: entry.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      role: msg.role || "user",
+      content: normalizedContent,
+      timestamp: new Date(msg.timestamp || entry.timestamp || Date.now()),
+      isStreaming: false,
+      isThinkingCollapsed: true,
+      isToolsCollapsed: true,
+      isMessageCollapsed: false,
+    });
+  });
+
+  return messages;
 }

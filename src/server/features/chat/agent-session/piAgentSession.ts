@@ -416,6 +416,19 @@ export class PiAgentSession {
       const timestamp = new Date().toISOString().split("T")[1].split(".")[0];
 
       switch (event.type) {
+        // Turn 边界 - 表示 Pi coding agent 的一个回合开始/结束
+        case "turn_start": {
+          console.log(`[${timestamp}] [SEND] turn_start`);
+          this.send({ type: "turn_start" });
+          break;
+        }
+
+        case "turn_end": {
+          console.log(`[${timestamp}] [SEND] turn_end`);
+          this.send({ type: "turn_end" });
+          break;
+        }
+
         // Message 边界 - 只处理 assistant 消息
         case "message_start": {
           const startMsg = event.message;

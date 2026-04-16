@@ -114,8 +114,20 @@
   background: #f85149;
 }
 
-.sendButton.stopButton:hover:not(:disabled) {
-  background: #ff7b72;
+.sendButton.steerButton {
+  background: #3fb950; /* 绿色 - steer模式 */
+}
+
+.sendButton.steerButton:hover:not(:disabled) {
+  background: #56d364;
+}
+
+.sendButton.promptButton {
+  background: var(--unified-blue); /* 蓝色 - prompt模式 */
+}
+
+.sendButton.promptButton:hover:not(:disabled) {
+  background: var(--unified-blue-hover);
 }
 
 .sendButton svg {
@@ -123,8 +135,8 @@
   height: 18px;
 }
 
-/* New session button - shorter, same width */
-.newSessionButton {
+/* Abort button - middle height, red when active */
+.abortButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -132,26 +144,38 @@
   height: 28px;
   border: none;
   border-radius: 8px;
-  background: var(--unified-blue-dim);
-  color: var(--unified-blue);
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
 }
 
-.newSessionButton:hover:not(:disabled) {
-  background: var(--unified-blue-dim-hover);
-  color: var(--unified-blue-hover);
+/* isRunning=true: 激活状态 - 红色 */
+.abortButton.active {
+  background: rgba(248, 81, 73, 0.2);
+  color: #f85149;
 }
 
-.newSessionButton:disabled {
-  opacity: 0.4;
+.abortButton.active:hover {
+  background: rgba(248, 81, 73, 0.3);
+  color: #ff7b72;
+}
+
+/* isRunning=false: 禁用状态 - 灰色 */
+.abortButton.disabled {
+  background: rgba(88, 166, 255, 0.1);
+  color: #484f58;
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
-.newSessionButton svg {
+.abortButton svg {
   width: 16px;
   height: 16px;
+}
+
+/* New session button in toolbar - aligned right, same size as toolbarBtn */
+.newSessionBtn {
+  margin-left: auto; /* 推到最右边 */
 }
 
 /* Toolbar - minimal spacing */
@@ -167,7 +191,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
+  width: 40px;
   height: 28px;
   border: none;
   border-radius: 6px;

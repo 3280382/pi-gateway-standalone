@@ -15,6 +15,7 @@ import {
   filterMessages,
   selectCurrentStreamingMessage,
   selectInputText,
+  selectIsRunning,
   selectIsStreaming,
   selectMessages,
   selectSearchFilters,
@@ -34,6 +35,7 @@ export function ChatPanel() {
   const currentStreamingMessage = useChatStore(selectCurrentStreamingMessage);
   const inputText = useChatStore(selectInputText);
   const isStreaming = useChatStore(selectIsStreaming);
+  const isRunning = useChatStore(selectIsRunning);
   const showThinking = useChatStore(selectShowThinking);
   const searchQuery = useChatStore(selectSearchQuery);
   const searchFilters = useChatStore(selectSearchFilters);
@@ -72,10 +74,12 @@ export function ChatPanel() {
         <InputArea
           value={inputText}
           isStreaming={isStreaming}
+          isRunning={isRunning}
           onChange={chatController.setInputText}
           onSend={chatPanel.handleSend}
           onSendWithImages={chatPanel.handleSendWithImages}
           onAbort={chatController.abortGeneration}
+          onSteer={chatController.steer}
           onBashCommand={chatPanel.handleBashCommand}
           onSlashCommand={chatPanel.handleSlashCommand}
           onNewSession={chatPanel.handleNewSession}

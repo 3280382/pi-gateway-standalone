@@ -297,6 +297,24 @@
   border-color: var(--accent-blue);
 }
 
+/* -------- Session Model Specific -------- */
+.usingDefault {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.paramHint {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.dropdownDivider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 4px 0;
+}
+
 /* ===== 新增样式：紧凑工作目录 ===== */
 .compactList {
   display: flex;

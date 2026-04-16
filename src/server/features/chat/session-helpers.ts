@@ -119,6 +119,77 @@ export async function getSessionMessages(sessionFile: string): Promise<any[]> {
 }
 
 /**
+ * 获取 Session 级别的模型设置
+ * 从 session 文件中查找最后一次 model_change entry
+ * @returns sessionModel: { provider: string, modelId: string } | null
+ */
+export async function getSessionModel(sessionFile: string): Promise<{
+  provider: string;
+  modelId: string;
+  fullId: string;
+} | null> {
+  try {
+    const messages = await getSessionMessages(sessionFile);
+
+    // 从后向前查找最后一次 model_change
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.type === "model_change" && msg.provider && msg.modelId) {
+        logger.info(`[getSessionModel] Found session model: ${msg.provider}/${msg.modelId}`);
+        return {
+          provider: msg.provider,
+          modelId: msg.modelId,
+          fullId: `${msg.provider}/${msg.modelId}`,
+        };
+      }
+    }
+
+    logger.info(`[getSessionModel] No model_change found in session`);
+    return null;
+  } catch (e) {
+    logger.error(`[getSessionModel] Failed: ${e}`);
+    return null;
+  }
+}
+
+/**
+ * 获取 Session 当前使用的模型
+ * 优先从 session JSONL 文件中读取最后一次 model_change
+ * 如果没有则使用 settings.json 的默认模型
+ */
+export async function getSessionCurrentModel(
+  sessionFile: string,
+  defaultModel?: string | null
+): Promise<string | null> {
+  try {
+    const messages = await getSessionMessages(sessionFile);
+
+    // 从后向前查找最后一次 model_change
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.type === "model_change" && (msg.model || msg.modelId)) {
+        const modelId = msg.model || msg.modelId;
+        const provider = msg.provider || "";
+        const fullId = provider ? `${provider}/${modelId}` : modelId;
+        logger.info(`[getSessionCurrentModel] Found session model: ${fullId}`);
+        return fullId;
+      }
+    }
+
+    // Session 中没有 model_change，使用默认模型
+    if (defaultModel) {
+      logger.info(`[getSessionCurrentModel] Using default model: ${defaultModel}`);
+      return defaultModel;
+    }
+
+    return null;
+  } catch (e) {
+    logger.error(`[getSessionCurrentModel] Failed: ${e}`);
+    return defaultModel || null;
+  }
+}
+
+/**
  * 构建统一的初始化/切换响应
  *
  * 用于：
@@ -138,17 +209,26 @@ export async function buildSessionResponse(
   };
   allSessions: Awaited<ReturnType<typeof getAllSessions>>;
   currentModel: string | null;
+  defaultModel: string | null;
   allModels: Awaited<ReturnType<typeof getAllModels>>;
   thinkingLevel: string;
 }> {
   // 获取 session 信息
-  // 统一使用完整路径作为 sessionId（与 sessionFile 一致）
   const sessionFile = session.session?.sessionFile || "";
-  const sessionId = sessionFile; // 使用完整路径作为 ID，而不是 UUID
+  const sessionId = sessionFile;
   const sessionMessages = await getSessionMessages(sessionFile);
 
+  // 获取默认模型（来自 settings.json）
+  const defaultModel = session.session?.model?.id || null;
+
+  // 获取当前实际使用的模型（优先从 session 中读取，否则使用默认）
+  const currentModel = await getSessionCurrentModel(sessionFile, defaultModel);
+
   // 并行获取其他数据
-  const [allSessions, allModels] = await Promise.all([getAllSessions(workingDir), getAllModels()]);
+  const [allSessions, allModels] = await Promise.all([
+    getAllSessions(workingDir),
+    getAllModels(),
+  ]);
 
   return {
     pid: process.pid,
@@ -159,7 +239,8 @@ export async function buildSessionResponse(
       messages: sessionMessages,
     },
     allSessions,
-    currentModel: session.session?.model?.id || null,
+    currentModel,
+    defaultModel,
     allModels,
     thinkingLevel: session.session?.thinkingLevel || "off",
   };
