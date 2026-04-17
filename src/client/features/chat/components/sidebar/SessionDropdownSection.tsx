@@ -65,22 +65,19 @@ export function SessionDropdownSection() {
   );
 
   // ========== 4. Computed ==========
-  // 对会话进行排序：活跃的在前，然后按消息数量排序
+  // 对会话进行排序：活跃的在前，其他按最后修改时间排序（最新的在前）
   const sortedSessions = [...sessions].sort((a, b) => {
     const aActive = activeSessions.has(a.id);
     const bActive = activeSessions.has(b.id);
     
-    // 活跃状态优先
+    // 1. 活跃状态优先
     if (aActive && !bActive) return -1;
     if (!aActive && bActive) return 1;
     
-    // 然后按消息数量排序
-    if (a.messageCount !== b.messageCount) {
-      return b.messageCount - a.messageCount;
-    }
-    
-    // 最后按ID（或名称）排序
-    return (a.name || a.id).localeCompare(b.name || b.id);
+    // 2. 都是活跃或都是非活跃时，按最后修改时间排序（最新的在前）
+    const aTime = new Date(a.lastModified).getTime();
+    const bTime = new Date(b.lastModified).getTime();
+    return bTime - aTime;
   });
 
   // Debug: log sessions data
