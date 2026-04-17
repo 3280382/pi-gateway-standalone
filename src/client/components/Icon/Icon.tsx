@@ -43,7 +43,9 @@ export type IconName =
   | "log"
   | "view"
   | "search"
-  | "more";
+  | "more"
+  // UI Marker
+  | "target";
 
 export interface IconProps {
   /** 图标名称 */
@@ -380,6 +382,18 @@ const icons: Record<IconName, ReactNode> = {
       <circle cx="12" cy="12" r="1" />
       <circle cx="19" cy="12" r="1" />
       <circle cx="5" cy="12" r="1" />
+    </>
+  ),
+  // UI Marker
+  target: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
+      <line x1="12" y1="2" x2="12" y2="6" />
+      <line x1="12" y1="18" x2="12" y2="22" />
+      <line x1="2" y1="12" x2="6" y2="12" />
+      <line x1="18" y1="12" x2="22" y2="12" />
     </>
   ),
 };
