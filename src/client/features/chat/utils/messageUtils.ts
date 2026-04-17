@@ -216,16 +216,28 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
     const rawContent = msg.content;
     const contentArray = normalizeContent(rawContent);
 
-    // 过滤掉 toolCall，避免重复显示（toolResult 已经单独处理了）
-    const filteredContent = contentArray.filter((item: any) => {
-      if (item.type === "toolCall") {
-        return false;
+    // 转换 content items，保留 toolCall 并标记状态
+    const normalizedContent = contentArray.map((item: any) => {
+      if (item.type === "toolCall" || item.type === "tool_use") {
+        const toolCallId = item.id || item.toolCallId;
+        // 检查是否有对应的 toolResult
+        const hasResult = entries.some((e: any) => 
+          e.type === "message" && 
+          e.message?.role === "toolResult" && 
+          e.message?.toolCallId === toolCallId
+        );
+        
+        return {
+          type: "tool_use" as const,
+          toolCallId: toolCallId || `tool-${Date.now()}`,
+          toolName: item.name || item.toolName || "unknown",
+          partialArgs: item.arguments ? JSON.stringify(item.arguments, null, 2) : undefined,
+          args: item.arguments,
+          status: hasResult ? "executing" : "pending",
+        };
       }
-      return true;
+      return normalizeContentItem(item);
     });
-
-    // 转换 content items
-    const normalizedContent = filteredContent.map(normalizeContentItem);
 
     messages.push({
       id: entry.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
