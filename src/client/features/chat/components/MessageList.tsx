@@ -46,16 +46,29 @@ export function MessageList({
     // 获取已完成的工具 ID 集合
     const completedToolIds = new Set(activeTools.keys());
 
-    // 已固化的内容（过滤掉已完成的工具调用，避免重复显示）
+    // 已固化的内容 - tool_use 保持原样显示，通过 status 字段更新状态
     if (currentStreamingMessage.content?.length) {
-      const filteredContent = currentStreamingMessage.content.filter((c) => {
-        // 如果 content 中的 tool_use 已经在 activeTools 中完成，则过滤掉
-        if (c.type === "tool_use" && completedToolIds.has(c.toolCallId || "")) {
-          return false;
+      const processedContent = currentStreamingMessage.content.map((c) => {
+        // 如果 content 中的 tool_use 有对应的 activeTool，更新其状态
+        if (c.type === "tool_use" && c.toolCallId && completedToolIds.has(c.toolCallId)) {
+          const tool = activeTools.get(c.toolCallId);
+          return {
+            ...c,
+            status: tool?.status || (tool?.error ? "error" : tool?.output ? "success" : "executing"),
+            output: tool?.output,
+            error: tool?.error,
+          };
         }
-        return true;
+        // 如果 tool_use 没有对应的 activeTool，标记为 pending 状态
+        if (c.type === "tool_use" && c.toolCallId && !completedToolIds.has(c.toolCallId)) {
+          return {
+            ...c,
+            status: "pending" as const,
+          };
+        }
+        return c;
       });
-      content.push(...filteredContent);
+      content.push(...processedContent);
     }
 
     // 当前流式内容
@@ -63,29 +76,24 @@ export function MessageList({
       content.push({ type: "thinking", thinking: streamingThinking });
     }
 
-    // 流式中的工具调用（过滤掉已完成的）
+    // 流式中的工具调用（只添加不在 content 中的）
     streamingToolCalls.forEach((tool) => {
-      if (!completedToolIds.has(tool.id)) {
+      const existsInContent = currentStreamingMessage.content?.some(
+        (c) => c.type === "tool_use" && c.toolCallId === tool.id
+      );
+      if (!existsInContent) {
         content.push({
           type: "tool_use",
           toolCallId: tool.id,
           toolName: tool.name,
           partialArgs: tool.args,
+          status: completedToolIds.has(tool.id) ? "executing" : "pending",
         });
       }
     });
 
-    // 已完成的工具调用（包含结果）
-    activeTools.forEach((tool) => {
-      content.push({
-        type: "tool",
-        toolCallId: tool.id,
-        toolName: tool.name,
-        args: tool.args,
-        output: tool.output,
-        error: tool.error,
-      });
-    });
+    // activeTools 只用于更新已有 tool_use 的状态，不单独添加 tool 类型
+    // 结果通过更新 tool_use 的 output/error/status 字段显示
 
     if (streamingContent) {
       content.push({ type: "text", text: streamingContent });

@@ -23,6 +23,7 @@ export interface MessageContent {
   error?: string;
   imageUrl?: string;
   turnNumber?: number;
+  status?: ToolStatus; // for tool/tool_use to show execution status
 }
 
 export interface Message {
@@ -40,7 +41,7 @@ export interface Message {
 // Tool Execution Types
 // ============================================================================
 
-export type ToolStatus = "pending" | "executing" | "success" | "error";
+export type ToolStatus = "pending" | "executing" | "success" | "error" | "timeout";
 
 export interface ToolExecution {
   id: string;

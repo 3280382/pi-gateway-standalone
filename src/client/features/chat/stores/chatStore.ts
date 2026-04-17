@@ -520,6 +520,7 @@ export const useChatStore = create<
     // Tool Actions
     setActiveTool: (tool: ToolExecution) => void;
     updateToolOutput: (toolId: string, output: string, error?: string) => void;
+    checkToolExecutionStatus: () => string[];
 
     // UI State
     setShowThinking: (show: boolean) => void;
@@ -838,6 +839,33 @@ export const useChatStore = create<
       // Tool Actions
       setActiveTool: (tool: ToolExecution) => {
         set((state) => applyToolActivation(state, tool), false, "setActiveTool");
+        
+        // 启动超时检测
+        const TOOL_EXECUTION_TIMEOUT = 60000; // 60秒超时
+        setTimeout(() => {
+          const currentState = get();
+          const activeTool = currentState.activeTools.get(tool.id);
+          if (activeTool && activeTool.status === "executing" && !activeTool.endTime) {
+            // 工具执行超时，标记为警告状态
+            console.warn(`[ChatStore] Tool execution timeout: ${tool.name} (${tool.id})`);
+            set(
+              (state) => {
+                const newTools = new Map(state.activeTools);
+                const t = newTools.get(tool.id);
+                if (t && t.status === "executing") {
+                  newTools.set(tool.id, {
+                    ...t,
+                    status: "timeout",
+                    error: "工具执行超时，可能仍在后台运行...",
+                  });
+                }
+                return { activeTools: newTools };
+              },
+              false,
+              "toolExecutionTimeout"
+            );
+          }
+        }, TOOL_EXECUTION_TIMEOUT);
       },
 
       updateToolOutput: (toolId: string, output: string, error?: string) => {
@@ -846,6 +874,26 @@ export const useChatStore = create<
           false,
           "updateToolOutput"
         );
+      },
+
+      // 检查工具执行状态（用于手动触发检查）
+      checkToolExecutionStatus: () => {
+        const state = get();
+        const now = new Date();
+        const warnings: string[] = [];
+        
+        state.activeTools.forEach((tool) => {
+          if (tool.status === "executing" && !tool.endTime) {
+            const elapsed = now.getTime() - tool.startTime.getTime();
+            const elapsedSeconds = Math.floor(elapsed / 1000);
+            
+            if (elapsed > 30000) { // 超过30秒
+              warnings.push(`${tool.name}: 已执行 ${elapsedSeconds} 秒`);
+            }
+          }
+        });
+        
+        return warnings;
       },
 
       // UI State

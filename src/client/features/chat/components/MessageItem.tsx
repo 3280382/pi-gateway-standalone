@@ -315,19 +315,28 @@ function GlassCard({
     }
 
     case "tool_use": {
-      // 流式中的工具调用 - 只显示参数，没有结果
+      // 流式中的工具调用或没有执行结果的工具调用
       if (!showTools) return null;
 
       const toolName = block.toolName || "unknown";
       const toolArgs = block.partialArgs ?? block.args;
+      const toolStatus = block.status || (isStreaming ? "running" : "pending");
 
       // 解析参数摘要和格式化
       const summary = parseToolSummary(toolName, toolArgs);
       const formattedArgs = formatToolArgs(toolName, toolArgs);
 
+      // 状态显示文本
+      const statusText = {
+        running: "执行中...",
+        pending: "等待执行...",
+        timeout: "执行超时",
+        error: "执行失败",
+      }[toolStatus] || toolStatus;
+
       return (
         <div
-          className={`${styles.card} ${styles.toolUse} ${isStreaming ? styles.streaming : ""} ${isExpanded ? styles.expanded : styles.collapsed}`}
+          className={`${styles.card} ${styles.toolUse} ${styles[toolStatus] || ""} ${isStreaming ? styles.streaming : ""} ${isExpanded ? styles.expanded : styles.collapsed}`}
           onClick={(e) => toggleExpand(e)}
           onMouseEnter={() => setIsCopyVisible(true)}
           onMouseLeave={() => setIsCopyVisible(false)}
@@ -336,7 +345,7 @@ function GlassCard({
             <span className={styles.dot} />
             <span className={styles.label}>{toolName}</span>
             {summary && <span className={styles.summary}>{summary}</span>}
-            <span className={`${styles.chip} ${styles.running}`}>running</span>
+            <span className={`${styles.chip} ${styles[toolStatus] || styles.pending}`}>{statusText}</span>
             <div className={styles.actions}>
               <button
                 type="button"
@@ -360,6 +369,23 @@ function GlassCard({
                   <code>{formattedArgs}</code>
                 </pre>
               </div>
+              {/* 显示执行结果（如果有） */}
+              {block.output && (
+                <div className={styles.toolSection}>
+                  <div className={styles.toolSectionLabel}>Output:</div>
+                  <pre className={`${styles.toolCode} ${styles.toolOutput}`}>
+                    <code>{block.output}</code>
+                  </pre>
+                </div>
+              )}
+              {block.error && (
+                <div className={styles.toolSection}>
+                  <div className={styles.toolSectionLabel}>Error:</div>
+                  <pre className={`${styles.toolCode} ${styles.toolError}`}>
+                    <code>{block.error}</code>
+                  </pre>
+                </div>
+              )}
             </div>
           )}
         </div>
