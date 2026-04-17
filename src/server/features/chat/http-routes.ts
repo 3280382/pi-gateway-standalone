@@ -49,10 +49,11 @@ export async function registerChatHTTPRoutes(
   });
 
   // Session API
-  const { getSessions, getSystemPrompt, loadSession } = await import(
+  const { getSessions, getSystemPrompt, loadSession, getActiveSessions } = await import(
     "./controllers/session.controller"
   );
   app.get("/api/sessions", getSessions);
+  app.get("/api/sessions/active", getActiveSessions);
   app.post("/api/session/load", loadSession);
   app.get("/api/system-prompt", getSystemPrompt);
 

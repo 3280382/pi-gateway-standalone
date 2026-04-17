@@ -911,3 +911,77 @@
   color: #6e7681;
   text-align: center;
 }
+
+/* ===== 会话列表容器（固定显示4个，可滚动） ===== */
+.sessionListContainer {
+  width: 100%;
+  max-height: 160px; /* 4个会话项的高度，每个约40px */
+  overflow-y: auto;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  background: #0d1117;
+  /* 自定义滚动条 */
+  scrollbar-width: thin;
+  scrollbar-color: #30363d #0d1117;
+}
+
+.sessionListContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sessionListContainer::-webkit-scrollbar-track {
+  background: #0d1117;
+  border-radius: 3px;
+}
+
+.sessionListContainer::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 3px;
+}
+
+.sessionListContainer::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+.sessionListItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid #21262d;
+}
+
+.sessionListItem:last-child {
+  border-bottom: none;
+}
+
+.sessionListItem:hover {
+  background: #21262d;
+}
+
+.sessionListItem.active {
+  background: rgba(31, 111, 235, 0.2);
+}
+
+.sessionItemContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Active session indicator */
+.activeIndicator {
+  color: #4CAF50;
+  font-size: 12px;
+  margin-left: 4px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}

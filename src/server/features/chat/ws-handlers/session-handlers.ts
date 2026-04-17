@@ -114,9 +114,9 @@ export async function handleNewSession(
     return;
   }
 
-  // 1. 结束当前 session（强制创建新的）
-  serverSessionManager.endSession(workingDir);
-  logger.info(`[handleNewSession] Ended current session for: ${workingDir}`);
+  // 1. 结束当前 session（强制创建新的）- 注释掉以允许多会话共存
+  // serverSessionManager.endSession(workingDir);
+  // logger.info(`[handleNewSession] Ended current session for: ${workingDir}`);
 
   // 2. 创建新的 session 文件路径（确保是全新的session）
   const { SessionManager } = await import("@mariozechner/pi-coding-agent");

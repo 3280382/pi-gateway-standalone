@@ -102,14 +102,15 @@ export class ServerSessionManager {
     const sessionKey = sessionFile ? this.getSessionKey(workingDir, sessionFile) : workingDir;
 
     // Check if there's an existing session for this workingDir with different sessionFile
-    const existingKeyForDir = this.workingDirToKey.get(workingDir);
-    if (existingKeyForDir && existingKeyForDir !== sessionKey) {
-      // Different session file for same workingDir - dispose old session
-      console.log(
-        `[ServerSessionManager] Different sessionFile for same workingDir, disposing old session: ${workingDir}`
-      );
-      this.disposeSessionByKey(existingKeyForDir);
-    }
+    // Allow multiple sessions per workingDir - comment out disposal logic
+    // const existingKeyForDir = this.workingDirToKey.get(workingDir);
+    // if (existingKeyForDir && existingKeyForDir !== sessionKey) {
+    //   // Different session file for same workingDir - dispose old session
+    //   console.log(
+    //     `[ServerSessionManager] Different sessionFile for same workingDir, disposing old session: ${workingDir}`
+    //   );
+    //   this.disposeSessionByKey(existingKeyForDir);
+    // }
 
     const existingEntry = this.sessions.get(sessionKey);
 
@@ -180,8 +181,12 @@ export class ServerSessionManager {
       lastActivity: new Date(),
     });
 
-    // Update lookup maps
-    this.workingDirToKey.set(workingDir, newSessionKey);
+    // Update lookup maps (using workingDirToKeys for multi-session support)
+    // this.workingDirToKey.set(workingDir, newSessionKey);  // Old single-session mapping
+    if (!this.workingDirToKeys.has(workingDir)) {
+      this.workingDirToKeys.set(workingDir, new Set());
+    }
+    this.workingDirToKeys.get(workingDir)!.add(newSessionKey);
 
     // Update reverse mapping
     this.clientToWorkingDir.set(client, workingDir);
@@ -234,15 +239,17 @@ export class ServerSessionManager {
     );
 
     // End current session for this client
-    if (currentWorkingDir) {
-      const currentKey = this.workingDirToKey.get(currentWorkingDir);
-      if (currentKey) {
-        const currentEntry = this.sessions.get(currentKey);
-        if (currentEntry && currentEntry.client === client) {
-          console.log(`[ServerSessionManager] Ending old session for: ${currentWorkingDir}`);
-          this.disposeSessionByKey(currentKey);
-        }
+    // Find the current session by client (not by workingDir, as there may be multiple)
+    let currentKeyToDispose: string | null = null;
+    this.sessions.forEach((entry, sessionKey) => {
+      if (entry.client === client) {
+        currentKeyToDispose = sessionKey;
       }
+    });
+    
+    if (currentKeyToDispose) {
+      console.log(`[ServerSessionManager] Ending old session: ${currentKeyToDispose}`);
+      this.disposeSessionByKey(currentKeyToDispose);
     }
 
     // Get or create session for new working directory
@@ -258,33 +265,40 @@ export class ServerSessionManager {
    * @param client WebSocket client
    */
   disconnectClient(workingDir: string, client: WebSocket): void {
-    const sessionKey = this.workingDirToKey.get(workingDir);
-    if (!sessionKey) return;
-
-    const entry = this.sessions.get(sessionKey);
-    if (entry && entry.client === client) {
-      console.log(
-        `[ServerSessionManager] Client disconnected from: ${workingDir} + ${entry.sessionFile}`
-      );
-      console.log(`[ServerSessionManager] Session preserved, Pi continues in background`);
-
-      // Mark WebSocket as disconnected (but don't dispose session)
-      // Pi continues executing, events will be dropped until reconnection
-
-      // Unsubscribe event handlers to prevent memory leaks
-      // Note: We unsubscribe here, but reconnect() will re-subscribe
-      if (entry.session.unsubscribeFn) {
-        entry.session.unsubscribeFn();
-        entry.session.unsubscribeFn = null;
+    // Find the session for this client (there may be multiple sessions per workingDir)
+    let targetSessionKey: string | null = null;
+    let targetEntry: SessionEntry | null = null;
+    
+    this.sessions.forEach((entry, sessionKey) => {
+      if (entry.workingDir === workingDir && entry.client === client) {
+        targetSessionKey = sessionKey;
+        targetEntry = entry;
       }
+    });
+    
+    if (!targetSessionKey || !targetEntry) return;
 
-      // Remove reverse mapping
-      this.clientToWorkingDir.delete(client);
+    console.log(
+      `[ServerSessionManager] Client disconnected from: ${workingDir} + ${targetEntry.sessionFile}`
+    );
+    console.log(`[ServerSessionManager] Session preserved, Pi continues in background`);
 
-      // Note: We keep the entry in this.sessions so it can be reconnected
-      // The entry.session.ws still points to the old closed WebSocket
-      // When reconnect() is called, it will be updated to the new WebSocket
+    // Mark WebSocket as disconnected (but don't dispose session)
+    // Pi continues executing, events will be dropped until reconnection
+
+    // Unsubscribe event handlers to prevent memory leaks
+    // Note: We unsubscribe here, but reconnect() will re-subscribe
+    if (targetEntry.session.unsubscribeFn) {
+      targetEntry.session.unsubscribeFn();
+      targetEntry.session.unsubscribeFn = null;
     }
+
+    // Remove reverse mapping
+    this.clientToWorkingDir.delete(client);
+
+    // Note: We keep the entry in this.sessions so it can be reconnected
+    // The entry.session.ws still points to the old closed WebSocket
+    // When reconnect() is called, it will be updated to the new WebSocket
   }
 
   /**
@@ -301,7 +315,13 @@ export class ServerSessionManager {
       this.clientToWorkingDir.delete(entry.client);
 
       // Remove workingDir lookup
-      this.workingDirToKey.delete(entry.workingDir);
+      const sessionKeys = this.workingDirToKeys.get(entry.workingDir);
+      if (sessionKeys) {
+        sessionKeys.delete(sessionKey);
+        if (sessionKeys.size === 0) {
+          this.workingDirToKeys.delete(entry.workingDir);
+        }
+      }
 
       // Dispose session
       entry.session.dispose();
@@ -315,9 +335,17 @@ export class ServerSessionManager {
    * @param workingDir Working directory
    */
   private disposeSession(workingDir: string): void {
-    const sessionKey = this.workingDirToKey.get(workingDir);
-    if (sessionKey) {
-      this.disposeSessionByKey(sessionKey);
+    // Find and dispose the first session for this workingDir
+    // (For backward compatibility, in multi-session mode we only dispose one)
+    let sessionKeyToDispose: string | null = null;
+    this.sessions.forEach((entry, sessionKey) => {
+      if (!sessionKeyToDispose && entry.workingDir === workingDir) {
+        sessionKeyToDispose = sessionKey;
+      }
+    });
+    
+    if (sessionKeyToDispose) {
+      this.disposeSessionByKey(sessionKeyToDispose);
     }
   }
 
@@ -328,11 +356,14 @@ export class ServerSessionManager {
    * @returns Session entry or undefined
    */
   getSession(workingDir: string): SessionEntry | undefined {
-    const sessionKey = this.workingDirToKey.get(workingDir);
-    if (sessionKey) {
-      return this.sessions.get(sessionKey);
-    }
-    return undefined;
+    // Traverse to find the first matching session (simplified for multi-session support)
+    let foundEntry: SessionEntry | undefined = undefined;
+    this.sessions.forEach((entry, sessionKey) => {
+      if (!foundEntry && entry.workingDir === workingDir) {
+        foundEntry = entry;
+      }
+    });
+    return foundEntry;
   }
 
   /**
@@ -354,10 +385,14 @@ export class ServerSessionManager {
    * @returns True if session exists
    */
   hasSession(workingDir: string): boolean {
-    const sessionKey = this.workingDirToKey.get(workingDir);
-    if (!sessionKey) return false;
-    const entry = this.sessions.get(sessionKey);
-    return !!(entry && entry.session.session);
+    // Check if any session exists for this workingDir
+    let hasActiveSession = false;
+    this.sessions.forEach((entry, sessionKey) => {
+      if (entry.workingDir === workingDir && entry.session.session) {
+        hasActiveSession = true;
+      }
+    });
+    return hasActiveSession;
   }
 
   /**
@@ -407,11 +442,11 @@ export class ServerSessionManager {
     const sessionKey = this.getSessionKey(workingDir, sessionFile);
     console.log(`[ServerSessionManager] Registering new session: ${sessionKey}`);
 
-    // Remove any existing entry for this workingDir first
-    const existingKey = this.workingDirToKey.get(workingDir);
-    if (existingKey) {
-      this.disposeSessionByKey(existingKey);
-    }
+    // Allow multiple sessions per workingDir - don't dispose existing ones
+    // const existingKey = this.workingDirToKey.get(workingDir);
+    // if (existingKey) {
+    //   this.disposeSessionByKey(existingKey);
+    // }
 
     // Register new session
     this.sessions.set(sessionKey, {
@@ -423,7 +458,10 @@ export class ServerSessionManager {
     });
 
     // Update lookup maps
-    this.workingDirToKey.set(workingDir, sessionKey);
+    if (!this.workingDirToKeys.has(workingDir)) {
+      this.workingDirToKeys.set(workingDir, new Set());
+    }
+    this.workingDirToKeys.get(workingDir)!.add(sessionKey);
 
     // Update reverse mapping
     this.clientToWorkingDir.set(client, workingDir);
@@ -439,6 +477,30 @@ export class ServerSessionManager {
    */
   getWorkingDirForClient(client: WebSocket): string | undefined {
     return this.clientToWorkingDir.get(client);
+  }
+
+  /**
+   * Get all active sessions for a working directory
+   * For HTTP API to show active session status
+   *
+   * @param workingDir Working directory
+   * @returns Array of active session info
+   */
+  getActiveSessions(workingDir: string): Array<{
+    sessionFile: string;
+    isActive: boolean;
+  }> {
+    const result = [];
+    // Use forEach to avoid iterator issues
+    this.sessions.forEach((entry, sessionKey) => {
+      if (entry.workingDir === workingDir) {
+        result.push({
+          sessionFile: entry.sessionFile,
+          isActive: entry.client.readyState === WebSocket.OPEN,
+        });
+      }
+    });
+    return result;
   }
 }
 

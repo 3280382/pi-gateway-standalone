@@ -161,3 +161,33 @@ You are Pi Coding Agent, an AI assistant that helps developers write, debug, and
     res.status(500).json({ error: String(error) });
   }
 }
+
+import { serverSessionManager } from "../agent-session/session-manager";
+
+/**
+ * 获取活跃会话列表
+ */
+export async function getActiveSessions(req: Request, res: Response) {
+  const workingDir = req.query.workingDir as string;
+  
+  if (!workingDir) {
+    return res.status(400).json({ 
+      error: "workingDir parameter is required" 
+    });
+  }
+  
+  try {
+    const activeSessions = serverSessionManager.getActiveSessions(workingDir);
+    
+    res.json({
+      workingDir,
+      activeSessions,
+      count: activeSessions.length,
+    });
+  } catch (error) {
+    logger.error(`[getActiveSessions] Error: ${error}`);
+    res.status(500).json({ 
+      error: "Failed to get active sessions" 
+    });
+  }
+}

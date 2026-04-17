@@ -13,6 +13,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import type { Session } from "@/features/chat/types/sidebar";
 import styles from "./SidebarPanel.module.css";
 
@@ -21,34 +22,66 @@ export function SessionDropdownSection() {
   const sessions = useSidebarStore((state) => state.sessions);
   const currentSessionId = useSidebarStore((state) => state.selectedSessionId);
   const isLoading = useSidebarStore((state) => state.isLoading);
+  const workingDir = useSessionStore((state) => state.workingDir);
   const controller = useSidebarController();
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [activeSessions, setActiveSessions] = useState<Set<string>>(new Set());
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // ========== 2. Effects ==========
-  // 点击外部关闭下拉框
+  // 定期获取活跃会话状态
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
+    if (!workingDir) return;
+
+    const fetchActiveSessions = async () => {
+      try {
+        const response = await fetch(
+          `/api/sessions/active?workingDir=${encodeURIComponent(workingDir)}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          const activeFiles = new Set<string>(
+            data.activeSessions
+              .filter((s: any) => s.isActive)
+              .map((s: any) => s.sessionFile as string)
+          );
+          setActiveSessions(activeFiles);
+        }
+      } catch (error) {
+        console.error("Failed to fetch active sessions:", error);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+
+    fetchActiveSessions();
+    const interval = setInterval(fetchActiveSessions, 5000); // 每5秒刷新
+    return () => clearInterval(interval);
+  }, [workingDir]);
 
   // ========== 3. Actions ==========
   const handleSelect = useCallback(
     async (session: Session) => {
       await controller.selectSession(session.id);
-      setIsOpen(false);
     },
     [controller]
   );
 
   // ========== 4. Computed ==========
-  const currentSession = sessions.find((s) => s.id === currentSessionId);
-  const displayName = currentSession?.name || currentSessionId?.slice(-8) || "Select";
+  // 对会话进行排序：活跃的在前，然后按消息数量排序
+  const sortedSessions = [...sessions].sort((a, b) => {
+    const aActive = activeSessions.has(a.id);
+    const bActive = activeSessions.has(b.id);
+    
+    // 活跃状态优先
+    if (aActive && !bActive) return -1;
+    if (!aActive && bActive) return 1;
+    
+    // 然后按消息数量排序
+    if (a.messageCount !== b.messageCount) {
+      return b.messageCount - a.messageCount;
+    }
+    
+    // 最后按ID（或名称）排序
+    return (a.name || a.id).localeCompare(b.name || b.id);
+  });
 
   // Debug: log sessions data
   console.log("[SessionDropdownSection] Sessions:", {
@@ -94,46 +127,31 @@ export function SessionDropdownSection() {
         <h3 className={styles.sectionTitle}>Session</h3>
       </div>
 
-      <div className={styles.sessionSelector} ref={dropdownRef}>
-        <button
-          type="button"
-          className={styles.selectorBtn}
-          onClick={() => setIsOpen(!isOpen)}
-          disabled={isLoading}
-        >
-          <span className={styles.selectorValue}>{displayName}</span>
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            className={styles.dropdownIcon}
-            style={{ transform: isOpen ? "rotate(180deg)" : "none" }}
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </button>
-
-        {isOpen && (
-          <div className={styles.sessionDropdown}>
-            {sessions.map((session) => (
-              <div
-                key={session.id}
-                className={`${styles.dropdownItem} ${session.id === currentSessionId ? styles.active : ""}`}
-                onClick={() => handleSelect(session)}
-              >
+      <div className={styles.sessionListContainer} ref={containerRef}>
+        {sortedSessions.map((session) => {
+          const isActive = activeSessions.has(session.id);
+          return (
+            <div
+              key={session.id}
+              className={`${styles.sessionListItem} ${session.id === currentSessionId ? styles.active : ""}`}
+              onClick={() => handleSelect(session)}
+            >
+              <div className={styles.sessionItemContent}>
                 <span className={styles.sessionName}>
                   {session.name || `Session ${session.id.slice(-8)}`}
+                  {isActive && (
+                    <span className={styles.activeIndicator}>
+                      ●
+                    </span>
+                  )}
                 </span>
                 {session.messageCount > 0 && (
                   <span className={styles.sessionCount}>{session.messageCount}</span>
                 )}
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          );
+        })}
       </div>
     </section>
   );
