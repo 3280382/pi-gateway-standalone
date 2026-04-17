@@ -979,6 +979,7 @@
       this.isActive = false;
       this.onSubmit = options.onSubmit;
       this.shortcut = options.shortcut || "Ctrl+Shift+M";
+      this.controlButton = null; // 浮动控制按钮
 
       this.bindEvents();
     }
@@ -1016,6 +1017,80 @@
     }
 
     /**
+     * 创建浮动控制按钮（手机友好）
+     */
+    createControlButton() {
+      // 如果已存在，先移除
+      if (this.controlButton) {
+        this.controlButton.remove();
+      }
+
+      const button = document.createElement("div");
+      button.className = "ui-marker-control-button";
+
+      // 样式
+      Object.assign(button.style, {
+        position: "fixed",
+        bottom: "20px",
+        right: "20px",
+        width: "50px",
+        height: "50px",
+        background: "#6366f1",
+        color: "white",
+        borderRadius: "50%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "20px",
+        fontWeight: "bold",
+        cursor: "pointer",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+        zIndex: "2147483644", // 比标记低一级
+        userSelect: "none",
+        transition: "all 0.3s ease",
+      });
+
+      button.textContent = "×";
+      button.title = "点击停用 UI Marker (或按 Ctrl+Shift+M)";
+
+      // 点击事件
+      button.addEventListener("click", () => {
+        this.deactivate();
+        // 同时更新 localStorage
+        try {
+          localStorage.setItem("UI_MARKER_ENABLED", "false");
+        } catch (e) {
+          // 忽略错误
+        }
+      });
+
+      // 悬停效果
+      button.addEventListener("mouseenter", () => {
+        button.style.transform = "scale(1.1)";
+        button.style.background = "#4f46e5";
+      });
+      button.addEventListener("mouseleave", () => {
+        button.style.transform = "scale(1)";
+        button.style.background = "#6366f1";
+      });
+
+      document.body.appendChild(button);
+      this.controlButton = button;
+
+      return button;
+    }
+
+    /**
+     * 移除浮动控制按钮
+     */
+    removeControlButton() {
+      if (this.controlButton) {
+        this.controlButton.remove();
+        this.controlButton = null;
+      }
+    }
+
+    /**
      * 激活 UI Marker
      */
     activate() {
@@ -1039,6 +1114,9 @@
       document.addEventListener("mousemove", this._boundMouseMove);
       document.addEventListener("click", this._boundClick, true);
 
+      // 创建浮动控制按钮（手机友好）
+      this.createControlButton();
+
       console.log(`[UI Marker] 已激活，找到 ${this.markers.length} 个元素`);
     }
 
@@ -1057,6 +1135,9 @@
       if (this._boundClick) {
         document.removeEventListener("click", this._boundClick, true);
       }
+
+      // 移除浮动控制按钮
+      this.removeControlButton();
 
       console.log("[UI Marker] 已停用");
     }
@@ -1167,13 +1248,60 @@
   if (!window.uiMarker) {
     window.uiMarker = new UIMarker();
 
+    // 检查 localStorage 设置，决定是否自动激活
+    try {
+      const value = localStorage.getItem("UI_MARKER_ENABLED");
+      // 如果设置为 "true"，则自动激活
+      if (value === "true" && window.uiMarker) {
+        // 延迟激活以确保 DOM 已准备就绪
+        setTimeout(() => {
+          if (window.uiMarker && !window.uiMarker.isActive) {
+            window.uiMarker.activate();
+            console.log("[UI Marker] Auto-activated from localStorage");
+          }
+        }, 500);
+      }
+    } catch (e) {
+      // 忽略 localStorage 错误
+      console.warn("[UI Marker] Failed to read localStorage:", e);
+    }
+
     // 开发环境提示
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
       console.log(
-        "%c[UI Marker v2.0]%c 已加载，按 Ctrl+Shift+M 激活",
+        "%c[UI Marker v2.0]%c 已加载，按 Ctrl+Shift+M 激活\n%c在手机上可通过工具菜单 (右下角) 控制",
         "background: #6366f1; color: white; padding: 2px 6px; border-radius: 3px;",
-        ""
+        "",
+        "color: #666; font-size: 12px;"
       );
     }
+  }
+
+  // 添加全局帮助函数
+  if (!window.toggleUIMarker) {
+    window.toggleUIMarker = function () {
+      if (window.uiMarker) {
+        window.uiMarker.toggle();
+        return true;
+      }
+      return false;
+    };
+  }
+
+  // 添加紧急停用函数（可在控制台调用）
+  if (!window.forceDisableUIMarker) {
+    window.forceDisableUIMarker = function () {
+      try {
+        if (window.uiMarker && window.uiMarker.isActive) {
+          window.uiMarker.deactivate();
+          localStorage.setItem("UI_MARKER_ENABLED", "false");
+          console.log("[UI Marker] Force disabled");
+          return true;
+        }
+      } catch (e) {
+        console.error("[UI Marker] Force disable failed:", e);
+      }
+      return false;
+    };
   }
 })();
