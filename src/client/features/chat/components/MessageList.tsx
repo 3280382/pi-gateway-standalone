@@ -76,9 +76,40 @@ export function MessageList({
       content.push({ type: "thinking", thinking: streamingThinking });
     }
 
-    // 流式中的工具调用（只添加不在 content 中的）
+    // 流式中的工具调用（只添加不在 content 中的，或更新已有的）
     streamingToolCalls.forEach((tool) => {
-      const existsInContent = currentStreamingMessage.content?.some(
+      const existingIndex = content.findIndex(
+        (c) => c.type === "tool_use" && c.toolCallId === tool.id
+      );
+      const activeTool = activeTools.get(tool.id);
+      
+      if (existingIndex >= 0) {
+        // 更新已有的 tool_use，添加 output
+        if (activeTool?.output || activeTool?.error) {
+          content[existingIndex] = {
+            ...content[existingIndex],
+            status: activeTool.status || (activeTool.error ? "error" : "success"),
+            output: activeTool.output,
+            error: activeTool.error,
+          };
+        }
+      } else {
+        // 添加新的 tool_use
+        content.push({
+          type: "tool_use",
+          toolCallId: tool.id,
+          toolName: tool.name,
+          partialArgs: tool.args,
+          status: activeTool?.status || (completedToolIds.has(tool.id) ? "executing" : "pending"),
+          output: activeTool?.output,
+          error: activeTool?.error,
+        });
+      }
+    });
+
+    // activeTools 中不在 streamingToolCalls 的已完成工具也显示
+    activeTools.forEach((tool) => {
+      const existsInContent = content.some(
         (c) => c.type === "tool_use" && c.toolCallId === tool.id
       );
       if (!existsInContent) {
@@ -86,14 +117,13 @@ export function MessageList({
           type: "tool_use",
           toolCallId: tool.id,
           toolName: tool.name,
-          partialArgs: tool.args,
-          status: completedToolIds.has(tool.id) ? "executing" : "pending",
+          args: tool.args,
+          status: tool.status || (tool.error ? "error" : "success"),
+          output: tool.output,
+          error: tool.error,
         });
       }
     });
-
-    // activeTools 只用于更新已有 tool_use 的状态，不单独添加 tool 类型
-    // 结果通过更新 tool_use 的 output/error/status 字段显示
 
     if (streamingContent) {
       content.push({ type: "text", text: streamingContent });

@@ -196,6 +196,18 @@
   word-break: break-word;
 }
 
+/* 工具输出样式 */
+.toolOutput {
+  background: rgba(16, 185, 129, 0.1);
+  border-left: 2px solid #10b981;
+}
+
+/* 工具错误样式 */
+.toolErrorText {
+  background: rgba(244, 63, 94, 0.1);
+  border-left: 2px solid #f43f5e;
+}
+
 .toolResult.error .dot {
   background: #f43f5e;
 }

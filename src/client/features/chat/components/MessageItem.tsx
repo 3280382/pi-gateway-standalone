@@ -381,7 +381,7 @@ function GlassCard({
               {block.error && (
                 <div className={styles.toolSection}>
                   <div className={styles.toolSectionLabel}>Error:</div>
-                  <pre className={`${styles.toolCode} ${styles.toolError}`}>
+                  <pre className={`${styles.toolCode} ${styles.toolErrorText}`}>
                     <code>{block.error}</code>
                   </pre>
                 </div>
