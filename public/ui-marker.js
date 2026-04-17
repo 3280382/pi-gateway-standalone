@@ -1017,7 +1017,7 @@
     }
 
     /**
-     * 创建浮动控制按钮（手机友好）
+     * 创建浮动控制按钮（手机友好，可拖动）
      */
     createControlButton() {
       // 如果已存在，先移除
@@ -1027,52 +1027,183 @@
 
       const button = document.createElement("div");
       button.className = "ui-marker-control-button";
+      button.id = "ui-marker-control-btn";
+
+      // 从 localStorage 读取保存的位置，或使用默认位置（右侧中部）
+      let savedPos = null;
+      try {
+        const saved = localStorage.getItem("UI_MARKER_BUTTON_POS");
+        if (saved) {
+          savedPos = JSON.parse(saved);
+        }
+      } catch (e) {
+        // 忽略错误
+      }
+
+      // 默认位置：右侧上下中部（垂直居中偏上一点）
+      const defaultTop = window.innerHeight / 2 - 100;
+      const defaultRight = 20;
+
+      const top = savedPos?.top ?? defaultTop;
+      const right = savedPos?.right ?? defaultRight;
 
       // 样式
       Object.assign(button.style, {
         position: "fixed",
-        bottom: "20px",
-        right: "20px",
+        top: `${top}px`,
+        right: `${right}px`,
         width: "50px",
         height: "50px",
-        background: "#6366f1",
+        background: "#ef4444", // 红色，更醒目
         color: "white",
         borderRadius: "50%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        fontSize: "20px",
+        fontSize: "24px",
         fontWeight: "bold",
-        cursor: "pointer",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+        cursor: "move", // 表示可拖动
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
         zIndex: "2147483644", // 比标记低一级
         userSelect: "none",
-        transition: "all 0.3s ease",
+        touchAction: "none", // 防止触摸时的默认行为
+        transition: "transform 0.2s ease, background 0.2s ease",
       });
 
       button.textContent = "×";
-      button.title = "点击停用 UI Marker (或按 Ctrl+Shift+M)";
+      button.title = "点击停用 UI Marker，按住拖动移动位置";
 
-      // 点击事件
-      button.addEventListener("click", () => {
-        this.deactivate();
-        // 同时更新 localStorage
-        try {
-          localStorage.setItem("UI_MARKER_ENABLED", "false");
-        } catch (e) {
-          // 忽略错误
+      // 拖动功能
+      let isDragging = false;
+      let startX, startY;
+      let startTop, startRight;
+      let dragThreshold = 5; // 移动超过这个像素数才算拖动
+      let hasMoved = false;
+
+      const onPointerDown = (e) => {
+        isDragging = true;
+        hasMoved = false;
+        startX = e.clientX || e.touches?.[0]?.clientX;
+        startY = e.clientY || e.touches?.[0]?.clientY;
+
+        // 获取当前位置
+        const rect = button.getBoundingClientRect();
+        startTop = rect.top;
+        startRight = window.innerWidth - rect.right;
+
+        button.style.transition = "none"; // 拖动时禁用过渡动画
+        button.style.transform = "scale(0.95)"; // 按下效果
+
+        // 阻止默认行为（防止页面滚动）
+        e.preventDefault?.();
+      };
+
+      const onPointerMove = (e) => {
+        if (!isDragging) return;
+
+        const clientX = e.clientX || e.touches?.[0]?.clientX;
+        const clientY = e.clientY || e.touches?.[0]?.clientY;
+
+        if (!clientX || !clientY) return;
+
+        const deltaX = clientX - startX;
+        const deltaY = clientY - startY;
+
+        // 检查是否移动了足够距离
+        if (Math.abs(deltaX) > dragThreshold || Math.abs(deltaY) > dragThreshold) {
+          hasMoved = true;
         }
-      });
+
+        // 计算新位置（保持 right 定位）
+        let newTop = startTop + deltaY;
+        let newRight = startRight - deltaX;
+
+        // 边界限制
+        const maxTop = window.innerHeight - 60;
+        const maxRight = window.innerWidth - 60;
+        newTop = Math.max(10, Math.min(newTop, maxTop));
+        newRight = Math.max(10, Math.min(newRight, maxRight));
+
+        button.style.top = `${newTop}px`;
+        button.style.right = `${newRight}px`;
+
+        e.preventDefault?.();
+      };
+
+      const onPointerUp = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+
+        button.style.transition = "transform 0.2s ease, background 0.2s ease";
+        button.style.transform = "scale(1)";
+
+        if (hasMoved) {
+          // 保存位置到 localStorage
+          try {
+            const rect = button.getBoundingClientRect();
+            const pos = {
+              top: rect.top,
+              right: window.innerWidth - rect.right,
+            };
+            localStorage.setItem("UI_MARKER_BUTTON_POS", JSON.stringify(pos));
+          } catch (e) {
+            // 忽略错误
+          }
+        } else {
+          // 如果没有移动（只是点击），则停用 UI Marker
+          this.deactivate();
+          try {
+            localStorage.setItem("UI_MARKER_ENABLED", "false");
+          } catch (e) {
+            // 忽略错误
+          }
+        }
+      };
+
+      // 鼠标事件
+      button.addEventListener("mousedown", onPointerDown);
+      document.addEventListener("mousemove", onPointerMove);
+      document.addEventListener("mouseup", onPointerUp);
+
+      // 触摸事件（移动端）
+      button.addEventListener("touchstart", onPointerDown, { passive: false });
+      document.addEventListener("touchmove", onPointerMove, { passive: false });
+      document.addEventListener("touchend", onPointerUp);
 
       // 悬停效果
       button.addEventListener("mouseenter", () => {
-        button.style.transform = "scale(1.1)";
-        button.style.background = "#4f46e5";
+        if (!isDragging) {
+          button.style.transform = "scale(1.1)";
+          button.style.background = "#dc2626";
+        }
       });
       button.addEventListener("mouseleave", () => {
-        button.style.transform = "scale(1)";
-        button.style.background = "#6366f1";
+        if (!isDragging) {
+          button.style.transform = "scale(1)";
+          button.style.background = "#ef4444";
+        }
       });
+
+      // 窗口大小变化时调整位置
+      const onResize = () => {
+        const rect = button.getBoundingClientRect();
+        if (rect.right > window.innerWidth) {
+          button.style.right = "20px";
+        }
+        if (rect.bottom > window.innerHeight) {
+          button.style.top = `${window.innerHeight - 60}px`;
+        }
+      };
+      window.addEventListener("resize", onResize);
+
+      // 保存引用以便清理
+      button._cleanup = () => {
+        window.removeEventListener("resize", onResize);
+        document.removeEventListener("mousemove", onPointerMove);
+        document.removeEventListener("mouseup", onPointerUp);
+        document.removeEventListener("touchmove", onPointerMove);
+        document.removeEventListener("touchend", onPointerUp);
+      };
 
       document.body.appendChild(button);
       this.controlButton = button;
@@ -1085,6 +1216,10 @@
      */
     removeControlButton() {
       if (this.controlButton) {
+        // 清理事件监听器
+        if (this.controlButton._cleanup) {
+          this.controlButton._cleanup();
+        }
         this.controlButton.remove();
         this.controlButton = null;
       }
