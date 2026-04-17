@@ -1064,39 +1064,127 @@ export class PiAgentSession {
   /** WebSocket connection state */
   private wsConnected: boolean = false;
 
-  /** Message buffer for offline mode (optional, for critical messages) */
-  private offlineBuffer: ServerMessage[] = [];
+  /** 
+   * Message buffer for disconnected mode
+   * When WebSocket is not connected, events are cached here
+   * Cleared on each message_start, only keeps the most recent complete message
+   */
+  private messageEventBuffer: ServerMessage[] = [];
+
+  /** 
+   * Whether currently buffering messages (WebSocket not connected)
+   * Set to true when disconnected, false when connected
+   */
+  private isBuffering: boolean = false;
+
+  /** Track if we're currently inside a message (between message_start and message_end) */
+  private insideMessage: boolean = false;
 
   /**
    * Send message to WebSocket client
+   * Core logic:
+   * - If WebSocket is connected: send immediately
+   * - If WebSocket is NOT connected: cache to messageEventBuffer
+   * - On message_start: clear previous buffer, start new caching
+   * - On message_end: keep the complete message in buffer
    * Fail-safe: any WebSocket error is caught and logged, never throws
    * @param message Message object
    */
   send(message: ServerMessage) {
     try {
+      // Track message boundaries for buffer management
+      if (message.type === "message_start") {
+        // Clear previous buffer on new message start
+        // This ensures we only keep the most recent complete message
+        if (this.messageEventBuffer.length > 0) {
+          console.log(`[PiAgentSession.send] Clearing ${this.messageEventBuffer.length} buffered events from previous message`);
+          this.messageEventBuffer = [];
+        }
+        this.insideMessage = true;
+      } else if (message.type === "message_end") {
+        this.insideMessage = false;
+      }
+
       // Check if WebSocket exists and is open
       if (!this.ws) {
         console.log(
-          `[PiAgentSession.send] WebSocket not available, message dropped: ${message.type}`
+          `[PiAgentSession.send] WebSocket not available, caching message: ${message.type}`
         );
+        // Cache the message for later playback
+        this.messageEventBuffer.push(message);
+        this.isBuffering = true;
         return;
       }
 
       if (this.ws.readyState === WebSocket.OPEN) {
+        // WebSocket is connected, send immediately
         this.ws.send(JSON.stringify(message));
         this.wsConnected = true;
+        this.isBuffering = false;
       } else {
-        // WebSocket not open, just log and continue (don't throw)
+        // WebSocket not open, cache the message
         console.log(
-          `[PiAgentSession.send] WebSocket not OPEN (state=${this.ws.readyState}), message dropped: ${message.type}`
+          `[PiAgentSession.send] WebSocket not OPEN (state=${this.ws.readyState}), caching message: ${message.type}`
         );
+        this.messageEventBuffer.push(message);
+        this.isBuffering = true;
         this.wsConnected = false;
       }
     } catch (error) {
       // Catch ANY error to ensure Pi execution continues
       console.error(`[PiAgentSession.send] Error sending message (type=${message.type}):`, error);
+      // Try to cache even on error
+      this.messageEventBuffer.push(message);
       this.wsConnected = false;
     }
+  }
+
+  /**
+   * Flush buffered messages to WebSocket
+   * Called when reconnecting to send cached events first
+   * @returns Number of messages flushed
+   */
+  flushMessageBuffer(): number {
+    const bufferSize = this.messageEventBuffer.length;
+    if (bufferSize === 0) {
+      return 0;
+    }
+
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      console.log(`[PiAgentSession.flushMessageBuffer] WebSocket not connected, keeping ${bufferSize} messages in buffer`);
+      return 0;
+    }
+
+    console.log(`[PiAgentSession.flushMessageBuffer] Flushing ${bufferSize} buffered messages`);
+    
+    // Send all buffered messages
+    for (const message of this.messageEventBuffer) {
+      try {
+        this.ws.send(JSON.stringify(message));
+      } catch (error) {
+        console.error(`[PiAgentSession.flushMessageBuffer] Error sending buffered message:`, error);
+      }
+    }
+
+    // Clear the buffer after successful flush
+    this.messageEventBuffer = [];
+    this.isBuffering = false;
+    
+    return bufferSize;
+  }
+
+  /**
+   * Get current buffer size (for debugging/monitoring)
+   */
+  getBufferSize(): number {
+    return this.messageEventBuffer.length;
+  }
+
+  /**
+   * Check if currently buffering messages
+   */
+  isCurrentlyBuffering(): boolean {
+    return this.isBuffering;
   }
 
   /**
@@ -1190,11 +1278,19 @@ export class PiAgentSession {
     // Re-setup event handlers (re-subscribe to AgentSession events)
     this.setupEventHandlers();
 
-    // Notify client that session is reconnected (optional)
+    // Flush buffered messages BEFORE sending reconnected notification
+    // This ensures cached events are sent in correct order
+    const flushedCount = this.flushMessageBuffer();
+    if (flushedCount > 0) {
+      console.log(`[PiAgentSession.reconnect] Flushed ${flushedCount} buffered messages to client`);
+    }
+
+    // Notify client that session is reconnected
     this.send({
       type: "session_reconnected",
       message: "Session reconnected, resuming...",
       workingDir: this.workingDir,
+      flushedMessages: flushedCount, // Inform client how many messages were replayed
     });
 
     console.log(`[PiAgentSession.reconnect] ========== END ==========`);
