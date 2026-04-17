@@ -47,7 +47,7 @@ export class ServerSessionManager {
   /** Maps sessionKey (workingDir + sessionFile) to session entry */
   private sessions: Map<string, SessionEntry> = new Map();
   /** Maps workingDir to sessionKey for quick lookup */
-  private workingDirToKey: Map<string, string> = new Map();
+  private workingDirToKeys: Map<string, Set<string>> = new Map();
   /** Maps WebSocket to workingDir for quick lookup on disconnect */
   private clientToWorkingDir: Map<WebSocket, string> = new Map();
   private llmLogManager: LlmLogManager | null = null;
