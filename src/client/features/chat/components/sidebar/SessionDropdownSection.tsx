@@ -83,8 +83,9 @@ export function SessionDropdownSection() {
   // Debug: log sessions data
   console.log("[SessionDropdownSection] Sessions:", {
     count: sessions.length,
-    currentSessionId: currentSessionId?.slice(-8),
-    sessions: sessions.map((s) => ({ id: s.id.slice(-8), name: s.name, msgCount: s.messageCount })),
+    currentSessionId: currentSessionId,
+    currentSessionIdShort: currentSessionId?.slice(-8),
+    sessions: sessions.map((s) => ({ id: s.id, idShort: s.id.slice(-8), name: s.name, msgCount: s.messageCount })),
   });
 
   // ========== 5. Render ==========
@@ -126,18 +127,34 @@ export function SessionDropdownSection() {
 
       <div className={styles.sessionListContainer} ref={containerRef}>
         {sortedSessions.map((session) => {
-          const isActive = activeSessions.has(session.id);
+          // 使用完整路径或多种格式进行匹配
+          const isActive = activeSessions.has(session.id) || 
+                          activeSessions.has(session.path) ||
+                          Array.from(activeSessions).some(activeId => 
+                            activeId.includes(session.id) || session.id.includes(activeId)
+                          );
+          const isSelected = session.id === currentSessionId || 
+                            session.path === currentSessionId ||
+                            (currentSessionId && (session.id.includes(currentSessionId) || currentSessionId.includes(session.id)));
+          
+          // Debug log for first few sessions
+          if (sortedSessions.indexOf(session) < 3) {
+            console.log(`[SessionDropdownSection] Session ${session.id.slice(-8)}: isActive=${isActive}, isSelected=${isSelected}`);
+            console.log(`  session.id=${session.id.slice(-20)}, currentSessionId=${currentSessionId?.slice(-20)}`);
+            console.log(`  activeSessions=${Array.from(activeSessions).map(s => s.slice(-20))}`);
+          }
+          
           return (
             <div
               key={session.id}
-              className={`${styles.sessionListItem} ${session.id === currentSessionId ? styles.active : ""}`}
+              className={`${styles.sessionListItem} ${isSelected ? styles.active : ""}`}
               onClick={() => handleSelect(session)}
             >
               <div className={styles.sessionItemContent}>
                 <span className={styles.sessionName}>
                   {session.name || `Session ${session.id.slice(-8)}`}
                   {isActive && (
-                    <span className={styles.activeIndicator}>
+                    <span className={styles.activeIndicator} title="Active session">
                       ●
                     </span>
                   )}
