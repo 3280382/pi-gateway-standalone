@@ -1,54 +1,56 @@
 /**
- * DebugTool - 调试系统工具
- * 职责：加载/控制 debug-system.js
+ * DebugTool - Debug 开关控制
+ * 职责：切换 localStorage 标记，控制首页是否加载 eruda
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { IconButton } from "@/components/Icon/Icon";
 
+const DEBUG_KEY = "DEBUG_ERUDA";
+
 export function DebugTool() {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(true);
+
+  // 读取初始状态
+  useEffect(() => {
+    try {
+      const value = localStorage.getItem(DEBUG_KEY);
+      // null（未设置）或 "true" 都表示启用，只有 "force" 表示禁用
+      setIsEnabled(value !== "force");
+    } catch {
+      setIsEnabled(true);
+    }
+  }, []);
 
   const toggle = useCallback(() => {
-    if (!isLoaded) {
-      // 首次加载
-      if (!document.getElementById("debug-system-script")) {
-        const script = document.createElement("script");
-        script.id = "debug-system-script";
-        script.src = "/debug-system.js";
-        script.onload = () => {
-          if ((window as any).DebugSystem) {
-            (window as any).DebugSystem.show();
-          }
-        };
-        document.head.appendChild(script);
+    try {
+      const newValue = isEnabled ? "force" : null;
+      if (newValue === null) {
+        localStorage.removeItem(DEBUG_KEY);
+      } else {
+        localStorage.setItem(DEBUG_KEY, newValue);
       }
-      setIsLoaded(true);
-      setIsVisible(true);
-    } else {
-      // 切换显隐
-      const debugSystem = (window as any).DebugSystem;
-      if (debugSystem) {
-        if (isVisible) {
-          debugSystem.hide();
-          setIsVisible(false);
-        } else {
-          debugSystem.show();
-          setIsVisible(true);
-        }
-      }
+      setIsEnabled(!isEnabled);
+
+      // 提示用户刷新生效
+      console.log(`[DebugTool] Eruda ${!isEnabled ? "enabled" : "disabled"} - refresh to apply`);
+    } catch {
+      // ignore
     }
-  }, [isLoaded, isVisible]);
+  }, [isEnabled]);
 
   return (
     <IconButton
       name="bug"
-      label="Debug"
+      label={isEnabled ? "Debug: On" : "Debug: Off"}
       variant="ghost"
-      suffix={isVisible ? "✓" : undefined}
+      suffix={isEnabled ? "✓" : undefined}
       onClick={toggle}
-      title={isVisible ? "Hide Debug" : "Show Debug"}
+      title={
+        isEnabled
+          ? "Click to disable eruda (refresh required)"
+          : "Click to enable eruda (refresh required)"
+      }
     />
   );
 }

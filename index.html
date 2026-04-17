@@ -7,6 +7,13 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Pi Gateway - AI Coding Agent</title>
+  
+  <!-- Debug System - 最先同步加载，确保 React 出错时也能调试 -->
+  <script src="/debug-system.js"></script>
+  
+  <!-- UI Marker - 浏览器端可视化选择器，帮助 AI 理解页面元素 -->
+  <script src="/ui-marker.js"></script>
+  
   <script type="module">
     import RefreshRuntime from "/@react-refresh"
 
@@ -44,9 +51,6 @@
       console.error('Error:', e);
     });
   </script>
-  
-  <!-- Mobile Debug System -->
-  <script src="/debug-system.js"></script>
   
   <!-- Vite handles this script tag -->
   <script type="module" src="/src/client/main.tsx"></script>

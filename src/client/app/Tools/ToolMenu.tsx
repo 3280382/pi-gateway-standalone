@@ -7,10 +7,12 @@ import { useEffect, useRef, useState } from "react";
 import { SettingsModal } from "@/app/SettingsModal";
 import { DebugTool } from "@/app/Tools/DebugTool";
 import { PageAgentTool } from "@/app/Tools/PageAgentTool";
+import { UIMarkerTool } from "@/app/Tools/UIMarkerTool";
 import styles from "@/app/Tools/ToolMenu.module.css";
 import { IconButton } from "@/components/Icon/Icon";
 
 export function ToolMenu() {
+  // 默认关闭菜单
   const [isOpen, setIsOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -45,6 +47,7 @@ export function ToolMenu() {
           <div className={styles.menu}>
             <DebugTool />
             <PageAgentTool />
+            <UIMarkerTool />
             <div className={styles.divider} />
             <button type="button" className={styles.item} onClick={openSettings}>
               <span className={styles.menuIcon}>⚙️</span>
