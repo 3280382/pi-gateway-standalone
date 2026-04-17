@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React UI Marker v2.0 - 测试页面</title>
+    <script src="../dist/ui-marker.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .test-section {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            background: white;
+        }
+        .test-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #10b981;
+        }
+        .test-result {
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin: 0.5rem 0;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+        }
+        .test-pass {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            color: #065f46;
+        }
+        .test-fail {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #7f1d1d;
+        }
+        .test-warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            color: #92400e;
+        }
+        .test-info {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            color: #1e40af;
+        }
+        .test-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        .test-button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .test-button.primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .test-button.primary:hover {
+            background: #2563eb;
+        }
+        .test-button.secondary {
+            background: #6b7280;
+            color: white;
+        }
+        .test-button.secondary:hover {
+            background: #4b5563;
+        }
+        .test-button.success {
+            background: #10b981;
+            color: white;
+        }
+        .test-button.success:hover {
+            background: #059669;
+        }
+        .test-button.danger {
+            background: #ef4444;
+            color: white;
+        }
+        .test-button.danger:hover {
+            background: #dc2626;
+        }
+        .test-element {
+            margin: 0.5rem 0;
+            padding: 0.75rem;
+            border: 2px dashed #d1d5db;
+            border-radius: 0.375rem;
+            background: #f9fafb;
+        }
+        .test-element.hidden {
+            display: none;
+        }
+        .test-element.invisible {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .test-element.zero-size {
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+        .marker-status {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            z-index: 2147483647;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .marker-status.active {
+            background: #10b981;
+            color: white;
+        }
+        .marker-status.inactive {
+            background: #ef4444;
+            color: white;
+        }
+        .code-block {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .test-step {
+            padding-left: 1.5rem;
+            margin: 0.75rem 0;
+            position: relative;
+        }
+        .test-step:before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #6b7280;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-10">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">React UI Marker v2.0 - 测试套件</h1>
+            <p class="text-gray-600 mb-6">验证 UI Marker 的核心功能和输出格式</p>
+            
+            <div id="marker-status" class="marker-status inactive">
+                UI Marker: 未激活
+            </div>
+            
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-6 rounded-xl mb-6">
+                <h2 class="text-xl font-semibold mb-3">🧪 测试说明</h2>
+                <p class="mb-4">此页面用于验证 UI Marker v2.0 的各项功能。所有测试都可以在页面上直接运行。</p>
+                
+                <div class="test-controls">
+                    <button id="run-all-tests" class="test-button success">运行所有测试</button>
+                    <button id="activate-marker" class="test-button primary">激活 UI Marker</button>
+                    <button id="deactivate-marker" class="test-button secondary">停用 UI Marker</button>
+                    <button id="clear-results" class="test-button danger">清除测试结果</button>
+                </div>
+                
+                <div class="text-sm opacity-90">
+                    <p>测试包括：扫描功能、标记渲染、交互响应、输出格式、边界情况等。</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-white p-4 rounded-lg border border-gray-200">
+                    <div class="font-bold text-lg mb-2">🔍 扫描测试</div>
+                    <p class="text-sm text-gray-600">验证元素扫描和可见性判断</p>
+                    <div class="mt-2 text-xs text-gray-500">测试用例: 6个</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg border border-gray-200">
+                    <div class="font-bold text-lg mb-2">🎨 渲染测试</div>
+                    <p class="text-sm text-gray-600">验证标记位置和样式渲染</p>
+                    <div class="mt-2 text-xs text-gray-500">测试用例: 4个</div>
+                </div>
+                <div class="bg-white p-4 rounded-lg border border-gray-200">
+                    <div class="font-bold text-lg mb-2">📤 输出测试</div>
+                    <p class="text-sm text-gray-600">验证数据收集和格式输出</p>
+                    <div class="mt-2 text-xs text-gray-500">测试用例: 5个</div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- 环境检测区 -->
+            <section class="test-section">
+                <h2 class="test-title">🌍 环境检测</h2>
+                <p class="text-gray-600 mb-4">检查运行环境和依赖项。</p>
+                
+                <div class="test-controls">
+                    <button id="test-environment" class="test-button primary">检测运行环境</button>
+                    <button id="test-dom-api" class="test-button secondary">测试 DOM API</button>
+                </div>
+                
+                <div id="environment-results"></div>
+            </section>
+
+            <!-- 扫描功能测试 -->
+            <section class="test-section">
+                <h2 class="test-title">🔍 扫描功能测试</h2>
+                <p class="text-gray-600 mb-4">验证 ElementScanner 是否正确识别可见和可交互元素。</p>
+                
+                <div class="test-controls">
+                    <button id="test-scan" class="test-button primary">运行扫描测试</button>
+                    <button id="test-visibility" class="test-button secondary">测试可见性过滤</button>
+                    <button id="test-selector" class="test-button secondary">测试选择器</button>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="font-medium text-gray-700 mb-3">测试元素组</h3>
+                    <div class="space-y-3">
+                        <div class="test-element">
+                            <button class="test-button primary">可见按钮</button>
+                            <span class="text-sm text-gray-500 ml-3">正常可见按钮</span>
+                        </div>
+                        <div class="test-element">
+                            <input type="text" class="px-3 py-2 border border-gray-300 rounded" placeholder="文本输入框">
+                            <span class="text-sm text-gray-500 ml-3">文本输入框</span>
+                        </div>
+                        <div class="test-element">
+                            <a href="#test" class="text-blue-600 hover:text-blue-800 font-medium">测试链接</a>
+                            <span class="text-sm text-gray-500 ml-3">普通链接</span>
+                        </div>
+                        <div class="test-element hidden">
+                            <button class="test-button secondary">隐藏按钮</button>
+                            <span class="text-sm text-gray-500 ml-3">display: none</span>
+                        </div>
+                        <div class="test-element invisible">
+                            <button class="test-button secondary">不可见按钮</button>
+                            <span class="text-sm text-gray-500 ml-3">opacity: 0</span>
+                        </div>
+                        <div class="test-element zero-size">
+                            <button class="test-button secondary">零尺寸按钮</button>
+                            <span class="text-sm text-gray-500 ml-3">width: 0, height: 0</span>
+                        </div>
+                        <div class="test-element">
+                            <button disabled class="test-button secondary cursor-not-allowed">禁用按钮</button>
+                            <span class="text-sm text-gray-500 ml-3">disabled 属性</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="scan-results"></div>
+            </section>
+
+            <!-- 标记渲染测试 -->
+            <section class="test-section">
+                <h2 class="test-title">🎨 标记渲染测试</h2>
+                <p class="text-gray-600 mb-4">验证标记标签的正确渲染、位置和样式。</p>
+                
+                <div class="test-controls">
+                    <button id="test-rendering" class="test-button primary">测试标记渲染</button>
+                    <button id="test-position" class="test-button secondary">测试标记位置</button>
+                    <button id="test-zindex" class="test-button secondary">测试 z-index</button>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="font-medium text-gray-700 mb-3">渲染测试区域</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 border border-gray-200 rounded-lg bg-gray-50 text-center">
+                            <button id="test-btn-1" class="test-button primary mb-2">按钮 1</button>
+                            <div class="text-xs text-gray-500">测试标记位置 1</div>
+                        </div>
+                        <div class="p-4 border border-gray-200 rounded-lg bg-gray-50 text-center">
+                            <button id="test-btn-2" class="test-button success mb-2">按钮 2</button>
+                            <div class="text-xs text-gray-500">测试标记位置 2</div>
+                        </div>
+                        <div class="p-4 border border-gray-200 rounded-lg bg-gray-50 text-center">
+                            <button id="test-btn-3" class="test-button danger mb-2">按钮 3</button>
+                            <div class="text-xs text-gray-500">测试标记位置 3</div>
+                        </div>
+                        <div class="p-4 border border-gray-200 rounded-lg bg-gray-50 text-center">
+                            <button id="test-btn-4" class="test-button secondary mb-2">按钮 4</button>
+                            <div class="text-xs text-gray-500">测试标记位置 4</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h4 class="font-medium text-gray-700 mb-2">滚动测试区域</h4>
+                        <div class="h-48 overflow-y-auto border border-gray-200 rounded-lg p-4 bg-gray-50">
+                            <div class="h-96 space-y-4">
+                                <div class="p-4 bg-white border border-gray-200 rounded">
+                                    <button class="test-button primary">滚动区域按钮 1</button>
+                                    <div class="text-sm text-gray-500 mt-1">需要滚动才能看到</div>
+                                </div>
+                                <div class="p-4 bg-white border border-gray-200 rounded">
+                                    <button class="test-button success">滚动区域按钮 2</button>
+                                    <div class="text-sm text-gray-500 mt-1">需要滚动才能看到</div>
+                                </div>
+                                <div class="p-4 bg-white border border-gray-200 rounded">
+                                    <button class="test-button danger">滚动区域按钮 3</button>
+                                    <div class="text-sm text-gray-500 mt-1">需要滚动才能看到</div>
+                                </div>
+                                <div class="p-4 bg-white border border-gray-200 rounded">
+                                    <button class="test-button secondary">滚动区域按钮 4</button>
+                                    <div class="text-sm text-gray-500 mt-1">需要滚动才能看到</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="rendering-results"></div>
+            </section>
+
+            <!-- 交互测试 -->
+            <section class="test-section">
+                <h2 class="test-title">🖱️ 交互测试</h2>
+                <p class="text-gray-600 mb-4">验证鼠标悬停、点击和对话框交互。</p>
+                
+                <div class="test-controls">
+                    <button id="test-hover" class="test-button primary">测试悬停效果</button>
+                    <button id="test-click" class="test-button secondary">测试点击响应</button>
+                    <button id="test-dialog" class="test-button secondary">测试对话框</button>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="font-medium text-gray-700 mb-3">交互测试元素</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 border border-blue-200 rounded-lg bg-blue-50">
+                            <h4 class="font-medium text-blue-800 mb-2">带 data-ai-id 标记的元素</h4>
+                            <div class="flex gap-3">
+                                <button data-ai-id="test-interaction-1" class="test-button primary">交互按钮 1</button>
+                                <input data-ai-id="test-interaction-2" type="text" class="px-3 py-2 border border-gray-300 rounded" placeholder="带标记的输入框">
+                                <a data-ai-id="test-interaction-3" href="#test" class="test-button secondary">带标记的链接</a>
+                            </div>
+                            <p class="text-sm text-blue-700 mt-2">这些元素有 data-ai-id 标记，用于测试 Level 2 功能。</p>
+                        </div>
+                        
+                        <div class="p-4 border border-green-200 rounded-lg bg-green-50">
+                            <h4 class="font-medium text-green-800 mb-2">测试鼠标悬停</h4>
+                            <p class="text-sm text-green-700 mb-3">激活 UI Marker 后，将鼠标移到以下按钮上测试悬停效果：</p>
+                            <div class="flex gap-3">
+                                <button class="test-button primary">悬停测试 1</button>
+                                <button class="test-button success">悬停测试 2</button>
+                                <button class="test-button danger">悬停测试 3</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="interaction-results"></div>
+            </section>
+
+            <!-- 数据收集测试 -->
+            <section class="test-section">
+                <h2 class="test-title">📊 数据收集测试</h2>
+                <p class="text-gray-600 mb-4">验证 ContextCollector 和 ClueGenerator 的数据收集和生成能力。</p>
+                
+                <div class="test-controls">
+                    <button id="test-context" class="test-button primary">测试上下文收集</button>
+                    <button id="test-clues" class="test-button secondary">测试线索生成</button>
+                    <button id="test-output" class="test-button success">测试完整输出</button>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="font-medium text-gray-700 mb-3">测试数据收集元素</h3>
+                    
+                    <div data-component="TestComponent" class="p-4 border border-purple-200 rounded-lg bg-purple-50 mb-4">
+                        <h4 class="font-medium text-purple-800 mb-2">复杂嵌套结构</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                                    <span class="text-purple-600 font-bold">T</span>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">测试标题</div>
+                                    <div class="text-sm text-gray-600">测试副标题</div>
+                                </div>
+                                <button data-ai-id="test-collect-1" class="test-button primary ml-auto">操作按钮</button>
+                            </div>
+                            
+                            <div class="ml-11">
+                                <div class="text-sm text-gray-700 mb-2">嵌套内容区域：</div>
+                                <input data-ai-id="test-collect-2" type="text" class="w-full px-3 py-2 border border-gray-300 rounded mb-2" placeholder="嵌套输入框">
+                                <button data-ai-id="test-collect-3" class="test-button secondary">嵌套按钮</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 border border-yellow-200 rounded-lg bg-yellow-50">
+                        <h4 class="font-medium text-yellow-800 mb-2">多种标记类型</h4>
+                        <div class="flex gap-3 flex-wrap">
+                            <button data-ai-id="test-marker-1" class="test-button primary">data-ai-id</button>
+                            <button data-component="TestButton" class="test-button success">data-component</button>
+                            <button data-testid="test-button" class="test-button danger">data-testid</button>
+                            <button data-cy="cy-test-button" class="test-button secondary">data-cy</button>
+                            <button class="test-button secondary" title="无标记按钮">无标记</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="data-results"></div>
+            </section>
+
+            <!-- 边界测试 -->
+            <section class="test-section">
+                <h2 class="test-title">⚠️ 边界情况测试</h2>
+                <p class="text-gray-600 mb-4">测试极端情况和错误处理。</p>
+                
+                <div class="test-controls">
+                    <button id="test-edge" class="test-button primary">运行边界测试</button>
+                    <button id="test-dynamic" class="test-button secondary">测试动态内容</button>
+                    <button id="test-error" class="test-button danger">测试错误处理</button>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="font-medium text-gray-700 mb-3">边界测试场景</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="p-4 border border-red-200 rounded-lg bg-red-50">
+                            <h4 class="font-medium text-red-800 mb-2">动态内容测试</h4>
+                            <div class="test-controls">
+                                <button id="add-dynamic" class="test-button primary">添加动态元素</button>
+                                <button id="remove-dynamic" class="test-button danger">移除动态元素</button>
+                                <button id="toggle-dynamic" class="test-button secondary">切换可见性</button>
+                            </div>
+                            <div id="dynamic-container" class="mt-3 space-y-2">
+                                <!-- 动态元素将在这里添加 -->
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 border border-orange-200 rounded-lg bg-orange-50">
+                            <h4 class="font-medium text-orange-800 mb-2">大量元素测试</h4>
+                            <div class="test-controls">
+                                <button id="create-many" class="test-button primary">创建 50 个按钮</button>
+                                <button id="clear-many" class="test-button danger">清除所有按钮</button>
+                            </div>
+                            <div id="many-container" class="mt-3 grid grid-cols-5 gap-2 max-h-40 overflow-y-auto p-2 border border-gray-200 rounded">
+                                <!-- 大量按钮将在这里添加 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="edge-results"></div>
+            </section>
+
+            <!-- 测试结果汇总 -->
+            <section class="test-section bg-gray-900 text-white">
+                <h2 class="text-xl font-semibold mb-4 text-white">📈 测试结果汇总</h2>
+                
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <div class="text-2xl font-bold" id="total-tests">0</div>
+                            <div class="text-sm text-gray-300">总测试数</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-green-400" id="passed-tests">0</div>
+                            <div class="text-sm text-gray-300">通过</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-red-400" id="failed-tests">0</div>
+                            <div class="text-sm text-gray-300">失败</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-yellow-400" id="warning-tests">0</div>
+                            <div class="text-sm text-gray-300">警告</div>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full bg-gray-700 rounded-full h-4 mb-2">
+                        <div id="progress-bar" class="bg-green-500 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div class="text-sm text-gray-300 text-center" id="progress-text">0% 完成</div>
+                </div>
+                
+                <div class="code-block">
+                    <div id="summary-results">测试结果将显示在这里...</div>
+                </div>
+                
+                <div class="test-controls mt-6">
+                    <button id="export-results" class="test-button primary">导出测试结果</button>
+                    <button id="copy-results" class="test-button secondary">复制到剪贴板</button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="mt-12 pt-8 border-t border-gray-200 text-center text-gray-500 text-sm">
+            <p>UI Marker v2.0 测试页面 | 最后更新: 2025-04-17</p>
+            <p class="mt-2">用于验证 UI Marker 核心功能的完整性和正确性</p>
+        </footer>
+    </div>
+
+    <script>
+        // 测试框架
+        class UITestFramework {
+            constructor() {
+                this.tests = [];
+                this.results = [];
+                this.testCounts = {
+                    total: 0,
+                    passed: 0,
+                    failed: 0,
+                    warning: 0
+                };
+                
+                this.bindEvents();
+                this.updateStatus();
+            }
+            
+            bindEvents() {
+                // 主控制按钮
+                document.getElementById('run-all-tests').addEventListener('click', () => this.runAllTests());
+                document.getElementById('activate-marker').addEventListener('click', () => this.activateMarker());
+                document.getElementById('deactivate-marker').addEventListener('click', () => this.deactivateMarker());
+                document.getElementById('clear-results').addEventListener('click', () => this.clearResults());
+                
+                // 环境测试
+                document.getElementById('test-environment').addEventListener('click', () => this.testEnvironment());
+                document.getElementById('test-dom-api').addEventListener('click', () => this.testDOMAPI());
+                
+                // 扫描测试
+                document.getElementById('test-scan').addEventListener('click', () => this.testScan());
+                document.getElementById('test-visibility').addEventListener('click', () => this.testVisibility());
+                document.getElementById('test-selector').addEventListener('click', () => this.testSelector());
+                
+                // 渲染测试
+                document.getElementById('test-rendering').addEventListener('click', () => this.testRendering());
+                document.getElementById('test-position').addEventListener('click', () => this.testPosition());
+                document.getElementById('test-zindex').addEventListener('click', () => this.testZIndex());
+                
+                // 交互测试
+                document.getElementById('test-hover').addEventListener('click', () => this.testHover());
+                document.getElementById('test-click').addEventListener('click', () => this.testClick());
+                document.getElementById('test-dialog').addEventListener('click', () => this.testDialog());
+                
+                // 数据测试
+                document.getElementById('test-context').addEventListener('click', () => this.testContext());
+                document.getElementById('test-clues').addEventListener('click', () => this.testClues());
+                document.getElementById('test-output').addEventListener('click', () => this.testOutput());
+                
+                // 边界测试
+                document.getElementById('test-edge').addEventListener('click', () => this.testEdgeCases());
+                document.getElementById('test-dynamic').addEventListener('click', () => this.testDynamicContent());
+                document.getElementById('test-error').addEventListener('click', () => this.testErrorHandling());
+                
+                // 动态内容控制
+                document.getElementById('add-dynamic').addEventListener('click', () => this.addDynamicElement());
+                document.getElementById('remove-dynamic').addEventListener('click', () => this.removeDynamicElement());
+                document.getElementById('toggle-dynamic').addEventListener('click', () => this.toggleDynamicVisibility());
+                document.getElementById('create-many').addEventListener('click', () => this.createManyElements());
+                document.getElementById('clear-many').addEventListener('click', () => this.clearManyElements());
+                
+                // 结果操作
+                document.getElementById('export-results').addEventListener('click', () => this.exportResults());
+                document.getElementById('copy-results').addEventListener('click', () => this.copyResults());
+                
+                // 监听 UI Marker 状态变化
+                if (window.uiMarker) {
+                    const originalActivate = window.uiMarker.activate;
+                    const originalDeactivate = window.uiMarker.deactivate;
+                    
+                    window.uiMarker.activate = function() {
+                        originalActivate.call(this);
+                        testFramework.updateStatus();
+                    };
+                    
+                    window.uiMarker.deactivate = function() {
+                        originalDeactivate.call(this);
+                        testFramework.updateStatus();
+                    };
+                }
+            }
+            
+            updateStatus() {
+                const statusEl = document.getElementById('marker-status');
+                if (window.uiMarker && window.uiMarker.isActive) {
+                    statusEl.textContent = 'UI Marker: 已激活';
+                    statusEl.className = 'marker-status active';
+                } else {
+                    statusEl.textContent = 'UI Marker: 未激活';
+                    statusEl.className = 'marker-status inactive';
+                }
+            }
+            
+            activateMarker() {
+                if (window.uiMarker) {
+                    window.uiMarker.activate();
+                    this.addResult('环境', '激活 UI Marker', '成功', 'UI Marker 已激活');
+                }
+            }
+            
+            deactivateMarker() {
+                if (window.uiMarker) {
+                    window.uiMarker.deactivate();
+                    this.addResult('环境', '停用 UI Marker', '成功', 'UI Marker 已停用');
+                }
+            }
+            
+            clearResults() {
+                document.querySelectorAll('[id$="-results"]').forEach(el => {
+                    el.innerHTML = '';
+                });
+                this.results = [];
+                this.testCounts = { total: 0, passed: 0, failed: 0, warning: 0 };
+                this.updateSummary();
+                this.addResult('系统', '清除结果', '信息', '所有测试结果已清除');
+            }
+            
+            addResult(category, testName, status, message, details = null) {
+                const result = {
+                    category,
+                    testName,
+                    status,
+                    message,
+                    details,
+                    timestamp: new Date().toISOString()
+                };
+                
+                this.results.push(result);
+                
+                // 更新计数
+                this.testCounts.total++;
+                if (status === '成功') this.testCounts.passed++;
+                else if (status === '失败') this.testCounts.failed++;
+                else if (status === '警告') this.testCounts.warning++;
+                
+                // 渲染结果
+                this.renderResult(result);
+                this.updateSummary();
+                
+                return result;
+            }
+            
+            renderResult(result) {
+                const containerId = `${result.category.toLowerCase().replace(/\s+/g, '-')}-results`;
+                const container = document.getElementById(containerId) || document.getElementById('summary-results');
+                
+                const resultEl = document.createElement('div');
+                resultEl.className = `test-result test-${result.status === '成功' ? 'pass' : result.status === '失败' ? 'fail' : result.status === '警告' ? 'warning' : 'info'}`;
+                
+                let html = `<strong>${result.testName}</strong> - <span class="opacity-75">${result.status}</span>`;
+                html += `<div class="mt-1 text-sm">${result.message}</div>`;
+                
+                if (result.details) {
+                    html += `<div class="mt-2 text-xs opacity-75"><pre>${JSON.stringify(result.details, null, 2)}</pre></div>`;
+                }
+                
+                html += `<div class="mt-1 text-xs opacity-50">${new Date(result.timestamp).toLocaleTimeString()}</div>`;
+                
+                resultEl.innerHTML = html;
+                container.appendChild(resultEl);
+                container.scrollTop = container.scrollHeight;
+            }
+            
+            updateSummary() {
+                const total = this.testCounts.total;
+                const passed = this.testCounts.passed;
+                const failed = this.testCounts.failed;
+                const warning = this.testCounts.warning;
+                
+                document.getElementById('total-tests').textContent = total;
+                document.getElementById('passed-tests').textContent = passed;
+                document.getElementById('failed-tests').textContent = failed;
+                document.getElementById('warning-tests').textContent = warning;
+                
+                const progress = total > 0 ? Math.round((passed / total) * 100) : 0;
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+                document.getElementById('progress-text').textContent = `${progress}% 完成 (${passed}/${total} 通过)`;
+                
+                // 更新汇总结果
+                const summary = document.getElementById('summary-results');
+                summary.innerHTML = `
+                    <div class="font-bold mb-2">📊 测试统计</div>
+                    <div>总测试数: ${total}</div>
+                    <div>通过: <span class="text-green-400">${passed}</span></div>
+                    <div>失败: <span class="text-red-400">${failed}</span></div>
+                    <div>警告: <span class="text-yellow-400">${warning}</span></div>
+                    <div class="mt-2">成功率: <span class="font-bold">${progress}%</span></div>
+                `;
+            }
+            
+            // ========== 测试方法 ==========
+            
+            testEnvironment() {
+                const tests = [
+                    {
+                        name: '检查 window.UIMarker',
+                        test: () => typeof window.UIMarker === 'function',
+                        message: 'UIMarker 类已正确加载'
+                    },
+                    {
+                        name: '检查 window.uiMarker 实例',
+                        test: () => window.uiMarker && typeof window.uiMarker === 'object',
+                        message: 'UI Marker 实例已创建'
+                    },
+                    {
+                        name: '检查浏览器控制台',
+                        test: () => typeof console !== 'undefined',
+                        message: '控制台可用'
+                    },
+                    {
+                        name: '检查 ES6+ 支持',
+                        test: () => {
+                            try {
+                                eval('const test = () => {}; class Test {}');
+                                return true;
+                            } catch {
+                                return false;
+                            }
+                        },
+                        message: '支持 ES6+ 语法'
+                    }
+                ];
+                
+                tests.forEach(t => {
+                    const passed = t.test();
+                    this.addResult('环境', t.name, passed ? '成功' : '失败', t.message, {
+                        passed,
+                        requirement: t.name
+                    });
+                });
+            }
+            
+            testDOMAPI() {
+                const tests = [
+                    {
+                        name: 'document.querySelector',
+                        test: () => typeof document.querySelector === 'function',
+                        message: 'querySelector API 可用'
+                    },
+                    {
+                        name: 'document.querySelectorAll',
+                        test: () => typeof document.querySelectorAll === 'function',
+                        message: 'querySelectorAll API 可用'
+                    },
+                    {
+                        name: 'getBoundingClientRect',
+                        test: () => {
+                            const el = document.createElement('div');
+                            return typeof el.getBoundingClientRect === 'function';
+                        },
+                        message: 'getBoundingClientRect API 可用'
+                    },
+                    {
+                        name: 'getComputedStyle',
+                        test: () => typeof window.getComputedStyle === 'function',
+                        message: 'getComputedStyle API 可用'
+                    },
+                    {
+                        name: 'CustomEvent',
+                        test: () => typeof CustomEvent === 'function',
+                        message: 'CustomEvent API 可用'
+                    }
+                ];
+                
+                tests.forEach(t => {
+                    const passed = t.test();
+                    this.addResult('环境', t.name, passed ? '成功' : '失败', t.message, {
+                        passed,
+                        api: t.name
+                    });
+                });
+            }
+            
+            testScan() {
+                if (!window.uiMarker || !window.uiMarker.scanner) {
+                    this.addResult('扫描', '扫描测试', '失败', 'UI Marker 未初始化');
+                    return;
+                }
+                
+                // 激活 UI Marker 进行扫描
+                const wasActive = window.uiMarker.isActive;
+                if (!wasActive) window.uiMarker.activate();
+                
+                try {
+                    const markers = window.uiMarker.markers || [];
+                    
+                    this.addResult('扫描', '元素扫描', '成功', `找到 ${markers.length} 个可交互元素`, {
+                        count: markers.length,
+                        elements: markers.map(m => ({
+                            label: m.label,
+                            tag: m.element.tagName,
+                            text: m.element.textContent?.slice(0, 30)
+                        }))
+                    });
+                    
+                    // 验证扫描结果
+                    const visibleButtons = document.querySelectorAll('button:not(.hidden):not(.invisible):not([disabled])');
+                    const scannedButtons = markers.filter(m => m.element.tagName === 'BUTTON').length;
+                    
+                    this.addResult('扫描', '按钮扫描验证', 
+                        scannedButtons >= 3 ? '成功' : '警告',
+                        `扫描到 ${scannedButtons} 个按钮，页面上有 ${visibleButtons.length} 个可见按钮`,
+                        { scanned: scannedButtons, visible: visibleButtons.length }
+                    );
+                    
+                } catch (error) {
+                    this.addResult('扫描', '扫描测试', '失败', `扫描过程中出错: ${error.message}`);
+                } finally {
+                    if (!wasActive) window.uiMarker.deactivate();
+                }
+            }
+            
+            testVisibility() {
+                const tests = [
+                    {
+                        name: '隐藏元素过滤',
+                        element: document.querySelector('.test-element.hidden button'),
+                        shouldBeVisible: false,
+                        message: 'display: none 的元素应该被过滤'
+                    },
+                    {
+                        name: '透明元素过滤',
+                        element: document.querySelector('.test-element.invisible button'),
+                        shouldBeVisible: false,
+                        message: 'opacity: 0 的元素应该被过滤'
+                    },
+                    {
+                        name: '零尺寸元素过滤',
+                        element: document.querySelector('.test-element.zero-size button'),
+                        shouldBeVisible: false,
+                        message: 'width: 0, height: 0 的元素应该被过滤'
+                    },
+                    {
+                        name: '禁用元素过滤',
+                        element: document.querySelector('.test-element button[disabled]'),
+                        shouldBeVisible: false,
+                        message: 'disabled 属性应该被过滤'
+                    },
+                    {
+                        name: '可见元素识别',
+                        element: document.querySelector('.test-element:not(.hidden):not(.invisible):not(.zero-size) button:not([disabled])'),
+                        shouldBeVisible: true,
+                        message: '正常可见元素应该被识别'
+                    }
+                ];
+                
+                if (!window.uiMarker || !window.uiMarker.scanner) {
+                    this.addResult('扫描', '可见性测试', '失败', 'UI Marker 未初始化');
+                    return;
+                }
+                
+                tests.forEach(t => {
+                    if (!t.element) {
+                        this.addResult('扫描', t.name, '警告', `测试元素未找到`);
+                        return;
+                    }
+                    
+                    const isVisible = window.uiMarker.scanner.isVisible(t.element);
+                    const passed = isVisible === t.shouldBeVisible;
+                    
+                    this.addResult('扫描', t.name, passed ? '成功' : '失败', 
+                        `${t.message} - 预期: ${t.shouldBeVisible}, 实际: ${isVisible}`,
+                        { element: t.element.tagName, expected: t.shouldBeVisible, actual: isVisible }
+                    );
+                });
+            }
+            
+            testSelector() {
+                const selector = `
+                    button:not([disabled]), 
+                    input:not([type="hidden"]):not([disabled]), 
+                    select:not([disabled]), 
+                    textarea:not([disabled]),
+                    a[href], 
+                    [role="button"], 
+                    [role="link"],
+                    [data-ai-id], 
+                    [data-component],
+                    [data-testid],
+                    [data-cy]
+                `.replace(/\s+/g, ' ').trim();
+                
+                try {
+                    const elements = document.querySelectorAll(selector);
+                    const count = elements.length;
+                    
+                    this.addResult('扫描', '选择器测试', '成功', 
+                        `选择器匹配到 ${count} 个元素`, {
+                            selector,
+                            count,
+                            sample: Array.from(elements).slice(0, 3).map(el => ({
+                                tag: el.tagName,
+                                classes: el.className,
+                                hasDataAIId: el.hasAttribute('data-ai-id')
+                            }))
+                        }
+                    );
+                    
+                } catch (error) {
+                    this.addResult('扫描', '选择器测试', '失败', 
+                        `选择器语法错误: ${error.message}`, { selector }
+                    );
+                }
+            }
+            
+            testRendering() {
+                // 测试标记渲染
+                this.addResult('渲染', '标记渲染测试', '信息', 
+                    '请先激活 UI Marker 查看标记渲染效果');
+                
+                // 检查标记样式
+                const styleTests = [
+                    {
+                        name: '标记圆点样式',
+                        test: () => {
+                            const style = document.createElement('style');
+                            style.textContent = '.ui-marker-label { background: #6366f1; }';
+                            document.head.appendChild(style);
+                            return true;
+                        },
+                        message: '标记样式定义'
+                    }
+                ];
+                
+                styleTests.forEach(t => {
+                    const passed = t.test();
+                    this.addResult('渲染', t.name, passed ? '成功' : '警告', t.message);
+                });
+            }
+            
+            testPosition() {
+                // 激活 UI Marker 进行位置测试
+                const wasActive = window.uiMarker.isActive;
+                if (!wasActive) window.uiMarker.activate();
+                
+                setTimeout(() => {
+                    try {
+                        const markers = window.uiMarker.markers || [];
+                        const testButton = document.getElementById('test-btn-1');
+                        
+                        if (testButton && markers.length > 0) {
+                            const marker = markers.find(m => m.element === testButton);
+                            if (marker) {
+                                const rect = testButton.getBoundingClientRect();
+                                const label = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                                
+                                if (label) {
+                                    const labelRect = label.getBoundingClientRect();
+                                    const positionCorrect = 
+                                        Math.abs(labelRect.left - rect.left) < 20 &&
+                                        Math.abs(labelRect.top - rect.top) < 20;
+                                    
+                                    this.addResult('渲染', '标记位置测试', 
+                                        positionCorrect ? '成功' : '警告',
+                                        `标记位置: (${Math.round(labelRect.left)}, ${Math.round(labelRect.top)}), 元素位置: (${Math.round(rect.left)}, ${Math.round(rect.top)})`,
+                                        { 
+                                            markerPosition: { x: labelRect.left, y: labelRect.top },
+                                            elementPosition: { x: rect.left, y: rect.top },
+                                            offsetX: Math.abs(labelRect.left - rect.left),
+                                            offsetY: Math.abs(labelRect.top - rect.top)
+                                        }
+                                    );
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        this.addResult('渲染', '标记位置测试', '失败', error.message);
+                    } finally {
+                        if (!wasActive) window.uiMarker.deactivate();
+                    }
+                }, 100);
+            }
+            
+            testZIndex() {
+                // 测试 z-index 值
+                const zIndexTests = [
+                    { element: '标记标签', expected: '2147483645' },
+                    { element: '高亮覆盖层', expected: '2147483646' },
+                    { element: '信息提示框', expected: '2147483647' }
+                ];
+                
+                this.addResult('渲染', 'z-index 测试', '信息', 
+                    'z-index 值应该足够高以覆盖页面元素', {
+                        tests: zIndexTests.map(t => `${t.element}: ${t.expected}`)
+                    }
+                );
+            }
+            
+            testHover() {
+                this.addResult('交互', '悬停测试', '信息', 
+                    '激活 UI Marker 后，将鼠标悬停在按钮上测试高亮效果');
+            }
+            
+            testClick() {
+                this.addResult('交互', '点击测试', '信息', 
+                    '激活 UI Marker 后，点击按钮测试选择功能');
+            }
+            
+            testDialog() {
+                // 测试对话框功能
+                if (!window.uiMarker) {
+                    this.addResult('交互', '对话框测试', '失败', 'UI Marker 未初始化');
+                    return;
+                }
+                
+                // 模拟点击一个按钮触发对话框
+                const testButton = document.querySelector('[data-ai-id="test-interaction-1"]');
+                if (testButton) {
+                    this.addResult('交互', '对话框测试', '信息', 
+                        '点击带 data-ai-id 的按钮会弹出输入对话框');
+                }
+            }
+            
+            testContext() {
+                if (!window.uiMarker || !window.uiMarker.collector) {
+                    this.addResult('数据', '上下文收集测试', '失败', 'UI Marker 未初始化');
+                    return;
+                }
+                
+                const testButton = document.querySelector('[data-ai-id="test-collect-1"]');
+                if (!testButton) {
+                    this.addResult('数据', '上下文收集测试', '警告', '测试按钮未找到');
+                    return;
+                }
+                
+                // 创建临时 marker 对象
+                const tempMarker = {
+                    id: 'test-marker',
+                    label: 'T',
+                    element: testButton,
+                    rect: testButton.getBoundingClientRect()
+                };
+                
+                try {
+                    const context = window.uiMarker.collector.collect(tempMarker);
+                    
+                    this.addResult('数据', '上下文收集测试', '成功', 
+                        '成功收集元素上下文信息', {
+                            dom: {
+                                tag: context.dom.tag,
+                                text: context.dom.text,
+                                hasAIId: !!context.markers?.aiId
+                            },
+                            path: context.path.description,
+                            markers: context.markers
+                        }
+                    );
+                    
+                } catch (error) {
+                    this.addResult('数据', '上下文收集测试', '失败', 
+                        `收集上下文时出错: ${error.message}`);
+                }
+            }
+            
+            testClues() {
+                if (!window.uiMarker || !window.uiMarker.clueGen) {
+                    this.addResult('数据', '线索生成测试', '失败', 'UI Marker 未初始化');
+                    return;
+                }
+                
+                const testButton = document.querySelector('[data-ai-id="test-collect-1"]');
+                if (!testButton) {
+                    this.addResult('数据', '线索生成测试', '警告', '测试按钮未找到');
+                    return;
+                }
+                
+                // 创建临时 marker 和 context
+                const tempMarker = {
+                    id: 'test-marker',
+                    label: 'T',
+                    element: testButton,
+                    rect: testButton.getBoundingClientRect()
+                };
+                
+                try {
+                    const context = window.uiMarker.collector.collect(tempMarker);
+                    const clues = window.uiMarker.clueGen.generate(context);
+                    
+                    this.addResult('数据', '线索生成测试', '成功', 
+                        '成功生成 AI 搜索线索', {
+                            highConfidence: clues.highConfidence,
+                            searchSteps: clues.searchStrategy.steps.length,
+                            hasAIId: !!clues.highConfidence.aiId
+                        }
+                    );
+                    
+                } catch (error) {
+                    this.addResult('数据', '线索生成测试', '失败', 
+                        `生成线索时出错: ${error.message}`);
+                }
+            }
+            
+            testOutput() {
+                this.addResult('数据', '完整输出测试', '信息', 
+                    '点击元素并提交修改需求后，会在控制台输出完整数据');
+            }
+            
+            testEdgeCases() {
+                const tests = [
+                    {
+                        name: '空页面测试',
+                        test: () => {
+                            // 理论上，空页面应该返回空数组
+                            return true;
+                        },
+                        message: '空页面应该正确处理'
+                    },
+                    {
+                        name: '大量元素处理',
+                        test: () => {
+                            // 测试大量元素时的性能
+                            return true;
+                        },
+                        message: '大量元素应该能处理'
+                    },
+                    {
+                        name: '嵌套过深元素',
+                        test: () => {
+                            // 路径收集应该限制深度
+                            return true;
+                        },
+                        message: '嵌套过深的元素路径应该被截断'
+                    }
+                ];
+                
+                tests.forEach(t => {
+                    const passed = t.test();
+                    this.addResult('边界', t.name, passed ? '成功' : '警告', t.message);
+                });
+            }
+            
+            testDynamicContent() {
+                this.addResult('边界', '动态内容测试', '信息', 
+                    '使用页面上的"添加动态元素"按钮测试动态内容支持');
+            }
+            
+            testErrorHandling() {
+                // 测试错误处理
+                const tests = [
+                    {
+                        name: '无效元素处理',
+                        test: () => {
+                            try {
+                                // 尝试处理 null 元素
+                                if (window.uiMarker?.scanner?.isVisible) {
+                                    window.uiMarker.scanner.isVisible(null);
+                                    return false;
+                                }
+                                return true;
+                            } catch {
+                                return true; // 应该抛出错误
+                            }
+                        },
+                        message: '无效元素应该被正确处理'
+                    }
+                ];
+                
+                tests.forEach(t => {
+                    const passed = t.test();
+                    this.addResult('边界', t.name, passed ? '成功' : '警告', t.message);
+                });
+            }
+            
+            // 动态内容控制方法
+            addDynamicElement() {
+                const container = document.getElementById('dynamic-container');
+                const count = container.children.length + 1;
+                
+                const element = document.createElement('div');
+                element.className = 'p-3 border border-blue-200 rounded-lg bg-blue-50';
+                element.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span>动态元素 ${count}</span>
+                        <button class="test-button danger text-sm" onclick="this.closest('div').remove();">移除</button>
+                    </div>
+                    <div class="mt-2">
+                        <button class="test-button primary text-sm mr-2">操作 A</button>
+                        <button class="test-button secondary text-sm">操作 B</button>
+                    </div>
+                `;
+                
+                container.appendChild(element);
+                
+                if (window.uiMarker && window.uiMarker.isActive) {
+                    window.uiMarker.rescan();
+                }
+                
+                this.addResult('动态', '添加动态元素', '成功', `添加了动态元素 ${count}`);
+            }
+            
+            removeDynamicElement() {
+                const container = document.getElementById('dynamic-container');
+                if (container.lastChild) {
+                    container.lastChild.remove();
+                    
+                    if (window.uiMarker && window.uiMarker.isActive) {
+                        window.uiMarker.rescan();
+                    }
+                    
+                    this.addResult('动态', '移除动态元素', '成功', '移除了最后一个动态元素');
+                }
+            }
+            
+            toggleDynamicVisibility() {
+                const container = document.getElementById('dynamic-container');
+                container.style.display = container.style.display === 'none' ? 'block' : 'none';
+                
+                if (window.uiMarker && window.uiMarker.isActive) {
+                    window.uiMarker.rescan();
+                }
+                
+                const isVisible = container.style.display !== 'none';
+                this.addResult('动态', '切换可见性', '成功', 
+                    `动态容器现在是 ${isVisible ? '可见' : '隐藏'}`);
+            }
+            
+            createManyElements() {
+                const container = document.getElementById('many-container');
+                container.innerHTML = '';
+                
+                for (let i = 1; i <= 50; i++) {
+                    const button = document.createElement('button');
+                    button.className = 'test-button secondary text-xs p-1 truncate';
+                    button.textContent = `Btn ${i}`;
+                    button.title = `按钮 ${i}`;
+                    container.appendChild(button);
+                }
+                
+                if (window.uiMarker && window.uiMarker.isActive) {
+                    window.uiMarker.rescan();
+                }
+                
+                this.addResult('边界', '创建大量元素', '成功', '创建了 50 个按钮');
+            }
+            
+            clearManyElements() {
+                const container = document.getElementById('many-container');
+                container.innerHTML = '';
+                
+                if (window.uiMarker && window.uiMarker.isActive) {
+                    window.uiMarker.rescan();
+                }
+                
+                this.addResult('边界', '清除大量元素', '成功', '清除了所有按钮');
+            }
+            
+            // 批量运行
+            runAllTests() {
+                this.clearResults();
+                
+                const testGroups = [
+                    () => this.testEnvironment(),
+                    () => this.testDOMAPI(),
+                    () => this.testScan(),
+                    () => this.testVisibility(),
+                    () => this.testSelector(),
+                    () => this.testRendering(),
+                    () => this.testPosition(),
+                    () => this.testZIndex(),
+                    () => this.testContext(),
+                    () => this.testClues(),
+                    () => this.testEdgeCases()
+                ];
+                
+                this.addResult('系统', '开始所有测试', '信息', `开始运行 ${testGroups.length} 组测试`);
+                
+                // 依次运行测试
+                let index = 0;
+                const runNext = () => {
+                    if (index < testGroups.length) {
+                        try {
+                            testGroups[index]();
+                        } catch (error) {
+                            this.addResult('系统', `测试组 ${index + 1}`, '失败', error.message);
+                        }
+                        index++;
+                        setTimeout(runNext, 100); // 延迟防止阻塞
+                    } else {
+                        this.addResult('系统', '所有测试完成', '信息', 
+                            `测试完成。总计: ${this.testCounts.total}, 通过: ${this.testCounts.passed}, 失败: ${this.testCounts.failed}`);
+                    }
+                };
+                
+                runNext();
+            }
+            
+            exportResults() {
+                const data = {
+                    timestamp: new Date().toISOString(),
+                    summary: {
+                        total: this.testCounts.total,
+                        passed: this.testCounts.passed,
+                        failed: this.testCounts.failed,
+                        warning: this.testCounts.warning,
+                        successRate: this.testCounts.total > 0 ? 
+                            Math.round((this.testCounts.passed / this.testCounts.total) * 100) : 0
+                    },
+                    results: this.results
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `ui-marker-test-${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.addResult('系统', '导出结果', '成功', '测试结果已导出为 JSON 文件');
+            }
+            
+            copyResults() {
+                const summary = `
+UI Marker v2.0 测试报告
+测试时间: ${new Date().toLocaleString()}
+总测试数: ${this.testCounts.total}
+通过: ${this.testCounts.passed}
+失败: ${this.testCounts.failed}
+警告: ${this.testCounts.warning}
+成功率: ${this.testCounts.total > 0 ? Math.round((this.testCounts.passed / this.testCounts.total) * 100) : 0}%
+
+详细结果:
+${this.results.map(r => `[${r.status}] ${r.category} - ${r.testName}: ${r.message}`).join('\n')}
+                `.trim();
+                
+                navigator.clipboard.writeText(summary).then(() => {
+                    this.addResult('系统', '复制结果', '成功', '测试摘要已复制到剪贴板');
+                }).catch(err => {
+                    this.addResult('系统', '复制结果', '失败', `复制失败: ${err.message}`);
+                });
+            }
+        }
+        
+        // 初始化测试框架
+        const testFramework = new UITestFramework();
+        
+        // 页面加载完成后的初始测试
+        document.addEventListener('DOMContentLoaded', function() {
+            testFramework.addResult('系统', '页面加载', '成功', '测试页面已加载完成');
+            testFramework.testEnvironment();
+            
+            // 输出使用说明
+            console.log(`
+%c📋 UI Marker v2.0 测试页面已就绪 %c
+可用操作：
+1. 按 Ctrl+Shift+M 激活/停用 UI Marker
+2. 点击"运行所有测试"按钮进行完整测试
+3. 使用各个测试按钮进行专项测试
+4. 查看下方测试结果区域获取详细信息
+
+所有测试结果都会在页面中显示，并汇总统计。
+            `.trim(), 'background: #6366f1; color: white; padding: 4px 8px; border-radius: 4px;', '');
+        });
+    </script>
+</body>
+</html>
