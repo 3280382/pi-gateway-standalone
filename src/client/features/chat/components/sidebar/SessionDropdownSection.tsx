@@ -65,6 +65,11 @@ export function SessionDropdownSection() {
   const controller = useSidebarController();
 
   // ========== 2. Effects ==========
+  // Log runtimeStatus changes for debugging
+  useEffect(() => {
+    console.log("[SessionDropdown] runtimeStatus updated:", runtimeStatus);
+  }, [runtimeStatus]);
+
   // 只在侧边栏打开时定期请求会话列表更新
   useEffect(() => {
     if (!workingDir || !isSidebarVisible) return;
