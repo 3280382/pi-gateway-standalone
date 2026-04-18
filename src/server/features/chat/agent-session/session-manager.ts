@@ -137,15 +137,8 @@ export class ServerSessionManager {
         hasClient: this.isClientConnected(entry.client),
       }));
 
-      // Send to clients in this working directory
       for (const entry of entries) {
-        // Skip if: client not connected, sidebar not visible, and status hasn't changed
-        if (entry.client.readyState !== WebSocket.OPEN) continue;
-        
-        const shouldBroadcast = entry.sidebarVisible === true || 
-                               entry.lastBroadcastedStatus !== entry.runtimeStatus;
-        
-        if (!shouldBroadcast) continue;
+        if (!this.shouldBroadcastToClient(entry)) continue;
 
         try {
           entry.client.send(JSON.stringify({
@@ -534,6 +527,12 @@ export class ServerSessionManager {
    */
   private isClientConnected(client: WebSocket): boolean {
     return client.readyState === WebSocket.OPEN;
+  }
+
+  private shouldBroadcastToClient(entry: SessionEntry): boolean {
+    if (!this.isClientConnected(entry.client)) return false;
+    if (entry.sidebarVisible) return true;
+    return entry.lastBroadcastedStatus !== entry.runtimeStatus;
   }
 
   /**
