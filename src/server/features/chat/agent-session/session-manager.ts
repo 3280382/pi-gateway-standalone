@@ -106,7 +106,7 @@ export class ServerSessionManager {
   private broadcastAllRuntimeStatus(): void {
     // Group sessions by workingDir
     const workingDirMap = new Map<string, SessionEntry[]>();
-    
+  
     for (const entry of this.sessions.values()) {
       if (!workingDirMap.has(entry.workingDir)) {
         workingDirMap.set(entry.workingDir, []);
@@ -132,7 +132,7 @@ export class ServerSessionManager {
             sessions: statusList,
             timestamp: new Date().toISOString(),
           }));
-          
+        
           // Update last broadcasted status
           entry.lastBroadcastedStatus = entry.runtimeStatus;
         } catch (e) {
@@ -590,7 +590,7 @@ export class ServerSessionManager {
 
     // Update lookup maps
     this.sessionFileToShortId.set(sessionFile, shortId);
-    
+  
     if (!this.workingDirToShortIds.has(workingDir)) {
       this.workingDirToShortIds.set(workingDir, new Set());
     }
@@ -639,7 +639,7 @@ export class ServerSessionManager {
       const oldStatus = entry.runtimeStatus;
       entry.runtimeStatus = status;
       entry.lastActivity = new Date();
-      
+    
       // If status changed, immediately broadcast to sidebar-visible clients
       if (oldStatus !== status) {
         this.broadcastRuntimeStatus(entry.workingDir);
@@ -669,7 +669,7 @@ export class ServerSessionManager {
     if (entry) {
       entry.sidebarVisible = visible;
       console.log(`[ServerSessionManager] Sidebar visibility for ${shortId}: ${visible}`);
-      
+    
       // If sidebar is now visible, immediately broadcast current status
       if (visible) {
         this.broadcastRuntimeStatus(entry.workingDir);
@@ -687,7 +687,7 @@ export class ServerSessionManager {
   setClientSelectedSession(client: WebSocket, shortId: string): void {
     this.clientToSelectedSessionId.set(client, shortId);
     console.log(`[ServerSessionManager] Client selected session: ${shortId}`);
-    
+  
     // Flush buffered messages for this session to the client
     const entry = this.sessions.get(shortId);
     if (entry && entry.session) {

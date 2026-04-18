@@ -218,7 +218,7 @@ export async function handleLoadSession(
   try {
     // Use PiAgentSession's loadSession method
     await ctx.session.loadSession(sessionPath);
-    
+  
     // Update client selected session for strict message routing
     const shortId = extractShortSessionId(sessionPath);
     if (shortId) {
@@ -226,7 +226,7 @@ export async function handleLoadSession(
       ctx.selectedSessionId = shortId;
       logger.info(`[handleLoadSession] Client switched to session: ${shortId}`);
     }
-    
+  
     // loadSession already sends response internally
     logger.info(`[handleLoadSession] Session loaded: ${sessionPath}`);
   } catch (error) {
@@ -350,7 +350,7 @@ export async function handleGetSessionStatus(
 
   try {
     const entry = serverSessionManager.getSessionByShortId(shortId);
-    
+  
     if (!entry) {
       sendSuccess(ctx, "session_status", {
         sessionId: shortId,

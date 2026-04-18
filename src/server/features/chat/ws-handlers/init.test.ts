@@ -33,15 +33,15 @@ describe("WebSocket Init Handler", () => {
     await reporter.runTest("连接后收到欢迎消息", async () => {
       const client = new TestWebSocketClient(wsUrl);
       await client.connect(wsUrl);
-      
+    
       const welcomeMsg = await client.waitForMessage(
         (m) => m.type === "welcome" || m.type === "connected",
         5000
       );
-      
+    
       expect(welcomeMsg).toBeDefined();
       logger.info("收到欢迎消息", welcomeMsg);
-      
+    
       client.disconnect();
     });
   });
@@ -50,27 +50,27 @@ describe("WebSocket Init Handler", () => {
     await reporter.runTest("发送初始化消息", async () => {
       const client = new TestWebSocketClient(wsUrl);
       await client.connect(wsUrl);
-      
+    
       // 等待连接确认
       await client.waitForMessage(
         (m) => m.type === "welcome" || m.type === "connected",
         5000
       );
-      
+    
       // 发送 init 消息
       client.send("init", {
         workingDir: "/root/pi-gateway-standalone",
       });
-      
+    
       // 等待确认
       const response = await client.waitForMessage(
         (m) => m.type === "init_ack" || m.type === "initialized",
         5000
       );
-      
+    
       expect(response).toBeDefined();
       logger.info("初始化确认收到", response);
-      
+    
       client.disconnect();
     });
   });

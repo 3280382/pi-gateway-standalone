@@ -134,7 +134,7 @@ export class TerminalWebSocketService {
           clearTimeout(timeoutId);
           this._isConnected = false;
           this.connectionId = null;
-          
+        
           // Only emit disconnected if we were previously connected
           if (this.reconnectAttempts === 0) {
             wsLog.info(`[TerminalWS] Disconnected: ${event.code} ${event.reason}`);

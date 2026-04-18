@@ -169,16 +169,16 @@ import { serverSessionManager } from "../agent-session/session-manager";
  */
 export async function getActiveSessions(req: Request, res: Response) {
   const workingDir = req.query.workingDir as string;
-  
+
   if (!workingDir) {
     return res.status(400).json({ 
       error: "workingDir parameter is required" 
     });
   }
-  
+
   try {
     const activeSessions = serverSessionManager.getActiveSessions(workingDir);
-    
+  
     res.json({
       workingDir,
       activeSessions,

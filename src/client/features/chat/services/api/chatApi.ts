@@ -161,7 +161,7 @@ export function useChatController(): EnhancedChatController {
 
     steer: (text: string) => {
       if (!text.trim()) return;
-      
+    
       // 添加用户消息到列表（类似 sendMessage）
       const userMessage: Message = {
         id: generateMessageId(),
@@ -171,7 +171,7 @@ export function useChatController(): EnhancedChatController {
       };
       chatStore.addMessage(userMessage);
       chatStore.clearInput();
-      
+    
       steerChat(text);
     },
 
@@ -598,22 +598,22 @@ export function setupWebSocketListeners(): void {
     console.log("[setupWebSocketListeners] initialized:", data);
     const sessionStore = useSessionStore.getState();
     const sidebarStore = useSidebarStore.getState();
-    
+  
     if (data?.resourceFiles) {
       sessionStore.setResourceFiles(data.resourceFiles);
     }
-    
+  
     // 使用后端返回的 currentModel（已考虑 session 优先级）
     if (data?.currentModel) {
       sessionStore.setCurrentModel(data.currentModel);
       console.log("[initialized] Current model:", data.currentModel);
     }
-    
+  
     // 保存默认模型信息（用于显示）
     if (data?.defaultModel) {
       sessionStore.setDefaultModel(data.defaultModel);
     }
-    
+  
     // 设置当前选中的会话 ID（短 ID）
     if (data?.sessionId) {
       sidebarStore.setSelectedSessionId(data.sessionId);
@@ -625,15 +625,15 @@ export function setupWebSocketListeners(): void {
   websocketService.on("dir_changed", (data: any) => {
     console.log("[setupWebSocketListeners] dir_changed:", data);
     const sessionStore = useSessionStore.getState();
-    
+  
     if (data?.resourceFiles) {
       sessionStore.setResourceFiles(data.resourceFiles);
     }
-    
+  
     if (data?.currentModel) {
       sessionStore.setCurrentModel(data.currentModel);
     }
-    
+  
     if (data?.defaultModel) {
       sessionStore.setDefaultModel(data.defaultModel);
     }
@@ -645,7 +645,7 @@ export function setupWebSocketListeners(): void {
     const sidebarStore = useSidebarStore.getState();
     if (data?.sessions) {
       sidebarStore.setSessions(data.sessions);
-      
+    
       // Also update runtimeStatus from the status field in sessions
       const statusList = data.sessions
         .filter((s: any) => s && s.id && s.status)
@@ -653,7 +653,7 @@ export function setupWebSocketListeners(): void {
           sessionId: s.id,
           status: s.status,
         }));
-      
+    
       if (statusList.length > 0) {
         sidebarStore.updateRuntimeStatusBulk(statusList);
         console.log("[sessions_list] Updated runtime status for", statusList.length, "sessions");
@@ -669,13 +669,13 @@ export function setupWebSocketListeners(): void {
         console.warn("[runtime_status_broadcast] Invalid data received:", data);
         return;
       }
-      
+    
       const sidebarStore = useSidebarStore.getState();
       if (!sidebarStore) {
         console.warn("[runtime_status_broadcast] Sidebar store not available");
         return;
       }
-      
+    
       if (Array.isArray(data.sessions)) {
         const statusList = data.sessions
           .filter((s: any) => s && typeof s === 'object' && s.shortId)
@@ -683,7 +683,7 @@ export function setupWebSocketListeners(): void {
             sessionId: s.shortId,
             status: s.status || 'idle',
           }));
-        
+      
         if (statusList.length > 0) {
           sidebarStore.updateRuntimeStatusBulk(statusList);
           console.log("[runtime_status_broadcast] Updated status for", statusList.length, "sessions");

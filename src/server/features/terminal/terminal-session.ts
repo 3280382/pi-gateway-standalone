@@ -111,7 +111,7 @@ export class TerminalSessionManager {
     // Handle process exit
     ptyProcess.onExit(({ exitCode, signal }) => {
       logger.info(`[Terminal] Session ${id} exited with code ${exitCode}, signal ${signal}`);
-      
+    
       this.broadcastToClients(session, {
         type: "terminal_ended",
         sessionId: id,
@@ -128,7 +128,7 @@ export class TerminalSessionManager {
    */
   private broadcastToClients(session: TerminalSessionInfo, message: unknown): void {
     const messageStr = JSON.stringify(message);
-    
+  
     for (const client of session.clients) {
       if (client.readyState === WebSocket.OPEN) {
         try {
@@ -276,7 +276,7 @@ export class TerminalSessionManager {
    */
   cleanupAll(): void {
     logger.info(`[Terminal] Cleaning up ${this.sessions.size} sessions`);
-    
+  
     for (const [id, session] of this.sessions) {
       try {
         session.process.kill("SIGKILL");
@@ -284,7 +284,7 @@ export class TerminalSessionManager {
         // Ignore
       }
     }
-    
+  
     this.sessions.clear();
   }
 

@@ -34,7 +34,7 @@ describe("Server Routes", () => {
     await reporter.runTest("健康检查端点", async () => {
       const response = await fetch(`${baseUrl}/api/health`);
       expect(response.status).toBe(200);
-      
+    
       const data = await response.json();
       expect(data.status).toBe("ok");
       logger.info("健康检查通过", data);
@@ -57,7 +57,7 @@ describe("Server Routes", () => {
           Origin: "http://localhost:3000",
         },
       });
-      
+    
       expect(response.headers.get("access-control-allow-origin")).toBeTruthy();
       logger.info("CORS 响应头正确");
     });

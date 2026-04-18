@@ -838,7 +838,7 @@ export const useChatStore = create<
       // Tool Actions
       setActiveTool: (tool: ToolExecution) => {
         set((state) => applyToolActivation(state, tool), false, "setActiveTool");
-        
+      
         // 启动超时检测
         const TOOL_EXECUTION_TIMEOUT = 60000; // 60秒超时
         setTimeout(() => {
@@ -880,18 +880,18 @@ export const useChatStore = create<
         const state = get();
         const now = new Date();
         const warnings: string[] = [];
-        
+      
         state.activeTools.forEach((tool) => {
           if (tool.status === "executing" && !tool.endTime) {
             const elapsed = now.getTime() - tool.startTime.getTime();
             const elapsedSeconds = Math.floor(elapsed / 1000);
-            
+          
             if (elapsed > 30000) { // 超过30秒
               warnings.push(`${tool.name}: 已执行 ${elapsedSeconds} 秒`);
             }
           }
         });
-        
+      
         return warnings;
       },
 

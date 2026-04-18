@@ -226,7 +226,7 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
           e.message?.role === "toolResult" && 
           e.message?.toolCallId === toolCallId
         );
-        
+      
         return {
           type: "tool_use" as const,
           toolCallId: toolCallId || `tool-${Date.now()}`,

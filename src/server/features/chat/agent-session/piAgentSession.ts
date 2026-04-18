@@ -1237,7 +1237,7 @@ export class PiAgentSession {
     }
 
     console.log(`[PiAgentSession.flushMessageBuffer] Flushing ${bufferSize} buffered messages`);
-    
+  
     // Send all buffered messages
     for (const message of this.messageEventBuffer) {
       try {
@@ -1250,7 +1250,7 @@ export class PiAgentSession {
     // Clear the buffer after successful flush
     this.messageEventBuffer = [];
     this.isBuffering = false;
-    
+  
     return bufferSize;
   }
 
