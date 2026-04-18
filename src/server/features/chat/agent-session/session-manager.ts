@@ -1,21 +1,6 @@
 /**
  * Server-Level Session Manager
- * Manages PiAgentSession lifecycle independently of WebSocket connections
- *
- * Architecture (Consolidated):
- * - PiAgentSession lifecycle is server-level, bound to (workingDir, sessionFile) pair
- * - One PiAgentSession per (workingDir, sessionFile) combination
- * - Session reuse decision is made ONLY here in getOrCreateSession()
- * - On init with same (workingDir, sessionFile): reuse existing session, call session.reconnect(newWs)
- * - On init with different workingDir OR different sessionFile: end old session, create new one
- * - WebSocket disconnect keeps session alive for potential reconnection
- *
- * Key Design:
- * - All session initialization logic is centralized here
- * - Session identity = workingDir + sessionFile (both must match to reuse)
- * - PiAgentSession.initialize() = create NEW session (always creates new AgentSession)
- * - PiAgentSession.reconnect() = reuse EXISTING session (updates WebSocket, re-subscribes events)
- * - No duplicate checks in PiAgentSession (removed from initialize())
+ * Manages PiAgentSession lifecycle, handles strict session-to-client message routing
  */
 
 import { WebSocket } from "ws";
