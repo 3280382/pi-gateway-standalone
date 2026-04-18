@@ -363,6 +363,9 @@ export class WebSocketService {
       models_list: "models_list",
       llm_log_set: "llm_log_set",
       command_result: "command_result",
+      // Session Status
+      runtime_status_broadcast: "runtime_status_broadcast",
+      session_status: "session_status",
     };
 
     const event = eventMap[type];
