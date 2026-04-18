@@ -96,6 +96,13 @@ export class ServerSessionManager {
   }
 
   /**
+   * Log with prefix
+   */
+  private log(message: string): void {
+    console.log(`[ServerSessionManager] ${message}`);
+  }
+
+  /**
    * Start periodic runtime status broadcast
    */
   private startStatusBroadcast(): void {
@@ -125,7 +132,7 @@ export class ServerSessionManager {
       const statusList = entries.map(entry => ({
         shortId: entry.shortId,
         status: entry.runtimeStatus,
-        hasClient: entry.client.readyState === WebSocket.OPEN,
+        hasClient: this.isClientConnected(entry.client),
       }));
 
       // Send to clients in this working directory
@@ -507,9 +514,6 @@ export class ServerSessionManager {
 
   /**
    * Check if a session exists for a working directory
-   *
-   * @param workingDir Working directory
-   * @returns True if session exists
    */
   hasSession(workingDir: string): boolean {
     for (const entry of this.sessions.values()) {
@@ -518,6 +522,13 @@ export class ServerSessionManager {
       }
     }
     return false;
+  }
+
+  /**
+   * Check if a WebSocket client is connected
+   */
+  private isClientConnected(client: WebSocket): boolean {
+    return client.readyState === WebSocket.OPEN;
   }
 
   /**
@@ -537,7 +548,7 @@ export class ServerSessionManager {
       shortId,
       workingDir: entry.workingDir,
       sessionFile: entry.sessionFile,
-      hasClient: entry.client.readyState === WebSocket.OPEN,
+      hasClient: this.isClientConnected(entry.client),
       lastActivity: entry.lastActivity,
       runtimeStatus: entry.runtimeStatus,
     }));
@@ -723,12 +734,12 @@ export class ServerSessionManager {
     const statusList = sessions.map(entry => ({
       shortId: entry.shortId,
       status: entry.runtimeStatus,
-      hasClient: entry.client.readyState === WebSocket.OPEN,
+      hasClient: this.isClientConnected(entry.client),
     }));
 
     // Send to all clients in this working directory
     sessions.forEach(entry => {
-      if (entry.client.readyState === WebSocket.OPEN) {
+      if (this.isClientConnected(entry.client)) {
         try {
           entry.client.send(JSON.stringify({
             type: "runtime_status_broadcast",
