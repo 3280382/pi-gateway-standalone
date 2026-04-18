@@ -40,6 +40,8 @@ export interface WSContext {
   connectionId: string;
   /** Connection time */
   connectedAt: Date;
+  /** Whether client sidebar is visible (for optimizing status broadcasts) */
+  sidebarVisible?: boolean;
 }
 
 /**
@@ -289,6 +291,7 @@ import {
   handleListSessionsWrapped,
   handleLoadSessionWrapped,
   handleNewSessionWrapped,
+  handleSidebarVisibilityWrapped,
 } from "./ws-handlers/session-handlers";
 
 /**
@@ -321,6 +324,7 @@ export function registerAllWSHandlers(): void {
   wsRouter.register("list_sessions", handleListSessionsWrapped);
   wsRouter.register("load_session", handleLoadSessionWrapped);
   wsRouter.register("change_dir", handleChangeDirWrapped);
+  wsRouter.register("sidebar_visibility", handleSidebarVisibilityWrapped);
 
   logger.info(`[WSRouter] Registered ${wsRouter.getRegisteredTypes().length} handlers`);
 }

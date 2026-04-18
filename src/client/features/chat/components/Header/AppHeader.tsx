@@ -19,6 +19,7 @@ import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
+import { formatSessionId } from "@/features/chat/utils/sessionUtils";
 import type { ChatSearchFilters } from "@/features/chat/types/chat";
 import styles from "./AppHeader.module.css";
 
@@ -270,7 +271,7 @@ export function AppHeader({
               className={styles.sessionInfo} 
               title={`Session: ${currentSessionId}${runtimeStatus ? ` (${runtimeStatus})` : ""}`}
             >
-              <span className={styles.sessionId}>{currentSessionId.slice(-8)}</span>
+              <span className={styles.sessionId}>{formatSessionId(currentSessionId)}</span>
               {runtimeStatus && (
                 <span className={`${styles.runtimeStatus} ${styles[runtimeStatus]}`}>
                   {runtimeStatus === "thinking" && "🤔"}

@@ -18,9 +18,15 @@ import type { PiAgentSession } from "./agent-session/piAgentSession";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 获取工作目录下的所有 session 文件列表
+ * 获取工作目录下的 session 文件列表
+ * @param workingDir 工作目录
+ * @param limit 最大返回数量（默认返回所有）
+ * @returns Session 列表（按最后修改时间排序，最新的在前）
  */
-export async function getAllSessions(workingDir: string): Promise<
+export async function getAllSessions(
+  workingDir: string,
+  limit?: number
+): Promise<
   Array<{
     id: string;
     path: string;
@@ -33,9 +39,17 @@ export async function getAllSessions(workingDir: string): Promise<
     const localSessionsDir = getLocalSessionsDir(workingDir);
     const sessions = await SessionManager.list(workingDir, localSessionsDir);
 
-    logger.info(`[getAllSessions] Found ${sessions.length} sessions for ${workingDir}`);
+    // 按最后修改时间排序（最新的在前）
+    const sortedSessions = sessions.sort(
+      (a, b) => new Date(b.modified).getTime() - new Date(a.modified).getTime()
+    );
 
-    return sessions.map((s) => ({
+    // 应用分页限制
+    const limitedSessions = limit ? sortedSessions.slice(0, limit) : sortedSessions;
+
+    logger.info(`[getAllSessions] Found ${sortedSessions.length} sessions, returning ${limitedSessions.length} for ${workingDir}`);
+
+    return limitedSessions.map((s) => ({
       id: s.path,
       path: s.path,
       name: s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
@@ -95,15 +109,23 @@ export async function getAllModels(): Promise<
 
 /**
  * 读取 session 文件内容（JSONL）
+ * @param sessionFile Session file path
+ * @param limit Maximum number of messages to return (from the end)
+ * @param offset Number of messages to skip from the end (for pagination)
+ * @returns Array of messages
  */
-export async function getSessionMessages(sessionFile: string): Promise<any[]> {
+export async function getSessionMessages(
+  sessionFile: string,
+  limit?: number,
+  offset?: number
+): Promise<any[]> {
   try {
     if (!existsSync(sessionFile)) {
       return [];
     }
     const content = await readFile(sessionFile, "utf-8");
     const lines = content.split("\n").filter((line) => line.trim());
-    return lines
+    const messages = lines
       .map((line) => {
         try {
           return JSON.parse(line);
@@ -112,9 +134,36 @@ export async function getSessionMessages(sessionFile: string): Promise<any[]> {
         }
       })
       .filter(Boolean);
+
+    // Apply pagination (from the end)
+    if (limit !== undefined || offset !== undefined) {
+      const actualOffset = offset || 0;
+      const actualLimit = limit || messages.length;
+      const startIndex = Math.max(0, messages.length - actualOffset - actualLimit);
+      const endIndex = Math.max(0, messages.length - actualOffset);
+      return messages.slice(startIndex, endIndex);
+    }
+
+    return messages;
   } catch (e) {
     logger.error(`[getSessionMessages] Failed: ${e}`);
     return [];
+  }
+}
+
+/**
+ * 获取消息总数
+ */
+export async function getSessionMessageCount(sessionFile: string): Promise<number> {
+  try {
+    if (!existsSync(sessionFile)) {
+      return 0;
+    }
+    const content = await readFile(sessionFile, "utf-8");
+    return content.split("\n").filter((line) => line.trim()).length;
+  } catch (e) {
+    logger.error(`[getSessionMessageCount] Failed: ${e}`);
+    return 0;
   }
 }
 
@@ -196,9 +245,21 @@ export async function getSessionCurrentModel(
  * - init.ts 的 initialized 响应
  * - change-dir.ts 的 dir_changed 响应
  */
+/**
+ * 构建统一的 Session 响应
+ * 用于：
+ * - init.ts 的 initialized 响应
+ * - change-dir.ts 的 dir_changed 响应
+ *
+ * 优化：
+ * - 默认只加载最近 100 条消息
+ * - allSessions 默认只加载最近 10 个
+ */
 export async function buildSessionResponse(
   session: PiAgentSession,
-  workingDir: string
+  workingDir: string,
+  messageLimit: number = 100,
+  sessionLimit: number = 10
 ): Promise<{
   pid: number;
   workingDir: string;
@@ -206,6 +267,7 @@ export async function buildSessionResponse(
     sessionId: string;
     sessionFile: string;
     messages: any[];
+    totalMessageCount: number;
   };
   allSessions: Awaited<ReturnType<typeof getAllSessions>>;
   currentModel: string | null;
@@ -216,7 +278,12 @@ export async function buildSessionResponse(
   // 获取 session 信息
   const sessionFile = session.session?.sessionFile || "";
   const sessionId = sessionFile;
-  const sessionMessages = await getSessionMessages(sessionFile);
+
+  // 获取消息总数和最近的消息（优化：只加载最近 100 条）
+  const [sessionMessages, totalMessageCount] = await Promise.all([
+    getSessionMessages(sessionFile, messageLimit),
+    getSessionMessageCount(sessionFile),
+  ]);
 
   // 获取默认模型（来自 settings.json）
   const defaultModel = session.session?.model?.id || null;
@@ -224,9 +291,9 @@ export async function buildSessionResponse(
   // 获取当前实际使用的模型（优先从 session 中读取，否则使用默认）
   const currentModel = await getSessionCurrentModel(sessionFile, defaultModel);
 
-  // 并行获取其他数据
+  // 并行获取其他数据（优化：只加载最近 10 个 session）
   const [allSessions, allModels] = await Promise.all([
-    getAllSessions(workingDir),
+    getAllSessions(workingDir, sessionLimit),
     getAllModels(),
   ]);
 
@@ -237,6 +304,7 @@ export async function buildSessionResponse(
       sessionId,
       sessionFile,
       messages: sessionMessages,
+      totalMessageCount,
     },
     allSessions,
     currentModel,

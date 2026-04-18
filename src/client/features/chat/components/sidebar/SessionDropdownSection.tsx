@@ -15,6 +15,7 @@ import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import type { Session } from "@/features/chat/types/sidebar";
+import { formatSessionId } from "@/features/chat/utils/sessionUtils";
 import styles from "./SidebarPanel.module.css";
 
 // 格式化时间为相对时间
@@ -170,7 +171,7 @@ export function SessionDropdownSection() {
                 >
                   <td className={styles.sessionTableCell}>
                     <span className={styles.sessionId}>
-                      {session.id.slice(-8)}
+                      {formatSessionId(session.id)}
                     </span>
                     {isSelected && (
                       <span className={styles.currentIndicator} title="Current session">

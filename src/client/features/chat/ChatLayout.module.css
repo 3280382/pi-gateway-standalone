@@ -31,8 +31,8 @@
   top: 0;
   left: 0;
   bottom: 44px;
-  width: 70%;
-  max-width: 400px;
+  width: 80%;
+  max-width: 520px;
   background: var(--bg-secondary);
   border-right: 1px solid var(--border-subtle);
   display: flex;

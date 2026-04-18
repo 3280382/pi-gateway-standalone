@@ -400,3 +400,32 @@ export const handleGetSessionStatusWrapped = createHandler(handleGetSessionStatu
   name: "get_session_status",
   requireSession: false,
 });
+
+// ============================================================================
+// Sidebar Visibility Handler (WebSocket)
+// Client notifies server when sidebar is opened/closed
+// ============================================================================
+
+/**
+ * Handle sidebar_visibility message
+ * Used to optimize status broadcasts
+ */
+export async function handleSidebarVisibility(
+  ctx: WSContext,
+  payload: { visible?: boolean }
+): Promise<void> {
+  const isVisible = payload.visible ?? false;
+  ctx.sidebarVisible = isVisible;
+
+  // Update session's sidebar visibility
+  if (ctx.session?.shortId) {
+    serverSessionManager.updateSidebarVisibility(ctx.session.shortId, isVisible);
+  }
+
+  logger.info(`[handleSidebarVisibility] Connection ${ctx.connectionId}: sidebar ${isVisible ? "visible" : "hidden"}`);
+}
+
+export const handleSidebarVisibilityWrapped = createHandler(handleSidebarVisibility, {
+  name: "sidebar_visibility",
+  requireSession: false,
+});

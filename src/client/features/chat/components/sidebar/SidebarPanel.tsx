@@ -12,7 +12,7 @@
 
 import { useCallback } from "react";
 import { IconButton } from "@/components/Icon/Icon";
-import { useSidebarSessions } from "@/features/chat/hooks/useSidebarSessions";
+import { useSidebarSessions, useSidebarVisibility } from "@/features/chat/hooks";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { sessionManager } from "@/features/chat/services/sessionManager";
 import { useLlmLogStore } from "@/features/chat/stores/llmLogStore";
@@ -45,6 +45,9 @@ export function SidebarPanel({ currentView = "chat" }: SidebarPanelProps) {
 
   // 以当前工作目录为参数，从服务器获取所有历史 session 文件
   const { isLoading: isSessionsLoading } = useSidebarSessions();
+
+  // 通知服务器侧边栏可见性状态（用于优化状态广播）
+  useSidebarVisibility();
 
   // ========== 5. Render ==========
   return (

@@ -23,16 +23,17 @@ import type { LlmLogManager } from "../llm/log-manager";
 import { PiAgentSession } from "./piAgentSession";
 
 /**
- * Extract short session ID from session file path
- * Example: "/.../2026-04-17T08-26-10-585Z_019d9a8c-2b19-7345-94f5-5efedb498871.jsonl" -> "5efedb498871"
+ * Extract short session ID from session file path (fixed 8 characters)
+ * Example: "/.../2026-04-17T08-26-10-585Z_019d9a8c-2b19-7345-94f5-5efedb498871.jsonl" -> "5efedb49"
  */
 export function extractShortSessionId(sessionFile: string): string {
   if (!sessionFile) return "";
   const fileName = sessionFile.split("/").pop() || "";
   const withoutExt = fileName.replace(".jsonl", "");
   const parts = withoutExt.split("_");
-  // Return the last part (UUID) or full name if no underscore
-  return parts[parts.length - 1] || fileName;
+  // Get UUID part (last segment after underscore) and take first 8 chars
+  const uuidPart = parts[parts.length - 1] || fileName;
+  return uuidPart.slice(0, 8);
 }
 
 /**
@@ -64,6 +65,10 @@ interface SessionEntry {
   lastActivity: Date;
   /** Current runtime status */
   runtimeStatus: SessionRuntimeStatus;
+  /** Whether client's sidebar is visible (for optimizing broadcasts) */
+  sidebarVisible?: boolean;
+  /** Last broadcasted status (for detecting changes) */
+  lastBroadcastedStatus?: SessionRuntimeStatus;
 }
 
 /**
@@ -100,6 +105,7 @@ export class ServerSessionManager {
 
   /**
    * Broadcast runtime status for all working directories
+   * Optimized: only broadcast to clients with visible sidebar or when status changes
    */
   private broadcastAllRuntimeStatus(): void {
     // Group sessions by workingDir
@@ -120,19 +126,28 @@ export class ServerSessionManager {
         hasClient: entry.client.readyState === WebSocket.OPEN,
       }));
 
-      // Send to all clients in this working directory
+      // Send to clients in this working directory
       for (const entry of entries) {
-        if (entry.client.readyState === WebSocket.OPEN) {
-          try {
-            entry.client.send(JSON.stringify({
-              type: "runtime_status_broadcast",
-              workingDir,
-              sessions: statusList,
-              timestamp: new Date().toISOString(),
-            }));
-          } catch (e) {
-            // Ignore send errors
-          }
+        // Skip if: client not connected, sidebar not visible, and status hasn't changed
+        if (entry.client.readyState !== WebSocket.OPEN) continue;
+        
+        const shouldBroadcast = entry.sidebarVisible === true || 
+                               entry.lastBroadcastedStatus !== entry.runtimeStatus;
+        
+        if (!shouldBroadcast) continue;
+
+        try {
+          entry.client.send(JSON.stringify({
+            type: "runtime_status_broadcast",
+            workingDir,
+            sessions: statusList,
+            timestamp: new Date().toISOString(),
+          }));
+          
+          // Update last broadcasted status
+          entry.lastBroadcastedStatus = entry.runtimeStatus;
+        } catch (e) {
+          // Ignore send errors
         }
       }
     }
@@ -602,6 +617,26 @@ export class ServerSessionManager {
    */
   getRuntimeStatus(shortId: string): SessionRuntimeStatus | undefined {
     return this.sessions.get(shortId)?.runtimeStatus;
+  }
+
+  /**
+   * Update sidebar visibility for a session's client
+   * Used to optimize status broadcasts
+   *
+   * @param shortId Short session ID
+   * @param visible Whether sidebar is visible
+   */
+  updateSidebarVisibility(shortId: string, visible: boolean): void {
+    const entry = this.sessions.get(shortId);
+    if (entry) {
+      entry.sidebarVisible = visible;
+      console.log(`[ServerSessionManager] Sidebar visibility for ${shortId}: ${visible}`);
+      
+      // If sidebar is now visible, immediately broadcast current status
+      if (visible) {
+        this.broadcastRuntimeStatus(entry.workingDir);
+      }
+    }
   }
 
   /**
