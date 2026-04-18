@@ -644,6 +644,19 @@ export function setupWebSocketListeners(): void {
     const sidebarStore = useSidebarStore.getState();
     if (data?.sessions) {
       sidebarStore.setSessions(data.sessions);
+      
+      // Also update runtimeStatus from the status field in sessions
+      const statusList = data.sessions
+        .filter((s: any) => s && s.id && s.status)
+        .map((s: any) => ({
+          sessionId: s.id,
+          status: s.status,
+        }));
+      
+      if (statusList.length > 0) {
+        sidebarStore.updateRuntimeStatusBulk(statusList);
+        console.log("[sessions_list] Updated runtime status for", statusList.length, "sessions");
+      }
     }
   });
 
