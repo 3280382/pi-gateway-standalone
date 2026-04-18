@@ -17,6 +17,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { AgentMessage } from "@mariozechner/pi-agent-core";
 import type { ImageContent } from "@mariozechner/pi-ai";
+import { extractShortSessionId, serverSessionManager } from "./session-manager";
 import {
   type AgentSession,
   type AgentSessionEvent,
@@ -127,7 +128,6 @@ export class PiAgentSession {
   private updateRuntimeStatus(status: typeof this.runtimeStatus): void {
     this.runtimeStatus = status;
     // Notify session manager to broadcast status
-    const { serverSessionManager } = require("./session-manager");
     if (this.shortId) {
       serverSessionManager.updateRuntimeStatus(this.shortId, status);
     }
@@ -270,7 +270,6 @@ export class PiAgentSession {
     this.setupEventHandlers();
 
     // Set short ID from session file
-    const { extractShortSessionId } = require("./session-manager");
     this.shortId = extractShortSessionId(session.sessionFile);
     this.updateRuntimeStatus("idle");
 

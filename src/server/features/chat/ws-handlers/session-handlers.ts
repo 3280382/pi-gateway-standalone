@@ -193,31 +193,6 @@ export async function handleNewSession(
 /**
  * Handle list_sessions message
  */
-export async function handleListSessions(ctx: WSContext, payload: { cwd: string }): Promise<void> {
-  const { cwd } = payload;
-
-  try {
-    const localSessionsDir = getLocalSessionsDir(cwd);
-    const sessions = await SessionManager.list(cwd, localSessionsDir);
-
-    sendSuccess(ctx, "sessions_list", {
-      sessions: sessions.map((s) => ({
-        id: s.id,
-        path: s.path,
-        firstMessage: s.firstMessage,
-        messageCount: s.messageCount,
-        cwd: s.cwd,
-        modified: s.modified.toISOString(),
-      })),
-    });
-
-    logger.info(`[handleListSessions] Sent ${sessions.length} sessions`);
-  } catch (error) {
-    logger.error("[handleListSessions] Error:", {}, error instanceof Error ? error : undefined);
-    sendError(ctx, error instanceof Error ? error.message : "Failed to list sessions");
-  }
-}
-
 // ============================================================================
 // Load Session Handler
 // ============================================================================
@@ -418,11 +393,6 @@ export const handleLoadSessionWrapped = createHandler(handleLoadSession, {
 
 export const handleChangeDirWrapped = createHandler(handleChangeDir, {
   name: "change_dir",
-  requireSession: false,
-});
-
-export const handleListSessionsWrapped = createHandler(handleListSessions, {
-  name: "list_sessions",
   requireSession: false,
 });
 

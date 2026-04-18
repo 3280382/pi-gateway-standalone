@@ -103,7 +103,7 @@ export class ServerSessionManager {
    */
   private broadcastAllRuntimeStatus(): void {
     // Group sessions by workingDir
-    const workingDirMap = new Map<string, typeof this.sessions.values()>();
+    const workingDirMap = new Map<string, SessionEntry[]>();
     
     for (const entry of this.sessions.values()) {
       if (!workingDirMap.has(entry.workingDir)) {
@@ -277,8 +277,7 @@ export class ServerSessionManager {
     const session = new PiAgentSession(client, this.llmLogManager);
 
     // Initialize the session
-    // If sessionFile is provided, the session will be loaded/created for that specific file
-    const actualSessionFile = sessionFile || (await this.findMostRecentSessionFile(workingDir));
+    // Use the actualSessionFile already determined at the beginning of this function
     await session.initialize(workingDir, actualSessionFile);
 
     // Register session with shortId as primary key
