@@ -66,6 +66,7 @@ export interface SidebarController {
   changeWorkingDir: (path: string) => Promise<void>;
   selectSession: (id: string) => void;
   createNewSession: () => Promise<void>;
+  listSessions: () => void; // 通过 WebSocket 请求会话列表
 
   // Error Handling
   clearError: () => void;

@@ -10,6 +10,8 @@
 import { useCallback } from "react";
 import { sessionManager } from "@/features/chat/services/sessionManager";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { useSessionStore } from "@/features/chat/stores/sessionStore";
+import { websocketService } from "@/services/websocket.service";
 import type { SidebarController } from "@/features/chat/types/sidebar";
 
 // ============================================================================
@@ -46,6 +48,14 @@ export function useSidebarController(): SidebarController {
 
     createNewSession: useCallback(() => sessionManager.createNewSession(), []),
 
+    // List sessions via WebSocket
+    listSessions: useCallback(() => {
+      const workingDir = useSessionStore.getState().workingDir;
+      if (workingDir && websocketService.isConnected()) {
+        websocketService.send("list_sessions", { workingDir });
+      }
+    }, []),
+
     // Error Handling
     clearError: useCallback(() => store.clearError(), [store]),
   };
@@ -79,6 +89,13 @@ export function createSidebarController(): SidebarController {
     selectSession: (id: string) => sessionManager.selectSession(id),
 
     createNewSession: () => sessionManager.createNewSession(),
+
+    listSessions: () => {
+      const workingDir = useSessionStore.getState().workingDir;
+      if (workingDir && websocketService.isConnected()) {
+        websocketService.send("list_sessions", { workingDir });
+      }
+    },
 
     clearError: () => store.clearError(),
   };
