@@ -15,8 +15,7 @@ export function useSidebarVisibility(): void {
 
   useEffect(() => {
     // 通知服务器侧边栏状态变化
-    websocketService.sendMessage({
-      type: "sidebar_visibility",
+    websocketService.send("sidebar_visibility", {
       visible: isVisible,
     });
 
