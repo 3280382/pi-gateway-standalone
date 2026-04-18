@@ -53,8 +53,9 @@
       tooltipBg: '#1f2937',
       tooltipColor: '#ffffff',
       overlayBorder: '2px solid #6366f1',
-      labelSize: '20px',
-      labelFontSize: '11px',
+      labelSize: '14px',
+      labelFontSize: '9px',
+      labelOpacity: '0.85',
       zIndex: {
         label: 2147483645,
         overlay: 2147483646,
@@ -1050,7 +1051,7 @@
       
       Object.assign(label.style, {
         position: 'fixed',
-        top: `${marker.rect.top + window.scrollY - 10}px`,
+        top: `${marker.rect.top + window.scrollY - 8}px`,
         left: `${marker.rect.left + window.scrollX}px`,
         width: theme.labelSize,
         height: theme.labelSize,
@@ -1064,8 +1065,10 @@
         justifyContent: 'center',
         zIndex: theme.zIndex.label,
         pointerEvents: 'none',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-        transition: 'transform 0.1s ease'
+        boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+        transition: 'transform 0.1s ease, opacity 0.2s ease',
+        opacity: theme.labelOpacity,
+        border: '1px solid rgba(255,255,255,0.3)'
       });
       
       return label;

@@ -649,15 +649,36 @@ export function setupWebSocketListeners(): void {
 
   // Runtime status broadcast handler - 更新会话运行状态
   websocketService.on("runtime_status_broadcast", (data: any) => {
-    console.log("[setupWebSocketListeners] runtime_status_broadcast:", data);
-    const sidebarStore = useSidebarStore.getState();
-    if (data?.sessions) {
-      sidebarStore.updateRuntimeStatusBulk(
-        data.sessions.map((s: any) => ({
-          sessionId: s.shortId,
-          status: s.status,
-        }))
-      );
+    try {
+      console.log("[setupWebSocketListeners] runtime_status_broadcast:", data);
+      if (!data || typeof data !== 'object') {
+        console.warn("[runtime_status_broadcast] Invalid data received:", data);
+        return;
+      }
+      
+      const sidebarStore = useSidebarStore.getState();
+      if (!sidebarStore) {
+        console.warn("[runtime_status_broadcast] Sidebar store not available");
+        return;
+      }
+      
+      if (Array.isArray(data.sessions)) {
+        const statusList = data.sessions
+          .filter((s: any) => s && typeof s === 'object' && s.shortId)
+          .map((s: any) => ({
+            sessionId: s.shortId,
+            status: s.status || 'idle',
+          }));
+        
+        if (statusList.length > 0) {
+          sidebarStore.updateRuntimeStatusBulk(statusList);
+          console.log("[runtime_status_broadcast] Updated status for", statusList.length, "sessions");
+        }
+      } else {
+        console.warn("[runtime_status_broadcast] sessions is not an array:", data.sessions);
+      }
+    } catch (error) {
+      console.error("[runtime_status_broadcast] Error in handler:", error);
     }
   });
 
