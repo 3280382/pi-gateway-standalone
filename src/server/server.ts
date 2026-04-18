@@ -288,6 +288,9 @@ function setupGracefulShutdown() {
       // Cleanup terminal sessions
       cleanupTerminalSessions();
 
+      // Stop session manager status broadcast
+      serverSessionManager.stopStatusBroadcast();
+
       // Close HTTP server
       if (server) {
         server.close(() => {
