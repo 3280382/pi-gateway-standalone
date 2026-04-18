@@ -85,6 +85,8 @@ export class ServerSessionManager {
   private clientToShortId: Map<WebSocket, string> = new Map();
   /** Maps sessionFile to shortId for file-based lookup */
   private sessionFileToShortId: Map<string, string> = new Map();
+  /** Maps WebSocket to selected session ID for strict message routing */
+  private clientToSelectedSessionId: Map<WebSocket, string> = new Map();
   private llmLogManager: LlmLogManager | null = null;
   private statusBroadcastInterval: NodeJS.Timeout | null = null;
 
@@ -276,6 +278,17 @@ export class ServerSessionManager {
       // Update reverse mapping
       this.clientToShortId.set(client, shortId);
 
+      // Re-set session verification callback for the new WebSocket
+      session.setSessionVerificationCallback((ws: WebSocket, sessionShortId: string) => {
+        return this.hasClientSelectedSession(ws, sessionShortId);
+      });
+
+      // Flush buffered messages for this session to the client
+      const flushedCount = session.flushMessageBuffer();
+      if (flushedCount > 0) {
+        console.log(`[ServerSessionManager] Reconnected and flushed ${flushedCount} buffered messages for session ${shortId}`);
+      }
+
       console.log(`[ServerSessionManager] Session reused: shortId=${shortId}`);
       return session;
     }
@@ -316,6 +329,12 @@ export class ServerSessionManager {
 
     // Update reverse mapping
     this.clientToShortId.set(client, shortId);
+
+    // Set up session verification callback for strict message routing
+    // This ensures only clients that have selected this session receive its messages
+    session.setSessionVerificationCallback((ws: WebSocket, sessionShortId: string) => {
+      return this.hasClientSelectedSession(ws, sessionShortId);
+    });
 
     console.log(`[ServerSessionManager] Session created: shortId=${shortId}`);
     return session;
@@ -643,6 +662,50 @@ export class ServerSessionManager {
         this.broadcastRuntimeStatus(entry.workingDir);
       }
     }
+  }
+
+  /**
+   * Set the selected session ID for a WebSocket client
+   * This is used for strict message routing - only messages from the selected session are sent
+   *
+   * @param client WebSocket client
+   * @param shortId Selected session short ID
+   */
+  setClientSelectedSession(client: WebSocket, shortId: string): void {
+    this.clientToSelectedSessionId.set(client, shortId);
+    console.log(`[ServerSessionManager] Client selected session: ${shortId}`);
+    
+    // Flush buffered messages for this session to the client
+    const entry = this.sessions.get(shortId);
+    if (entry && entry.session) {
+      const flushedCount = entry.session.flushMessageBuffer();
+      if (flushedCount > 0) {
+        console.log(`[ServerSessionManager] Flushed ${flushedCount} buffered messages to client for session ${shortId}`);
+      }
+    }
+  }
+
+  /**
+   * Get the selected session ID for a WebSocket client
+   *
+   * @param client WebSocket client
+   * @returns Selected session short ID or undefined
+   */
+  getClientSelectedSession(client: WebSocket): string | undefined {
+    return this.clientToSelectedSessionId.get(client);
+  }
+
+  /**
+   * Check if a client has selected a specific session
+   * Used for strict message routing
+   *
+   * @param client WebSocket client
+   * @param shortId Session short ID to check
+   * @returns true if client has selected this session
+   */
+  hasClientSelectedSession(client: WebSocket, shortId: string): boolean {
+    const selectedSessionId = this.clientToSelectedSessionId.get(client);
+    return selectedSessionId === shortId;
   }
 
   /**

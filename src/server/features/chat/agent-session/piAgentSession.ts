@@ -141,6 +141,20 @@ export class PiAgentSession {
   }
 
   /**
+   * Set session verification callback
+   * This callback is called before sending each message to verify 
+   * the client has selected this session for receiving messages
+   * 
+   * @param callback Function that takes (ws, shortId) and returns true if client has selected this session
+   */
+  setSessionVerificationCallback(
+    callback: (ws: WebSocket, shortId: string) => boolean
+  ): void {
+    this.sessionVerificationCallback = callback;
+    console.log(`[PiAgentSession] Session verification callback set for ${this.shortId}`);
+  }
+
+  /**
    * Initialize a NEW session for the given working directory
    *
    * IMPORTANT: This method always creates a NEW AgentSession.
@@ -1124,6 +1138,13 @@ export class PiAgentSession {
   /** Track if we're currently inside a message (between message_start and message_end) */
   private insideMessage: boolean = false;
 
+  /** 
+   * Session verification callback
+   * Called before sending each message to verify the client has selected this session
+   * If returns false, message is buffered instead of sent
+   */
+  private sessionVerificationCallback: ((ws: WebSocket, shortId: string) => boolean) | null = null;
+
   /**
    * Send message to WebSocket client
    * Core logic:
@@ -1161,7 +1182,22 @@ export class PiAgentSession {
       }
 
       if (this.ws.readyState === WebSocket.OPEN) {
-        // WebSocket is connected, send immediately
+        // STRICT SESSION MATCHING: Verify client has selected this session
+        if (this.sessionVerificationCallback && this.shortId) {
+          const isClientSelected = this.sessionVerificationCallback(this.ws, this.shortId);
+          if (!isClientSelected) {
+            // Client has NOT selected this session, buffer the message
+            // This prevents message cross-talk between sessions
+            console.log(
+              `[PiAgentSession.send] Client has NOT selected session ${this.shortId}, buffering: ${message.type}`
+            );
+            this.messageEventBuffer.push(message);
+            this.isBuffering = true;
+            return;
+          }
+        }
+        
+        // WebSocket is connected and session matches, send immediately
         this.ws.send(JSON.stringify(message));
         this.wsConnected = true;
         this.isBuffering = false;

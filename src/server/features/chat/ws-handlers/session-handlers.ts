@@ -48,6 +48,15 @@ export async function handleInit(
     throw new Error("Failed to create or get session");
   }
 
+  // 2.5 设置客户端选择的 session（用于严格消息路由）
+  const sessionShortId = extractShortSessionId(session.session?.sessionFile || "");
+  if (sessionShortId) {
+    serverSessionManager.setClientSelectedSession(ctx.ws, sessionShortId);
+    ctx.selectedSessionId = sessionShortId;
+    ctx.workingDir = workingDir;
+    logger.info(`[handleInit] Client selected session: ${sessionShortId}`);
+  }
+
   // 3. 构建响应数据
   let responseData = await buildSessionResponse(session, workingDir);
 
@@ -209,6 +218,15 @@ export async function handleLoadSession(
   try {
     // Use PiAgentSession's loadSession method
     await ctx.session.loadSession(sessionPath);
+    
+    // Update client selected session for strict message routing
+    const shortId = extractShortSessionId(sessionPath);
+    if (shortId) {
+      serverSessionManager.setClientSelectedSession(ctx.ws, shortId);
+      ctx.selectedSessionId = shortId;
+      logger.info(`[handleLoadSession] Client switched to session: ${shortId}`);
+    }
+    
     // loadSession already sends response internally
     logger.info(`[handleLoadSession] Session loaded: ${sessionPath}`);
   } catch (error) {

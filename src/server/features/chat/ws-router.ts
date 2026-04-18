@@ -34,7 +34,7 @@ export interface WSMessagePayload {
 export interface WSContext {
   /** WebSocket connection */
   ws: WebSocket;
-  /** Gateway session */
+  /** Gateway session (current active session for this connection) */
   session: PiAgentSession;
   /** Connection ID */
   connectionId: string;
@@ -42,6 +42,10 @@ export interface WSContext {
   connectedAt: Date;
   /** Whether client sidebar is visible (for optimizing status broadcasts) */
   sidebarVisible?: boolean;
+  /** Selected session ID for this connection (for strict message routing) */
+  selectedSessionId?: string;
+  /** Working directory for this connection */
+  workingDir?: string;
 }
 
 /**
