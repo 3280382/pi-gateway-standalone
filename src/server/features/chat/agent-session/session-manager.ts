@@ -39,13 +39,13 @@ export function extractShortSessionId(sessionFile: string): string {
 /**
  * Session runtime status
  */
-export type SessionRuntimeStatus = 
-  | "idle"        // 空闲，等待输入
-  | "thinking"    // AI 正在思考
-  | "tooling"     // 正在执行工具
-  | "streaming"   // 正在流式输出
-  | "waiting"     // 等待用户输入
-  | "error";      // 发生错误
+export type SessionStatus = 
+  | "idle" 
+  | "thinking" 
+  | "tooling" 
+  | "streaming" 
+  | "waiting" 
+  | "error";
 
 /**
  * Session entry in the server-level registry
