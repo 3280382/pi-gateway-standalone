@@ -51,7 +51,8 @@ export function useSidebarController(): SidebarController {
     // List sessions via WebSocket
     listSessions: useCallback(() => {
       const workingDir = useSessionStore.getState().workingDir;
-      if (workingDir && websocketService.isConnected()) {
+      const status = websocketService.getConnectionStatus();
+      if (workingDir && status.isConnected) {
         websocketService.send("list_sessions", { workingDir });
       }
     }, []),
@@ -92,7 +93,8 @@ export function createSidebarController(): SidebarController {
 
     listSessions: () => {
       const workingDir = useSessionStore.getState().workingDir;
-      if (workingDir && websocketService.isConnected()) {
+      const status = websocketService.getConnectionStatus();
+      if (workingDir && status.isConnected) {
         websocketService.send("list_sessions", { workingDir });
       }
     },
