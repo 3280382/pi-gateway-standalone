@@ -231,113 +231,118 @@ export class ServerSessionManager {
     client: WebSocket,
     sessionFile?: string
   ): Promise<PiAgentSession> {
-    // Determine actual session file
     const actualSessionFile = sessionFile || await this.findMostRecentSessionFile(workingDir);
     const shortId = this.getShortId(actualSessionFile);
 
     console.log(
-      `[ServerSessionManager] getOrCreateSession: workingDir=${workingDir}, shortId=${shortId}, sessionFile=${actualSessionFile}`
+      `[ServerSessionManager] getOrCreateSession: workingDir=${workingDir}, shortId=${shortId}`
     );
 
-    const existingEntry = this.sessions.get(shortId);
-
-    if (existingEntry) {
-      const { client: existingClient, session, sessionFile: existingSessionFile } = existingEntry;
-
-      console.log(
-        `[ServerSessionManager] Reusing existing session: shortId=${shortId}`
-      );
-
-      // Notify old client that it's being replaced (if different client)
-      if (existingClient !== client && existingClient.readyState === WebSocket.OPEN) {
-        try {
-          existingClient.send(
-            JSON.stringify({
-              type: "session_replaced",
-              message: "Another client has taken over this session",
-              shortId,
-              workingDir,
-            })
-          );
-        } catch (e) {
-          // Ignore send errors
-        }
-      }
-
-      // Remove old client mapping
-      this.clientToShortId.delete(existingClient);
-
-      // Reconnect session with new WebSocket
-      session.reconnect(client);
-
-      // Update entry with new client
-      existingEntry.client = client;
-      existingEntry.lastActivity = new Date();
-      existingEntry.runtimeStatus = "idle";
-
-      // Update reverse mapping
-      this.clientToShortId.set(client, shortId);
-
-      // Re-set session verification callback for the new WebSocket
-      session.setSessionVerificationCallback((ws: WebSocket, sessionShortId: string) => {
-        return this.hasClientSelectedSession(ws, sessionShortId);
-      });
-
-      // Flush buffered messages for this session to the client
-      const flushedCount = session.flushMessageBuffer();
-      if (flushedCount > 0) {
-        console.log(`[ServerSessionManager] Reconnected and flushed ${flushedCount} buffered messages for session ${shortId}`);
-      }
-
-      console.log(`[ServerSessionManager] Session reused: shortId=${shortId}`);
-      return session;
+    const existing = this.sessions.get(shortId);
+    if (existing) {
+      return this.reuseSession(existing, client, shortId, workingDir);
     }
 
-    // Create new session
-    console.log(
-      `[ServerSessionManager] Creating new session: shortId=${shortId}`
-    );
+    return this.createSession(workingDir, client, actualSessionFile, shortId);
+  }
+
+  private reuseSession(
+    entry: SessionEntry,
+    newClient: WebSocket,
+    shortId: string,
+    workingDir: string
+  ): PiAgentSession {
+    const { client: oldClient, session } = entry;
+
+    console.log(`[ServerSessionManager] Reusing session: ${shortId}`);
+
+    this.notifyClientReplaced(oldClient, shortId, workingDir);
+    this.clientToShortId.delete(oldClient);
+
+    session.reconnect(newClient);
+    this.updateEntryClient(entry, newClient);
+    this.setupSessionVerification(session);
+
+    const flushed = session.flushMessageBuffer();
+    if (flushed > 0) {
+      console.log(`[ServerSessionManager] Flushed ${flushed} buffered messages for ${shortId}`);
+    }
+
+    return session;
+  }
+
+  private async createSession(
+    workingDir: string,
+    client: WebSocket,
+    sessionFile: string,
+    shortId: string
+  ): Promise<PiAgentSession> {
+    console.log(`[ServerSessionManager] Creating session: ${shortId}`);
 
     if (!this.llmLogManager) {
-      throw new Error("ServerSessionManager not initialized with LLM log manager");
+      throw new Error("LLM log manager not initialized");
     }
 
     const session = new PiAgentSession(client, this.llmLogManager);
+    await session.initialize(workingDir, sessionFile);
 
-    // Initialize the session
-    // Use the actualSessionFile already determined at the beginning of this function
-    await session.initialize(workingDir, actualSessionFile);
+    this.registerSession(session, shortId, workingDir, sessionFile, client);
+    this.setupSessionVerification(session);
 
-    // Register session with shortId as primary key
+    return session;
+  }
+
+  private notifyClientReplaced(oldClient: WebSocket, shortId: string, workingDir: string): void {
+    if (oldClient.readyState !== WebSocket.OPEN) return;
+    try {
+      oldClient.send(JSON.stringify({
+        type: "session_replaced",
+        message: "Another client has taken over this session",
+        shortId,
+        workingDir,
+      }));
+    } catch {
+      // Ignore send errors
+    }
+  }
+
+  private updateEntryClient(entry: SessionEntry, client: WebSocket): void {
+    entry.client = client;
+    entry.lastActivity = new Date();
+    entry.runtimeStatus = "idle";
+    this.clientToShortId.set(client, entry.shortId);
+  }
+
+  private registerSession(
+    session: PiAgentSession,
+    shortId: string,
+    workingDir: string,
+    sessionFile: string,
+    client: WebSocket
+  ): void {
     this.sessions.set(shortId, {
       session,
       shortId,
       workingDir,
-      sessionFile: actualSessionFile,
+      sessionFile,
       client,
       lastActivity: new Date(),
       runtimeStatus: "idle",
     });
 
-    // Update lookup maps
-    this.sessionFileToShortId.set(actualSessionFile, shortId);
-    
+    this.sessionFileToShortId.set(sessionFile, shortId);
+    this.clientToShortId.set(client, shortId);
+
     if (!this.workingDirToShortIds.has(workingDir)) {
       this.workingDirToShortIds.set(workingDir, new Set());
     }
     this.workingDirToShortIds.get(workingDir)!.add(shortId);
+  }
 
-    // Update reverse mapping
-    this.clientToShortId.set(client, shortId);
-
-    // Set up session verification callback for strict message routing
-    // This ensures only clients that have selected this session receive its messages
-    session.setSessionVerificationCallback((ws: WebSocket, sessionShortId: string) => {
-      return this.hasClientSelectedSession(ws, sessionShortId);
+  private setupSessionVerification(session: PiAgentSession): void {
+    session.setSessionVerificationCallback((ws, shortId) => {
+      return this.hasClientSelectedSession(ws, shortId);
     });
-
-    console.log(`[ServerSessionManager] Session created: shortId=${shortId}`);
-    return session;
   }
 
   /**

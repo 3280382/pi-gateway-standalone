@@ -1155,66 +1155,60 @@ export class PiAgentSession {
    * Fail-safe: any WebSocket error is caught and logged, never throws
    * @param message Message object
    */
-  send(message: ServerMessage) {
+  send(message: ServerMessage): void {
+    this.trackMessageBoundary(message);
+
+    if (!this.canSend()) {
+      this.bufferMessage(message, "WebSocket not available");
+      return;
+    }
+
+    if (!this.isClientSelected()) {
+      this.bufferMessage(message, `Client not selected session ${this.shortId}`);
+      return;
+    }
+
+    this.doSend(message);
+  }
+
+  private trackMessageBoundary(message: ServerMessage): void {
+    if (message.type === "message_start") {
+      this.clearBuffer();
+      this.insideMessage = true;
+    } else if (message.type === "message_end") {
+      this.insideMessage = false;
+    }
+  }
+
+  private clearBuffer(): void {
+    if (this.messageEventBuffer.length === 0) return;
+    console.log(`[PiAgentSession] Clearing ${this.messageEventBuffer.length} buffered events`);
+    this.messageEventBuffer = [];
+  }
+
+  private canSend(): boolean {
+    return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+  }
+
+  private isClientSelected(): boolean {
+    if (!this.sessionVerificationCallback || !this.shortId) return true;
+    return this.sessionVerificationCallback(this.ws!, this.shortId);
+  }
+
+  private bufferMessage(message: ServerMessage, reason: string): void {
+    console.log(`[PiAgentSession] Buffering ${message.type}: ${reason}`);
+    this.messageEventBuffer.push(message);
+    this.isBuffering = true;
+  }
+
+  private doSend(message: ServerMessage): void {
     try {
-      // Track message boundaries for buffer management
-      if (message.type === "message_start") {
-        // Clear previous buffer on new message start
-        // This ensures we only keep the most recent complete message
-        if (this.messageEventBuffer.length > 0) {
-          console.log(`[PiAgentSession.send] Clearing ${this.messageEventBuffer.length} buffered events from previous message`);
-          this.messageEventBuffer = [];
-        }
-        this.insideMessage = true;
-      } else if (message.type === "message_end") {
-        this.insideMessage = false;
-      }
-
-      // Check if WebSocket exists and is open
-      if (!this.ws) {
-        console.log(
-          `[PiAgentSession.send] WebSocket not available, caching message: ${message.type}`
-        );
-        // Cache the message for later playback
-        this.messageEventBuffer.push(message);
-        this.isBuffering = true;
-        return;
-      }
-
-      if (this.ws.readyState === WebSocket.OPEN) {
-        // STRICT SESSION MATCHING: Verify client has selected this session
-        if (this.sessionVerificationCallback && this.shortId) {
-          const isClientSelected = this.sessionVerificationCallback(this.ws, this.shortId);
-          if (!isClientSelected) {
-            // Client has NOT selected this session, buffer the message
-            // This prevents message cross-talk between sessions
-            console.log(
-              `[PiAgentSession.send] Client has NOT selected session ${this.shortId}, buffering: ${message.type}`
-            );
-            this.messageEventBuffer.push(message);
-            this.isBuffering = true;
-            return;
-          }
-        }
-        
-        // WebSocket is connected and session matches, send immediately
-        this.ws.send(JSON.stringify(message));
-        this.wsConnected = true;
-        this.isBuffering = false;
-      } else {
-        // WebSocket not open, cache the message
-        console.log(
-          `[PiAgentSession.send] WebSocket not OPEN (state=${this.ws.readyState}), caching message: ${message.type}`
-        );
-        this.messageEventBuffer.push(message);
-        this.isBuffering = true;
-        this.wsConnected = false;
-      }
+      this.ws!.send(JSON.stringify(message));
+      this.wsConnected = true;
+      this.isBuffering = false;
     } catch (error) {
-      // Catch ANY error to ensure Pi execution continues
-      console.error(`[PiAgentSession.send] Error sending message (type=${message.type}):`, error);
-      // Try to cache even on error
-      this.messageEventBuffer.push(message);
+      console.error(`[PiAgentSession] Send failed for ${message.type}:`, error);
+      this.bufferMessage(message, "Send error");
       this.wsConnected = false;
     }
   }
