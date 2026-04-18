@@ -5,7 +5,7 @@
 
 import { existsSync } from "node:fs";
 import { SessionManager } from "@mariozechner/pi-coding-agent";
-import { serverSessionManager } from "../agent-session/session-manager";
+import { serverSessionManager, extractShortSessionId } from "../agent-session/session-manager";
 import { buildSessionResponse, getAllSessions, getSessionMessages } from "../session-helpers";
 import { getLocalSessionsDir } from "../agent-session/utils";
 import type { WSContext } from "../ws-router";
@@ -69,11 +69,23 @@ export async function handleInit(
     }
   }
 
-  // 5. 发送响应
-  sendSuccess(ctx, "initialized", responseData);
+  // 5. 添加短 ID 到响应
+  const shortId = extractShortSessionId(responseData.currentSession.sessionFile);
+  const enhancedResponse = {
+    ...responseData,
+    currentSession: {
+      ...responseData.currentSession,
+      shortId,
+      sessionId: shortId, // 使用短 ID 作为主要 ID
+      fullPath: responseData.currentSession.sessionFile, // 保留完整路径
+    },
+  };
+
+  // 6. 发送响应
+  sendSuccess(ctx, "initialized", enhancedResponse);
 
   logger.info(
-    `[handleInit] Success: pid=${process.pid}, sessionId=${responseData.currentSession.sessionId}`
+    `[handleInit] Success: pid=${process.pid}, shortId=${shortId}`
   );
 }
 
@@ -277,6 +289,110 @@ export async function handleChangeDir(
 }
 
 // ============================================================================
+// List Sessions Handler (WebSocket)
+// Replaces HTTP GET /api/sessions
+// ============================================================================
+
+/**
+ * Handle list_sessions message via WebSocket
+ */
+export async function handleListSessions(
+  ctx: WSContext,
+  payload: { workingDir?: string }
+): Promise<void> {
+  const workingDir = payload.workingDir || ctx.session?.workingDir || process.cwd();
+
+  try {
+    const localSessionsDir = getLocalSessionsDir(workingDir);
+    const sessions = await SessionManager.list(workingDir, localSessionsDir);
+
+    // Get active sessions status from serverSessionManager
+    const activeSessions = serverSessionManager.getAllSessions();
+    const activeSessionMap = new Map(
+      activeSessions.map(s => [extractShortSessionId(s.sessionFile), s])
+    );
+
+    sendSuccess(ctx, "sessions_list", {
+      sessions: sessions.map((s) => {
+        const shortId = extractShortSessionId(s.path);
+        const activeInfo = activeSessionMap.get(shortId);
+        return {
+          id: shortId,
+          path: s.path,
+          name: s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
+          messageCount: s.messageCount || 0,
+          lastModified: s.modified.toISOString(),
+          status: activeInfo?.runtimeStatus || "idle",
+          hasClient: activeInfo?.hasClient || false,
+        };
+      }),
+    });
+
+    logger.info(`[handleListSessions] Sent ${sessions.length} sessions`);
+  } catch (error) {
+    logger.error("[handleListSessions] Error:", {}, error instanceof Error ? error : undefined);
+    sendError(ctx, error instanceof Error ? error.message : "Failed to list sessions");
+  }
+}
+
+// ============================================================================
+// Get Session Status Handler (WebSocket)
+// Replaces HTTP GET /api/sessions/active
+// ============================================================================
+
+/**
+ * Handle get_session_status message via WebSocket
+ */
+export async function handleGetSessionStatus(
+  ctx: WSContext,
+  payload: { sessionId?: string }
+): Promise<void> {
+  const shortId = payload.sessionId;
+
+  if (!shortId) {
+    sendError(ctx, "sessionId is required");
+    return;
+  }
+
+  try {
+    const entry = serverSessionManager.getSessionByShortId(shortId);
+    
+    if (!entry) {
+      sendSuccess(ctx, "session_status", {
+        sessionId: shortId,
+        status: "idle",
+        statusText: "Session not found",
+        exists: false,
+      });
+      return;
+    }
+
+    const statusText = {
+      idle: "空闲",
+      thinking: "思考中",
+      tooling: "执行工具",
+      streaming: "输出中",
+      waiting: "等待输入",
+      error: "发生错误",
+    }[entry.runtimeStatus] || entry.runtimeStatus;
+
+    sendSuccess(ctx, "session_status", {
+      sessionId: shortId,
+      status: entry.runtimeStatus,
+      statusText,
+      exists: true,
+      hasClient: entry.client.readyState === WebSocket.OPEN,
+      lastActivity: entry.lastActivity.toISOString(),
+    });
+
+    logger.info(`[handleGetSessionStatus] Sent status for ${shortId}: ${entry.runtimeStatus}`);
+  } catch (error) {
+    logger.error("[handleGetSessionStatus] Error:", {}, error instanceof Error ? error : undefined);
+    sendError(ctx, error instanceof Error ? error.message : "Failed to get session status");
+  }
+}
+
+// ============================================================================
 // Wrapped Handlers for Registration
 // ============================================================================
 
@@ -302,5 +418,15 @@ export const handleLoadSessionWrapped = createHandler(handleLoadSession, {
 
 export const handleChangeDirWrapped = createHandler(handleChangeDir, {
   name: "change_dir",
+  requireSession: false,
+});
+
+export const handleListSessionsWrapped = createHandler(handleListSessions, {
+  name: "list_sessions",
+  requireSession: false,
+});
+
+export const handleGetSessionStatusWrapped = createHandler(handleGetSessionStatus, {
+  name: "get_session_status",
   requireSession: false,
 });
