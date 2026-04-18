@@ -33,8 +33,6 @@ export interface SessionManagerAPI {
   switchDirectory: (dir: string, options?: SwitchDirOptions) => Promise<void>;
   selectSession: (sessionId: string) => Promise<void>;
   createNewSession: () => Promise<void>;
-  getLastSessionForDir: (dir: string) => string | undefined;
-  sessionExists: (sessionId: string) => boolean;
 }
 
 // ============================================================================
@@ -297,22 +295,6 @@ async function createNewSession(): Promise<void> {
   }
 }
 
-/**
- * 获取指定目录上次使用的 session ID
- * （服务器决定，客户端不保存）
- */
-function getLastSessionForDir(_dir: string): string | undefined {
-  return undefined;
-}
-
-/**
- * 检查 session 是否存在于当前列表
- */
-function sessionExists(sessionId: string): boolean {
-  const sessions = useSidebarStore.getState().sessions;
-  return !!findSessionInList(sessions, sessionId);
-}
-
 // ============================================================================
 // Public API
 // ============================================================================
@@ -321,8 +303,6 @@ export const sessionManager: SessionManagerAPI = {
   switchDirectory,
   selectSession,
   createNewSession,
-  getLastSessionForDir,
-  sessionExists,
 };
 
 export function useSessionManager(): SessionManagerAPI {

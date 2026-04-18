@@ -592,10 +592,11 @@ export function setupWebSocketListeners(): void {
     store.setIsRunning(false);
   });
 
-  // Initialized handler - 保存 resourceFiles 和模型信息
+  // Initialized handler - 保存 resourceFiles、模型信息和会话 ID
   websocketService.on("initialized", (data: any) => {
     console.log("[setupWebSocketListeners] initialized:", data);
     const sessionStore = useSessionStore.getState();
+    const sidebarStore = useSidebarStore.getState();
     
     if (data?.resourceFiles) {
       sessionStore.setResourceFiles(data.resourceFiles);
@@ -610,6 +611,12 @@ export function setupWebSocketListeners(): void {
     // 保存默认模型信息（用于显示）
     if (data?.defaultModel) {
       sessionStore.setDefaultModel(data.defaultModel);
+    }
+    
+    // 设置当前选中的会话 ID（短 ID）
+    if (data?.sessionId) {
+      sidebarStore.setSelectedSessionId(data.sessionId);
+      console.log("[initialized] Session ID:", data.sessionId);
     }
   });
 

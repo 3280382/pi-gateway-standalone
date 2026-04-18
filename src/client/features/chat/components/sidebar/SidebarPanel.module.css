@@ -943,45 +943,142 @@
   background: #484f58;
 }
 
-.sessionListItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 10px;
+/* Session Table Styles */
+.sessionTableContainer {
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  background: #0d1117;
+}
+
+.sessionTableContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sessionTableContainer::-webkit-scrollbar-track {
+  background: #0d1117;
+  border-radius: 3px;
+}
+
+.sessionTableContainer::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 3px;
+}
+
+.sessionTableContainer::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+.sessionTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.sessionTable thead {
+  background: #161b22;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.sessionTableHeader {
+  padding: 8px 6px;
+  text-align: left;
+  font-weight: 600;
+  color: #8b949e;
+  border-bottom: 1px solid #30363d;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.sessionTableRow {
   cursor: pointer;
   transition: background 0.15s;
   border-bottom: 1px solid #21262d;
 }
 
-.sessionListItem:last-child {
+.sessionTableRow:last-child {
   border-bottom: none;
 }
 
-.sessionListItem:hover {
+.sessionTableRow:hover {
   background: #21262d;
 }
 
-.sessionListItem.active {
+.sessionTableRowSelected {
   background: rgba(31, 111, 235, 0.2);
 }
 
-.sessionItemContent {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
+.sessionTableRowSelected:hover {
+  background: rgba(31, 111, 235, 0.3);
 }
 
-/* Active session indicator */
-.activeIndicator {
+.sessionTableCell {
+  padding: 8px 6px;
+  vertical-align: middle;
+}
+
+.sessionId {
+  font-family: "JetBrains Mono", monospace;
+  color: #58a6ff;
+  font-weight: 600;
+}
+
+.currentIndicator {
   color: #4CAF50;
-  font-size: 12px;
   margin-left: 4px;
-  animation: pulse 2s infinite;
+  font-weight: bold;
 }
 
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.statusThinking {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.statusTooling {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+}
+
+.statusStreaming {
+  background: rgba(167, 139, 250, 0.15);
+  color: #a78bfa;
+}
+
+.statusWaiting {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+}
+
+.statusError {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.statusIdle {
+  background: rgba(107, 114, 128, 0.15);
+  color: #6b7280;
+}
+
+.messageCount {
+  color: #c9d1d9;
+  font-weight: 500;
+}
+
+.relativeTime {
+  color: #8b949e;
+  font-size: 11px;
 }
