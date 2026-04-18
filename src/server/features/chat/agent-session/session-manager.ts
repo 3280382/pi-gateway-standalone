@@ -23,11 +23,37 @@ import type { LlmLogManager } from "../llm/log-manager";
 import { PiAgentSession } from "./piAgentSession";
 
 /**
+ * Extract short session ID from session file path
+ * Example: "/.../2026-04-17T08-26-10-585Z_019d9a8c-2b19-7345-94f5-5efedb498871.jsonl" -> "5efedb498871"
+ */
+export function extractShortSessionId(sessionFile: string): string {
+  if (!sessionFile) return "";
+  const fileName = sessionFile.split("/").pop() || "";
+  const withoutExt = fileName.replace(".jsonl", "");
+  const parts = withoutExt.split("_");
+  // Return the last part (UUID) or full name if no underscore
+  return parts[parts.length - 1] || fileName;
+}
+
+/**
+ * Session runtime status
+ */
+export type SessionRuntimeStatus = 
+  | "idle"        // 空闲，等待输入
+  | "thinking"    // AI 正在思考
+  | "tooling"     // 正在执行工具
+  | "streaming"   // 正在流式输出
+  | "waiting"     // 等待用户输入
+  | "error";      // 发生错误
+
+/**
  * Session entry in the server-level registry
  */
 interface SessionEntry {
   /** Session instance */
   session: PiAgentSession;
+  /** Short session ID (extracted from sessionFile) */
+  shortId: string;
   /** Current working directory */
   workingDir: string;
   /** Current session file path */
@@ -36,6 +62,8 @@ interface SessionEntry {
   client: WebSocket;
   /** Last activity timestamp */
   lastActivity: Date;
+  /** Current runtime status */
+  runtimeStatus: SessionRuntimeStatus;
 }
 
 /**
@@ -44,15 +72,81 @@ interface SessionEntry {
  */
 export class ServerSessionManager {
   private static instance: ServerSessionManager;
-  /** Maps sessionKey (workingDir + sessionFile) to session entry */
+  /** Maps shortId to session entry (PRIMARY KEY) */
   private sessions: Map<string, SessionEntry> = new Map();
-  /** Maps workingDir to sessionKey for quick lookup */
-  private workingDirToKeys: Map<string, Set<string>> = new Map();
-  /** Maps WebSocket to workingDir for quick lookup on disconnect */
-  private clientToWorkingDir: Map<WebSocket, string> = new Map();
+  /** Maps workingDir to Set of shortIds */
+  private workingDirToShortIds: Map<string, Set<string>> = new Map();
+  /** Maps WebSocket to shortId for quick lookup on disconnect */
+  private clientToShortId: Map<WebSocket, string> = new Map();
+  /** Maps sessionFile to shortId for file-based lookup */
+  private sessionFileToShortId: Map<string, string> = new Map();
   private llmLogManager: LlmLogManager | null = null;
+  private statusBroadcastInterval: NodeJS.Timeout | null = null;
 
-  private constructor() {}
+  private constructor() {
+    // Start runtime status broadcast timer
+    this.startStatusBroadcast();
+  }
+
+  /**
+   * Start periodic runtime status broadcast
+   */
+  private startStatusBroadcast(): void {
+    // Broadcast every 5 seconds
+    this.statusBroadcastInterval = setInterval(() => {
+      this.broadcastAllRuntimeStatus();
+    }, 5000);
+  }
+
+  /**
+   * Broadcast runtime status for all working directories
+   */
+  private broadcastAllRuntimeStatus(): void {
+    // Group sessions by workingDir
+    const workingDirMap = new Map<string, typeof this.sessions.values()>();
+    
+    for (const entry of this.sessions.values()) {
+      if (!workingDirMap.has(entry.workingDir)) {
+        workingDirMap.set(entry.workingDir, []);
+      }
+      workingDirMap.get(entry.workingDir)!.push(entry);
+    }
+
+    // Broadcast for each workingDir
+    for (const [workingDir, entries] of workingDirMap) {
+      const statusList = entries.map(entry => ({
+        shortId: entry.shortId,
+        status: entry.runtimeStatus,
+        hasClient: entry.client.readyState === WebSocket.OPEN,
+      }));
+
+      // Send to all clients in this working directory
+      for (const entry of entries) {
+        if (entry.client.readyState === WebSocket.OPEN) {
+          try {
+            entry.client.send(JSON.stringify({
+              type: "runtime_status_broadcast",
+              workingDir,
+              sessions: statusList,
+              timestamp: new Date().toISOString(),
+            }));
+          } catch (e) {
+            // Ignore send errors
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Stop status broadcast (for cleanup)
+   */
+  stopStatusBroadcast(): void {
+    if (this.statusBroadcastInterval) {
+      clearInterval(this.statusBroadcastInterval);
+      this.statusBroadcastInterval = null;
+    }
+  }
 
   /**
    * Get singleton instance
@@ -72,21 +166,43 @@ export class ServerSessionManager {
   }
 
   /**
-   * Generate unique session key from workingDir and sessionFile
+   * Get short ID from session file
    */
-  private getSessionKey(workingDir: string, sessionFile: string): string {
-    return `${workingDir}::${sessionFile}`;
+  private getShortId(sessionFile: string): string {
+    return extractShortSessionId(sessionFile);
+  }
+
+  /**
+   * Get session entry by short ID
+   */
+  getSessionByShortId(shortId: string): SessionEntry | undefined {
+    return this.sessions.get(shortId);
+  }
+
+  /**
+   * Get session entry by session file
+   */
+  getSessionByFile(sessionFile: string): SessionEntry | undefined {
+    const shortId = this.sessionFileToShortId.get(sessionFile);
+    if (shortId) {
+      return this.sessions.get(shortId);
+    }
+    // Fallback: search by sessionFile
+    for (const entry of this.sessions.values()) {
+      if (entry.sessionFile === sessionFile) {
+        return entry;
+      }
+    }
+    return undefined;
   }
 
   /**
    * Get or create a session for the given working directory and session file
    *
    * Architecture:
-   * - If session exists with same (workingDir, sessionFile): reuse PiAgentSession, reconnect
-   * - If session exists but different sessionFile: end old, create new
+   * - If session exists with same sessionFile: reuse PiAgentSession, reconnect
    * - If no session: create new one
-   *
-   * Key principle: Session identity = workingDir + sessionFile (both must match to reuse)
+   * - Primary key: shortId (extracted from sessionFile)
    *
    * @param workingDir Working directory
    * @param client WebSocket client
@@ -98,28 +214,21 @@ export class ServerSessionManager {
     client: WebSocket,
     sessionFile?: string
   ): Promise<PiAgentSession> {
-    // Generate session key (if no sessionFile provided, use workingDir only for backward compatibility)
-    const sessionKey = sessionFile ? this.getSessionKey(workingDir, sessionFile) : workingDir;
+    // Determine actual session file
+    const actualSessionFile = sessionFile || await this.findMostRecentSessionFile(workingDir);
+    const shortId = this.getShortId(actualSessionFile);
 
-    // Check if there's an existing session for this workingDir with different sessionFile
-    // Allow multiple sessions per workingDir - comment out disposal logic
-    // const existingKeyForDir = this.workingDirToKey.get(workingDir);
-    // if (existingKeyForDir && existingKeyForDir !== sessionKey) {
-    //   // Different session file for same workingDir - dispose old session
-    //   console.log(
-    //     `[ServerSessionManager] Different sessionFile for same workingDir, disposing old session: ${workingDir}`
-    //   );
-    //   this.disposeSessionByKey(existingKeyForDir);
-    // }
+    console.log(
+      `[ServerSessionManager] getOrCreateSession: workingDir=${workingDir}, shortId=${shortId}, sessionFile=${actualSessionFile}`
+    );
 
-    const existingEntry = this.sessions.get(sessionKey);
+    const existingEntry = this.sessions.get(shortId);
 
     if (existingEntry) {
       const { client: existingClient, session, sessionFile: existingSessionFile } = existingEntry;
 
-      // Both workingDir and sessionFile match - reuse existing PiAgentSession
       console.log(
-        `[ServerSessionManager] Reusing existing session: ${workingDir} + ${existingSessionFile}`
+        `[ServerSessionManager] Reusing existing session: shortId=${shortId}`
       );
 
       // Notify old client that it's being replaced (if different client)
@@ -129,8 +238,8 @@ export class ServerSessionManager {
             JSON.stringify({
               type: "session_replaced",
               message: "Another client has taken over this session",
+              shortId,
               workingDir,
-              sessionFile: existingSessionFile,
             })
           );
         } catch (e) {
@@ -139,25 +248,26 @@ export class ServerSessionManager {
       }
 
       // Remove old client mapping
-      this.clientToWorkingDir.delete(existingClient);
+      this.clientToShortId.delete(existingClient);
 
-      // Reconnect session with new WebSocket (完整的重新连接逻辑)
+      // Reconnect session with new WebSocket
       session.reconnect(client);
 
       // Update entry with new client
       existingEntry.client = client;
       existingEntry.lastActivity = new Date();
+      existingEntry.runtimeStatus = "idle";
 
       // Update reverse mapping
-      this.clientToWorkingDir.set(client, workingDir);
+      this.clientToShortId.set(client, shortId);
 
-      console.log(`[ServerSessionManager] Session reused with new WebSocket: ${sessionKey}`);
+      console.log(`[ServerSessionManager] Session reused: shortId=${shortId}`);
       return session;
     }
 
     // Create new session
     console.log(
-      `[ServerSessionManager] Creating new session: ${workingDir}${sessionFile ? " + " + sessionFile : ""}`
+      `[ServerSessionManager] Creating new session: shortId=${shortId}`
     );
 
     if (!this.llmLogManager) {
@@ -171,27 +281,29 @@ export class ServerSessionManager {
     const actualSessionFile = sessionFile || (await this.findMostRecentSessionFile(workingDir));
     await session.initialize(workingDir, actualSessionFile);
 
-    // Register session
-    const newSessionKey = this.getSessionKey(workingDir, actualSessionFile);
-    this.sessions.set(newSessionKey, {
+    // Register session with shortId as primary key
+    this.sessions.set(shortId, {
       session,
+      shortId,
       workingDir,
       sessionFile: actualSessionFile,
       client,
       lastActivity: new Date(),
+      runtimeStatus: "idle",
     });
 
-    // Update lookup maps (using workingDirToKeys for multi-session support)
-    // this.workingDirToKey.set(workingDir, newSessionKey);  // Old single-session mapping
-    if (!this.workingDirToKeys.has(workingDir)) {
-      this.workingDirToKeys.set(workingDir, new Set());
+    // Update lookup maps
+    this.sessionFileToShortId.set(actualSessionFile, shortId);
+    
+    if (!this.workingDirToShortIds.has(workingDir)) {
+      this.workingDirToShortIds.set(workingDir, new Set());
     }
-    this.workingDirToKeys.get(workingDir)!.add(newSessionKey);
+    this.workingDirToShortIds.get(workingDir)!.add(shortId);
 
     // Update reverse mapping
-    this.clientToWorkingDir.set(client, workingDir);
+    this.clientToShortId.set(client, shortId);
 
-    console.log(`[ServerSessionManager] Session created and registered: ${newSessionKey}`);
+    console.log(`[ServerSessionManager] Session created: shortId=${shortId}`);
     return session;
   }
 
@@ -234,22 +346,16 @@ export class ServerSessionManager {
     client: WebSocket,
     newSessionFile?: string
   ): Promise<PiAgentSession> {
+    const newShortId = newSessionFile ? this.getShortId(newSessionFile) : "auto";
     console.log(
-      `[ServerSessionManager] Switching session from ${currentWorkingDir} to ${newWorkingDir}${newSessionFile ? " + " + newSessionFile : ""}`
+      `[ServerSessionManager] Switching session: from ${currentWorkingDir} to ${newWorkingDir}, shortId=${newShortId}`
     );
 
     // End current session for this client
-    // Find the current session by client (not by workingDir, as there may be multiple)
-    let currentKeyToDispose: string | null = null;
-    this.sessions.forEach((entry, sessionKey) => {
-      if (entry.client === client) {
-        currentKeyToDispose = sessionKey;
-      }
-    });
-    
-    if (currentKeyToDispose) {
-      console.log(`[ServerSessionManager] Ending old session: ${currentKeyToDispose}`);
-      this.disposeSessionByKey(currentKeyToDispose);
+    const currentShortId = this.clientToShortId.get(client);
+    if (currentShortId) {
+      console.log(`[ServerSessionManager] Ending old session: shortId=${currentShortId}`);
+      this.disposeSessionByShortId(currentShortId);
     }
 
     // Get or create session for new working directory
@@ -259,73 +365,59 @@ export class ServerSessionManager {
   /**
    * Disconnect a client from a session
    * Does not dispose the session - keeps it for potential reconnection
-   * Pi continues running in the background
    *
-   * @param workingDir Working directory
+   * @param shortId Short session ID
    * @param client WebSocket client
    */
-  disconnectClient(workingDir: string, client: WebSocket): void {
-    // Find the session for this client (there may be multiple sessions per workingDir)
-    let targetSessionKey: string | null = null;
-    let targetEntry: SessionEntry | null = null;
-    
-    this.sessions.forEach((entry, sessionKey) => {
-      if (entry.workingDir === workingDir && entry.client === client) {
-        targetSessionKey = sessionKey;
-        targetEntry = entry;
-      }
-    });
-    
-    if (!targetSessionKey || !targetEntry) return;
+  disconnectClient(shortId: string, client: WebSocket): void {
+    const entry = this.sessions.get(shortId);
+    if (!entry || entry.client !== client) return;
 
     console.log(
-      `[ServerSessionManager] Client disconnected from: ${workingDir} + ${targetEntry.sessionFile}`
+      `[ServerSessionManager] Client disconnected: shortId=${shortId}`
     );
     console.log(`[ServerSessionManager] Session preserved, Pi continues in background`);
 
-    // Mark WebSocket as disconnected (but don't dispose session)
-    // Pi continues executing, events will be dropped until reconnection
-
     // Unsubscribe event handlers to prevent memory leaks
-    // Note: We unsubscribe here, but reconnect() will re-subscribe
-    if (targetEntry.session.unsubscribeFn) {
-      targetEntry.session.unsubscribeFn();
-      targetEntry.session.unsubscribeFn = null;
+    if (entry.session.unsubscribeFn) {
+      entry.session.unsubscribeFn();
+      entry.session.unsubscribeFn = null;
     }
 
     // Remove reverse mapping
-    this.clientToWorkingDir.delete(client);
+    this.clientToShortId.delete(client);
 
     // Note: We keep the entry in this.sessions so it can be reconnected
-    // The entry.session.ws still points to the old closed WebSocket
-    // When reconnect() is called, it will be updated to the new WebSocket
   }
 
   /**
-   * Dispose a session by key and cleanup resources
+   * Dispose a session by short ID and cleanup resources
    *
-   * @param sessionKey Session key (workingDir::sessionFile)
+   * @param shortId Short session ID
    */
-  private disposeSessionByKey(sessionKey: string): void {
-    const entry = this.sessions.get(sessionKey);
+  private disposeSessionByShortId(shortId: string): void {
+    const entry = this.sessions.get(shortId);
     if (entry) {
-      console.log(`[ServerSessionManager] Disposing session: ${sessionKey}`);
+      console.log(`[ServerSessionManager] Disposing session: shortId=${shortId}`);
 
       // Remove reverse mapping
-      this.clientToWorkingDir.delete(entry.client);
+      this.clientToShortId.delete(entry.client);
 
       // Remove workingDir lookup
-      const sessionKeys = this.workingDirToKeys.get(entry.workingDir);
-      if (sessionKeys) {
-        sessionKeys.delete(sessionKey);
-        if (sessionKeys.size === 0) {
-          this.workingDirToKeys.delete(entry.workingDir);
+      const shortIds = this.workingDirToShortIds.get(entry.workingDir);
+      if (shortIds) {
+        shortIds.delete(shortId);
+        if (shortIds.size === 0) {
+          this.workingDirToShortIds.delete(entry.workingDir);
         }
       }
 
+      // Remove session file mapping
+      this.sessionFileToShortId.delete(entry.sessionFile);
+
       // Dispose session
       entry.session.dispose();
-      this.sessions.delete(sessionKey);
+      this.sessions.delete(shortId);
     }
   }
 
@@ -336,46 +428,43 @@ export class ServerSessionManager {
    */
   private disposeSession(workingDir: string): void {
     // Find and dispose the first session for this workingDir
-    // (For backward compatibility, in multi-session mode we only dispose one)
-    let sessionKeyToDispose: string | null = null;
-    this.sessions.forEach((entry, sessionKey) => {
-      if (!sessionKeyToDispose && entry.workingDir === workingDir) {
-        sessionKeyToDispose = sessionKey;
+    for (const [shortId, entry] of this.sessions) {
+      if (entry.workingDir === workingDir) {
+        this.disposeSessionByShortId(shortId);
+        break;
       }
-    });
-    
-    if (sessionKeyToDispose) {
-      this.disposeSessionByKey(sessionKeyToDispose);
     }
   }
 
   /**
-   * Get session for a working directory
+   * Get session for a working directory (returns first match)
    *
    * @param workingDir Working directory
    * @returns Session entry or undefined
    */
   getSession(workingDir: string): SessionEntry | undefined {
-    // Traverse to find the first matching session (simplified for multi-session support)
-    let foundEntry: SessionEntry | undefined = undefined;
-    this.sessions.forEach((entry, sessionKey) => {
-      if (!foundEntry && entry.workingDir === workingDir) {
-        foundEntry = entry;
+    for (const entry of this.sessions.values()) {
+      if (entry.workingDir === workingDir) {
+        return entry;
       }
-    });
-    return foundEntry;
+    }
+    return undefined;
   }
 
   /**
-   * Get session by working directory and session file
+   * Get all sessions for a working directory
    *
    * @param workingDir Working directory
-   * @param sessionFile Session file path
-   * @returns Session entry or undefined
+   * @returns Array of session entries
    */
-  getSessionByFile(workingDir: string, sessionFile: string): SessionEntry | undefined {
-    const sessionKey = this.getSessionKey(workingDir, sessionFile);
-    return this.sessions.get(sessionKey);
+  getSessionsByWorkingDir(workingDir: string): SessionEntry[] {
+    const result: SessionEntry[] = [];
+    for (const entry of this.sessions.values()) {
+      if (entry.workingDir === workingDir) {
+        result.push(entry);
+      }
+    }
+    return result;
   }
 
   /**
@@ -385,48 +474,49 @@ export class ServerSessionManager {
    * @returns True if session exists
    */
   hasSession(workingDir: string): boolean {
-    // Check if any session exists for this workingDir
-    let hasActiveSession = false;
-    this.sessions.forEach((entry, sessionKey) => {
+    for (const entry of this.sessions.values()) {
       if (entry.workingDir === workingDir && entry.session.session) {
-        hasActiveSession = true;
+        return true;
       }
-    });
-    return hasActiveSession;
+    }
+    return false;
   }
 
   /**
-   * Get all active sessions
+   * Get all active sessions with runtime status
    *
    * @returns Array of session info
    */
   getAllSessions(): Array<{
+    shortId: string;
     workingDir: string;
     sessionFile: string;
     hasClient: boolean;
     lastActivity: Date;
+    runtimeStatus: SessionRuntimeStatus;
   }> {
-    return Array.from(this.sessions.entries()).map(([sessionKey, entry]) => ({
+    return Array.from(this.sessions.entries()).map(([shortId, entry]) => ({
+      shortId,
       workingDir: entry.workingDir,
       sessionFile: entry.sessionFile,
       hasClient: entry.client.readyState === WebSocket.OPEN,
       lastActivity: entry.lastActivity,
+      runtimeStatus: entry.runtimeStatus,
     }));
   }
 
   /**
    * End a specific session (for explicit session termination)
    *
-   * @param workingDir Working directory
+   * @param shortId Short session ID
    */
-  endSession(workingDir: string): void {
-    console.log(`[ServerSessionManager] Explicitly ending session: ${workingDir}`);
-    this.disposeSession(workingDir);
+  endSession(shortId: string): void {
+    console.log(`[ServerSessionManager] Explicitly ending session: shortId=${shortId}`);
+    this.disposeSessionByShortId(shortId);
   }
 
   /**
    * Register a newly created session (used by new-session handler)
-   * This is different from getOrCreateSession as it always registers a fresh session
    *
    * @param workingDir Working directory
    * @param client WebSocket client
@@ -439,18 +529,13 @@ export class ServerSessionManager {
     session: PiAgentSession,
     sessionFile: string
   ): void {
-    const sessionKey = this.getSessionKey(workingDir, sessionFile);
-    console.log(`[ServerSessionManager] Registering new session: ${sessionKey}`);
+    const shortId = this.getShortId(sessionFile);
+    console.log(`[ServerSessionManager] Registering new session: shortId=${shortId}`);
 
-    // Allow multiple sessions per workingDir - don't dispose existing ones
-    // const existingKey = this.workingDirToKey.get(workingDir);
-    // if (existingKey) {
-    //   this.disposeSessionByKey(existingKey);
-    // }
-
-    // Register new session
-    this.sessions.set(sessionKey, {
+    // Register new session with shortId
+    this.sessions.set(shortId, {
       session,
+      shortId,
       workingDir,
       sessionFile,
       client,
@@ -458,15 +543,17 @@ export class ServerSessionManager {
     });
 
     // Update lookup maps
-    if (!this.workingDirToKeys.has(workingDir)) {
-      this.workingDirToKeys.set(workingDir, new Set());
+    this.sessionFileToShortId.set(sessionFile, shortId);
+    
+    if (!this.workingDirToShortIds.has(workingDir)) {
+      this.workingDirToShortIds.set(workingDir, new Set());
     }
-    this.workingDirToKeys.get(workingDir)!.add(sessionKey);
+    this.workingDirToShortIds.get(workingDir)!.add(shortId);
 
     // Update reverse mapping
-    this.clientToWorkingDir.set(client, workingDir);
+    this.clientToShortId.set(client, shortId);
 
-    console.log(`[ServerSessionManager] New session registered: ${sessionKey}`);
+    console.log(`[ServerSessionManager] New session registered: shortId=${shortId}`);
   }
 
   /**
@@ -476,31 +563,74 @@ export class ServerSessionManager {
    * @returns Working directory or undefined
    */
   getWorkingDirForClient(client: WebSocket): string | undefined {
-    return this.clientToWorkingDir.get(client);
+    const shortId = this.clientToShortId.get(client);
+    if (shortId) {
+      const entry = this.sessions.get(shortId);
+      return entry?.workingDir;
+    }
+    return undefined;
   }
 
   /**
-   * Get all active sessions for a working directory
-   * For HTTP API to show active session status
+   * Get short ID for a client
+   *
+   * @param client WebSocket client
+   * @returns Short session ID or undefined
+   */
+  getShortIdForClient(client: WebSocket): string | undefined {
+    return this.clientToShortId.get(client);
+  }
+
+  /**
+   * Update runtime status for a session
+   *
+   * @param shortId Short session ID
+   * @param status New runtime status
+   */
+  updateRuntimeStatus(shortId: string, status: SessionRuntimeStatus): void {
+    const entry = this.sessions.get(shortId);
+    if (entry) {
+      entry.runtimeStatus = status;
+      entry.lastActivity = new Date();
+    }
+  }
+
+  /**
+   * Get runtime status for a session
+   *
+   * @param shortId Short session ID
+   * @returns Runtime status or undefined
+   */
+  getRuntimeStatus(shortId: string): SessionRuntimeStatus | undefined {
+    return this.sessions.get(shortId)?.runtimeStatus;
+  }
+
+  /**
+   * Broadcast runtime status to all clients in a working directory
    *
    * @param workingDir Working directory
-   * @returns Array of active session info
    */
-  getActiveSessions(workingDir: string): Array<{
-    sessionFile: string;
-    isActive: boolean;
-  }> {
-    const result = [];
-    // Use forEach to avoid iterator issues
-    this.sessions.forEach((entry, sessionKey) => {
-      if (entry.workingDir === workingDir) {
-        result.push({
-          sessionFile: entry.sessionFile,
-          isActive: entry.client.readyState === WebSocket.OPEN,
-        });
+  broadcastRuntimeStatus(workingDir: string): void {
+    const sessions = this.getSessionsByWorkingDir(workingDir);
+    const statusList = sessions.map(entry => ({
+      shortId: entry.shortId,
+      status: entry.runtimeStatus,
+      hasClient: entry.client.readyState === WebSocket.OPEN,
+    }));
+
+    // Send to all clients in this working directory
+    sessions.forEach(entry => {
+      if (entry.client.readyState === WebSocket.OPEN) {
+        try {
+          entry.client.send(JSON.stringify({
+            type: "runtime_status_broadcast",
+            sessions: statusList,
+          }));
+        } catch (e) {
+          // Ignore send errors
+        }
       }
     });
-    return result;
   }
 }
 

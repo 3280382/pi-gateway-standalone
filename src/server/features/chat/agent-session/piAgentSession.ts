@@ -99,6 +99,15 @@ export class PiAgentSession {
   /** Track if message_start has been sent for current message */
   private messageStarted: boolean = false;
 
+  /** Short session ID */
+  shortId: string = "";
+
+  /** Current runtime status */
+  runtimeStatus: "idle" | "thinking" | "tooling" | "streaming" | "waiting" | "error" = "idle";
+
+  /** Active tool execution tracking */
+  private activeToolExecution: { toolCallId: string; toolName: string; startTime: Date } | null = null;
+
   /**
    * Create new PiAgentSession
    * @param ws WebSocket connection
@@ -110,6 +119,25 @@ export class PiAgentSession {
     this.authStorage = AuthStorage.create();
     this.modelRegistry = new ModelRegistry(this.authStorage, "/root/.pi/agent/models.json");
     this.settingsManager = SettingsManager.create();
+  }
+
+  /**
+   * Update runtime status and notify session manager
+   */
+  private updateRuntimeStatus(status: typeof this.runtimeStatus): void {
+    this.runtimeStatus = status;
+    // Notify session manager to broadcast status
+    const { serverSessionManager } = require("./session-manager");
+    if (this.shortId) {
+      serverSessionManager.updateRuntimeStatus(this.shortId, status);
+    }
+  }
+
+  /**
+   * Get current runtime status
+   */
+  getRuntimeStatus(): typeof this.runtimeStatus {
+    return this.runtimeStatus;
   }
 
   /**
@@ -241,8 +269,13 @@ export class PiAgentSession {
     this.session = session;
     this.setupEventHandlers();
 
+    // Set short ID from session file
+    const { extractShortSessionId } = require("./session-manager");
+    this.shortId = extractShortSessionId(session.sessionFile);
+    this.updateRuntimeStatus("idle");
+
     console.log(
-      `[Gateway] Session created: sessionId=${session.sessionId}, sessionFile=${session.sessionFile}`
+      `[Gateway] Session created: shortId=${this.shortId}, sessionId=${session.sessionId}, sessionFile=${session.sessionFile}`
     );
 
     // Check if session has model setting, if not set default model
@@ -419,12 +452,14 @@ export class PiAgentSession {
         // Turn 边界 - 表示 Pi coding agent 的一个回合开始/结束
         case "turn_start": {
           console.log(`[${timestamp}] [SEND] turn_start`);
+          this.updateRuntimeStatus("thinking");
           this.send({ type: "turn_start" });
           break;
         }
 
         case "turn_end": {
           console.log(`[${timestamp}] [SEND] turn_end`);
+          this.updateRuntimeStatus("idle");
           this.send({ type: "turn_end" });
           break;
         }
@@ -465,6 +500,7 @@ export class PiAgentSession {
                 type: "thinking",
                 index: contentIndex,
               };
+              this.updateRuntimeStatus("thinking");
               this.send({ type: "thinking_start", index: contentIndex });
               break;
             }
@@ -552,6 +588,12 @@ export class PiAgentSession {
 
         // Tool 实际执行事件
         case "tool_execution_start": {
+          this.activeToolExecution = {
+            toolCallId: event.toolCallId,
+            toolName: event.toolName,
+            startTime: new Date(),
+          };
+          this.updateRuntimeStatus("tooling");
           this.send({
             type: "tool_execution_start",
             toolCallId: event.toolCallId,
@@ -562,6 +604,7 @@ export class PiAgentSession {
         }
 
         case "tool_execution_end": {
+          this.activeToolExecution = null;
           const toolResult = event.result;
           const toolName = event.toolName;
           const isWriteOperation =
