@@ -81,7 +81,17 @@ export class Config {
     const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
     const host = process.env.HOST || "127.0.0.1";
 
-    const rootDir = path.resolve(__dirname, "../..");
+    // Find project root - check multiple possible locations
+    let rootDir = path.resolve(__dirname, "../..");
+    // If we're in src/server/config, go up one more level
+    if (!existsSync(path.join(rootDir, "package.json"))) {
+      rootDir = path.resolve(__dirname, "../../..");
+    }
+    // Fallback to process.cwd() if still not found
+    if (!existsSync(path.join(rootDir, "package.json"))) {
+      rootDir = process.cwd();
+    }
+
     // Use dist folder if it exists (built frontend), otherwise fall back to public
     const distDir = path.join(rootDir, "dist");
     const publicDir = path.join(rootDir, "public");

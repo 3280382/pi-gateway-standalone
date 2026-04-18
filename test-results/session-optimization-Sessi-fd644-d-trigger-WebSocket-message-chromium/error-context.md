@@ -1,0 +1,528 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - main [ref=e4]:
+      - generic [ref=e6]:
+        - generic [ref=e8]:
+          - button "/root" [ref=e10] [cursor=pointer]:
+            - img [ref=e11]
+            - generic [ref=e13]: /root
+          - generic [ref=e14]:
+            - generic [ref=e15]:
+              - img
+              - textbox "Search messages..." [ref=e16]
+              - button "8" [ref=e17] [cursor=pointer]:
+                - img [ref=e18]
+                - generic [ref=e20]: "8"
+            - 'generic "connected (PID: 4468)" [ref=e21]':
+              - generic [ref=e23]: "4468"
+        - main [ref=e25]:
+          - generic [ref=e26]:
+            - generic [ref=e28]:
+              - generic [ref=e30]: 你好。
+              - generic [ref=e31]:
+                - generic [ref=e33] [cursor=pointer]:
+                  - generic [ref=e35]: Thinking
+                  - generic [ref=e37]: +
+                - generic [ref=e38]:
+                  - generic [ref=e41]: Assistant
+                  - generic [ref=e43]:
+                    - generic [ref=e44]: 你好！👋 很高兴见到你。我是你的编程助手，可以帮助你：
+                    - generic [ref=e45]: "- 编写、编辑和调试代码"
+                    - generic [ref=e46]: "- 读取和分析文件"
+                    - generic [ref=e47]: "- 执行命令和脚本"
+                    - generic [ref=e48]: "- 创建各种文档（Word、Excel、PPT、PDF 等）"
+                    - generic [ref=e49]: "- 搜索网页和研究主题"
+                    - generic [ref=e50]: "- 构建网页应用和可视化"
+                    - generic [ref=e51]: "- 管理邮箱（QQ邮箱）"
+                    - generic [ref=e52]: 有什么我可以帮你的吗？
+              - generic [ref=e54]: Hi, just testing.
+              - generic [ref=e55]:
+                - generic [ref=e57] [cursor=pointer]:
+                  - generic [ref=e59]: Thinking
+                  - generic [ref=e61]: +
+                - generic [ref=e62]:
+                  - generic [ref=e65]: Assistant
+                  - generic [ref=e67]:
+                    - generic [ref=e68]: Hello! 👋 Testing received loud and clear. Everything's working on my end.
+                    - generic [ref=e69]: Let me know if you need any help with coding, file management, research, or anything else!
+              - generic [ref=e71]: Hi.
+              - generic [ref=e72]:
+                - generic [ref=e74] [cursor=pointer]:
+                  - generic [ref=e76]: Thinking
+                  - generic [ref=e78]: +
+                - generic [ref=e79]:
+                  - generic [ref=e82]: Assistant
+                  - generic [ref=e84]:
+                    - generic [ref=e85]: Hello! 👋
+                    - generic [ref=e86]: How can I help you today?
+              - generic [ref=e88]: 习惯了。
+              - generic [ref=e89]:
+                - generic [ref=e91] [cursor=pointer]:
+                  - generic [ref=e93]: Thinking
+                  - generic [ref=e95]: +
+                - generic [ref=e96]:
+                  - generic [ref=e99]: Assistant
+                  - generic [ref=e101]:
+                    - generic [ref=e102]: 哈哈，明白 👋
+                    - generic [ref=e103]: 有什么我可以帮你的吗？比如：
+                    - generic [ref=e104]: "- 写代码或调试程序"
+                    - generic [ref=e105]: "- 处理文件（Excel、Word、PDF 等）"
+                    - generic [ref=e106]: "- 搜索信息或研究某个话题"
+                    - generic [ref=e107]: "- 搭建网站或 Web 应用"
+                    - generic [ref=e108]: "- 其他任何事情"
+                    - generic [ref=e109]: 随时告诉我你需要什么！
+              - generic [ref=e111]: 你好。
+              - generic [ref=e112]:
+                - generic [ref=e114] [cursor=pointer]:
+                  - generic [ref=e116]: Thinking
+                  - generic [ref=e118]: +
+                - generic [ref=e119]:
+                  - generic [ref=e122]: Assistant
+                  - generic [ref=e124]:
+                    - generic [ref=e125]: 你好！👋 又见面了。
+                    - generic [ref=e126]: 今天有什么我可以帮你的吗？无论是技术问题、文件处理，还是其他需求，我都在这里。
+              - generic [ref=e128]: What can I do for you?
+              - generic [ref=e129]:
+                - generic [ref=e131] [cursor=pointer]:
+                  - generic [ref=e133]: Thinking
+                  - generic [ref=e135]: +
+                - generic [ref=e136]:
+                  - generic [ref=e139]: Assistant
+                  - generic [ref=e141]:
+                    - generic [ref=e142]: Haha, I think you might have that backwards! 😄
+                    - generic [ref=e143]:
+                      - text: I'm the assistant here - I'm here to help
+                      - strong [ref=e144]: you
+                      - text: "! But if you're offering, here's what would help me help you better:"
+                    - generic [ref=e145]:
+                      - text: "1."
+                      - strong [ref=e146]: Tell me what you need
+                      - text: "- Code, documents, research, web apps, data analysis?"
+                    - generic [ref=e147]:
+                      - text: "2."
+                      - strong [ref=e148]: Provide context
+                      - text: "- What are you working on? What have you tried?"
+                    - generic [ref=e149]:
+                      - text: "3."
+                      - strong [ref=e150]: Share files
+                      - text: "- Got code, docs, or data you need help with?"
+                    - generic [ref=e151]:
+                      - text: "4."
+                      - strong [ref=e152]: Ask questions
+                      - text: "- Even vague \"I'm not sure what's possible\" questions are welcome!"
+                    - generic [ref=e153]: So... what brings you here today?
+              - generic [ref=e155]:
+                - generic [ref=e158]: Assistant
+                - generic [ref=e160]:
+                  - generic [ref=e161]: "🗜️ 上下文压缩: ## Goal"
+                  - generic [ref=e162]: Session initialization - awaiting user requirements and objectives.
+                  - generic [ref=e163]: "## Constraints & Preferences"
+                  - generic [ref=e164]: "- (none)"
+                  - generic [ref=e165]: "## Progress"
+                  - generic [ref=e166]: "### Done"
+                  - generic [ref=e167]: "- (none)"
+                  - generic [ref=e168]: "### In Progress"
+                  - generic [ref=e169]: "- [ ] Establishing session context and user objectives"
+                  - generic [ref=e170]: "### Blocked"
+                  - generic [ref=e171]: "- (none)"
+                  - generic [ref=e172]: "## Key Decisions"
+                  - generic [ref=e173]: "- (none)"
+                  - generic [ref=e174]: "## Next Steps"
+                  - generic [ref=e175]: 1. User to provide initial requirements, coding tasks, or questions
+                  - generic [ref=e176]: 2. Clarify project context, technology stack, and specific goals
+                  - generic [ref=e177]: 3. Establish any constraints, preferences, or architectural decisions
+                  - generic [ref=e178]: "## Critical Context"
+                  - generic [ref=e179]: "- (none) (释放约 5351 tokens)"
+              - generic [ref=e181]: What's wrong with you?
+              - generic [ref=e182]:
+                - generic [ref=e184] [cursor=pointer]:
+                  - generic [ref=e186]: Thinking
+                  - generic [ref=e188]: +
+                - generic [ref=e189]:
+                  - generic [ref=e192]: Assistant
+                  - generic [ref=e194]:
+                    - generic [ref=e195]: Nothing's wrong with me! 😄 I'm functioning normally and ready to help.
+                    - generic [ref=e196]: Were you expecting a different kind of response, or is there something specific you'd like assistance with? I'm all ears!
+              - generic [ref=e198]:
+                - generic [ref=e201]: Assistant
+                - generic [ref=e204]: "🧠 思考级别已设置为: off"
+              - generic [ref=e206]:
+                - generic [ref=e209]: Assistant
+                - generic [ref=e212]: "🧠 思考级别已设置为: minimal"
+              - generic [ref=e214]:
+                - generic [ref=e217]: Assistant
+                - generic [ref=e220]: "🤖 模型已切换为: ollama/llama3.2:1b"
+              - generic [ref=e222]:
+                - generic [ref=e225]: Assistant
+                - generic [ref=e228]: "🧠 思考级别已设置为: off"
+              - generic [ref=e230]: stop ollama server
+              - generic [ref=e232]:
+                - generic [ref=e235]: Assistant
+                - generic [ref=e238]: "🧠 思考级别已设置为: off"
+              - generic [ref=e240]: stop ollama server
+              - generic [ref=e242]:
+                - generic [ref=e245]: Assistant
+                - generic [ref=e247]:
+                  - generic [ref=e248]: "🗜️ 上下文压缩: ## Goal"
+                  - generic [ref=e249]: The conversation will continue to assess the user's requirement for summarization.
+                  - generic [ref=e250]: "## Constraints & Preferences"
+                  - generic [ref=e251]: No specific constraints or preferences were mentioned.
+                  - generic [ref=e252]: "### Progress"
+                  - generic [ref=e253]: "#### New Items:"
+                  - generic [ref=e254]: "- The conversation continues assessing the user's requirement."
+                  - generic [ref=e255]: "#### Done"
+                  - generic [ref=e256]: "-"
+                  - generic [ref=e257]: "### In Progress"
+                  - generic [ref=e258]: "- Nothing is mentioned specifically related to current work or progress in the conversation."
+                  - generic [ref=e259]: "## Key Decisions"
+                  - generic [ref=e260]: "- There are no explicit decisions discussed in this conversation, but it appears the conversation remains focused on assessing the user's requirements."
+                  - generic [ref=e261]: "## Critical Context"
+                  - generic [ref=e262]: The conversation does not directly reference any external data or context that would need further understanding for continuation.
+                  - generic [ref=e263]: "## Additional context:"
+                  - generic [ref=e264]: Given no new messages yet from the end-user, proceed with determining the next steps and deciding if clarification is needed to fulfill the request for summarization.
+                  - generic [ref=e265]: "## Next Steps"
+                  - generic [ref=e266]: "1. Clarify Requirements: The conversation proceeds by acknowledging an unresolved requirement."
+                  - generic [ref=e267]: "## Critical Context"
+                  - generic [ref=e268]: No additional critical context is available since the message simply accepts that no new information has been provided from the end-user.
+                  - generic [ref=e269]: Keep each section concise. Preserve exact file paths, function names, and error messages.
+                  - generic [ref=e270]: The conversation remains entirely within the given initial message and has concluded without any change to the summary sections or additions of meaningful data. (释放约 196 tokens)
+              - generic [ref=e273] [cursor=pointer]:
+                - generic [ref=e275]: read
+                - generic [ref=e276]: "content: {\"limit\": 5000, \"offset\":..."
+                - generic [ref=e277]: error
+                - generic [ref=e279]: +
+              - generic [ref=e281]:
+                - generic [ref=e284]: Assistant
+                - generic [ref=e286]:
+                  - generic [ref=e287]: "🗜️ 上下文压缩: ## Goal"
+                  - generic [ref=e288]: "### New task: Establishing session context and user objectives with user - provide initial requirements, coding tasks, or questions."
+                  - generic [ref=e289]: "## Constraints & Preferences"
+                  - generic [ref=e290]: "- No specific constraints or preferences mentioned in the conversation to add to this summary."
+                  - generic [ref=e291]: "## Progress"
+                  - generic [ref=e292]: "### Done"
+                  - generic [ref=e293]: "- [ ] Established session context and user objectives (1 step completed). The conversation started without any issues, so the progress is complete."
+                  - generic [ref=e294]: "### In Progress"
+                  - generic [ref=e295]: "- Establishing session context and user objectives. This section can be updated as more information becomes available in future messages."
+                  - generic [ref=e296]: "### Blocked"
+                  - generic [ref=e297]: "- No current blockers mentioned, so [none] (释放约 4194 tokens)"
+              - generic [ref=e299]:
+                - generic [ref=e302]: Assistant
+                - generic [ref=e305]: "🧠 思考级别已设置为: off"
+              - generic [ref=e307]:
+                - generic [ref=e310]: Assistant
+                - generic [ref=e313]: "🧠 思考级别已设置为: off"
+              - generic [ref=e315]:
+                - generic [ref=e318]: Assistant
+                - generic [ref=e321]: "🧠 思考级别已设置为: off"
+              - generic [ref=e323]:
+                - generic [ref=e326]: Assistant
+                - generic [ref=e329]: "🧠 思考级别已设置为: off"
+              - generic [ref=e331]:
+                - generic [ref=e334]: Assistant
+                - generic [ref=e337]: "🧠 思考级别已设置为: off"
+              - generic [ref=e339]:
+                - generic [ref=e342]: Assistant
+                - generic [ref=e345]: "🧠 思考级别已设置为: off"
+              - generic [ref=e347]:
+                - generic [ref=e350]: Assistant
+                - generic [ref=e353]: "🧠 思考级别已设置为: off"
+              - generic [ref=e355]:
+                - generic [ref=e358]: Assistant
+                - generic [ref=e361]: "🧠 思考级别已设置为: off"
+              - generic [ref=e363]:
+                - generic [ref=e366]: Assistant
+                - generic [ref=e369]: "🧠 思考级别已设置为: off"
+              - generic [ref=e371]:
+                - generic [ref=e374]: Assistant
+                - generic [ref=e377]: "🧠 思考级别已设置为: off"
+              - generic [ref=e379]:
+                - generic [ref=e382]: Assistant
+                - generic [ref=e385]: "🧠 思考级别已设置为: off"
+              - generic [ref=e387]:
+                - generic [ref=e390]: Assistant
+                - generic [ref=e393]: "🧠 思考级别已设置为: off"
+              - generic [ref=e395]:
+                - generic [ref=e398]: Assistant
+                - generic [ref=e401]: "🧠 思考级别已设置为: off"
+              - generic [ref=e403]:
+                - generic [ref=e406]: Assistant
+                - generic [ref=e409]: "🧠 思考级别已设置为: off"
+              - generic [ref=e411]:
+                - generic [ref=e414]: Assistant
+                - generic [ref=e417]: "🧠 思考级别已设置为: off"
+              - generic [ref=e419]: hi
+              - generic [ref=e421]: go
+              - generic [ref=e423]: hi
+              - generic [ref=e425]:
+                - generic [ref=e428]: Assistant
+                - generic [ref=e431]: "🧠 思考级别已设置为: off"
+              - generic [ref=e433]:
+                - generic [ref=e436]: Assistant
+                - generic [ref=e439]: "🧠 思考级别已设置为: off"
+              - generic [ref=e441]: hi
+              - generic [ref=e443]: go
+              - generic [ref=e445]: pwd
+              - generic [ref=e447]: ls
+              - generic [ref=e449]:
+                - generic [ref=e452]: Assistant
+                - generic [ref=e455]: "🧠 思考级别已设置为: off"
+              - generic [ref=e457]:
+                - generic [ref=e460]: Assistant
+                - generic [ref=e463]: "🧠 思考级别已设置为: off"
+              - generic [ref=e465]:
+                - generic [ref=e468]: Assistant
+                - generic [ref=e471]: "🧠 思考级别已设置为: off"
+              - generic [ref=e473]:
+                - generic [ref=e476]: Assistant
+                - generic [ref=e479]: "🧠 思考级别已设置为: off"
+              - generic [ref=e481]:
+                - generic [ref=e484]: Assistant
+                - generic [ref=e487]: "🧠 思考级别已设置为: off"
+              - generic [ref=e489]:
+                - generic [ref=e492]: Assistant
+                - generic [ref=e495]: "🧠 思考级别已设置为: off"
+              - generic [ref=e497]:
+                - generic [ref=e500]: Assistant
+                - generic [ref=e503]: "🧠 思考级别已设置为: off"
+              - generic [ref=e505]: hi
+              - generic [ref=e508] [cursor=pointer]:
+                - generic [ref=e510]: Thinking
+                - generic [ref=e512]: +
+              - generic [ref=e515] [cursor=pointer]:
+                - generic [ref=e517]: bash
+                - generic [ref=e518]: pkill -f ollama 2>/dev/nu...
+                - generic [ref=e519]: success
+                - generic [ref=e521]: +
+              - generic [ref=e524] [cursor=pointer]:
+                - generic [ref=e526]: bash
+                - generic [ref=e527]: pwd
+                - generic [ref=e528]: success
+                - generic [ref=e530]: +
+              - generic [ref=e533] [cursor=pointer]:
+                - generic [ref=e535]: bash
+                - generic [ref=e536]: ls -la
+                - generic [ref=e537]: success
+                - generic [ref=e539]: +
+              - generic [ref=e540]:
+                - generic [ref=e542] [cursor=pointer]:
+                  - generic [ref=e544]: Thinking
+                  - generic [ref=e546]: +
+                - generic [ref=e547]:
+                  - generic [ref=e550]: Assistant
+                  - generic [ref=e552]:
+                    - generic [ref=e553]: Hey! 👋
+                    - generic [ref=e554]: "Here's what I did:"
+                    - generic [ref=e555]:
+                      - strong [ref=e556]: Stopped Ollama server
+                      - text: ✅ (no output means it was either stopped or wasn't running)
+                    - generic [ref=e557]:
+                      - strong [ref=e558]: "Current directory:"
+                      - code [ref=e559]: /root
+                    - generic [ref=e560]:
+                      - strong [ref=e561]: "Directory listing:"
+                      - text: "I can see you have many projects here including:"
+                    - generic [ref=e562]:
+                      - text: "-"
+                      - code [ref=e563]: pi-gateway-standalone
+                      - text: ","
+                      - code [ref=e564]: pi-mono
+                      - text: ","
+                      - code [ref=e565]: pibeter
+                      - text: "- pi-related projects"
+                    - generic [ref=e566]:
+                      - text: "-"
+                      - code [ref=e567]: flutter
+                      - text: ","
+                      - code [ref=e568]: flutter_openclaw
+                      - text: "- Flutter projects"
+                    - generic [ref=e569]:
+                      - text: "-"
+                      - code [ref=e570]: llm_client
+                      - text: ","
+                      - code [ref=e571]: llm_client_v1.0.1
+                      - text: "- LLM clients"
+                    - generic [ref=e572]: "- Various HTML games (snake, tetris, space fighter)"
+                    - generic [ref=e573]:
+                      - text: "- Config directories ("
+                      - code [ref=e574]: .pi
+                      - text: ","
+                      - code [ref=e575]: .config
+                      - text: ","
+                      - code [ref=e576]: .claude
+                      - text: ", etc.)"
+                    - generic [ref=e577]: Everything looks good! The Ollama server has been stopped. What would you like to work on?
+              - generic [ref=e579]: hi
+              - generic [ref=e580]:
+                - generic [ref=e582] [cursor=pointer]:
+                  - generic [ref=e584]: Thinking
+                  - generic [ref=e586]: +
+                - generic [ref=e587]:
+                  - generic [ref=e590]: Assistant
+                  - generic [ref=e593]: Hi there! 👋 How can I help you today?
+              - generic [ref=e595]: ni
+              - generic [ref=e596]:
+                - generic [ref=e598] [cursor=pointer]:
+                  - generic [ref=e600]: Thinking
+                  - generic [ref=e602]: +
+                - generic [ref=e603]:
+                  - generic [ref=e606]: Assistant
+                  - generic [ref=e608]:
+                    - generic [ref=e609]: Ni! 🎭
+                    - generic [ref=e610]: (We are the knights who say... NI!)
+                    - generic [ref=e611]: Or did you mean something else? How can I help you today?
+              - generic [ref=e613]: 跟谁一个hello？
+              - generic [ref=e614]:
+                - generic [ref=e616] [cursor=pointer]:
+                  - generic [ref=e618]: Thinking
+                  - generic [ref=e620]: +
+                - generic [ref=e621]:
+                  - generic [ref=e624]: Assistant
+                  - generic [ref=e626]:
+                    - generic [ref=e627]: 你好！👋 我是你的AI助手，随时准备帮助你！
+                    - generic [ref=e628]: 我能帮你：
+                    - generic [ref=e629]: "- 💻 编写和修改代码"
+                    - generic [ref=e630]: "- 📁 管理文件和目录"
+                    - generic [ref=e631]: "- 🔧 执行命令行操作"
+                    - generic [ref=e632]: "- 🔍 搜索和分析信息"
+                    - generic [ref=e633]: 有什么我可以帮你的吗？
+              - generic [ref=e635]: ls ps summary
+              - generic [ref=e638] [cursor=pointer]:
+                - generic [ref=e640]: Thinking
+                - generic [ref=e642]: +
+              - generic [ref=e645] [cursor=pointer]:
+                - generic [ref=e647]: bash
+                - generic [ref=e648]: ls -la
+                - generic [ref=e649]: success
+                - generic [ref=e651]: +
+              - generic [ref=e654] [cursor=pointer]:
+                - generic [ref=e656]: bash
+                - generic [ref=e657]: ps aux --sort=-%cpu | hea...
+                - generic [ref=e658]: success
+                - generic [ref=e660]: +
+              - generic [ref=e661]:
+                - generic [ref=e663] [cursor=pointer]:
+                  - generic [ref=e665]: Thinking
+                  - generic [ref=e667]: +
+                - generic [ref=e668]:
+                  - generic [ref=e671]: Assistant
+                  - generic [ref=e673]:
+                    - generic [ref=e674]: "## 📊 System Summary"
+                    - generic [ref=e675]:
+                      - text: "### Current Directory ("
+                      - code [ref=e676]: /root
+                      - text: )
+                    - generic [ref=e677]:
+                      - strong [ref=e678]: "Total items:"
+                      - text: 50 directories/files
+                    - strong [ref=e680]: "Key projects:"
+                    - generic [ref=e681]:
+                      - text: "-"
+                      - code [ref=e682]: pi-gateway-standalone
+                      - text: "- Active gateway project"
+                    - generic [ref=e683]:
+                      - text: "-"
+                      - code [ref=e684]: pi-mono
+                      - text: ","
+                      - code [ref=e685]: pibeter
+                      - text: "- Other pi projects"
+                    - generic [ref=e686]:
+                      - text: "-"
+                      - code [ref=e687]: flutter
+                      - text: ","
+                      - code [ref=e688]: flutter_openclaw
+                      - text: "- Flutter apps"
+                    - generic [ref=e689]:
+                      - text: "-"
+                      - code [ref=e690]: llm_client
+                      - text: "- LLM clients"
+                    - generic [ref=e691]: "- Various HTML games (snake, tetris, space fighter)"
+                    - generic [ref=e692]: "### Top Processes (by CPU usage)"
+                    - generic [ref=e693]: "| Process | PID | CPU% | Memory | Command |"
+                    - generic [ref=e694]: "|---------|-----|------|--------|---------|"
+                    - generic [ref=e695]: "| ps | 21681 | 66.6% | 3.7MB | ps aux |"
+                    - generic [ref=e696]:
+                      - text: "|"
+                      - strong [ref=e697]: pi
+                      - text: "| 17656 | 6.9% | 151MB | pi (this session!) |"
+                    - generic [ref=e698]:
+                      - text: "|"
+                      - strong [ref=e699]: pi-gateway server
+                      - text: "| 12219 | 3.1% | 317MB | Node.js server.ts |"
+                    - generic [ref=e700]: "| proot | 16549 | 2.6% | 3.6MB | Termux proot container |"
+                    - generic [ref=e701]: "| tmux | 17486 | 0.8% | 12.6MB | tmux gateway-dev session |"
+                    - generic [ref=e702]:
+                      - text: "|"
+                      - strong [ref=e703]: vite dev server
+                      - text: "| 17957 | 0.6% | 79.6MB | Vite frontend dev server |"
+                    - generic [ref=e704]: "### 🔥 Active Services"
+                    - generic [ref=e705]:
+                      - text: "-"
+                      - strong [ref=e706]: pi-gateway-standalone
+                      - text: "is running:"
+                    - generic [ref=e707]: "- Backend: Node.js server on tsx (PID 12219)"
+                    - generic [ref=e708]: "- Frontend: Vite dev server on port 5173 (PID 17957)"
+                    - generic [ref=e709]:
+                      - text: "- Managed via tmux session"
+                      - code [ref=e710]: gateway-dev
+                    - generic [ref=e711]: System looks healthy! CPU usage is mainly from the pi-gateway project. Want me to check anything specific?
+              - generic [ref=e713]: hi
+              - generic [ref=e714]:
+                - generic [ref=e716] [cursor=pointer]:
+                  - generic [ref=e718]: Thinking
+                  - generic [ref=e720]: +
+                - generic [ref=e721]:
+                  - generic [ref=e724]: Assistant
+                  - generic [ref=e727]: Hello! 👋 How can I help you today?
+            - generic [ref=e729]:
+              - generic [ref=e730]:
+                - textbox "Message... Ctrl+Enter to send" [ref=e731]
+                - generic [ref=e732]:
+                  - button "Send (Ctrl+Enter)" [ref=e733] [cursor=pointer]:
+                    - img [ref=e734]
+                  - button "Abort Generation" [disabled] [ref=e736]:
+                    - img [ref=e737]
+              - generic [ref=e739]:
+                - button "System Prompt" [ref=e740] [cursor=pointer]:
+                  - img [ref=e741]
+                - button "@" [ref=e744] [cursor=pointer]:
+                  - generic [ref=e745]: "@"
+                - button / [ref=e746] [cursor=pointer]:
+                  - generic [ref=e747]: /
+                - button "!" [ref=e748] [cursor=pointer]:
+                  - generic [ref=e749]: "!"
+                - button "Upload image/file" [ref=e750] [cursor=pointer]:
+                  - img [ref=e751]
+                - button "自动滚屏已启用 (点击关闭)" [ref=e755] [cursor=pointer]:
+                  - img [ref=e756]
+                - button "New Session" [ref=e759] [cursor=pointer]:
+                  - img [ref=e760]
+    - navigation [ref=e761]:
+      - generic [ref=e762]:
+        - button "rightArrow" [ref=e763] [cursor=pointer]:
+          - img "rightArrow" [ref=e764]
+        - button "upArrow" [ref=e766] [cursor=pointer]:
+          - img "upArrow" [ref=e767]
+      - generic [ref=e769]:
+        - button "chat Chat" [ref=e770] [cursor=pointer]:
+          - img "chat" [ref=e771]
+          - generic [ref=e773]: Chat
+        - button "files Files" [ref=e774] [cursor=pointer]:
+          - img "files" [ref=e775]
+          - generic [ref=e777]: Files
+      - generic [ref=e778]:
+        - button "tools" [ref=e780] [cursor=pointer]:
+          - img "tools" [ref=e781]
+        - button "View LocalStorage" [ref=e784] [cursor=pointer]:
+          - img [ref=e785]
+  - generic [ref=e788]:
+    - generic [ref=e789]:
+      - generic [ref=e790]: 📱 Debug Console
+      - button "✕" [ref=e791] [cursor=pointer]
+    - generic [ref=e792]:
+      - generic [ref=e793]: "[1:59:15 PM] [WebSocket] Unknown message type: session_reconnected"
+      - generic [ref=e794]: "[1:59:15 PM] Icon \"chevron-left\" not found"
+      - generic [ref=e795]: "[1:59:15 PM] [DebugSystem] Eruda failed, using fallback: Error: Failed to load eruda script"
+```
