@@ -19,6 +19,10 @@ import type { Session } from "@/features/chat/types/sidebar";
 import { formatSessionId } from "@/features/chat/utils/sessionUtils";
 import styles from "./SidebarPanel.module.css";
 
+// Constants
+const REFRESH_INTERVAL_MS = 5000;
+const DEBOUNCE_MS = 3000;
+
 // 格式化时间为相对时间
 function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString);
@@ -70,19 +74,19 @@ export function SessionDropdownSection() {
   useEffect(() => {
     if (!workingDir || !isSidebarVisible) return;
 
-    // 防抖：确保至少间隔 3 秒
+    // Debounce: ensure at least DEBOUNCE_MS between requests
     const now = Date.now();
-    if (now - lastFetchRef.current < 3000) return;
+    if (now - lastFetchRef.current < DEBOUNCE_MS) return;
     lastFetchRef.current = now;
 
-    // 立即请求一次
+    // Fetch immediately
     listChatSessions(workingDir);
 
-    // 每 5 秒刷新一次
+    // Refresh periodically
     const interval = setInterval(() => {
       listChatSessions(workingDir);
       lastFetchRef.current = Date.now();
-    }, 5000);
+    }, REFRESH_INTERVAL_MS);
 
     return () => clearInterval(interval);
   }, [workingDir, isSidebarVisible]);

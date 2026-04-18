@@ -75,6 +75,9 @@ interface SessionEntry {
  * Server-Level Session Manager
  * Singleton pattern - maintains PiAgentSession across WebSocket connections
  */
+// Constants
+const STATUS_BROADCAST_INTERVAL_MS = 5000;
+
 export class ServerSessionManager {
   private static instance: ServerSessionManager;
   /** Maps shortId to session entry (PRIMARY KEY) */
@@ -106,10 +109,9 @@ export class ServerSessionManager {
    * Start periodic runtime status broadcast
    */
   private startStatusBroadcast(): void {
-    // Broadcast every 5 seconds
     this.statusBroadcastInterval = setInterval(() => {
       this.broadcastAllRuntimeStatus();
-    }, 5000);
+    }, STATUS_BROADCAST_INTERVAL_MS);
   }
 
   /**
