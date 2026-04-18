@@ -287,21 +287,22 @@ export async function handleListSessions(
       activeSessions.map(s => [extractShortSessionId(s.sessionFile), s])
     );
 
-    sendSuccess(ctx, "sessions_list", {
-      sessions: sessions.map((s) => {
-        const shortId = extractShortSessionId(s.path);
-        const activeInfo = activeSessionMap.get(shortId);
-        return {
-          id: shortId,
-          path: s.path,
-          name: s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
-          messageCount: s.messageCount || 0,
-          lastModified: s.modified.toISOString(),
-          status: activeInfo?.runtimeStatus || "idle",
-          hasClient: activeInfo?.hasClient || false,
-        };
-      }),
+    // Build sessions list with safe data access
+    const sessionsList = sessions.map((s) => {
+      const shortId = extractShortSessionId(s.path);
+      const activeInfo = activeSessionMap.get(shortId);
+      return {
+        id: shortId,
+        path: s.path,
+        name: s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
+        messageCount: s.messageCount || 0,
+        lastModified: s.modified.toISOString(),
+        status: activeInfo?.runtimeStatus || "idle",
+        hasClient: activeInfo ? activeInfo.hasClient : false,
+      };
     });
+
+    sendSuccess(ctx, "sessions_list", { sessions: sessionsList });
 
     logger.info(`[handleListSessions] Sent ${sessions.length} sessions`);
   } catch (error) {
