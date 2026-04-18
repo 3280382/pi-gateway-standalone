@@ -21,7 +21,7 @@
   ],
   "scripts": {
     "clean": "shx rm -rf dist",
-    "dev": "tsx watch --poll src/server/server.ts",
+    "dev": "NODE_OPTIONS=--max-old-space-size=4096 tsx watch --poll src/server/server.ts",
     "dev:react": "vite",
     "build": "vite build --logLevel warn",
     "build:ci": "vite build --logLevel error --mode production",
