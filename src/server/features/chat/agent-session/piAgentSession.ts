@@ -519,6 +519,7 @@ export class PiAgentSession {
             case "text_start": {
               this.endCurrentContentBlock(timestamp);
               this.currentContentBlock = { type: "text", index: contentIndex };
+              this.updateRuntimeStatus("streaming");
               this.send({ type: "text_start", index: contentIndex });
               break;
             }
@@ -545,6 +546,7 @@ export class PiAgentSession {
                   toolCallId: toolCall.id,
                   toolName: toolCall.name,
                 };
+                this.updateRuntimeStatus("tooling");
                 this.send({
                   type: "toolcall_start",
                   toolCallId: toolCall.id,

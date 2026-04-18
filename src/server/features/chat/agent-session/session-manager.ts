@@ -604,8 +604,14 @@ export class ServerSessionManager {
   updateRuntimeStatus(shortId: string, status: SessionRuntimeStatus): void {
     const entry = this.sessions.get(shortId);
     if (entry) {
+      const oldStatus = entry.runtimeStatus;
       entry.runtimeStatus = status;
       entry.lastActivity = new Date();
+      
+      // If status changed, immediately broadcast to sidebar-visible clients
+      if (oldStatus !== status) {
+        this.broadcastRuntimeStatus(entry.workingDir);
+      }
     }
   }
 
