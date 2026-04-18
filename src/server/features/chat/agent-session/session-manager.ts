@@ -270,7 +270,7 @@ export class ServerSessionManager {
 
     session.reconnect(newClient);
     this.updateEntryClient(entry, newClient);
-    this.setupSessionVerification(session);
+    this.setupCallbacks(session);
 
     const flushed = session.flushMessageBuffer();
     if (flushed > 0) {
@@ -296,7 +296,7 @@ export class ServerSessionManager {
     await session.initialize(workingDir, sessionFile);
 
     this.registerSession(session, shortId, workingDir, sessionFile, client);
-    this.setupSessionVerification(session);
+    this.setupCallbacks(session);
 
     return session;
   }
@@ -348,9 +348,12 @@ export class ServerSessionManager {
     this.workingDirToShortIds.get(workingDir)!.add(shortId);
   }
 
-  private setupSessionVerification(session: PiAgentSession): void {
+  private setupCallbacks(session: PiAgentSession): void {
     session.setSessionVerificationCallback((ws, shortId) => {
       return this.hasClientSelectedSession(ws, shortId);
+    });
+    session.setStatusUpdateCallback((shortId, status) => {
+      this.updateRuntimeStatus(shortId, status as SessionRuntimeStatus);
     });
   }
 

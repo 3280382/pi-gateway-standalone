@@ -17,7 +17,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { AgentMessage } from "@mariozechner/pi-agent-core";
 import type { ImageContent } from "@mariozechner/pi-ai";
-import { extractShortSessionId, serverSessionManager } from "./session-manager";
+import { extractShortSessionId } from "./session-manager";
 import {
   type AgentSession,
   type AgentSessionEvent,
@@ -123,13 +123,19 @@ export class PiAgentSession {
   }
 
   /**
-   * Update runtime status and notify session manager
+   * Set status update callback
+   */
+  setStatusUpdateCallback(callback: (shortId: string, status: string) => void): void {
+    this.statusUpdateCallback = callback;
+  }
+
+  /**
+   * Update runtime status via callback
    */
   private updateRuntimeStatus(status: typeof this.runtimeStatus): void {
     this.runtimeStatus = status;
-    // Notify session manager to broadcast status
-    if (this.shortId) {
-      serverSessionManager.updateRuntimeStatus(this.shortId, status);
+    if (this.shortId && this.statusUpdateCallback) {
+      this.statusUpdateCallback(this.shortId, status);
     }
   }
 
@@ -1144,6 +1150,7 @@ export class PiAgentSession {
    * If returns false, message is buffered instead of sent
    */
   private sessionVerificationCallback: ((ws: WebSocket, shortId: string) => boolean) | null = null;
+  private statusUpdateCallback: ((shortId: string, status: string) => void) | null = null;
 
   /**
    * Send message to WebSocket client
