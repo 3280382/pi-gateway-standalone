@@ -63,7 +63,6 @@ const createInitialState = () => ({
   activeTools: new Map<string, ToolExecution>(),
   showThinking: true,
   showTools: true,
-  scrollToBottom: false,
   searchQuery: "",
   searchFilters: {
     user: true,
@@ -899,10 +898,6 @@ export const useChatStore = create<
       // UI State
       setShowThinking: (show: boolean) => {
         set({ showThinking: show }, false, "setShowThinking");
-      },
-
-      setScrollToBottom: (scroll: boolean) => {
-        set({ scrollToBottom: scroll }, false, "setScrollToBottom");
       },
 
       // Search

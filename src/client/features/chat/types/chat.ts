@@ -116,9 +116,7 @@ export interface ChatState {
 
   // UI State
   showThinking: boolean;
-  scrollToBottom: boolean;
   setShowThinking: (show: boolean) => void;
-  setScrollToBottom: (scroll: boolean) => void;
 
   // Search
   searchQuery: string;
