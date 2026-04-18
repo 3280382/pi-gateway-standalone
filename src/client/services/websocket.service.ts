@@ -72,7 +72,10 @@ export type WebSocketEvent =
   | "thinking_set"
   | "models_list"
   | "llm_log_set"
-  | "command_result";
+  | "command_result"
+  // Session Status Events
+  | "runtime_status_broadcast"
+  | "session_status";
 
 export interface WebSocketMessage<T = any> {
   type: string;
