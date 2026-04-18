@@ -18,6 +18,7 @@ import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
 import { websocketService } from "@/services/websocket.service";
 import { initChatWorkingDirectory } from "@/features/chat/services/chatWebSocket";
+import { extractShortSessionId } from "@/features/chat/utils/sessionUtils";
 import { useWorkspaceStore as useGlobalWorkspaceStore } from "@/stores/workspaceStore";
 import { createNewChatSession } from "./chatWebSocket";
 
@@ -93,10 +94,12 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
 
   // 3. 更新 sessions 列表
   stores.sidebar.setSessions(allSessions || []);
-  stores.sidebar.setSelectedSessionId(currentSession?.sessionFile || null);
+  // 使用短 ID 作为 selectedSessionId
+  const shortSessionId = currentSession?.sessionFile ? extractShortSessionId(currentSession.sessionFile) : null;
+  stores.sidebar.setSelectedSessionId(shortSessionId);
 
   // 4. 更新当前 session
-  stores.session.setCurrentSession(currentSession?.sessionFile || null);
+  stores.session.setCurrentSession(shortSessionId);
   stores.session.setCurrentSessionFile(currentSession?.sessionFile || null);
 
   // 5. 加载消息（使用统一的消息转换）
@@ -167,6 +170,8 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
  * 使用与刷新页面完全相同的 initChatWorkingDirectory API
  * 使用覆盖式 loading，不清空界面直到服务器返回
  */
+let isSelectingSession = false;
+
 async function selectSession(sessionId: string): Promise<void> {
   const stores = getStores();
   const session = findSessionInList(stores.sidebar.sessions, sessionId);
@@ -176,7 +181,22 @@ async function selectSession(sessionId: string): Promise<void> {
     return;
   }
 
+  // 如果已经在切换中，忽略重复点击
+  if (isSelectingSession) {
+    console.log("[SessionManager.selectSession] already selecting, ignoring click");
+    return;
+  }
+
+  // 如果点击的是当前已选中的 session，直接返回
+  const currentSelectedId = stores.sidebar.selectedSessionId;
+  const shortSessionId = extractShortSessionId(session.path);
+  if (currentSelectedId === shortSessionId) {
+    console.log("[SessionManager.selectSession] already selected, skipping");
+    return;
+  }
+
   console.log("[SessionManager.selectSession] sessionId=", sessionId);
+  isSelectingSession = true;
 
   // 设置加载状态（覆盖式，不清空界面）
   stores.sidebar.setLoading(true);
@@ -197,13 +217,15 @@ async function selectSession(sessionId: string): Promise<void> {
     console.log("[SessionManager.selectSession] 界面重建完成");
   } catch (error) {
     console.error("[SessionManager.selectSession] error:", error);
-    // 降级：只更新 UI 状态
-    stores.sidebar.setSelectedSessionId(session.path);
-    stores.session.setCurrentSession(session.path);
+    // 降级：只更新 UI 状态（使用短 ID）
+    const shortId = extractShortSessionId(session.path);
+    stores.sidebar.setSelectedSessionId(shortId);
+    stores.session.setCurrentSession(shortId);
     stores.session.setCurrentSessionFile(session.path);
   } finally {
     // 结束 loading
     stores.sidebar.setLoading(false);
+    isSelectingSession = false;
     console.log("[SessionManager.selectSession] loading 结束");
   }
 }
@@ -243,9 +265,10 @@ async function createNewSession(): Promise<void> {
       sessionFile: createResponse.sessionFile,
     });
 
-    // 2. 构建新 session 对象
+    // 2. 构建新 session 对象（使用短 ID）
+    const shortId = extractShortSessionId(createResponse.sessionFile);
     const newSession: Session = {
-      id: createResponse.sessionFile,
+      id: shortId,
       path: createResponse.sessionFile,
       name: "New Session",
       messageCount: 0,

@@ -1455,6 +1455,11 @@
       // 事件处理器缓存（用于解绑）
       this.handlers = {};
       
+      // 绑定公共方法（防止 this 丢失）
+      this.isActive = this.isActive.bind(this);
+      this.getMarkers = this.getMarkers.bind(this);
+      this.toggle = this.toggle.bind(this);
+      
       // 初始化
       this.init();
     }
