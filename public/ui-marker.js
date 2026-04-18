@@ -1592,12 +1592,13 @@
     
     // 切换
     toggle() {
+      if (!this.state) return;
       this.state.isActive ? this.deactivate() : this.activate();
     }
     
     // 刷新
     refresh() {
-      if (!this.state.isActive) return;
+      if (!this.state?.isActive) return;
       
       const wasActive = this.state.isActive;
       this.deactivate();
@@ -1732,11 +1733,11 @@
     
     // 公共 API
     isActive() {
-      return this.state.isActive;
+      return this.state?.isActive || false;
     }
     
     getMarkers() {
-      return [...this.state.markers];
+      return this.state?.markers ? [...this.state.markers] : [];
     }
     
     getConfig() {
@@ -1749,10 +1750,10 @@
     
     // 销毁
     destroy() {
-      this.deactivate();
-      document.removeEventListener('keydown', this.handlers.keydown);
-      window.removeEventListener('scroll', this.handlers.updatePositions);
-      window.removeEventListener('resize', this.handlers.updatePositions);
+      this.deactivate?.();
+      document.removeEventListener('keydown', this.handlers?.keydown);
+      window.removeEventListener('scroll', this.handlers?.updatePositions);
+      window.removeEventListener('resize', this.handlers?.updatePositions);
     }
   }
 

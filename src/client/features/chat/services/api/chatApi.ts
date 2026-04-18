@@ -19,6 +19,7 @@ import {
 } from "@/features/chat/services/chatWebSocket";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { ChatController, Message, ToolExecution } from "@/features/chat/types/chat";
 import { websocketService } from "@/services/websocket.service";
 import { sessionManager } from "@/features/chat/services/sessionManager";
