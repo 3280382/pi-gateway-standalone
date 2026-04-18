@@ -43,6 +43,8 @@ function formatRelativeTime(dateString: string): string {
 // 获取状态图标和颜色类名
 function getStatusInfo(status: string | undefined): { icon: string; className: string; label: string } {
   switch (status) {
+    case "history":
+      return { icon: "📜", className: styles.statusHistory, label: "History" };
     case "thinking":
       return { icon: "🤔", className: styles.statusThinking, label: "Thinking" };
     case "tooling":
@@ -54,8 +56,9 @@ function getStatusInfo(status: string | undefined): { icon: string; className: s
     case "error":
       return { icon: "❌", className: styles.statusError, label: "Error" };
     case "idle":
-    default:
       return { icon: "💤", className: styles.statusIdle, label: "Idle" };
+    default:
+      return { icon: "📜", className: styles.statusHistory, label: "History" };
   }
 }
 

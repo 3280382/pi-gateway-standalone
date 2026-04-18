@@ -315,7 +315,7 @@ export async function handleListSessions(
         name: s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
         messageCount: s.messageCount || 0,
         lastModified: s.modified.toISOString(),
-        status: activeInfo?.runtimeStatus || "idle",
+        status: activeInfo?.runtimeStatus || "history",
         hasClient: activeInfo ? activeInfo.hasClient : false,
       };
     });

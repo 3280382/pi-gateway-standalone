@@ -24,12 +24,13 @@ export function extractShortSessionId(sessionFile: string): string {
 /**
  * Session runtime status
  */
-export type SessionStatus = 
-  | "idle" 
-  | "thinking" 
-  | "tooling" 
-  | "streaming" 
-  | "waiting" 
+export type SessionStatus =
+  | "history"  // No active PiAgentSession (file exists but not loaded)
+  | "idle"
+  | "thinking"
+  | "tooling"
+  | "streaming"
+  | "waiting"
   | "error";
 
 /**

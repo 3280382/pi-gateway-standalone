@@ -280,10 +280,17 @@ export async function buildSessionResponse(
   const sessionId = sessionFile;
 
   // 获取消息总数和最近的消息（优化：只加载最近 100 条）
-  const [sessionMessages, totalMessageCount] = await Promise.all([
+  const [fileMessages, totalMessageCount] = await Promise.all([
     getSessionMessages(sessionFile, messageLimit),
     getSessionMessageCount(sessionFile),
   ]);
+
+  // 合并缓冲区消息（如果有）- 实现无缝衔接
+  // 当 session 在后台运行时产生的消息会被缓冲，需要与文件消息合并
+  const bufferedMessages = session.getBufferedMessages ? session.getBufferedMessages() : [];
+  const sessionMessages = bufferedMessages.length > 0
+    ? [...fileMessages, ...bufferedMessages]
+    : fileMessages;
 
   // 获取默认模型（来自 settings.json）
   const defaultModel = session.session?.model?.id || null;

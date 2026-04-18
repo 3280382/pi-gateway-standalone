@@ -1262,6 +1262,14 @@ export class PiAgentSession {
   }
 
   /**
+   * Get buffered messages without clearing (for session loading)
+   * Used to merge buffer with file messages for seamless experience
+   */
+  getBufferedMessages(): ServerMessage[] {
+    return [...this.messageEventBuffer];
+  }
+
+  /**
    * Check if currently buffering messages
    */
   isCurrentlyBuffering(): boolean {
