@@ -12,13 +12,11 @@ git clone https://github.com/3280382/pi-gateway-standalone.git
 cd pi-gateway-standalone
 npm install
 
-# Start development (Tmux 3-pane mode recommended)
+# Start development - see AGENTS.md for detailed environment setup
 bash scripts/start-tmux-dev.sh
-
-# Or traditional way
-npm run dev        # Backend: http://127.0.0.1:3000
-npm run dev:react  # Frontend: http://127.0.0.1:5173
 ```
+
+> **Note**: For detailed development environment setup, auto-reload configuration, and troubleshooting, see [AGENTS.md](./AGENTS.md).
 
 ## Project Structure
 

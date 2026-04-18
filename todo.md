@@ -1,15 +1,36 @@
 # Todo List
 
 ## Project: Current Directory
-Generated: 2026-04-15T13:34:43.771Z
+Generated: 2026-04-17T03:48:49.105Z
 
 ---
 
 ## TODO
-### [/root/pi-gateway-standalone/src/server/features/chat/ws-handlers]
-- [ ] 需要关注服务端这个目录代码的修改。
-### [/root/pi-gateway-standalone/src/client/features/chat/components/InputArea.tsx]
-- [ ] 在这个文件的聊天输入框右侧，应该是现在的send按钮,然后下面插入一个Abort按钮,下面才是原来的新建按钮。isStreaming表示的还是消息是否正在流式显示。增加一个isRunning，这个是监听Pi coating agent的turn start好turn end事件,在turn star和end之间就是isRunning,只有isRunning是true的时候,abort按钮才是激活状态,这个时候send按钮触发的是steer.send爱你在不是isRunning的时候，触发的是prompt. 这个需要你同时修改服务器后端的相关逻辑,包括增加事件发送,增加或者确认事件接收处理逻辑。 需要去阅读pi codingagent的相关事件及sdk函数.
+### [/root/pi-gateway-standalone/public/debug-system.js]
+- [ ] 这个文件应该直接在index.html里面就加载，因为它是一个测试使用的js,不能把它封装成react 控件去调用，因为react 控件有问题的时候就看不到调试信息了，而且应该是最先同步加载的。
+### [/root/pi-gateway-standalone/test-results/latest]
+- [ ] 你看一下服务器上这是不是应该是个目录，为什么file页面程序显示的时候会认为它是个文件？
+### [/root/pi-gateway-standalone/AGENTS.md]
+- [x] 对那个开发测试环境的。后前后端的重启，你看一下相关目录的脚本，再认真的编写一下。
+
+以下是由开发用户的第一次的时候已经执行的启动，一般在在测试过程中不需要再进行这个完整的流程。你只需要看一下里面的相关脚本，如何单独重启后端或者单独重启前端就行了。
+## Development Environment
+
+**统一的开发测试环境（唯一推荐方式）**
+
+```bash
+# Tmux 3-pane mode - 同时启动前端、后端和监控
+bash scripts/start-tmux-dev.sh
+```
+
+### 自动监控和热启动
+
+Tmux 模式下已配置自动监控和热启动：
+
+| 组件 | 热启动方式 | 单独重启命令 |
+|------|-----------|-------------|
+| 后端 | `tsx watch` 自动重启 | `tmux send-keys -t gateway:backend C-c && tmux send-keys -t gateway:backend 'npm run dev' Enter` |
+| 前端 | Vite HMR 热更新 | `tmux send-keys -t gateway
 
 ---
 

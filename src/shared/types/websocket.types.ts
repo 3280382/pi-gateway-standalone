@@ -219,3 +219,76 @@ export interface WebSocketConnection {
   ip?: string;
   userAgent?: string;
 }
+
+// ============================================================================
+// Terminal WebSocket Types
+// ============================================================================
+
+/** Terminal session identification */
+export interface TerminalSession {
+  id: string;
+  name: string;
+  createdAt: string;
+  workingDir: string;
+}
+
+/** Client -> Server: Create new terminal session */
+export interface TerminalCreateMessage {
+  type: "terminal_create";
+  sessionName?: string;
+  workingDir?: string;
+}
+
+/** Client -> Server: Execute command in terminal */
+export interface TerminalExecuteMessage {
+  type: "terminal_execute";
+  sessionId: string;
+  command: string;
+}
+
+/** Client -> Server: Resize terminal */
+export interface TerminalResizeMessage {
+  type: "terminal_resize";
+  sessionId: string;
+  cols: number;
+  rows: number;
+}
+
+/** Client -> Server: Close terminal session */
+export interface TerminalCloseMessage {
+  type: "terminal_close";
+  sessionId: string;
+}
+
+/** Server -> Client: Terminal session created */
+export interface TerminalCreatedData {
+  sessionId: string;
+  name: string;
+  workingDir: string;
+  createdAt: string;
+}
+
+/** Server -> Client: Terminal output data (streaming) */
+export interface TerminalOutputData {
+  sessionId: string;
+  data: string;
+  isError?: boolean;
+}
+
+/** Server -> Client: Terminal session ended */
+export interface TerminalEndedData {
+  sessionId: string;
+  exitCode?: number;
+  signal?: string;
+}
+
+/** Server -> Client: Terminal error */
+export interface TerminalErrorData {
+  sessionId: string;
+  error: string;
+}
+
+/** Server -> Client: List of active terminal sessions */
+export interface TerminalListData {
+  sessions: TerminalSession[];
+}

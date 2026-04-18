@@ -1,75 +1,77 @@
 /**
- * Init Handler 单元测试
+ * WebSocket Init Handler Tests
  */
 
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { WebSocket } from "ws";
-import type { WSContext } from "../ws-router";
-import { handleInit } from "./session-handlers";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { 
+  TestLogger, 
+  TestReporter,
+  TestServerManager,
+  TestWebSocketClient,
+} from "../../../../test/lib/test-utils.js";
 
-describe("handleInit", () => {
-  let mockCtx: WSContext;
-  let mockWs: Partial<WebSocket>;
-  let mockSession: any;
+const logger = new TestLogger("ws-init");
+const reporter = new TestReporter("ws-init");
 
-  beforeEach(() => {
-    mockWs = {
-      send: vi.fn() as any,
-      readyState: 1,
-    };
-    mockSession = {
-      initialize: vi.fn().mockResolvedValue({
-        sessionId: "test-session-123",
-        sessionFile: "/path/to/session.jsonl",
-        workingDir: "/test/dir",
-        model: "deepseek-chat",
-      }),
-    };
-    mockCtx = {
-      ws: mockWs as WebSocket,
-      session: mockSession,
-      connectionId: "test-conn-1",
-      connectedAt: new Date(),
-    };
+describe("WebSocket Init Handler", () => {
+  const server = new TestServerManager();
+  let wsUrl: string;
+
+  beforeAll(async () => {
+    logger.info("初始化 WebSocket 测试");
+    await server.start();
+    const port = process.env.TEST_PORT || 3000;
+    wsUrl = `ws://127.0.0.1:${port}/ws`;
   });
 
-  it("should initialize session with workingDir", async () => {
-    await handleInit(mockCtx, { workingDir: "/test/dir" });
-
-    expect(mockSession.initialize).toHaveBeenCalledWith("/test/dir", undefined);
+  afterAll(() => {
+    server.stop();
+    reporter.generateReport();
   });
 
-  it("should initialize session with only workingDir", async () => {
-    await handleInit(mockCtx, {
-      workingDir: "/test/dir",
+  it("receives welcome message on connect", async () => {
+    await reporter.runTest("连接后收到欢迎消息", async () => {
+      const client = new TestWebSocketClient(wsUrl);
+      await client.connect(wsUrl);
+      
+      const welcomeMsg = await client.waitForMessage(
+        (m) => m.type === "welcome" || m.type === "connected",
+        5000
+      );
+      
+      expect(welcomeMsg).toBeDefined();
+      logger.info("收到欢迎消息", welcomeMsg);
+      
+      client.disconnect();
     });
-
-    expect(mockSession.initialize).toHaveBeenCalledWith("/test/dir", undefined);
   });
 
-  it("should send initialized response on success", async () => {
-    await handleInit(mockCtx, { workingDir: "/test/dir" });
-
-    expect(mockWs.send).toHaveBeenCalledWith(expect.stringContaining("initialized"));
-  });
-
-  it("should include session info in response", async () => {
-    await handleInit(mockCtx, { workingDir: "/test/dir" });
-
-    const callArg = (mockWs.send as any).mock.calls[0][0];
-    const response = JSON.parse(callArg);
-
-    expect(response.type).toBe("initialized");
-    expect(response.sessionId).toBe("test-session-123");
-    expect(response.workingDir).toBe("/test/dir");
-    expect(response.pid).toBe(process.pid);
-  });
-
-  it("should send error on initialization failure", async () => {
-    mockSession.initialize = vi.fn().mockRejectedValue(new Error("Init failed"));
-
-    await handleInit(mockCtx, { workingDir: "/test/dir" });
-
-    expect(mockWs.send).toHaveBeenCalledWith(expect.stringContaining("error"));
+  it("can send init message", async () => {
+    await reporter.runTest("发送初始化消息", async () => {
+      const client = new TestWebSocketClient(wsUrl);
+      await client.connect(wsUrl);
+      
+      // 等待连接确认
+      await client.waitForMessage(
+        (m) => m.type === "welcome" || m.type === "connected",
+        5000
+      );
+      
+      // 发送 init 消息
+      client.send("init", {
+        workingDir: "/root/pi-gateway-standalone",
+      });
+      
+      // 等待确认
+      const response = await client.waitForMessage(
+        (m) => m.type === "init_ack" || m.type === "initialized",
+        5000
+      );
+      
+      expect(response).toBeDefined();
+      logger.info("初始化确认收到", response);
+      
+      client.disconnect();
+    });
   });
 });

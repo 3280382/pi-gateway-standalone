@@ -13,11 +13,12 @@
 import { FileBottomMenu } from "@/features/files/components/BottomMenu/FileBottomMenu";
 import { FileBrowser } from "@/features/files/components/FileBrowser/FileBrowser";
 import { FileToolbar } from "@/features/files/components/Header/FileToolbar";
-import { TerminalPanel } from "@/features/files/components/panels/TerminalPanel";
+import { XTermTerminalPanel } from "@/features/files/components/panels/XTermTerminalPanel";
 import { FileSidebar } from "@/features/files/components/Sidebar/FileSidebar";
 import styles from "@/features/files/FilesLayout.module.css";
 import { useFileBrowser, useFileNavigation } from "@/features/files/hooks";
-import { useFileStore, useViewerStore } from "@/features/files/stores";
+import { useFileStore } from "@/features/files/stores";
+import { useTerminalStore } from "@/features/files/stores/terminalStore";
 import { useAppStore } from "@/stores/appStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
 
@@ -28,18 +29,13 @@ export function FilesPage() {
   const { currentView } = useAppStore();
   const isActive = currentView === "files";
 
-  const {
-    isSidebarVisible,
-    isBottomPanelOpen,
-    bottomPanelHeight,
-    closeBottomPanel,
-    setBottomPanelHeight,
-  } = useFileStore();
+  const { isSidebarVisible } = useFileStore();
+
+  // Terminal state from new WebSocket terminal store
+  const { isPanelOpen, panelHeight, setPanelOpen, setPanelHeight } = useTerminalStore();
 
   // 全局工作目录（用于 FileToolbar 显示）
   const { workingDir } = useWorkspaceStore();
-
-  const { terminalCommand, setTerminalCommand } = useViewerStore();
 
   // ===== [ANCHOR:HOOKS] =====
   // 仅在激活状态下加载数据
@@ -62,17 +58,13 @@ export function FilesPage() {
           <FileBrowser
             isActive={isActive}
             onExecuteOutput={(output) => console.log("[Files] Execute output:", output)}
-            onOpenBottomPanel={setTerminalCommand}
+            onOpenBottomPanel={() => setPanelOpen(true)}
           />
-          {isBottomPanelOpen && (
-            <TerminalPanel
-              height={bottomPanelHeight}
-              onClose={closeBottomPanel}
-              onHeightChange={setBottomPanelHeight}
-              initialCommand={terminalCommand}
-              onExecuteCommand={(cmd) => {
-                setTerminalCommand(cmd);
-              }}
+          {isPanelOpen && (
+            <XTermTerminalPanel
+              height={panelHeight}
+              onClose={() => setPanelOpen(false)}
+              onHeightChange={setPanelHeight}
             />
           )}
         </main>

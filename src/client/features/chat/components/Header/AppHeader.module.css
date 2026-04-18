@@ -510,3 +510,40 @@
   border-color: rgba(88, 166, 255, 0.3);
   color: #58a6ff;
 }
+
+/* Session Info and Runtime Status */
+.statusGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sessionInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(88, 166, 255, 0.1);
+  border: 1px solid rgba(88, 166, 255, 0.2);
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.sessionId {
+  color: #58a6ff;
+  font-weight: 600;
+}
+
+.runtimeStatus {
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* Runtime Status Colors */
+.runtimeStatus.thinking { color: #fbbf24; }
+.runtimeStatus.tooling { color: #60a5fa; }
+.runtimeStatus.streaming { color: #a78bfa; }
+.runtimeStatus.waiting { color: #f97316; }
+.runtimeStatus.idle { color: #6b7280; }
+.runtimeStatus.error { color: #ef4444; }

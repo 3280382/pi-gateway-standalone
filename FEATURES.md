@@ -48,7 +48,20 @@ All views share a unified layout framework:
 | **View Modes** | Grid/List toggle |
 | **Batch Operations** | Multi-select files |
 | **File Preview** | Text file preview with syntax highlighting |
-| **File Execution** | Run scripts in terminal |
+| **Multi-Session Terminal** | WebSocket-based terminal with node-pty support |
+
+#### Terminal Feature Details
+
+- **Technology**: xterm.js + node-pty for full TTY support
+- **WebSocket Path**: `/ws/terminal` (separate from chat WebSocket)
+- **Multi-Session**: Single WebSocket connection manages multiple terminal sessions
+- **PTY Support**: Full TTY support for interactive programs (vim, top, pi, etc.)
+- **Features**:
+  - Tab-based session switching
+  - Streaming output display
+  - Terminal resize (cols/rows)
+  - Session persistence during navigation
+  - Input focus pushes interface up (like Chat InputArea)
 
 ### 3. Sidebar
 

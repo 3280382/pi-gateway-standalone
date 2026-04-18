@@ -12,6 +12,7 @@
 
 // ===== [ANCHOR:STEP1_IMPORTS_LLM] =====
 
+import path from "node:path";
 import { Config } from "./config";
 import { setupLlmInterceptors } from "./features/chat/llm";
 import { LlmLogManager } from "./features/chat/llm/log-manager";
@@ -38,6 +39,10 @@ import { registerRoutes } from "./app/routes";
 // WebSocket handlers are auto-registered when ws-router.ts is imported
 import { serverSessionManager } from "./features/chat/agent-session/session-manager";
 import { type WSContext, wsRouter } from "./features/chat/ws-router";
+import {
+  cleanupTerminalSessions,
+  handleTerminalConnection,
+} from "./features/terminal/terminal-ws-router";
 import { AppFactory } from "./lib/app-factory";
 
 // ===== [ANCHOR:CONSTANTS] =====
@@ -74,8 +79,20 @@ const server = appFactory.getServer();
 // ===== [ANCHOR:REGISTER_ROUTES] =====
 
 await registerRoutes(app, llmLogManager, SERVER_START_TIME);
+
+// SPA fallback - serve index.html for non-API routes
+const staticConfig = Config.getStaticConfig();
+app.get("*", (req, res, next) => {
+  // Skip API routes
+  if (req.path.startsWith("/api/") || req.path.startsWith("/ws")) {
+    return next();
+  }
+  // Serve index.html for all other routes
+  res.sendFile(path.join(staticConfig.path, "index.html"));
+});
+
 appFactory.setupNotFoundHandler();
-logger.info("API routes registered, 404 handler set");
+logger.info("API routes registered, SPA fallback set, 404 handler set");
 
 // Initialize server-level session manager
 serverSessionManager.initialize(llmLogManager);
@@ -83,11 +100,47 @@ logger.info("Server session manager initialized");
 
 // ===== [ANCHOR:WEBSOCKET_SETUP] =====
 
-const wss = new WebSocketServer({ server });
-
 // Connection counter (for generating unique IDs)
 let connectionCounter = 0;
 
+// Create WebSocket servers - use noServer to manually handle upgrade
+const wss = new WebSocketServer({ noServer: true });
+const terminalWss = new WebSocketServer({ noServer: true });
+
+// Handle upgrade manually
+server.on("upgrade", (request, socket, head) => {
+  const pathname = request.url;
+  const origin = request.headers.origin;
+  logger.info(`[WebSocket] Upgrade request for path: ${pathname}, origin: ${origin}`);
+
+  // Check origin for security (allow localhost/127.0.0.1 in development)
+  const allowedOrigins = ["http://127.0.0.1:5173", "http://localhost:5173"];
+  const isAllowed = !origin || allowedOrigins.includes(origin) || origin.includes("localhost") || origin.includes("127.0.0.1");
+  if (!isAllowed) {
+    logger.warn(`[WebSocket] Rejected connection from origin: ${origin}`);
+    socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+    socket.destroy();
+    return;
+  }
+
+  if (pathname === "/ws/terminal") {
+    terminalWss.handleUpgrade(request, socket, head, (ws) => {
+      terminalWss.emit("connection", ws, request);
+    });
+  } else {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit("connection", ws, request);
+    });
+  }
+});
+
+// Handle Terminal WebSocket connections
+terminalWss.on("connection", (ws) => {
+  logger.info("[WebSocket] Terminal connection established");
+  handleTerminalConnection(ws);
+});
+
+// Handle Chat WebSocket connections
 wss.on("connection", (ws) => {
   const connectionId = `conn_${++connectionCounter}_${Date.now()}`;
   logger.info(`[WebSocket] New connection established: ${connectionId}`);
@@ -208,9 +261,9 @@ function setupGracefulShutdown() {
     process.on(signal, async () => {
       logger.info(`Received ${signal} signal, shutting down gracefully...`);
 
-      // Close WebSocket server
+      // Close WebSocket servers
       if (wss) {
-        logger.info("Closing WebSocket server...");
+        logger.info("Closing Chat WebSocket server...");
         wss.clients.forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
             client.close(1001, "Server is shutting down");
@@ -219,8 +272,21 @@ function setupGracefulShutdown() {
         wss.close();
       }
 
+      if (terminalWss) {
+        logger.info("Closing Terminal WebSocket server...");
+        terminalWss.clients.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.close(1001, "Server is shutting down");
+          }
+        });
+        terminalWss.close();
+      }
+
       // Cleanup LLM log manager
       llmLogManager.dispose();
+
+      // Cleanup terminal sessions
+      cleanupTerminalSessions();
 
       // Close HTTP server
       if (server) {

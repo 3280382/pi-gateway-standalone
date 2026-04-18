@@ -631,6 +631,38 @@ export function setupWebSocketListeners(): void {
     }
   });
 
+  // Sessions list handler - 更新侧边栏会话列表
+  websocketService.on("sessions_list", (data: any) => {
+    console.log("[setupWebSocketListeners] sessions_list:", data);
+    const sidebarStore = useSidebarStore.getState();
+    if (data?.sessions) {
+      sidebarStore.setSessions(data.sessions);
+    }
+  });
+
+  // Runtime status broadcast handler - 更新会话运行状态
+  websocketService.on("runtime_status_broadcast", (data: any) => {
+    console.log("[setupWebSocketListeners] runtime_status_broadcast:", data);
+    const sidebarStore = useSidebarStore.getState();
+    if (data?.sessions) {
+      sidebarStore.updateRuntimeStatusBulk(
+        data.sessions.map((s: any) => ({
+          sessionId: s.shortId,
+          status: s.status,
+        }))
+      );
+    }
+  });
+
+  // Session status handler - 单个会话状态更新
+  websocketService.on("session_status", (data: any) => {
+    console.log("[setupWebSocketListeners] session_status:", data);
+    const sidebarStore = useSidebarStore.getState();
+    if (data?.sessionId && data?.status) {
+      sidebarStore.setRuntimeStatus(data.sessionId, data.status);
+    }
+  });
+
   // Dir changed handler - 也保存 resourceFiles（切换目录时）
   websocketService.on("dir_changed", (data: any) => {
     console.log("[setupWebSocketListeners] dir_changed:", data);

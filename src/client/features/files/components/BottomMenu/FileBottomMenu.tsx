@@ -13,6 +13,7 @@ import { TodoInputModal } from "@/features/files/components/modals/TodoInputModa
 import { useFileBottomMenu } from "@/features/files/hooks";
 import { useFileNavigation } from "@/features/files/hooks/useFileNavigation";
 import { useFileStore } from "@/features/files/stores/fileStore";
+import { useTerminalStore } from "@/features/files/stores/terminalStore";
 import type { ViewMode } from "@/features/files/types";
 
 export function FileBottomMenu() {
@@ -42,6 +43,8 @@ export function FileBottomMenu() {
   const { isGitModeActive, toggleGitMode, gitHistoryFile, setGitHistoryFile } = useFileStore();
   // Todo 模式
   const { isTodoModeActive, toggleTodoMode, todoInputFile, setTodoInputFile } = useFileStore();
+  // Terminal
+  const { isPanelOpen, togglePanel } = useTerminalStore();
 
   // 打开视图选择器
   const openViewSelector = () => {
@@ -134,6 +137,17 @@ export function FileBottomMenu() {
           title={isTodoModeActive ? "Todo Mode (Active)" : "Todo Mode"}
         >
           <TodoIcon />
+        </button>
+        {/* 分隔 */}
+        <div className={styles.divider} />
+        {/* Terminal 按钮 */}
+        <button
+          type="button"
+          className={`${styles.btn} ${styles.terminalBtn} ${isPanelOpen ? styles.active : ""}`}
+          onClick={togglePanel}
+          title={isPanelOpen ? "Close Terminal" : "Open Terminal"}
+        >
+          <TerminalIcon />
         </button>
       </div>
 
@@ -384,6 +398,15 @@ function TodoIcon() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
       <path d="M9 11l3 3L22 4" />
       <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+    </svg>
+  );
+}
+
+function TerminalIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+      <polyline points="4 17 10 11 4 5" />
+      <line x1="12" y1="19" x2="20" y2="19" />
     </svg>
   );
 }

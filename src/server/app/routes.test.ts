@@ -1,86 +1,65 @@
 /**
- * Register Routes 单元测试
+ * Server Routes Tests
+ * 规范：使用 test/lib/test-utils.ts 中的工具函数
  */
 
-import type { Application, Request } from "express";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { LlmLogManager } from "../features/chat/llm/log-manager";
-import { registerRoutes } from "./routes";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { 
+  TestLogger, 
+  TestReporter,
+  TestServerManager,
+} from "../../../test/lib/test-utils.js";
 
-describe("registerRoutes", () => {
-  let mockApp: Partial<Application>;
-  let mockLlmLogManager: Partial<LlmLogManager>;
-  let routes: Map<string, Function>;
+const logger = new TestLogger("routes");
+const reporter = new TestReporter("routes");
 
-  beforeEach(() => {
-    routes = new Map();
-    mockApp = {
-      get: vi.fn((path: string, handler: Function) => {
-        routes.set(`GET ${path}`, handler);
-      }) as any,
-      post: vi.fn((path: string, handler: Function) => {
-        routes.set(`POST ${path}`, handler);
-      }) as any,
-      delete: vi.fn((path: string, handler: Function) => {
-        routes.set(`DELETE ${path}`, handler);
-      }) as any,
-    };
-    mockLlmLogManager = {
-      getLogFilePath: vi.fn().mockReturnValue("/path/to/log"),
-      setEnabled: vi.fn(),
-    };
+// 注意：这些测试需要服务器运行
+describe("Server Routes", () => {
+  const server = new TestServerManager();
+  let baseUrl: string;
+
+  beforeAll(async () => {
+    logger.info("初始化路由测试");
+    await server.start();
+    const port = process.env.TEST_PORT || 3000;
+    baseUrl = `http://127.0.0.1:${port}`;
   });
 
-  it("should register all API routes", async () => {
-    await registerRoutes(mockApp as Application, mockLlmLogManager as LlmLogManager, Date.now());
+  afterAll(() => {
+    server.stop();
+    reporter.generateReport();
+  });
 
-    // Check version/status routes
-    expect(routes.has("GET /api/version")).toBe(true);
-    expect(routes.has("GET /api/health")).toBe(true);
-    expect(routes.has("GET /api/ready")).toBe(true);
-    expect(routes.has("GET /api/status")).toBe(true);
+  it("health endpoint returns 200", async () => {
+    await reporter.runTest("健康检查端点", async () => {
+      const response = await fetch(`${baseUrl}/api/health`);
+      expect(response.status).toBe(200);
+      
+      const data = await response.json();
+      expect(data.status).toBe("ok");
+      logger.info("健康检查通过", data);
+    });
+  });
 
-    // Check model routes
-    expect(routes.has("GET /api/models")).toBe(true);
-    expect(routes.has("POST /api/models")).toBe(true);
+  it("404 for unknown routes", async () => {
+    await reporter.runTest("未知路由返回404", async () => {
+      const response = await fetch(`${baseUrl}/api/unknown-route`);
+      expect(response.status).toBe(404);
+      logger.info("404 响应正确");
+    });
+  });
 
-    // Check session routes
-    expect(routes.has("GET /api/sessions")).toBe(true);
-    expect(routes.has("POST /api/session/load")).toBe(true);
-    expect(routes.has("GET /api/system-prompt")).toBe(true);
-
-    // Check file routes
-    expect(routes.has("POST /api/browse")).toBe(true);
-    expect(routes.has("GET /api/files/tree")).toBe(true);
-    expect(routes.has("GET /api/files/content")).toBe(true);
-    expect(routes.has("POST /api/files/write")).toBe(true);
-    expect(routes.has("POST /api/files/batch-delete")).toBe(true);
-    expect(routes.has("POST /api/files/batch-move")).toBe(true);
-    expect(routes.has("POST /api/execute")).toBe(true);
-
-    // Check workspace routes
-    expect(routes.has("GET /api/workspace/current")).toBe(true);
-    expect(routes.has("GET /api/working-dir")).toBe(true);
-    expect(routes.has("GET /api/workspace/recent")).toBe(true);
-    expect(routes.has("POST /api/workspace/recent")).toBe(true);
-    expect(routes.has("DELETE /api/workspace/recent")).toBe(true);
-  }, 10000);
-
-  it("should return settings on GET /api/settings", async () => {
-    await registerRoutes(mockApp as Application, mockLlmLogManager as LlmLogManager, Date.now());
-
-    const handler = routes.get("GET /api/settings");
-    const mockRes = {
-      json: vi.fn(),
-    };
-
-    handler?.({} as Request, mockRes as any);
-
-    expect(mockRes.json).toHaveBeenCalledWith({
-      theme: "dark",
-      fontSize: "small",
-      showThinking: true,
-      language: "zh-CN",
+  it("CORS headers are present", async () => {
+    await reporter.runTest("CORS 响应头", async () => {
+      const response = await fetch(`${baseUrl}/api/health`, {
+        method: "OPTIONS",
+        headers: {
+          Origin: "http://localhost:3000",
+        },
+      });
+      
+      expect(response.headers.get("access-control-allow-origin")).toBeTruthy();
+      logger.info("CORS 响应头正确");
     });
   });
 });

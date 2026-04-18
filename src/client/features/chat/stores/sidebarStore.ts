@@ -24,6 +24,7 @@ const createInitialState = (): Omit<SidebarState, keyof SidebarActions> => ({
   isLoading: false,
   error: null,
   selectedSessionId: null,
+  runtimeStatus: {}, // Map of sessionId -> runtime status
 });
 
 // ============================================================================
@@ -51,6 +52,10 @@ interface SidebarActions {
   selectSession: (id: string | null) => void;
   setSelectedSessionId: (id: string | null) => void;
   clearError: () => void;
+
+  // Runtime Status Actions
+  setRuntimeStatus: (sessionId: string, status: string) => void;
+  updateRuntimeStatusBulk: (statuses: Array<{ sessionId: string; status: string }>) => void;
 
   // Reset
   reset: () => void;
@@ -127,6 +132,31 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 
       clearError: () => {
         set({ error: null }, false, "clearError");
+      },
+
+      // Runtime Status Actions
+      setRuntimeStatus: (sessionId: string, status: string) => {
+        set(
+          (state) => ({
+            runtimeStatus: { ...state.runtimeStatus, [sessionId]: status },
+          }),
+          false,
+          "setRuntimeStatus"
+        );
+      },
+
+      updateRuntimeStatusBulk: (statuses: Array<{ sessionId: string; status: string }>) => {
+        set(
+          (state) => {
+            const newStatus = { ...state.runtimeStatus };
+            statuses.forEach(({ sessionId, status }) => {
+              newStatus[sessionId] = status;
+            });
+            return { runtimeStatus: newStatus };
+          },
+          false,
+          "updateRuntimeStatusBulk"
+        );
       },
 
       // Reset

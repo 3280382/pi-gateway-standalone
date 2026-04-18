@@ -452,6 +452,27 @@
   font-weight: 600;
 }
 
+/* Terminal 按钮 - 绿色主题 */
+.terminalBtn {
+  background: rgba(88, 166, 255, 0.1);
+  color: #58a6ff;
+  transition: all 0.2s ease;
+}
+
+.terminalBtn:hover:not(:disabled) {
+  background: rgba(88, 166, 255, 0.2);
+  color: #79b8ff;
+}
+
+.terminalBtn.active {
+  background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
+  color: #ffffff;
+  box-shadow:
+    0 0 12px rgba(35, 134, 54, 0.6),
+    0 0 24px rgba(35, 134, 54, 0.3);
+  font-weight: 600;
+}
+
 /* ===== View Selector Compact (贴在按钮顶部) ===== */
 .overlay {
   position: fixed;

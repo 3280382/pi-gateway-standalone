@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-04-17T04:47:03.939Z",
+  "config": {
+    "resultsDir": "/root/pi-gateway-standalone/test-results/2026-04-17T04-42-45",
+    "timestamp": "2026-04-17T04-42-45",
+    "port": 3871,
+    "logLevel": "info"
+  },
+  "summary": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "duration": 15826
+  },
+  "results": [
+    {
+      "name": "WebSocket 连接",
+      "passed": true,
+      "duration": 128
+    },
+    {
+      "name": "创建终端会话",
+      "passed": true,
+      "duration": 114
+    },
+    {
+      "name": "执行命令",
+      "passed": true,
+      "duration": 281
+    },
+    {
+      "name": "列出会话",
+      "passed": true,
+      "duration": 116
+    },
+    {
+      "name": "多会话管理",
+      "passed": true,
+      "duration": 419
+    },
+    {
+      "name": "命令多行输出",
+      "passed": true,
+      "duration": 224
+    },
+    {
+      "name": "调整终端大小",
+      "passed": true,
+      "duration": 622
+    },
+    {
+      "name": "关闭会话",
+      "passed": true,
+      "duration": 628
+    }
+  ]
+}

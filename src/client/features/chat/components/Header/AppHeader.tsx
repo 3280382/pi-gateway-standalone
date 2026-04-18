@@ -17,6 +17,7 @@ import {
 } from "@/features/chat/stores/chatStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
 import type { ChatSearchFilters } from "@/features/chat/types/chat";
 import styles from "./AppHeader.module.css";
@@ -83,6 +84,11 @@ export function AppHeader({
   const pid = serverPid;
   const searchQuery = externalSearchQuery ?? chatStoreQuery;
   const filters = externalSearchFilters ?? chatStoreFilters;
+
+  // 当前会话 ID 和运行状态
+  const sidebarStore = useSidebarStore();
+  const currentSessionId = sidebarStore.selectedSessionId;
+  const runtimeStatus = currentSessionId ? sidebarStore.runtimeStatus[currentSessionId] : null;
 
   // ========== 3. Computed ==========
   const hasActiveFilters = useMemo(
@@ -257,10 +263,30 @@ export function AppHeader({
 
         <div className={styles.spacer} />
 
-        {/* 状态 + PID */}
-        <div className={styles.status} title={`${connectionStatus}${pid ? ` (PID: ${pid})` : ""}`}>
-          <span className={`${styles.statusDot} ${styles[connectionStatus]}`} />
-          {pid && <span className={styles.pid}>{pid}</span>}
+        {/* 会话 ID + 运行状态 + 连接状态 + PID */}
+        <div className={styles.statusGroup}>
+          {currentSessionId && (
+            <div 
+              className={styles.sessionInfo} 
+              title={`Session: ${currentSessionId}${runtimeStatus ? ` (${runtimeStatus})` : ""}`}
+            >
+              <span className={styles.sessionId}>{currentSessionId.slice(-8)}</span>
+              {runtimeStatus && (
+                <span className={`${styles.runtimeStatus} ${styles[runtimeStatus]}`}>
+                  {runtimeStatus === "thinking" && "🤔"}
+                  {runtimeStatus === "tooling" && "🔧"}
+                  {runtimeStatus === "streaming" && "📝"}
+                  {runtimeStatus === "waiting" && "⏳"}
+                  {runtimeStatus === "idle" && "💤"}
+                  {runtimeStatus === "error" && "❌"}
+                </span>
+              )}
+            </div>
+          )}
+          <div className={styles.status} title={`${connectionStatus}${pid ? ` (PID: ${pid})` : ""}`}>
+            <span className={`${styles.statusDot} ${styles[connectionStatus]}`} />
+            {pid && <span className={styles.pid}>{pid}</span>}
+          </div>
         </div>
       </div>
 

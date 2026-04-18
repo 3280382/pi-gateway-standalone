@@ -38,14 +38,17 @@ export async function browse(req: Request, res: Response) {
       const batchResults = await Promise.all(
         batch.map(async (entry) => {
           const fullPath = path.join(targetPath, entry.name);
+          // 使用 stat 而不是 entry.isDirectory()，以正确识别符号链接
           const stats = await stat(fullPath).catch(() => null);
+          const isDirectory = stats?.isDirectory() ?? entry.isDirectory();
           return {
             name: entry.name,
             path: fullPath,
-            isDirectory: entry.isDirectory(),
+            isDirectory,
+            isSymlink: entry.isSymbolicLink(),
             size: stats?.size || 0,
             modified: stats?.mtime.toISOString() || new Date().toISOString(),
-            extension: entry.isDirectory()
+            extension: isDirectory
               ? undefined
               : entry.name.includes(".")
                 ? entry.name.split(".").pop()?.toLowerCase()

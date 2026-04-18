@@ -12,12 +12,14 @@ export interface WorkingDirectory {
 }
 
 export interface Session {
-  id: string;
-  path: string;
+  id: string;        // Short ID
+  path: string;      // Full path
   name: string;
   messageCount: number;
   lastModified: Date;
   firstMessage?: string;
+  status?: string;   // Runtime status: idle/thinking/tooling/streaming/waiting/error
+  hasClient?: boolean;
 }
 
 export type Theme = "dark" | "light";
@@ -46,6 +48,9 @@ export interface SidebarState {
   isLoading: boolean;
   error: string | null;
   selectedSessionId: string | null;
+
+  // 运行时状态映射（sessionId -> status）
+  runtimeStatus: Record<string, string>;
 }
 
 // ============================================================================

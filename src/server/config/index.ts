@@ -3,6 +3,7 @@
  * Centralized application configuration management
  */
 
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Environment } from "../../shared/types/common.types";
@@ -81,7 +82,10 @@ export class Config {
     const host = process.env.HOST || "127.0.0.1";
 
     const rootDir = path.resolve(__dirname, "../..");
+    // Use dist folder if it exists (built frontend), otherwise fall back to public
+    const distDir = path.join(rootDir, "dist");
     const publicDir = path.join(rootDir, "public");
+    const staticDir = existsSync(distDir) ? distDir : publicDir;
     const sessionsDir = path.join(rootDir, ".pi", "sessions");
     const logsDir = path.join(rootDir, "logs");
 
@@ -95,7 +99,7 @@ export class Config {
         credentials: true,
       },
       static: {
-        path: publicDir,
+        path: staticDir,
         maxAge: env === "development" ? 0 : 3600000, // 1 hour
         etag: env !== "development",
         lastModified: env !== "development",

@@ -2,18 +2,9 @@
  
 > **AI Assistants**: This is a supplementary document. Read [`AGENTS.md`](./AGENTS.md) first.
 
-## Quick Start
-
-```bash
-# Tmux 3-pane mode (recommended)
-bash scripts/start-tmux-dev.sh
-
-# Or separate terminals
-npm run dev        # Backend
-npm run dev:react  # Frontend
-```
-
 ## Architecture Principles
+
+> **Development Environment**: See [AGENTS.md](./AGENTS.md) for unified development/test environment setup.
 
 ### Frontend: Feature-Based Organization
 
