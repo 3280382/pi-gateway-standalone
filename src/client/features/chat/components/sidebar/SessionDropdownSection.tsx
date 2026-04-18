@@ -10,10 +10,11 @@
  * 注意：新建会话的唯一入口是聊天输入框右侧的新建按钮
  */
 
-import { useCallback, useEffect } from "react";
-import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
+import { useCallback, useEffect, useRef } from "react";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
+import { sessionManager } from "@/features/chat/services/sessionManager";
+import { listChatSessions } from "@/features/chat/services/chatWebSocket";
 import type { Session } from "@/features/chat/types/sidebar";
 import { formatSessionId } from "@/features/chat/utils/sessionUtils";
 import styles from "./SidebarPanel.module.css";
@@ -62,35 +63,36 @@ export function SessionDropdownSection() {
   const isLoading = useSidebarStore((state) => state.isLoading);
   const isSidebarVisible = useSidebarStore((state) => state.isVisible);
   const workingDir = useSessionStore((state) => state.workingDir);
-  const controller = useSidebarController();
+  const lastFetchRef = useRef<number>(0);
 
   // ========== 2. Effects ==========
-  // Log runtimeStatus changes for debugging
-  useEffect(() => {
-    console.log("[SessionDropdown] runtimeStatus updated:", runtimeStatus);
-  }, [runtimeStatus]);
-
   // 只在侧边栏打开时定期请求会话列表更新
   useEffect(() => {
     if (!workingDir || !isSidebarVisible) return;
 
+    // 防抖：确保至少间隔 3 秒
+    const now = Date.now();
+    if (now - lastFetchRef.current < 3000) return;
+    lastFetchRef.current = now;
+
     // 立即请求一次
-    controller.listSessions();
+    listChatSessions(workingDir);
 
     // 每 5 秒刷新一次
     const interval = setInterval(() => {
-      controller.listSessions();
+      listChatSessions(workingDir);
+      lastFetchRef.current = Date.now();
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [workingDir, isSidebarVisible, controller]);
+  }, [workingDir, isSidebarVisible]);
 
   // ========== 3. Actions ==========
   const handleSelect = useCallback(
     async (session: Session) => {
-      await controller.selectSession(session.id);
+      await sessionManager.selectSession(session.id);
     },
-    [controller]
+    []
   );
 
   // ========== 4. Computed ==========
