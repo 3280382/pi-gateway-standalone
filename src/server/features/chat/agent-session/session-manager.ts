@@ -514,6 +514,14 @@ export class ServerSessionManager {
     return client.readyState === WebSocket.OPEN;
   }
 
+  private sendToClient(client: WebSocket, message: object): void {
+    try {
+      client.send(JSON.stringify(message));
+    } catch {
+      // Ignore send errors
+    }
+  }
+
   private shouldBroadcastToClient(entry: SessionEntry): boolean {
     if (!this.isClientConnected(entry.client)) return false;
     if (entry.sidebarVisible) return true;
