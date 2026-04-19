@@ -571,7 +571,9 @@ export const useChatStore = create<
 
       setMessages: (messages: Message[]) => {
         console.log("[chatStore.setMessages] Setting messages:", messages.length);
+        console.log("[chatStore.setMessages] Current messages before:", get().messages.length);
         set({ messages, currentStreamingMessage: null }, false, "setMessages");
+        console.log("[chatStore.setMessages] Current messages after:", get().messages.length);
         console.log("[chatStore.setMessages] Messages set successfully");
       },
 

@@ -77,9 +77,11 @@ function getStores() {
  * 所有场景（刷新、切换目录、选择 session）使用相同的处理逻辑
  */
 async function handleInitResponse(response: any, stores: ReturnType<typeof getStores>) {
-  console.log("[handleInitResponse] Called with:", {
+  console.log("HANDLEINITRESPONSE CALLED!", {
     hasResponse: !!response,
     hasCurrentSession: !!response?.currentSession,
+    hasChat: !!stores.chat,
+    messagesCount: response?.currentSession?.messages?.length,
   });
   const { pid, workingDir, currentSession, allSessions, currentModel, allModels, thinkingLevel } =
     response;
@@ -114,15 +116,22 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
     hasMessages: !!currentSession?.messages,
   });
   if (currentSession?.messages?.length > 0) {
-    console.log("[handleInitResponse] Setting messages:", currentSession.messages.length);
+    console.log("LOADING MESSAGES:", currentSession.messages.length);
     const { normalizeSessionMessages } = await import("@/features/chat/utils/messageUtils");
     const formattedMessages = normalizeSessionMessages(currentSession.messages);
-    console.log("[handleInitResponse] Formatted messages:", formattedMessages.length, "stores.chat:", typeof stores.chat);
-    console.log("[handleInitResponse] About to call setMessages");
-    stores.chat.setMessages(formattedMessages);
-    console.log("[handleInitResponse] Messages set to store, current messages count:", stores.chat.messages?.length);
+    console.log("FORMATTED MESSAGES:", formattedMessages.length);
+    console.log("ABOUT TO CALL SETMESSAGES...");
+    console.log("stores.chat object:", stores.chat);
+    console.log("stores.chat.setMessages:", stores.chat?.setMessages);
+    try {
+      stores.chat.setMessages(formattedMessages);
+      console.log("SETMESSAGES CALLED SUCCESSFULLY!");
+    } catch (e) {
+      console.error("SETMESSAGES FAILED:", e);
+    }
+    console.log("NEW MESSAGES COUNT:", stores.chat.messages?.length);
   } else {
-    console.log("[handleInitResponse] No messages, clearing");
+    console.log("NO MESSAGES TO LOAD");
     stores.chat.setMessages([]);
   }
 
@@ -180,10 +189,14 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
  * 使用与刷新页面完全相同的 initChatWorkingDirectory API
  * 使用覆盖式 loading，不清空界面直到服务器返回
  */
-let isSelectingSession = false;
-
 async function selectSession(sessionId: string): Promise<void> {
+  console.log("SELECTSESSION STARTED:", sessionId);
   const stores = getStores();
+  console.log("STORES:", {
+    hasChat: !!stores.chat,
+    hasSetMessages: typeof stores.chat?.setMessages === 'function',
+    chatMessages: stores.chat?.messages?.length,
+  });
   const session = findSessionInList(stores.sidebar.sessions, sessionId);
 
   if (!session) {
@@ -191,22 +204,24 @@ async function selectSession(sessionId: string): Promise<void> {
     return;
   }
 
-  // 如果已经在切换中，忽略重复点击
-  if (isSelectingSession) {
-    console.log("[SessionManager.selectSession] already selecting, ignoring click");
-    return;
-  }
-
   // 如果点击的是当前已选中的 session，直接返回
   const currentSelectedId = stores.sidebar.selectedSessionId;
-  const shortSessionId = extractShortSessionId(session.path);
-  if (currentSelectedId === shortSessionId) {
+  // 统一使用短ID进行比较
+  const currentShortId = extractShortSessionId(currentSelectedId || "");
+  const targetShortId = extractShortSessionId(session.path);
+  console.log("CHECKING SELECTED:", {
+    currentSelectedId,
+    currentShortId,
+    targetShortId,
+    sessionPath: session.path,
+    equal: currentShortId === targetShortId,
+  });
+  if (currentShortId && currentShortId === targetShortId) {
     console.log("[SessionManager.selectSession] already selected, skipping");
     return;
   }
 
   console.log("[SessionManager.selectSession] sessionId=", sessionId);
-  isSelectingSession = true;
 
   // 设置加载状态（覆盖式，不清空界面）
   stores.sidebar.setLoading(true);
@@ -214,7 +229,9 @@ async function selectSession(sessionId: string): Promise<void> {
 
   try {
     // 使用统一的 init API（传入 sessionFile 用于精确匹配）
+    console.log("[SessionManager.selectSession] Calling initChatWorkingDirectory...");
     const response = await initChatWorkingDirectory(stores.session.workingDir, session.path, 15000);
+    console.log("[SessionManager.selectSession] initChatWorkingDirectory returned!");
 
     console.log("[SessionManager.selectSession] 服务器返回:", {
       hasCurrentSession: !!response.currentSession,
@@ -242,7 +259,6 @@ async function selectSession(sessionId: string): Promise<void> {
   } finally {
     // 结束 loading
     stores.sidebar.setLoading(false);
-    isSelectingSession = false;
     console.log("[SessionManager.selectSession] loading 结束");
   }
 }

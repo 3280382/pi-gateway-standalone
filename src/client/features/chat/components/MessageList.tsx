@@ -31,6 +31,8 @@ export function MessageList({
   onDeleteMessage,
   onRegenerateMessage,
 }: MessageListProps) {
+  console.log("[MessageList] Rendering with messages:", messages.length);
+  
   // 获取流式状态和工具状态
   const streamingContent = useChatStore((state) => state.streamingContent);
   const streamingThinking = useChatStore((state) => state.streamingThinking);
