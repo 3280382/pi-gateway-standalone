@@ -77,6 +77,10 @@ function getStores() {
  * 所有场景（刷新、切换目录、选择 session）使用相同的处理逻辑
  */
 async function handleInitResponse(response: any, stores: ReturnType<typeof getStores>) {
+  console.log("[handleInitResponse] Called with:", {
+    hasResponse: !!response,
+    hasCurrentSession: !!response?.currentSession,
+  });
   const { pid, workingDir, currentSession, allSessions, currentModel, allModels, thinkingLevel } =
     response;
 
@@ -105,14 +109,19 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
   // 5. 加载消息（使用统一的消息转换）
   console.log("[handleInitResponse] currentSession:", {
     sessionFile: currentSession?.sessionFile,
-    sessionId: currentSession?.sessionId,
+    shortId: currentSession?.shortId,
     messageCount: currentSession?.messages?.length,
+    hasMessages: !!currentSession?.messages,
   });
   if (currentSession?.messages?.length > 0) {
+    console.log("[handleInitResponse] Setting messages:", currentSession.messages.length);
     const { normalizeSessionMessages } = await import("@/features/chat/utils/messageUtils");
     const formattedMessages = normalizeSessionMessages(currentSession.messages);
+    console.log("[handleInitResponse] Formatted messages:", formattedMessages.length);
     stores.chat.setMessages(formattedMessages);
+    console.log("[handleInitResponse] Messages set to store");
   } else {
+    console.log("[handleInitResponse] No messages, clearing");
     stores.chat.setMessages([]);
   }
 
@@ -207,8 +216,12 @@ async function selectSession(sessionId: string): Promise<void> {
     const response = await initChatWorkingDirectory(stores.session.workingDir, session.path, 15000);
 
     console.log("[SessionManager.selectSession] 服务器返回:", {
-      currentSessionFile: response.currentSession?.sessionFile,
+      hasCurrentSession: !!response.currentSession,
+      currentSessionKeys: response.currentSession ? Object.keys(response.currentSession) : [],
+      sessionFile: response.currentSession?.sessionFile,
+      shortId: response.currentSession?.shortId,
       messageCount: response.currentSession?.messages?.length,
+      firstMessage: response.currentSession?.messages?.[0],
     });
 
     // 重建界面（更新所有状态）
@@ -327,6 +340,13 @@ export const sessionManager: SessionManagerAPI = {
   selectSession,
   createNewSession,
 };
+
+// Debug: mount to window for testing
+console.log("[SessionManager] Module loaded, typeof window:", typeof window);
+if (typeof window !== "undefined") {
+  (window as any).sessionManager = sessionManager;
+  console.log("[SessionManager] Mounted to window.sessionManager");
+}
 
 export function useSessionManager(): SessionManagerAPI {
   return sessionManager;

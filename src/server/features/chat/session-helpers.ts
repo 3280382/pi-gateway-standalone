@@ -280,11 +280,15 @@ export async function buildSessionResponse(
   const sessionFile = explicitSessionFile || session.session?.sessionFile || "";
   const sessionId = sessionFile;
 
+  logger.info(`[buildSessionResponse] Loading messages for: ${sessionFile}, explicit: ${explicitSessionFile || 'none'}`);
+
   // 获取消息总数和最近的消息（优化：只加载最近 100 条）
   const [fileMessages, totalMessageCount] = await Promise.all([
     getSessionMessages(sessionFile, messageLimit),
     getSessionMessageCount(sessionFile),
   ]);
+
+  logger.info(`[buildSessionResponse] Loaded ${fileMessages.length} messages (total: ${totalMessageCount})`);
 
   // 合并缓冲区消息（如果有）- 实现无缝衔接
   // 当 session 在后台运行时产生的消息会被缓冲，需要与文件消息合并

@@ -63,6 +63,8 @@ function getStatusInfo(status: string | undefined): { icon: string; className: s
 }
 
 export function SessionDropdownSection() {
+  console.log("[SessionDropdownSection] Rendering");
+  
   // ========== 1. State ==========
   const sessions = useSidebarStore((state) => state.sessions);
   const currentSessionId = useSidebarStore((state) => state.selectedSessionId);
@@ -199,6 +201,7 @@ export function SessionDropdownSection() {
               return (
                 <tr
                   key={session.id}
+                  data-session-id={session.id}
                   className={`${styles.sessionTableRow} ${isSelected ? styles.sessionTableRowSelected : ""}`}
                   onClick={() => handleSelect(session)}
                 >

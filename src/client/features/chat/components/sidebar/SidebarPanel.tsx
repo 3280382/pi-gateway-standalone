@@ -38,6 +38,8 @@ interface SidebarPanelProps {
 // ============================================================================
 
 export function SidebarPanel({ currentView = "chat" }: SidebarPanelProps) {
+  console.log("[SidebarPanel] Rendering with currentView:", currentView);
+  
   // ========== 1. State (Domain State from Zustand) ==========
   const isVisible = useSidebarStore((state) => state.isVisible);
   const error = useSidebarStore((state) => state.error);
@@ -63,7 +65,11 @@ export function SidebarPanel({ currentView = "chat" }: SidebarPanelProps) {
           </div>
         )}
         <CompactWorkspacesSection maxItems={3} />
-        {currentView === "chat" && <SessionDropdownSection />}
+        <div style={{ border: '2px solid red', padding: '10px' }}>
+          <p>Before SessionDropdownSection</p>
+          <SessionDropdownSection />
+          <p>After SessionDropdownSection</p>
+        </div>
         {currentView === "chat" && <ModelParamsSection />}
         {currentView === "chat" && <ChatSettingsSection />}
       </div>

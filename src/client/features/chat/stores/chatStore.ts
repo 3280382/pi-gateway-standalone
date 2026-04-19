@@ -570,7 +570,9 @@ export const useChatStore = create<
       },
 
       setMessages: (messages: Message[]) => {
+        console.log("[chatStore.setMessages] Setting messages:", messages.length);
         set({ messages, currentStreamingMessage: null }, false, "setMessages");
+        console.log("[chatStore.setMessages] Messages set successfully");
       },
 
       prependMessages: (messages: Message[]) => {
