@@ -658,6 +658,19 @@ export function setupWebSocketListeners(): void {
     console.log("[setupWebSocketListeners] WebSocket connected");
   });
 
+  websocketService.on("session_reconnected", (data: any) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] session_reconnected:`, data);
+    
+    // 重置消息重建器状态，准备接收缓冲消息
+    messageReconstructor.reset();
+    
+    // 如果 flushedMessages > 0，说明有缓冲消息即将到达
+    if (data?.flushedMessages > 0) {
+      console.log(`[${ts}] [RECONNECT] Expecting ${data.flushedMessages} buffered messages`);
+    }
+  });
+
   websocketService.on("disconnected", () => {
     console.log("[setupWebSocketListeners] WebSocket disconnected");
     // 如果正在流式生成，中止

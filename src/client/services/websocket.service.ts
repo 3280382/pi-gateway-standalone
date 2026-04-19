@@ -76,7 +76,9 @@ export type WebSocketEvent =
   // Session Status Events
   | "runtime_status_broadcast"
   | "session_status"
-  | "more_messages_loaded";
+  | "more_messages_loaded"
+  // Reconnection Events
+  | "session_reconnected";
 
 export interface WebSocketMessage<T = any> {
   type: string;
@@ -368,6 +370,8 @@ export class WebSocketService {
       runtime_status_broadcast: "runtime_status_broadcast",
       session_status: "session_status",
       more_messages_loaded: "more_messages_loaded",
+      // Reconnection
+      session_reconnected: "session_reconnected",
     };
 
     const event = eventMap[type];
@@ -431,6 +435,7 @@ export class WebSocketService {
       "models_list",
       "llm_log_set",
       "command_result",
+      "session_reconnected",
     ];
 
     events.forEach((event) => {
