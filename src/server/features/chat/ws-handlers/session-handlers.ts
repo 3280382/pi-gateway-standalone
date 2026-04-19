@@ -235,8 +235,9 @@ export async function handleLoadSession(
     }
 
     // Build full response with messages using shared helper
+    // 传入明确的 sessionPath，因为 switchSession 后 session.sessionFile 可能未更新
     const workingDir = ctx.session.workingDir;
-    const responseData = await buildSessionResponse(ctx.session, workingDir);
+    const responseData = await buildSessionResponse(ctx.session, workingDir, 100, 10, sessionPath);
 
     // Send session_loaded with full message list (统一命名规范)
     sendSuccess(ctx, "session_loaded", {

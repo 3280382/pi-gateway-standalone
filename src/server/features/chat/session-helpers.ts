@@ -259,7 +259,8 @@ export async function buildSessionResponse(
   session: PiAgentSession,
   workingDir: string,
   messageLimit: number = 100,
-  sessionLimit: number = 10
+  sessionLimit: number = 10,
+  explicitSessionFile?: string  // 可选：明确指定 sessionFile（用于 switchSession 后）
 ): Promise<{
   pid: number;
   workingDir: string;
@@ -275,8 +276,8 @@ export async function buildSessionResponse(
   allModels: Awaited<ReturnType<typeof getAllModels>>;
   thinkingLevel: string;
 }> {
-  // 获取 session 信息
-  const sessionFile = session.session?.sessionFile || "";
+  // 获取 session 信息：优先使用明确指定的路径，否则从 session 对象获取
+  const sessionFile = explicitSessionFile || session.session?.sessionFile || "";
   const sessionId = sessionFile;
 
   // 获取消息总数和最近的消息（优化：只加载最近 100 条）
