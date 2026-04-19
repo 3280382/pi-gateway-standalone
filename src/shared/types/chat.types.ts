@@ -62,6 +62,7 @@ export interface ChatSearchFilters {
   assistant: boolean;
   thinking: boolean;
   tools: boolean;
+  usage: boolean; // Usage/cost information
   dates?: {
     from?: Date;
     to?: Date;

@@ -416,6 +416,34 @@ export function setupWebSocketListeners(): void {
     messageReconstructor.endMessage();
   });
 
+  // Usage event handler
+  websocketService.on("usage", (data: any) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] usage:`, data);
+    
+    if (data?.usage) {
+      const usage = data.usage;
+      let message = `📊 Usage: ${usage.totalTokens?.toLocaleString() || 0} tokens`;
+      if (usage.inputTokens || usage.outputTokens) {
+        message += ` (input: ${usage.inputTokens?.toLocaleString() || 0}, output: ${usage.outputTokens?.toLocaleString() || 0})`;
+      }
+      if (usage.cost) {
+        message += ` · $${typeof usage.cost === 'number' ? usage.cost.toFixed(4) : usage.cost}`;
+      }
+      if (usage.model) {
+        message += ` · ${usage.model}`;
+      }
+      
+      store.addMessage({
+        id: `usage-${Date.now()}`,
+        role: "system",
+        content: [{ type: "text", text: message }],
+        timestamp: new Date(),
+        isStreaming: false,
+      });
+    }
+  });
+
   // =========================================================================
   // Content Block Level Events - Text
   // =========================================================================

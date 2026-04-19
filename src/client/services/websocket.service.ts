@@ -81,7 +81,9 @@ export type WebSocketEvent =
   | "session_reconnected"
   // System Events
   | "process_tree_data"
-  | "process_details";
+  | "process_details"
+  // Usage Events
+  | "usage";
 
 export interface WebSocketMessage<T = any> {
   type: string;
@@ -378,6 +380,8 @@ export class WebSocketService {
       // System
       process_tree_data: "process_tree_data",
       process_details: "process_details",
+      // Usage
+      usage: "usage",
     };
 
     const event = eventMap[type];
@@ -444,6 +448,7 @@ export class WebSocketService {
       "session_reconnected",
       "process_tree_data",
       "process_details",
+      "usage",
     ];
 
     events.forEach((event) => {

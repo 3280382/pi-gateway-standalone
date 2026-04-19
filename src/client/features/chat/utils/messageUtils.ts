@@ -124,6 +124,35 @@ function convertSpecialEntryToMessage(entry: any): Message | null {
       const level = entry.thinkingLevel || "unknown";
       return createSystemMessage(`🧠 思考级别已设置为: ${level}`, entry.id);
     }
+    case "usage": {
+      // Handle usage/cost information
+      const usage = entry.usage;
+      if (usage) {
+        const inputTokens = usage.inputTokens || usage.input_tokens || 0;
+        const outputTokens = usage.outputTokens || usage.output_tokens || 0;
+        const totalTokens = usage.totalTokens || usage.total_tokens || (inputTokens + outputTokens);
+        const cost = usage.cost || usage.estimatedCost || 0;
+        
+        let message = `📊 Usage: ${totalTokens.toLocaleString()} tokens`;
+        if (inputTokens || outputTokens) {
+          message += ` (input: ${inputTokens.toLocaleString()}, output: ${outputTokens.toLocaleString()})`;
+        }
+        if (cost) {
+          message += ` · $${cost.toFixed(4)}`;
+        }
+        if (usage.model) {
+          message += ` · ${usage.model}`;
+        }
+        return createSystemMessage(message, entry.id);
+      }
+      return null;
+    }
+    case "cost": {
+      // Handle cost-only entries
+      const cost = entry.cost || entry.estimatedCost || 0;
+      const currency = entry.currency || "$";
+      return createSystemMessage(`💰 Cost: ${currency}${cost.toFixed(4)}`, entry.id);
+    }
     case "custom": {
       const customType = entry.customType || "custom";
       const data = entry.data ? JSON.stringify(entry.data).slice(0, 100) : "";

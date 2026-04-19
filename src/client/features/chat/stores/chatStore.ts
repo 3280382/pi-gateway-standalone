@@ -73,6 +73,7 @@ const createInitialState = () => ({
     compaction: true,
     modelChange: true,
     thinkingLevelChange: true,
+    usage: true,
   },
   searchResults: [] as SearchResult[],
   isSearching: false,
@@ -1162,6 +1163,7 @@ function detectMessageTypes(message: Message): {
   isModelChange: boolean;
   isCompaction: boolean;
   isThinkingLevelChange: boolean;
+  isUsage: boolean;
 } {
   const text = message.content
     .filter((c) => c.type === "text")
@@ -1174,6 +1176,7 @@ function detectMessageTypes(message: Message): {
     isModelChange: message.role === "system" && text.includes("模型已切换为"),
     isCompaction: message.role === "system" && text.includes("上下文压缩"),
     isThinkingLevelChange: message.role === "system" && text.includes("思考级别已设置"),
+    isUsage: message.role === "system" && (text.includes("📊") || text.includes("tokens") || text.includes("cost")),
   };
 }
 
@@ -1188,7 +1191,7 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
   const lowerQuery = query.toLowerCase().trim();
 
   return messages.filter((message) => {
-    const { hasThinking, hasTools, isModelChange, isCompaction, isThinkingLevelChange } =
+    const { hasThinking, hasTools, isModelChange, isCompaction, isThinkingLevelChange, isUsage } =
       detectMessageTypes(message);
 
     // 1. 按消息 role 过滤
@@ -1207,12 +1210,13 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
     if (isModelChange && !filters.modelChange) return false;
     if (isCompaction && !filters.compaction) return false;
     if (isThinkingLevelChange && !filters.thinkingLevelChange) return false;
+    if (isUsage && !filters.usage) return false;
 
     // 4. 普通系统消息（非特殊类型）如果 system 为 false 已经被过滤
     // 但如果 system 为 true，但特殊类型为 false，需要检查
     if (message.role === "system") {
       // 如果是特殊类型且都被关闭了，或者不是特殊类型
-      const isSpecialType = isModelChange || isCompaction || isThinkingLevelChange;
+      const isSpecialType = isModelChange || isCompaction || isThinkingLevelChange || isUsage;
       // 特殊类型已经被上面的检查过滤了
       // 如果不是特殊类型，但 system 为 false，已经在 role 检查中过滤
       // 所以这里不需要额外处理

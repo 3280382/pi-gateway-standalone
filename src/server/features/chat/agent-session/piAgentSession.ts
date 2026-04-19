@@ -501,6 +501,22 @@ export class PiAgentSession {
           if (endMsg.role === "assistant" && this.messageStarted) {
             console.log(`[${timestamp}] [SEND] message_end: ${(endMsg as any).id}`);
             this.send({ type: "message_end", message: endMsg });
+            
+            // Send usage information if available
+            const assistantMsg = endMsg as any;
+            if (assistantMsg.usage) {
+              this.send({
+                type: "usage",
+                usage: {
+                  inputTokens: assistantMsg.usage.input,
+                  outputTokens: assistantMsg.usage.output,
+                  totalTokens: assistantMsg.usage.totalTokens,
+                  cost: assistantMsg.usage.cost?.total || 0,
+                  model: assistantMsg.model,
+                },
+              });
+            }
+            
             this.messageStarted = false;
           }
           break;

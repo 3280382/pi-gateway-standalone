@@ -39,6 +39,7 @@ interface AppHeaderProps {
     compaction: boolean;
     modelChange: boolean;
     thinkingLevelChange: boolean;
+    usage: boolean;
   };
   onSearchQueryChange?: (query: string) => void;
   onSearchFiltersChange?: (filters: {
@@ -50,6 +51,7 @@ interface AppHeaderProps {
     compaction: boolean;
     modelChange: boolean;
     thinkingLevelChange: boolean;
+    usage: boolean;
   }) => void;
 }
 
@@ -101,7 +103,8 @@ export function AppHeader({
       filters.tools ||
       filters.compaction ||
       filters.modelChange ||
-      filters.thinkingLevelChange,
+      filters.thinkingLevelChange ||
+      filters.usage,
     [filters]
   );
 
@@ -116,6 +119,7 @@ export function AppHeader({
         filters.compaction,
         filters.modelChange,
         filters.thinkingLevelChange,
+        filters.usage,
       ].filter(Boolean).length,
     [filters]
   );
@@ -257,6 +261,11 @@ export function AppHeader({
                 label="Thinking Level"
                 checked={filters.thinkingLevelChange}
                 onChange={() => handleFilterChange("thinkingLevelChange")}
+              />
+              <FilterChip
+                label="Usage"
+                checked={filters.usage}
+                onChange={() => handleFilterChange("usage")}
               />
             </div>
           )}

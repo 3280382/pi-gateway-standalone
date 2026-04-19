@@ -67,6 +67,7 @@ export interface ChatSearchFilters {
   compaction: boolean;
   modelChange: boolean;
   thinkingLevelChange: boolean;
+  usage: boolean; // Usage/cost information
   dates?: {
     from?: Date;
     to?: Date;
