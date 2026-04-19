@@ -4,7 +4,6 @@
 
 // 基础 Hooks
 export { useChat } from "@/features/chat/hooks/useChat";
-export { useMobile } from "@/features/chat/hooks/useMobile";
 export { useChatInit } from "@/features/chat/hooks/useChatInit";
 export { useChatMessages } from "@/features/chat/hooks/useChatMessages";
 // ChatPanel 相关 Hooks
