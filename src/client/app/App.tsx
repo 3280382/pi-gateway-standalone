@@ -12,29 +12,29 @@ import { useAppStore } from "@/stores/appStore";
 import "@/styles/global.css";
 import styles from "@/app/App.module.css";
 
-// 懒加载页面
+// Lazy load pages
 const ChatPage = React.lazy(() => import("@/features/chat/page"));
 const FilesPage = React.lazy(() => import("@/features/files/page"));
 
 // ===== [ANCHOR:KEEP_ALIVE_COMPONENT] =====
 
 /**
- * KeepAlive - 页面缓存容器
- * 功能：
- * - 首次激活才挂载
- * - 挂载后永不卸载
- * - 通过 display 控制显示隐藏
- * - 避免未激活页面提前加载资源
+ * KeepAlive - Page cache container
+ * Features:
+ * - Only mount on first activation
+ * - Never unmount after mounting
+ * - Control show/hide via display
+ * - Avoid loading resources for inactive pages
  */
 function KeepAlive({ active, children }: { active: boolean; children: React.ReactNode }) {
   const mountedRef = useRef(false);
 
-  // 首次激活时标记
+  // Mark on first activation
   if (active) {
     mountedRef.current = true;
   }
 
-  // 未激活过，不渲染（避免提前加载）
+  // Not activated yet, do not render
   if (!mountedRef.current) return null;
 
   return (

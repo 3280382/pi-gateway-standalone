@@ -6,11 +6,11 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./app/App";
 
-// 全局错误处理 - 捕获未处理的错误
+// Global error handling - 捕获未处理的错误
 let errorDiv: HTMLDivElement | null = null;
 
 function showErrorBanner(message: string, type: "error" | "promise" = "error") {
-  // 如果已有错误提示，先移除
+  // If error indicator exists, remove it first
   if (errorDiv?.parentNode) {
     errorDiv.parentNode.removeChild(errorDiv);
   }
@@ -32,7 +32,7 @@ function showErrorBanner(message: string, type: "error" | "promise" = "error") {
 	`;
   errorDiv.innerHTML = `<strong>${isError ? "Global Error" : "Promise Error"}:</strong> ${message}<br><small>Click to dismiss</small>`;
 
-  // 点击关闭
+  // Click to close
   errorDiv.onclick = () => {
     if (errorDiv?.parentNode) {
       errorDiv.parentNode.removeChild(errorDiv);

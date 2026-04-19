@@ -1,7 +1,7 @@
 /**
  * useDirectoryPicker - 目录选择器逻辑 Hook
  *
- * 职责：
+ * Responsibilities:
  * - 管理目录选择器状态
  * - 加载目录列表
  * - 处理目录选择
@@ -22,7 +22,7 @@ export interface UseDirectoryPickerReturn {
   entries: DirectoryEntry[];
   isLoading: boolean;
 
-  // 操作
+  // Actions
   open: (initialPath?: string) => void;
   close: () => void;
   loadDirectory: (path: string) => Promise<void>;
@@ -103,7 +103,7 @@ export function useDirectoryPicker(options: UseDirectoryPickerOptions): UseDirec
     [onSelect, close]
   );
 
-  // 导航到上级目录
+  // Navigation到上级目录
   const navigateToParent = useCallback(() => {
     // 从 entries 中找到 .. 项
     const parentEntry = entries.find((e) => e.name === "..");

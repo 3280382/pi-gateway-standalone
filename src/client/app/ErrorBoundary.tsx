@@ -1,6 +1,6 @@
 /**
- * ErrorBoundary - 捕获 React 渲染错误
- * 防止单个组件崩溃导致整个应用黑屏
+ * ErrorBoundary - Catch React rendering errors
+ * Prevent app black screen from single component crash
  */
 
 import { Component, type ReactNode } from "react";

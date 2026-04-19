@@ -1,6 +1,6 @@
 /**
- * Footer - 全局底部导航
- * 职责：纯布局容器，根据当前视图操作对应 feature 的 sidebar/panel
+ * Footer - Global bottom navigation
+ * Responsibilities:纯布局容器，根据当前视图操作对应 feature 的 sidebar/panel
  */
 
 // ===== [ANCHOR:IMPORTS] =====
@@ -18,13 +18,13 @@ export function Footer() {
   // ===== [ANCHOR:STATE] =====
   const { currentView, setCurrentView } = useAppStore();
 
-  // Chat sidebar 状态
+  // Chat sidebar state
   const chatSidebarVisible = useSidebarStore((state) => state.isVisible);
   const toggleChatSidebar = useSidebarStore((state) => state.toggleVisibility);
   const chatPanelOpen = useSidebarStore((state) => state.isBottomPanelOpen);
   const toggleChatPanel = useSidebarStore((state) => state.setBottomPanelOpen);
 
-  // Files layout 状态
+  // Files layout state
   const filesSidebarVisible = useFileStore((state) => state.isSidebarVisible);
   const toggleFilesSidebar = useFileStore((state) => state.toggleSidebar);
   const filesPanelOpen = useFileStore((state) => state.isBottomPanelOpen);

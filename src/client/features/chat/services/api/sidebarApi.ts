@@ -1,7 +1,7 @@
 /**
  * Sidebar API - Controller Layer
  *
- * 重构后职责：
+ * 重构后Responsibilities:
  * - 提供 React Hook 接口
  * - 委托给 sessionManager 处理 session 逻辑
  * - 所有数据来自 WebSocket，不使用 HTTP API

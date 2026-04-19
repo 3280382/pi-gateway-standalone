@@ -1,7 +1,7 @@
 /**
  * useFileCache - 文件路径缓存 Hook
  *
- * 职责：管理文件路径的缓存逻辑
+ * Responsibilities:管理文件路径的缓存逻辑
  */
 
 import { useCallback } from "react";

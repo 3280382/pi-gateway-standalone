@@ -1,11 +1,11 @@
 /**
  * SystemPromptModal - 系统提示查看器
  *
- * 职责：
+ * Responsibilities:
  * - 显示系统提示、AGENTS.md、Skills、Extensions、Resources
  * - 通过Tab切换不同内容视图
  *
- * 结构规范：State → Ref → Effects → Computed → Actions → Render
+ * Structure:State → Ref → Effects → Computed → Actions → Render
  */
 
 import { useEffect, useState } from "react";

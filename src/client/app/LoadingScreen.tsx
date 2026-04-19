@@ -1,5 +1,5 @@
 /**
- * LoadingScreen - 应用加载中页面
+ * LoadingScreen - Application loading page
  */
 
 import styles from "@/app/App.module.css";

@@ -18,7 +18,7 @@ describe("WebSocket Init Handler", () => {
   let wsUrl: string;
 
   beforeAll(async () => {
-    logger.info("初始化 WebSocket 测试");
+    logger.info("Initializing WebSocket test");
     await server.start();
     const port = process.env.TEST_PORT || 3000;
     wsUrl = `ws://127.0.0.1:${port}/ws`;
@@ -30,7 +30,7 @@ describe("WebSocket Init Handler", () => {
   });
 
   it("receives welcome message on connect", async () => {
-    await reporter.runTest("连接后收到欢迎消息", async () => {
+    await reporter.runTest("Receive welcome message after connection", async () => {
       const client = new TestWebSocketClient(wsUrl);
       await client.connect(wsUrl);
     
@@ -40,36 +40,36 @@ describe("WebSocket Init Handler", () => {
       );
     
       expect(welcomeMsg).toBeDefined();
-      logger.info("收到欢迎消息", welcomeMsg);
+      logger.info("Received welcome message", welcomeMsg);
     
       client.disconnect();
     });
   });
 
   it("can send init message", async () => {
-    await reporter.runTest("发送初始化消息", async () => {
+    await reporter.runTest("Send initialization message", async () => {
       const client = new TestWebSocketClient(wsUrl);
       await client.connect(wsUrl);
     
-      // 等待连接确认
+      // Wait for connection confirmation
       await client.waitForMessage(
         (m) => m.type === "welcome" || m.type === "connected",
         5000
       );
     
-      // 发送 init 消息
+      // Send init message
       client.send("init", {
         workingDir: "/root/pi-gateway-standalone",
       });
     
-      // 等待确认
+      // Wait for confirmation
       const response = await client.waitForMessage(
         (m) => m.type === "init_ack" || m.type === "initialized",
         5000
       );
     
       expect(response).toBeDefined();
-      logger.info("初始化确认收到", response);
+      logger.info("Initialization confirmation received", response);
     
       client.disconnect();
     });

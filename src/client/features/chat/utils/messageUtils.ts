@@ -1,7 +1,7 @@
 /**
  * Message Utilities - 统一的 Session 消息转换
  *
- * 这个文件包含统一的消息转换逻辑，用于：
+ * 这个文件包含统一的消息转换逻辑，Used for:
  * - 页面刷新时的 init 响应处理
  * - 左侧面板选择 session 时的加载
  * - HTTP loadSession 响应处理

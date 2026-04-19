@@ -1,7 +1,7 @@
 /**
  * FileViewer - 文件查看器模态框
  *
- * 职责：纯 UI 渲染
+ * Responsibilities:纯 UI 渲染
  * - 不包含业务逻辑
  * - 通过 useFileViewer hook 获取所有逻辑
  */

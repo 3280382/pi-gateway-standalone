@@ -1,6 +1,6 @@
 /**
- * StorageViewer - LocalStorage 查看器
- * 作为 ToolMenu 的菜单项
+ * StorageViewer - LocalStorage viewer
+ * As ToolMenu menu item
  */
 
 import { useState } from "react";

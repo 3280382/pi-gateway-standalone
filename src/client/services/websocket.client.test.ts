@@ -1,6 +1,6 @@
 /**
  * WebSocket Client Integration Tests
- * 测试 WebSocket 连接和消息处理 (mock server)
+ * Test WebSocket connection and message handling (mock server)
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

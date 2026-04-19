@@ -1,7 +1,7 @@
 /**
  * useGitStatus - Git状态管理Hook
  *
- * 职责：管理文件项的Git状态显示
+ * Responsibilities:管理文件项的Git状态显示
  * - 当Git模式激活且组件激活时，获取当前目录文件的Git状态
  * - 将Git状态映射到store中的文件项
  * - 处理路径映射（相对路径 vs 绝对路径）

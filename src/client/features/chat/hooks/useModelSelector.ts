@@ -1,7 +1,7 @@
 /**
  * useModelSelector - 模型选择器逻辑 Hook
  *
- * 职责：
+ * Responsibilities:
  * - 管理模型选择器状态
  * - 加载模型列表
  * - 处理模型选择
@@ -21,7 +21,7 @@ export interface UseModelSelectorReturn {
   models: Model[];
   isLoading: boolean;
 
-  // 操作
+  // Actions
   open: () => void;
   close: () => void;
   toggle: () => void;

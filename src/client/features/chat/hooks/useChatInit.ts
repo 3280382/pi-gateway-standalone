@@ -1,9 +1,9 @@
 /**
  * useChatInit - Chat 页面初始化 Hook
  *
- * 职责：
+ * Responsibilities:
  * 1. WebSocket 连接
- * 2. 发送 init 请求（带 workingDir）
+ * 2. Send init 请求（带 workingDir）
  * 3. 处理服务器返回的完整数据，恢复界面
  *
  * 服务器返回数据：
@@ -79,7 +79,7 @@ export function useChatInit(): { isConnecting: boolean } {
       const savedWorkingDir = useWorkspaceStore.getState().workingDir;
       console.log("[ChatInit] Sending init with workingDir:", savedWorkingDir);
 
-      // 3. 发送 init 请求，传入当前工作目录和 sessionFile
+      // 3. Send init 请求，传入当前工作目录和 sessionFile
       // 从 localStorage 获取上次使用的 sessionFile
       const savedSessionFile = useSessionStore.getState().currentSessionFile;
       // 获取用户设置的消息限制

@@ -155,8 +155,8 @@ export function initConnection() {
   wsClient.connect();
 }
 
-// 注：控制器、服务和模型导出已移到各自目录的 index.ts
-// 避免循环依赖。请从以下位置导入：
-// - 控制器: '../controllers'
-// - 服务: '../services'
-// - 模型: '../models'
+// Note: Controller, service, model exports moved
+// Avoid circular dependencies. Import from:
+// - Controllers: '../controllers'
+// - Services: '../services'
+// - Models: '../models'

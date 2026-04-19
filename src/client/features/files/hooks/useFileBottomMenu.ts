@@ -1,7 +1,7 @@
 /**
  * useFileBottomMenu - 文件底部菜单业务逻辑 Hook
  *
- * 职责：管理底部菜单的所有业务逻辑
+ * Responsibilities:管理底部菜单的所有业务逻辑
  * - 新建文件
  * - 删除文件
  * - 树状视图
@@ -26,7 +26,7 @@ export interface UseFileBottomMenuResult {
   // 状态设置
   setNewFileName: (name: string) => void;
 
-  // 操作方法
+  // Actions方法
   handleNewClick: () => void;
   handleConfirmNew: () => Promise<void>;
   handleCancelNew: () => void;

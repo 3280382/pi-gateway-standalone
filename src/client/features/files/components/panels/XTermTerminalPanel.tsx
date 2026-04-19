@@ -301,7 +301,7 @@ export function XTermTerminalPanel({
     term.loadAddon(fitAddon);
     term.open(container);
 
-    // 初始化命令缓冲区
+    // Initialize命令缓冲区
     commandBuffers.current.set(sessionId, "");
 
     // 初始大小调整

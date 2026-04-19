@@ -1,7 +1,7 @@
 /**
  * useImageUpload - 图片上传处理 Hook
  *
- * 职责：
+ * Responsibilities:
  * - 管理图片上传状态
  * - 处理文件选择和 base64 转换
  * - 执行 OCR 文本识别
@@ -24,7 +24,7 @@ export interface UseImageUploadReturn {
   images: ImageUpload[];
   showPreview: boolean;
 
-  // 操作
+  // Actions
   addImages: (files: FileList | null) => void;
   removeImage: (id: string) => void;
   clearImages: () => void;

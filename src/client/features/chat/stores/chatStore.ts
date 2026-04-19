@@ -56,7 +56,7 @@ const createInitialState = () => ({
   inputText: "",
   isInputFocused: false,
   isStreaming: false,
-  isRunning: false, // Pi coding agent turn运行状态
+  isRunning: false, // Pi coding agent turn running status
   streamingContent: "",
   streamingThinking: "",
   streamingThinkings: [] as Array<{ id: string; content: string }>, // 多轮思考支持
@@ -609,7 +609,7 @@ export const useChatStore = create<
             isStreaming: true,
             streamingContent: "",
             streamingThinking: "",
-            streamingThinkings: [], // 初始化多轮思考
+            streamingThinkings: [], // Initialize多轮思考
             streamingToolCalls: new Map(),
             activeTools: new Map(), // 清理上一次的工具状态
             currentStreamingMessage: streamingMessage,

@@ -1,7 +1,7 @@
 /**
  * useChatPanel - ChatPanel 组件业务逻辑 Hook
  *
- * 职责：
+ * Responsibilities:
  * - 管理消息列表自动滚动逻辑
  * - 处理消息发送协调
  * - 处理 bash/slash 命令
@@ -119,7 +119,7 @@ export function useChatPanel(): UseChatPanelReturn {
   const chatController = useChatController();
 
   // ===== [ANCHOR:EFFECTS] =====
-  // 首次加载时滚动到底部，并根据消息数量判断是否有更多历史消息
+  // First load时滚动到底部，并根据消息数量判断是否有更多历史消息
   useEffect(() => {
     const timer = setTimeout(() => {
       if (messagesRef.current) {

@@ -1,7 +1,7 @@
 /**
  * FileBottomMenu - 文件功能底部菜单
  *
- * 职责：纯 UI 渲染
+ * Responsibilities:纯 UI 渲染
  * - 不包含业务逻辑
  * - 通过 useFileBottomMenu hook 获取所有逻辑
  */
@@ -30,12 +30,12 @@ export function FileBottomMenu() {
     handleCancelDelete,
   } = useFileBottomMenu();
 
-  // 导航功能
+  // Navigation功能
   const { navigateUp, navigateHome, canNavigateUp } = useFileNavigation();
-  // 视图和刷新功能
+  // View和刷新功能
   const { viewMode, setViewMode } = useFileStore();
 
-  // 视图选择弹窗状态
+  // View选择弹窗状态
   const [isViewSelectorOpen, setIsViewSelectorOpen] = useState(false);
   const viewBtnRef = useRef<HTMLButtonElement>(null);
 

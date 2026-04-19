@@ -1,7 +1,7 @@
 /**
  * File Operations API - 文件业务操作层
  *
- * 职责：封装文件相关的业务操作 API 调用
+ * Responsibilities:封装文件相关的业务操作 API 调用
  * 不包含状态管理，只负责与服务器通信
  */
 

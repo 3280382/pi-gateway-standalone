@@ -1,10 +1,10 @@
 /**
  * InputArea - Chat Input Component
  *
- * 职责：
- * - 负责消息输入区域的 UI 渲染
- * - 包含输入框、工具栏、命令菜单、文件选择器、图片预览
- * - 不包含业务逻辑，通过 useInputArea hook 处理
+ * Responsibilities:
+ * - Responsible for message input area UI rendering
+ * - Includes input, toolbar, command menu, file picker, image preview
+ * - Business logic handled by useInputArea hook
  */
 
 // ===== [ANCHOR:IMPORTS] =====
@@ -19,11 +19,11 @@ import styles from "./InputArea.module.css";
 interface InputAreaProps {
   value: string;
   isStreaming: boolean;
-  isRunning?: boolean; // Pi coding agent turn运行状态
+  isRunning?: boolean; // Pi coding agent turn running status
   onChange: (text: string) => void;
   onSend: () => void;
   onAbort: () => void;
-  onSteer?: (text: string) => void; // steer模式发送
+  onSteer?: (text: string) => void; // steer mode send
   onBashCommand?: (command: string) => void;
   onSlashCommand?: (command: string, args: string) => void;
   onSendWithImages?: (
@@ -37,10 +37,10 @@ interface InputAreaProps {
   // Session operations
   onCompactSession?: () => void;
   onExportSession?: () => void;
-  // 自动滚屏相关
+  // Auto scroll related
   shouldScrollToBottom?: boolean;
   onToggleScroll?: () => void;
-  // 重新加载消息
+  // Reload messages
   onReloadMessages?: () => void;
   isLoadingMore?: boolean;
 }
@@ -61,10 +61,10 @@ export function InputArea({
   onNewSession,
   onCompactSession,
   onExportSession,
-  // 自动滚屏相关
+  // Auto scroll related
   shouldScrollToBottom = true,
   onToggleScroll,
-  // 重新加载消息
+  // Reload messages
   onReloadMessages,
   isLoadingMore = false,
 }: InputAreaProps) {
@@ -121,7 +121,7 @@ export function InputArea({
         }}
       />
 
-      {/* Tools Menu - 替换Slash Commands */}
+      {/* Tools Menu - Replace Slash Commands */}
       {showToolsMenu && (
         <div className={styles.commandMenu}>
           {onCompactSession && (
@@ -237,10 +237,10 @@ export function InputArea({
             setTimeout(autoResizeTextarea, 0);
           }}
           rows={2}
-          disabled={false} /* isRunning时也可以输入 */
+          disabled={false} /* Can input when isRunning */
         />
         <div className={styles.buttonColumn}>
-          {/* Send按钮 - isRunning时绿色(steer)，否则蓝色(prompt) */}
+          {/* Send button - green when isRunning(steer)，otherwise blue (prompt) */}
           <button
             type="button"
             className={`${styles.sendButton} ${isRunning ? styles.steerButton : styles.promptButton}`}
@@ -249,7 +249,7 @@ export function InputArea({
           >
             <SendIcon />
           </button>
-          {/* Abort按钮 - isRunning时激活(红色)，否则disabled(灰色) */}
+          {/* Abort button - active when isRunning(红色)，otherwise disabled(灰色) */}
           <button
             type="button"
             className={`${styles.abortButton} ${isRunning ? styles.active : styles.disabled}`}
@@ -322,13 +322,13 @@ export function InputArea({
             className={`${styles.toolbarBtn} ${shouldScrollToBottom ? styles.active : ""}`}
             onClick={onToggleScroll}
             title={shouldScrollToBottom ? "Auto-scroll enabled (click to disable)" : "Auto-scroll disabled (click to enable)"}
-            // 滚屏按钮在AI处理时仍然可用，用户应该能控制滚屏状态
+            // Scroll button available during AI processing，User should control scroll state
           >
             <ScrollIcon active={shouldScrollToBottom} />
           </button>
         )}
 
-        {/* New Session按钮 - 放到底部最右侧，与其他toolbar按钮同宽 */}
+        {/* New Session button - place at bottom right，与其他toolbar按钮同宽 */}
         {onNewSession && (
           <button
             type="button"

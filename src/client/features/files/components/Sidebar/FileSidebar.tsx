@@ -25,7 +25,7 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
       // 阻止事件冒泡
       e.stopPropagation();
 
-      // 导航到该目录
+      // Navigation到该目录
       if (onNavigate) {
         onNavigate(node.path);
       }

@@ -1,12 +1,12 @@
 /**
- * UIMarkerTool - UI Marker 工具
- * 职责：点击红色按钮后显示 UI Marker 功能
+ * UIMarkerTool - UI Marker tool
+ * Responsibilities:点击红色按钮后显示 UI Marker 功能
  */
 
 import { useCallback, useState, useEffect } from "react";
 import styles from "@/app/Tools/ToolMenu.module.css";
 
-// 扩展 Window 接口以包含 uiMarker
+// Extend Window interface for uiMarker
 declare global {
   interface Window {
     uiMarker?: {
@@ -18,14 +18,14 @@ declare global {
   }
 }
 
-// localStorage 键
+// localStorage key
 const UI_MARKER_KEY = "UI_MARKER_ENABLED";
 
 export function UIMarkerTool() {
   const [isEnabled, setIsEnabled] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
 
-  // 读取初始状态
+  // Read initial state
   useEffect(() => {
     try {
       const value = localStorage.getItem(UI_MARKER_KEY);
@@ -36,11 +36,11 @@ export function UIMarkerTool() {
     }
   }, []);
 
-  // 激活 UI Marker 功能
+  // Activate UI Marker functionality
   const activate = useCallback(() => {
     setIsActivated(true);
     
-    // 等待 ui-marker.js 加载
+    // Wait for ui-marker.js to load
     const activateMarker = () => {
       if (window.uiMarker) {
         window.uiMarker.activate();
@@ -55,14 +55,14 @@ export function UIMarkerTool() {
     if (window.uiMarker) {
       activateMarker();
     } else {
-      // 等待加载
+      // Wait for loading
       let attempts = 0;
       const checkInterval = setInterval(() => {
         attempts++;
         if (window.uiMarker) {
           clearInterval(checkInterval);
           activateMarker();
-        } else if (attempts > 50) { // 5秒超时
+        } else if (attempts > 50) { // 5 second timeout
           clearInterval(checkInterval);
           console.warn("[UIMarkerTool] window.uiMarker not found after 5 seconds");
         }
@@ -70,7 +70,7 @@ export function UIMarkerTool() {
     }
   }, []);
 
-  // 停用 UI Marker
+  // Deactivate UI Marker
   const deactivate = useCallback(() => {
     if (window.uiMarker) {
       window.uiMarker.deactivate();
@@ -81,7 +81,7 @@ export function UIMarkerTool() {
     console.log("[UIMarkerTool] UI Marker deactivated");
   }, []);
 
-  // 如果未激活，显示红色激活按钮
+  // If not activated, show red activation button
   if (!isActivated) {
     return (
       <button type="button" className={styles.item} onClick={activate}>
@@ -91,7 +91,7 @@ export function UIMarkerTool() {
     );
   }
 
-  // 已激活，显示开关
+  // Activated, show toggle
   return (
     <button type="button" className={styles.item} onClick={deactivate}>
       <span className={styles.menuIcon} style={{ color: "#ff4444" }}>●</span>

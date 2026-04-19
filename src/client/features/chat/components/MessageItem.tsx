@@ -1,13 +1,13 @@
 /**
  * MessageItem - Individual message rendering component
  *
- * 职责：
- * - 渲染单条消息（用户或AI）
- * - 处理消息内容的块级渲染（thinking, tool_use, tool, text）
- * - 将 tool_use 和 tool 结果合并为一个完整的工具调用卡片
+ * Responsibilities:
+ * - Render single message (user or AI)
+ * - Handle message content block rendering（thinking, tool_use, tool, text）
+ * - Merge tool_use and tool resultsinto a complete tool call card
  * - 不包含业务逻辑
  *
- * 结构规范：State → Ref → Effects → Computed → Actions → Render
+ * Structure:State → Ref → Effects → Computed → Actions → Render
  */
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -29,7 +29,7 @@ interface MessageItemProps {
   onRegenerate?: () => void;
 }
 
-// 内容块类型（带原始索引）
+// Content block type (with original index)
 interface IndexedContentBlock extends MessageContent {
   originalIndex: number;
 }
@@ -37,7 +37,7 @@ interface IndexedContentBlock extends MessageContent {
 interface GlassCardProps {
   block: IndexedContentBlock;
   isStreaming?: boolean;
-  isNewMessage?: boolean; // true=流式消息(默认展开), false=历史消息(思考/工具默认折叠)
+  isNewMessage?: boolean; // true=streaming message (default expand), false=historical message(thinking/tool default collapse)
   showThinking: boolean;
   showTools?: boolean;
   messageKind?: Message["kind"];
@@ -60,7 +60,7 @@ function safeString(val: unknown): string {
 }
 
 /**
- * 解析工具参数，提取关键信息用于顶部显示
+ * Parse tool params, extract key infofor top display
  */
 function parseToolSummary(toolName: string, args: string | undefined): string {
   if (!args) return "";
@@ -68,23 +68,23 @@ function parseToolSummary(toolName: string, args: string | undefined): string {
   try {
     const parsed = JSON.parse(args);
 
-    // 文件写入类工具 - 显示文件路径
+    // Files写入类工具 - show file path
     if (["write_file", "create_file", "edit_file", "apply_diff"].includes(toolName)) {
       const path = parsed.path || parsed.file_path || parsed.filepath || parsed.filePath;
       if (path) {
-        // 简化路径显示
+        // Simplify path display
         const shortPath = path.split("/").pop() || path;
         return `→ ${shortPath}`;
       }
     }
 
-    // bash 命令 - 显示命令前20字符
+    // bash command - show first 20 chars of command
     if (toolName === "bash" && parsed.command) {
       const cmd = parsed.command.slice(0, 25);
       return cmd.length < parsed.command.length ? `${cmd}...` : cmd;
     }
 
-    // read/grep 等 - 显示路径
+    // read/grep etc - show path
     if (["read", "grep", "find"].includes(toolName)) {
       const path = parsed.path || parsed.file || parsed.pattern;
       if (path) {
@@ -93,25 +93,25 @@ function parseToolSummary(toolName: string, args: string | undefined): string {
       }
     }
 
-    // 其他工具 - 显示第一个字符串参数
+    // Others工具 - show first string parameter
     for (const key of Object.keys(parsed)) {
       if (typeof parsed[key] === "string" && parsed[key].length > 0) {
         return `${key}: ${parsed[key].slice(0, 25)}${parsed[key].length > 25 ? "..." : ""}`;
       }
     }
   } catch (_e) {
-    // 解析失败返回原始参数的前30字符
+    // Parse failed: return first 30 chars
     return args.slice(0, 30) + (args.length > 30 ? "..." : "");
   }
   return "";
 }
 
 /**
- * 格式化工具参数显示
- * - 第一行显示简要信息（路径、命令等）
- * - 对于写文件类工具，格式化显示文件路径和内容
- * - 对内容部分进行适当的格式化（保留换行，代码样式）
- * - 支持流式字符串 (partialArgs) 和已完成对象 (args)
+ * Formatter utilities参数显示
+ * - First line shows brief info（path, command, etc）
+ * - For file write tools，格式化show file path和内容
+ * - Properly format content part（preserve newlines, code style）
+ * - Support streaming strings (partialArgs) and completed objects (args)
  */
 function formatToolArgs(
   toolName: string,
@@ -119,23 +119,23 @@ function formatToolArgs(
 ): string {
   if (!args) return "";
 
-  // 统一解析为对象
+  // Uniformly parse as object
   let parsed: Record<string, unknown>;
   if (typeof args === "string") {
     try {
       parsed = JSON.parse(args);
     } catch (_e) {
-      // 不是 JSON，返回原始字符串
+      // Not JSON, return raw string
       return args;
     }
   } else {
     parsed = args;
   }
 
-  // 第一行：简要信息
+  // First line: brief info
   let firstLine = "";
 
-  // 提取第一行简要信息
+  // Extract first line brief info
   if (["write_file", "create_file", "edit_file", "apply_diff"].includes(toolName)) {
     const path = parsed.path || parsed.file_path || parsed.filepath || parsed.filePath;
     if (path) firstLine = `// File: ${path}`;
@@ -148,22 +148,22 @@ function formatToolArgs(
     firstLine = `// Dir: ${parsed.path}`;
   }
 
-  // 写文件类工具 - 特殊格式化
+  // File write tools - special formatting
   if (["write_file", "create_file", "edit_file", "apply_diff"].includes(toolName)) {
     const content = parsed.content || parsed.new_content || parsed.newContent || parsed.text || "";
     if (content) {
-      // 格式化：第一行路径，然后空行，然后内容
+      // Format: first line path，then empty line, then content
       return firstLine ? `${firstLine}\n\n${content}` : String(content);
     }
   }
 
-  // 其他工具 - 格式化 JSON，但第一行显示简要信息
+  // Others工具 - 格式化 JSON，但First line shows brief info
   const formattedJson = JSON.stringify(parsed, null, 2);
   return firstLine ? `${firstLine}\n${formattedJson}` : formattedJson;
 }
 
 /**
- * 为内容块添加索引
+ * Add index to content blocks
  */
 function indexContentBlocks(content: MessageContent[]): IndexedContentBlock[] {
   return content.map((item, index) => ({ ...item, originalIndex: index }));
@@ -180,7 +180,7 @@ export const MessageItem = memo(
 
     const blocks = useMemo(() => {
       if (!message.content || !Array.isArray(message.content)) return [];
-      // 为内容块添加索引
+      // Add index to content blocks
       return indexContentBlocks(message.content);
     }, [message.content]);
 
@@ -197,7 +197,7 @@ export const MessageItem = memo(
       );
     }
 
-    // 检测是否为compaction消息
+    // Detect if compaction message
     const isCompaction = message.kind === "compaction";
     
     return (
@@ -207,7 +207,7 @@ export const MessageItem = memo(
             key={`${block.type}-${idx}`}
             block={block}
             isStreaming={message.isStreaming}
-            isNewMessage={message.isStreaming} // 流式消息视为新消息
+            isNewMessage={message.isStreaming} // Streaming message treated as new
             showThinking={showThinking}
             showTools={showTools ?? true}
             messageKind={message.kind}
@@ -237,25 +237,25 @@ function GlassCard({
   messageKind,
 }: GlassCardProps) {
   // ========== 1. State ==========
-  // 默认展开规则：
-  // - 新消息（流式中）：全部展开
-  // - 历史消息：text 展开，thinking/tool 折叠
+  // Default expand rules:
+  // - New messages (streaming): expand all
+  // - Historical: text expand，thinking/tool collapse
   const getDefaultExpanded = () => {
     if (isNewMessage) return true;
     if (block.type === "text") return true;
-    return false; // thinking, tool_use, tool 默认折叠
+    return false; // thinking, tool_use, tool default collapse
   };
   const [isExpanded, setIsExpanded] = useState(getDefaultExpanded);
   const [isCopyVisible, setIsCopyVisible] = useState(false);
 
   // ========== 2. Effects ==========
-  // 只在流式真正结束时（从 true 变为 false）才折叠（针对流式消息）
+  // Only when streaming truly ends（from true to false）collapse (for streaming messages)
   const wasStreamingRef = useRef(isStreaming);
   useEffect(() => {
     const wasStreaming = wasStreamingRef.current;
     wasStreamingRef.current = isStreaming;
 
-    // 只对新消息：流式结束（true -> false）且不是 text 类型时才折叠
+    // Only for new messages: streaming ends（true -> false）and not text type then collapse
     if (isNewMessage && wasStreaming && !isStreaming && block.type !== "text") {
       setIsExpanded(false);
     }
@@ -264,7 +264,7 @@ function GlassCard({
   // ========== 3. Actions ==========
   const toggleExpand = useCallback(
     (e?: React.MouseEvent) => {
-      // 如果点击的是复制按钮或内容区域，不触发折叠
+      // If clicking copy buttonor content area, don't trigger collapse
       if (e) {
         const target = e.target as HTMLElement;
         if (target.closest(`.${styles.btnCopy}`) || target.closest(`.${styles.content}`)) {
@@ -321,22 +321,22 @@ function GlassCard({
     }
 
     case "tool_use": {
-      // 流式中的工具调用或没有执行结果的工具调用
+      // Tool calls in streamingor without execution results
       if (!showTools) return null;
 
       const toolName = block.toolName || "unknown";
       const toolArgs = block.partialArgs ?? block.args;
       const toolStatus = block.status || (isStreaming ? "running" : "pending");
 
-      // 解析参数摘要和格式化
+      // Parse param summary and formatting
       const summary = parseToolSummary(toolName, toolArgs);
       const formattedArgs = formatToolArgs(toolName, toolArgs);
 
-      // 状态显示文本
+      // Status display text
       const statusText = {
-        running: "执行中...",
-        pending: "等待执行...",
-        timeout: "执行超时",
+        running: "Executing...",
+        pending: "Waiting...",
+        timeout: "Execution timeout",
         error: "Execution failed",
       }[toolStatus] || toolStatus;
 
@@ -375,7 +375,7 @@ function GlassCard({
                   <code>{formattedArgs}</code>
                 </pre>
               </div>
-              {/* 显示执行结果（如果有） */}
+              {/* Show execution results (if any) */}
               {block.output && (
                 <div className={styles.toolSection}>
                   <div className={styles.toolSectionLabel}>Output:</div>
@@ -399,24 +399,24 @@ function GlassCard({
     }
 
     case "tool": {
-      // tool 类型包含已完成的工具调用（参数 + 结果）
+      // tool type contains completed calls（参数 + 结果）
       if (!showTools) return null;
 
       const toolName = block.toolName || "unknown";
       const toolArgs = block.args;
       const status = block.error ? "error" : block.output ? "success" : "pending";
 
-      // 格式化参数和结果
+      // Format params and results
       const formattedArgs = formatToolArgs(toolName, toolArgs);
       const resultOutput = block.output || block.error || "";
       const hasResult = !!resultOutput;
 
-      // 完整内容（复制用）
+      // Complete content (for copying)
       const fullContent = hasResult
         ? `${formattedArgs}\n\n// Result:\n${resultOutput}`
         : formattedArgs;
 
-      // 摘要显示在顶部
+      // Summary displayed at top
       const summary = parseToolSummary(
         toolName,
         typeof toolArgs === "string" ? toolArgs : JSON.stringify(toolArgs)
@@ -451,7 +451,7 @@ function GlassCard({
           </div>
           {isExpanded && (
             <div className={styles.content} onClick={(e) => e.stopPropagation()}>
-              {/* 参数部分 */}
+              {/* Parameter section */}
               <div className={styles.toolSection}>
                 <div className={styles.toolSectionLabel}>Arguments:</div>
                 <pre className={styles.toolCode}>
@@ -459,7 +459,7 @@ function GlassCard({
                 </pre>
               </div>
 
-              {/* 结果部分（如果有） */}
+              {/* Result section (if any) */}
               {hasResult && (
                 <div
                   className={`${styles.toolSection} ${block.error ? styles.toolSectionError : styles.toolSectionSuccess}`}
@@ -477,7 +477,7 @@ function GlassCard({
     case "text":
       if (!block.text) return null;
       
-      // 检测是否是 usage 消息
+      // Detect if usage message
       const isUsageMessage = block.text.startsWith("📊 Usage:");
       if (isUsageMessage) {
         return (
@@ -493,7 +493,7 @@ function GlassCard({
         );
       }
       
-      // 根据messageKind确定标签
+      // Determine label by messageKind
       const label = messageKind === "compaction" ? "Compaction" : 
                     messageKind === "export" ? "Export" :
                     messageKind === "usage" ? "Usage" : "Assistant";

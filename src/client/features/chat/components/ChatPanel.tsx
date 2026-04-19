@@ -1,7 +1,7 @@
 /**
  * ChatPanel - Main Chat Container
  *
- * 职责：
+ * Responsibilities:
  * - 负责聊天面板的整体布局
  * - 协调 MessageList 和 InputArea 组件
  * - 不包含业务逻辑，只负责视图组合
@@ -85,10 +85,10 @@ export function ChatPanel() {
           onNewSession={chatPanel.handleNewSession}
           onCompactSession={chatController.compactSession}
           onExportSession={chatController.exportSession}
-          // 自动滚屏相关
+          // Auto scroll related
           shouldScrollToBottom={chatPanel.shouldScrollToBottom}
           onToggleScroll={() => chatPanel.setShouldScrollToBottom(!chatPanel.shouldScrollToBottom)}
-          // 重新加载消息
+          // Reload messages
           onReloadMessages={chatPanel.reloadAllMessages}
           isLoadingMore={chatPanel.isLoadingMore}
         />

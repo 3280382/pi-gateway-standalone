@@ -1,7 +1,7 @@
 /**
  * useFileBrowser - 文件浏览器核心逻辑 Hook
  *
- * 职责：管理文件浏览器的业务逻辑
+ * Responsibilities:管理文件浏览器的业务逻辑
  * - 目录加载（仅在激活状态时）
  * - 错误处理
  * - 与 store 和 service 协调
@@ -42,7 +42,7 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
   const lastLoadedPathRef = useRef<string>("");
   const isInitializedRef = useRef(false);
 
-  // 初始化：如果 FileStore 的 currentBrowsePath 为空，使用 workingDir
+  // Initialize：如果 FileStore 的 currentBrowsePath 为空，使用 workingDir
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!isActive || isInitializedRef.current) return;

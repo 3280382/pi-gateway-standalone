@@ -1,7 +1,7 @@
 /**
  * Terminal Store - 多终端会话状态管理
  *
- * 职责：
+ * Responsibilities:
  * - 管理多个终端会话
  * - 处理终端输出流
  * - 与 TerminalWebSocketService 集成

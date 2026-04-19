@@ -1,6 +1,6 @@
 /**
- * 主导出文件
- * 导出所有模块供外部使用
+ * Main export file
+ * Export all modules for external use
  */
 
 // UI

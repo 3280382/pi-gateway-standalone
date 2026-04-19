@@ -1,10 +1,10 @@
 /**
- * WebSocket Service - 通用 WebSocket 连接服务
+ * WebSocket Service - General WebSocket service
  *
- * 职责（重构后）：
- * - 仅提供通用 WebSocket 连接管理
- * - 不包含任何 feature 特定的业务方法
- * - Feature 特定方法请在各自 feature 中封装
+ * Responsibilities (after refactoring):
+ * - Only provide general WebSocket connection
+ * - No feature-specific business methods
+ * - Feature-specific methods in respective features
  */
 
 // ===== [ANCHOR:IMPORTS] =====
@@ -123,7 +123,7 @@ export class WebSocketService {
   }
 
   /**
-   * 建立 WebSocket 连接（带超时）
+   * Establish WebSocket connection (with timeout)
    */
   connect(url?: string, timeoutMs = 3000): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -137,11 +137,11 @@ export class WebSocketService {
 
         wsLog.info(`Connecting to ${wsUrl}`);
 
-        // 设置连接超时
+        // Set connection timeout
         const timeoutId = setTimeout(() => {
           if (this.ws?.readyState !== WebSocket.OPEN) {
             this.ws?.close();
-            reject(new Error(`WebSocket 连接超时 (${timeoutMs}ms)`));
+            reject(new Error(`WebSocket connection timeout (${timeoutMs}ms)`));
           }
         }, timeoutMs);
 
@@ -168,7 +168,7 @@ export class WebSocketService {
 
           this.emit("disconnected", { code: event.code, reason: event.reason });
 
-          // 自动重连
+          // Auto reconnect
           if (
             this.reconnectAttempts < this.maxReconnectAttempts &&
             this.connectionStatus.lastConnected
@@ -209,7 +209,7 @@ export class WebSocketService {
   }
 
   /**
-   * 断开 WebSocket 连接
+   * Disconnect WebSocket connection
    */
   disconnect(code?: number, reason?: string): void {
     if (this.ws) {
@@ -221,8 +221,8 @@ export class WebSocketService {
   }
 
   /**
-   * 发送消息（通用方法）
-   * 注意：后端期望直接的消息对象，而不是嵌套在 data 字段中
+   * Send message (general method)
+   * Note: Backend expects direct message object，Not nested in data field
    */
   send<T = any>(type: string, data?: T): boolean {
     if (!this.ws) {
@@ -251,7 +251,7 @@ export class WebSocketService {
   }
 
   /**
-   * 订阅事件
+   * Subscribe to event
    */
   on(event: WebSocketEvent, handler: Function): () => void {
     if (!this.eventHandlers.has(event)) {
@@ -269,7 +269,7 @@ export class WebSocketService {
   }
 
   /**
-   * 取消订阅事件
+   * 取消Subscribe to event
    */
   off(event: WebSocketEvent, handler: Function): void {
     const handlers = this.eventHandlers.get(event);
@@ -279,28 +279,28 @@ export class WebSocketService {
   }
 
   /**
-   * 获取连接状态
+   * Get connection status
    */
   getConnectionStatus(): ConnectionStatus {
     return { ...this.connectionStatus };
   }
 
   /**
-   * 是否已连接
+   * Is connected
    */
   get isConnected(): boolean {
     return this.ws?.readyState === WebSocket.OPEN;
   }
 
   /**
-   * 获取 WebSocket 状态
+   * Get WebSocket status
    */
   get readyState(): number {
     return this.ws?.readyState ?? WebSocket.CLOSED;
   }
 
   /**
-   * 获取 WebSocket URL（用于调试）
+   * Get WebSocket URL (for debugging)
    */
   getWebSocketUrl(): string {
     const backendHost = "127.0.0.1:3000";
@@ -311,26 +311,26 @@ export class WebSocketService {
   }
 
   /**
-   * 处理传入消息
+   * Handle incoming message
    */
   private handleIncomingMessage(message: any): void {
     const { type, timestamp, sessionId } = message;
     const data = message;
 
-    // 只在非高频事件时打印日志
+    // Only log for non-high-frequency events
     if (type !== "content_delta" && type !== "thinking_delta" && type !== "toolcall_delta") {
       wsLog.info(`Received: ${type}`);
     }
 
-    // 触发通用消息事件
+    // Trigger general message event
     this.emit("message", { type, data, timestamp, sessionId });
 
-    // 触发特定类型事件
+    // Trigger specific type event
     this.emitSpecificEvent(type, data);
   }
 
   /**
-   * 触发特定类型事件
+   * Trigger specific type event
    */
   private emitSpecificEvent(type: string, data: any): void {
     const eventMap: Record<string, WebSocketEvent> = {
@@ -403,7 +403,7 @@ export class WebSocketService {
   }
 
   /**
-   * 触发事件
+   * Trigger event
    */
   private emit(event: WebSocketEvent, data?: any): void {
     const handlers = this.eventHandlers.get(event);
@@ -419,7 +419,7 @@ export class WebSocketService {
   }
 
   /**
-   * 设置事件处理器
+   * Set event handler
    */
   private setupEventHandlers(): void {
     const events: WebSocketEvent[] = [

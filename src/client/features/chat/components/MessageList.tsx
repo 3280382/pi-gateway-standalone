@@ -33,25 +33,25 @@ export function MessageList({
 }: MessageListProps) {
   console.log("[MessageList] Rendering with messages:", messages.length);
   
-  // 获取流式状态和工具状态
+  // Get streaming and tool status
   const streamingContent = useChatStore((state) => state.streamingContent);
   const streamingThinking = useChatStore((state) => state.streamingThinking);
   const streamingToolCalls = useChatStore((state) => state.streamingToolCalls);
   const activeTools = useChatStore((state) => state.activeTools);
 
-  // 构建流式消息内容
+  // Build streaming message content
   const streamingMessageWithContent = useMemo(() => {
     if (!currentStreamingMessage) return null;
 
     const content: MessageContent[] = [];
 
-    // 获取已完成的工具 ID 集合
+    // Get completed tool ID set
     const completedToolIds = new Set(activeTools.keys());
 
-    // 已固化的内容 - tool_use 保持原样显示，通过 status 字段更新状态
+    // Solidified content - tool_use display as-is，update status via status field
     if (currentStreamingMessage.content?.length) {
       const processedContent = currentStreamingMessage.content.map((c) => {
-        // 如果 content 中的 tool_use 有对应的 activeTool，更新其状态
+        // If tool_use in content has activeTool，update its status
         if (c.type === "tool_use" && c.toolCallId && completedToolIds.has(c.toolCallId)) {
           const tool = activeTools.get(c.toolCallId);
           return {
@@ -61,7 +61,7 @@ export function MessageList({
             error: tool?.error,
           };
         }
-        // 如果 tool_use 没有对应的 activeTool，标记为 pending 状态
+        // If tool_use has no activeTool，mark as pending status
         if (c.type === "tool_use" && c.toolCallId && !completedToolIds.has(c.toolCallId)) {
           return {
             ...c,
@@ -73,12 +73,12 @@ export function MessageList({
       content.push(...processedContent);
     }
 
-    // 当前流式内容
+    // Current streaming content
     if (streamingThinking) {
       content.push({ type: "thinking", thinking: streamingThinking });
     }
 
-    // 流式中的工具调用（只添加不在 content 中的，或更新已有的）
+    // Tool calls in streaming（only add those not in content，or update existing）
     streamingToolCalls.forEach((tool) => {
       const existingIndex = content.findIndex(
         (c) => c.type === "tool_use" && c.toolCallId === tool.id
@@ -86,7 +86,7 @@ export function MessageList({
       const activeTool = activeTools.get(tool.id);
       
       if (existingIndex >= 0) {
-        // 更新已有的 tool_use，添加 output
+        // Update existing tool_use, add output
         if (activeTool?.output || activeTool?.error) {
           content[existingIndex] = {
             ...content[existingIndex],

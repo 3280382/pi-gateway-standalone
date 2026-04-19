@@ -15,7 +15,7 @@ export interface UseChatMessagesReturn {
   // UI 状态
   showThinking: boolean;
 
-  // 操作
+  // Actions
   toggleMessageCollapse: (messageId: string) => void;
   toggleThinkingCollapse: (messageId: string) => void;
   toggleToolsCollapse: (messageId: string) => void;

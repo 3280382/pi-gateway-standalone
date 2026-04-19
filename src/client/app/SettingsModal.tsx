@@ -1,5 +1,5 @@
 /**
- * SettingsModal - 全局设置弹窗
+ * SettingsModal - Global settings modal
  */
 
 import { useEffect } from "react";
@@ -9,12 +9,12 @@ import { type FontSize, type Theme, useAppStore } from "@/stores/appStore";
 export function SettingsModal() {
   const { theme, setTheme, fontSize, setFontSize } = useAppStore();
 
-  // 应用主题到 document.body
+  // Apply theme to document.body
   useEffect(() => {
     document.body.setAttribute("data-theme", theme);
   }, [theme]);
 
-  // 应用字体大小到 CSS 变量
+  // Apply font size to CSS variables
   useEffect(() => {
     const sizes = {
       tiny: "12px",

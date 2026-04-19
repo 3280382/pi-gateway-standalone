@@ -1,7 +1,7 @@
 /**
  * useTodos - Todo列表管理 Hook
  *
- * 职责：
+ * Responsibilities:
  * - 加载工作目录的todo列表
  * - 缓存并按文件路径分组
  * - 提供刷新功能

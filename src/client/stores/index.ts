@@ -1,5 +1,5 @@
 /**
- * Global Stores - 全局状态管理
+ * Global Stores - Global state management
  */
 
 export { useAppStore } from "./appStore";

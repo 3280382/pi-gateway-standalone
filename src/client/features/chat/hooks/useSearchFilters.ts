@@ -1,7 +1,7 @@
 /**
  * useSearchFilters - 搜索过滤逻辑 Hook
  *
- * 职责：
+ * Responsibilities:
  * - 管理搜索查询和过滤器状态
  * - 处理搜索查询变化
  * - 处理过滤器变化
@@ -24,7 +24,7 @@ export interface UseSearchFiltersReturn {
   hasActiveFilters: boolean;
   activeFilterCount: number;
 
-  // 操作
+  // Actions
   setQuery: (query: string) => void;
   clearQuery: () => void;
   toggleFilter: (key: keyof SearchFilters) => void;

@@ -1,13 +1,13 @@
 /**
- * Persist Config - App 全局持久化配置
+ * Persist Config - App global persistence config
  *
- * 职责：
- * - App 级别的持久化配置
- * - 聚合各 feature 的配置供调试使用
+ * Responsibilities:
+ * - App-level persistence configuration
+ * - Aggregate feature configs for debugging
  *
- * 命名规范：
+ * Naming convention:
  * - App: pi:app:{store}
- * - 各 feature 引用自己的配置文件
+ * - Each feature references its own config
  */
 
 import { CHAT_STORAGE_KEYS } from "@/features/chat/stores/persist.config";
@@ -19,7 +19,7 @@ import { FILES_STORAGE_KEYS } from "@/features/files/stores/persist.config";
 
 export const APP_STORAGE_KEYS = {
   APP_GLOBAL: "pi:app:global",
-  APP_WORKSPACE: "pi:app:workspace", // 全局工作目录（Chat & File 共享）
+  APP_WORKSPACE: "pi:app:workspace", // Global working directory (shared)
 } as const;
 
 // ============================================================================
@@ -39,11 +39,11 @@ export const APP_GLOBAL_PERSIST = ["currentView", "theme", "fontSize"] as const;
 
 /** App Workspace Store - 持久化字段（全局工作目录） */
 // 注意：currentBrowsePath 现在由 FileStore (pi:files:browser) 持久化
-// workspaceStore 只保留 workingDir
+// workspaceStore only keeps workingDir
 export const APP_WORKSPACE_PERSIST = ["workingDir"] as const;
 
 // ============================================================================
-// 聚合所有 Storage Keys（供调试使用）
+// Aggregate all Storage Keys (for debugging)
 // ============================================================================
 
 export const ALL_STORAGE_KEYS = {
@@ -53,10 +53,10 @@ export const ALL_STORAGE_KEYS = {
 } as const;
 
 // ============================================================================
-// 调试工具
+// Debug tools
 // ============================================================================
 
-/** 打印所有持久化状态（开发环境使用） */
+/** Print all persisted states (dev use) */
 export function inspectPersistedState(): void {
   if (process.env.NODE_ENV !== "development") return;
 
@@ -82,7 +82,7 @@ export function inspectPersistedState(): void {
   console.groupEnd();
 }
 
-/** 清空所有持久化状态 */
+/** Clear all persisted states */
 export function clearPersistedState(): void {
   Object.values(ALL_STORAGE_KEYS).forEach((key) => {
     localStorage.removeItem(key);
@@ -90,7 +90,7 @@ export function clearPersistedState(): void {
   console.log("[Persist] All states cleared");
 }
 
-/** 暴露到 window 供调试（开发环境） */
+/** Expose to window for debugging (dev) */
 if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
   (window as any).__PI_PERSIST = {
     inspect: inspectPersistedState,

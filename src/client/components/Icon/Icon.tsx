@@ -1,28 +1,28 @@
 /**
- * Icon - 统一图标组件
+ * Icon - Unified icon component
  *
- * 职责：
- * - 纯展示时：渲染 SVG 图标
- * - 有 onClick 时：自动变成按钮
- * - 支持文字组合
- * - 统一管理所有 SVG 图标
+ * Responsibilities:
+ * - When purely displaying: render SVG icon
+ * - When onClick present: automatically becomes button
+ * - Supports text combination
+ * - Unified management of all SVG icons
  */
 
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from "react";
 import styles from "./Icon.module.css";
 
 export type IconName =
-  // 导航
+  // Navigation
   | "leftArrow"
   | "rightArrow"
   | "upArrow"
   | "downArrow"
-  // 视图
+  // View
   | "chat"
   | "files"
   | "settings"
   | "tools"
-  // 操作
+  // Actions
   | "bug"
   | "robot"
   | "check"
@@ -32,12 +32,12 @@ export type IconName =
   | "edit"
   | "refresh"
   | "document"
-  // 文件
+  // Files
   | "folder"
   | "file"
   | "grid"
   | "list"
-  // 其他
+  // Others
   | "moon"
   | "sun"
   | "log"
@@ -48,30 +48,30 @@ export type IconName =
   | "target";
 
 export interface IconProps {
-  /** 图标名称 */
+  /** Icon name */
   name: IconName;
-  /** 图标尺寸 */
+  /** Icon size */
   size?: "xs" | "sm" | "md" | "lg" | "xl" | number;
-  /** 颜色 */
+  /** Color */
   color?: string;
-  /** 自定义类名 */
+  /** Custom class name */
   className?: string;
-  /** 自定义样式 */
+  /** Custom style */
   style?: CSSProperties;
 }
 
 export interface IconButtonProps
   extends IconProps,
     Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "name"> {
-  /** 按钮文字（可选） */
+  /** Button text (optional) */
   label?: string;
-  /** 图标位置 */
+  /** Icon position */
   iconPosition?: "left" | "right";
-  /** 按钮变体 */
+  /** Button variant */
   variant?: "default" | "primary" | "ghost" | "danger" | "toggle";
-  /** 是否激活（用于 toggle 变体） */
+  /** Whether active (for toggle variant) */
   isActive?: boolean;
-  /** 后缀内容（如 check 标记） */
+  /** Suffix content (e.g., check mark) */
   suffix?: ReactNode;
 }
 
@@ -84,7 +84,7 @@ const sizeMap = {
 };
 
 /**
- * Icon - 纯图标展示
+ * Icon - Pure icon display
  */
 export function Icon({
   name,
@@ -126,8 +126,8 @@ export function Icon({
 }
 
 /**
- * IconButton - 带按钮功能的图标
- * 自动根据是否有 onClick 决定渲染方式
+ * IconButton - Icon with button functionality
+ * Automatically determines rendering based on onClick
  */
 export function IconButton({
   name,
@@ -143,7 +143,7 @@ export function IconButton({
   onClick,
   ...props
 }: IconButtonProps) {
-  // 如果没有 onClick，当作纯图标渲染
+  // If no onClick, render as pure icon
   if (!onClick) {
     return <Icon name={name} size={size} className={className} />;
   }
@@ -182,14 +182,14 @@ export function IconButton({
 }
 
 /**
- * IconToggle - 带切换状态的图标按钮
+ * IconToggle - Icon button with toggle state
  */
 interface IconToggleProps extends Omit<IconButtonProps, "name" | "isActive"> {
-  /** 激活状态图标 */
+  /** Active state icon */
   activeIcon: IconName;
-  /** 非激活状态图标 */
+  /** 非Active state icon */
   inactiveIcon: IconName;
-  /** 当前是否激活 */
+  /** Currently active */
   isActive: boolean;
 }
 
@@ -204,9 +204,9 @@ export function IconToggle({ activeIcon, inactiveIcon, isActive, ...props }: Ico
   );
 }
 
-// 图标定义
+// Icon definitions
 const icons: Record<IconName, ReactNode> = {
-  // 导航
+  // Navigation
   leftArrow: (
     <>
       <path d="M19 12H5" />
@@ -232,7 +232,7 @@ const icons: Record<IconName, ReactNode> = {
     </>
   ),
 
-  // 视图
+  // View
   chat: (
     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
   ),
@@ -250,7 +250,7 @@ const icons: Record<IconName, ReactNode> = {
     </>
   ),
 
-  // 操作
+  // Actions
   bug: (
     <>
       <path d="m8 2 1.88 1.88" />
@@ -318,7 +318,7 @@ const icons: Record<IconName, ReactNode> = {
     </>
   ),
 
-  // 文件
+  // Files
   folder: <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />,
   file: (
     <>
@@ -345,7 +345,7 @@ const icons: Record<IconName, ReactNode> = {
     </>
   ),
 
-  // 其他
+  // Others
   moon: <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />,
   sun: (
     <>

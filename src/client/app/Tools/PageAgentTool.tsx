@@ -1,6 +1,6 @@
 /**
- * PageAgentTool - Page Agent 工具
- * 职责：加载/控制 page-agent
+ * PageAgentTool - Page Agent tool
+ * Responsibilities:加载/控制 page-agent
  */
 
 import { useCallback, useState } from "react";
@@ -12,7 +12,7 @@ export function PageAgentTool() {
 
   const toggle = useCallback(() => {
     if (!isLoaded) {
-      // 首次加载
+      // First load
       if (!document.getElementById("page-agent-script")) {
         const script = document.createElement("script");
         script.id = "page-agent-script";
@@ -23,7 +23,7 @@ export function PageAgentTool() {
       setIsLoaded(true);
       setIsVisible(true);
     } else {
-      // 切换显隐
+      // Toggle visibility
       const mask = document.querySelector(".page-agent-mask") as HTMLElement;
       if (mask) {
         if (isVisible) {

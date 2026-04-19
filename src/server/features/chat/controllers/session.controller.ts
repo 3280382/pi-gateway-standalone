@@ -165,7 +165,7 @@ You are Pi Coding Agent, an AI assistant that helps developers write, debug, and
 import { serverSessionManager } from "../agent-session/session-manager";
 
 /**
- * 获取活跃会话列表
+ * Get active session list
  */
 export async function getActiveSessions(req: Request, res: Response) {
   const workingDir = req.query.workingDir as string;

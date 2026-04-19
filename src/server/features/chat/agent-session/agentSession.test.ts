@@ -19,7 +19,7 @@ describe("Agent Session", () => {
   let wsUrl: string;
 
   beforeAll(async () => {
-    logger.info("初始化 Agent Session 测试");
+    logger.info("Initializing Agent Session test");
     await server.start();
     const port = process.env.TEST_PORT || 3000;
     wsUrl = `ws://127.0.0.1:${port}/ws`;
@@ -31,7 +31,7 @@ describe("Agent Session", () => {
   });
 
   it("creates session with working directory", async () => {
-    await reporter.runTest("创建工作目录会话", async () => {
+    await reporter.runTest("Create working directory session", async () => {
       const client = new TestWebSocketClient(wsUrl);
       await client.connect(wsUrl);
 
@@ -49,14 +49,14 @@ describe("Agent Session", () => {
       );
 
       expect(response).toBeDefined();
-      logger.info("会话已创建", { workingDir, response });
+      logger.info("Session created", { workingDir, response });
 
       client.disconnect();
     });
   });
 
   it("maintains session state across messages", async () => {
-    await reporter.runTest("跨消息保持会话状态", async () => {
+    await reporter.runTest("Maintain session state across messages", async () => {
       const client = new TestWebSocketClient(wsUrl);
       await client.connect(wsUrl);
 
@@ -65,29 +65,29 @@ describe("Agent Session", () => {
         5000
       );
 
-      // 初始化
+      // Initialize
       client.send("init", { workingDir: "/root" });
       await client.waitForMessage(
         (m) => m.type === "init_ack" || m.type === "initialized",
         5000
       );
 
-      // 发送第一个消息
+      // Send first message
       client.send("prompt", { text: "Message 1" });
       await delay(1000);
 
-      // 发送第二个消息
+      // Send second message
       client.send("prompt", { text: "Message 2" });
       await delay(1000);
 
-      logger.info("多条消息已发送，会话状态保持");
+      logger.info("Multiple messages sent, session state maintained");
 
       client.disconnect();
     });
   });
 
   it("handles model parameter changes", async () => {
-    await reporter.runTest("处理模型参数变更", async () => {
+    await reporter.runTest("Handle model parameter changes", async () => {
       const client = new TestWebSocketClient(wsUrl);
       await client.connect(wsUrl);
 
@@ -102,7 +102,7 @@ describe("Agent Session", () => {
         5000
       );
 
-      // 设置模型参数
+      // Set model parameters
       client.send("set_model", {
         model: "test-model",
         temperature: 0.5,
@@ -113,9 +113,9 @@ describe("Agent Session", () => {
           (m) => m.type === "model_set" || m.type === "ack",
           5000
         );
-        logger.info("模型参数已设置", response);
+        logger.info("Model parameters set", response);
       } catch {
-        logger.info("模型参数设置被静默处理");
+        logger.info("Model parameter setting silently handled");
       }
 
       client.disconnect();

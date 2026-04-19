@@ -1,7 +1,7 @@
 /**
  * File Store - 文件浏览器状态管理
  *
- * 职责：纯状态管理
+ * Responsibilities:纯状态管理
  * - 不包含业务逻辑
  * - 不包含 API 调用
  * - 只提供状态读取和设置方法
@@ -24,7 +24,7 @@ import { FILES_BROWSER_PERSIST, FILES_STORAGE_KEYS, FILES_STORAGE_VERSION } from
 // ============================================================================
 
 export interface FileState {
-  // 文件浏览状态（注意：workingDir 已从全局 workspaceStore 获取）
+  // Files浏览状态（注意：workingDir 已从全局 workspaceStore 获取）
   // currentBrowsePath: 当前浏览的绝对路径（用于 grid/list/tree 显示）
   currentBrowsePath: string;
   parentPath: string;
@@ -69,7 +69,7 @@ export interface FileState {
 }
 
 export interface FileActions {
-  // 文件操作
+  // Files操作
   setCurrentBrowsePath: (path: string) => void;
   setParentPath: (path: string) => void;
   setItems: (items: FileItem[]) => void;
@@ -130,7 +130,7 @@ export const useFileStore = create<FileState & FileActions>()(
   devtools(
     persist(
       (set, get) => ({
-        // 初始状态
+        // Initial state
         // workingDir 已从全局 workspaceStore 获取
         currentBrowsePath: "/root",
         parentPath: "/",

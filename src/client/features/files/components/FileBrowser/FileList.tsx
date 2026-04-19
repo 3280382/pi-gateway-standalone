@@ -1,7 +1,7 @@
 /**
  * FileList - List view for file browser
  *
- * 职责：纯 UI 渲染
+ * Responsibilities:纯 UI 渲染
  * - 无业务逻辑
  * - 通过 useFileItemActions 获取所有交互处理器
  */

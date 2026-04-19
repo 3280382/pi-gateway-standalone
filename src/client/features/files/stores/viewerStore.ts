@@ -1,12 +1,12 @@
 /**
  * Viewer Store - 文件查看器和终端状态管理
  *
- * 职责：
+ * Responsibilities:
  * - 管理文件查看器状态（查看、编辑、执行模式）
  * - 管理终端状态（输出、命令执行）
  * - 合并原 fileViewerStore 和 terminalStore
  *
- * 结构规范：State → Actions
+ * Structure:State → Actions
  */
 
 import { create } from "zustand";
@@ -18,7 +18,7 @@ import { create } from "zustand";
 export type ViewerMode = "view" | "edit" | "execute";
 
 export interface ViewerState {
-  // 文件查看器状态
+  // Files查看器状态
   isOpen: boolean;
   filePath: string;
   fileName: string;
@@ -41,7 +41,7 @@ export interface ViewerState {
 }
 
 interface ViewerActions {
-  // 文件查看器操作
+  // Files查看器操作
   openViewer: (path: string, name: string, mode: ViewerMode) => void;
   openViewerWithContent: (name: string, content: string, mode?: ViewerMode) => void;
   closeViewer: () => void;
@@ -72,7 +72,7 @@ interface ViewerActions {
 
 export const useViewerStore = create<ViewerState & ViewerActions>()((set) => ({
   // ========== 1. State ==========
-  // 文件查看器初始状态
+  // Files查看器初始状态
   isOpen: false,
   filePath: "",
   fileName: "",
@@ -94,7 +94,7 @@ export const useViewerStore = create<ViewerState & ViewerActions>()((set) => ({
   isExecuting: false,
 
   // ========== 2. Actions ==========
-  // 文件查看器
+  // Files查看器
   openViewer: (path, name, mode) => {
     console.log("[ViewerStore] openViewer:", { path, name, mode });
     set({

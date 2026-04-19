@@ -1,18 +1,18 @@
 /**
- * Workspace Store - 全局工作区状态管理
+ * Workspace Store - Global workspace state
  *
- * 职责：
- * - 统一管理当前工作目录（Chat 和 File 共用）
- * - 影响 Chat 的 session 文件选择
- * - 影响 File 的 todo 根目录
- * - 持久化到 localStorage
+ * Responsibilities:
+ * - Unified working directory (shared)
+ * - Affects Chat session file selection
+ * - Affects File todo root directory
+ * - Persist to localStorage
  */
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { APP_STORAGE_KEYS, APP_STORAGE_VERSION, APP_WORKSPACE_PERSIST } from "./persist.config";
 
-// 延迟导入以避免循环依赖
+// Delay import to avoid circular dependency
 let sidebarStore: typeof import("@/features/chat/stores/sidebarStore") | null = null;
 let sessionStore: typeof import("@/features/chat/stores/sessionStore") | null = null;
 
@@ -31,7 +31,7 @@ function getSessionStore() {
 }
 
 export interface WorkspaceState {
-  // 当前工作目录（项目根目录）- 这是真正持久化的工作目录
+  // Current working directory (project root)- 这是真正持久化的工作目录
   workingDir: string;
 }
 
@@ -43,14 +43,14 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
   devtools(
     persist(
       (set) => ({
-        // 初始状态
+        // Initial state
         workingDir: "/root",
 
-        // 设置工作目录（同时同步到 sidebarStore 和 sessionStore）
+        // Set working directory (sync to stores)
         setWorkingDir: (workingDir) => {
           console.log("[WorkspaceStore] setWorkingDir called:", workingDir);
 
-          // 同步更新 sidebarStore 的 workingDir（包含 path 和 displayName 的对象）
+          // Sync update sidebarStore workingDir（包含 path 和 displayName 的对象）
           try {
             const { useSidebarStore } = getSidebarStore();
             const sidebarState = useSidebarStore.getState();
@@ -65,11 +65,11 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
               );
             }
           } catch (e) {
-            // sidebarStore 可能尚未初始化，忽略错误
+            // sidebarStore may not be initialized
             console.log("[WorkspaceStore] sidebarStore not ready:", e);
           }
 
-          // 同步更新 sessionStore 的 workingDir（字符串）
+          // Sync update sessionStore workingDir
           try {
             const { useSessionStore } = getSessionStore();
             const sessionState = useSessionStore.getState();
@@ -83,7 +83,7 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
               );
             }
           } catch (e) {
-            // sessionStore 可能尚未初始化，忽略错误
+            // sessionStore may not be initialized
             console.log("[WorkspaceStore] sessionStore not ready:", e);
           }
 

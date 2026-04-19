@@ -559,7 +559,7 @@ export async function batchMove(req: Request, res: Response) {
         // 检查目标是否已存在
         try {
           await stat(destPath);
-          // 文件已存在，添加数字后缀
+          // Files已存在，添加数字后缀
           const ext = path.extname(fileName);
           const base = path.basename(fileName, ext);
           let newDestPath = destPath;

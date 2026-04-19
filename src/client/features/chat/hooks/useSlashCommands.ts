@@ -1,7 +1,7 @@
 /**
  * useSlashCommands - Slash Command 处理 Hook
  *
- * 职责：
+ * Responsibilities:
  * - 管理 slash command 选择器状态
  * - 过滤命令列表
  * - 处理命令选择
@@ -23,7 +23,7 @@ export interface UseSlashCommandsReturn {
   selectedIndex: number;
   filteredCommands: SlashCommand[];
 
-  // 操作
+  // Actions
   open: () => void;
   close: () => void;
   setFilter: (filter: string) => void;

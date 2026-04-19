@@ -1,7 +1,7 @@
 /**
  * Files Feature - Type Definitions
  *
- * 职责：前端文件功能特有的基础类型定义
+ * Responsibilities:前端文件功能特有的基础类型定义
  * 注意：FileState/FileActions 已内联到 fileStore.ts
  */
 

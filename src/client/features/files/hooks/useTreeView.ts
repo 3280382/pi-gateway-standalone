@@ -1,7 +1,7 @@
 /**
  * useTreeView - 树形视图数据获取 Hook
  *
- * 职责：为TreeView组件提供全量静态树形数据
+ * Responsibilities:为TreeView组件提供全量静态树形数据
  * 服务端过滤（normal模式），客户端搜索过滤
  */
 

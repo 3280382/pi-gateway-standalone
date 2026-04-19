@@ -1,7 +1,7 @@
 /**
  * useSidebarVisibility - 通知服务器侧边栏可见性状态
  *
- * 职责：
+ * Responsibilities:
  * - 当侧边栏打开/关闭时通知服务器
  * - 服务器根据此状态决定是否广播 session 状态
  */

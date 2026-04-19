@@ -1,7 +1,7 @@
 /**
  * Session Manager - 统一会话管理模块
  *
- * 职责：
+ * Responsibilities:
  * 1. 封装 session 生命周期管理（切换目录、选择 session、恢复 session）
  * 2. 协调 sidebarStore、sessionStore、workspaceStore、chatStore 的更新
  * 3. 所有操作使用统一的 initChatWorkingDirectory API

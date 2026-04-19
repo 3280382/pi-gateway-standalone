@@ -1,7 +1,7 @@
 /**
  * useFileNavigation - 文件导航逻辑 Hook
  *
- * 职责：管理文件浏览器的导航逻辑
+ * Responsibilities:管理文件浏览器的导航逻辑
  * - 在文件浏览器中导航（只改变 currentBrowsePath，不改变全局 workingDir）
  */
 

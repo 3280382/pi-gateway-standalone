@@ -1,7 +1,7 @@
 /**
  * File API - 文件操作
  *
- * 职责：
+ * Responsibilities:
  * - 提供文件相关的 API 调用
  * - 不包含业务逻辑，纯数据访问层
  */
@@ -234,7 +234,7 @@ export function getFileExtension(filename: string): string {
   return parts[parts.length - 1].toLowerCase();
 }
 
-// 检查路径是否存在
+// Check if path exists
 export async function checkPathExists(path: string): Promise<boolean> {
   try {
     const response = await fetch("/api/files/file/browse", {

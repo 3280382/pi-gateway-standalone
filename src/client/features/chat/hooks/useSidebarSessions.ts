@@ -1,7 +1,7 @@
 /**
  * useSidebarSessions - Sidebar Sessions 管理 Hook
  *
- * 职责：
+ * Responsibilities:
  * - 从 WebSocket init 响应获取 sessions（不再使用 HTTP API）
  * - 提供手动刷新功能（如果需要）
  *

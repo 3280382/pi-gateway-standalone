@@ -6,7 +6,7 @@
 SESSION_NAME="gateway-dev"
 GATEWAY_DIR="/root/pi-gateway-standalone"
 
-# 颜色定义
+# Color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -147,7 +147,7 @@ clear_cache() {
 
 # 函数：检查状态
 status() {
-    echo -e "${BLUE}检查服务状态...${NC}"
+    echo -e "${BLUE}Checking service status...${NC}"
     
     # 前端状态
     FRONTEND_PID=$(pgrep -f "vite --host 127.0.0.1" | head -1)
@@ -241,7 +241,7 @@ case "${1:-}" in
     *)
         echo "Gateway Tmux 开发环境管理"
         echo ""
-        echo "用法: $0 <command>"
+        echo "Usage: $0 <command>"
         echo ""
         echo "会话管理:"
         echo "  create              创建新的 tmux 会话"

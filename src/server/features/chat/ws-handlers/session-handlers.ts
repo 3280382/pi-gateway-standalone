@@ -28,7 +28,7 @@ export async function handleInit(
 ): Promise<void> {
   const { workingDir: clientWorkingDir, sessionFile: clientSessionFile, messageLimit = 100 } = payload;
 
-  // 1. 确定工作目录
+  // 1. Determine working directory
   const workingDir = clientWorkingDir || process.cwd();
 
   if (!existsSync(workingDir)) {
@@ -36,7 +36,7 @@ export async function handleInit(
     return;
   }
 
-  // 2. 获取或创建 session（ServerSessionManager 处理复用逻辑）
+  // 2. Get or create session (ServerSessionManager handles reuse)
   const session = await serverSessionManager.getOrCreateSession(
     workingDir,
     ctx.ws,
@@ -49,7 +49,7 @@ export async function handleInit(
     throw new Error("Failed to create or get session");
   }
 
-  // 2.5 设置客户端选择的 session（用于严格消息路由）
+  // 2.5 Set client-selected session (for strict message routing)
   const sessionShortId = extractShortSessionId(session.session?.sessionFile || "");
   if (sessionShortId) {
     serverSessionManager.setClientSelectedSession(ctx.ws, sessionShortId);
@@ -58,13 +58,13 @@ export async function handleInit(
     logger.info(`[handleInit] Client selected session: ${sessionShortId}`);
   }
 
-  // 3. 构建响应数据
-  // 传入 clientSessionFile 确保使用正确的 session 文件路径
+  // 3. Build response data
+  // Pass clientSessionFile to ensure correct session file path
   logger.info(`[handleInit] Building response with sessionFile: ${clientSessionFile || 'none'}`);
   let responseData = await buildSessionResponse(session, workingDir, messageLimit, 10, clientSessionFile);
   logger.info(`[handleInit] Response built: ${responseData.currentSession.messages.length} messages`);
 
-  // 4. 如果当前 session 没有消息，尝试加载最近的有消息的 session
+  // 4. If current session has no messages, try loading recent session with messages
   if (responseData.currentSession.messages.length === 0) {
     const allSessions = await getAllSessions(workingDir);
     const recentSessionWithMessages = await findRecentSessionWithMessages(allSessions);
@@ -73,27 +73,27 @@ export async function handleInit(
       logger.info(
         `[handleInit] Switching to session with messages: ${recentSessionWithMessages.path}`
       );
-      // 加载该 session 的消息
+      // Load this session's messages
       const messages = await getSessionMessages(recentSessionWithMessages.path);
       responseData.currentSession.sessionFile = recentSessionWithMessages.path;
-      // sessionId 应该是完整路径，不是短ID
+      // sessionId should be full path, not short ID
       responseData.currentSession.sessionId = recentSessionWithMessages.path;
       responseData.currentSession.messages = messages;
     }
   }
 
-  // 5. 添加短 ID 到响应（统一命名规范）
+  // 5. Add short ID to response (unified naming convention)
   const shortId = extractShortSessionId(responseData.currentSession.sessionFile);
   const enhancedResponse = {
     ...responseData,
     currentSession: {
       ...responseData.currentSession,
-      shortId,           // 8字符短 ID
-      sessionFile: responseData.currentSession.sessionFile, // 完整路径
+      shortId,           // 8-character short ID
+      sessionFile: responseData.currentSession.sessionFile, // Full path
     },
   };
 
-  // 6. 发送响应
+  // 6. Send response
   sendSuccess(ctx, "initialized", enhancedResponse);
 
   logger.info(
@@ -102,7 +102,7 @@ export async function handleInit(
 }
 
 /**
- * 查找最近的有消息的 session
+ * Find recent session with messages
  */
 async function findRecentSessionWithMessages(
   sessions: Awaited<ReturnType<typeof getAllSessions>>
@@ -138,11 +138,11 @@ export async function handleNewSession(
     return;
   }
 
-  // 1. 结束当前 session（强制创建新的）- 注释掉以允许多会话共存
+  // 1. End current session (force create new) - commented for multi-session coexistence
   // serverSessionManager.endSession(workingDir);
   // logger.info(`[handleNewSession] Ended current session for: ${workingDir}`);
 
-  // 2. 创建新的 session 文件路径（确保是全新的session）
+  // 2. Create new session file path (ensure completely new session)
   const { SessionManager } = await import("@mariozechner/pi-coding-agent");
   const { getLocalSessionsDir } = await import("../agent-session/utils");
   const localSessionsDir = getLocalSessionsDir(workingDir);
@@ -155,11 +155,11 @@ export async function handleNewSession(
 
   logger.info(`[handleNewSession] Created new session file: ${newSessionFile}`);
 
-  // 3. 使用新创建的 session 文件初始化 session
+  // 3. Initialize session with new session file
   const session = await serverSessionManager.getOrCreateSession(
     workingDir,
     ctx.ws,
-    newSessionFile // 明确指定新创建的 session 文件
+    newSessionFile // Explicitly specify new session file
   );
 
   logger.info(
@@ -172,22 +172,22 @@ export async function handleNewSession(
     throw new Error("Failed to create session");
   }
 
-  // 关键：设置 client 到新 session 的关联，否则消息会被缓冲
+  // Key: Set client to new session association, else messages buffered
   const shortId = extractShortSessionId(newSessionFile);
   serverSessionManager.setClientSelectedSession(ctx.ws, shortId);
   logger.info(`[handleNewSession] Client associated with new session: ${shortId}`);
 
-  // 4. 使用与 init 相同的响应构建函数
-  // 注意：需要重新获取allSessions，确保包含新创建的session
+  // 4. Use same response builder as init
+  // Note: Need to refetch allSessions to include newly created session
   const responseData = await buildSessionResponse(session, workingDir);
 
-  // 验证新session是否在列表中
+  // Verify new session is in list
   const newSessionInList = responseData.allSessions.find((s: any) => s.path === newSessionFile);
   if (!newSessionInList) {
     logger.warn(
       `[handleNewSession] New session ${newSessionFile} not found in allSessions list, adding manually`
     );
-    // 手动添加到列表开头
+    // Manually add to beginning of list
     responseData.allSessions.unshift({
       id: newSessionFile,
       path: newSessionFile,
@@ -197,7 +197,7 @@ export async function handleNewSession(
     });
   }
 
-  // 5. 构建前端期望的响应格式
+  // 5. Build response format expected by frontend
   const responsePayload = {
     sessionId: responseData.currentSession.sessionId,
     sessionFile: responseData.currentSession.sessionFile,
@@ -253,15 +253,15 @@ export async function handleLoadSession(
     }
 
     // Build full response with messages using shared helper
-    // 传入明确的 sessionPath，因为 switchSession 后 session.sessionFile 可能未更新
+    // Pass explicit sessionPath as session.sessionFile may not be updated after switchSession
     const workingDir = ctx.session.workingDir;
     const responseData = await buildSessionResponse(ctx.session, workingDir, 100, 10, sessionPath);
 
-    // Send session_loaded with full message list (统一命名规范)
+    // Send session_loaded with full message list (unified naming convention)
     sendSuccess(ctx, "session_loaded", {
       success: true,
-      shortId,  // 8字符短 ID
-      sessionFile: responseData.currentSession.sessionFile,  // 完整路径
+      shortId,  // 8-character short ID
+      sessionFile: responseData.currentSession.sessionFile,  // Full path
       messages: responseData.currentSession.messages,
       totalMessageCount: responseData.currentSession.totalMessageCount,
       cwdChanged: loadResult.cwdChanged,
@@ -292,16 +292,16 @@ export async function handleChangeDir(
 ): Promise<void> {
   const { path: newPath, currentPath } = payload;
 
-  // 检查路径是否存在
+  // Check if path exists
   if (!existsSync(newPath)) {
     sendError(ctx, `Path does not exist: ${newPath}`);
     return;
   }
 
-  // 确定当前工作目录
+  // Determine current working directory
   const oldWorkingDir = currentPath || ctx.session?.workingDir || null;
 
-  // 使用 ServerSessionManager 切换 session
+  // Use ServerSessionManager to switch session
   const session = await serverSessionManager.switchSession(
     oldWorkingDir || newPath,
     newPath,
@@ -314,7 +314,7 @@ export async function handleChangeDir(
     throw new Error("Failed to create or get session");
   }
 
-  // 使用共享函数构建响应
+  // Use shared function to build response
   const responseData = await buildSessionResponse(session, newPath);
 
   sendSuccess(ctx, "dir_changed", responseData);
@@ -403,12 +403,12 @@ export async function handleGetSessionStatus(
     }
 
     const statusText = {
-      idle: "空闲",
-      thinking: "思考中",
-      tooling: "执行工具",
-      streaming: "输出中",
-      waiting: "等待输入",
-      error: "发生错误",
+      idle: "Idle",
+      thinking: "Thinking",
+      tooling: "Executing Tool",
+      streaming: "Streaming",
+      waiting: "Waiting for Input",
+      error: "Error Occurred",
     }[entry.runtimeStatus] || entry.runtimeStatus;
 
     sendSuccess(ctx, "session_status", {

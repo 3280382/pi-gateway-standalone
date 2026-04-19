@@ -1,7 +1,7 @@
 /**
  * ModelParamsSection - Model parameters display and selection
  *
- * 职责：
+ * Responsibilities:
  * - 显示当前模型信息
  * - 提供模型下拉框选择
  * - 支持切换模型

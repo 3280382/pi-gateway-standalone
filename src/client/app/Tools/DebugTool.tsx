@@ -1,6 +1,6 @@
 /**
- * DebugTool - Debug 开关控制
- * 职责：切换 localStorage 标记，控制首页是否加载 eruda
+ * DebugTool - Debug switch control
+ * Responsibilities:切换 localStorage 标记，控制首页是否加载 eruda
  */
 
 import { useCallback, useState, useEffect } from "react";
@@ -11,11 +11,11 @@ const DEBUG_KEY = "DEBUG_ERUDA";
 export function DebugTool() {
   const [isEnabled, setIsEnabled] = useState(true);
 
-  // 读取初始状态
+  // Read initial state
   useEffect(() => {
     try {
       const value = localStorage.getItem(DEBUG_KEY);
-      // null（未设置）或 "true" 都表示启用，只有 "force" 表示禁用
+      // null (unset) or "true" means enabled，only "force" means disabled
       setIsEnabled(value !== "force");
     } catch {
       setIsEnabled(true);
@@ -32,7 +32,7 @@ export function DebugTool() {
       }
       setIsEnabled(!isEnabled);
 
-      // 提示用户刷新生效
+      // Prompt user to refresh
       console.log(`[DebugTool] Eruda ${!isEnabled ? "enabled" : "disabled"} - refresh to apply`);
     } catch {
       // ignore

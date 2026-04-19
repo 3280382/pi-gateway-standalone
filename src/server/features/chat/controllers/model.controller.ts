@@ -30,7 +30,7 @@ export async function getModels(_req: Request, res: Response) {
       provider: m.provider,
       name: m.name ?? (typeof m.id === "object" ? String(m.id) : m.id),
       description: "",
-      // 完整的模型参数
+      // Complete model parameters
       contextWindow: m.contextWindow,
       maxTokens: m.maxTokens,
       reasoning: m.reasoning,

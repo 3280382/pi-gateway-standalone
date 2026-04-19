@@ -1,9 +1,9 @@
 /**
- * 调试日志工具
- * 提供不同级别的日志输出，便于调试前端功能
+ * Debug log tool
+ * Provide different log levels for frontend debugging
  */
 
-// 调试级别
+// Debug level
 export enum DebugLevel {
   NONE = 0,
   ERROR = 1,
@@ -13,11 +13,11 @@ export enum DebugLevel {
   VERBOSE = 5,
 }
 
-// 当前调试级别（可以从环境变量或配置中读取）
+// Current debug level（can be read from env or config）
 const CURRENT_LEVEL: DebugLevel =
-  process.env.NODE_ENV === "production" ? DebugLevel.ERROR : DebugLevel.INFO; // 开发环境只显示 INFO 及以上
+  process.env.NODE_ENV === "production" ? DebugLevel.ERROR : DebugLevel.INFO; // Dev env only shows INFO and above
 
-// 调试上下文
+// Debug context
 interface DebugContext {
   component?: string;
   function?: string;
@@ -28,7 +28,7 @@ interface DebugContext {
 }
 
 /**
- * 创建调试日志器
+ * Create debug logger
  */
 export function createDebugger(namespace: string, defaultContext: Partial<DebugContext> = {}) {
   return {
@@ -62,7 +62,7 @@ export function createDebugger(namespace: string, defaultContext: Partial<DebugC
         ...context,
       }),
 
-    // 性能监控
+    // Performance monitoring
     time: (label: string) => {
       if (CURRENT_LEVEL >= DebugLevel.DEBUG) {
         console.time(`[${namespace}] ${label}`);
@@ -75,7 +75,7 @@ export function createDebugger(namespace: string, defaultContext: Partial<DebugC
       }
     },
 
-    // 断言
+    // Assertion
     assert: (condition: boolean, message: string, data?: any) => {
       if (!condition && CURRENT_LEVEL >= DebugLevel.ERROR) {
         console.error(`[${namespace}] ASSERTION FAILED: ${message}`, data);
@@ -85,7 +85,7 @@ export function createDebugger(namespace: string, defaultContext: Partial<DebugC
 }
 
 /**
- * 内部日志函数
+ * Internal log function
  */
 function log(
   level: DebugLevel,
@@ -126,77 +126,77 @@ function log(
 }
 
 /**
- * 文件浏览器专用调试器
+ * File browser specific debugger
  */
 export const fileBrowserDebug = createDebugger("FileBrowser", {
   component: "FileBrowser",
 });
 
 /**
- * 文件查看器专用调试器
+ * File viewer specific debugger
  */
 export const fileViewerDebug = createDebugger("FileViewer", {
   component: "FileViewer",
 });
 
 /**
- * 文件侧边栏专用调试器
+ * File sidebar specific debugger
  */
 export const fileSidebarDebug = createDebugger("FileSidebar", {
   component: "FileSidebar",
 });
 
 /**
- * 文件工具栏专用调试器
+ * File toolbar specific debugger
  */
 export const fileToolbarDebug = createDebugger("FileToolbar", {
   component: "FileToolbar",
 });
 
 /**
- * 文件列表专用调试器
+ * File list specific debugger
  */
 export const fileListDebug = createDebugger("FileList", {
   component: "FileList",
 });
 
 /**
- * 文件网格专用调试器
+ * File grid specific debugger
  */
 export const fileGridDebug = createDebugger("FileGrid", {
   component: "FileGrid",
 });
 
 /**
- * 文件操作栏专用调试器
+ * File action bar specific debugger
  */
 export const fileActionBarDebug = createDebugger("FileActionBar", {
   component: "FileActionBar",
 });
 
 /**
- * API调用专用调试器
+ * API call specific debugger
  */
 export const apiDebug = createDebugger("API", {
   component: "API",
 });
 
 /**
- * Store专用调试器
+ * Store specific debugger
  */
 export const storeDebug = createDebugger("Store", {
   component: "Store",
 });
 
 /**
- * 钩子专用调试器
+ * Hook specific debugger
  */
 export const hookDebug = createDebugger("Hook", {
   component: "Hook",
 });
 
 /**
- * 工具函数：格式化对象为可读字符串
+ * Utility: Format object to readable string
  */
 export function formatObject(obj: any, maxDepth = 3): string {
   if (obj === null) return "null";
@@ -209,7 +209,7 @@ export function formatObject(obj: any, maxDepth = 3): string {
       obj,
       (_key, value) => {
         if (typeof value === "object" && value !== null) {
-          // 限制深度
+          // Limit depth
           if (maxDepth <= 0) return "[Object]";
           return formatObject(value, maxDepth - 1);
         }
@@ -223,7 +223,7 @@ export function formatObject(obj: any, maxDepth = 3): string {
 }
 
 /**
- * 工具函数：记录函数调用
+ * Utility: Log function calls
  */
 export function logFunctionCall(
   debuggerInstance: ReturnType<typeof createDebugger>,

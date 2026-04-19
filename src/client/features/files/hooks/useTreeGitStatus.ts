@@ -1,7 +1,7 @@
 /**
  * useTreeGitStatus - TreeView 专用 Git 状态管理 Hook
  *
- * 职责：为 TreeView 组件管理整棵树的 Git 状态
+ * Responsibilities:为 TreeView 组件管理整棵树的 Git 状态
  * - 当 Git 模式激活且 TreeView 激活时，获取整棵树的 Git 状态
  * - 将 Git 状态映射到树中的所有文件节点
  * - 相比 useGitStatus，这个 hook 获取的是整棵树而不仅仅是当前目录

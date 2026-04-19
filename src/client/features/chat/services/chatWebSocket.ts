@@ -1,7 +1,7 @@
 /**
  * Chat WebSocket Service - Chat 特定的 WebSocket 方法
  *
- * 职责：
+ * Responsibilities:
  * - 封装 chat feature 特定的 WebSocket 调用
  * - 委托通用连接操作给 websocketService
  */
@@ -80,7 +80,7 @@ export function initChatWorkingDirectory(
       reject(new Error(`Timeout waiting for initialization (${timeoutMs}ms)`));
     }, timeoutMs);
 
-    // 发送 init 消息
+    // Send init message
     const payload: { workingDir?: string; sessionFile?: string; messageLimit?: number } = {};
     if (path) payload.workingDir = path;
     if (sessionFile) payload.sessionFile = sessionFile;

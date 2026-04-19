@@ -1,7 +1,7 @@
 /**
  * useFilePicker - @mention 文件选择逻辑 Hook
  *
- * 职责：
+ * Responsibilities:
  * - 管理 @mention 文件选择器的状态
  * - 加载文件列表
  * - 过滤文件
@@ -28,7 +28,7 @@ export interface UseFilePickerReturn {
   selectedIndex: number;
   filteredFiles: FileItem[];
 
-  // 操作
+  // Actions
   open: (triggerAtEnd?: boolean) => Promise<void>;
   close: () => void;
   setFilter: (filter: string) => void;

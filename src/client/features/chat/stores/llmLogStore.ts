@@ -43,7 +43,7 @@ interface LlmLogActions {
 export const useLlmLogStore = create<LlmLogState & LlmLogActions>()(
   persist(
     (set, _get) => ({
-      // 初始状态
+      // Initial state
       config: {
         enabled: true,
         refreshInterval: 5,

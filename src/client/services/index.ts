@@ -1,8 +1,8 @@
 /**
- * Services 导出 - 统一入口
+ * Services export - Unified entry
  *
- * 全局共享 services 直接导出
- * Feature services 通过 re-export 保持兼容性
+ * Global shared services direct export
+ * Feature services compatibility via re-export
  */
 
 // Feature services (re-export for backward compatibility)

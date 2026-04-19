@@ -1,12 +1,12 @@
 /**
  * TerminalPanel - XTerm.js Terminal Component
  *
- * 职责：
+ * Responsibilities:
  * - 提供真实的 xterm.js 终端体验
  * - 支持命令执行、全屏模式
  * - 合并了原 useXTerm hook 的所有逻辑
  *
- * 结构规范：State → Ref → Effects → Computed → Actions → Render
+ * Structure:State → Ref → Effects → Computed → Actions → Render
  */
 
 import type { FitAddon } from "@xterm/addon-fit";

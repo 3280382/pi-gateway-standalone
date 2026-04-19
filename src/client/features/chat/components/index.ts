@@ -1,5 +1,5 @@
 /**
- * Chat 组件导出
+ * Chat component exports
  */
 
 export { ChatPanel } from "./ChatPanel";
@@ -9,7 +9,7 @@ export { MessageItem } from "./MessageItem";
 export { MessageList } from "./MessageList";
 export { LlmLogPanel } from "./panels/LlmLogPanel";
 
-// Sidebar 组件
+// Sidebar components
 export {
   RecentWorkspaces,
   Sessions,

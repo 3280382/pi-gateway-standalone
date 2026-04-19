@@ -32,7 +32,7 @@ const MODULE_LEVELS: Record<string, LogLevel> = {
   WS: LogLevel.INFO,
   Gateway: LogLevel.INFO,
 
-  // 其他模块默认级别
+  // Others模块默认级别
   default: LogLevel.INFO,
 };
 

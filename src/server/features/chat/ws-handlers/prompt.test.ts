@@ -19,7 +19,7 @@ describe("WebSocket Prompt Handler", () => {
   let wsUrl: string;
 
   beforeAll(async () => {
-    logger.info("初始化 Prompt 测试");
+    logger.info("Initializing Prompt test");
     await server.start();
     const port = process.env.TEST_PORT || 3000;
     wsUrl = `ws://127.0.0.1:${port}/ws`;
@@ -31,45 +31,45 @@ describe("WebSocket Prompt Handler", () => {
   });
 
   it("can send prompt message", async () => {
-    await reporter.runTest("发送 Prompt 消息", async () => {
+    await reporter.runTest("Send Prompt message", async () => {
       const client = new TestWebSocketClient(wsUrl);
       await client.connect(wsUrl);
 
-      // 等待连接确认
+      // Wait for connection confirmation
       await client.waitForMessage(
         (m) => m.type === "welcome" || m.type === "connected",
         5000
       );
 
-      // 发送 init
+      // Send init
       client.send("init", { workingDir: "/root/pi-gateway-standalone" });
       await client.waitForMessage(
         (m) => m.type === "init_ack" || m.type === "initialized",
         5000
       );
 
-      // 发送 prompt
+      // Send prompt
       client.send("prompt", {
         text: "Hello, this is a test message",
       });
 
-      logger.info("Prompt 消息已发送");
+      logger.info("Prompt message sent");
 
-      // 等待响应（可能是 streaming 的开始）
+      // Wait for response (may be streaming start)
       const response = await client.waitForMessage(
         (m) => m.type === "response_start" || m.type === "chunk",
         10000
       );
 
       expect(response).toBeDefined();
-      logger.info("收到响应", response);
+      logger.info("Received response", response);
 
       client.disconnect();
     });
   });
 
   it("handles empty prompt gracefully", async () => {
-    await reporter.runTest("处理空 Prompt", async () => {
+    await reporter.runTest("Handle empty Prompt", async () => {
       const client = new TestWebSocketClient(wsUrl);
       await client.connect(wsUrl);
 
@@ -84,18 +84,18 @@ describe("WebSocket Prompt Handler", () => {
         5000
       );
 
-      // 发送空 prompt
+      // Send empty prompt
       client.send("prompt", { text: "" });
 
-      // 应该收到错误响应
+      // Should receive error response
       try {
         const response = await client.waitForMessage(
           (m) => m.type === "error" || m.type === "validation_error",
           5000
         );
-        logger.info("收到错误响应", response);
+        logger.info("Received error response", response);
       } catch {
-        logger.info("空 prompt 被静默处理");
+        logger.info("Empty prompt silently handled");
       }
 
       client.disconnect();

@@ -1,7 +1,7 @@
 /**
  * useFileViewer - 文件查看器业务逻辑 Hook
  *
- * 职责：管理文件查看器的所有业务逻辑
+ * Responsibilities:管理文件查看器的所有业务逻辑
  * - 文件类型判断
  * - 加载文件内容
  * - 保存文件
@@ -14,7 +14,7 @@ import * as fileApi from "@/features/files/services/api/fileApi";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { fileViewerDebug } from "@/lib/debug";
 
-// 文件类型配置
+// Files类型配置
 const FILE_TYPES = {
   image: ["png", "jpg", "jpeg", "gif", "svg", "webp", "ico", "bmp", "tiff", "tif"],
   html: ["html", "htm"],
@@ -74,7 +74,7 @@ const LANG_MAP: Record<string, string> = {
   ts: "typescript",
   jsx: "jsx",
   tsx: "tsx",
-  // 其他语言
+  // Others语言
   py: "python",
   java: "java",
   c: "c",
@@ -139,10 +139,10 @@ export interface FileTypeInfo {
 }
 
 export interface UseFileViewerResult {
-  // 文件类型信息
+  // Files类型信息
   fileTypes: FileTypeInfo;
 
-  // 操作方法
+  // Actions方法
   loadFile: () => Promise<void>;
   saveFile: () => Promise<void>;
   execute: () => Promise<void>;
@@ -170,10 +170,10 @@ export function useFileViewer(): UseFileViewerResult {
 
   const abortRef = useRef<AbortController | null>(null);
 
-  // 文件扩展名
+  // Files扩展名
   const ext = useMemo(() => fileName.split(".").pop()?.toLowerCase() || "", [fileName]);
 
-  // 文件类型判断
+  // Files类型判断
   const fileTypes = useMemo<FileTypeInfo>(() => {
     const isImage = FILE_TYPES.image.includes(ext);
     const isHtml = FILE_TYPES.html.includes(ext);

@@ -1,9 +1,9 @@
 /**
- * Session Helpers - 共享的 Session 辅助函数
+ * Session Helpers - Shared session utilities
  *
- * 这些函数被多个 WebSocket handlers 和 HTTP controllers 共享
- * - getAllSessions: 获取工作目录下的所有 session 文件列表
- * - getAllModels: 获取模型列表
+ * These functions shared by WebSocket handlers and HTTP controllers
+ * - getAllSessions: Get all session file lists in working directory
+ * - getAllModels: Get model list
  * - getSessionMessages: 读取 session 文件内容
  * - buildInitResponse: 构建统一的初始化响应
  */
@@ -20,8 +20,8 @@ const logger = new Logger({ level: LogLevel.INFO });
 /**
  * 获取工作目录下的 session 文件列表
  * @param workingDir 工作目录
- * @param limit 最大返回数量（默认返回所有）
- * @returns Session 列表（按最后修改时间排序，最新的在前）
+ * @param limit Max return count (default: all)
+ * @returns Session list (sorted by modification time, newest first)
  */
 export async function getAllSessions(
   workingDir: string,
@@ -39,12 +39,12 @@ export async function getAllSessions(
     const localSessionsDir = getLocalSessionsDir(workingDir);
     const sessions = await SessionManager.list(workingDir, localSessionsDir);
 
-    // 按最后修改时间排序（最新的在前）
+    // Sort by modification time (newest first)
     const sortedSessions = sessions.sort(
       (a, b) => new Date(b.modified).getTime() - new Date(a.modified).getTime()
     );
 
-    // 应用分页限制
+    // Apply pagination limit
     const limitedSessions = limit ? sortedSessions.slice(0, limit) : sortedSessions;
 
     logger.info(`[getAllSessions] Found ${sortedSessions.length} sessions, returning ${limitedSessions.length} for ${workingDir}`);
@@ -63,7 +63,7 @@ export async function getAllSessions(
 }
 
 /**
- * 获取模型列表
+ * Get model list
  */
 export async function getAllModels(): Promise<
   Array<{
@@ -108,7 +108,7 @@ export async function getAllModels(): Promise<
 }
 
 /**
- * 读取 session 文件内容（JSONL）
+ * Read session file content (JSONL)
  * @param sessionFile Session file path
  * @param limit Maximum number of messages to return (from the end)
  * @param offset Number of messages to skip from the end (for pagination)
@@ -154,7 +154,7 @@ export async function getSessionMessages(
 }
 
 /**
- * 获取消息总数
+ * Get total message count
  */
 export async function getSessionMessageCount(sessionFile: string): Promise<number> {
   try {
@@ -170,8 +170,8 @@ export async function getSessionMessageCount(sessionFile: string): Promise<numbe
 }
 
 /**
- * 获取 Session 级别的模型设置
- * 从 session 文件中查找最后一次 model_change entry
+ * Get Session-level model settings
+ * Find last model_change entry from session file
  * @returns sessionModel: { provider: string, modelId: string } | null
  */
 export async function getSessionModel(sessionFile: string): Promise<{
@@ -182,7 +182,7 @@ export async function getSessionModel(sessionFile: string): Promise<{
   try {
     const messages = await getSessionMessages(sessionFile);
 
-    // 从后向前查找最后一次 model_change
+    // Search backwards for last model_change
     for (let i = messages.length - 1; i >= 0; i--) {
       const msg = messages[i];
       if (msg.type === "model_change" && msg.provider && msg.modelId) {
@@ -204,9 +204,9 @@ export async function getSessionModel(sessionFile: string): Promise<{
 }
 
 /**
- * 获取 Session 当前使用的模型
- * 优先从 session JSONL 文件中读取最后一次 model_change
- * 如果没有则使用 settings.json 的默认模型
+ * Get current model used by Session
+ * Priority: read last model_change from session JSONL
+ * If not found, use default model from settings.json
  */
 export async function getSessionCurrentModel(
   sessionFile: string,
@@ -215,7 +215,7 @@ export async function getSessionCurrentModel(
   try {
     const messages = await getSessionMessages(sessionFile);
 
-    // 从后向前查找最后一次 model_change
+    // Search backwards for last model_change
     for (let i = messages.length - 1; i >= 0; i--) {
       const msg = messages[i];
       if (msg.type === "model_change" && (msg.model || msg.modelId)) {
@@ -227,7 +227,7 @@ export async function getSessionCurrentModel(
       }
     }
 
-    // Session 中没有 model_change，使用默认模型
+    // No model_change in Session, use default
     if (defaultModel) {
       logger.info(`[getSessionCurrentModel] Using default model: ${defaultModel}`);
       return defaultModel;
@@ -241,28 +241,28 @@ export async function getSessionCurrentModel(
 }
 
 /**
- * 构建统一的初始化/切换响应
+ * Build unified initialization/switch response
  *
- * 用于：
- * - init.ts 的 initialized 响应
- * - change-dir.ts 的 dir_changed 响应
+ * Used for:
+ * - init.ts initialized response
+ * - change-dir.ts dir_changed response
  */
 /**
- * 构建统一的 Session 响应
- * 用于：
- * - init.ts 的 initialized 响应
- * - change-dir.ts 的 dir_changed 响应
+ * Build unified Session response
+ * Used for:
+ * - init.ts initialized response
+ * - change-dir.ts dir_changed response
  *
- * 优化：
- * - 默认只加载最近 100 条消息
- * - allSessions 默认只加载最近 10 个
+ * Optimizations:
+ * - Default: only load recent 100 messages
+ * - allSessions default: only load recent 10
  */
 export async function buildSessionResponse(
   session: PiAgentSession,
   workingDir: string,
   messageLimit: number = 100,
   sessionLimit: number = 10,
-  explicitSessionFile?: string  // 可选：明确指定 sessionFile（用于 switchSession 后）
+  explicitSessionFile?: string  // Optional: explicitly specify sessionFile（used after switchSession）
 ): Promise<{
   pid: number;
   workingDir: string;
@@ -278,13 +278,13 @@ export async function buildSessionResponse(
   allModels: Awaited<ReturnType<typeof getAllModels>>;
   thinkingLevel: string;
 }> {
-  // 获取 session 信息：优先使用明确指定的路径，否则从 session 对象获取
+  // Get session info: prioritize explicit path，otherwise get from session object
   const sessionFile = explicitSessionFile || session.session?.sessionFile || "";
   const sessionId = sessionFile;
 
   logger.info(`[buildSessionResponse] Loading messages for: ${sessionFile}, explicit: ${explicitSessionFile || 'none'}`);
 
-  // 获取消息总数和最近的消息（优化：只加载最近 100 条）
+  // Get total message count和最近的消息（Optimizations:只加载最近 100 条）
   const [fileMessages, totalMessageCount] = await Promise.all([
     getSessionMessages(sessionFile, messageLimit),
     getSessionMessageCount(sessionFile),
@@ -292,20 +292,20 @@ export async function buildSessionResponse(
 
   logger.info(`[buildSessionResponse] Loaded ${fileMessages.length} messages (total: ${totalMessageCount})`);
 
-  // 合并缓冲区消息（如果有）- 实现无缝衔接
-  // 当 session 在后台运行时产生的消息会被缓冲，需要与文件消息合并
+  // Merge buffered messages (if any)- achieve seamless connection
+  // Messages produced when session runs in background are buffered，need to merge with file messages
   const bufferedMessages = session.getBufferedMessages ? session.getBufferedMessages() : [];
   const sessionMessages = bufferedMessages.length > 0
     ? [...fileMessages, ...bufferedMessages]
     : fileMessages;
 
-  // 获取默认模型（来自 settings.json）
+  // Get default model (from settings.json)
   const defaultModel = session.session?.model?.id || null;
 
-  // 获取当前实际使用的模型（优先从 session 中读取，否则使用默认）
+  // Get current actual model（priority: read from session, else use default）
   const currentModel = await getSessionCurrentModel(sessionFile, defaultModel);
 
-  // 并行获取其他数据（优化：只加载最近 10 个 session）
+  // Fetch other data in parallel（Optimizations:只加载最近 10 个 session）
   const [allSessions, allModels] = await Promise.all([
     getAllSessions(workingDir, sessionLimit),
     getAllModels(),

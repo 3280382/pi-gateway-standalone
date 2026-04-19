@@ -1,7 +1,7 @@
 /**
  * FileBrowser - 文件浏览器主组件
  *
- * 职责：UI 渲染
+ * Responsibilities:UI 渲染
  * - 不包含业务逻辑
  * - 通过 hooks 获取数据和操作
  * - 仅在激活状态时加载数据

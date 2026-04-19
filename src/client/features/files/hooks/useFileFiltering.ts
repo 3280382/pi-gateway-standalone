@@ -1,7 +1,7 @@
 /**
  * useFileFiltering - 文件过滤和排序逻辑 Hook
  *
- * 职责：管理文件列表的过滤和排序逻辑
+ * Responsibilities:管理文件列表的过滤和排序逻辑
  */
 
 import { useMemo } from "react";

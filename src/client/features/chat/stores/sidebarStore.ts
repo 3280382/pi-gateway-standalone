@@ -1,7 +1,7 @@
 /**
  * Sidebar Store - Zustand State Management
  *
- * 职责：
+ * Responsibilities:
  * - 管理 Sidebar UI 状态
  * - 所有 session 数据来自服务器（WebSocket），不持久化到 localStorage
  * - 只有 workingDir 由全局 workspaceStore 管理

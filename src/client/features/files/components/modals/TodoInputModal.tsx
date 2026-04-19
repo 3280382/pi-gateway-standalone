@@ -237,7 +237,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
   );
 }
 
-// 获取标签颜色
+// 获取标签Color
 function getTagColor(tag: string): string {
   const colors: Record<string, string> = {
     urgent: "#f85149",

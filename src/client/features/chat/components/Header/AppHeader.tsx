@@ -1,11 +1,11 @@
 /**
  * AppHeader - Chat Top Menu (Two-Row Layout)
  *
- * 职责：
+ * Responsibilities:
  * - Row 1: Working Directory, PID/Status
  * - Row 2: Search Box
  *
- * 结构规范：State → Ref → Effects → Computed → Actions → Render
+ * Structure:State → Ref → Effects → Computed → Actions → Render
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";

@@ -1,6 +1,6 @@
 /**
  * Server Routes Tests
- * 规范：使用 test/lib/test-utils.ts 中的工具函数
+ * Standard: Use utility functions from test/lib/test-utils.ts
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
@@ -13,13 +13,13 @@ import {
 const logger = new TestLogger("routes");
 const reporter = new TestReporter("routes");
 
-// 注意：这些测试需要服务器运行
+// Note: These tests require server running
 describe("Server Routes", () => {
   const server = new TestServerManager();
   let baseUrl: string;
 
   beforeAll(async () => {
-    logger.info("初始化路由测试");
+    logger.info("Initializing route test");
     await server.start();
     const port = process.env.TEST_PORT || 3000;
     baseUrl = `http://127.0.0.1:${port}`;
@@ -31,26 +31,26 @@ describe("Server Routes", () => {
   });
 
   it("health endpoint returns 200", async () => {
-    await reporter.runTest("健康检查端点", async () => {
+    await reporter.runTest("Health check endpoint", async () => {
       const response = await fetch(`${baseUrl}/api/health`);
       expect(response.status).toBe(200);
     
       const data = await response.json();
       expect(data.status).toBe("ok");
-      logger.info("健康检查通过", data);
+      logger.info("Health check passed", data);
     });
   });
 
   it("404 for unknown routes", async () => {
-    await reporter.runTest("未知路由返回404", async () => {
+    await reporter.runTest("Unknown route returns 404", async () => {
       const response = await fetch(`${baseUrl}/api/unknown-route`);
       expect(response.status).toBe(404);
-      logger.info("404 响应正确");
+      logger.info("404 response correct");
     });
   });
 
   it("CORS headers are present", async () => {
-    await reporter.runTest("CORS 响应头", async () => {
+    await reporter.runTest("CORS response headers", async () => {
       const response = await fetch(`${baseUrl}/api/health`, {
         method: "OPTIONS",
         headers: {
@@ -59,7 +59,7 @@ describe("Server Routes", () => {
       });
     
       expect(response.headers.get("access-control-allow-origin")).toBeTruthy();
-      logger.info("CORS 响应头正确");
+      logger.info("CORS response headers正确");
     });
   });
 });

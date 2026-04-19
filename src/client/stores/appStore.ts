@@ -1,6 +1,6 @@
 /**
- * App Store - 应用级别状态管理
- * 统一管理视图切换、侧边栏、底部面板等全局状态
+ * App Store - Application-level state management
+ * Unified management of view switching
  */
 
 // ===== [ANCHOR:IMPORTS] =====
@@ -17,11 +17,11 @@ export type Theme = "dark" | "light";
 export type FontSize = "tiny" | "small" | "medium" | "large";
 
 interface AppState {
-  // 视图状态
+  // View状态
   currentView: ViewType;
   setCurrentView: (view: ViewType) => void;
 
-  // 全局设置
+  // Global settings
   theme: Theme;
   setTheme: (theme: Theme) => void;
   fontSize: FontSize;
@@ -33,13 +33,13 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set, _get) => ({
-      // 初始状态
+      // Initial state
       currentView: "chat",
 
-      // 视图操作
+      // View操作
       setCurrentView: (view) => set({ currentView: view }),
 
-      // 全局设置
+      // Global settings
       theme: "dark",
       setTheme: (theme) => set({ theme }),
       fontSize: "medium",

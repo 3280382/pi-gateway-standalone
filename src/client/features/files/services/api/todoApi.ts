@@ -86,7 +86,7 @@ export async function update(params: UpdateTodoParams): Promise<void> {
 }
 
 /**
- * 获取优先级颜色
+ * 获取优先级Color
  */
 export function getPriorityColor(tags: string[]): string {
   if (tags.includes("urgent") || tags.includes("high")) return "#f85149"; // 红色

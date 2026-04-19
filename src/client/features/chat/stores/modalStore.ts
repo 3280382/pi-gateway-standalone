@@ -15,7 +15,7 @@ export interface ModalState {
   isThinkingLevelOpen: boolean;
   // 目录浏览器
   isDirectoryBrowserOpen: boolean;
-  // 文件查看器
+  // Files查看器
   isFileViewerOpen: boolean;
   // 过滤器面板
   isFilterPanelOpen: boolean;
@@ -45,7 +45,7 @@ interface ModalActions {
 }
 
 export const useModalStore = create<ModalState & ModalActions>()((set) => ({
-  // 初始状态
+  // Initial state
   isSystemPromptOpen: false,
   isLlmLogOpen: false,
   isModelSelectorOpen: false,

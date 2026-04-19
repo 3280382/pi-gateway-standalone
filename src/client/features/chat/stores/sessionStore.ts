@@ -136,7 +136,7 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
   persist(
     devtools(
       (set) => ({
-        // 初始状态
+        // Initial state
         workingDir: "/root",
         currentSessionId: null,
         currentSessionFile: null,

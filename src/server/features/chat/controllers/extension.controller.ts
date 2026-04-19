@@ -1,5 +1,5 @@
 /**
- * Extension Controller - 扩展管理
+ * Extension Controller - Extension management
  */
 
 import { readdir, readFile, stat } from "node:fs/promises";
@@ -15,14 +15,14 @@ interface ExtensionInfo {
 }
 
 /**
- * 扫描扩展目录获取扩展列表
+ * Scan extension directories to get extension list
  */
 async function scanExtensions(): Promise<ExtensionInfo[]> {
   const extensions: ExtensionInfo[] = [];
 
-  // 扫描全局扩展目录
+  // Scan global extension directory
   const globalExtPath = process.env.PI_GLOBAL_EXTENSIONS || "/root/.pi/extensions";
-  // 扫描项目扩展目录
+  // Scan project extension directory
   const projectExtPath = `${process.cwd()}/.pi/extensions`;
 
   const scanPaths = [
@@ -43,7 +43,7 @@ async function scanExtensions(): Promise<ExtensionInfo[]> {
 
         let extInfo: ExtensionInfo | null = null;
 
-        // 尝试读取 package.json
+        // Try reading package.json
         try {
           const packageContent = await readFile(packageJsonPath, "utf-8");
           const pkg = JSON.parse(packageContent);
@@ -55,7 +55,7 @@ async function scanExtensions(): Promise<ExtensionInfo[]> {
             path: extDir,
           };
         } catch {
-          // 尝试读取 manifest.json
+          // Try reading manifest.json
           try {
             const manifestContent = await readFile(manifestPath, "utf-8");
             const manifest = JSON.parse(manifestContent);
@@ -67,7 +67,7 @@ async function scanExtensions(): Promise<ExtensionInfo[]> {
               path: extDir,
             };
           } catch {
-            // 如果都没有，使用目录名作为扩展名
+            // If neither, use directory name as extension name
             extInfo = {
               name: entry.name,
               version: "0.0.1",
@@ -79,19 +79,19 @@ async function scanExtensions(): Promise<ExtensionInfo[]> {
         }
 
         if (extInfo) {
-          // 检查是否有禁用标记文件
+          // Check if disable marker file exists
           try {
             await stat(join(extDir, ".disabled"));
             extInfo.enabled = false;
           } catch {
-            // 文件不存在，扩展启用
+            // Files不存在，扩展启用
           }
 
           extensions.push(extInfo);
         }
       }
     } catch {
-      // 目录不存在或无法读取，跳过
+      // Directory doesn't exist or can't be read, skip
     }
   }
 
@@ -99,7 +99,7 @@ async function scanExtensions(): Promise<ExtensionInfo[]> {
 }
 
 /**
- * 获取扩展列表
+ * Get extension list
  */
 export async function getExtensions(_req: Request, res: Response): Promise<void> {
   try {

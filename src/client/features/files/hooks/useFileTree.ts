@@ -1,7 +1,7 @@
 /**
  * useFileTree - 文件树逻辑 Hook
  *
- * 职责：管理文件侧边栏的目录树逻辑
+ * Responsibilities:管理文件侧边栏的目录树逻辑
  */
 
 import { useCallback, useEffect, useState } from "react";

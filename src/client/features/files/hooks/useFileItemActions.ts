@@ -1,7 +1,7 @@
 /**
  * useFileItemActions - 文件项操作逻辑 Hook
  *
- * 职责：管理文件项的交互操作（点击、选择、拖拽、手势等）
+ * Responsibilities:管理文件项的交互操作（点击、选择、拖拽、手势等）
  * - 所有交互逻辑封装在此
  * - 组件只负责渲染和绑定事件处理器
  */
@@ -25,7 +25,7 @@ export interface UseFileItemActionsResult {
   dropTarget: string | null;
   showPinchHint: boolean;
 
-  // 文件项事件处理器（直接绑定到 FileItem）
+  // Files项事件处理器（直接绑定到 FileItem）
   getItemHandlers: (item: FileItem) => {
     onTap: () => void;
     onDoubleTap: () => void;

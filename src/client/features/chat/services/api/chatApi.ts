@@ -245,7 +245,7 @@ export function useChatController(): EnhancedChatController {
         eventName: "session_loaded",
         onSuccess: async (data) => {
           if (data.success) {
-            // 统一使用 shortId（8字符短 ID）
+            // 统一使用 shortId（8-character short ID）
             chatStore.setSessionId(data.shortId);
             // Use messages from WebSocket response (already merged with buffer)
             const messages = data.messages || [];
@@ -783,7 +783,7 @@ export function setupWebSocketListeners(): void {
   websocketService.on("turn_end", () => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] turn_end`);
-    // Turn 结束，AI 完成输出，进入 waiting 状态（等待用户输入）
+    // Turn 结束，AI 完成输出，进入 waiting 状态（waiting for user input）
     store.setIsRunning(false);
   });
 

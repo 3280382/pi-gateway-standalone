@@ -1,7 +1,7 @@
 /**
  * SessionDropdownSection - Session table with rich information
  *
- * 职责：
+ * Responsibilities:
  * - 以表格形式显示所有历史 session
  * - 显示会话 ID、运行状态、消息数、最后修改时间
  * - 只在侧边栏打开时定期通过 WebSocket 更新
@@ -40,7 +40,7 @@ function formatRelativeTime(dateString: string): string {
   return date.toLocaleDateString();
 }
 
-// 获取状态图标和颜色类名
+// 获取状态图标和Color类名
 function getStatusInfo(status: string | undefined): { icon: string; className: string; label: string } {
   switch (status) {
     case "history":
@@ -122,7 +122,7 @@ export function SessionDropdownSection() {
       case "streaming": return 1;  // 最活跃：正在输出
       case "thinking": return 2;   // AI 思考中
       case "tooling": return 3;    // 使用工具
-      case "waiting": return 4;    // 等待用户输入
+      case "waiting": return 4;    // waiting for user input
       case "idle": return 5;       // 空闲
       case "error": return 6;      // 错误状态
       case "history": return 7;    // 历史会话

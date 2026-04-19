@@ -1,11 +1,11 @@
 /**
  * useInputArea - InputArea 组件业务逻辑 Hook
  *
- * 职责：
+ * Responsibilities:
  * - 整合 useFilePicker, useImageUpload, useSlashCommands
  * - 处理键盘事件（发送、命令选择、文件选择）
  * - 处理输入文本变化
- * - 协调发送流程（普通消息、bash 命令、slash 命令、图片）
+ * - 协调发送流程（普通消息、bash command、slash 命令、图片）
  */
 
 import { useCallback, useMemo, useRef } from "react";
@@ -74,7 +74,7 @@ export interface UseInputAreaReturn {
     hasImages: boolean;
   };
 
-  // 操作
+  // Actions
   handleChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleKeyDown: (e: React.KeyboardEvent) => void;
   handleSend: () => void;
@@ -201,7 +201,7 @@ export function useInputArea(options: UseInputAreaOptions): UseInputAreaReturn {
   // 处理键盘事件
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      // 文件选择器打开时的键盘处理
+      // Files选择器打开时的键盘处理
       if (filePicker.isOpen && filePicker.filteredFiles.length > 0) {
         if (e.key === "ArrowDown") {
           e.preventDefault();
@@ -344,7 +344,7 @@ export function useInputArea(options: UseInputAreaOptions): UseInputAreaReturn {
       hasImages: imageUpload.images.length > 0,
     },
 
-    // 操作
+    // Actions
     handleChange,
     handleKeyDown,
     handleSend,

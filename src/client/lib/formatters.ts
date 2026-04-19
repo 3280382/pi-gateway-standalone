@@ -1,5 +1,5 @@
 /**
- * Formatters - 格式化工具函数库
+ * Formatters - Formatter utilities函数库
  * 纯函数，便于测试和复用
  */
 

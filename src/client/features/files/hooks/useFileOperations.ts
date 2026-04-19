@@ -1,7 +1,7 @@
 /**
  * useFileOperations - 文件操作逻辑 Hook
  *
- * 职责：封装文件增删改查的业务逻辑
+ * Responsibilities:封装文件增删改查的业务逻辑
  * - 批量删除
  * - 批量移动
  * - 创建文件

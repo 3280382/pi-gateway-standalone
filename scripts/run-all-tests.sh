@@ -32,7 +32,7 @@ PROJECT_ROOT="/root/pi-gateway-standalone"
 log_section "🧪 Pi Gateway 统一测试运行器"
 log_info "测试类型: $TEST_TYPE"
 
-# ========== 运行测试 ==========
+# ========== Test ==========
 cd "$PROJECT_ROOT"
 
 if [ "$TEST_TYPE" = "all" ]; then
@@ -59,7 +59,7 @@ EXIT_CODE=$?
 
 # ========== 输出结果 ==========
 if [ $EXIT_CODE -eq 0 ]; then
-    log_success "所有测试通过!"
+    log_success "All tests passed!"
     echo ""
     echo "查看结果:"
     echo "  报告: cat test-results/latest/summary.md"

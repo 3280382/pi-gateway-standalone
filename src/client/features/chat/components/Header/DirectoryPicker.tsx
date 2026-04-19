@@ -1,13 +1,13 @@
 /**
  * DirectoryPicker - 目录选择器组件
  *
- * 职责：
+ * Responsibilities:
  * - 显示目录列表供用户选择
  * - 支持进入子目录和返回上级
  * - 过滤不必要的目录（node_modules, .git 等）
  * - 每次打开从 home 目录开始
  *
- * 结构规范：State → Ref → Effects → Computed → Actions → Render
+ * Structure:State → Ref → Effects → Computed → Actions → Render
  */
 
 import { useCallback, useEffect, useState } from "react";

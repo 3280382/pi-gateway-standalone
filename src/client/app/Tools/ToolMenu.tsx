@@ -1,6 +1,6 @@
 /**
- * ToolMenu - 工具菜单容器
- * 职责：管理工具菜单的展开/收起，渲染工具列表
+ * ToolMenu - Tool menu container
+ * Responsibilities:管理工具菜单的展开/收起，渲染工具列表
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -14,12 +14,12 @@ import styles from "@/app/Tools/ToolMenu.module.css";
 import { IconButton } from "@/components/Icon/Icon";
 
 export function ToolMenu() {
-  // 默认关闭菜单
+  // Default close menu
   const [isOpen, setIsOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // 点击外部关闭菜单
+  // Click outside to close menu
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {

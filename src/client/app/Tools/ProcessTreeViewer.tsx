@@ -1,6 +1,6 @@
 /**
- * ProcessTreeViewer - 系统进程树查看器
- * 紧凑设计，显示所有进程详细信息
+ * ProcessTreeViewer - System process tree viewer
+ * Compact design, display all process details
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -72,7 +72,7 @@ export function ProcessTreeViewer() {
   const [isLoading, setIsLoading] = useState(false);
   const serverPid = useSessionStore((state) => state.serverPid);
 
-  // 获取进程树数据
+  // Get process tree data
   const fetchData = useCallback(async () => {
     if (!isOpen) return;
 
@@ -104,13 +104,13 @@ export function ProcessTreeViewer() {
           unsubError();
         }
 
-        // 发送 WebSocket 请求
+        // Send WebSocket request
         websocketService.send("get_process_tree", { serverPid });
       });
 
       setData(response);
 
-      // 默认展开服务器进程
+      // Default expand server processes
       if (response.serverProcess) {
         setExpandedPids(new Set([response.serverProcess.pid]));
       }
@@ -121,7 +121,7 @@ export function ProcessTreeViewer() {
     }
   }, [isOpen, serverPid]);
 
-  // 获取进程详情
+  // Get process details
   const fetchProcessDetails = useCallback(async (pid: number) => {
     try {
       const response = await new Promise<ProcessDetails>((resolve, reject) => {
@@ -153,14 +153,14 @@ export function ProcessTreeViewer() {
     }
   }, []);
 
-  // 打开窗口时获取一次数据（不自动刷新）
+  // Get data once when opening window（不自动刷新）
   useEffect(() => {
     if (isOpen) {
       fetchData();
     }
   }, [isOpen, fetchData]);
 
-  // 选中进程时获取详情
+  // Get details when process selected
   useEffect(() => {
     if (selectedPid) {
       fetchProcessDetails(selectedPid);
@@ -169,7 +169,7 @@ export function ProcessTreeViewer() {
     }
   }, [selectedPid, fetchProcessDetails]);
 
-  // 切换展开状态
+  // Toggle expand state
   const toggleExpand = useCallback((pid: number) => {
     setExpandedPids((prev) => {
       const next = new Set(prev);
@@ -182,14 +182,14 @@ export function ProcessTreeViewer() {
     });
   }, []);
 
-  // 格式化字节
+  // Format bytes
   const formatBytes = (kb: number) => {
     if (kb > 1048576) return `${(kb / 1048576).toFixed(1)}G`;
     if (kb > 1024) return `${(kb / 1024).toFixed(1)}M`;
     return `${kb}K`;
   };
 
-  // 渲染进程行
+  // Render process row
   const renderProcessRow = (proc: ProcessInfo, isServerChild = false) => {
     const isExpanded = expandedPids.has(proc.pid);
     const isSelected = selectedPid === proc.pid;
@@ -227,7 +227,7 @@ export function ProcessTreeViewer() {
     );
   };
 
-  // 渲染服务器子进程
+  // Render server child processes
   const renderServerChildren = () => {
     if (!data?.serverChildren?.length) return null;
 
@@ -263,7 +263,7 @@ export function ProcessTreeViewer() {
     );
   };
 
-  // 渲染线程信息
+  // Render thread info
   const renderThreads = () => {
     if (!processDetails?.threads?.length) return null;
 
@@ -285,7 +285,7 @@ export function ProcessTreeViewer() {
     );
   };
 
-  // 渲染打开的文件
+  // Render open files
   const renderOpenFiles = () => {
     if (!processDetails?.openFiles?.length) return null;
 

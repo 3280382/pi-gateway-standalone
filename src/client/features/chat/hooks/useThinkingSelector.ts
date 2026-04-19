@@ -1,7 +1,7 @@
 /**
  * useThinkingSelector - Thinking Level 选择器逻辑 Hook
  *
- * 职责：
+ * Responsibilities:
  * - 管理 thinking level 选择器状态
  * - 处理 thinking level 选择
  */
@@ -26,7 +26,7 @@ export interface UseThinkingSelectorReturn {
   currentLevelData: (typeof THINKING_LEVELS)[number];
   levels: typeof THINKING_LEVELS;
 
-  // 操作
+  // Actions
   open: () => void;
   close: () => void;
   toggle: () => void;

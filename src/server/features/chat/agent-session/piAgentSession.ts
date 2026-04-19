@@ -220,15 +220,15 @@ export class PiAgentSession {
           `[PiAgentSession.initialize] Failed to open session file: ${sessionFile}, error:`,
           error
         );
-        // 如果明确指定了 sessionFile 但打开失败，抛出错误
-        // 不应该回退到最近使用的 session，因为用户明确选择了特定的 session
+        // If sessionFile explicitly specified but opening failed，throw error
+        // Should not fall back to recently used session，because user explicitly selected specific session
         throw new Error(`Failed to open specified session file: ${sessionFile}. Error: ${error}`);
       }
     }
 
-    // 如果没有指定 sessionFile 或打开失败，查找最近使用的 session
+    // If no sessionFile specified or opening failed，find recently used session
     if (!sessionManager) {
-      // 获取所有 sessions 列表
+      // Get all sessions list
       console.log(
         `[PiAgentSession.initialize] Calling SessionManager.list("${workingDir}", "${localSessionsDir}")`
       );
@@ -240,7 +240,7 @@ export class PiAgentSession {
         )
       );
 
-      // 总是使用最近的一个 session（按修改时间排序）
+      // Always use most recent session（sorted by modification time）
       if (sessions.length > 0) {
         const mostRecent = sessions.sort((a, b) => b.modified.getTime() - a.modified.getTime())[0];
         console.log(`[PiAgentSession.initialize] Using most recent session: ${mostRecent.path}`);
@@ -451,9 +451,9 @@ export class PiAgentSession {
   }
 
   /**
-   * Setup event handlers - 简化版本
+   * Setup event handlers - simplified version
    *
-   * 核心事件流:
+   * Core event flow:
    * message_start (assistant) -> content blocks -> message_end
    *
    * Content blocks:
@@ -468,7 +468,7 @@ export class PiAgentSession {
       const timestamp = new Date().toISOString().split("T")[1].split(".")[0];
 
       switch (event.type) {
-        // Turn 边界 - 表示 Pi coding agent 的一个回合开始/结束
+        // Turn boundary - indicates Pi coding agent turn start/end
         case "turn_start": {
           console.log(`[${timestamp}] [SEND] turn_start`);
           this.updateRuntimeStatus("thinking");
@@ -478,7 +478,7 @@ export class PiAgentSession {
 
         case "turn_end": {
           console.log(`[${timestamp}] [SEND] turn_end`);
-          // AI 完成输出后进入 waiting 状态（等待用户输入），而不是 idle
+          // AI enters waiting state after completing output（waiting for user input），not idle
           this.updateRuntimeStatus("waiting");
           this.send({ type: "turn_end" });
           break;
@@ -540,7 +540,7 @@ export class PiAgentSession {
           break;
         }
 
-        // Message 边界 - 只处理 assistant 消息
+        // Message boundary - only process assistant messages
         case "message_start": {
           const startMsg = event.message;
           if (startMsg.role === "assistant") {
@@ -579,7 +579,7 @@ export class PiAgentSession {
           break;
         }
 
-        // Content blocks - 实际的消息内容
+        // Content blocks - actual message content
         case "message_update": {
           const msgEvent = event.assistantMessageEvent;
           const contentIndex = (msgEvent as any).contentIndex;
@@ -680,7 +680,7 @@ export class PiAgentSession {
           break;
         }
 
-        // Tool 实际执行事件
+        // Tool actual execution event
         case "tool_execution_start": {
           this.activeToolExecution = {
             toolCallId: event.toolCallId,
