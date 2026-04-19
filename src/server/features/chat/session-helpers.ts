@@ -136,9 +136,11 @@ export async function getSessionMessages(
       .filter(Boolean);
 
     // Apply pagination (from the end)
+    // limit: -1 means load all messages
     if (limit !== undefined || offset !== undefined) {
       const actualOffset = offset || 0;
-      const actualLimit = limit || messages.length;
+      // limit = -1 means load all remaining messages
+      const actualLimit = limit === -1 ? messages.length : (limit || messages.length);
       const startIndex = Math.max(0, messages.length - actualOffset - actualLimit);
       const endIndex = Math.max(0, messages.length - actualOffset);
       return messages.slice(startIndex, endIndex);

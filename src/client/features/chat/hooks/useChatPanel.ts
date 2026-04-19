@@ -12,7 +12,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useChatController } from "@/features/chat/services/api/chatApi";
+import { loadMoreMessages } from "@/features/chat/services/chatWebSocket";
 import { useChatStore } from "@/features/chat/stores/chatStore";
+import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import type { Message } from "@/features/chat/types/chat";
 
 // ===== [ANCHOR:HELPERS] =====
@@ -72,6 +74,12 @@ export interface UseChatPanelReturn {
   setShouldScrollToBottom: (value: boolean) => void;
   handleScroll: () => void;
 
+  // 加载更多消息
+  isLoadingMore: boolean;
+  hasMoreMessages: boolean;
+  loadMore: () => void;
+  reloadAllMessages: () => void;
+
   // 消息操作
   handleSend: () => Promise<void>;
   handleSendWithImages: (
@@ -93,9 +101,13 @@ export function useChatPanel(): UseChatPanelReturn {
   const messagesRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastScrollTimeRef = useRef(0);
+  const loadingMoreRef = useRef(false);
+  const hasMoreRef = useRef(true);
 
   // ===== [ANCHOR:STATE] =====
   const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
 
   // ===== [ANCHOR:STORE_SELECTORS] =====
   const inputText = useChatStore((state) => state.inputText);
@@ -159,16 +171,86 @@ export function useChatPanel(): UseChatPanelReturn {
     }
   }, [messages.length]);
 
+  // 监听 more_messages_loaded 事件
+  useEffect(() => {
+    const unsubscribe = useChatStore.subscribe((state) => {
+      // 检查是否有新加载的消息（通过消息数量变化判断）
+      const currentMessages = state.messages;
+      if (currentMessages.length > 0 && loadingMoreRef.current) {
+        loadingMoreRef.current = false;
+        setIsLoadingMore(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   // ===== [ANCHOR:HANDLERS] =====
   const handleScroll = useCallback(() => {
     if (messagesRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = messagesRef.current;
       const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
+      const isAtTop = scrollTop < 50; // 距离顶部50px内认为是顶部
+
       if (!isAtBottom && shouldScrollToBottom) {
         setShouldScrollToBottom(false);
       }
+
+      // 滚动到顶部时自动加载更多消息
+      if (isAtTop && hasMoreRef.current && !loadingMoreRef.current) {
+        loadMore();
+      }
     }
   }, [shouldScrollToBottom]);
+
+  // 加载更多消息
+  const loadMore = useCallback(() => {
+    const sessionStore = useSessionStore.getState();
+    const currentSessionFile = sessionStore.currentSessionFile;
+
+    if (!currentSessionFile || loadingMoreRef.current) return;
+
+    loadingMoreRef.current = true;
+    setIsLoadingMore(true);
+
+    const currentMessages = useChatStore.getState().messages;
+    const offset = currentMessages.length;
+
+    console.log(`[useChatPanel] Loading more messages from offset ${offset}`);
+
+    const success = loadMoreMessages(currentSessionFile, offset, 50);
+
+    if (!success) {
+      loadingMoreRef.current = false;
+      setIsLoadingMore(false);
+    }
+
+    // 5秒后重置加载状态（防止卡住）
+    setTimeout(() => {
+      if (loadingMoreRef.current) {
+        loadingMoreRef.current = false;
+        setIsLoadingMore(false);
+      }
+    }, 5000);
+  }, []);
+
+  // 重新加载所有消息
+  const reloadAllMessages = useCallback(() => {
+    const sessionStore = useSessionStore.getState();
+    const chatStore = useChatStore.getState();
+    const currentSessionFile = sessionStore.currentSessionFile;
+
+    if (!currentSessionFile) return;
+
+    // 清空当前消息，触发重新加载
+    chatStore.setMessages([]);
+    hasMoreRef.current = true;
+    setHasMoreMessages(true);
+
+    // 使用 -1 表示加载所有
+    loadMoreMessages(currentSessionFile, 0, -1);
+    console.log("[useChatPanel] Reloading all messages");
+  }, []);
 
   const handleSend = useCallback(async () => {
     if (inputText.trim()) {
@@ -254,6 +336,10 @@ export function useChatPanel(): UseChatPanelReturn {
     shouldScrollToBottom,
     setShouldScrollToBottom,
     handleScroll,
+    isLoadingMore,
+    hasMoreMessages,
+    loadMore,
+    reloadAllMessages,
     handleSend,
     handleSendWithImages,
     handleBashCommand,

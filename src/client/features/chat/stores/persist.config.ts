@@ -45,6 +45,7 @@ export const CHAT_STORAGE_VERSION = {
  */
 export const CHAT_SESSION_PERSIST: string[] = [
   "currentSessionFile", // 用于刷新页面后精确恢复 session
+  "defaultMessageLimit", // 用户设置：默认加载历史消息条数
 ] as const;
 
 /** Chat Sidebar Store - 持久化字段

@@ -159,7 +159,8 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
 
   try {
     // 使用统一的 init API（不传 sessionFile，让服务器选择新目录的默认 session）
-    const response = await initChatWorkingDirectory(targetDir, undefined, 15000);
+    const messageLimit = stores.session.defaultMessageLimit;
+    const response = await initChatWorkingDirectory(targetDir, undefined, 15000, messageLimit);
 
     console.log("[SessionManager.switchDirectory] 服务器返回:", {
       workingDir: response.workingDir,
@@ -230,7 +231,8 @@ async function selectSession(sessionId: string): Promise<void> {
   try {
     // 使用统一的 init API（传入 sessionFile 用于精确匹配）
     console.log("[SessionManager.selectSession] Calling initChatWorkingDirectory...");
-    const response = await initChatWorkingDirectory(stores.session.workingDir, session.path, 15000);
+    const messageLimit = stores.session.defaultMessageLimit;
+    const response = await initChatWorkingDirectory(stores.session.workingDir, session.path, 15000, messageLimit);
     console.log("[SessionManager.selectSession] initChatWorkingDirectory returned!");
 
     console.log("[SessionManager.selectSession] 服务器返回:", {

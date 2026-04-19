@@ -5,6 +5,7 @@
 
 import { useCallback } from "react";
 import { useLlmLogStore } from "@/features/chat/stores/llmLogStore";
+import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import styles from "./SidebarPanel.module.css";
 
 export function ChatSettingsSection() {
@@ -12,6 +13,10 @@ export function ChatSettingsSection() {
   const llmLogConfig = useLlmLogStore((state) => state.config);
   const setLlmLogConfig = useLlmLogStore((state) => state.setConfig);
   const openLlmLogModal = useLlmLogStore((state) => state.openModal);
+
+  // Message limit setting
+  const defaultMessageLimit = useSessionStore((state) => state.defaultMessageLimit);
+  const setDefaultMessageLimit = useSessionStore((state) => state.setDefaultMessageLimit);
 
   // ========== 2. Actions ==========
   const handleToggleLlmLog = useCallback(() => {
@@ -23,6 +28,14 @@ export function ChatSettingsSection() {
       setLlmLogConfig({ refreshInterval: Number(e.target.value) });
     },
     [setLlmLogConfig]
+  );
+
+  const handleMessageLimitChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const value = Number(e.target.value);
+      setDefaultMessageLimit(value);
+    },
+    [setDefaultMessageLimit]
   );
 
   // ========== 3. Render ==========
@@ -73,6 +86,23 @@ export function ChatSettingsSection() {
           </select>
         </div>
       )}
+
+      {/* Message limit setting */}
+      <div className={styles.setting}>
+        <span className={styles.label}>Messages</span>
+        <select
+          className={styles.select}
+          value={defaultMessageLimit}
+          onChange={handleMessageLimitChange}
+          title="默认加载历史消息条数（-1表示加载所有）"
+        >
+          <option value={50}>50</option>
+          <option value={100}>100</option>
+          <option value={200}>200</option>
+          <option value={500}>500</option>
+          <option value={-1}>All</option>
+        </select>
+      </div>
     </section>
   );
 }

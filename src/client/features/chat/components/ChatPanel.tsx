@@ -86,6 +86,9 @@ export function ChatPanel() {
           // 自动滚屏相关
           shouldScrollToBottom={chatPanel.shouldScrollToBottom}
           onToggleScroll={() => chatPanel.setShouldScrollToBottom(!chatPanel.shouldScrollToBottom)}
+          // 重新加载消息
+          onReloadMessages={chatPanel.reloadAllMessages}
+          isLoadingMore={chatPanel.isLoadingMore}
         />
       </div>
     </div>

@@ -55,7 +55,8 @@ export function switchChatSession(sessionId: string): boolean {
 export function initChatWorkingDirectory(
   path?: string,
   sessionFile?: string,
-  timeoutMs = 10000 // 增加到 10 秒，因为初始化可能需要加载模型和文件系统
+  timeoutMs = 10000, // 增加到 10 秒，因为初始化可能需要加载模型和文件系统
+  messageLimit?: number
 ): Promise<any> {
   return new Promise((resolve, reject) => {
     // 设置一次性监听器等待 initialized 响应
@@ -80,9 +81,10 @@ export function initChatWorkingDirectory(
     }, timeoutMs);
 
     // 发送 init 消息
-    const payload: { workingDir?: string; sessionFile?: string } = {};
+    const payload: { workingDir?: string; sessionFile?: string; messageLimit?: number } = {};
     if (path) payload.workingDir = path;
     if (sessionFile) payload.sessionFile = sessionFile;
+    if (messageLimit !== undefined) payload.messageLimit = messageLimit;
 
     const sent = websocketService.send("init", payload);
 

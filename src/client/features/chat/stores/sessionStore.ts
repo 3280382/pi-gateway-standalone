@@ -102,6 +102,9 @@ export interface ChatSessionState {
 
   // 资源文件路径
   resourceFiles: ResourceFiles | null;
+
+  // 消息加载设置
+  defaultMessageLimit: number; // 默认加载历史消息条数，-1表示加载所有
 }
 
 interface ChatSessionActions {
@@ -124,6 +127,9 @@ interface ChatSessionActions {
 
   // 资源文件
   setResourceFiles: (files: ResourceFiles | null) => void;
+
+  // 消息加载设置
+  setDefaultMessageLimit: (limit: number) => void;
 }
 
 export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
@@ -141,6 +147,7 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
         serverPid: null,
         isConnected: false,
         resourceFiles: null,
+        defaultMessageLimit: 100, // 默认加载100条，-1表示加载所有
 
         // 工作目录
         // 注意：此方法仅更新本地状态，全局 workspaceStore 的同步由调用方负责
@@ -163,6 +170,9 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
 
         // 资源文件
         setResourceFiles: (files) => set({ resourceFiles: files }),
+
+        // 消息加载设置
+        setDefaultMessageLimit: (limit) => set({ defaultMessageLimit: limit }),
       }),
       { name: "ChatSessionStore" }
     ),

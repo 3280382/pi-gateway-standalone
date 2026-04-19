@@ -82,15 +82,20 @@ export function useChatInit(): { isConnecting: boolean } {
       // 3. 发送 init 请求，传入当前工作目录和 sessionFile
       // 从 localStorage 获取上次使用的 sessionFile
       const savedSessionFile = useSessionStore.getState().currentSessionFile;
+      // 获取用户设置的消息限制
+      const messageLimit = useSessionStore.getState().defaultMessageLimit;
+
       console.log("[ChatInit] Sending init with:", {
         workingDir: savedWorkingDir,
         sessionFile: savedSessionFile,
+        messageLimit,
       });
 
       const initResponse = await initChatWorkingDirectory(
         savedWorkingDir,
         savedSessionFile, // 传递 sessionFile 用于精确匹配
-        10000 // 10秒超时，因为需要加载文件
+        10000, // 10秒超时，因为需要加载文件
+        messageLimit
       ).catch((err) => {
         console.error("[ChatInit] init error:", err);
         return null;

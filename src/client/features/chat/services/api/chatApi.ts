@@ -805,6 +805,27 @@ export function setupWebSocketListeners(): void {
     }
   });
 
+  // More messages loaded handler - 加载更多历史消息
+  websocketService.on("more_messages_loaded", (data: any) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] more_messages_loaded:`, data);
+
+    if (data?.messages && Array.isArray(data.messages)) {
+      // 转换消息格式并添加到开头
+      const formattedMessages = data.messages.map((msg: any) => ({
+        id: msg.id || `msg-${Date.now()}-${Math.random()}`,
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp || Date.now(),
+        name: msg.name,
+        model: msg.model,
+      }));
+
+      store.prependMessages(formattedMessages);
+      console.log(`[${ts}] [more_messages_loaded] Prepended ${formattedMessages.length} messages, hasMore: ${data.hasMore}`);
+    }
+  });
+
   // Dir changed handler - 也保存 resourceFiles（切换目录时）
   websocketService.on("dir_changed", (data: any) => {
     console.log("[setupWebSocketListeners] dir_changed:", data);
