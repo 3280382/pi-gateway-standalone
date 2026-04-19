@@ -221,7 +221,7 @@ export function useFileViewer(): UseFileViewerResult {
       });
       setContent(data.content);
     } catch (err) {
-      fileViewerDebug.error("files加载失败", {
+      fileViewerDebug.error("files加载Failed", {
         filePath,
         error: err instanceof Error ? err.message : String(err),
       });
@@ -279,7 +279,7 @@ export function useFileViewer(): UseFileViewerResult {
       await navigator.clipboard.writeText(filePath);
       fileViewerDebug.info("路径已复制", { filePath });
     } catch (err) {
-      fileViewerDebug.error("复制路径失败", { error: err });
+      fileViewerDebug.error("复制路径Failed", { error: err });
     }
   }, [filePath]);
 

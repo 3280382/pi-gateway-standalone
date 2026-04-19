@@ -119,7 +119,7 @@ export class FileBrowserErrorBoundary extends Component<Props, State> {
             .file-browser-error {
               display: flex;
               flex-direction: column;
-              align-items: center;
+              align- items: center;
               justify-content: center;
               padding: 32px 24px;
               background: var(--bg-secondary);
@@ -185,7 +185,7 @@ export class FileBrowserErrorBoundary extends Component<Props, State> {
             .retry-btn,
             .refresh-btn {
               display: flex;
-              align-items: center;
+              align- items: center;
               gap: 8px;
               padding: 8px 16px;
               border-radius: 4px;

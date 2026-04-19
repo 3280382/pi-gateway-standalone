@@ -56,7 +56,7 @@ export function useTreeGitStatus(options: UseTreeGitStatusOptions) {
     // 非激活状态不执行
     if (!isActive) return;
 
-    // Git 模式关闭时，清空状态
+    // Git 模式Close时，清空状态
     if (!isGitModeActive) {
       setTreeGitStatusMap(new Map());
       lastFetchedDirRef.current = "";

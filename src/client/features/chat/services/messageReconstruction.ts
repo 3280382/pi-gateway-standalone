@@ -1,7 +1,7 @@
 /**
  * Message Reconstruction Service
  * 
- * 处理刷新页面后的消息重建，确保缓冲消息和流式消息无缝衔接
+ * 处理RefreshPages面后的消息重建，确保缓冲消息和流式消息无缝衔接
  * 主要解决以下问题：
  * 1. 缺失 message_start 事件 - 自动创建消息容器
  * 2. 缺失 content block start 事件 - 自动补充开始标记
@@ -160,7 +160,7 @@ class MessageReconstructor {
     // 结束所有未结束的块
     const content: ContentPart[] = [];
     
-    // 按索引排序处理 blocks
+    // 按索引Sort处理 blocks
     const sortedBlocks = Array.from(this.state.pendingBlocks.entries())
       .sort(([a], [b]) => a - b);
 

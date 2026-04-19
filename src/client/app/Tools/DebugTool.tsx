@@ -1,6 +1,6 @@
 /**
  * DebugTool - Debug switch control
- * Responsibilities:切换 localStorage 标记，控制首页是否加载 eruda
+ * Responsibilities:切换 localStorage 标记，控制首Pages是否加载 eruda
  */
 
 import { useCallback, useState, useEffect } from "react";

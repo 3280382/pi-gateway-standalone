@@ -28,9 +28,9 @@ export interface FileState {
   // currentBrowsePath: 当前浏览的绝对路径（用于 grid/list/tree 显示）
   currentBrowsePath: string;
   parentPath: string;
-  items: FileItem[];
+   items: FileItem[];
   selectedItems: string[];
-  pathCache: Map<string, { items: FileItem[]; timestamp: number }>;
+  pathCache: Map<string, {  items: FileItem[]; timestamp: number }>;
   viewMode: ViewMode;
   sortMode: SortMode;
   filterType: FilterType;
@@ -72,9 +72,9 @@ export interface FileActions {
   // Files操作
   setCurrentBrowsePath: (path: string) => void;
   setParentPath: (path: string) => void;
-  setItems: (items: FileItem[]) => void;
-  setSelectedItems: (items: string[]) => void;
-  setPathCache: (cache: Map<string, { items: FileItem[]; timestamp: number }>) => void;
+  setItems: ( items: FileItem[]) => void;
+  setSelectedItems: ( items: string[]) => void;
+  setPathCache: (cache: Map<string, {  items: FileItem[]; timestamp: number }>) => void;
   setViewMode: (mode: ViewMode) => void;
   setSortMode: (mode: SortMode) => void;
   setFilterType: (type: FilterType) => void;
@@ -134,7 +134,7 @@ export const useFileStore = create<FileState & FileActions>()(
         // workingDir 已从全局 workspaceStore 获取
         currentBrowsePath: "/root",
         parentPath: "/",
-        items: [],
+         items: [],
         selectedItems: [],
         pathCache: new Map(),
         viewMode: "grid",
@@ -149,7 +149,7 @@ export const useFileStore = create<FileState & FileActions>()(
         draggedItem: null,
         isDragging: false,
 
-        // 布局状态 - 默认都关闭
+        // 布局状态 - 默认都Close
         isSidebarVisible: false,
         isBottomPanelOpen: false,
         bottomPanelType: null,
@@ -176,7 +176,7 @@ export const useFileStore = create<FileState & FileActions>()(
         // 基本设置方法
         setCurrentBrowsePath: (path) => set({ currentBrowsePath: path }),
         setParentPath: (path) => set({ parentPath: path }),
-        setItems: (items) => set({ items }),
+        setItems: ( items) => set({  items }),
         setSelectedItems: (selectedItems) => set({ selectedItems }),
         setPathCache: (pathCache) => set({ pathCache }),
         setViewMode: (viewMode) => set({ viewMode }),
@@ -245,7 +245,7 @@ export const useFileStore = create<FileState & FileActions>()(
         updateFileGitStatuses: (statusMap: Record<string, string>) =>
           set((state) => {
             let hasChanges = false;
-            const newItems = state.items.map((item) => {
+            const newItems = state. items.map((item) => {
               const newGitStatus = statusMap[item.path] || statusMap[item.name] || undefined;
 
               // 检查状态是否变化
@@ -265,7 +265,7 @@ export const useFileStore = create<FileState & FileActions>()(
               return state; // 返回原状态，表示没有变化
             }
 
-            return { items: newItems };
+            return {  items: newItems };
           }),
 
         // Todo 模式操作

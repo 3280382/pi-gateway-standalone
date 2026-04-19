@@ -284,7 +284,7 @@ export async function buildSessionResponse(
 
   logger.info(`[buildSessionResponse] Loading messages for: ${sessionFile}, explicit: ${explicitSessionFile || 'none'}`);
 
-  // Get total message count and recent messages（Optimizations:只加载最近 100 条）
+  // Get total message count and recent messages（Optimizations: only load recent 100）
   const [fileMessages, totalMessageCount] = await Promise.all([
     getSessionMessages(sessionFile, messageLimit),
     getSessionMessageCount(sessionFile),

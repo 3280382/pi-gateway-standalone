@@ -10,7 +10,7 @@ import styles from "./TreeViewModal.module.css";
 
 export interface TreeViewModalProps {
   isOpen: boolean;
-  treeData: { path: string; items: TreeNode[] } | null;
+  treeData: { path: string;  items: TreeNode[] } | null;
   treeLoading: boolean;
   onClose: () => void;
   onFileClick: (path: string, name: string) => void;
@@ -34,7 +34,7 @@ const DEFAULT_EXCLUDES = [
   ".vscode",
 ];
 
-/** 转义正则表达式特殊字符 */
+/** 转义正则表达式特殊chars */
 function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -80,11 +80,11 @@ function getFileIcon(name: string, isDirectory: boolean): string {
 }
 
 /** 过滤树节点 */
-function filterNodes(items: TreeNode[], mode: FilterMode, search: string): TreeNode[] {
-  if (mode === "all" && !search) return items;
+function filterNodes( items: TreeNode[], mode: FilterMode, search: string): TreeNode[] {
+  if (mode === "all" && !search) return  items;
 
-  return items.filter((item) => {
-    // 搜索模式
+  return  items.filter((item) => {
+    // Search模式
     if (search) {
       return item.name.toLowerCase().includes(search.toLowerCase());
     }
@@ -101,8 +101,8 @@ function filterNodes(items: TreeNode[], mode: FilterMode, search: string): TreeN
 }
 
 /** 生成树形文本（用于复制） */
-function generateTreeText(items: TreeNode[]): string {
-  return items
+function generateTreeText( items: TreeNode[]): string {
+  return  items
     .map((item) => {
       const indent = "  ".repeat(item.level || 0);
       const connector = item.isLast ? "└── " : "├── ";
@@ -128,7 +128,7 @@ export function TreeViewModal({
   // 暂无DOM引用需要管理
 
   // ========== 3. Effects ==========
-  // ESC 关闭
+  // ESC Close
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -142,7 +142,7 @@ export function TreeViewModal({
   // 过滤节点
   const filteredItems = useMemo(() => {
     if (!treeData) return [];
-    return filterNodes(treeData.items, filterMode, searchText);
+    return filterNodes(treeData. items, filterMode, searchText);
   }, [treeData, filterMode, searchText]);
 
   // 生成复制文本
@@ -159,7 +159,7 @@ export function TreeViewModal({
       setIsCopySuccess(true);
       setTimeout(() => setIsCopySuccess(false), 2000);
     } catch (err) {
-      console.error("复制失败:", err);
+      console.error("复制Failed:", err);
     }
   }, [treeText]);
 
@@ -188,7 +188,7 @@ export function TreeViewModal({
             >
               <option value="normal">隐藏排除files</option>
               <option value="all">显示所有</option>
-              <option value="search">搜索过滤...</option>
+              <option value="search">Search过滤...</option>
             </select>
             {filterMode === "search" && (
               <input
@@ -222,7 +222,7 @@ export function TreeViewModal({
                 const level = node.level || 0;
                 const isLast = node.isLast || false;
 
-                // 搜索高亮
+                // Search高亮
                 let displayName: React.ReactNode = node.name;
                 if (searchText) {
                   const escaped = escapeRegExp(searchText);

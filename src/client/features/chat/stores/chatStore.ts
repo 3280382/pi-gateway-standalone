@@ -137,7 +137,7 @@ function buildTextContent(textContent: string): ContentPartWithOrder[] {
 }
 
 /**
- * 收集工具条目（已完成和流式中）
+ * 收集工具Items目（已完成和流式中）
  */
 function collectToolEntries(state: State): Array<{ tool: any; isCompleted: boolean }> {
   const entries: Array<{ tool: any; isCompleted: boolean }> = [];
@@ -154,7 +154,7 @@ function collectToolEntries(state: State): Array<{ tool: any; isCompleted: boole
     }
   });
 
-  // 按开始时间排序
+  // 按开始时间Sort
   entries.sort((a, b) => {
     const timeA = a.tool.startTime?.getTime() || 0;
     const timeB = b.tool.startTime?.getTime() || 0;
@@ -208,7 +208,7 @@ function buildContentArray(state: State): ContentPart[] {
     ...buildTextContent(state.streamingContent),
   ];
 
-  // 按顺序排序并返回（移除 _order 字段）
+  // 按顺序Sort并返回（移除 _order 字段）
   return content
     .sort((a, b) => a._order - b._order)
     .map(({ _order, ...rest }) => rest as ContentPart);
@@ -766,7 +766,7 @@ export const useChatStore = create<
               .map((c: any) => c.type)
               .lastIndexOf("turn_marker");
             const previousRounds =
-              lastTurnMarkerIndex >= 0 ? existingContent.slice(0, lastTurnMarkerIndex + 1) : []; // 第一轮不需要保留 existingContent，currentContent 已经包含了所有内容
+              lastTurnMarkerIndex >= 0 ? existingContent.slice(0, lastTurnMarkerIndex + 1) : []; // Page一轮不需要保留 existingContent，currentContent 已经包含了所有内容
 
             return {
               currentStreamingMessage: {
@@ -1185,7 +1185,7 @@ function detectMessageTypes(message: Message): {
     hasTools: message.content.some((c) => c.type === "tool" || c.type === "tool_use"),
     isModelChange: message.role === "system" && text.includes("模型已切换为"),
     isCompaction: message.role === "system" && text.includes("上下文压缩"),
-    isThinkingLevelChange: message.role === "system" && text.includes("思考级别已设置"),
+    isThinkingLevelChange: message.role === "system" && text.includes("Thinking level已设置"),
     isUsage: message.role === "system" && (text.includes("📊") || text.includes("tokens") || text.includes("cost")),
   };
 }
@@ -1225,14 +1225,14 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
     // 4. 普通系统消息（非特殊类型）如果 system 为 false 已经被过滤
     // 但如果 system 为 true，但特殊类型为 false，需要检查
     if (message.role === "system") {
-      // 如果是特殊类型且都被关闭了，或者不是特殊类型
+      // 如果是特殊类型且都被Close了，或者不是特殊类型
       const isSpecialType = isModelChange || isCompaction || isThinkingLevelChange || isUsage;
       // 特殊类型已经被上面的检查过滤了
       // 如果不是特殊类型，但 system 为 false，已经在 role 检查中过滤
       // 所以这里不需要额外处理
     }
 
-    // 5. 按搜索关键词过滤（如果有关键词）
+    // 5. 按Search关键词过滤（如果有关键词）
     if (lowerQuery) {
       const messageText = message.content
         .map((c) => {

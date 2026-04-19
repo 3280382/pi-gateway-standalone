@@ -1,7 +1,7 @@
 /**
- * useFileFiltering - files过滤和排序逻辑 Hook
+ * useFileFiltering - files过滤和Sort逻辑 Hook
  *
- * Responsibilities:管理files列表的过滤和排序逻辑
+ * Responsibilities:管理files列表的过滤和Sort逻辑
  */
 
 import { useMemo } from "react";
@@ -64,7 +64,7 @@ function matchesFilterType(item: FileItem, filterType: FilterType): boolean {
 }
 
 /**
- * 检查files是否匹配搜索文本
+ * 检查files是否匹配Search文本
  */
 function matchesSearchText(item: FileItem, searchText: string): boolean {
   if (!searchText) return true;
@@ -73,10 +73,10 @@ function matchesSearchText(item: FileItem, searchText: string): boolean {
 }
 
 /**
- * 比较两个files项进行排序
+ * 比较两 items项进行Sort
  */
 function compareItems(a: FileItem, b: FileItem, sortMode: string): number {
-  // ".." 始终排在第一位
+  // ".." 始终排在Page一位
   if (a.name === "..") return -1;
   if (b.name === "..") return 1;
 
@@ -105,12 +105,12 @@ function compareItems(a: FileItem, b: FileItem, sortMode: string): number {
 }
 
 export function useFileFiltering(): UseFileFilteringResult {
-  const { items, filterText, filterType, sortMode } = useFileStore();
+  const {  items, filterText, filterType, sortMode } = useFileStore();
 
   const result = useMemo(() => {
-    let filtered = [...items];
+    let filtered = [... items];
 
-    // 应用搜索过滤
+    // 应用Search过滤
     if (filterText) {
       filtered = filtered.filter((item) => matchesSearchText(item, filterText));
     }
@@ -120,7 +120,7 @@ export function useFileFiltering(): UseFileFilteringResult {
       filtered = filtered.filter((item) => matchesFilterType(item, filterType));
     }
 
-    // 应用排序
+    // 应用Sort
     filtered.sort((a, b) => compareItems(a, b, sortMode));
 
     const hasActiveFilter = filterText !== "" || filterType !== "all" || sortMode !== "time-desc";
@@ -128,9 +128,9 @@ export function useFileFiltering(): UseFileFilteringResult {
     return {
       filteredItems: filtered,
       hasActiveFilter,
-      filterCount: items.length - filtered.length,
+      filterCount:  items.length - filtered.length,
     };
-  }, [items, filterText, filterType, sortMode]);
+  }, [ items, filterText, filterType, sortMode]);
 
   return result;
 }

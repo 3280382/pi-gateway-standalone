@@ -2,7 +2,7 @@
  * useTreeView - 树形视图数据获取 Hook
  *
  * Responsibilities:为TreeView组件提供全量静态树形数据
- * 服务端过滤（normal模式），客户端搜索过滤
+ * 服务端过滤（normal模式），客户端Search过滤
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -26,11 +26,11 @@ export interface UseTreeViewResult {
   refresh: () => Promise<void>;
 }
 
-/** 客户端搜索过滤（服务端已完成排除项过滤） */
-function filterTreeNodes(items: TreeNode[], search: string): TreeNode[] {
-  if (!search) return items;
+/** 客户端Search过滤（服务端已完成排除项过滤） */
+function filterTreeNodes( items: TreeNode[], search: string): TreeNode[] {
+  if (!search) return  items;
 
-  return items.filter((item) => {
+  return  items.filter((item) => {
     return item.name.toLowerCase().includes(search.toLowerCase());
   });
 }
@@ -50,7 +50,7 @@ export function useTreeView(options: UseTreeViewOptions = {}): UseTreeViewResult
   const refresh = useCallback(async (pathToLoad: string, filter: "all" | "normal") => {
     if (!pathToLoad) return;
 
-    // 使用 ref 防止重复加载相同路径和过滤条件
+    // 使用 ref 防止重复加载相同路径和过滤Items件
     if (pathToLoad === lastPathRef.current && filter === lastFilterRef.current) return;
 
     // 立即更新 ref，防止并发请求
@@ -63,7 +63,7 @@ export function useTreeView(options: UseTreeViewOptions = {}): UseTreeViewResult
     try {
       // 传递 filter 参数给服务端，在服务端进行过滤
       const response = await fileApi.tree(pathToLoad, filter);
-      setRawTreeData(response.items);
+      setRawTreeData(response. items);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to load tree";
       setError(errorMsg);
@@ -76,7 +76,7 @@ export function useTreeView(options: UseTreeViewOptions = {}): UseTreeViewResult
     }
   }, []);
 
-  // 当浏览路径或过滤模式变化时自动刷新（仅在激活状态下）
+  // 当浏览路径或过滤模式变化时自动Refresh（仅在激活状态下）
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!isActive || !currentBrowsePath) {
@@ -87,7 +87,7 @@ export function useTreeView(options: UseTreeViewOptions = {}): UseTreeViewResult
     refresh(currentBrowsePath, filter);
   }, [isActive, currentBrowsePath, treeFilterMode]);
 
-  // 应用客户端搜索过滤（服务端已完成排除项过滤）
+  // 应用客户端Search过滤（服务端已完成排除项过滤）
   const treeData = useMemo(() => {
     return filterTreeNodes(rawTreeData, treeFilterText);
   }, [rawTreeData, treeFilterText]);

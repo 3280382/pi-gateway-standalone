@@ -1,5 +1,5 @@
 /**
- * ThinkingLevelModal - 思考级别选择器
+ * ThinkingLevelModal - Thinking level选择器
  */
 
 import { useModalStore } from "@/features/chat/stores/modalStore";

@@ -64,7 +64,7 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
   }, []);
 
   // ========== 3. Effects ==========
-  // ESC 关闭树状视图
+  // ESC Close树状视图
   useEffect(() => {
     if (!isTreeModalOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -75,7 +75,7 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
   }, [isTreeModalOpen, handleCloseTree]);
 
   // ========== 4. Computed ==========
-  // 简单条件判断，无需useMemo
+  // 简单Items件判断，无需useMemo
 
   // ========== 5. Actions ==========
   // 新建files

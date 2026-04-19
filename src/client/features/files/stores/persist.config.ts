@@ -28,12 +28,12 @@ export const FILES_STORAGE_VERSION = {
 /** Files Browser Store - 持久化字段
  * 注意：
  * - workingDir 已由全局 workspaceStore (pi:app:workspace) 管理
- * - currentBrowsePath: 当前浏览路径，持久化以便刷新后恢复位置
+ * - currentBrowsePath: 当前浏览路径，持久化以便Refresh后恢复位置
  * - isGitModeActive/isTodoModeActive 是临时状态，不持久化
  */
 export const FILES_BROWSER_PERSIST = [
   // "workingDir", // 已由全局 workspaceStore (pi:app:workspace) 管理
-  "currentBrowsePath", // 当前浏览路径，刷新后恢复
+  "currentBrowsePath", // 当前浏览路径，Refresh后恢复
   "viewMode",
   "sortMode",
   "filterType",

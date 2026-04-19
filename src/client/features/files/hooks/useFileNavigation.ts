@@ -47,7 +47,7 @@ export function useFileNavigation(): UseFileNavigationResult {
   }, [currentBrowsePath, parentPath, setCurrentBrowsePath]);
 
   /**
-   * 导航到主页（全局工作directories）
+   * 导航到主Pages（全局工作directories）
    */
   const navigateHome = useCallback(() => {
     setCurrentBrowsePath(workingDir);

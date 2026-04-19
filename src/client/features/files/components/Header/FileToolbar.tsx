@@ -25,7 +25,7 @@ const TREE_FILTER_OPTIONS: { value: "normal" | "all" | "search"; icon: string; l
   { value: "search", icon: "🔍", label: "Search..." },
 ];
 
-// 排序选项定义
+// Sort选项定义
 const SORT_OPTIONS: { value: SortMode; icon: string; label: string }[] = [
   { value: "time-desc", icon: "🕐", label: "Time ↓" },
   { value: "time-asc", icon: "🕐", label: "Time ↑" },
@@ -70,7 +70,7 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
   const sortDropdownRef = useRef<HTMLDivElement>(null);
 
   // ========== 3. Effects ==========
-  // 点击外部关闭下拉框
+  // 点击外部Close下拉框
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (filterDropdownRef.current && !filterDropdownRef.current.contains(event.target as Node)) {
@@ -101,7 +101,7 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
   // 处理输入框变化
   const handleFilterInputChange = (value: string) => {
     if (isTreeView) {
-      // TreeView模式：搜索文本
+      // TreeView模式：Search文本
       setTreeFilterText(value);
       if (value) {
         setTreeFilterMode("search");
@@ -123,14 +123,14 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
 
   return (
     <div className={styles.toolbarWrapper}>
-      {/* 第一行：路径 */}
+      {/* Page一行：路径 */}
       <div className={styles.toolbarRow}>
         <div className={styles.pathBar}>
           <PathIcon />
           <span>{workingDir}</span>
         </div>
       </div>
-      {/* 第二行：过滤 + 排序 */}
+      {/* Page二行：过滤 + Sort */}
       <div className={styles.toolbarRow}>
         {/* 过滤 */}
         <div className={styles.filterCombo} ref={filterDropdownRef}>
@@ -199,7 +199,7 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
           )}
         </div>
 
-        {/* 排序 */}
+        {/* Sort */}
         <div className={styles.sortCombo} ref={sortDropdownRef}>
           <button
             type="button"

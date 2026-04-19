@@ -87,7 +87,7 @@ describe("WebSocket Abort Handler", () => {
         5000
       );
 
-      // 直接Send abort，没有 pending 的请求
+      // Send abort directly, no pending request
       client.send("abort", {});
 
       // Should receive error or no response

@@ -297,7 +297,7 @@ export class ServerSessionManager {
   private updateEntryClient(entry: SessionEntry, client: WebSocket): void {
     entry.client = client;
     entry.lastActivity = new Date();
-    // Keep original runtimeStatus, don't reset（waiting 应该保持 waiting）
+    // Keep original runtimeStatus, don't reset (waiting should remain waiting)
     this.clientToShortId.set(client, entry.shortId);
   }
 

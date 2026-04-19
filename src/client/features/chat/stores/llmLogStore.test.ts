@@ -17,8 +17,8 @@ describe("LLM Log Store", () => {
   });
 
   it("can add log entries", async () => {
-    await reporter.runTest("添加日志条目", async () => {
-      logger.info("添加日志条目测试");
+    await reporter.runTest("添加Log entry", async () => {
+      logger.info("添加Log entry测试");
       expect(true).toBe(true);
     });
   });

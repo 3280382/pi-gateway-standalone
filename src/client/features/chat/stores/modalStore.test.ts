@@ -10,7 +10,7 @@ const reporter = new TestReporter("modal-store");
 
 describe("Modal Store", () => {
   it("initializes with all modals closed", async () => {
-    await reporter.runTest("所有弹窗关闭初始化", async () => {
+    await reporter.runTest("所有弹窗Close初始化", async () => {
       logger.info("弹窗初始化测试");
       expect(true).toBe(true);
     });
@@ -24,8 +24,8 @@ describe("Modal Store", () => {
   });
 
   it("can close modal", async () => {
-    await reporter.runTest("关闭弹窗", async () => {
-      logger.info("关闭弹窗测试");
+    await reporter.runTest("Close弹窗", async () => {
+      logger.info("Close弹窗测试");
       expect(true).toBe(true);
     });
   });

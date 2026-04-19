@@ -99,7 +99,7 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
       const data = await response.json();
 
       // 过滤directories：只显示非排除的directories
-      const dirs = data.items
+      const dirs = data. items
         .filter((item: any) => item.isDirectory && !shouldExcludeDir(item.name))
         .map((item: any) => ({
           name: item.name,
@@ -125,7 +125,7 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
         });
       }
 
-      // 排序：.. 在最前面，然后是 home 按钮，其他按字母排序
+      // Sort：.. 在最前面，然后是 home 按钮，其他按字母Sort
       dirs.sort((a: any, b: any) => {
         if (a.name === "..") return -1;
         if (b.name === "..") return 1;

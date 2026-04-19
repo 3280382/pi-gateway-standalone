@@ -31,7 +31,7 @@ export async function browse(req: Request, res: Response) {
 
     // Fetch file status in parallel (limit concurrency)
     const concurrencyLimit = 10;
-    const items = [];
+    const  items = [];
 
     for (let i = 0; i < entries.length; i += concurrencyLimit) {
       const batch = entries.slice(i, i + concurrencyLimit);
@@ -56,10 +56,10 @@ export async function browse(req: Request, res: Response) {
           };
         })
       );
-      items.push(...batchResults);
+       items.push(...batchResults);
     }
 
-    items.sort((a, b) => {
+     items.sort((a, b) => {
       if (a.isDirectory === b.isDirectory) {
         return a.name.localeCompare(b.name);
       }
@@ -69,21 +69,21 @@ export async function browse(req: Request, res: Response) {
     const response = {
       currentPath: targetPath,
       parentPath: path.dirname(targetPath),
-      items,
+       items,
       metadata: {
-        count: items.length,
-        directories: items.filter((i) => i.isDirectory).length,
-        files: items.filter((i) => !i.isDirectory).length,
+        count:  items.length,
+        directories:  items.filter((i) => i.isDirectory).length,
+        files:  items.filter((i) => !i.isDirectory).length,
         processingTime: Date.now() - startTime,
       },
     };
 
     logger.info(
-      `[browse] Response successful: ${targetPath}, ${items.length} items (${items.filter((i) => i.isDirectory).length} directories, ${items.filter((i) => !i.isDirectory).length} files), Time taken: ${Date.now() - startTime}ms`
+      `[browse] Response successful: ${targetPath}, ${ items.length}  items (${ items.filter((i) => i.isDirectory).length} directories, ${ items.filter((i) => !i.isDirectory).length} files), Time taken: ${Date.now() - startTime}ms`
     );
     res.json(response);
   } catch (error) {
-    logger.error(`files浏览错误: ${error instanceof Error ? error.message : String(error)}`, {
+    logger.error(`File browse error: ${error instanceof Error ? error.message : String(error)}`, {
       targetPath,
     });
     res.status(500).json({
@@ -96,7 +96,7 @@ export async function browse(req: Request, res: Response) {
 }
 
 /**
- * 获取directories树 - 对应 /api/files/tree
+ * Get directory tree - 对应 /api/files/tree
  */
 export async function tree(req: Request, res: Response) {
   const rawPath = req.query.path as string;
@@ -114,7 +114,7 @@ export async function tree(req: Request, res: Response) {
     return;
   }
 
-  // 默认排除的directories和files
+  // Default excluded directories and files
   const DEFAULT_EXCLUDES = [
     "node_modules",
     "__pycache__",
@@ -139,14 +139,14 @@ export async function tree(req: Request, res: Response) {
     const stats = await stat(targetPath);
 
     if (!stats.isDirectory()) {
-      res.status(400).json({ error: "路径不是directories" });
+      res.status(400).json({ error: "Path is not a directory" });
       return;
     }
 
     const buildTree = async (
       dirPath: string,
       depth: number,
-      maxDepth: number = 10 // 最大支持10层directories
+      maxDepth: number = 10 // Max 10 directory levels supported
     ): Promise<any> => {
       if (depth >= maxDepth) {
         return {
@@ -163,7 +163,7 @@ export async function tree(req: Request, res: Response) {
       for (const entry of entries) {
         const fullPath = path.join(dirPath, entry.name);
 
-        // 服务端过滤：排除隐藏files和默认排除项
+        // Server filter: exclude hidden files and default exclusions
         if (filterMode === "normal") {
           if (entry.name.startsWith(".") || DEFAULT_EXCLUDES.includes(entry.name)) {
             continue;
@@ -200,10 +200,10 @@ export async function tree(req: Request, res: Response) {
     };
 
     const tree = await buildTree(targetPath, 0);
-    logger.info(`获取directories树: ${targetPath}, filter: ${filterMode}`);
+    logger.info(`Get directory tree: ${targetPath}, filter: ${filterMode}`);
     res.json(tree);
   } catch (error) {
-    logger.error(`获取directories树错误: ${error instanceof Error ? error.message : String(error)}`, {
+    logger.error(`Get directory tree错误: ${error instanceof Error ? error.message : String(error)}`, {
       targetPath,
     });
     res.status(500).json({ error: String(error) });
@@ -211,7 +211,7 @@ export async function tree(req: Request, res: Response) {
 }
 
 /**
- * 获取files内容 - 对应 /api/files/content
+ * Get file content - 对应 /api/files/content
  */
 export async function content(req: Request, res: Response) {
   const rawPath = req.query.path as string;
@@ -233,19 +233,19 @@ export async function content(req: Request, res: Response) {
     const stats = await stat(targetPath);
 
     if (stats.isDirectory()) {
-      res.status(400).json({ error: "路径是directories，请使用/api/files/tree" });
+      res.status(400).json({ error: "Path is directory, use /api/files/tree" });
       return;
     }
 
-    // 限制内容API的files大小为10MB
+    // Limit content API file size to 10MB
     if (stats.size > 10 * 1024 * 1024) {
-      res.status(413).json({ error: "files太大，请使用/api/files/raw" });
+      res.status(413).json({ error: "File too large, use /api/files/raw" });
       return;
     }
 
     const content = await readFile(targetPath, "utf-8");
 
-    logger.info(`获取files内容: ${targetPath}, 大小: ${stats.size}字节`);
+    logger.info(`Get file content: ${targetPath}, Size: ${stats.size}bytes`);
     res.json({
       path: targetPath,
       content,
@@ -256,7 +256,7 @@ export async function content(req: Request, res: Response) {
       binary: isBinaryFile(targetPath),
     });
   } catch (error) {
-    logger.error(`获取files内容错误: ${error instanceof Error ? error.message : String(error)}`, {
+    logger.error(`Get file content错误: ${error instanceof Error ? error.message : String(error)}`, {
       targetPath,
     });
     res.status(500).json({ error: String(error) });
@@ -264,7 +264,7 @@ export async function content(req: Request, res: Response) {
 }
 
 /**
- * 获取原始files - 对应 /api/files/raw
+ * Get raw file - 对应 /api/files/raw
  */
 export async function raw(req: Request, res: Response) {
   const rawPath = req.query.path as string;
@@ -286,7 +286,7 @@ export async function raw(req: Request, res: Response) {
     const stats = await stat(targetPath);
 
     if (stats.isDirectory()) {
-      res.status(400).json({ error: "路径是directories" });
+      res.status(400).json({ error: "Path is directory" });
       return;
     }
 
@@ -297,10 +297,10 @@ export async function raw(req: Request, res: Response) {
 
     const content = await readFile(targetPath);
 
-    logger.info(`获取原始files: ${targetPath}, MIME类型: ${mimeType}, 大小: ${stats.size}字节`);
+    logger.info(`Get raw file: ${targetPath}, MIME type: ${mimeType}, Size: ${stats.size}bytes`);
     res.send(content);
   } catch (error) {
-    logger.error(`获取原始files错误: ${error instanceof Error ? error.message : String(error)}`, {
+    logger.error(`Get raw file错误: ${error instanceof Error ? error.message : String(error)}`, {
       targetPath,
     });
     res.status(500).json({ error: String(error) });
@@ -308,13 +308,13 @@ export async function raw(req: Request, res: Response) {
 }
 
 /**
- * 写入files内容 - 对应 /api/files/write
+ * Write file content - 对应 /api/files/write
  */
 export async function write(req: Request, res: Response) {
   const { path: filePath, content } = req.body;
 
   if (!filePath || content === undefined) {
-    res.status(400).json({ error: "path和content参数必填" });
+    res.status(400).json({ error: "path and content parameters required" });
     return;
   }
 
@@ -329,17 +329,17 @@ export async function write(req: Request, res: Response) {
     const { writeFile, mkdir } = await import("node:fs/promises");
     const { dirname } = path;
 
-    // 确保directories存在
+    // Ensure directory exists
     const dir = dirname(targetPath);
     await mkdir(dir, { recursive: true });
 
-    // 写入files
+    // Write file
     await writeFile(targetPath, content, "utf-8");
 
-    logger.info(`写入files: ${targetPath}, 大小: ${content.length}字符`);
+    logger.info(`Write file: ${targetPath}, Size: ${content.length}chars`);
     res.json({ success: true, path: targetPath });
   } catch (error) {
-    logger.error(`写入files错误: ${error instanceof Error ? error.message : String(error)}`, {
+    logger.error(`Write file错误: ${error instanceof Error ? error.message : String(error)}`, {
       targetPath,
     });
     res.status(500).json({ error: String(error) });
@@ -347,9 +347,9 @@ export async function write(req: Request, res: Response) {
 }
 
 /**
- * 批量删除files - 对应 /api/files/batch-delete
+ * Batch delete files - 对应 /api/files/batch-delete
  */
-// 禁止删除的系统关键directories（仅系统directories，不包括用户directories）
+// Prohibited system-critical directories（Only system directories, not user directories）
 const PROTECTED_PATHS = [
   "/",
   "/bin",
@@ -364,8 +364,8 @@ const PROTECTED_PATHS = [
   "/sys",
   "/usr",
   "/var",
-  // 注意：/root 和 /home 被移除，因为用户需要管理自己的files
-  // 这些路径通过 isPathAllowed 进行基础保护
+  // Note: /root and /home removed，Because users need to manage their own files
+  // These paths protected by isPathAllowed
 ];
 
 const MAX_DELETE_COUNT = 100;
@@ -373,16 +373,16 @@ const MAX_DELETE_COUNT = 100;
 export async function batchDelete(req: Request, res: Response) {
   const { paths } = req.body;
 
-  // 参数校验
+  // Parameter validation
   if (!paths || !Array.isArray(paths) || paths.length === 0) {
-    res.status(400).json({ error: "paths参数必填且必须是非空数组" });
+    res.status(400).json({ error: "paths parameter required and must be non-empty array" });
     return;
   }
 
-  // 数量限制
+  // Quantity limit
   if (paths.length > MAX_DELETE_COUNT) {
     res.status(400).json({
-      error: `一次最多只能删除 ${MAX_DELETE_COUNT} 个files`,
+      error: `Can only delete max ${MAX_DELETE_COUNT}  items`,
       maxAllowed: MAX_DELETE_COUNT,
       requested: paths.length,
     });
@@ -396,21 +396,21 @@ export async function batchDelete(req: Request, res: Response) {
   try {
     const { unlink, stat, rmdir } = await import("node:fs/promises");
 
-    // 第一阶段：验证所有路径
+    // Stage 1: Validate all paths
     const validatedPaths = [];
     for (const filePath of paths) {
       const targetPath = expandPath(filePath);
 
-      // 检查是否在允许的路径范围内
+      // Check if within allowed path range
       if (!isPathAllowed(targetPath)) {
         errors.push({
           path: filePath,
-          error: "Access denied - 路径不在允许范围内",
+          error: "Access denied - Path not in allowed range",
         });
         continue;
       }
 
-      // 检查是否是受保护的系统directories
+      // Check if protected system directory
       const isProtected = PROTECTED_PATHS.some(
         (protectedPath) =>
           targetPath === protectedPath || targetPath.startsWith(`${protectedPath}/`)
@@ -418,13 +418,13 @@ export async function batchDelete(req: Request, res: Response) {
       if (isProtected) {
         errors.push({
           path: filePath,
-          error: "Access denied - 系统关键directories受保护",
+          error: "Access denied - System-critical directories protected",
         });
-        logger.warn(`尝试删除受保护路径: ${targetPath}`);
+        logger.warn(`Attempt to delete protected path: ${targetPath}`);
         continue;
       }
 
-      // 检查files/directories是否存在
+      // Check if files/directories exist
       try {
         const stats = await stat(targetPath);
         validatedPaths.push({
@@ -435,14 +435,14 @@ export async function batchDelete(req: Request, res: Response) {
         });
         totalSize += stats.size;
       } catch {
-        errors.push({ path: filePath, error: "files或directories不存在" });
+        errors.push({ path: filePath, error: "Files or directories don't exist" });
       }
     }
 
-    // 如果没有有效路径，直接返回
+    // If no valid paths, return directly
     if (validatedPaths.length === 0) {
       res.status(400).json({
-        error: "没有可删除的有效files或directories",
+        error: "No valid files or directories to delete",
         validated: 0,
         requested: paths.length,
         errors,
@@ -450,19 +450,19 @@ export async function batchDelete(req: Request, res: Response) {
       return;
     }
 
-    // 第二阶段：执行删除
-    logger.info(`开始批量删除: ${validatedPaths.length} items, 总大小: ${totalSize} 字节`);
+    // Stage 2: Execute deletion
+    logger.info(`Start batch delete: ${validatedPaths.length}  items, 总Size: ${totalSize} bytes`);
 
     for (const { originalPath, resolvedPath, isDirectory, size } of validatedPaths) {
       try {
         if (isDirectory) {
-          // 递归删除directories
+          // Recursively delete directories
           await rmdir(resolvedPath, { recursive: true });
           logger.info(`删除directories成功: ${resolvedPath}`);
         } else {
           // 删除files
           await unlink(resolvedPath);
-          logger.info(`删除files成功: ${resolvedPath}, 大小: ${size} 字节`);
+          logger.info(`删除files成功: ${resolvedPath}, Size: ${size} bytes`);
         }
 
         results.push({
@@ -474,7 +474,7 @@ export async function batchDelete(req: Request, res: Response) {
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
         errors.push({ path: originalPath, error: errorMsg });
-        logger.error(`删除失败: ${resolvedPath}, 错误: ${errorMsg}`);
+        logger.error(`Delete failed: ${resolvedPath}, 错误: ${errorMsg}`);
       }
     }
 
@@ -483,7 +483,7 @@ export async function batchDelete(req: Request, res: Response) {
     const statusCode = success ? 200 : errors.length < paths.length ? 207 : 400;
 
     logger.info(
-      `批量删除完成: ${results.length} 成功, ${errors.length} 失败, 总大小: ${totalSize} 字节`
+      `Batch delete complete: ${results.length} 成功, ${errors.length} Failed, 总Size: ${totalSize} bytes`
     );
 
     res.status(statusCode).json({
@@ -497,7 +497,7 @@ export async function batchDelete(req: Request, res: Response) {
   } catch (error) {
     logger.error(`批量删除系统错误: ${error instanceof Error ? error.message : String(error)}`);
     res.status(500).json({
-      error: "删除操作失败",
+      error: "删除操作Failed",
       details: error instanceof Error ? error.message : String(error),
     });
   }
@@ -510,7 +510,7 @@ export async function batchMove(req: Request, res: Response) {
   const { paths, targetPath } = req.body;
 
   if (!paths || !Array.isArray(paths) || paths.length === 0) {
-    res.status(400).json({ error: "paths参数必填且必须是非空数组" });
+    res.status(400).json({ error: "paths parameter required and must be non-empty array" });
     return;
   }
 
@@ -596,11 +596,11 @@ export async function batchMove(req: Request, res: Response) {
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
         errors.push({ path: filePath, error: errorMsg });
-        logger.error(`移动失败: ${sourcePath}, 错误: ${errorMsg}`);
+        logger.error(`移动Failed: ${sourcePath}, 错误: ${errorMsg}`);
       }
     }
 
-    logger.info(`批量移动完成: ${results.length} 成功, ${errors.length} 失败`);
+    logger.info(`批量移动完成: ${results.length} 成功, ${errors.length} Failed`);
     res.json({
       success: errors.length === 0,
       moved: results.length,

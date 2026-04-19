@@ -112,7 +112,7 @@ export function buildProcessTree(processes: ProcessInfo[]): ProcessInfo[] {
     }
   }
 
-  // 计算深度并排序
+  // 计算深度并Sort
   const calculateDepth = (proc: ProcessInfo, depth: number) => {
     proc.depth = depth;
     if (proc.children) {
@@ -126,7 +126,7 @@ export function buildProcessTree(processes: ProcessInfo[]): ProcessInfo[] {
     calculateDepth(root, 0);
   }
 
-  // 按 PID 排序
+  // 按 PID Sort
   const sortByPid = (a: ProcessInfo, b: ProcessInfo) => a.pid - b.pid;
   rootProcesses.sort(sortByPid);
 

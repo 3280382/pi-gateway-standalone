@@ -81,7 +81,7 @@ export function useSlashCommands(options: UseSlashCommandsOptions): UseSlashComm
     onFocusInput?.();
   }, [value, onChange, onFocusInput]);
 
-  // 关闭命令选择器
+  // Close命令选择器
   const close = useCallback(() => {
     setIsOpen(false);
   }, []);

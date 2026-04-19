@@ -1,8 +1,8 @@
 /**
  * Message Utilities - 统一的 Session 消息转换
  *
- * 这个files包含统一的消息转换逻辑，Used for:
- * - 页面刷新时的 init 响应处理
+ * 这 items包含统一的消息转换逻辑，Used for:
+ * - Pages面Refresh时的 init 响应处理
  * - 左侧面板选择 session 时的加载
  * - HTTP loadSession 响应处理
  *
@@ -124,7 +124,7 @@ function convertSpecialEntryToMessage(entry: any): Message | null {
     }
     case "thinking_level_change": {
       const level = entry.thinkingLevel || "unknown";
-      return createSystemMessage(`🧠 思考级别已设置为: ${level}`, entry.id);
+      return createSystemMessage(`🧠 Thinking level已设置为: ${level}`, entry.id);
     }
     case "usage": {
       // Handle usage/cost information
@@ -169,14 +169,14 @@ function convertSpecialEntryToMessage(entry: any): Message | null {
  * 统一的 Session 消息转换函数
  *
  * 处理流程：
- * 1. 第一遍遍历：收集所有 toolCall 的参数
- * 2. 第二遍遍历：转换消息，处理 toolResult 和特殊 entry 类型
+ * 1. Page一遍遍历：收集所有 toolCall 的参数
+ * 2. Page二遍遍历：转换消息，处理 toolResult 和特殊 entry 类型
  *
  * @param entries Session files中的 entries 数组（JSONL 解析后的）
  * @returns 转换后的 Message 数组
  */
 export function normalizeSessionMessages(entries: any[]): Message[] {
-  // 第一遍：收集所有 toolCall 的参数
+  // Page一遍：收集所有 toolCall 的参数
   const toolCallArgsMap = new Map<string, any>();
   entries.forEach((entry: any) => {
     if (
@@ -247,7 +247,7 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
     const rawContent = msg.content;
     const contentArray = normalizeContent(rawContent);
 
-    // 转换 content items，保留 toolCall 并标记状态
+    // 转换 content  items，保留 toolCall 并标记状态
     const normalizedContent = contentArray.map((item: any) => {
       if (item.type === "toolCall" || item.type === "tool_use") {
         const toolCallId = item.id || item.toolCallId;

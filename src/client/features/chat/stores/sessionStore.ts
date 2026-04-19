@@ -92,7 +92,7 @@ export interface ChatSessionState {
 
   // 模型设置（从服务器获取，不持久化到 localStorage）
   currentModel: string | null;  // 当前实际使用的模型（优先 session 级别）
-  defaultModel: string | null;  // settings.json 中的默认模型
+  defaultModel: string | null;  // settings.json 中的Default model
   thinkingLevel: ThinkingLevel;
   availableModels: ModelInfo[];
 
@@ -104,7 +104,7 @@ export interface ChatSessionState {
   resourceFiles: ResourceFiles | null;
 
   // 消息加载设置
-  defaultMessageLimit: number; // 默认加载历史消息条数，-1表示加载所有
+  defaultMessageLimit: number; // 默认加载历史消息Items数，-1表示加载所有
 }
 
 interface ChatSessionActions {
@@ -147,7 +147,7 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
         serverPid: null,
         isConnected: false,
         resourceFiles: null,
-        defaultMessageLimit: 100, // 默认加载100条，-1表示加载所有
+        defaultMessageLimit: 100, // 默认加载100Items，-1表示加载所有
 
         // 工作directories
         // 注意：此方法仅更新本地状态，全局 workspaceStore 的同步由调用方负责

@@ -128,7 +128,7 @@ export function useChatPanel(): UseChatPanelReturn {
       }
     }, 100);
 
-    // 检查是否有更多历史消息（如果当前消息少于100条，认为已全部加载）
+    // 检查是否有更多历史消息（如果当前消息少于100Items，认为已全部加载）
     const messageLimit = useSessionStore.getState().defaultMessageLimit;
     if (messages.length < messageLimit && messageLimit > 0) {
       hasMoreRef.current = false;
@@ -368,7 +368,7 @@ export function useChatPanel(): UseChatPanelReturn {
       console.log("[useChatPanel] Reloaded", formattedMessages.length, "messages");
     } catch (error) {
       console.error("[useChatPanel] Failed to reload messages:", error);
-      // 如果失败，尝试恢复原来的消息（通过重新初始化）
+      // 如果Failed，尝试恢复原来的消息（通过重新初始化）
       const messageLimit = sessionStore.defaultMessageLimit;
       const { initChatWorkingDirectory } = await import("@/features/chat/services/chatWebSocket");
       const response = await initChatWorkingDirectory(

@@ -22,7 +22,7 @@ const shellLanguage = StreamLanguage.define({
   token: (stream, state: { inString: boolean }) => {
     if (stream.eatSpace()) return null;
 
-    // 字符串
+    // chars串
     if (!state.inString && (stream.eat('"') || stream.eat("'"))) {
       state.inString = true;
       return "string";

@@ -269,7 +269,7 @@ export class WebSocketService {
   }
 
   /**
-   * 取消Subscribe to event
+   * CancelSubscribe to event
    */
   off(event: WebSocketEvent, handler: Function): void {
     const handlers = this.eventHandlers.get(event);

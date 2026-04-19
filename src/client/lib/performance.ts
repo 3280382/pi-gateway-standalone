@@ -83,7 +83,7 @@ export class BatchedUpdater {
     this.callback(updates);
   }
 
-  // 强制立即刷新
+  // 强制立即Refresh
   forceFlush() {
     if (this.rafId !== null) {
       cancelAnimationFrame(this.rafId);

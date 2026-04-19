@@ -3,7 +3,7 @@
  * 
  * 改进：
  * 1. WebSocket 输出直接写入 xterm，不经过 store 中转
- * 2. 支持正确的中文和特殊字符显示
+ * 2. 支持正确的中文和特殊chars显示
  * 3. 输入时界面自动调整（类似 Chat InputArea）
  */
 
@@ -348,7 +348,7 @@ export function XTermTerminalPanel({
         term.write(data);
         commandBuffers.current.set(sessionId, buffer);
       } else if (data.length > 1) {
-        // 多字符输入（如中文、特殊键）直接发送
+        // 多chars输入（如中文、特殊键）直接发送
         buffer += data;
         term.write(data);
         commandBuffers.current.set(sessionId, buffer);

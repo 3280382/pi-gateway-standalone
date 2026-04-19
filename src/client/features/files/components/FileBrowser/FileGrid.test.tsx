@@ -68,8 +68,8 @@ describe("FileGrid", () => {
     });
   });
 
-  it("renders all file items in grid layout", () => {
-    render(<FileGrid items={mockFiles} />);
+  it("renders all file  items in grid layout", () => {
+    render(<FileGrid  items={mockFiles} />);
 
     expect(screen.getByText("file1.txt")).toBeInTheDocument();
     expect(screen.getByText("folder1")).toBeInTheDocument();
@@ -78,14 +78,14 @@ describe("FileGrid", () => {
   });
 
   it("shows folder icon for directories", () => {
-    render(<FileGrid items={mockFiles} />);
+    render(<FileGrid  items={mockFiles} />);
 
     const folderItem = screen.getByText("folder1").closest(".gridItem");
     expect(folderItem).toHaveClass("directory");
   });
 
   it("shows file icon for files", () => {
-    render(<FileGrid items={mockFiles} />);
+    render(<FileGrid  items={mockFiles} />);
 
     const fileItem = screen.getByText("file1.txt").closest(".gridItem");
     expect(fileItem).not.toHaveClass("directory");
@@ -99,14 +99,14 @@ describe("FileGrid", () => {
       setSelectedActionFile: mockSetSelectedActionFile,
     });
 
-    render(<FileGrid items={mockFiles} />);
+    render(<FileGrid  items={mockFiles} />);
 
     const selectedItem = screen.getByText("file1.txt").closest(".gridItem");
     expect(selectedItem).toHaveClass("selected");
   });
 
   it("calls selectFile when a file is clicked", () => {
-    render(<FileGrid items={mockFiles} />);
+    render(<FileGrid  items={mockFiles} />);
 
     const fileElement = screen.getByText("file1.txt");
     fireEvent.click(fileElement);
@@ -115,7 +115,7 @@ describe("FileGrid", () => {
   });
 
   it("calls setSelectedActionFile on single click", () => {
-    render(<FileGrid items={mockFiles} />);
+    render(<FileGrid  items={mockFiles} />);
 
     const fileElement = screen.getByText("file1.txt");
     fireEvent.click(fileElement);
@@ -124,7 +124,7 @@ describe("FileGrid", () => {
   });
 
   it("handles double click to open viewer", () => {
-    render(<FileGrid items={mockFiles} />);
+    render(<FileGrid  items={mockFiles} />);
 
     const fileElement = screen.getByText("file1.txt");
 
@@ -136,7 +136,7 @@ describe("FileGrid", () => {
   });
 
   it("handles directory double click differently", () => {
-    render(<FileGrid items={mockFiles} />);
+    render(<FileGrid  items={mockFiles} />);
 
     const folderElement = screen.getByText("folder1");
 
@@ -147,8 +147,8 @@ describe("FileGrid", () => {
     expect(mockOpenViewer).not.toHaveBeenCalled();
   });
 
-  it("shows empty state when no items", () => {
-    render(<FileGrid items={[]} />);
+  it("shows empty state when no  items", () => {
+    render(<FileGrid  items={[]} />);
 
     expect(screen.queryByText("file1.txt")).not.toBeInTheDocument();
     expect(screen.queryByText("folder1")).not.toBeInTheDocument();
@@ -179,7 +179,7 @@ describe("FileGrid", () => {
       },
     ];
 
-    render(<FileGrid items={specialFiles} />);
+    render(<FileGrid  items={specialFiles} />);
 
     expect(screen.getByText("file with spaces.txt")).toBeInTheDocument();
     expect(screen.getByText("file-with-dashes.txt")).toBeInTheDocument();
@@ -199,7 +199,7 @@ describe("FileGrid", () => {
       },
     ];
 
-    render(<FileGrid items={longFiles} />);
+    render(<FileGrid  items={longFiles} />);
 
     const nameElement = screen.getByText(longFileName);
     expect(nameElement).toBeInTheDocument();
@@ -231,7 +231,7 @@ describe("FileGrid", () => {
       },
     ];
 
-    render(<FileGrid items={diverseFiles} />);
+    render(<FileGrid  items={diverseFiles} />);
 
     expect(screen.getByText("script.js")).toBeInTheDocument();
     expect(screen.getByText("image.png")).toBeInTheDocument();
@@ -247,7 +247,7 @@ describe("FileGrid", () => {
       modified: "2024-01-01T10:00:00Z",
     }));
 
-    render(<FileGrid items={manyFiles} />);
+    render(<FileGrid  items={manyFiles} />);
 
     // Should render all files
     for (let i = 0; i < 10; i++) {
@@ -257,7 +257,7 @@ describe("FileGrid", () => {
   });
 
   it("applies hover effects correctly", () => {
-    render(<FileGrid items={mockFiles} />);
+    render(<FileGrid  items={mockFiles} />);
 
     const fileElement = screen.getByText("file1.txt").closest(".gridItem");
     expect(fileElement).toBeInTheDocument();
@@ -272,7 +272,7 @@ describe("FileGrid", () => {
       setSelectedActionFile: mockSetSelectedActionFile,
     });
 
-    render(<FileGrid items={mockFiles} />);
+    render(<FileGrid  items={mockFiles} />);
 
     const fileElement = screen.getByText("file1.txt");
     fireEvent.click(fileElement);
@@ -282,11 +282,11 @@ describe("FileGrid", () => {
   });
 
   it("maintains consistent grid item sizing", () => {
-    render(<FileGrid items={mockFiles} />);
+    render(<FileGrid  items={mockFiles} />);
 
     const gridItems = screen.getAllByText(/file1\.txt|folder1|script\.js|image\.png/);
 
-    // All grid items should be rendered
+    // All grid  items should be rendered
     expect(gridItems.length).toBe(4);
 
     // Each should be within a gridItem container
@@ -325,9 +325,9 @@ describe("FileGrid", () => {
       },
     ];
 
-    render(<FileGrid items={mixedFiles} />);
+    render(<FileGrid  items={mixedFiles} />);
 
-    // Should render all items in correct order
+    // Should render all  items in correct order
     expect(screen.getByText("dir1")).toBeInTheDocument();
     expect(screen.getByText("file1.txt")).toBeInTheDocument();
     expect(screen.getByText("dir2")).toBeInTheDocument();

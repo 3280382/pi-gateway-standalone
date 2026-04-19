@@ -37,16 +37,16 @@ export function useFileOperations(): UseFileOperationsResult {
   const { workingDir } = useWorkspaceStore();
 
   /**
-   * 操作后刷新directories
+   * 操作后Refreshdirectories
    */
   const refreshAfterOperation = useCallback(async () => {
     try {
       const data = await fileOperationsApi.loadDirectoryContent(currentBrowsePath);
-      setItems(data.items);
+      setItems(data. items);
       setCurrentBrowsePath(data.workingDir);
       setParentPath(data.parentPath);
     } catch (error) {
-      fileBrowserDebug.error("刷新directories失败", { error });
+      fileBrowserDebug.error("RefreshdirectoriesFailed", { error });
       setError("Failed to refresh directory");
     }
   }, [currentBrowsePath, setItems, setCurrentBrowsePath, setParentPath, setError]);
@@ -58,19 +58,19 @@ export function useFileOperations(): UseFileOperationsResult {
     if (selectedItems.length === 0) return;
 
     try {
-      fileBrowserDebug.info("批量删除files", { paths: selectedItems });
+      fileBrowserDebug.info("Batch delete files", { paths: selectedItems });
       await fileOperationsApi.batchDeleteFiles(selectedItems);
 
-      // 刷新directories
+      // Refreshdirectories
       await refreshAfterOperation();
 
       // 清除选择
       setSelectedItems([]);
       setIsMultiSelectMode(false);
 
-      fileBrowserDebug.info("批量删除成功");
+      fileBrowserDebug.info("批量Delete successful");
     } catch (error) {
-      fileBrowserDebug.error("批量删除失败", { error });
+      fileBrowserDebug.error("批量删除Failed", { error });
       setError("Failed to delete selected files");
       throw error;
     }
@@ -90,7 +90,7 @@ export function useFileOperations(): UseFileOperationsResult {
         });
         await fileOperationsApi.batchMoveFiles(selectedItems, targetPath);
 
-        // 刷新directories
+        // Refreshdirectories
         await refreshAfterOperation();
 
         // 清除选择
@@ -99,7 +99,7 @@ export function useFileOperations(): UseFileOperationsResult {
 
         fileBrowserDebug.info("批量移动成功");
       } catch (error) {
-        fileBrowserDebug.error("批量移动失败", { error });
+        fileBrowserDebug.error("批量移动Failed", { error });
         setError("Failed to move selected files");
         throw error;
       }
@@ -116,12 +116,12 @@ export function useFileOperations(): UseFileOperationsResult {
         fileBrowserDebug.info("创建新files", { fileName, currentBrowsePath });
         await fileOperationsApi.createFile(currentBrowsePath, fileName);
 
-        // 刷新directories
+        // Refreshdirectories
         await refreshAfterOperation();
 
         fileBrowserDebug.info("创建files成功", { fileName });
       } catch (error) {
-        fileBrowserDebug.error("创建files失败", { error });
+        fileBrowserDebug.error("创建filesFailed", { error });
         setError("Failed to create file");
         throw error;
       }
@@ -140,7 +140,7 @@ export function useFileOperations(): UseFileOperationsResult {
         fileBrowserDebug.info("执行files成功", { path });
         return output;
       } catch (error) {
-        fileBrowserDebug.error("执行files失败", { error });
+        fileBrowserDebug.error("执行filesFailed", { error });
         const errorMessage = error instanceof Error ? error.message : "Failed to execute file";
         setError(errorMessage);
         if (onOutput) {

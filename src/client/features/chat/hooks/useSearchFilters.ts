@@ -1,9 +1,9 @@
 /**
- * useSearchFilters - 搜索过滤逻辑 Hook
+ * useSearchFilters - Search过滤逻辑 Hook
  *
  * Responsibilities:
- * - 管理搜索查询和过滤器状态
- * - 处理搜索查询变化
+ * - 管理Search查询和过滤器状态
+ * - 处理Search查询变化
  * - 处理过滤器变化
  */
 

@@ -45,7 +45,7 @@ export function useFileTree(): UseFileTreeResult {
       const data = await fileApi.browse(path);
 
       // 只保留子directories路径
-      const childDirs = data.items.filter((item) => item.isDirectory).map((item) => item.path);
+      const childDirs = data. items.filter((item) => item.isDirectory).map((item) => item.path);
 
       const node: TreeNode = {
         name: data.workingDir.split("/").pop() || "/",
@@ -65,8 +65,8 @@ export function useFileTree(): UseFileTreeResult {
 
       return node;
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "加载失败";
-      fileSidebarDebug.error("directories加载失败", { path, error: errorMsg });
+      const errorMsg = err instanceof Error ? err.message : "加载Failed";
+      fileSidebarDebug.error("directories加载Failed", { path, error: errorMsg });
       throw err;
     }
   }, []);
@@ -84,7 +84,7 @@ export function useFileTree(): UseFileTreeResult {
       setTree([rootNode]);
       setLoading(false);
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "根directories加载失败";
+      const errorMsg = err instanceof Error ? err.message : "根directories加载Failed";
       setError(errorMsg);
       setLoading(false);
     }
@@ -137,7 +137,7 @@ export function useFileTree(): UseFileTreeResult {
 
       fileSidebarDebug.info("加载子directories", { path: node.path });
 
-      // 标记为加载中
+      // 标记为Loading
       setTree((_prev) => updateNodeInTree(node.path, (n) => ({ ...n, loading: true })));
 
       try {
@@ -145,7 +145,7 @@ export function useFileTree(): UseFileTreeResult {
         const childNodes = await Promise.all(
           node.childPaths.map((childPath) =>
             loadDirectoryNode(childPath).catch((err) => {
-              fileSidebarDebug.error("加载子directories失败", {
+              fileSidebarDebug.error("加载子directoriesFailed", {
                 path: childPath,
                 error: err instanceof Error ? err.message : String(err),
               });
@@ -154,7 +154,7 @@ export function useFileTree(): UseFileTreeResult {
           )
         );
 
-        // 过滤掉加载失败的
+        // 过滤掉加载Failed的
         const validChildren = childNodes.filter((child): child is TreeNode => child !== null);
 
         // 更新节点
@@ -173,7 +173,7 @@ export function useFileTree(): UseFileTreeResult {
           childCount: validChildren.length,
         });
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : "加载失败";
+        const errorMsg = err instanceof Error ? err.message : "加载Failed";
         setTree((_prev) =>
           updateNodeInTree(node.path, (n) => ({
             ...n,

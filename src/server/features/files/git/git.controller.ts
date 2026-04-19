@@ -78,7 +78,7 @@ async function hasWorkingTreeChanges(gitRoot: string, relativePath: string): Pro
 
 /**
  * Get git history for a file - 对应 /api/git/history
- * 如果有未提交的修改，在历史列表顶部添加"工作区"条目
+ * 如果有未提交的修改，在历史列表顶部添加"工作区"Items目
  */
 async function getGitHistory(workingDir: string, filePath: string): Promise<GitCommit[]> {
   const gitRoot = await getGitRoot(workingDir);
@@ -100,7 +100,7 @@ async function getGitHistory(workingDir: string, filePath: string): Promise<GitC
     // 检查是否有未提交的修改
     const hasChanges = await hasWorkingTreeChanges(gitRoot, relativePath);
     if (hasChanges) {
-      // 添加"工作区"条目到历史列表顶部
+      // 添加"工作区"Items目到历史列表顶部
       commits.push({
         hash: "WORKING",
         shortHash: "WORKING",
@@ -378,13 +378,13 @@ export async function status(req: Request, res: Response): Promise<void> {
       // 解析状态代码和files路径
       // Git porcelain格式: XY PATH
       // 但有时X可能是空格，导致格式不一致
-      // 更好的方法：找到第二个空格后的所有内容
+      // 更好的方法：找到Page二个空格后的所有内容
       const firstSpaceIndex = line.indexOf(" ");
       let status, path;
 
       if (firstSpaceIndex >= 0) {
-        // 第一个空格后的下一个字符开始是状态代码的第二部分
-        // 状态代码是前2个字符
+        // Page一个空格后的下一个chars开始是状态代码的Page二部分
+        // 状态代码是前2个chars
         status = line.substring(0, 2);
 
         // 找到状态代码后的空格

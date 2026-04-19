@@ -43,7 +43,7 @@ export async function tree(path: string, filter: "all" | "normal" = "all"): Prom
 
   // API returns nested tree structure with children, flatten it for UI
   // 同时计算 level, isLast, parentLastStack 等字段
-  const items: TreeNode[] = [];
+  const  items: TreeNode[] = [];
   const rootPath = data.path || "";
 
   function flatten(
@@ -67,7 +67,7 @@ export async function tree(path: string, filter: "all" | "normal" = "all"): Prom
         ? relativePath.substring(0, relativePath.lastIndexOf("/"))
         : "";
 
-      items.push({
+       items.push({
         name: node.name,
         path: fullPath, // 使用完整绝对路径
         isDirectory: node.isDirectory,
@@ -81,12 +81,12 @@ export async function tree(path: string, filter: "all" | "normal" = "all"): Prom
 
     // 递归处理子节点
     if (node.children && !node.truncated) {
-      // 排序：先directories后files，然后按名称排序
+      // Sort：先directories后files，然后按名称Sort
       const sortedChildren = [...node.children].sort((a, b) => {
-        // 先按类型排序（directories在前）
+        // 先按类型Sort（directories在前）
         if (a.isDirectory && !b.isDirectory) return -1;
         if (!a.isDirectory && b.isDirectory) return 1;
-        // 再按名称排序
+        // 再按名称Sort
         return a.name.localeCompare(b.name);
       });
 
@@ -110,7 +110,7 @@ export async function tree(path: string, filter: "all" | "normal" = "all"): Prom
     flatten(data, 0);
   }
 
-  return { path: data.path || path, items };
+  return { path: data.path || path,  items };
 }
 
 // 读取files内容
@@ -124,7 +124,7 @@ export async function content(path: string): Promise<FileContentResponse> {
   return response.json();
 }
 
-// 写入files
+// Write file
 export async function write(path: string, content: string): Promise<void> {
   const response = await fetch("/api/files/file/write", {
     method: "POST",
@@ -137,7 +137,7 @@ export async function write(path: string, content: string): Promise<void> {
   }
 }
 
-// 获取原始files（图片等）
+// Get raw file（图片等）
 export function raw(path: string): string {
   return `/api/files/file/raw?path=${encodeURIComponent(path)}`;
 }

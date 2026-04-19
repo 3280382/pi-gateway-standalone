@@ -174,9 +174,9 @@ export function AppHeader({
         </button>
       </div>
 
-      {/* Row 2: 搜索框 + PID */}
+      {/* Row 2: Search框 + PID */}
       <div className={styles.bottomRow}>
-        {/* 搜索 */}
+        {/* Search */}
         <div className={styles.searchWrapper}>
           <SearchIcon className={styles.searchIcon} />
           <input
@@ -489,7 +489,7 @@ function DirectoryPickerModal({
         body: JSON.stringify({ path: dirPath }),
       });
       const data = await response.json();
-      const dirs = data.items
+      const dirs = data. items
         .filter((item: any) => item.isDirectory && !shouldExcludeDir(item.name))
         .map((item: any) => ({
           name: item.name,
@@ -515,7 +515,7 @@ function DirectoryPickerModal({
         });
       }
 
-      // 排序：.. 在最前面，然后是 home 按钮，其他按字母排序
+      // Sort：.. 在最前面，然后是 home 按钮，其他按字母Sort
       dirs.sort((a: any, b: any) => {
         if (a.name === "..") return -1;
         if (b.name === "..") return 1;

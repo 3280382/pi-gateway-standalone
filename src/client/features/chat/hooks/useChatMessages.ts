@@ -1,6 +1,6 @@
 /**
  * useChatMessages - 聊天消息处理 Hook
- * 处理消息过滤和搜索
+ * 处理消息过滤和Search
  */
 
 import { useMemo } from "react";
@@ -30,7 +30,7 @@ export function useChatMessages(): UseChatMessagesReturn {
   const toggleThinkingCollapse = useChatStore((s) => s.toggleThinkingCollapse);
   const toggleToolsCollapse = useChatStore((s) => s.toggleToolsCollapse);
 
-  // 搜索过滤
+  // Search过滤
   const searchQuery = useChatStore((s) => s.searchQuery);
   const searchFilters = useChatStore((s) => s.searchFilters);
 

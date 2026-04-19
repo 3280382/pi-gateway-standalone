@@ -111,7 +111,7 @@ export const FileItem = memo<FileItemProps>(
       }, LONG_PRESS_DURATION);
     }, [onLongPress]);
 
-    // 处理鼠标松开 - 取消长按计时
+    // 处理鼠标松开 - Cancel长按计时
     const handleMouseUp = useCallback(() => {
       setIsPressed(false);
       if (longPressTimerRef.current) {
@@ -120,7 +120,7 @@ export const FileItem = memo<FileItemProps>(
       }
     }, []);
 
-    // 处理鼠标离开 - 取消长按计时
+    // 处理鼠标离开 - Cancel长按计时
     const handleMouseLeave = useCallback(() => {
       setIsPressed(false);
       if (longPressTimerRef.current) {

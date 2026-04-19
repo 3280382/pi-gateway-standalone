@@ -3,7 +3,7 @@
  *
  * Responsibilities:
  * - 管理模型选择器状态
- * - 加载模型列表
+ * - 加载Model list
  * - 处理模型选择
  */
 
@@ -41,7 +41,7 @@ export function useModelSelector(options: UseModelSelectorOptions): UseModelSele
   const [models, setModels] = useState<Model[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 加载模型列表
+  // 加载Model list
   const refreshModels = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -64,7 +64,7 @@ export function useModelSelector(options: UseModelSelectorOptions): UseModelSele
     }
   }, [models.length, isLoading, refreshModels]);
 
-  // 关闭选择器
+  // Close选择器
   const close = useCallback(() => {
     setIsOpen(false);
   }, []);

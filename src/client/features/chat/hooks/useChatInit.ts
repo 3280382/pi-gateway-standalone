@@ -1,5 +1,5 @@
 /**
- * useChatInit - Chat 页面初始化 Hook
+ * useChatInit - Chat Pages面初始化 Hook
  *
  * Responsibilities:
  * 1. WebSocket 连接
@@ -12,8 +12,8 @@
  * - currentSession: { sessionId, sessionFile, messages } - 聊天界面历史消息
  * - allSessions: 左侧面板所有 session 列表
  * - currentModel: 当前模型
- * - allModels: 左侧面板所有模型列表
- * - thinkingLevel: 思考级别
+ * - allModels: 左侧面板所有Model list
+ * - thinkingLevel: Thinking level
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -160,7 +160,7 @@ export function useChatInit(): { isConnecting: boolean } {
         useChatStore.getState().setMessages(formattedMessages);
       }
 
-      // 5.5 保存模型列表到 sessionStore（用于 ModelParamsSection）
+      // 5.5 保存Model list到 sessionStore（用于 ModelParamsSection）
       useSessionStore.setState({ availableModels: allModels || [] });
 
       console.log("[ChatInit] UI fully restored from server data");

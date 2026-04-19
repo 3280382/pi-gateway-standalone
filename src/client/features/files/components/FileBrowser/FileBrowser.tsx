@@ -91,15 +91,15 @@ export function FileBrowser({
               <div className={styles.error}>{error}</div>
             ) : viewMode === "grid" ? (
               <FileBrowserErrorBoundary componentName="File Grid">
-                <FileGrid items={filteredItems} />
+                <FileGrid  items={filteredItems} />
               </FileBrowserErrorBoundary>
             ) : viewMode === "list" ? (
               <FileBrowserErrorBoundary componentName="File List">
-                <FileList items={filteredItems} />
+                <FileList  items={filteredItems} />
               </FileBrowserErrorBoundary>
             ) : (
               <FileBrowserErrorBoundary componentName="Tree View">
-                <TreeView items={treeData} />
+                <TreeView  items={treeData} />
               </FileBrowserErrorBoundary>
             )}
           </div>

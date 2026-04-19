@@ -1,5 +1,5 @@
 /**
- * LLM Log Store - LLM日志设置与配置
+ * LLM Log Store - LLM logs设置与配置
  */
 
 import { create } from "zustand";
@@ -21,7 +21,7 @@ export interface LlmLogEntry {
 export interface LlmLogState {
   // 配置
   config: LlmLogConfig;
-  // 日志条目
+  // Log entry
   logs: LlmLogEntry[];
   // 模态框状态
   isModalOpen: boolean;

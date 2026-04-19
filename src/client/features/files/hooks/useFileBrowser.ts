@@ -71,7 +71,7 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
       try {
         const data = await fileOperationsApi.loadDirectoryContent(path);
         lastLoadedPathRef.current = path;
-        setItems(data.items);
+        setItems(data. items);
         setParentPath(data.parentPath);
       } catch (err) {
         const friendlyMessage = fileOperationsApi.getFriendlyErrorMessage(err, path);
@@ -84,7 +84,7 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
   );
 
   /**
-   * 刷新当前directories
+   * Refresh当前directories
    */
   const refresh = useCallback(async () => {
     lastLoadedPathRef.current = "";

@@ -270,7 +270,7 @@ export function useChatController(): EnhancedChatController {
       console.log("[ChatAPI] setModel:", { fullModelId, provider, modelId, thinkingLevel });
 
       await createPromiseWithTimeout<void>({
-        timeoutMessage: "设置模型超时",
+        timeoutMessage: "Set model超时",
         eventName: "model_set",
         onSuccess: (data) => {
           console.log("[ChatAPI] model_set success:", data);
@@ -284,7 +284,7 @@ export function useChatController(): EnhancedChatController {
       console.log("[ChatAPI] setThinkingLevel:", { level });
 
       await createPromiseWithTimeout<void>({
-        timeoutMessage: "设置思考级别超时",
+        timeoutMessage: "设置Thinking level超时",
         eventName: "thinking_set",
         onSuccess: (data) => {
           console.log("[ChatAPI] thinking_set success:", data);
@@ -335,10 +335,10 @@ export function useChatController(): EnhancedChatController {
       });
     },
 
-    // LLM日志
+    // LLM logs
     setLlmLogEnabled: async (enabled: boolean) => {
       await createPromiseWithTimeout<void>({
-        timeoutMessage: "设置LLM日志超时",
+        timeoutMessage: "设置LLM logs超时",
         eventName: "llm_log_set",
         onSuccess: () => {},
         sendAction: () => setChatLlmLogEnabled(enabled),
@@ -803,7 +803,7 @@ export function setupWebSocketListeners(): void {
       console.log("[initialized] Current model:", data.currentModel);
     }
   
-    // 保存默认模型信息（用于显示）
+    // 保存Default model信息（用于显示）
     if (data?.defaultModel) {
       sessionStore.setDefaultModel(data.defaultModel);
     }

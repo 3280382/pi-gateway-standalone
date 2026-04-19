@@ -59,7 +59,7 @@ describe("Server Routes", () => {
       });
     
       expect(response.headers.get("access-control-allow-origin")).toBeTruthy();
-      logger.info("CORS response headers正确");
+      logger.info("CORS response headers correct");
     });
   });
 });

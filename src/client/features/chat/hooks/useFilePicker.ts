@@ -61,13 +61,13 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
     setIsLoading(true);
     try {
       const data = await fileApi.browse(workingDir);
-      const items: FileItem[] = [
+      const  items: FileItem[] = [
         ...(data.parentPath !== data.workingDir
           ? [{ name: "..", path: data.parentPath, isDirectory: true }]
           : []),
-        ...data.items,
+        ...data. items,
       ];
-      setFileList(items);
+      setFileList( items);
     } catch (err) {
       console.error("[useFilePicker] Failed to load files:", err);
       setFileList([]);
@@ -119,7 +119,7 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
     [value, onChange, loadFileList, onFocusInput]
   );
 
-  // 关闭files选择器
+  // Closefiles选择器
   const close = useCallback(() => {
     setIsOpen(false);
   }, []);
@@ -151,7 +151,7 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
     [filteredFiles.length]
   );
 
-  // 刷新files列表
+  // Refreshfiles列表
   const refreshFileList = useCallback(async () => {
     await loadFileList();
   }, [loadFileList]);

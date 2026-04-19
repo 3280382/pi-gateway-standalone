@@ -7,11 +7,11 @@ import { create } from "zustand";
 export interface ModalState {
   // 系统提示
   isSystemPromptOpen: boolean;
-  // LLM日志
+  // LLM logs
   isLlmLogOpen: boolean;
   // 模型选择器
   isModelSelectorOpen: boolean;
-  // 思考级别
+  // Thinking level
   isThinkingLevelOpen: boolean;
   // directories浏览器
   isDirectoryBrowserOpen: boolean;
@@ -25,13 +25,13 @@ interface ModalActions {
   // 系统提示
   openSystemPrompt: () => void;
   closeSystemPrompt: () => void;
-  // LLM日志
+  // LLM logs
   openLlmLog: () => void;
   closeLlmLog: () => void;
   // 模型选择器
   openModelSelector: () => void;
   closeModelSelector: () => void;
-  // 思考级别
+  // Thinking level
   openThinkingLevel: () => void;
   closeThinkingLevel: () => void;
   // directories浏览器
@@ -40,7 +40,7 @@ interface ModalActions {
   // 过滤器面板
   openFilterPanel: () => void;
   closeFilterPanel: () => void;
-  // 关闭所有
+  // Close所有
   closeAll: () => void;
 }
 
@@ -58,7 +58,7 @@ export const useModalStore = create<ModalState & ModalActions>()((set) => ({
   openSystemPrompt: () => set({ isSystemPromptOpen: true }),
   closeSystemPrompt: () => set({ isSystemPromptOpen: false }),
 
-  // LLM日志
+  // LLM logs
   openLlmLog: () => set({ isLlmLogOpen: true }),
   closeLlmLog: () => set({ isLlmLogOpen: false }),
 
@@ -66,7 +66,7 @@ export const useModalStore = create<ModalState & ModalActions>()((set) => ({
   openModelSelector: () => set({ isModelSelectorOpen: true }),
   closeModelSelector: () => set({ isModelSelectorOpen: false }),
 
-  // 思考级别
+  // Thinking level
   openThinkingLevel: () => set({ isThinkingLevelOpen: true }),
   closeThinkingLevel: () => set({ isThinkingLevelOpen: false }),
 
@@ -78,7 +78,7 @@ export const useModalStore = create<ModalState & ModalActions>()((set) => ({
   openFilterPanel: () => set({ isFilterPanelOpen: true }),
   closeFilterPanel: () => set({ isFilterPanelOpen: false }),
 
-  // 关闭所有
+  // Close所有
   closeAll: () =>
     set({
       isSystemPromptOpen: false,

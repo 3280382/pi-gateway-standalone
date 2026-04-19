@@ -97,7 +97,7 @@ export function FileViewer() {
   const renderContentWithInvisibleChars = (text: string): string => {
     if (!showInvisibleChars) return text;
 
-    // 替换非可视化字符
+    // 替换非可视化chars
     return text
       .replace(/\t/g, "→   ") // 制表符
       .replace(/ /g, "·") // 空格

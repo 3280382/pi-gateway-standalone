@@ -104,7 +104,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
         const pendingTodos = todos.filter((t) => !t.checked);
 
         if (pendingTodos.length > 0) {
-          // 有未完成的 todo，打开编辑模式（编辑第一个未完成的）
+          // 有未完成的 todo，打开编辑模式（编辑Page一个未完成的）
           console.log("[useFileItemActions] Editing existing todo:", item.path);
           useFileStore.getState().setEditingTodo(pendingTodos[0]);
           setTodoInputFile({ path: item.path, name: item.name });

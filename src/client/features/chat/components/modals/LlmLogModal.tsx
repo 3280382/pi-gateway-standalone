@@ -1,5 +1,5 @@
 /**
- * LlmLogModal - LLM日志查看器
+ * LlmLogModal - LLM logs查看器
  */
 
 import { useCallback, useEffect, useState } from "react";

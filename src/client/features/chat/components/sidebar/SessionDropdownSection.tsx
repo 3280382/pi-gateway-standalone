@@ -106,7 +106,7 @@ export function SessionDropdownSection() {
       await sessionManager.selectSession(session.id);
       console.log("sessionManager.selectSession DONE!");
       
-      // 切换后立即刷新session列表（获取最新状态）
+      // 切换后立即Refreshsession列表（获取最新状态）
       if (workingDir) {
         listChatSessions(workingDir);
       }
@@ -115,7 +115,7 @@ export function SessionDropdownSection() {
   );
 
   // ========== 4. Computed ==========
-  // 对会话进行排序：选中 > streaming > thinking > tooling > waiting > idle > history
+  // 对会话进行Sort：选中 > streaming > thinking > tooling > waiting > idle > history
   // streaming/thinking/tooling 是活跃状态，优先显示
   const getStatusPriority = (status: string | undefined): number => {
     switch (status) {
@@ -135,7 +135,7 @@ export function SessionDropdownSection() {
     if (a.id === currentSessionId) return -1;
     if (b.id === currentSessionId) return 1;
 
-    // 2. 按状态优先级排序：waiting > thinking > tooling > idle > history
+    // 2. 按状态优先级Sort：waiting > thinking > tooling > idle > history
     const aPriority = getStatusPriority(runtimeStatus[a.id]);
     const bPriority = getStatusPriority(runtimeStatus[b.id]);
 
@@ -143,7 +143,7 @@ export function SessionDropdownSection() {
       return aPriority - bPriority;
     }
 
-    // 3. 相同优先级按最后修改时间排序（最新的在前）
+    // 3. 相同优先级按最后修改时间Sort（最新的在前）
     const aTime = new Date(a.lastModified).getTime();
     const bTime = new Date(b.lastModified).getTime();
     return bTime - aTime;

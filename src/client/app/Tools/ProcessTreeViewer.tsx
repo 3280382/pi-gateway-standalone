@@ -153,7 +153,7 @@ export function ProcessTreeViewer() {
     }
   }, []);
 
-  // Get data once when opening window（不自动刷新）
+  // Get data once when opening window（不自动Refresh）
   useEffect(() => {
     if (isOpen) {
       fetchData();

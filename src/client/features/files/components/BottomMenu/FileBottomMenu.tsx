@@ -32,7 +32,7 @@ export function FileBottomMenu() {
 
   // Navigation功能
   const { navigateUp, navigateHome, canNavigateUp } = useFileNavigation();
-  // View和刷新功能
+  // View和Refresh功能
   const { viewMode, setViewMode } = useFileStore();
 
   // View选择弹窗状态

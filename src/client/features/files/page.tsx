@@ -1,5 +1,5 @@
 /**
- * FilesPage - files页面
+ * FilesPage - filesPages面
  *
  * Responsibilities:files功能完整布局
  * - 包含 FileToolbar、FileSidebar、FileBrowser、Panel、BottomMenu

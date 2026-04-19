@@ -4,7 +4,7 @@
  * Responsibilities:
  * - 加载工作directories的todo列表
  * - 缓存并按files路径分组
- * - 提供刷新功能
+ * - 提供Refresh功能
  */
 
 import { useCallback, useEffect, useRef } from "react";
@@ -51,7 +51,7 @@ export function useTodos(options: UseTodosOptions): UseTodosResult {
 
   // 初始加载，使用 ref 防止重复
   useEffect(() => {
-    // 非激活状态或 Todo 模式关闭时不加载
+    // 非激活状态或 Todo 模式Close时不加载
     if (!isActive || !isTodoModeActive) {
       // 清空状态
       if (lastLoadedDirRef.current) {

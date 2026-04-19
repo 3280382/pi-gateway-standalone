@@ -14,10 +14,10 @@ import type { TreeNode } from "@/features/files/types";
 import styles from "./TreeView.module.css";
 
 interface TreeViewProps {
-  items: TreeNode[];
+   items: TreeNode[];
 }
 
-/** 转义正则表达式特殊字符 */
+/** 转义正则表达式特殊chars */
 function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -62,7 +62,7 @@ function getFileIcon(name: string, isDirectory: boolean): string {
   return icons[ext] || "📄";
 }
 
-export const TreeView = memo<TreeViewProps>(({ items }) => {
+export const TreeView = memo<TreeViewProps>(({  items }) => {
   // ========== 1. Hooks ==========
   const { selectedItems, getItemHandlers } = useFileItemActions();
   const {
@@ -79,7 +79,7 @@ export const TreeView = memo<TreeViewProps>(({ items }) => {
   const { currentBrowsePath } = useFileStore();
   useTreeGitStatus({
     isActive: true,
-    treeData: items,
+    treeData:  items,
     workingDir: currentBrowsePath,
   });
 
@@ -104,17 +104,17 @@ export const TreeView = memo<TreeViewProps>(({ items }) => {
   // ========== 3. Render ==========
   return (
     <div className={styles.treeView}>
-      {items.length === 0 ? (
+      { items.length === 0 ? (
         <div className={styles.empty}>No files found</div>
       ) : (
         <div className={styles.tree}>
-          {items.map((node) => {
+          { items.map((node) => {
             const icon = getFileIcon(node.name, node.isDirectory);
             const level = node.level || 0;
             const isLast = node.isLast || false;
             const isSelected = selectedItems.includes(node.path);
 
-            // 搜索高亮
+            // Search高亮
             let displayName: React.ReactNode = node.name;
             if (treeFilterText) {
               const escaped = escapeRegExp(treeFilterText);

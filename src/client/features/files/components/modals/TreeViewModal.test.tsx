@@ -46,9 +46,9 @@ const mockClipboard = {
 Object.assign(navigator, { clipboard: mockClipboard });
 
 // 测试数据
-const createTestTree = (): { path: string; items: TreeNode[] } => ({
+const createTestTree = (): { path: string;  items: TreeNode[] } => ({
   path: "/project",
-  items: [
+   items: [
     {
       path: "/project/src",
       name: "src",
@@ -113,7 +113,7 @@ describe("TreeViewModal", () => {
   });
 
   describe("工具函数", () => {
-    it("escapeRegExp 应该转义特殊字符", () => {
+    it("escapeRegExp 应该转义特殊chars", () => {
       expect(escapeRegExp("test.txt")).toBe("test\\.txt");
       expect(escapeRegExp("file[1].js")).toBe("file\\[1\\]\\.js");
       expect(escapeRegExp("a*b+c?")).toBe("a\\*b\\+c\\?");
@@ -128,7 +128,7 @@ describe("TreeViewModal", () => {
     });
 
     it("filterNodes 应该正确过滤节点", () => {
-      const tree = createTestTree().items;
+      const tree = createTestTree(). items;
 
       // 正常模式 - 排除 node_modules 和 .git
       const normal = filterNodes(tree, "normal", "");
@@ -142,7 +142,7 @@ describe("TreeViewModal", () => {
       const all = filterNodes(tree, "all", "");
       expect(all.length).toBe(4);
 
-      // 搜索模式 - 返回包含匹配项的完整树路径
+      // Search模式 - 返回包含匹配项的完整树路径
       const search = filterNodes(tree, "search", "Button");
       expect(search.length).toBe(1);
       expect(search[0].name).toBe("src"); // 返回根节点，包含匹配的路径
@@ -151,7 +151,7 @@ describe("TreeViewModal", () => {
     });
 
     it("generateTreeText 应该生成正确的树形文本", () => {
-      const tree = createTestTree().items.slice(0, 1);
+      const tree = createTestTree(). items.slice(0, 1);
       const text = generateTreeText(tree);
 
       expect(text).toContain("src");
@@ -191,7 +191,7 @@ describe("TreeViewModal", () => {
       render(
         <TreeViewModal
           isOpen={true}
-          treeData={{ path: "/empty", items: [] }}
+          treeData={{ path: "/empty",  items: [] }}
           treeLoading={false}
           onClose={mockOnClose}
           onFileClick={mockOnFileClick}
@@ -241,7 +241,7 @@ describe("TreeViewModal", () => {
       // 创建明确的嵌套结构
       const nestedTree = {
         path: "/test",
-        items: [
+         items: [
           {
             path: "/test/level0",
             name: "level0",
@@ -305,7 +305,7 @@ describe("TreeViewModal", () => {
   });
 
   describe("用户交互", () => {
-    it("点击关闭按钮应该关闭", () => {
+    it("点击Close按钮应该Close", () => {
       render(
         <TreeViewModal
           isOpen={true}
@@ -321,7 +321,7 @@ describe("TreeViewModal", () => {
       expect(mockOnClose).toHaveBeenCalled();
     });
 
-    it("ESC键应该关闭", () => {
+    it("ESC键应该Close", () => {
       render(
         <TreeViewModal
           isOpen={true}
@@ -372,7 +372,7 @@ describe("TreeViewModal", () => {
       });
     });
 
-    it("搜索应该过滤结果", () => {
+    it("Search应该过滤结果", () => {
       render(
         <TreeViewModal
           isOpen={true}
@@ -383,11 +383,11 @@ describe("TreeViewModal", () => {
         />
       );
 
-      // 切换到搜索模式
+      // 切换到Search模式
       const select = screen.getByDisplayValue("隐藏排除files");
       fireEvent.change(select, { target: { value: "search" } });
 
-      // 输入搜索词
+      // 输入Search词
       const input = screen.getByPlaceholderText("输入过滤文字...");
       fireEvent.change(input, { target: { value: "src" } });
 

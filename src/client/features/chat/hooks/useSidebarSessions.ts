@@ -3,7 +3,7 @@
  *
  * Responsibilities:
  * - 从 WebSocket init 响应获取 sessions（不再使用 HTTP API）
- * - 提供手动刷新功能（如果需要）
+ * - 提供手动Refresh功能（如果需要）
  *
  * 架构：
  * - 所有初始化数据来自 WebSocket init 响应

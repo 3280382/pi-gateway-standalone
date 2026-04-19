@@ -134,7 +134,7 @@ export function exportSession(outputPath?: string): boolean {
 }
 
 /**
- * 列出可用模型（对应后端的 list_models 类型）
+ * 列出Available models（对应后端的 list_models 类型）
  */
 export function listChatModels(): boolean {
   return websocketService.send("list_models");
@@ -163,7 +163,7 @@ export function loadMoreMessages(sessionFile: string, offset: number, limit: num
 }
 
 /**
- * 设置模型（对应后端的 set_model 类型）
+ * Set model（对应后端的 set_model 类型）
  */
 export function setChatModel(provider: string, modelId: string, thinkingLevel?: string): boolean {
   console.log("[ChatWebSocket] setModel called:", {
@@ -179,7 +179,7 @@ export function setChatModel(provider: string, modelId: string, thinkingLevel?: 
 }
 
 /**
- * 发送思考级别变更
+ * 发送Thinking level变更
  */
 export function setChatThinkingLevel(level: string): boolean {
   return websocketService.send("thinking_level_change", { thinkingLevel: level });
