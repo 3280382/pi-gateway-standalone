@@ -1,0 +1,3 @@
+修复完成: 
+- Session切换消息加载
+- Session排序优先级: waiting>thinking>tooling>idle>history
