@@ -100,8 +100,8 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
 
   // 3. 更新 sessions 列表
   stores.sidebar.setSessions(allSessions || []);
-  // 使用后端返回的 shortId（统一命名）
-  const shortSessionId = currentSession?.shortId || null;
+  // 使用服务器返回的短 ID 作为选中 session ID（确保与 sidebar 中的 session.id 一致）
+  const shortSessionId = (currentSession as any)?.shortId || null;
   stores.sidebar.setSelectedSessionId(shortSessionId);
 
   // 4. 更新当前 session

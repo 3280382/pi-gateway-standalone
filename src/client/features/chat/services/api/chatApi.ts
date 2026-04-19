@@ -619,9 +619,10 @@ export function setupWebSocketListeners(): void {
     }
   
     // 设置当前选中的会话 ID（短 ID）
-    if (data?.sessionId) {
-      sidebarStore.setSelectedSessionId(data.sessionId);
-      console.log("[initialized] Session ID:", data.sessionId);
+    const shortId = data?.currentSession?.shortId || data?.sessionId;
+    if (shortId) {
+      sidebarStore.setSelectedSessionId(shortId);
+      console.log("[initialized] Session ID:", shortId);
     }
   });
 

@@ -18,6 +18,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useChatStore } from "@/features/chat/stores/chatStore";
+import { extractShortSessionId } from "@/features/chat/utils/sessionUtils";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
@@ -141,7 +142,9 @@ export function useChatInit(): { isConnecting: boolean } {
       });
       useSidebarStore.getState().setWorkingDir(workingDir);
       useSidebarStore.getState().setSessions(allSessions || []);
-      useSidebarStore.getState().setSelectedSessionId(currentSession?.sessionFile || null);
+      // 使用服务器返回的短 ID 作为选中 session ID（与 sidebar 中的 session.id 一致）
+      const shortId = (currentSession as any)?.shortId || null;
+      useSidebarStore.getState().setSelectedSessionId(shortId);
 
       // 5.4 聊天历史消息 - 使用统一的加载逻辑（参考 HTTP loadSession 的工具处理方式）
       console.log("[ChatInit] Messages from server:", currentSession?.messages?.length || 0);

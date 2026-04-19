@@ -101,10 +101,7 @@ export function SessionDropdownSection() {
     async (session: Session) => {
       console.log("CLICKED SESSION:", session.id, session.path);
       
-      // 立即更新本地选中状态（乐观更新，绿色箭头立即显示）
-      useSidebarStore.getState().setSelectedSessionId(session.id);
-      
-      // 执行实际的session切换
+      // 执行实际的session切换（让sessionManager处理状态更新）
       console.log("About to call sessionManager.selectSession...");
       await sessionManager.selectSession(session.id);
       console.log("sessionManager.selectSession DONE!");
