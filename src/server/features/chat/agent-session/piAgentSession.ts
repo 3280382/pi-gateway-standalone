@@ -697,9 +697,9 @@ export class PiAgentSession {
       return;
     }
 
-    // Handle slash commands (/ls, /clear, etc.)
+    // Handle / commands via SDK executeBash
     if (text.startsWith("/")) {
-      await this.handleSlashCommand(text);
+      await this.executeCommand(text);
       return;
     }
 
@@ -728,85 +728,6 @@ export class PiAgentSession {
         error: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }
-
-  /**
-   * Handle slash commands (/command)
-   */
-  private async handleSlashCommand(text: string): Promise<void> {
-    const cmd = text.slice(1).trim(); // Remove leading /
-    const [commandName, ...argsParts] = cmd.split(/\s+/);
-    const args = argsParts.join(" ");
-
-    console.log(`[PiAgentSession.handleSlashCommand] Command: ${commandName}, Args: ${args}`);
-
-    // Handle built-in slash commands
-    switch (commandName) {
-      case "clear":
-      case "new":
-        // Start new session - handled at higher level
-        this.send({ type: "error", error: "Use the UI to start a new session" });
-        return;
-
-      case "bash":
-      case "ls":
-      case "tree":
-      case "cat":
-      case "grep":
-      case "find":
-        // Execute as bash command
-        await this.executeCommand(text);
-        return;
-
-      case "settings":
-      case "model":
-      case "export":
-      case "import":
-      case "share":
-      case "copy":
-      case "name":
-      case "session":
-      case "changelog":
-      case "hotkeys":
-      case "fork":
-      case "tree":
-      case "login":
-      case "logout":
-      case "compact":
-      case "resume":
-      case "reload":
-      case "quit":
-        // These commands require UI interaction - not supported in web mode
-        this.send({ type: "error", error: `Command /${commandName} is not available in web mode` });
-        return;
-
-      default:
-        // Unknown command - treat as bash if it looks like a shell command
-        if (this.looksLikeShellCommand(commandName)) {
-          await this.executeCommand(text);
-        } else {
-          // Send to LLM as regular message (remove the /)
-          await this.session?.prompt(cmd);
-        }
-    }
-  }
-
-  /**
-   * Check if a command looks like a shell command
-   */
-  private looksLikeShellCommand(cmd: string): boolean {
-    const commonShellCommands = [
-      "ls", "ll", "la", "pwd", "cd", "cat", "less", "more", "head", "tail",
-      "grep", "find", "awk", "sed", "cut", "sort", "uniq", "wc", "xargs",
-      "ps", "top", "htop", "df", "du", "free", "uptime", "whoami", "id",
-      "echo", "printf", "touch", "mkdir", "rm", "rmdir", "cp", "mv", "ln",
-      "chmod", "chown", "chgrp", "tar", "zip", "unzip", "gzip", "gunzip",
-      "git", "npm", "yarn", "pnpm", "node", "python", "python3", "pip",
-      "docker", "kubectl", "terraform", "ansible",
-      "curl", "wget", "http", "ping", "netstat", "ss", "lsof",
-      "vim", "vi", "nano", "emacs", "code"
-    ];
-    return commonShellCommands.includes(cmd.toLowerCase());
   }
 
   /**
