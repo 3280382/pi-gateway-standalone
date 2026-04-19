@@ -76,7 +76,7 @@ function parseTodoLine(line: string, filePath: string, id: number): TodoItem | n
 }
 
 /**
- * 解析todo文件内容
+ * 解析todofiles内容
  */
 function parseTodoContent(content: string): TodoItem[] {
   const lines = content.split("\n");
@@ -85,7 +85,7 @@ function parseTodoContent(content: string): TodoItem[] {
   let todoId = 0;
 
   for (const line of lines) {
-    // 检测文件路径标题 ### [/path/to/file]
+    // 检测files路径标题 ### [/path/to/file]
     const pathMatch = line.match(/^### \[(.+)\]$/);
     if (pathMatch) {
       currentFilePath = pathMatch[1];
@@ -131,7 +131,7 @@ function generateTodoLine(todo: TodoItem): string {
 }
 
 /**
- * 初始化todo.md文件
+ * 初始化todo.mdfiles
  */
 async function initTodoFile(todoFilePath: string): Promise<void> {
   const header = `# Todo List
@@ -165,7 +165,7 @@ Generated: ${new Date().toISOString()}
 async function ensureValidTodoFormat(todoFilePath: string, content: string): Promise<string> {
   // 检查是否有必要的section
   if (!content.includes("## TODO")) {
-    // 旧格式或损坏的文件，重新初始化并保留旧的todos
+    // 旧格式或损坏的files，重新初始化并保留旧的todos
     const oldLines = content.split("\n").filter((line) => line.trim().startsWith("- ["));
 
     await initTodoFile(todoFilePath);
@@ -234,11 +234,11 @@ export async function add(req: Request, res: Response): Promise<void> {
   try {
     const todoFilePath = `${workingDir}/${TODO_FILE}`;
 
-    // 检查文件是否存在，不存在则初始化
+    // 检查files是否存在，不存在则初始化
     let content = "";
     try {
       content = await readFile(todoFilePath, "utf-8");
-      // 确保格式正确（处理旧格式文件）
+      // 确保格式正确（处理旧格式files）
       content = await ensureValidTodoFormat(todoFilePath, content);
     } catch {
       await initTodoFile(todoFilePath);
@@ -265,7 +265,7 @@ export async function add(req: Request, res: Response): Promise<void> {
     };
     const todoLine = generateTodoLine(newTodo);
 
-    // 检查是否已存在该文件的分组
+    // 检查是否已存在该files的分组
     const fileHeaderPattern = new RegExp(
       `^### \\[${filePath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\]$`,
       "m"
@@ -399,7 +399,7 @@ export async function toggle(req: Request, res: Response): Promise<void> {
 }
 
 /**
- * 根据文件路径获取todos - 对应 /api/files/todo/file
+ * 根据files路径获取todos - 对应 /api/files/todo/file
  */
 export async function getByFile(req: Request, res: Response): Promise<void> {
   const { workingDir, filePath } = req.query as { workingDir: string; filePath: string };
@@ -473,7 +473,7 @@ export async function update(req: Request, res: Response): Promise<void> {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
-      // 检测文件路径标题
+      // 检测files路径标题
       const pathMatch = line.match(/^### \[(.+)\]$/);
       if (pathMatch) {
         currentFilePath = pathMatch[1];

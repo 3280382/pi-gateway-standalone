@@ -61,12 +61,12 @@ EXIT_CODE=$?
 if [ $EXIT_CODE -eq 0 ]; then
     log_success "All tests passed!"
     echo ""
-    echo "查看结果:"
+    echo "View results:"
     echo "  报告: cat test-results/latest/summary.md"
     echo "  截图: ls test-results/latest/screenshots/"
     exit 0
 else
-    log_error "存在失败的测试"
+    log_error "Exists失败的测试"
     echo ""
     echo "诊断命令:"
     echo "  报告: cat test-results/latest/summary.md"

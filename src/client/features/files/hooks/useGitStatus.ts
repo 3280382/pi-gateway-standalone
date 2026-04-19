@@ -1,9 +1,9 @@
 /**
  * useGitStatus - Git状态管理Hook
  *
- * Responsibilities:管理文件项的Git状态显示
- * - 当Git模式激活且组件激活时，获取当前目录文件的Git状态
- * - 将Git状态映射到store中的文件项
+ * Responsibilities:管理files项的Git状态显示
+ * - 当Git模式激活且组件激活时，获取当前directoriesfiles的Git状态
+ * - 将Git状态映射到store中的files项
  * - 处理路径映射（相对路径 vs 绝对路径）
  */
 
@@ -55,7 +55,7 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
       return;
     }
 
-    // 无文件项时不执行操作
+    // 无files项时不执行操作
     if (items.length === 0) return;
 
     // 检查是否需要获取git状态
@@ -80,7 +80,7 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
       try {
         const statuses = await gitApi.status(workingDir);
 
-        // 将状态映射转换为与文件项路径匹配的格式
+        // 将状态映射转换为与files项路径匹配的格式
         const itemStatusMap: Record<string, string> = {};
 
         for (const item of items) {
@@ -100,7 +100,7 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
           if (relativePath && statuses[relativePath]) {
             matchedStatus = statuses[relativePath];
           }
-          // 尝试文件名匹配
+          // 尝试files名匹配
           else if (statuses[item.name]) {
             matchedStatus = statuses[item.name];
           }

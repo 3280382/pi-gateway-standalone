@@ -1,5 +1,5 @@
 /**
- * FileViewer - 文件查看器模态框
+ * FileViewer - files查看器模态框
  *
  * Responsibilities:纯 UI 渲染
  * - 不包含业务逻辑

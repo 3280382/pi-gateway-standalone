@@ -83,12 +83,12 @@ export interface ModelInfo {
 }
 
 export interface ChatSessionState {
-  // 当前工作目录
+  // 当前工作directories
   workingDir: string;
 
   // 当前会话
   currentSessionId: string | null;
-  currentSessionFile: string | null; // session 文件路径，用于 init 时的精确匹配
+  currentSessionFile: string | null; // session files路径，用于 init 时的精确匹配
 
   // 模型设置（从服务器获取，不持久化到 localStorage）
   currentModel: string | null;  // 当前实际使用的模型（优先 session 级别）
@@ -100,7 +100,7 @@ export interface ChatSessionState {
   serverPid: number | null;
   isConnected: boolean;
 
-  // 资源文件路径
+  // 资源files路径
   resourceFiles: ResourceFiles | null;
 
   // 消息加载设置
@@ -108,12 +108,12 @@ export interface ChatSessionState {
 }
 
 interface ChatSessionActions {
-  // 工作目录
+  // 工作directories
   setWorkingDir: (dir: string) => void;
 
   // 当前会话（用于 UI 显示当前选中的 session）
   setCurrentSession: (id: string | null) => void;
-  setCurrentSessionFile: (path: string | null) => void; // 设置 session 文件路径
+  setCurrentSessionFile: (path: string | null) => void; // 设置 session files路径
 
   // 模型设置
   setCurrentModel: (model: string | null) => void;
@@ -125,7 +125,7 @@ interface ChatSessionActions {
   setServerPid: (pid: number | null) => void;
   setIsConnected: (connected: boolean) => void;
 
-  // 资源文件
+  // 资源files
   setResourceFiles: (files: ResourceFiles | null) => void;
 
   // 消息加载设置
@@ -149,7 +149,7 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
         resourceFiles: null,
         defaultMessageLimit: 100, // 默认加载100条，-1表示加载所有
 
-        // 工作目录
+        // 工作directories
         // 注意：此方法仅更新本地状态，全局 workspaceStore 的同步由调用方负责
         // 或通过全局 workspaceStore.setWorkingDir 触发反向同步
         setWorkingDir: (dir) => set({ workingDir: dir }),
@@ -168,7 +168,7 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
         setServerPid: (pid) => set({ serverPid: pid }),
         setIsConnected: (connected) => set({ isConnected: connected }),
 
-        // 资源文件
+        // 资源files
         setResourceFiles: (files) => set({ resourceFiles: files }),
 
         // 消息加载设置

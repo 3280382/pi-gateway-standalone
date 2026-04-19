@@ -31,7 +31,7 @@ function getSessionStore() {
 }
 
 export interface WorkspaceState {
-  // Current working directory (project root)- 这是真正持久化的工作目录
+  // Current working directory (project root)- 这是真正持久化的工作directories
   workingDir: string;
 }
 

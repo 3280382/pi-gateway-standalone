@@ -22,7 +22,7 @@ export async function current(_req: Request, res: Response) {
 }
 
 /**
- * 获取工作目录 - 对应 /api/workspace/working-dir
+ * 获取工作directories - 对应 /api/workspace/working-dir
  */
 export async function workingDir(_req: Request, res: Response) {
   res.json({

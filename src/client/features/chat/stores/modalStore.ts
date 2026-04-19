@@ -13,7 +13,7 @@ export interface ModalState {
   isModelSelectorOpen: boolean;
   // 思考级别
   isThinkingLevelOpen: boolean;
-  // 目录浏览器
+  // directories浏览器
   isDirectoryBrowserOpen: boolean;
   // Files查看器
   isFileViewerOpen: boolean;
@@ -34,7 +34,7 @@ interface ModalActions {
   // 思考级别
   openThinkingLevel: () => void;
   closeThinkingLevel: () => void;
-  // 目录浏览器
+  // directories浏览器
   openDirectoryBrowser: () => void;
   closeDirectoryBrowser: () => void;
   // 过滤器面板
@@ -70,7 +70,7 @@ export const useModalStore = create<ModalState & ModalActions>()((set) => ({
   openThinkingLevel: () => set({ isThinkingLevelOpen: true }),
   closeThinkingLevel: () => set({ isThinkingLevelOpen: false }),
 
-  // 目录浏览器
+  // directories浏览器
   openDirectoryBrowser: () => set({ isDirectoryBrowserOpen: true }),
   closeDirectoryBrowser: () => set({ isDirectoryBrowserOpen: false }),
 

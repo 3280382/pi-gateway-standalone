@@ -7,9 +7,9 @@ SESSION_NAME="gateway-dev"
 echo "=== pi-gateway-standalone 会话恢复 ==="
 echo ""
 
-# 检查会话是否存在
+# 检查会话是否Exists
 if tmux has-session -t $SESSION_NAME 2>/dev/null; then
-    echo "✅ 会话 '$SESSION_NAME' 存在"
+    echo "✅ 会话 '$SESSION_NAME' Exists"
     echo "尝试附加到会话..."
     
     # 尝试附加
@@ -29,7 +29,7 @@ if tmux has-session -t $SESSION_NAME 2>/dev/null; then
             echo "杀掉现有会话..."
             pkill -f "tmux.*$SESSION_NAME"
             sleep 2
-            echo "重新创建会话..."
+            echo "重新Create session..."
             bash scripts/start-tmux-dev.sh
         else
             echo "退出"
@@ -37,7 +37,7 @@ if tmux has-session -t $SESSION_NAME 2>/dev/null; then
         fi
     fi
 else
-    echo "⚠️ 会话 '$SESSION_NAME' 不存在"
+    echo "⚠️ 会话 '$SESSION_NAME' 不Exists"
     echo "创建新会话..."
     bash scripts/start-tmux-dev.sh
 fi

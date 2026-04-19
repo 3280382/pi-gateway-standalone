@@ -4,8 +4,8 @@
  * These functions shared by WebSocket handlers and HTTP controllers
  * - getAllSessions: Get all session file lists in working directory
  * - getAllModels: Get model list
- * - getSessionMessages: 读取 session 文件内容
- * - buildInitResponse: 构建统一的初始化响应
+ * - getSessionMessages: Read session file content
+ * - buildInitResponse: Build unified initialization response
  */
 
 import { existsSync } from "node:fs";
@@ -18,8 +18,8 @@ import type { PiAgentSession } from "./agent-session/piAgentSession";
 const logger = new Logger({ level: LogLevel.INFO });
 
 /**
- * 获取工作目录下的 session 文件列表
- * @param workingDir 工作目录
+ * Get session file list in working directory
+ * @param workingDir Working directory
  * @param limit Max return count (default: all)
  * @returns Session list (sorted by modification time, newest first)
  */
@@ -284,7 +284,7 @@ export async function buildSessionResponse(
 
   logger.info(`[buildSessionResponse] Loading messages for: ${sessionFile}, explicit: ${explicitSessionFile || 'none'}`);
 
-  // Get total message count和最近的消息（Optimizations:只加载最近 100 条）
+  // Get total message count and recent messages（Optimizations:只加载最近 100 条）
   const [fileMessages, totalMessageCount] = await Promise.all([
     getSessionMessages(sessionFile, messageLimit),
     getSessionMessageCount(sessionFile),
@@ -305,7 +305,7 @@ export async function buildSessionResponse(
   // Get current actual model（priority: read from session, else use default）
   const currentModel = await getSessionCurrentModel(sessionFile, defaultModel);
 
-  // Fetch other data in parallel（Optimizations:只加载最近 10 个 session）
+  // Fetch other data in parallel (Optimizations:only load recent 10 sessions)）
   const [allSessions, allModels] = await Promise.all([
     getAllSessions(workingDir, sessionLimit),
     getAllModels(),

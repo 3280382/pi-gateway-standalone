@@ -1,5 +1,5 @@
 /**
- * FileBrowser - 文件浏览器主组件
+ * FileBrowser - files浏览器主组件
  *
  * Responsibilities:UI 渲染
  * - 不包含业务逻辑
@@ -46,7 +46,7 @@ export function FileBrowser({
   // ===== [ANCHOR:STATE] =====
   const { viewMode, isLoading, error, currentBrowsePath } = useFileStore();
 
-  // 使用全局 workspace store 的 workingDir（用于 todo 根目录）
+  // 使用全局 workspace store 的 workingDir（用于 todo 根directories）
   const { workingDir } = useWorkspaceStore();
 
   // ===== [ANCHOR:HOOKS] =====
@@ -54,7 +54,7 @@ export function FileBrowser({
   useFileBrowser({ isActive });
   // 使用当前浏览路径获取 git 状态
   useGitStatus({ isActive, currentBrowsePath: currentBrowsePath || workingDir });
-  // 使用全局工作目录加载 todos（所有 todo 都保存在项目根目录的 todo.md）
+  // 使用全局工作directories加载 todos（所有 todo 都保存在项目根directories的 todo.md）
   useTodos({ isActive, workingDir });
 
   // ===== [ANCHOR:COMPUTED] =====
@@ -72,7 +72,7 @@ export function FileBrowser({
       <div className={styles.container}>
         {/* 主内容区 */}
         <div className={styles.main}>
-          {/* 选中文件操作栏 */}
+          {/* 选中files操作栏 */}
           <FileBrowserErrorBoundary componentName="File Action Bar">
             <FileActionBar onExecute={onExecuteOutput} onOpenBottomPanel={onOpenBottomPanel} />
           </FileBrowserErrorBoundary>
@@ -83,7 +83,7 @@ export function FileBrowser({
             <span className={styles.pathText}>{currentBrowsePath || workingDir}</span>
           </div>
 
-          {/* 文件列表区域 */}
+          {/* files列表区域 */}
           <div className={styles.contentArea}>
             {isLoading || (viewMode === "tree" && treeLoading) ? (
               <div className={styles.loading}>Loading...</div>
@@ -106,7 +106,7 @@ export function FileBrowser({
         </div>
       </div>
 
-      {/* 文件查看器模态框 */}
+      {/* files查看器模态框 */}
       <FileViewer />
     </section>
   );

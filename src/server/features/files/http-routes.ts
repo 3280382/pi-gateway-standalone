@@ -1,12 +1,12 @@
 /**
- * Files Feature HTTP 路由注册
- * 集中注册所有文件系统相关的 HTTP API 路由
+ * Files Feature HTTP route registration
+ * Centralized registration of all filesystem HTTP API routes
  */
 
 import type { Application } from "express";
 
 /**
- * 注册 Files Feature 的所有 HTTP 路由
+ * Register all HTTP routes for Files Feature
  */
 export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
   // File controller

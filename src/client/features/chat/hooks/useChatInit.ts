@@ -8,7 +8,7 @@
  *
  * 服务器返回数据：
  * - pid: 顶部菜单显示
- * - workingDir: 当前工作目录
+ * - workingDir: 当前工作directories
  * - currentSession: { sessionId, sessionFile, messages } - 聊天界面历史消息
  * - allSessions: 左侧面板所有 session 列表
  * - currentModel: 当前模型
@@ -75,11 +75,11 @@ export function useChatInit(): { isConnecting: boolean } {
         return;
       }
 
-      // 2. 从 localStorage 获取当前工作目录
+      // 2. 从 localStorage 获取当前工作directories
       const savedWorkingDir = useWorkspaceStore.getState().workingDir;
       console.log("[ChatInit] Sending init with workingDir:", savedWorkingDir);
 
-      // 3. Send init 请求，传入当前工作目录和 sessionFile
+      // 3. Send init 请求，传入当前工作directories和 sessionFile
       // 从 localStorage 获取上次使用的 sessionFile
       const savedSessionFile = useSessionStore.getState().currentSessionFile;
       // 获取用户设置的消息限制
@@ -94,7 +94,7 @@ export function useChatInit(): { isConnecting: boolean } {
       const initResponse = await initChatWorkingDirectory(
         savedWorkingDir,
         savedSessionFile, // 传递 sessionFile 用于精确匹配
-        10000, // 10秒超时，因为需要加载文件
+        10000, // 10秒超时，因为需要加载files
         messageLimit
       ).catch((err) => {
         console.error("[ChatInit] init error:", err);
@@ -127,7 +127,7 @@ export function useChatInit(): { isConnecting: boolean } {
 
       // 5. 恢复所有状态
 
-      // 5.1 全局工作目录
+      // 5.1 全局工作directories
       useWorkspaceStore.getState().setWorkingDir(workingDir);
 
       // 5.2 Session 状态

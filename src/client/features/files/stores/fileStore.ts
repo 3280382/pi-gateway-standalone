@@ -1,5 +1,5 @@
 /**
- * File Store - 文件浏览器状态管理
+ * File Store - files浏览器状态管理
  *
  * Responsibilities:纯状态管理
  * - 不包含业务逻辑

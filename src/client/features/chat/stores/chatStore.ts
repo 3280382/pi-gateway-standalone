@@ -7,7 +7,7 @@
  *
  * 【数据流】
  * 1. 用户发送消息: UI → useChat/useChatController → websocketService.send()
- * 2. 接收AI响应: WebSocket → setupWebSocketListeners() → chatStore (本文件)
+ * 2. 接收AI响应: WebSocket → setupWebSocketListeners() → chatStore (本files)
  * 3. 组件更新: chatStore → React re-render → UI
  *
  * 【特殊设计】

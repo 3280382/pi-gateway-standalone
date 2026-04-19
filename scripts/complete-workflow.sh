@@ -166,7 +166,7 @@ case "$PHASE" in
         verify_endpoints
         ;;
     *)
-        echo "Usage: $0 [阶段]"
+        echo "Usage: $0 [stage]"
         echo "Stages: all, build, lint, test, service, verify"
         echo ""
         echo "Complete workflow:"

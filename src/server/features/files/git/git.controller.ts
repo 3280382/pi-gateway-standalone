@@ -20,7 +20,7 @@ export interface GitCommit {
 }
 
 /**
- * 获取 Git 仓库根目录
+ * 获取 Git 仓库根directories
  */
 async function getGitRoot(workingDir: string): Promise<string | null> {
   try {
@@ -34,7 +34,7 @@ async function getGitRoot(workingDir: string): Promise<string | null> {
 }
 
 /**
- * 检查目录是否是 Git 仓库
+ * 检查directories是否是 Git 仓库
  */
 async function isGitRepo(workingDir: string): Promise<boolean> {
   const root = await getGitRoot(workingDir);
@@ -42,7 +42,7 @@ async function isGitRepo(workingDir: string): Promise<boolean> {
 }
 
 /**
- * 获取文件相对于 Git 仓库根目录的路径
+ * 获取files相对于 Git 仓库根directories的路径
  */
 function getRelativePath(gitRoot: string, filePath: string): string {
   // 如果 filePath 是绝对路径，计算相对路径
@@ -54,7 +54,7 @@ function getRelativePath(gitRoot: string, filePath: string): string {
 }
 
 /**
- * 检查文件在工作区是否有未提交的修改
+ * 检查files在工作区是否有未提交的修改
  */
 async function hasWorkingTreeChanges(gitRoot: string, relativePath: string): Promise<boolean> {
   try {
@@ -156,7 +156,7 @@ async function getFileContent(
   );
 
   try {
-    // 如果是工作区，读取实际文件
+    // 如果是工作区，读取实际files
     if (commitHash === "WORKING") {
       const fullPath = join(gitRoot, relativePath);
       const { stdout } = await execAsync(`cat "${fullPath}"`);
@@ -375,7 +375,7 @@ export async function status(req: Request, res: Response): Promise<void> {
     for (const line of lines) {
       if (line.trim() === "") continue;
 
-      // 解析状态代码和文件路径
+      // 解析状态代码和files路径
       // Git porcelain格式: XY PATH
       // 但有时X可能是空格，导致格式不一致
       // 更好的方法：找到第二个空格后的所有内容
@@ -411,7 +411,7 @@ export async function status(req: Request, res: Response): Promise<void> {
         filePath = filePath.slice(1, -1);
       }
 
-      console.log("[Git] 处理后文件路径:", filePath);
+      console.log("[Git] 处理后files路径:", filePath);
 
       // 将状态映射为更易读的格式
       let displayStatus = "";
@@ -444,14 +444,14 @@ export async function status(req: Request, res: Response): Promise<void> {
         const absolutePath = join(normalizedGitRoot, filePath);
         relativePath = relative(normalizedWorkingDir, absolutePath);
 
-        // 如果相对路径以 ../ 开头，表示文件不在 workingDir 下
+        // 如果相对路径以 ../ 开头，表示files不在 workingDir 下
         // 这种情况可能发生在子模块或特殊情况下
         // 暂时保持原始路径
         if (relativePath.startsWith("../")) {
           relativePath = filePath;
         }
       } else {
-        // gitRoot 和 workingDir 相同，文件路径已经是相对于根目录的
+        // gitRoot 和 workingDir 相同，files路径已经是相对于根directories的
         relativePath = filePath;
       }
 

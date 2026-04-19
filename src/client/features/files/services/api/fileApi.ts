@@ -1,8 +1,8 @@
 /**
- * File API - 文件操作
+ * File API - files操作
  *
  * Responsibilities:
- * - 提供文件相关的 API 调用
+ * - 提供files相关的 API 调用
  * - 不包含业务逻辑，纯数据访问层
  */
 
@@ -13,7 +13,7 @@ import type {
   TreeResponse,
 } from "@/features/files/types";
 
-// 浏览目录
+// 浏览directories
 export async function browse(path: string): Promise<BrowseResponse> {
   const response = await fetch("/api/files/file/browse", {
     method: "POST",
@@ -28,8 +28,8 @@ export async function browse(path: string): Promise<BrowseResponse> {
   return response.json();
 }
 
-// 获取文件树
-// filter: "all" - 返回所有文件, "normal" - 排除隐藏文件和默认排除项
+// 获取files树
+// filter: "all" - 返回所有files, "normal" - 排除隐藏files和默认排除项
 export async function tree(path: string, filter: "all" | "normal" = "all"): Promise<TreeResponse> {
   const response = await fetch(
     `/api/files/file/tree?path=${encodeURIComponent(path)}&filter=${filter}`
@@ -81,9 +81,9 @@ export async function tree(path: string, filter: "all" | "normal" = "all"): Prom
 
     // 递归处理子节点
     if (node.children && !node.truncated) {
-      // 排序：先目录后文件，然后按名称排序
+      // 排序：先directories后files，然后按名称排序
       const sortedChildren = [...node.children].sort((a, b) => {
-        // 先按类型排序（目录在前）
+        // 先按类型排序（directories在前）
         if (a.isDirectory && !b.isDirectory) return -1;
         if (!a.isDirectory && b.isDirectory) return 1;
         // 再按名称排序
@@ -113,7 +113,7 @@ export async function tree(path: string, filter: "all" | "normal" = "all"): Prom
   return { path: data.path || path, items };
 }
 
-// 读取文件内容
+// 读取files内容
 export async function content(path: string): Promise<FileContentResponse> {
   const response = await fetch(`/api/files/file/content?path=${encodeURIComponent(path)}`);
 
@@ -124,7 +124,7 @@ export async function content(path: string): Promise<FileContentResponse> {
   return response.json();
 }
 
-// 写入文件
+// 写入files
 export async function write(path: string, content: string): Promise<void> {
   const response = await fetch("/api/files/file/write", {
     method: "POST",
@@ -137,21 +137,21 @@ export async function write(path: string, content: string): Promise<void> {
   }
 }
 
-// 获取原始文件（图片等）
+// 获取原始files（图片等）
 export function raw(path: string): string {
   return `/api/files/file/raw?path=${encodeURIComponent(path)}`;
 }
 
-// 执行文件
+// 执行files
 export async function execute(path: string): Promise<ReadableStream<Uint8Array>> {
-  // 获取文件所在目录作为工作目录
+  // 获取files所在directories作为工作directories
   const dir = path.split("/").slice(0, -1).join("/") || "/";
   const fileName = path.split("/").pop() || "";
 
   // 构建执行命令
   let command = `./${fileName}`;
 
-  // 根据文件类型调整命令
+  // 根据files类型调整命令
   if (fileName.endsWith(".py")) {
     command = `python3 "${path}"`;
   } else if (fileName.endsWith(".js")) {
@@ -181,7 +181,7 @@ export async function execute(path: string): Promise<ReadableStream<Uint8Array>>
   return response.body;
 }
 
-// 格式化文件大小
+// 格式化files大小
 export function formatFileSize(bytes?: number): string {
   if (bytes === undefined || bytes === null) return "-";
   if (bytes === 0) return "0 B";
@@ -193,7 +193,7 @@ export function formatFileSize(bytes?: number): string {
   return `${parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`;
 }
 
-// 获取文件图标
+// 获取files图标
 export function getFileIcon(extension?: string, isDirectory?: boolean): string {
   if (isDirectory) return "📁";
 
@@ -225,7 +225,7 @@ export function getFileIcon(extension?: string, isDirectory?: boolean): string {
   return iconMap[extension?.toLowerCase() || ""] || "📄";
 }
 
-// 获取文件扩展名
+// Get file extension
 export function getFileExtension(filename: string): string {
   const parts = filename.split(".");
   if (parts.length <= 1) return "";
@@ -248,7 +248,7 @@ export async function checkPathExists(path: string): Promise<boolean> {
   }
 }
 
-// 获取服务器当前工作目录
+// 获取服务器当前工作directories
 export async function getServerWorkingDir(): Promise<string> {
   try {
     const response = await fetch("/api/workspace/working-dir");

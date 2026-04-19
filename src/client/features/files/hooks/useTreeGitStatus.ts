@@ -3,8 +3,8 @@
  *
  * Responsibilities:为 TreeView 组件管理整棵树的 Git 状态
  * - 当 Git 模式激活且 TreeView 激活时，获取整棵树的 Git 状态
- * - 将 Git 状态映射到树中的所有文件节点
- * - 相比 useGitStatus，这个 hook 获取的是整棵树而不仅仅是当前目录
+ * - 将 Git 状态映射到树中的所有files节点
+ * - 相比 useGitStatus，这个 hook 获取的是整棵树而不仅仅是当前directories
  */
 
 import { useEffect, useRef } from "react";
@@ -17,12 +17,12 @@ export interface UseTreeGitStatusOptions {
   isActive?: boolean;
   /** 树数据 */
   treeData: TreeNode[];
-  /** 工作目录 */
+  /** 工作directories */
   workingDir: string;
 }
 
 /**
- * 从树节点中提取所有文件路径
+ * 从树节点中提取所有files路径
  */
 function extractAllPaths(nodes: TreeNode[]): string[] {
   const paths: string[] = [];
@@ -103,7 +103,7 @@ export function useTreeGitStatus(options: UseTreeGitStatusOptions) {
           if (relativePath && statuses[relativePath]) {
             matchedStatus = statuses[relativePath];
           }
-          // 2. 尝试文件名匹配
+          // 2. 尝试files名匹配
           else {
             const fileName = path.split("/").pop();
             if (fileName && statuses[fileName]) {

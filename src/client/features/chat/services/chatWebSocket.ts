@@ -45,17 +45,17 @@ export function switchChatSession(sessionId: string): boolean {
 }
 
 /**
- * 初始化工作目录（对应后端的 init 类型）
+ * 初始化工作directories（对应后端的 init 类型）
  * 返回 Promise 等待 initialized 响应
  *
- * @param path 工作目录路径
- * @param sessionFile Session 文件路径（可选，用于精确匹配 session）
+ * @param path 工作directories路径
+ * @param sessionFile Session files路径（可选，用于精确匹配 session）
  * @param timeoutMs 超时时间
  */
 export function initChatWorkingDirectory(
   path?: string,
   sessionFile?: string,
-  timeoutMs = 10000, // 增加到 10 秒，因为初始化可能需要加载模型和文件系统
+  timeoutMs = 10000, // 增加到 10 秒，因为初始化可能需要加载模型和files系统
   messageLimit?: number
 ): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -97,7 +97,7 @@ export function initChatWorkingDirectory(
 }
 
 /**
- * 切换工作目录 - 已弃用，使用 initChatWorkingDirectory
+ * 切换工作directories - 已弃用，使用 initChatWorkingDirectory
  * @deprecated
  */
 export function switchChatWorkingDirectory(path: string): Promise<unknown> {
@@ -193,7 +193,7 @@ export function createNewChatSession(workingDir?: string): boolean {
 }
 
 /**
- * 发送切换目录请求
+ * 发送切换directories请求
  */
 export function changeChatDirectory(path: string): boolean {
   console.log(`[changeChatDirectory] Sending change_dir request: path="${path}"`);

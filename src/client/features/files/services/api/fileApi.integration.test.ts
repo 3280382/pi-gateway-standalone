@@ -1,6 +1,6 @@
 /**
  * FileApi Integration Tests
- * 测试文件 API 调用 (mock fetch)
+ * 测试files API 调用 (mock fetch)
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";

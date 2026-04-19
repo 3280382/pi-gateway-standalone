@@ -1,5 +1,5 @@
 /**
- * TreeViewModal - 树形目录浏览模态窗口
+ * TreeViewModal - 树形directories浏览模态窗口
  * 使用 API 返回的计算字段 (level, isLast, parentLastStack)
  */
 
@@ -39,7 +39,7 @@ function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-/** 获取文件图标 */
+/** 获取files图标 */
 function getFileIcon(name: string, isDirectory: boolean): string {
   if (isDirectory) return "📁";
   const ext = name.split(".").pop()?.toLowerCase() || "";
@@ -89,7 +89,7 @@ function filterNodes(items: TreeNode[], mode: FilterMode, search: string): TreeN
       return item.name.toLowerCase().includes(search.toLowerCase());
     }
 
-    // 正常模式 - 排除隐藏文件
+    // 正常模式 - 排除隐藏files
     if (mode === "normal") {
       if (item.name.startsWith(".") || DEFAULT_EXCLUDES.includes(item.name)) {
         return false;
@@ -186,7 +186,7 @@ export function TreeViewModal({
                 if (e.target.value !== "search") setSearchText("");
               }}
             >
-              <option value="normal">隐藏排除文件</option>
+              <option value="normal">隐藏排除files</option>
               <option value="all">显示所有</option>
               <option value="search">搜索过滤...</option>
             </select>
@@ -248,10 +248,10 @@ export function TreeViewModal({
                     {/* 连接线 */}
                     <span className={styles.connector}>{isLast ? " " : " "}</span>
 
-                    {/* 文件图标 */}
+                    {/* files图标 */}
                     <span className={styles.icon}>{icon}</span>
 
-                    {/* 文件名 */}
+                    {/* files名 */}
                     <span className={node.isDirectory ? styles.dirName : styles.fileName}>
                       {displayName}
                     </span>

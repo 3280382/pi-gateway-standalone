@@ -1,9 +1,9 @@
 /**
- * useFileBottomMenu - 文件底部菜单业务逻辑 Hook
+ * useFileBottomMenu - files底部菜单业务逻辑 Hook
  *
  * Responsibilities:管理底部菜单的所有业务逻辑
- * - 新建文件
- * - 删除文件
+ * - 新建files
+ * - 删除files
  * - 树状视图
  */
 
@@ -78,7 +78,7 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
   // 简单条件判断，无需useMemo
 
   // ========== 5. Actions ==========
-  // 新建文件
+  // 新建files
   const handleNewClick = useCallback(() => {
     setIsNewModalOpen(true);
     setNewFileName("");
@@ -97,7 +97,7 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
     setNewFileName("");
   }, []);
 
-  // 删除文件
+  // 删除files
   const handleDeleteClick = useCallback(() => {
     if (selectedItems.length === 0) {
       if (!isMultiSelectMode) {

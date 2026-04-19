@@ -1,7 +1,7 @@
 /**
- * CompactWorkspacesSection - 当前工作目录显示
+ * CompactWorkspacesSection - 当前工作directories显示
  *
- * 简化版：只显示当前工作目录
+ * 简化版：只显示当前工作directories
  * （recentWorkspaces 功能已移除）
  */
 

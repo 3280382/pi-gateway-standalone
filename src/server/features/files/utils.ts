@@ -1,5 +1,5 @@
 /**
- * 文件系统工具函数
+ * Filesystem utility functions
  */
 
 import { readdirSync, statSync } from "node:fs";
@@ -7,7 +7,7 @@ import { homedir } from "node:os";
 import * as path from "node:path";
 
 /**
- * 扩展路径（处理~和相对路径）
+ * Expand path (handle ~ and relative paths)
  */
 export function expandPath(targetPath: string): string {
   if (targetPath === "~" || targetPath.startsWith("~/")) {
@@ -17,28 +17,28 @@ export function expandPath(targetPath: string): string {
 }
 
 /**
- * 安全检查防止目录遍历攻击。
- * 确保解析的路径在允许的目录内。
+ * Security check to prevent directory traversal attacks。
+ * Ensure resolved path is within allowed directories。
  */
 export function isPathAllowed(targetPath: string): boolean {
   const resolved = path.resolve(expandPath(targetPath));
   const home = homedir();
   const cwd = process.cwd();
 
-  // 允许主目录、当前工作目录或/tmp内的路径
+  // Allow paths in home, cwd, or /tmp
   const allowedPrefixes = [home, cwd, "/tmp"];
   return allowedPrefixes.some((prefix) => resolved.startsWith(path.resolve(prefix)));
 }
 
 /**
- * 获取文件扩展名
+ * Get file extension
  */
 export function getExtension(filePath: string): string {
   return path.extname(filePath).toLowerCase();
 }
 
 /**
- * 从文件扩展名确定MIME类型
+ * Determine MIME type from file extension
  */
 export function getMimeType(filePath: string): string {
   const ext = getExtension(filePath);
@@ -103,7 +103,7 @@ export function getMimeType(filePath: string): string {
 }
 
 /**
- * 检查文件扩展名是否支持语法高亮
+ * Check if file extension supports syntax highlighting
  */
 export function isHighlightable(filePath: string): boolean {
   const ext = getExtension(filePath);
@@ -177,7 +177,7 @@ export function isHighlightable(filePath: string): boolean {
 }
 
 /**
- * 检查文件是否是二进制文件
+ * Check if file is binary
  */
 export function isBinaryFile(filePath: string): boolean {
   const ext = getExtension(filePath);
@@ -230,7 +230,7 @@ export function isBinaryFile(filePath: string): boolean {
 }
 
 /**
- * 快速检查目录是否存在并可访问
+ * Quick check if directory exists and is accessible
  */
 export function isDirectoryAccessible(dirPath: string): boolean {
   try {
@@ -242,7 +242,7 @@ export function isDirectoryAccessible(dirPath: string): boolean {
 }
 
 /**
- * 快速检查文件是否存在并可访问
+ * Quick check if file exists and is accessible
  */
 export function isFileAccessible(filePath: string): boolean {
   try {
@@ -254,7 +254,7 @@ export function isFileAccessible(filePath: string): boolean {
 }
 
 /**
- * 递归获取目录树
+ * Recursively get directory tree
  */
 export interface DirectoryTreeNode {
   name: string;
@@ -266,7 +266,7 @@ export interface DirectoryTreeNode {
 }
 
 /**
- * 获取目录树（限制深度）
+ * Get directory tree (limit depth)
  */
 export function getDirectoryTree(rootPath: string, maxDepth: number = 3): DirectoryTreeNode | null {
   try {
@@ -313,7 +313,7 @@ export function getDirectoryTree(rootPath: string, maxDepth: number = 3): Direct
             }
           });
         } catch {
-          // 忽略无法访问的目录
+          // Ignore inaccessible directories
           node.children = [];
         }
       }
@@ -328,7 +328,7 @@ export function getDirectoryTree(rootPath: string, maxDepth: number = 3): Direct
 }
 
 /**
- * 获取人类可读的文件大小
+ * Get human-readable file size
  */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -338,7 +338,7 @@ export function formatFileSize(bytes: number): string {
 }
 
 /**
- * 获取人类可读的时间间隔
+ * Get human-readable time interval
  */
 export function formatTimeAgo(date: Date): string {
   const now = new Date();
@@ -348,8 +348,8 @@ export function formatTimeAgo(date: Date): string {
   const diffHour = Math.floor(diffMin / 60);
   const diffDay = Math.floor(diffHour / 24);
 
-  if (diffDay > 0) return `${diffDay}天前`;
-  if (diffHour > 0) return `${diffHour}小时前`;
-  if (diffMin > 0) return `${diffMin}分钟前`;
-  return `${diffSec}秒前`;
+  if (diffDay > 0) return `${diffDay}days ago`;
+  if (diffHour > 0) return `${diffHour}hours ago`;
+  if (diffMin > 0) return `${diffMin}minutes ago`;
+  return `${diffSec}seconds ago`;
 }

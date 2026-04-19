@@ -1,7 +1,7 @@
 /**
  * Message Utilities - 统一的 Session 消息转换
  *
- * 这个文件包含统一的消息转换逻辑，Used for:
+ * 这个files包含统一的消息转换逻辑，Used for:
  * - 页面刷新时的 init 响应处理
  * - 左侧面板选择 session 时的加载
  * - HTTP loadSession 响应处理
@@ -172,7 +172,7 @@ function convertSpecialEntryToMessage(entry: any): Message | null {
  * 1. 第一遍遍历：收集所有 toolCall 的参数
  * 2. 第二遍遍历：转换消息，处理 toolResult 和特殊 entry 类型
  *
- * @param entries Session 文件中的 entries 数组（JSONL 解析后的）
+ * @param entries Session files中的 entries 数组（JSONL 解析后的）
  * @returns 转换后的 Message 数组
  */
 export function normalizeSessionMessages(entries: any[]): Message[] {

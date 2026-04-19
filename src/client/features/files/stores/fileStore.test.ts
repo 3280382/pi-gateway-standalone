@@ -10,22 +10,22 @@ const reporter = new TestReporter("file-store");
 
 describe("File Store", () => {
   it("initializes with empty file list", async () => {
-    await reporter.runTest("空文件列表初始化", async () => {
-      logger.info("空文件列表初始化测试");
+    await reporter.runTest("空files列表初始化", async () => {
+      logger.info("空files列表初始化测试");
       expect(true).toBe(true);
     });
   });
 
   it("can set current directory", async () => {
-    await reporter.runTest("设置当前目录", async () => {
-      logger.info("设置当前目录测试");
+    await reporter.runTest("设置当前directories", async () => {
+      logger.info("设置当前directories测试");
       expect(true).toBe(true);
     });
   });
 
   it("can select files", async () => {
-    await reporter.runTest("选择文件", async () => {
-      logger.info("选择文件测试");
+    await reporter.runTest("选择files", async () => {
+      logger.info("选择files测试");
       expect(true).toBe(true);
     });
   });

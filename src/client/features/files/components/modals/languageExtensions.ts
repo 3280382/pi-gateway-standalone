@@ -1,6 +1,6 @@
 /**
  * CodeMirror 6 语言扩展映射
- * 根据文件类型返回对应的语言支持
+ * 根据files类型返回对应的语言支持
  */
 
 import { css } from "@codemirror/lang-css";
@@ -238,8 +238,8 @@ export function getLanguageExtension(lang: string): any {
 }
 
 /**
- * 根据文件扩展名获取语言标识
- * @param filename 文件名
+ * 根据files扩展名获取语言标识
+ * @param filename files名
  * @returns 语言标识
  */
 export function getLanguageFromFilename(filename: string): string {

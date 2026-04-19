@@ -1,11 +1,11 @@
 /**
- * FilesPage - 文件页面
+ * FilesPage - files页面
  *
- * Responsibilities:文件功能完整布局
+ * Responsibilities:files功能完整布局
  * - 包含 FileToolbar、FileSidebar、FileBrowser、Panel、BottomMenu
  * - 所有状态通过 Hooks 内部获取
  * - 实现 KeepAlive：首次激活才挂载，之后通过 display 控制显示隐藏
- * - 仅在文件视图激活时加载数据
+ * - 仅在files视图激活时加载数据
  */
 
 // ===== [ANCHOR:IMPORTS] =====
@@ -34,7 +34,7 @@ export function FilesPage() {
   // Terminal state from new WebSocket terminal store
   const { isPanelOpen, panelHeight, setPanelOpen, setPanelHeight } = useTerminalStore();
 
-  // 全局工作目录（用于 FileToolbar 显示）
+  // 全局工作directories（用于 FileToolbar 显示）
   const { workingDir } = useWorkspaceStore();
 
   // ===== [ANCHOR:HOOKS] =====

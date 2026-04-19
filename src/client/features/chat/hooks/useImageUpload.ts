@@ -3,7 +3,7 @@
  *
  * Responsibilities:
  * - 管理图片上传状态
- * - 处理文件选择和 base64 转换
+ * - 处理files选择和 base64 转换
  * - 执行 OCR 文本识别
  */
 

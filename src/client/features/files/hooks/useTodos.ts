@@ -2,8 +2,8 @@
  * useTodos - Todo列表管理 Hook
  *
  * Responsibilities:
- * - 加载工作目录的todo列表
- * - 缓存并按文件路径分组
+ * - 加载工作directories的todo列表
+ * - 缓存并按files路径分组
  * - 提供刷新功能
  */
 
@@ -28,14 +28,14 @@ export function useTodos(options: UseTodosOptions): UseTodosResult {
   const lastLoadedDirRef = useRef<string>("");
 
   const refresh = useCallback(async () => {
-    // 防止重复加载同一目录
+    // 防止重复加载同一directories
     if (!workingDir || workingDir === lastLoadedDirRef.current) return;
 
     try {
       const todos = await todoApi.list(workingDir);
       setTodoList(todos);
 
-      // 按文件路径分组
+      // 按files路径分组
       const map = new Map<string, typeof todos>();
       for (const todo of todos) {
         const existing = map.get(todo.filePath) || [];

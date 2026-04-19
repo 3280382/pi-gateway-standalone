@@ -15,7 +15,7 @@ echo ""
 
 # 检查 session 目录
 if [ ! -d "$SESSION_DIR" ]; then
-    echo "❌ Session 目录不存在: $SESSION_DIR"
+    echo "❌ Session 目录不Exists: $SESSION_DIR"
     exit 1
 fi
 
@@ -307,7 +307,7 @@ function main() {
         }
     }
     
-    console.log(`✅ 完成！共处理 ${totalFiles} 个文件`);
+    console.log(`✅ Complete!共处理 ${totalFiles} 个文件`);
     
     // 计算成功率
     for (const toolName in stats.tools) {
@@ -490,7 +490,7 @@ for (const [cmd, stat] of failedBash) {
             type: '命令失败',
             tool: `bash:${cmd}`,
             priority: '中',
-            message: `${cmd} 命令失败 ${stat.failures} 次，建议添加前置检查（如路径存在性、权限等）`,
+            message: `${cmd} 命令失败 ${stat.failures} 次，建议添加前置检查（如路径Exists性、权限等）`,
         });
     }
 }
@@ -573,7 +573,7 @@ node "$OUTPUT_DIR/report.js"
 
 echo ""
 echo "======================================"
-echo "✅ 分析完成！"
+echo "✅ 分析Complete!"
 echo "======================================"
 echo ""
 echo "📁 输出文件:"

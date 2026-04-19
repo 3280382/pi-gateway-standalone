@@ -1,10 +1,10 @@
 /**
- * useDirectoryPicker - 目录选择器逻辑 Hook
+ * useDirectoryPicker - directories选择器逻辑 Hook
  *
  * Responsibilities:
- * - 管理目录选择器状态
- * - 加载目录列表
- * - 处理目录选择
+ * - 管理directories选择器状态
+ * - 加载directories列表
+ * - 处理directories选择
  */
 
 import { useCallback, useState } from "react";
@@ -42,7 +42,7 @@ export function useDirectoryPicker(options: UseDirectoryPickerOptions): UseDirec
   const [entries, setEntries] = useState<DirectoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 加载目录
+  // 加载directories
   const loadDirectory = useCallback(async (path: string) => {
     setIsLoading(true);
     try {
@@ -94,7 +94,7 @@ export function useDirectoryPicker(options: UseDirectoryPickerOptions): UseDirec
     setIsOpen(false);
   }, []);
 
-  // 选择目录
+  // 选择directories
   const selectDirectory = useCallback(
     (path: string) => {
       onSelect(path);
@@ -103,7 +103,7 @@ export function useDirectoryPicker(options: UseDirectoryPickerOptions): UseDirec
     [onSelect, close]
   );
 
-  // Navigation到上级目录
+  // Navigation到上级directories
   const navigateToParent = useCallback(() => {
     // 从 entries 中找到 .. 项
     const parentEntry = entries.find((e) => e.name === "..");

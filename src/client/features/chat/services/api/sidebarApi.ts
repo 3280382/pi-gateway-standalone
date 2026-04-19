@@ -24,7 +24,7 @@ export function useSidebarController(): SidebarController {
   return {
     // Data Loading - 不再需要，数据来自 WebSocket init
     loadWorkingDir: useCallback(async () => {
-      // 工作目录来自 WebSocket init 响应，不需要 HTTP 获取
+      // 工作directories来自 WebSocket init 响应，不需要 HTTP 获取
       console.log("[SidebarController] loadWorkingDir: data comes from WebSocket init");
     }, []),
 
@@ -71,7 +71,7 @@ export function createSidebarController(): SidebarController {
 
   return {
     loadWorkingDir: async () => {
-      // 工作目录来自 WebSocket init 响应
+      // 工作directories来自 WebSocket init 响应
       console.log("[SidebarController] loadWorkingDir: data comes from WebSocket init");
     },
 

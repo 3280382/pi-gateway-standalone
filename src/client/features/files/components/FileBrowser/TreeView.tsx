@@ -1,6 +1,6 @@
 /**
- * TreeView - 树形目录浏览组件
- * 作为文件浏览器的一个视图模式（类似grid和list）
+ * TreeView - 树形directories浏览组件
+ * 作为files浏览器的一个视图模式（类似grid和list）
  * 显示紧凑的全量静态树，支持过滤
  */
 
@@ -22,7 +22,7 @@ function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-/** 获取文件图标 */
+/** 获取files图标 */
 function getFileIcon(name: string, isDirectory: boolean): string {
   if (isDirectory) return "📁";
   const ext = name.split(".").pop()?.toLowerCase() || "";
@@ -145,7 +145,7 @@ export const TreeView = memo<TreeViewProps>(({ items }) => {
                 }[gitStatus]
               : null;
 
-            // 获取该文件的todos
+            // 获取该files的todos
             const todos = todoMap.get(node.path) || [];
             const pendingTodos = todos.filter((t) => !t.checked);
             const hasTodos = todos.length > 0;
@@ -162,10 +162,10 @@ export const TreeView = memo<TreeViewProps>(({ items }) => {
                   {/* 连接线 */}
                   <span className={styles.connector}>{isLast ? "└── " : "├── "}</span>
 
-                  {/* 文件图标 */}
+                  {/* files图标 */}
                   <span className={styles.icon}>{icon}</span>
 
-                  {/* 文件名 */}
+                  {/* files名 */}
                   <span className={node.isDirectory ? styles.dirName : styles.fileName}>
                     {displayName}
                   </span>

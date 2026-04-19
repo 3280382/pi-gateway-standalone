@@ -47,7 +47,7 @@ export async function list(workingDir: string): Promise<TodoItem[]> {
 }
 
 /**
- * 获取指定文件的 todos
+ * 获取指定files的 todos
  */
 export async function getByFile(workingDir: string, filePath: string): Promise<TodoItem[]> {
   const response = await fetchApi<{ todos: TodoItem[] }>(

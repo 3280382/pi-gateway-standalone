@@ -1,7 +1,7 @@
 /**
- * useFileItemActions - 文件项操作逻辑 Hook
+ * useFileItemActions - files项操作逻辑 Hook
  *
- * Responsibilities:管理文件项的交互操作（点击、选择、拖拽、手势等）
+ * Responsibilities:管理files项的交互操作（点击、选择、拖拽、手势等）
  * - 所有交互逻辑封装在此
  * - 组件只负责渲染和绑定事件处理器
  */
@@ -81,7 +81,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
   const pinchState = useRef<PinchState | null>(null);
   const pinchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // ===== 文件项操作 =====
+  // ===== files项操作 =====
 
   const handleTap = useCallback(
     (item: FileItem) => {
@@ -92,7 +92,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
           return;
         }
 
-        // Git 模式下，点击文件触发 Git 历史弹窗
+        // Git 模式下，点击files触发 Git 历史弹窗
         if (isGitModeActive && !item.isDirectory) {
           console.log("[useFileItemActions] Git mode - selecting file:", item.path);
           setGitHistoryFile({ path: item.path, name: item.name });
@@ -111,7 +111,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
           return;
         }
 
-        // Todo 模式下，点击文件或目录都弹出 Todo 输入框（新建）
+        // Todo 模式下，点击files或directories都弹出 Todo 输入框（新建）
         if (isTodoModeActive) {
           console.log("[useFileItemActions] Todo mode - selecting item:", item.path);
           useFileStore.getState().setEditingTodo(null); // 清空编辑状态
@@ -121,7 +121,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
 
         if (item.isDirectory) {
           console.log("[useFileItemActions] Navigating to:", item.path);
-          // 在文件浏览器中导航只改变 currentBrowsePath，不改变全局 workingDir
+          // 在files浏览器中导航只改变 currentBrowsePath，不改变全局 workingDir
           setCurrentBrowsePath(item.path);
         } else {
           console.log("[useFileItemActions] Opening viewer:", item.path);
@@ -147,7 +147,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
     (item: FileItem) => {
       if (isMultiSelectMode) return;
       if (item.isDirectory) {
-        // 在文件浏览器中导航只改变 currentBrowsePath，不改变全局 workingDir
+        // 在files浏览器中导航只改变 currentBrowsePath，不改变全局 workingDir
         setCurrentBrowsePath(item.path);
       }
     },

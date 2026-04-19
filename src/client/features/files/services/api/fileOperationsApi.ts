@@ -1,7 +1,7 @@
 /**
- * File Operations API - 文件业务操作层
+ * File Operations API - files业务操作层
  *
- * Responsibilities:封装文件相关的业务操作 API 调用
+ * Responsibilities:封装files相关的业务操作 API 调用
  * 不包含状态管理，只负责与服务器通信
  */
 
@@ -15,7 +15,7 @@ export interface DirectoryData {
 }
 
 /**
- * 加载目录内容
+ * 加载directories内容
  */
 export async function loadDirectoryContent(path: string): Promise<DirectoryData> {
   const data = await fileApi.browse(path);
@@ -42,7 +42,7 @@ export async function loadDirectoryContent(path: string): Promise<DirectoryData>
 }
 
 /**
- * 批量删除文件
+ * 批量删除files
  */
 export async function batchDeleteFiles(paths: string[]): Promise<void> {
   if (paths.length === 0) return;
@@ -59,7 +59,7 @@ export async function batchDeleteFiles(paths: string[]): Promise<void> {
 }
 
 /**
- * 批量移动文件
+ * 批量移动files
  */
 export async function batchMoveFiles(paths: string[], targetPath: string): Promise<void> {
   if (paths.length === 0) return;
@@ -76,7 +76,7 @@ export async function batchMoveFiles(paths: string[], targetPath: string): Promi
 }
 
 /**
- * 创建新文件
+ * 创建新files
  */
 export async function createFile(workingDir: string, fileName: string): Promise<void> {
   const filePath = `${workingDir}/${fileName}`.replace(/\/+/g, "/");
@@ -93,7 +93,7 @@ export async function createFile(workingDir: string, fileName: string): Promise<
 }
 
 /**
- * 执行文件
+ * 执行files
  */
 export async function executeFileByPath(
   path: string,

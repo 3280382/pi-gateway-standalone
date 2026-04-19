@@ -1,5 +1,5 @@
 /**
- * FileBottomMenu - 文件功能底部菜单
+ * FileBottomMenu - files功能底部菜单
  *
  * Responsibilities:纯 UI 渲染
  * - 不包含业务逻辑
@@ -193,7 +193,7 @@ export function FileBottomMenu() {
         </>
       )}
 
-      {/* 新建文件对话框 */}
+      {/* 新建files对话框 */}
       {isNewModalOpen && (
         <div className={styles.modalOverlay} onClick={handleCancelNew}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>

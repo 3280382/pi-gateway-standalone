@@ -1,11 +1,11 @@
 /**
- * DirectoryPicker - 目录选择器组件
+ * DirectoryPicker - directories选择器组件
  *
  * Responsibilities:
- * - 显示目录列表供用户选择
- * - 支持进入子目录和返回上级
- * - 过滤不必要的目录（node_modules, .git 等）
- * - 每次打开从 home 目录开始
+ * - 显示directories列表供用户选择
+ * - 支持进入子directories和返回上级
+ * - 过滤不必要的directories（node_modules, .git 等）
+ * - 每次打开从 home directories开始
  *
  * Structure:State → Ref → Effects → Computed → Actions → Render
  */
@@ -17,7 +17,7 @@ import styles from "./AppHeader.module.css";
 // Constants
 // ============================================================================
 
-// 默认排除的目录（与 TreeView 保持一致）
+// 默认排除的directories（与 TreeView 保持一致）
 const DEFAULT_EXCLUDED_DIRS = [
   "node_modules",
   "__pycache__",
@@ -46,17 +46,17 @@ const DEFAULT_EXCLUDED_DIRS = [
   "temp",
 ];
 
-// Home 目录
+// Home directories
 const HOME_DIR = "/root";
 
-// 检查是否应该排除某个目录
+// 检查是否应该排除某个directories
 function shouldExcludeDir(name: string): boolean {
-  // 排除隐藏目录（以.开头）
+  // 排除隐藏directories（以.开头）
   if (name.startsWith(".")) {
-    // 但允许 .pi（特殊目录）
+    // 但允许 .pi（特殊directories）
     return name !== ".pi";
   }
-  // 排除默认列表中的目录
+  // 排除默认列表中的directories
   return DEFAULT_EXCLUDED_DIRS.includes(name.toLowerCase());
 }
 
@@ -82,7 +82,7 @@ interface DirectoryPickerProps {
 
 export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPickerProps) {
   // ========== 1. State ==========
-  // 每次打开都从 home 目录开始
+  // 每次打开都从 home directories开始
   const [path, setPath] = useState(HOME_DIR);
   const [entries, setEntries] = useState<DirectoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -98,7 +98,7 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
       });
       const data = await response.json();
 
-      // 过滤目录：只显示非排除的目录
+      // 过滤directories：只显示非排除的directories
       const dirs = data.items
         .filter((item: any) => item.isDirectory && !shouldExcludeDir(item.name))
         .map((item: any) => ({
@@ -107,7 +107,7 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
           isDirectory: true,
         }));
 
-      // 添加上级目录按钮（如果不在根目录）
+      // 添加上级directories按钮（如果不在根directories）
       if (data.parentPath !== data.currentPath && data.currentPath !== "/") {
         dirs.unshift({
           name: "..",
@@ -116,7 +116,7 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
         });
       }
 
-      // 添加快速导航到 home 目录按钮（如果当前不在 home）
+      // 添加快速导航到 home directories按钮（如果当前不在 home）
       if (data.currentPath !== HOME_DIR && HOME_DIR !== "/") {
         dirs.unshift({
           name: "🏠 ~ (home)",
@@ -145,7 +145,7 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
   }, []);
 
   // ========== 3. Effects ==========
-  // 每次打开都从 home 目录开始
+  // 每次打开都从 home directories开始
   useEffect(() => {
     loadDirectory(HOME_DIR);
   }, [loadDirectory]);

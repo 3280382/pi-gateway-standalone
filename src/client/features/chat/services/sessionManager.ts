@@ -2,12 +2,12 @@
  * Session Manager - 统一会话管理模块
  *
  * Responsibilities:
- * 1. 封装 session 生命周期管理（切换目录、选择 session、恢复 session）
+ * 1. 封装 session 生命周期管理（切换directories、选择 session、恢复 session）
  * 2. 协调 sidebarStore、sessionStore、workspaceStore、chatStore 的更新
  * 3. 所有操作使用统一的 initChatWorkingDirectory API
  *
  * 统一原则：
- * - 所有场景（刷新页面、切换目录、选择 session）都使用 initChatWorkingDirectory
+ * - 所有场景（刷新页面、切换directories、选择 session）都使用 initChatWorkingDirectory
  * - 都使用 normalizeSessionMessages 处理消息
  * - 都更新相同的 store 字段
  */
@@ -74,7 +74,7 @@ function getStores() {
 
 /**
  * 统一处理 init 响应
- * 所有场景（刷新、切换目录、选择 session）使用相同的处理逻辑
+ * 所有场景（刷新、切换directories、选择 session）使用相同的处理逻辑
  */
 async function handleInitResponse(response: any, stores: ReturnType<typeof getStores>) {
   console.log("HANDLEINITRESPONSE CALLED!", {
@@ -86,7 +86,7 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
   const { pid, workingDir, currentSession, allSessions, currentModel, allModels, thinkingLevel } =
     response;
 
-  // 1. 更新工作目录
+  // 1. 更新工作directories
   stores.globalWorkspace.setWorkingDir(workingDir);
   stores.sidebar.setWorkingDir(workingDir);
   stores.session.setWorkingDir(workingDir);
@@ -147,7 +147,7 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
 // ============================================================================
 
 /**
- * 切换工作目录
+ * 切换工作directories
  * 使用与刷新页面完全相同的 initChatWorkingDirectory API
  * 使用覆盖式 loading，不清空界面直到服务器返回
  */
@@ -161,7 +161,7 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
   console.log("[SessionManager.switchDirectory] 显示 loading");
 
   try {
-    // 使用统一的 init API（不传 sessionFile，让服务器选择新目录的默认 session）
+    // 使用统一的 init API（不传 sessionFile，让服务器选择新directories的默认 session）
     const messageLimit = stores.session.defaultMessageLimit;
     const response = await initChatWorkingDirectory(targetDir, undefined, 15000, messageLimit);
 
@@ -176,7 +176,7 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
     console.log("[SessionManager.switchDirectory] 界面重建完成");
   } catch (error) {
     console.error("[SessionManager.switchDirectory] error:", error);
-    // 降级：至少更新工作目录
+    // 降级：至少更新工作directories
     stores.globalWorkspace.setWorkingDir(targetDir);
     stores.sidebar.setWorkingDir(targetDir);
     stores.session.setWorkingDir(targetDir);

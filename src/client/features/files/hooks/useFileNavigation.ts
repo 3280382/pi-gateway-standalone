@@ -1,8 +1,8 @@
 /**
- * useFileNavigation - 文件导航逻辑 Hook
+ * useFileNavigation - files导航逻辑 Hook
  *
- * Responsibilities:管理文件浏览器的导航逻辑
- * - 在文件浏览器中导航（只改变 currentBrowsePath，不改变全局 workingDir）
+ * Responsibilities:管理files浏览器的导航逻辑
+ * - 在files浏览器中导航（只改变 currentBrowsePath，不改变全局 workingDir）
  */
 
 import { useCallback } from "react";
@@ -17,9 +17,9 @@ export interface UseFileNavigationResult {
 }
 
 export function useFileNavigation(): UseFileNavigationResult {
-  // currentBrowsePath: 当前浏览路径（在文件浏览器中导航不改变全局 workingDir）
+  // currentBrowsePath: 当前浏览路径（在files浏览器中导航不改变全局 workingDir）
   const { currentBrowsePath, parentPath, setCurrentBrowsePath } = useFileStore();
-  // workingDir: 全局工作目录（项目根目录）
+  // workingDir: 全局工作directories（项目根directories）
   const { workingDir } = useWorkspaceStore();
 
   /**
@@ -47,7 +47,7 @@ export function useFileNavigation(): UseFileNavigationResult {
   }, [currentBrowsePath, parentPath, setCurrentBrowsePath]);
 
   /**
-   * 导航到主页（全局工作目录）
+   * 导航到主页（全局工作directories）
    */
   const navigateHome = useCallback(() => {
     setCurrentBrowsePath(workingDir);

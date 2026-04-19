@@ -4,7 +4,7 @@
  */
 
 /**
- * 格式化文件大小
+ * 格式化files大小
  */
 export function formatFileSize(bytes?: number): string {
   if (bytes === undefined || bytes === null) return "";
@@ -35,7 +35,7 @@ export function formatDate(dateString?: string, options?: Intl.DateTimeFormatOpt
 }
 
 /**
- * 格式化时间为相对时间（如：2分钟前）
+ * 格式化时间为相对时间（如：2minutes ago）
  */
 export function formatTimeAgo(date: Date | string | number): string {
   const now = new Date();
@@ -49,10 +49,10 @@ export function formatTimeAgo(date: Date | string | number): string {
   if (diffDay > 30) {
     return formatDate(typeof date === "string" ? date : date.toISOString());
   }
-  if (diffDay > 0) return `${diffDay}天前`;
-  if (diffHour > 0) return `${diffHour}小时前`;
-  if (diffMin > 0) return `${diffMin}分钟前`;
-  return diffSec < 10 ? "刚刚" : `${diffSec}秒前`;
+  if (diffDay > 0) return `${diffDay}days ago`;
+  if (diffHour > 0) return `${diffHour}hours ago`;
+  if (diffMin > 0) return `${diffMin}minutes ago`;
+  return diffSec < 10 ? "刚刚" : `${diffSec}seconds ago`;
 }
 
 /**
@@ -105,7 +105,7 @@ export function formatMarkdown(text: string): string {
 }
 
 /**
- * 获取文件扩展名
+ * Get file extension
  */
 export function getFileExtension(filename: string): string {
   const match = filename.match(/\.([^.]+)$/);
@@ -113,7 +113,7 @@ export function getFileExtension(filename: string): string {
 }
 
 /**
- * 获取文件名（不含扩展名）
+ * 获取files名（不含扩展名）
  */
 export function getFileNameWithoutExt(filename: string): string {
   return filename.replace(/\.[^/.]+$/, "");

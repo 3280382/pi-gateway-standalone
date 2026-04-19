@@ -11,7 +11,7 @@ import * as gitApi from "@/features/files/services/api/gitApi";
 import { useViewerStore } from "@/features/files/stores/viewerStore";
 import styles from "./Modals.module.css";
 
-// 固定的 Git 仓库根目录
+// 固定的 Git 仓库根directories
 const GIT_ROOT = "/root/pi-gateway-standalone";
 
 interface GitHistoryModalProps {
@@ -172,7 +172,7 @@ export function GitHistoryModal({ isOpen, filePath, fileName, onClose }: GitHist
                         <span className={styles.author}>{commit.author}</span>
                         <span className={styles.date}>{formatDate(commit.date)}</span>
                         <div className={styles.actions}>
-                          {/* 工作区不显示查看内容按钮，因为文件已在编辑器中打开 */}
+                          {/* 工作区不显示查看内容按钮，因为files已在编辑器中打开 */}
                           {!isWorking && (
                             <button
                               type="button"

@@ -1,5 +1,5 @@
 /**
- * FileItem - 文件项组件
+ * FileItem - files项组件
  *
  * Responsibilities:纯 UI 渲染
  * - 无业务逻辑，只接收绑定好的处理器

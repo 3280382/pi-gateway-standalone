@@ -4,9 +4,9 @@
  * Chat 功能相关的持久化配置
  *
  * 架构原则：
- * - LocalStorage 只保留当前工作目录（由全局 workspaceStore 管理）
+ * - LocalStorage 只保留当前工作directories（由全局 workspaceStore 管理）
  * - 其他所有数据（sessions、currentSession、models、currentModel）都从服务器获取
- * - 工作目录初始化时（init），服务器返回所有相关参数
+ * - 工作directories初始化时（init），服务器返回所有相关参数
  */
 
 // ============================================================================
@@ -52,7 +52,7 @@ export const CHAT_SESSION_PERSIST: string[] = [
 /** Chat Sidebar Store - 持久化字段
  *
  * 注意：
- * - sessions 从服务器获取（以当前工作目录为参数）
+ * - sessions 从服务器获取（以当前工作directories为参数）
  * - selectedSessionId 从服务器获取（init 响应）
  * - workingDir 已由全局 workspaceStore 管理
  *

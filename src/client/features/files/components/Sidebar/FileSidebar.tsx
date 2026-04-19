@@ -1,5 +1,5 @@
 /**
- * FileSidebar - 文件侧边栏（支持层级展开）
+ * FileSidebar - files侧边栏（支持层级展开）
  */
 import type React from "react";
 import { useCallback } from "react";
@@ -18,19 +18,19 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
   // 处理节点点击 - 展开/折叠 + 导航
   const handleNodeClick = useCallback(
     async (node: ReturnType<typeof useFileTree>["tree"][0], e: React.MouseEvent) => {
-      fileSidebarDebug.debug("点击目录节点", { path: node.path });
+      fileSidebarDebug.debug("点击directories节点", { path: node.path });
 
       if (!node.isDirectory) return;
 
       // 阻止事件冒泡
       e.stopPropagation();
 
-      // Navigation到该目录
+      // Navigation到该directories
       if (onNavigate) {
         onNavigate(node.path);
       }
 
-      // 加载子目录（如果未加载）
+      // 加载子directories（如果未加载）
       if (!node.loaded) {
         await loadNodeChildren(node);
       } else {
@@ -85,10 +85,10 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
               )}
             </span>
 
-            {/* 目录图标 */}
+            {/* directories图标 */}
             <span className={styles.treeNodeFolder}>📂</span>
 
-            {/* 目录名称 */}
+            {/* directories名称 */}
             <span className={styles.treeNodeName}>{node.name}</span>
 
             {/* 错误提示 */}
@@ -99,7 +99,7 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
             )}
           </div>
 
-          {/* 子目录 */}
+          {/* 子directories */}
           {isExpanded && node.children.length > 0 && (
             <div className={styles.treeNodeChildren}>
               {node.children.map((child) => renderTreeNode(child, depth + 1))}

@@ -345,10 +345,10 @@ export function useChatController(): EnhancedChatController {
       });
     },
 
-    // 工作目录
+    // 工作directories
     changeWorkingDir: async (path: string) => {
       await createPromiseWithTimeout<void>({
-        timeoutMessage: "更改工作目录超时",
+        timeoutMessage: "更改工作directories超时",
         eventName: "dir_changed",
         onSuccess: (data) => {
           sessionStore.setWorkingDir(data.cwd);
@@ -906,7 +906,7 @@ export function setupWebSocketListeners(): void {
     console.log(`[${ts}] [RECV] more_messages_loaded:`, data);
 
     if (data?.messages && Array.isArray(data.messages)) {
-      // 使用 normalizeSessionMessages 正确处理 session 文件格式
+      // 使用 normalizeSessionMessages 正确处理 session files格式
       const { normalizeSessionMessages } = await import("@/features/chat/utils/messageUtils");
       const formattedMessages = normalizeSessionMessages(data.messages);
 
@@ -915,7 +915,7 @@ export function setupWebSocketListeners(): void {
     }
   });
 
-  // Dir changed handler - 也保存 resourceFiles（切换目录时）
+  // Dir changed handler - 也保存 resourceFiles（切换directories时）
   websocketService.on("dir_changed", (data: any) => {
     console.log("[setupWebSocketListeners] dir_changed:", data);
     if (data?.resourceFiles) {

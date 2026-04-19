@@ -3,7 +3,7 @@
  *
  * Responsibilities:
  * - 整合 useFilePicker, useImageUpload, useSlashCommands
- * - 处理键盘事件（发送、命令选择、文件选择）
+ * - 处理键盘事件（发送、命令选择、files选择）
  * - 处理输入文本变化
  * - 协调发送流程（普通消息、bash command、slash 命令、图片）
  */

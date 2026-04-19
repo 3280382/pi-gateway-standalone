@@ -1,12 +1,12 @@
 /**
- * useFileBrowser - 文件浏览器核心逻辑 Hook
+ * useFileBrowser - files浏览器核心逻辑 Hook
  *
- * Responsibilities:管理文件浏览器的业务逻辑
- * - 目录加载（仅在激活状态时）
+ * Responsibilities:管理files浏览器的业务逻辑
+ * - directories加载（仅在激活状态时）
  * - 错误处理
  * - 与 store 和 service 协调
  *
- * 注意：使用 currentBrowsePath 进行目录浏览，不改变全局 workingDir
+ * 注意：使用 currentBrowsePath 进行directories浏览，不改变全局 workingDir
  */
 
 // ===== [ANCHOR:IMPORTS] =====
@@ -33,7 +33,7 @@ export interface UseFileBrowserResult {
 export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrowserResult {
   const { isActive = true } = options;
 
-  // currentBrowsePath: 当前浏览的目录（在文件浏览器中导航不改变全局 workingDir）
+  // currentBrowsePath: 当前浏览的directories（在files浏览器中导航不改变全局 workingDir）
   const { currentBrowsePath, setItems, setCurrentBrowsePath, setParentPath, setLoading, setError } =
     useFileStore();
 
@@ -56,7 +56,7 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
   }, [isActive]); // 只在 isActive 变化时执行一次
 
   /**
-   * 加载目录内容
+   * 加载directories内容
    */
   const loadDirectory = useCallback(
     async (path: string) => {
@@ -84,7 +84,7 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
   );
 
   /**
-   * 刷新当前目录
+   * 刷新当前directories
    */
   const refresh = useCallback(async () => {
     lastLoadedPathRef.current = "";

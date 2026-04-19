@@ -1,12 +1,12 @@
 /**
- * FileActionBar - 选中文件操作栏
+ * FileActionBar - 选中files操作栏
  */
 
 import { useFileViewer } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import styles from "../FileBrowser/FileBrowser.module.css";
 
-// 可执行文件扩展名列表
+// 可执行files扩展名列表
 const EXECUTABLE_EXTENSIONS = [
   "sh",
   "bash",
@@ -24,7 +24,7 @@ const EXECUTABLE_EXTENSIONS = [
   "rs",
 ];
 
-// 不可编辑的文件扩展名列表
+// 不可编辑的files扩展名列表
 const NON_EDITABLE_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "webp", "ico", "pdf"];
 
 interface FileActionBarProps {
@@ -44,20 +44,20 @@ export function FileActionBar({ onExecute, onOpenBottomPanel }: FileActionBarPro
   // 暂无外部副作用
 
   // ========== 4. Computed ==========
-  // 无选中文件时不渲染
+  // 无选中files时不渲染
   if (!selectedActionFile) {
     return null;
   }
 
   const ext = selectedActionFile.split(".").pop()?.toLowerCase() || "";
 
-  // 判断文件是否可执行
+  // 判断files是否可执行
   const isExecutable =
     EXECUTABLE_EXTENSIONS.some((ext) =>
       selectedActionFileName?.toLowerCase().endsWith(`.${ext}`)
     ) || !selectedActionFileName?.includes(".");
 
-  // 判断文件是否可编辑
+  // 判断files是否可编辑
   const isEditable = !NON_EDITABLE_EXTENSIONS.includes(ext);
 
   // ========== 5. Actions ==========

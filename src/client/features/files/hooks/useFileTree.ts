@@ -1,7 +1,7 @@
 /**
- * useFileTree - 文件树逻辑 Hook
+ * useFileTree - files树逻辑 Hook
  *
- * Responsibilities:管理文件侧边栏的目录树逻辑
+ * Responsibilities:管理files侧边栏的directories树逻辑
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -36,15 +36,15 @@ export function useFileTree(): UseFileTreeResult {
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * 加载单个目录节点
+   * 加载单个directories节点
    */
   const loadDirectoryNode = useCallback(async (path: string): Promise<TreeNode> => {
-    fileSidebarDebug.info("加载目录", { path });
+    fileSidebarDebug.info("加载directories", { path });
 
     try {
       const data = await fileApi.browse(path);
 
-      // 只保留子目录路径
+      // 只保留子directories路径
       const childDirs = data.items.filter((item) => item.isDirectory).map((item) => item.path);
 
       const node: TreeNode = {
@@ -57,7 +57,7 @@ export function useFileTree(): UseFileTreeResult {
         expanded: false,
       };
 
-      fileSidebarDebug.info("目录节点创建", {
+      fileSidebarDebug.info("directories节点创建", {
         path,
         name: node.name,
         childCount: childDirs.length,
@@ -66,16 +66,16 @@ export function useFileTree(): UseFileTreeResult {
       return node;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "加载失败";
-      fileSidebarDebug.error("目录加载失败", { path, error: errorMsg });
+      fileSidebarDebug.error("directories加载失败", { path, error: errorMsg });
       throw err;
     }
   }, []);
 
   /**
-   * 加载根目录
+   * 加载根directories
    */
   const loadRoot = useCallback(async () => {
-    fileSidebarDebug.info("加载根目录树");
+    fileSidebarDebug.info("加载根directories树");
     setLoading(true);
     setError(null);
 
@@ -84,7 +84,7 @@ export function useFileTree(): UseFileTreeResult {
       setTree([rootNode]);
       setLoading(false);
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "根目录加载失败";
+      const errorMsg = err instanceof Error ? err.message : "根directories加载失败";
       setError(errorMsg);
       setLoading(false);
     }
@@ -129,23 +129,23 @@ export function useFileTree(): UseFileTreeResult {
   );
 
   /**
-   * 加载节点的子目录
+   * 加载节点的子directories
    */
   const loadNodeChildren = useCallback(
     async (node: TreeNode) => {
       if (!node.isDirectory || node.loaded || node.loading) return;
 
-      fileSidebarDebug.info("加载子目录", { path: node.path });
+      fileSidebarDebug.info("加载子directories", { path: node.path });
 
       // 标记为加载中
       setTree((_prev) => updateNodeInTree(node.path, (n) => ({ ...n, loading: true })));
 
       try {
-        // 并行加载所有子目录
+        // 并行加载所有子directories
         const childNodes = await Promise.all(
           node.childPaths.map((childPath) =>
             loadDirectoryNode(childPath).catch((err) => {
-              fileSidebarDebug.error("加载子目录失败", {
+              fileSidebarDebug.error("加载子directories失败", {
                 path: childPath,
                 error: err instanceof Error ? err.message : String(err),
               });
@@ -168,7 +168,7 @@ export function useFileTree(): UseFileTreeResult {
           }))
         );
 
-        fileSidebarDebug.info("子目录加载完成", {
+        fileSidebarDebug.info("子directories加载完成", {
           path: node.path,
           childCount: validChildren.length,
         });
@@ -205,7 +205,7 @@ export function useFileTree(): UseFileTreeResult {
           }))
         );
       }
-      // 否则加载子目录（loadNodeChildren 会处理展开）
+      // 否则加载子directories（loadNodeChildren 会处理展开）
     },
     [updateNodeInTree]
   );

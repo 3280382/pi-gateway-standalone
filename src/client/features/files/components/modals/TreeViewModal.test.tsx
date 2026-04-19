@@ -336,7 +336,7 @@ describe("TreeViewModal", () => {
       expect(mockOnClose).toHaveBeenCalled();
     });
 
-    it("点击文件应该触发 onFileClick", () => {
+    it("点击files应该触发 onFileClick", () => {
       render(
         <TreeViewModal
           isOpen={true}
@@ -384,7 +384,7 @@ describe("TreeViewModal", () => {
       );
 
       // 切换到搜索模式
-      const select = screen.getByDisplayValue("隐藏排除文件");
+      const select = screen.getByDisplayValue("隐藏排除files");
       fireEvent.change(select, { target: { value: "search" } });
 
       // 输入搜索词

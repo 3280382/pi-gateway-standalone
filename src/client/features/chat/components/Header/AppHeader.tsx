@@ -160,9 +160,9 @@ export function AppHeader({
   // ========== 6. Render ==========
   return (
     <div className={styles.topBar}>
-      {/* Row 1: 工作目录（最大宽度） */}
+      {/* Row 1: 工作directories（最大宽度） */}
       <div className={styles.topRow}>
-        {/* 工作目录按钮 - 宽度最大 */}
+        {/* 工作directories按钮 - 宽度最大 */}
         <button
           type="button"
           className={`${styles.workingDirBtn} ${styles.workingDirBtnFullWidth}`}
@@ -425,7 +425,7 @@ function DropdownIcon() {
 }
 
 // Directory Picker Modal
-// 默认排除的目录（与 TreeView 保持一致）
+// 默认排除的directories（与 TreeView 保持一致）
 const DEFAULT_EXCLUDED_DIRS = [
   "node_modules",
   "__pycache__",
@@ -454,14 +454,14 @@ const DEFAULT_EXCLUDED_DIRS = [
   "temp",
 ];
 
-// 检查是否应该排除某个目录
+// 检查是否应该排除某个directories
 function shouldExcludeDir(name: string): boolean {
-  // 排除隐藏目录（以.开头）
+  // 排除隐藏directories（以.开头）
   if (name.startsWith(".")) {
-    // 但允许 .pi（特殊目录）
+    // 但允许 .pi（特殊directories）
     return name !== ".pi";
   }
-  // 排除默认列表中的目录
+  // 排除默认列表中的directories
   return DEFAULT_EXCLUDED_DIRS.includes(name.toLowerCase());
 }
 
@@ -497,7 +497,7 @@ function DirectoryPickerModal({
           isDirectory: true,
         }));
 
-      // 添加上级目录按钮（如果不在根目录）
+      // 添加上级directories按钮（如果不在根directories）
       if (data.parentPath !== data.currentPath && data.currentPath !== "/") {
         dirs.unshift({
           name: "..",
@@ -506,7 +506,7 @@ function DirectoryPickerModal({
         });
       }
 
-      // 添加快速导航到 home 目录按钮（如果当前不在 home）
+      // 添加快速导航到 home directories按钮（如果当前不在 home）
       if (data.currentPath !== homeDir && homeDir !== "/") {
         dirs.unshift({
           name: "🏠 ~ (home)",
@@ -532,7 +532,7 @@ function DirectoryPickerModal({
     }
   }, []);
 
-  // 每次打开时从 home 目录开始
+  // 每次打开时从 home directories开始
   useEffect(() => {
     loadDirectory(homeDir);
   }, [loadDirectory]);

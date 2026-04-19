@@ -1,11 +1,11 @@
 /**
- * useFileViewer - 文件查看器业务逻辑 Hook
+ * useFileViewer - files查看器业务逻辑 Hook
  *
- * Responsibilities:管理文件查看器的所有业务逻辑
- * - 文件类型判断
- * - 加载文件内容
- * - 保存文件
- * - 执行文件
+ * Responsibilities:管理files查看器的所有业务逻辑
+ * - files类型判断
+ * - 加载files内容
+ * - 保存files
+ * - 执行files
  * - 复制路径
  */
 
@@ -205,23 +205,23 @@ export function useFileViewer(): UseFileViewerResult {
     };
   }, [ext]);
 
-  // 加载文件内容
+  // 加载files内容
   const loadFile = useCallback(async () => {
     if (!isOpen || !filePath || mode === "execute") return;
 
-    fileViewerDebug.info("开始加载文件", { filePath, mode });
+    fileViewerDebug.info("开始加载files", { filePath, mode });
     setLoading(true);
     setError(null);
 
     try {
       const data = await fileApi.content(filePath);
-      fileViewerDebug.info("文件加载成功", {
+      fileViewerDebug.info("files加载成功", {
         filePath,
         contentLength: data.content?.length,
       });
       setContent(data.content);
     } catch (err) {
-      fileViewerDebug.error("文件加载失败", {
+      fileViewerDebug.error("files加载失败", {
         filePath,
         error: err instanceof Error ? err.message : String(err),
       });
@@ -231,7 +231,7 @@ export function useFileViewer(): UseFileViewerResult {
     }
   }, [isOpen, filePath, mode, setContent, setLoading, setError]);
 
-  // 保存文件
+  // 保存files
   const saveFile = useCallback(async () => {
     if (!filePath) return;
 
@@ -247,7 +247,7 @@ export function useFileViewer(): UseFileViewerResult {
     }
   }, [filePath, editedContent, setContent, setMode, setSaving, setError]);
 
-  // 执行文件
+  // 执行files
   const execute = useCallback(async () => {
     if (!filePath) return;
 
@@ -291,7 +291,7 @@ export function useFileViewer(): UseFileViewerResult {
   // 获取语言
   const getLanguage = useCallback(() => LANG_MAP[ext] || "text", [ext]);
 
-  // 加载文件副作用
+  // 加载files副作用
   useEffect(() => {
     loadFile();
   }, [loadFile]);

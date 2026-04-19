@@ -1,7 +1,7 @@
 /**
- * useFileFiltering - 文件过滤和排序逻辑 Hook
+ * useFileFiltering - files过滤和排序逻辑 Hook
  *
- * Responsibilities:管理文件列表的过滤和排序逻辑
+ * Responsibilities:管理files列表的过滤和排序逻辑
  */
 
 import { useMemo } from "react";
@@ -50,7 +50,7 @@ const EXTENSION_MAPPINGS: Record<FilterType, string[]> = {
 };
 
 /**
- * 检查文件是否匹配过滤类型
+ * 检查files是否匹配过滤类型
  */
 function matchesFilterType(item: FileItem, filterType: FilterType): boolean {
   if (filterType === "all") return true;
@@ -64,7 +64,7 @@ function matchesFilterType(item: FileItem, filterType: FilterType): boolean {
 }
 
 /**
- * 检查文件是否匹配搜索文本
+ * 检查files是否匹配搜索文本
  */
 function matchesSearchText(item: FileItem, searchText: string): boolean {
   if (!searchText) return true;
@@ -73,14 +73,14 @@ function matchesSearchText(item: FileItem, searchText: string): boolean {
 }
 
 /**
- * 比较两个文件项进行排序
+ * 比较两个files项进行排序
  */
 function compareItems(a: FileItem, b: FileItem, sortMode: string): number {
   // ".." 始终排在第一位
   if (a.name === "..") return -1;
   if (b.name === "..") return 1;
 
-  // 目录始终在文件前面
+  // directories始终在files前面
   if (a.isDirectory && !b.isDirectory) return -1;
   if (!a.isDirectory && b.isDirectory) return 1;
 

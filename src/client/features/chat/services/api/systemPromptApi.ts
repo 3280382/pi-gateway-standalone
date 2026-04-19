@@ -22,7 +22,7 @@ export interface SystemPromptResponse {
 
 /**
  * 获取系统提示词和 AGENTS.md 内容
- * @param cwd 工作目录（可选，默认为当前工作目录）
+ * @param cwd 工作directories（可选，默认为当前工作directories）
  */
 export async function getSystemPrompt(cwd?: string): Promise<SystemPromptResponse> {
   const url = new URL("/api/system-prompt", window.location.origin);
@@ -45,17 +45,17 @@ export async function getSystemPrompt(cwd?: string): Promise<SystemPromptRespons
 export function formatSystemPromptContent(data: SystemPromptResponse): string {
   const sections: string[] = [];
 
-  // 工作目录信息
-  sections.push(`# 工作目录\n${data.cwd}\n`);
+  // 工作directories信息
+  sections.push(`# 工作directories\n${data.cwd}\n`);
 
   // 主系统提示
   if (data.systemPrompt) {
     sections.push(`# 系统提示词 (SYSTEM.md)\n${data.systemPrompt}\n`);
   }
 
-  // AGENTS.md 文件
+  // AGENTS.md files
   if (data.agentsFiles.length > 0) {
-    sections.push(`# AGENTS.md 文件 (${data.agentsFiles.length}个)`);
+    sections.push(`# AGENTS.md files (${data.agentsFiles.length}个)`);
     for (const file of data.agentsFiles) {
       sections.push(`\n## ${file.path}\n${file.content}`);
     }

@@ -230,7 +230,7 @@ export async function getProcessThreads(pid: number): Promise<
 }
 
 /**
- * 获取进程打开的文件
+ * 获取进程打开的files
  */
 export async function getProcessOpenFiles(pid: number): Promise<string[]> {
   try {
@@ -240,7 +240,7 @@ export async function getProcessOpenFiles(pid: number): Promise<string[]> {
       .filter((line) => line.trim())
       .map((line) => {
         const parts = line.split(/\s+/);
-        return parts[parts.length - 1]; // 返回文件路径
+        return parts[parts.length - 1]; // 返回files路径
       })
       .filter((path) => path && path.startsWith("/"));
   } catch {

@@ -1,7 +1,7 @@
 /**
- * useFileCache - 文件路径缓存 Hook
+ * useFileCache - files路径缓存 Hook
  *
- * Responsibilities:管理文件路径的缓存逻辑
+ * Responsibilities:管理files路径的缓存逻辑
  */
 
 import { useCallback } from "react";
@@ -21,7 +21,7 @@ export function useFileCache(): UseFileCacheResult {
   const { pathCache, setPathCache } = useFileStore();
 
   /**
-   * 获取缓存的目录项
+   * 获取缓存的directories项
    */
   const getCachedItems = useCallback(
     (path: string): FileItem[] | null => {
@@ -55,7 +55,7 @@ export function useFileCache(): UseFileCacheResult {
   );
 
   /**
-   * 设置缓存的目录项
+   * 设置缓存的directories项
    */
   const setCachedItems = useCallback(
     (path: string, items: FileItem[]) => {

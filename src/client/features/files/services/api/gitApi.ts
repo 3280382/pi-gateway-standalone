@@ -34,7 +34,7 @@ export interface GitStatusResponse {
 }
 
 /**
- * 获取文件的 Git 历史
+ * 获取files的 Git 历史
  */
 export async function history(filePath: string, workingDir: string): Promise<GitCommit[]> {
   const response = await fetchApi<GitHistoryResponse>(
@@ -44,7 +44,7 @@ export async function history(filePath: string, workingDir: string): Promise<Git
 }
 
 /**
- * 获取指定版本的文件内容
+ * 获取指定版本的files内容
  */
 export async function content(
   filePath: string,
@@ -72,7 +72,7 @@ export async function diff(
 }
 
 /**
- * 检查目录是否是 Git 仓库
+ * 检查directories是否是 Git 仓库
  */
 export async function check(workingDir: string): Promise<boolean> {
   const response = await fetchApi<GitCheckResponse>(
@@ -82,7 +82,7 @@ export async function check(workingDir: string): Promise<boolean> {
 }
 
 /**
- * 获取工作目录下文件的 Git 状态
+ * 获取工作directories下files的 Git 状态
  */
 export async function status(workingDir: string): Promise<Record<string, string>> {
   const response = await fetchApi<GitStatusResponse>(

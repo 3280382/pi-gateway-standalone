@@ -1,11 +1,11 @@
 /**
- * useFilePicker - @mention 文件选择逻辑 Hook
+ * useFilePicker - @mention files选择逻辑 Hook
  *
  * Responsibilities:
- * - 管理 @mention 文件选择器的状态
- * - 加载文件列表
- * - 过滤文件
- * - 处理文件选择
+ * - 管理 @mention files选择器的状态
+ * - 加载files列表
+ * - 过滤files
+ * - 处理files选择
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -56,7 +56,7 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // 加载文件列表
+  // 加载files列表
   const loadFileList = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     try {
@@ -76,7 +76,7 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
     }
   }, [workingDir]);
 
-  // 过滤文件列表
+  // 过滤files列表
   const filteredFiles = useMemo(() => {
     if (!filter) return fileList;
     const lowerFilter = filter.toLowerCase();
@@ -103,7 +103,7 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
     setIsOpen(false);
   }, [value, loadFileList]);
 
-  // 打开文件选择器
+  // 打开files选择器
   const open = useCallback(
     async (triggerAtEnd = true) => {
       if (triggerAtEnd) {
@@ -119,12 +119,12 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
     [value, onChange, loadFileList, onFocusInput]
   );
 
-  // 关闭文件选择器
+  // 关闭files选择器
   const close = useCallback(() => {
     setIsOpen(false);
   }, []);
 
-  // 选择文件
+  // 选择files
   const selectFile = useCallback(
     (file: FileItem) => {
       const lastAtIndex = value.lastIndexOf("@");
@@ -151,7 +151,7 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
     [filteredFiles.length]
   );
 
-  // 刷新文件列表
+  // 刷新files列表
   const refreshFileList = useCallback(async () => {
     await loadFileList();
   }, [loadFileList]);

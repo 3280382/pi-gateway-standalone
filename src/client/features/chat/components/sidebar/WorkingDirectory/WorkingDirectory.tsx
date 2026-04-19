@@ -1,6 +1,6 @@
 /**
  * WorkingDirectory Section
- * 使用系统API获取和设置工作目录
+ * 使用系统API获取和设置工作directories
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -27,12 +27,12 @@ export function WorkingDirectory() {
 
   // ========== 5. Actions ==========
 
-  // 点击工作目录打开选择器
+  // 点击工作directories打开选择器
   const handleClick = () => {
     setIsPickerVisible(true);
   };
 
-  // 处理目录选择
+  // 处理directories选择
   const handleSelect = async (path: string) => {
     setIsPickerVisible(false);
     if (path && path !== workingDir?.path) {
@@ -68,7 +68,7 @@ export function WorkingDirectory() {
   );
 }
 
-// 目录选择器组件
+// directories选择器组件
 function DirectoryPicker({
   currentPath,
   onSelect,
@@ -84,7 +84,7 @@ function DirectoryPicker({
   >([]);
   const [loading, setLoading] = useState(false);
 
-  // 加载目录内容
+  // 加载directories内容
   const loadDirectory = useCallback(async (dirPath: string) => {
     setLoading(true);
     try {
@@ -95,7 +95,7 @@ function DirectoryPicker({
       });
       const data = await response.json();
 
-      // 过滤只显示目录
+      // 过滤只显示directories
       const dirs = data.items
         .filter((item: any) => item.isDirectory)
         .map((item: any) => ({
@@ -104,7 +104,7 @@ function DirectoryPicker({
           isDirectory: true,
         }));
 
-      // 添加上级目录
+      // 添加上级directories
       if (data.parentPath !== data.currentPath) {
         dirs.unshift({
           name: "..",

@@ -31,7 +31,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
   const setTodoList = useFileStore((state) => state.setTodoList);
   const setTodoMap = useFileStore((state) => state.setTodoMap);
 
-  // 使用全局工作目录，确保所有 todo 都写在同一个文件
+  // 使用全局工作directories，确保所有 todo 都写在同一个files
   const workingDir = useWorkspaceStore((state) => state.workingDir);
 
   const isEditing = !!editingTodo;
@@ -80,7 +80,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
         const todos = await todoApi.list(workingDir);
         setTodoList(todos);
 
-        // 按文件路径分组
+        // 按files路径分组
         const map = new Map<string, typeof todos>();
         for (const todo of todos) {
           const existing = map.get(todo.filePath) || [];
