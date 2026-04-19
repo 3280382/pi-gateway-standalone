@@ -278,6 +278,37 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
       isToolsCollapsed: true,
       isMessageCollapsed: false,
     });
+
+    // 如果是 assistant 消息且有 usage 信息，添加 usage 消息
+    if (msg.role === "assistant" && msg.usage) {
+      const usage = msg.usage;
+      const inputTokens = usage.input || usage.inputTokens || 0;
+      const outputTokens = usage.output || usage.outputTokens || 0;
+      const totalTokens = usage.totalTokens || (inputTokens + outputTokens);
+      const cost = usage.cost?.total || usage.cost || 0;
+
+      let usageMessage = `📊 Usage: ${totalTokens.toLocaleString()} tokens`;
+      if (inputTokens || outputTokens) {
+        usageMessage += ` (input: ${inputTokens.toLocaleString()}, output: ${outputTokens.toLocaleString()})`;
+      }
+      if (cost) {
+        usageMessage += ` · $${typeof cost === 'number' ? cost.toFixed(4) : cost}`;
+      }
+      if (msg.model) {
+        usageMessage += ` · ${msg.model}`;
+      }
+
+      messages.push({
+        id: `usage-${entry.id || Date.now()}`,
+        role: "system",
+        content: [{ type: "text", text: usageMessage }],
+        timestamp: new Date(msg.timestamp || entry.timestamp || Date.now()),
+        isStreaming: false,
+        isThinkingCollapsed: true,
+        isToolsCollapsed: true,
+        isMessageCollapsed: false,
+      });
+    }
   });
 
   return messages;
