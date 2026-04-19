@@ -428,6 +428,22 @@ export function setupWebSocketListeners(): void {
   websocketService.on("text_delta", (data: { text?: string; index?: number }) => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] text_delta[${data?.index ?? "?"}]`);
+    
+    // 容错：检查是否需要自动创建 message_start
+    if (messageReconstructor.shouldCreateMessageStart()) {
+      console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing message_start`);
+      store.createStreamingMessage();
+      messageReconstructor.startMessage();
+    };
+    
+    // 容错：检查是否需要自动创建 text_start
+    const index = data?.index ?? 0;
+    if (messageReconstructor.shouldCreateContentBlockStart(index, "text")) {
+      console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing text_start[${index}]`);
+      store.startContentBlock("text", index);
+      messageReconstructor.startContentBlock(index, "text");
+    };
+    
     if (data?.text) {
       store.appendStreamingContent(data.text);
     }
@@ -453,6 +469,22 @@ export function setupWebSocketListeners(): void {
   websocketService.on("thinking_delta", (data: { thinking?: string; index?: number }) => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] thinking_delta[${data?.index ?? "?"}]`);
+    
+    // 容错：检查是否需要自动创建 message_start
+    if (messageReconstructor.shouldCreateMessageStart()) {
+      console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing message_start`);
+      store.createStreamingMessage();
+      messageReconstructor.startMessage();
+    };
+    
+    // 容错：检查是否需要自动创建 thinking_start
+    const thinkingIndex = data?.index ?? 0;
+    if (messageReconstructor.shouldCreateContentBlockStart(thinkingIndex, "thinking")) {
+      console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing thinking_start[${thinkingIndex}]`);
+      store.startContentBlock("thinking", thinkingIndex);
+      messageReconstructor.startContentBlock(thinkingIndex, "thinking");
+    };
+    
     if (data?.thinking) {
       store.appendStreamingThinking(data.thinking);
     }
@@ -490,6 +522,28 @@ export function setupWebSocketListeners(): void {
       console.log(
         `[${ts}] [RECV] toolcall_delta[${data?.index ?? "?"}]: ${data?.toolName || "unknown"}`
       );
+      
+      // 容错：检查是否需要自动创建 message_start
+      if (messageReconstructor.shouldCreateMessageStart()) {
+        console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing message_start`);
+        store.createStreamingMessage();
+        messageReconstructor.startMessage();
+      };
+      
+      // 容错：检查是否需要自动创建 toolcall_start
+      const toolIndex = data?.index ?? 0;
+      if (messageReconstructor.shouldCreateContentBlockStart(toolIndex, "tool_use")) {
+        console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing toolcall_start[${toolIndex}]`);
+        store.startContentBlock("tool_use", toolIndex, {
+          toolCallId: data?.toolCallId,
+          toolName: data?.toolName,
+        });
+        messageReconstructor.startContentBlock(toolIndex, "tool_use", {
+          toolCallId: data?.toolCallId,
+          toolName: data?.toolName,
+        });
+      };
+      
       if (data?.toolCallId && data?.toolName) {
         store.appendToolCallDelta(data.toolCallId, data.toolName, data.delta || "");
       }
