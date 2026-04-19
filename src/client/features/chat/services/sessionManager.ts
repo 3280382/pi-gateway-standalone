@@ -94,8 +94,8 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
 
   // 3. 更新 sessions 列表
   stores.sidebar.setSessions(allSessions || []);
-  // 使用短 ID 作为 selectedSessionId
-  const shortSessionId = currentSession?.sessionFile ? extractShortSessionId(currentSession.sessionFile) : null;
+  // 使用后端返回的 shortId（统一命名）
+  const shortSessionId = currentSession?.shortId || null;
   stores.sidebar.setSelectedSessionId(shortSessionId);
 
   // 4. 更新当前 session

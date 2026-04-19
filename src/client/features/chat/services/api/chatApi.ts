@@ -235,7 +235,8 @@ export function useChatController(): EnhancedChatController {
         eventName: "session_loaded",
         onSuccess: async (data) => {
           if (data.success) {
-            chatStore.setSessionId(data.sessionId);
+            // 统一使用 shortId（8字符短 ID）
+            chatStore.setSessionId(data.shortId);
             // Use messages from WebSocket response (already merged with buffer)
             const messages = data.messages || [];
             console.log("[ChatAPI] session_loaded with messages:", messages.length);

@@ -78,15 +78,14 @@ export async function handleInit(
     }
   }
 
-  // 5. 添加短 ID 到响应
+  // 5. 添加短 ID 到响应（统一命名规范）
   const shortId = extractShortSessionId(responseData.currentSession.sessionFile);
   const enhancedResponse = {
     ...responseData,
     currentSession: {
       ...responseData.currentSession,
-      shortId,
-      sessionId: shortId, // 使用短 ID 作为主要 ID
-      fullPath: responseData.currentSession.sessionFile, // 保留完整路径
+      shortId,           // 8字符短 ID
+      sessionFile: responseData.currentSession.sessionFile, // 完整路径
     },
   };
 
@@ -239,11 +238,12 @@ export async function handleLoadSession(
     const workingDir = ctx.session.workingDir;
     const responseData = await buildSessionResponse(ctx.session, workingDir);
 
-    // Send session_loaded with full message list
+    // Send session_loaded with full message list (统一命名规范)
+    const shortId = extractShortSessionId(sessionPath);
     sendSuccess(ctx, "session_loaded", {
       success: true,
-      sessionId: responseData.currentSession.sessionId,
-      sessionFile: responseData.currentSession.sessionFile,
+      shortId,  // 8字符短 ID
+      sessionFile: responseData.currentSession.sessionFile,  // 完整路径
       messages: responseData.currentSession.messages,
       totalMessageCount: responseData.currentSession.totalMessageCount,
       cwdChanged: loadResult.cwdChanged,
