@@ -1053,12 +1053,22 @@ export class PiAgentSession {
   }
 
   /**
-   * Execute command
-   * @param command Command string
+   * Execute bash command using SDK
+   * @param command Command string (with or without ! prefix)
    */
   async executeCommand(command: string) {
-    // Remove leading /
-    const cmd = command.slice(1).trim();
+    if (!this.session) {
+      this.send({
+        type: "command_result",
+        command,
+        output: "Session not initialized",
+        isError: true,
+      });
+      return;
+    }
+
+    // Remove leading ! if present
+    const cmd = command.startsWith("!") ? command.slice(1).trim() : command.trim();
     if (!cmd) {
       this.send({
         type: "command_result",
@@ -1070,49 +1080,26 @@ export class PiAgentSession {
     }
 
     try {
-      const { spawn } = await import("node:child_process");
-      const [executable, ...args] = cmd.split(/\s+/);
-
-      const child = spawn(executable, args, {
-        cwd: this.workingDir,
-        env: process.env,
-        shell: false,
+      this.send({
+        type: "tool_execution",
+        tool: "bash",
+        command: cmd,
+        status: "running",
       });
 
-      let output = "";
-      let errorOutput = "";
+      const result = await this.session.executeBash(cmd);
 
-      child.stdout.on("data", (data: Buffer) => {
-        output += data.toString();
-      });
-
-      child.stderr.on("data", (data: Buffer) => {
-        errorOutput += data.toString();
-      });
-
-      child.on("close", (code: number | null) => {
-        const isError = code !== 0;
-        const result = errorOutput ? `${output}\n${errorOutput}`.trim() : output.trim();
-        this.send({
-          type: "command_result",
-          command,
-          output: result || "(no output)",
-          isError,
-        });
-      });
-
-      child.on("error", (error: Error) => {
-        this.send({
-          type: "command_result",
-          command,
-          output: error.message,
-          isError: true,
-        });
+      this.send({
+        type: "command_result",
+        command: `!${cmd}`,
+        output: result.output || "(no output)",
+        isError: result.exitCode !== 0,
+        exitCode: result.exitCode,
       });
     } catch (error) {
       this.send({
         type: "command_result",
-        command,
+        command: `!${cmd}`,
         output: error instanceof Error ? error.message : "Unknown error",
         isError: true,
       });

@@ -157,14 +157,10 @@ export function useInputArea(options: UseInputAreaOptions): UseInputAreaReturn {
       return;
     }
 
-    // Slash 命令
+    // Slash 命令 - 直接发送完整文本给 SDK 处理
     if (trimmedValue.startsWith("/")) {
-      const parts = trimmedValue.slice(1).split(" ");
-      const cmd = parts[0];
-      const args = parts.slice(1).join(" ");
-
-      if (onSlashCommand) {
-        onSlashCommand(cmd, args);
+      if (onSend) {
+        onSend(trimmedValue);
       }
       onChange("");
       return;
