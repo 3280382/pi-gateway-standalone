@@ -553,8 +553,9 @@ export const useChatStore = create<
     loadSession: (sessionPath: string) => Promise<number>;
   }
 >()(
-  devtools(
-    (set, get) => ({
+  persist(
+    devtools(
+      (set, get) => ({
       ...createInitialState(),
 
       // Input Actions
@@ -1119,16 +1120,16 @@ export const useChatStore = create<
       updateMessage: () => {},
       deleteMessage: () => {},
       regenerateMessage: () => {},
-    }),
-    { name: "ChatStore" }
-  ),
-  {
-    name: CHAT_STORAGE_KEYS.CHAT_STORE,
-    partialize: (state) => ({
-      searchQuery: state.searchQuery,
-      searchFilters: state.searchFilters,
-    }),
-  }
+      }),
+      { name: "ChatStore" }
+    ),
+    {
+      name: CHAT_STORAGE_KEYS.CHAT_STORE,
+      partialize: (state) => ({
+        searchQuery: state.searchQuery,
+        searchFilters: state.searchFilters,
+      }),
+    }
   )
 );
 
