@@ -73,11 +73,6 @@ export function FileViewer() {
   };
 
   // ========== 5. Computed ==========
-  // Prism.js 查看模式语言映射（tsx -> typescript）
-  const language = getLanguage();
-  const prismLanguage =
-    language === "tsx" ? "typescript" : language === "jsx" ? "javascript" : language;
-
   // 渲染带有非可视化符号的内容
   const renderContentWithInvisibleChars = (text: string): string => {
     if (!showInvisibleChars) return text;
@@ -184,8 +179,8 @@ export function FileViewer() {
               sandbox="allow-scripts allow-same-origin allow-forms"
             />
           ) : (
-            <pre className={`${styles.code} language-${prismLanguage}`}>
-              <code data-prism-code className={`language-${prismLanguage}`}>
+            <pre className={styles.code}>
+              <code>
                 {showInvisibleChars
                   ? renderContentWithInvisibleChars(
                       typeof content === "string" ? content : JSON.stringify(content, null, 2)
