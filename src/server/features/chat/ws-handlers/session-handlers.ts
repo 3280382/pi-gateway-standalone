@@ -171,6 +171,11 @@ export async function handleNewSession(
     throw new Error("Failed to create session");
   }
 
+  // 关键：设置 client 到新 session 的关联，否则消息会被缓冲
+  const shortId = extractShortSessionId(newSessionFile);
+  serverSessionManager.setClientSelectedSession(ctx.ws, shortId);
+  logger.info(`[handleNewSession] Client associated with new session: ${shortId}`);
+
   // 4. 使用与 init 相同的响应构建函数
   // 注意：需要重新获取allSessions，确保包含新创建的session
   const responseData = await buildSessionResponse(session, workingDir);

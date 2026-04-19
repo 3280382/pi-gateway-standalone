@@ -206,8 +206,8 @@ export async function handleSetModel(
     try {
       const { SettingsManager } = await import("@mariozechner/pi-coding-agent");
       const settings = SettingsManager.create();
-      const fullModelId = `${provider}/${modelId}`;
-      settings.setDefaultModel(fullModelId);
+      //const fullModelId = `${provider}/${modelId}`;
+      settings.setDefaultModel(modelId);
       logger.info(`[handleSetModel] Settings.json default model updated to: ${fullModelId}`);
     } catch (settingsError) {
       logger.warn("[handleSetModel] Failed to update settings.json:", settingsError);
