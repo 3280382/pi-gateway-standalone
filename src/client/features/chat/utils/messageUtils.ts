@@ -285,14 +285,14 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
       const inputTokens = usage.input || usage.inputTokens || 0;
       const outputTokens = usage.output || usage.outputTokens || 0;
       const totalTokens = usage.totalTokens || (inputTokens + outputTokens);
-      const cost = usage.cost?.total || usage.cost || 0;
+      const cost = usage.cost?.total ?? (typeof usage.cost === 'number' ? usage.cost : 0);
 
       let usageMessage = `📊 Usage: ${totalTokens.toLocaleString()} tokens`;
       if (inputTokens || outputTokens) {
         usageMessage += ` (input: ${inputTokens.toLocaleString()}, output: ${outputTokens.toLocaleString()})`;
       }
       if (cost) {
-        usageMessage += ` · $${typeof cost === 'number' ? cost.toFixed(4) : cost}`;
+        usageMessage += ` · $${cost.toFixed(4)}`;
       }
       if (msg.model) {
         usageMessage += ` · ${msg.model}`;
