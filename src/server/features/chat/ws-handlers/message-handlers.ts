@@ -3,7 +3,6 @@
  * Combined handlers for all message-related WebSocket messages
  */
 
-import { spawn } from "node:child_process";
 import { createCodingTools } from "@mariozechner/pi-coding-agent";
 import type { WSContext } from "../ws-router";
 import {
@@ -26,70 +25,15 @@ export async function handleAbort(ctx: WSContext, _payload: unknown): Promise<vo
 }
 
 // ============================================================================
-// Command Handler
+// Command Handler (Bash execution via SDK)
 // ============================================================================
 
 /**
- * Handle command message
+ * Handle command message - Execute bash command via Pi SDK
  */
 export async function handleCommand(ctx: WSContext, payload: { text: string }): Promise<void> {
   const { text } = payload;
-
-  // Remove leading /
-  const cmd = text.slice(1).trim();
-
-  if (!cmd) {
-    sendSuccess(ctx, "command_result", {
-      command: text,
-      output: "Empty command",
-      isError: true,
-    });
-    return;
-  }
-
-  return new Promise((resolve) => {
-    const [executable, ...args] = cmd.split(/\s+/);
-
-    const child = spawn(executable, args, {
-      cwd: ctx.session.workingDir,
-      env: process.env,
-      shell: false,
-    });
-
-    let output = "";
-    let errorOutput = "";
-
-    child.stdout.on("data", (data: Buffer) => {
-      output += data.toString();
-    });
-
-    child.stderr.on("data", (data: Buffer) => {
-      errorOutput += data.toString();
-    });
-
-    child.on("close", (code: number | null) => {
-      const isError = code !== 0;
-      const result = errorOutput ? `${output}\n${errorOutput}`.trim() : output.trim();
-
-      sendSuccess(ctx, "command_result", {
-        command: text,
-        output: result || "(no output)",
-        isError,
-      });
-      resolve();
-    });
-
-    child.on("error", (error: Error) => {
-      sendSuccess(ctx, "command_result", {
-        command: text,
-        output: error.message,
-        isError: true,
-      });
-      resolve();
-    });
-
-    logger.info(`[handleCommand] Executing command: ${cmd}`);
-  });
+  await ctx.session.executeCommand(text);
 }
 
 // ============================================================================
@@ -208,7 +152,7 @@ export async function handleSetModel(
       const settings = SettingsManager.create();
       //const fullModelId = `${provider}/${modelId}`;
       settings.setDefaultModel(modelId);
-      logger.info(`[handleSetModel] Settings.json default model updated to: ${fullModelId}`);
+      logger.info(`[handleSetModel] Settings.json default model updated to: ${modelId}`);
     } catch (settingsError) {
       logger.warn("[handleSetModel] Failed to update settings.json:", settingsError);
       // 不影响主流程，继续执行

@@ -322,7 +322,7 @@ export function registerAllWSHandlers(): void {
   // Tool related
   wsRouter.register("tool_request", handleToolRequestWrapped);
 
-  // Command execution
+  // Bash command execution (via SDK)
   wsRouter.register("command", handleCommandWrapped);
 
   // LLM logs
