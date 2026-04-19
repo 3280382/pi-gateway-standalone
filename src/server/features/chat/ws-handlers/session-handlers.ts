@@ -239,7 +239,6 @@ export async function handleLoadSession(
     const responseData = await buildSessionResponse(ctx.session, workingDir);
 
     // Send session_loaded with full message list (统一命名规范)
-    const shortId = extractShortSessionId(sessionPath);
     sendSuccess(ctx, "session_loaded", {
       success: true,
       shortId,  // 8字符短 ID
