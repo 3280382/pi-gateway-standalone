@@ -197,10 +197,19 @@ export async function handleNewSession(
     });
   }
 
-  // 5. 发送响应（使用与 init 相同的格式，但 type 不同）
-  sendSuccess(ctx, "session_created", responseData);
+  // 5. 构建前端期望的响应格式
+  const responsePayload = {
+    sessionId: responseData.currentSession.sessionId,
+    sessionFile: responseData.currentSession.sessionFile,
+    allSessions: responseData.allSessions,
+    workingDir: responseData.workingDir,
+    currentModel: responseData.currentModel,
+    defaultModel: responseData.defaultModel,
+  };
 
-  logger.info(`[handleNewSession] Success: sessionId=${session.session.sessionId}`);
+  sendSuccess(ctx, "session_created", responsePayload);
+
+  logger.info(`[handleNewSession] Success: sessionId=${session.session.sessionId}, sessionFile=${responseData.currentSession.sessionFile}`);
 }
 
 // ============================================================================

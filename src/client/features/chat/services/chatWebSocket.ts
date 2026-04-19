@@ -174,8 +174,8 @@ export function setChatThinkingLevel(level: string): boolean {
 /**
  * 创建新 session
  */
-export function createNewChatSession(): boolean {
-  return websocketService.send("new_session", {});
+export function createNewChatSession(workingDir?: string): boolean {
+  return websocketService.send("new_session", { workingDir });
 }
 
 /**

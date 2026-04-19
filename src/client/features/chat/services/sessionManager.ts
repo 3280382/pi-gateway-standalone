@@ -289,7 +289,7 @@ async function createNewSession(): Promise<void> {
     }>((resolve, reject) => {
       const timeout = setTimeout(() => reject(new Error("创建 session 超时")), 10000);
 
-      createNewChatSession();
+      createNewChatSession(stores.session.workingDir);
 
       const unsub = websocketService.on("session_created", (data: any) => {
         clearTimeout(timeout);
