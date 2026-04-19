@@ -291,8 +291,10 @@ import {
 } from "./ws-handlers/message-handlers";
 import {
   handleChangeDirWrapped,
+  handleGetSessionStatusWrapped,
   handleInitWrapped,
   handleListSessionsWrapped,
+  handleLoadMoreMessagesWrapped,
   handleLoadSessionWrapped,
   handleNewSessionWrapped,
   handleSidebarVisibilityWrapped,
@@ -329,6 +331,8 @@ export function registerAllWSHandlers(): void {
   wsRouter.register("load_session", handleLoadSessionWrapped);
   wsRouter.register("change_dir", handleChangeDirWrapped);
   wsRouter.register("sidebar_visibility", handleSidebarVisibilityWrapped);
+  wsRouter.register("get_session_status", handleGetSessionStatusWrapped);
+  wsRouter.register("load_more_messages", handleLoadMoreMessagesWrapped);
 
   logger.info(`[WSRouter] Registered ${wsRouter.getRegisteredTypes().length} handlers`);
 }

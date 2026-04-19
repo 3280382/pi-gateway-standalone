@@ -497,6 +497,7 @@ export const useChatStore = create<
     // Message Actions
     addMessage: (message: Message) => void;
     setMessages: (messages: Message[]) => void;
+    prependMessages: (messages: Message[]) => void;  // 加载更多历史消息时用到
     clearMessages: () => void;
 
     // Running State (Pi coding agent turn)
@@ -570,6 +571,10 @@ export const useChatStore = create<
 
       setMessages: (messages: Message[]) => {
         set({ messages, currentStreamingMessage: null }, false, "setMessages");
+      },
+
+      prependMessages: (messages: Message[]) => {
+        set((state) => ({ messages: [...messages, ...state.messages] }), false, "prependMessages");
       },
 
       clearMessages: () => {

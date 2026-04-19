@@ -75,7 +75,8 @@ export type WebSocketEvent =
   | "command_result"
   // Session Status Events
   | "runtime_status_broadcast"
-  | "session_status";
+  | "session_status"
+  | "more_messages_loaded";
 
 export interface WebSocketMessage<T = any> {
   type: string;
@@ -366,6 +367,7 @@ export class WebSocketService {
       // Session Status
       runtime_status_broadcast: "runtime_status_broadcast",
       session_status: "session_status",
+      more_messages_loaded: "more_messages_loaded",
     };
 
     const event = eventMap[type];

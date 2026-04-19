@@ -439,6 +439,51 @@ export const handleChangeDirWrapped = createHandler(handleChangeDir, {
   requireSession: false,
 });
 
+// ============================================================================
+// Load More Messages Handler
+// ============================================================================
+
+/**
+ * Handle load_more_messages message via WebSocket
+ * Loads older messages when user scrolls to top
+ */
+export async function handleLoadMoreMessages(
+  ctx: WSContext,
+  payload: { sessionFile?: string; offset?: number; limit?: number }
+): Promise<void> {
+  const { sessionFile, offset = 0, limit = 50 } = payload;
+
+  if (!sessionFile) {
+    sendError(ctx, "sessionFile is required");
+    return;
+  }
+
+  try {
+    // Load older messages (going back from the offset)
+    const messages = await getSessionMessages(sessionFile, limit, offset);
+    const totalCount = await getSessionMessageCount(sessionFile);
+
+    sendSuccess(ctx, "more_messages_loaded", {
+      sessionFile,
+      messages,
+      offset,
+      limit,
+      totalCount,
+      hasMore: offset + messages.length < totalCount,
+    });
+
+    logger.info(`[handleLoadMoreMessages] Loaded ${messages.length} messages from offset ${offset} for ${sessionFile}`);
+  } catch (error) {
+    logger.error("[handleLoadMoreMessages] Error:", {}, error instanceof Error ? error : undefined);
+    sendError(ctx, error instanceof Error ? error.message : "Failed to load more messages");
+  }
+}
+
+export const handleLoadMoreMessagesWrapped = createHandler(handleLoadMoreMessages, {
+  name: "load_more_messages",
+  requireSession: true,
+});
+
 export const handleGetSessionStatusWrapped = createHandler(handleGetSessionStatus, {
   name: "get_session_status",
   requireSession: false,
