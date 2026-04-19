@@ -193,7 +193,7 @@ export function TreeViewModal({
             {filterMode === "search" && (
               <input
                 className={styles.searchInput}
-                placeholder="输入过滤文字..."
+                placeholder="Enter filter text..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
               />

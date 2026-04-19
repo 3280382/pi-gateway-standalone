@@ -94,7 +94,7 @@ export function ChatSettingsSection() {
           className={styles.select}
           value={defaultMessageLimit}
           onChange={handleMessageLimitChange}
-          title="默认加载历史消息条数（-1表示加载所有）"
+          title="Default number of history messages to load (-1 means load all)"
         >
           <option value={50}>50</option>
           <option value={100}>100</option>

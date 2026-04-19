@@ -331,7 +331,7 @@ function GlassCard({
         running: "执行中...",
         pending: "等待执行...",
         timeout: "执行超时",
-        error: "执行失败",
+        error: "Execution failed",
       }[toolStatus] || toolStatus;
 
       return (

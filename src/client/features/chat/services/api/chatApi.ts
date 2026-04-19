@@ -156,7 +156,7 @@ export function useChatController(): EnhancedChatController {
 
       if (!success) {
         chatStore.abortStreaming();
-        throw new Error("消息发送失败，请重试");
+        throw new Error("Failed to send message, please retry");
       }
     },
 
@@ -248,7 +248,7 @@ export function useChatController(): EnhancedChatController {
             console.log("[ChatAPI] session_loaded with messages:", messages.length);
             chatStore.setMessages(messages);
           } else {
-            throw new Error(data.error || "加载会话失败");
+            throw new Error(data.error || "Failed to load session");
           }
         },
         sendAction: () => switchChatSession(sessionPath),
@@ -626,7 +626,7 @@ export function setupWebSocketListeners(): void {
     (data: { toolCallId: string; result?: string; isError?: boolean }) => {
       const ts = new Date().toISOString().split("T")[1].split(".")[0];
       console.log(`[${ts}] [RECV] tool_execution_end: ${data?.toolCallId}`);
-      const error = data?.isError ? "工具执行失败" : undefined;
+      const error = data?.isError ? "Tool execution failed" : undefined;
       store.updateToolOutput(data.toolCallId, data?.result || "", error);
     }
   );
@@ -640,7 +640,7 @@ export function setupWebSocketListeners(): void {
     store.addMessage({
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: "system",
-      content: [{ type: "text", text: "🗜️ 正在压缩上下文..." }],
+      content: [{ type: "text", text: "🗜️ Compacting context..." }],
       timestamp: new Date(),
     });
   });
@@ -652,7 +652,7 @@ export function setupWebSocketListeners(): void {
     store.addMessage({
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: "system",
-      content: [{ type: "text", text: "✅ 上下文压缩完成" }],
+      content: [{ type: "text", text: "✅ Context compaction complete" }],
       timestamp: new Date(),
     });
   });
@@ -665,7 +665,7 @@ export function setupWebSocketListeners(): void {
     store.addMessage({
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: "system",
-      content: [{ type: "text", text: "🔄 正在重试..." }],
+      content: [{ type: "text", text: "🔄 Retrying..." }],
       timestamp: new Date(),
     });
   });
@@ -677,7 +677,7 @@ export function setupWebSocketListeners(): void {
     store.addMessage({
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: "system",
-      content: [{ type: "text", text: "✅ 重试完成" }],
+      content: [{ type: "text", text: "✅ Retry complete" }],
       timestamp: new Date(),
     });
   });

@@ -233,7 +233,7 @@ export const TreeView = memo<TreeViewProps>(({ items }) => {
                           setEditingTodo(todo);
                           setTodoInputFile({ path: node.path, name: node.name });
                         }}
-                        title="点击编辑"
+                        title="Click to edit"
                       >
                         <span className={styles.todoStatus}>{todo.checked ? "✓" : "○"}</span>
                         <span className={styles.todoText}>{todo.text}</span>

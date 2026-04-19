@@ -292,7 +292,7 @@ export function InputArea({
             type="button"
             className={`${styles.toolbarBtn} ${isLoadingMore ? styles.loading : ""}`}
             onClick={onReloadMessages}
-            title="重新加载所有历史消息"
+            title="Reload all history messages"
             disabled={isLoadingMore}
           >
             <ReloadIcon isLoading={isLoadingMore} />
@@ -305,7 +305,7 @@ export function InputArea({
             type="button"
             className={`${styles.toolbarBtn} ${shouldScrollToBottom ? styles.active : ""}`}
             onClick={onToggleScroll}
-            title={shouldScrollToBottom ? "自动滚屏已启用 (点击关闭)" : "自动滚屏已关闭 (点击启用)"}
+            title={shouldScrollToBottom ? "Auto-scroll enabled (click to disable)" : "Auto-scroll disabled (click to enable)"}
             // 滚屏按钮在AI处理时仍然可用，用户应该能控制滚屏状态
           >
             <ScrollIcon active={shouldScrollToBottom} />

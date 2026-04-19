@@ -66,7 +66,7 @@ export function ChatPage() {
             animation: "spin 1s linear infinite",
           }}
         />
-        <p style={{ color: "var(--text-muted)", textAlign: "center", width: "100%" }}>连接中...</p>
+        <p style={{ color: "var(--text-muted)", textAlign: "center", width: "100%" }}>Connecting...</p>
       </div>
     );
   }

@@ -40,7 +40,7 @@ function createSystemMessage(text: string): Message {
 
 function createErrorMessage(error: unknown): Message {
   const errorText = error instanceof Error ? error.message : String(error);
-  return createSystemMessage(`命令执行失败: ${errorText}`);
+  return createSystemMessage(`Command execution failed: ${errorText}`);
 }
 
 // ===== [ANCHOR:COMMAND_EXECUTION] =====
@@ -57,7 +57,7 @@ async function executeCommandWithMessages(
 
   try {
     const result = await executeFn(command);
-    const resultText = result?.output || result?.error || "命令执行完成";
+    const resultText = result?.output || result?.error || "Command execution complete";
     chatStore.addMessage(createSystemMessage(resultText));
   } catch (err) {
     chatStore.addMessage(createErrorMessage(err));
