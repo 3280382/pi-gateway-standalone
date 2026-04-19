@@ -24,7 +24,8 @@
 // ===== [ANCHOR:IMPORTS] =====
 
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
+import { CHAT_STORAGE_KEYS } from "./persist.config";
 import type {
   ChatSearchFilters,
   Message,
@@ -1120,6 +1121,14 @@ export const useChatStore = create<
       regenerateMessage: () => {},
     }),
     { name: "ChatStore" }
+  ),
+  {
+    name: CHAT_STORAGE_KEYS.CHAT_STORE,
+    partialize: (state) => ({
+      searchQuery: state.searchQuery,
+      searchFilters: state.searchFilters,
+    }),
+  }
   )
 );
 

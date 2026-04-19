@@ -16,6 +16,7 @@
 export const CHAT_STORAGE_KEYS = {
   CHAT_SESSION: "pi:chat:session",
   CHAT_SIDEBAR: "pi:chat:sidebar",
+  CHAT_STORE: "pi:chat:store",
 } as const;
 
 // ============================================================================
@@ -59,4 +60,14 @@ export const CHAT_SESSION_PERSIST: string[] = [
  */
 export const CHAT_SIDEBAR_PERSIST: string[] = [
   // 所有数据都从服务器获取，不持久化到 localStorage
+] as const;
+
+/** Chat Store - 持久化字段
+ *
+ * 注意：
+ * - searchQuery 和 searchFilters 保存用户的搜索偏好
+ */
+export const CHAT_STORE_PERSIST: string[] = [
+  "searchQuery",
+  "searchFilters",
 ] as const;
