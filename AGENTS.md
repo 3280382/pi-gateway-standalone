@@ -89,182 +89,182 @@ src/
 
 ## Development Environment
 
-**统一的开发测试环境（唯一推荐方式）**
+**Unified Development and Test Environment (Recommended)**
 
 ```bash
-# Tmux 3-pane mode - 同时启动前端、后端和监控
+# Tmux 3-pane mode - Start frontend, backend, and monitoring simultaneously
 bash scripts/start-tmux-dev.sh
 ```
 
-### 自动监控和热启动
+### Auto Monitoring and Hot Reload
 
-Tmux 模式下已配置自动监控和热启动：
+Tmux mode is configured with automatic monitoring and hot reload:
 
-| 组件 | 热启动方式 | 说明 |
-|------|-----------|------|
-| 后端 | `tsx watch` 自动重启 | 代码修改后自动重启 |
-| 前端 | Vite HMR 热更新 | 代码修改后浏览器自动刷新 |
+| Component | Hot Reload Method | Description |
+|-----------|-------------------|-------------|
+| Backend | `tsx watch` auto-restart | Auto-restart after code changes |
+| Frontend | Vite HMR hot update | Browser auto-refresh after code changes |
 
-**说明：**
-- 正常情况下无需手动重启，代码修改后自动生效
-- 仅在添加新依赖或配置文件修改后需要手动重启
-- 开发和测试使用同一套运行环境，确保一致性
+**Notes:**
+- No manual restart needed under normal circumstances, changes take effect automatically
+- Manual restart only required after adding new dependencies or modifying config files
+- Development and testing use the same environment for consistency
 
-### 单独重启前后端
+### Restart Frontend/Backend Individually
 
-使用 `scripts/tmux-dev.sh` 脚本管理：
+Use `scripts/tmux-dev.sh` script to manage:
 
 ```bash
-# 单独重启前端
+# Restart frontend only
 bash scripts/tmux-dev.sh restart-frontend
 
-# 单独重启后端
+# Restart backend only
 bash scripts/tmux-dev.sh restart-backend
 
-# 查看状态
+# Check status
 bash scripts/tmux-dev.sh status
 
-# 停止前端
+# Stop frontend
 bash scripts/tmux-dev.sh stop-frontend
 
-# 停止后端
+# Stop backend
 bash scripts/tmux-dev.sh stop-backend
 
-# 启动前端
+# Start frontend
 bash scripts/tmux-dev.sh start-frontend
 
-# 启动后端
+# Start backend
 bash scripts/tmux-dev.sh start-backend
 ```
 
-**直接命令方式（tmux 快捷键）：**
+**Direct Command Method (tmux shortcuts):**
 
 ```bash
-# 进入 tmux 后，切换到对应窗格重启
+# After entering tmux, switch to the corresponding pane to restart
 
-# 重启后端 (窗格 1)
+# Restart backend (pane 1)
 tmux select-pane -t gateway-dev:0.1
-tmux send-keys -t gateway-dev:0.1 C-c  # 停止
-tmux send-keys -t gateway-dev:0.1 'npm run dev' Enter  # 启动
+tmux send-keys -t gateway-dev:0.1 C-c  # stop
+tmux send-keys -t gateway-dev:0.1 'npm run dev' Enter  # start
 
-# 重启前端 (窗格 0)
+# Restart frontend (pane 0)
 tmux select-pane -t gateway-dev:0.0
-tmux send-keys -t gateway-dev:0.0 C-c  # 停止
-tmux send-keys -t gateway-dev:0.0 'npm run dev:react' Enter  # 启动
+tmux send-keys -t gateway-dev:0.0 C-c  # stop
+tmux send-keys -t gateway-dev:0.0 'npm run dev:react' Enter  # start
 ```
 
-### 检查代码
+### Code Check
 
 ```bash
-npm run check  # 提交前必须运行
+npm run check  # Must run before committing
 ```
 
 ## Testing Standards
 
-### 测试快速参考
+### Quick Testing Reference
 
-| 命令 | 说明 |
-|------|------|
-| `bash scripts/run-all-tests.sh` | 运行所有测试（推荐） |
-| `bash scripts/run-terminal-tests.sh all` | 运行终端服务端+客户端测试 |
-| `bash scripts/run-terminal-tests.sh server` | 仅运行服务端测试 |
-| `bash scripts/run-terminal-tests.sh client` | 仅运行浏览器测试 |
-| `npm run test` | 运行 Vitest 单元测试 |
-| `cat test-results/latest/summary.md` | 查看最新测试报告 |
+| Command | Description |
+|---------|-------------|
+| `bash scripts/run-all-tests.sh` | Run all tests (recommended) |
+| `bash scripts/run-terminal-tests.sh all` | Run terminal server + client tests |
+| `bash scripts/run-terminal-tests.sh server` | Run server tests only |
+| `bash scripts/run-terminal-tests.sh client` | Run browser tests only |
+| `npm run test` | Run Vitest unit tests |
+| `cat test-results/latest/summary.md` | View latest test report |
 
-### 测试结果位置
+### Test Results Location
 
-所有测试结果统一输出到 `test-results/<timestamp>/` 目录：
+All test results are output to `test-results/<timestamp>/` directory:
 
 ```
 test-results/latest/
-├── summary.md           # 📄 人类可读的总览报告
+├── summary.md           # Human-readable summary report
 ├── backend/
-│   ├── server.log      # 🖥️ 后端服务完整日志
-│   └── test.log        # 🧪 后端测试执行日志
+│   ├── server.log      # Backend service complete logs
+│   └── test.log        # Backend test execution logs
 ├── frontend/
-│   └── dev-server.log  # ⚛️ 前端服务日志
+│   └── dev-server.log  # Frontend service logs
 ├── browser/
-│   ├── test.log        # 🎭 Playwright测试日志
-│   ├── console.log     # 🌐 浏览器控制台输出
-│   └── ws-messages.json # 📡 WebSocket消息记录
+│   ├── test.log        # Playwright test logs
+│   ├── console.log     # Browser console output
+│   └── ws-messages.json # WebSocket message records
 └── screenshots/
-    └── *.png           # 📸 测试截图
+    └── *.png           # Test screenshots
 ```
 
-### 测试输出规范（重要）
+### Test Output Standards (Important)
 
-所有测试必须遵循统一的输出规范，确保测试结果对人类可读、可追踪、可备份。
+All tests must follow unified output standards to ensure results are human-readable, traceable, and backup-capable.
 
-#### 测试结果目录结构
+#### Test Results Directory Structure
 
 ```
 test-results/
-├── YYYY-MM-DD_HH-MM-SS/           # 每次测试的独立目录（时间戳命名）
-│   ├── summary.md                 # 人类可读的测试摘要
-│   ├── report.json                # 机器可读的完整报告
+├── YYYY-MM-DD_HH-MM-SS/           # Independent directory for each test (timestamp named)
+│   ├── summary.md                 # Human-readable test summary
+│   ├── report.json                # Machine-readable complete report
 │   ├── backend/
-│   │   ├── server.log             # 后端完整运行日志
-│   │   └── test.log               # 后端测试执行日志
+│   │   ├── server.log             # Backend complete runtime logs
+│   │   └── test.log               # Backend test execution logs
 │   ├── frontend/
-│   │   ├── build.log              # 前端构建日志
-│   │   └── dev-server.log         # 前端开发服务器日志
+│   │   ├── build.log              # Frontend build logs
+│   │   └── dev-server.log         # Frontend dev server logs
 │   ├── browser/
-│   │   ├── console.log            # 浏览器控制台日志
-│   │   ├── network.log            # 浏览器网络请求日志
-│   │   └── ws-messages.json       # WebSocket消息记录
+│   │   ├── console.log            # Browser console logs
+│   │   ├── network.log            # Browser network request logs
+│   │   └── ws-messages.json       # WebSocket message records
 │   └── screenshots/
-│       ├── 01-test-name.png       # 按顺序编号的截图
+│       ├── 01-test-name.png       # Sequentially numbered screenshots
 │       ├── 02-test-name.png
-│       └── failed-*.png           # 失败测试的截图
-└── latest -> YYYY-MM-DD_HH-MM-SS  # 软链接到最新结果
+│       └── failed-*.png           # Failed test screenshots
+└── latest -> YYYY-MM-DD_HH-MM-SS  # Symlink to latest results
 ```
 
-#### 测试脚本规范
+#### Test Script Standards
 
-测试脚本必须实现以下自动化流程，**不需要AI模型介入处理**：
+Test scripts must implement the following automated processes, **no AI model intervention required**:
 
 ```bash
 #!/bin/bash
-# 测试脚本模板规范
+# Test script template standard
 
 set -e
 
-# ========== 1. 配置 ==========
+# ========== 1. Configuration ==========
 TEST_TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 RESULTS_DIR="test-results/${TEST_TIMESTAMP}"
 BACKUP_DIR="test-results/backups"
 
-# ========== 2. 备份和清理 ==========
-# 自动备份上一次测试结果
+# ========== 2. Backup and Cleanup ==========
+# Auto backup last test results
 if [ -L "test-results/latest" ]; then
     LAST_RESULT=$(readlink test-results/latest)
     if [ -d "$LAST_RESULT" ]; then
         mkdir -p "$BACKUP_DIR"
         cp -r "$LAST_RESULT" "$BACKUP_DIR/$(basename $LAST_RESULT)"
-        echo "已备份上次结果: $BACKUP_DIR/$(basename $LAST_RESULT)"
+        echo "Backed up last results: $BACKUP_DIR/$(basename $LAST_RESULT)"
     fi
 fi
 
-# 清理旧的 latest 链接
+# Clean up old latest link
 rm -f test-results/latest
 
-# 创建新结果目录
+# Create new results directory
 mkdir -p "$RESULTS_DIR"/{backend,frontend,browser,screenshots}
 
-# ========== 3. 启动服务并捕获日志 ==========
-# 后端日志捕获
+# ========== 3. Start Services and Capture Logs ==========
+# Backend log capture
 npm run dev > "$RESULTS_DIR/backend/server.log" 2>&1 &
 SERVER_PID=$!
 
-# 前端日志捕获
+# Frontend log capture
 npm run dev:react > "$RESULTS_DIR/frontend/dev-server.log" 2>&1 &
 FRONTEND_PID=$!
 
-# 等待服务启动
+# Wait for services to start
 sleep 5
 
-# ========== 4. 执行测试并捕获所有输出 ==========
+# ========== 4. Execute Tests and Capture All Output ==========
 npx playwright test \
     --reporter=html,json,line \
     --output="$RESULTS_DIR" \
@@ -272,155 +272,155 @@ npx playwright test \
 
 TEST_EXIT_CODE=${PIPESTATUS[0]}
 
-# ========== 5. 收集浏览器日志 ==========
-# 浏览器控制台日志（由playwright自动收集到 test-results/
+# ========== 5. Collect Browser Logs ==========
+# Browser console logs (auto-collected by playwright to test-results/
 
-# ========== 6. 生成人类可读报告 ==========
+# ========== 6. Generate Human-Readable Report ==========
 cat > "$RESULTS_DIR/summary.md" << 'REPORT'
-测试报告: ${TEST_TIMESTAMP}
+Test Report: ${TEST_TIMESTAMP}
 
-[摘要]
-- 测试时间: $(date)
-- 测试类型: E2E / Unit / Integration
-- 总体结果: 通过 / 失败
+[Summary]
+- Test Time: $(date)
+- Test Type: E2E / Unit / Integration
+- Overall Result: Pass / Fail
 
-[统计]
-- 总测试数: X | 通过: X | 失败: X | 跳过: X
-- 总耗时: X秒
+[Statistics]
+- Total Tests: X | Passed: X | Failed: X | Skipped: X
+- Total Duration: X seconds
 
-[日志文件位置]
-- 后端日志: backend/server.log
-- 前端日志: frontend/dev-server.log
-- 浏览器控制台: browser/console.log
-- 测试执行日志: test-run.log
+[Log File Locations]
+- Backend Logs: backend/server.log
+- Frontend Logs: frontend/dev-server.log
+- Browser Console: browser/console.log
+- Test Execution Logs: test-run.log
 
 REPORT
 
-# ========== 7. 更新 latest 链接 ==========
+# ========== 7. Update latest Link ==========
 ln -sf "$RESULTS_DIR" test-results/latest
 
-# ========== 8. 输出结果摘要 ==========
+# ========== 8. Output Results Summary ==========
 echo ""
 echo "═══════════════════════════════════════════════════════"
-echo "测试完成"
+echo "Testing Complete"
 echo "═══════════════════════════════════════════════════════"
-echo "结果目录: $RESULTS_DIR"
-echo "查看报告: cat $RESULTS_DIR/summary.md"
-echo "查看截图: ls $RESULTS_DIR/screenshots/"
+echo "Results Directory: $RESULTS_DIR"
+echo "View Report: cat $RESULTS_DIR/summary.md"
+echo "View Screenshots: ls $RESULTS_DIR/screenshots/"
 echo ""
 
-# 返回测试退出码
+# Return test exit code
 exit $TEST_EXIT_CODE
 ```
 
-#### 可用的测试命令
+#### Available Test Commands
 
 ```bash
-# 运行所有测试（自动完成备份、日志收集、报告生成）
+# Run all tests (auto backup, log collection, report generation)
 bash scripts/run-all-tests.sh
 
-# 仅运行服务端测试（headless，无浏览器）
+# Run server tests only (headless, no browser)
 bash scripts/run-terminal-tests.sh server
 
-# 仅运行客户端浏览器测试
+# Run client browser tests only
 bash scripts/run-terminal-tests.sh client
 
-# 运行完整E2E测试
+# Run full E2E tests
 npx playwright test test/e2e/
 
-# 运行单元测试
+# Run unit tests
 npm run test
 ```
 
-#### 测试结果检查清单
+#### Test Results Checklist
 
-测试脚本运行后，检查结果目录是否包含：
+After test script runs, check if results directory contains:
 
-- [ ] `summary.md` - 人类可读的总览
-- [ ] `report.json` - 详细的JSON报告
-- [ ] `backend/server.log` - 后端完整日志
-- [ ] `frontend/dev-server.log` - 前端服务日志
-- [ ] `browser/console.log` - 浏览器控制台输出
-- [ ] `browser/ws-messages.json` - WebSocket通信记录
-- [ ] `screenshots/*.png` - 关键步骤截图（至少每个测试一张）
-- [ ] `latest` 软链接指向当前结果
+- [ ] `summary.md` - Human-readable summary
+- [ ] `report.json` - Detailed JSON report
+- [ ] `backend/server.log` - Backend complete logs
+- [ ] `frontend/dev-server.log` - Frontend service logs
+- [ ] `browser/console.log` - Browser console output
+- [ ] `browser/ws-messages.json` - WebSocket communication records
+- [ ] `screenshots/*.png` - Key step screenshots (at least one per test)
+- [ ] `latest` symlink pointing to current results
 
-#### 测试自动化规范（无需AI介入）
+#### Test Automation Standards (No AI Intervention Required)
 
-测试脚本已完全自动化以下流程，**AI模型不应重复处理**：
+Test scripts have fully automated the following processes, **AI models should not repeat**:
 
 ```bash
-# ✅ 脚本自动处理（无需AI操作）
-1. 备份上一次测试结果到 backups/ 目录
-2. 清理旧的 latest 链接
-3. 创建新的时间戳目录结构
-4. 启动后端服务并捕获所有输出到 backend/server.log
-5. 启动前端服务并捕获所有输出到 frontend/dev-server.log
-6. 运行测试并收集详细的执行日志
-7. 捕获浏览器控制台输出到 browser/console.log
-8. 捕获 WebSocket 消息到 browser/ws-messages.json
-9. 自动截图保存到 screenshots/ 目录
-10. 生成人类可读的 summary.md 报告
-11. 更新 latest 软链接
-12. 输出测试统计和结果摘要
+# Script auto-handles (no AI operation needed)
+1. Backup last test results to backups/ directory
+2. Clean up old latest link
+3. Create new timestamp directory structure
+4. Start backend service and capture all output to backend/server.log
+5. Start frontend service and capture all output to frontend/dev-server.log
+6. Run tests and collect detailed execution logs
+7. Capture browser console output to browser/console.log
+8. Capture WebSocket messages to browser/ws-messages.json
+9. Auto-screenshot and save to screenshots/ directory
+10. Generate human-readable summary.md report
+11. Update latest symlink
+12. Output test statistics and results summary
 
-# ❌ AI不应重复操作
-- 不要手动创建 test-results/ 目录
-- 不要手动复制日志文件
-- 不要手动生成报告
-- 不要手动备份旧结果
+# AI should NOT repeat
+- Do not manually create test-results/ directory
+- Do not manually copy log files
+- Do not manually generate reports
+- Do not manually backup old results
 ```
 
-#### 测试失败时的诊断流程
+#### Diagnostic Process When Tests Fail
 
-当测试失败时，按以下顺序查看日志：
+When tests fail, view logs in the following order:
 
 ```bash
-# 1. 查看测试摘要
+# 1. View test summary
 cat test-results/latest/summary.md
 
-# 2. 查看服务端测试日志
+# 2. View server test logs
 tail -100 test-results/latest/backend/test.log
 
-# 3. 查看服务端运行日志
+# 3. View server runtime logs
 tail -100 test-results/latest/backend/server.log
 
-# 4. 查看浏览器测试日志
+# 4. View browser test logs
 tail -100 test-results/latest/browser/test.log
 
-# 5. 查看浏览器控制台
+# 5. View browser console
 cat test-results/latest/browser/console.log
 
-# 6. 查看 WebSocket 消息
+# 6. View WebSocket messages
 jq . test-results/latest/browser/ws-messages.json | head -50
 
-# 7. 查看截图
+# 7. View screenshots
 ls -la test-results/latest/screenshots/
 ```
 
-#### 测试备份策略
+#### Test Backup Strategy
 
-每次测试运行自动执行备份：
+Automatic backup executed on each test run:
 
 ```bash
 test-results/
-├── backups/                       # 历史测试结果备份
-│   ├── 2024-01-15_10-30-00/      # 每次测试的备份
+├── backups/                       # Historical test result backups
+│   ├── 2024-01-15_10-30-00/      # Backup for each test run
 │   ├── 2024-01-15_09-15-00/
 │   └── ...
-├── 2024-01-15_11-00-00/          # 当前测试（最新）
+├── 2024-01-15_11-00-00/          # Current test (latest)
 │   └── ...
-└── latest -> 2024-01-15_11-00-00 # 软链接到最新结果
+└── latest -> 2024-01-15_11-00-00 # Symlink to latest results
 ```
 
-保留策略：
-- 自动保留最近 10 次测试备份
-- 手动清理：`rm -rf test-results/backups/*`
-- 查看备份：`ls -lt test-results/backups/`
+Retention Policy:
+- Automatically keep last 10 test backups
+- Manual cleanup: `rm -rf test-results/backups/*`
+- View backups: `ls -lt test-results/backups/`
 
-#### Playwright测试配置规范
+#### Playwright Test Configuration Standards
 
-测试文件必须配置正确的输出：
+Test files must be configured with correct output:
 
 ```typescript
 // test/example.test.ts
@@ -433,13 +433,13 @@ mkdirSync(`${RESULTS_DIR}/browser`, { recursive: true });
 const logFile = `${RESULTS_DIR}/browser/console.log`;
 
 test.beforeEach(async ({ page }) => {
-  // 捕获所有控制台输出
+  // Capture all console output
   page.on("console", (msg) => {
     const logEntry = `[${new Date().toISOString()}] [${msg.type()}] ${msg.text()}\n`;
     appendFileSync(logFile, logEntry);
   });
   
-  // 捕获WebSocket消息
+  // Capture WebSocket messages
   page.on("websocket", (ws) => {
     ws.on("framereceived", (data) => {
       appendFileSync(`${RESULTS_DIR}/browser/ws-messages.json`, 
@@ -458,9 +458,9 @@ test("example test", async ({ page }) => {
 });
 ```
 
-#### 环境变量
+#### Environment Variables
 
-测试脚本自动设置以下环境变量：
+Test scripts automatically set the following environment variables:
 
 ```bash
 TEST_RESULTS_DIR=test-results/YYYY-MM-DD_HH-MM-SS
@@ -470,28 +470,28 @@ TEST_BROWSER=chromium
 TEST_PORT=3000+random
 ```
 
-### 测试最佳实践
+### Testing Best Practices
 
-#### 编写新的测试文件
+#### Writing New Test Files
 
-遵循以下模板确保输出规范：
+Follow this template to ensure output standards:
 
 ```typescript
 // test/my-feature.test.ts
 import { test, expect } from "@playwright/test";
 import { mkdirSync, appendFileSync, writeFileSync } from "node:fs";
 
-// 使用环境变量或默认值
+// Use environment variable or default value
 const RESULTS_DIR = process.env.TEST_RESULTS_DIR 
   || "/root/pi-gateway-standalone/test-results/latest";
 const SCREENSHOTS_DIR = `${RESULTS_DIR}/screenshots`;
 const LOG_DIR = `${RESULTS_DIR}/browser`;
 
-// 确保目录存在
+// Ensure directories exist
 mkdirSync(SCREENSHOTS_DIR, { recursive: true });
 mkdirSync(LOG_DIR, { recursive: true });
 
-// 日志文件
+// Log file
 const LOG_FILE = `${LOG_DIR}/my-feature.log`;
 
 function log(level: string, message: string) {
@@ -501,7 +501,7 @@ function log(level: string, message: string) {
 }
 
 test.beforeEach(async ({ page }) => {
-  // 捕获控制台日志
+  // Capture console logs
   page.on("console", (msg) => {
     appendFileSync(`${LOG_DIR}/console.log`, 
       `[${msg.type()}] ${msg.text()}\n`);
@@ -509,49 +509,49 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("my feature test", async ({ page }) => {
-  log("INFO", "开始测试");
+  log("INFO", "Starting test");
   
   await page.goto("/");
   await page.waitForLoadState("networkidle");
   
-  // 截图 - 使用编号命名
+  // Screenshot - use sequential naming
   await page.screenshot({ 
     path: `${SCREENSHOTS_DIR}/01-my-feature.png`,
     fullPage: true 
   });
   
-  // 测试逻辑...
+  // Test logic...
   
-  log("INFO", "测试完成");
+  log("INFO", "Test completed");
 });
 ```
 
-#### 测试命名规范
+#### Test Naming Conventions
 
-| 类型 | 命名示例 | 位置 |
-|------|----------|------|
-| 单元测试 | `*.test.ts` | `src/**/` 或 `test/unit/` |
-| 集成测试 | `*.test.ts` | `test/integration/` |
-| E2E测试 | `*.spec.ts` | `test/e2e/` |
-| 终端测试 | `terminal-*.test.ts` | `test/` |
+| Type | Naming Example | Location |
+|------|----------------|----------|
+| Unit Test | `*.test.ts` | `src/**/` or `test/unit/` |
+| Integration Test | `*.test.ts` | `test/integration/` |
+| E2E Test | `*.spec.ts` | `test/e2e/` |
+| Terminal Test | `terminal-*.test.ts` | `test/` |
 
-#### 截图命名规范
+#### Screenshot Naming Conventions
 
 ```
 screenshots/
-├── 01-page-loaded.png          # 按顺序编号
+├── 01-page-loaded.png          # Sequentially numbered
 ├── 02-terminal-opened.png
 ├── 03-command-executed.png
-├── failed-invalid-state.png    # 失败状态截图
-└── error-modal-displayed.png   # 错误情况截图
+├── failed-invalid-state.png    # Failed state screenshot
+└── error-modal-displayed.png   # Error case screenshot
 ```
 
-#### 测试数据隔离
+#### Test Data Isolation
 
-- 每个测试使用独立的测试数据
-- 测试后清理创建的资源
-- 使用随机端口避免冲突
-- 使用临时目录存放测试文件
+- Each test uses independent test data
+- Clean up created resources after testing
+- Use random ports to avoid conflicts
+- Use temporary directories for test files
 
 ## Debugging Tips
 
@@ -563,11 +563,11 @@ screenshots/
 
 ## Prohibited Practices
 
-- ❌ Direct fetch in components (use services/)
-- ❌ Use Math.random() as key
-- ❌ Directly modify arrays/objects (return new objects)
-- ❌ Write business logic in components (extract to Hook)
-- ❌ Put runtime logic in shared/
+- Direct fetch in components (use services/)
+- Use Math.random() as key
+- Directly modify arrays/objects (return new objects)
+- Write business logic in components (extract to Hook)
+- Put runtime logic in shared/
 
 ## Need Help?
 
