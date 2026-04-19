@@ -1,10 +1,10 @@
 /**
  * UIMarkerTool - UI Marker 工具
- * 职责：控制 UI Marker 的激活/停用状态
+ * 职责：点击红色按钮后显示 UI Marker 功能
  */
 
 import { useCallback, useState, useEffect } from "react";
-import { IconButton } from "@/components/Icon/Icon";
+import styles from "@/app/Tools/ToolMenu.module.css";
 
 // 扩展 Window 接口以包含 uiMarker
 declare global {
@@ -23,121 +23,80 @@ const UI_MARKER_KEY = "UI_MARKER_ENABLED";
 
 export function UIMarkerTool() {
   const [isEnabled, setIsEnabled] = useState(false);
+  const [isActivated, setIsActivated] = useState(false);
 
-  // 读取初始状态并初始化 UI Marker
+  // 读取初始状态
   useEffect(() => {
-    const initUIMarker = () => {
-      try {
-        const value = localStorage.getItem(UI_MARKER_KEY);
-        // 默认禁用（如果未设置）
-        const enabled = value === "true";
-        setIsEnabled(enabled);
-
-        // 根据设置初始化 UI Marker
-        if (window.uiMarker) {
-          if (enabled) {
-            window.uiMarker.activate();
-            console.log("[UIMarkerTool] UI Marker activated on load");
-          } else {
-            window.uiMarker.deactivate();
-          }
-        } else {
-          console.warn("[UIMarkerTool] window.uiMarker not found during init");
-        }
-      } catch {
-        setIsEnabled(false);
-      }
-    };
-
-    // 延迟初始化以确保 ui-marker.js 已加载
-    if (window.uiMarker) {
-      initUIMarker();
-    } else {
-      // 等待 ui-marker.js 加载
-      const checkInterval = setInterval(() => {
-        if (window.uiMarker) {
-          clearInterval(checkInterval);
-          initUIMarker();
-        }
-      }, 100);
-
-      // 最多等待 5 秒
-      setTimeout(() => {
-        clearInterval(checkInterval);
-        if (!window.uiMarker) {
-          console.warn("[UIMarkerTool] window.uiMarker not found after 5 seconds");
-        }
-      }, 5000);
+    try {
+      const value = localStorage.getItem(UI_MARKER_KEY);
+      const enabled = value === "true";
+      setIsEnabled(enabled);
+    } catch {
+      setIsEnabled(false);
     }
   }, []);
 
-  const toggle = useCallback(() => {
-    const newEnabled = !isEnabled;
-
-    try {
-      // 保存到 localStorage
-      if (newEnabled) {
-        localStorage.setItem(UI_MARKER_KEY, "true");
-      } else {
-        localStorage.setItem(UI_MARKER_KEY, "false");
-      }
-
-      // 控制 UI Marker
+  // 激活 UI Marker 功能
+  const activate = useCallback(() => {
+    setIsActivated(true);
+    
+    // 等待 ui-marker.js 加载
+    const activateMarker = () => {
       if (window.uiMarker) {
-        if (newEnabled) {
-          window.uiMarker.activate();
-          console.log("[UIMarkerTool] UI Marker activated");
-        } else {
-          window.uiMarker.deactivate();
-          console.log("[UIMarkerTool] UI Marker deactivated");
-        }
-        // 更新状态
-        setIsEnabled(newEnabled);
+        window.uiMarker.activate();
+        setIsEnabled(true);
+        localStorage.setItem(UI_MARKER_KEY, "true");
+        console.log("[UIMarkerTool] UI Marker activated");
       } else {
         console.warn("[UIMarkerTool] window.uiMarker not found");
-        // 即使 uiMarker 不存在，也更新状态
-        setIsEnabled(newEnabled);
       }
-    } catch (error) {
-      console.error("[UIMarkerTool] Error toggling UI Marker:", error);
-    }
-  }, [isEnabled]);
-
-  // 监听 UI Marker 状态变化
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
+    };
 
     if (window.uiMarker) {
-      // 定期检查状态，因为 UI Marker 可能被快捷键触发
-      interval = setInterval(() => {
-        if (window.uiMarker && window.uiMarker.isActive !== undefined) {
-          const currentlyActive = window.uiMarker.isActive;
-          if (currentlyActive !== isEnabled) {
-            setIsEnabled(currentlyActive);
-            // 同步 localStorage
-            try {
-              localStorage.setItem(UI_MARKER_KEY, currentlyActive ? "true" : "false");
-            } catch {
-              // ignore
-            }
-          }
+      activateMarker();
+    } else {
+      // 等待加载
+      let attempts = 0;
+      const checkInterval = setInterval(() => {
+        attempts++;
+        if (window.uiMarker) {
+          clearInterval(checkInterval);
+          activateMarker();
+        } else if (attempts > 50) { // 5秒超时
+          clearInterval(checkInterval);
+          console.warn("[UIMarkerTool] window.uiMarker not found after 5 seconds");
         }
-      }, 1000); // 每秒检查一次
+      }, 100);
     }
+  }, []);
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isEnabled]);
+  // 停用 UI Marker
+  const deactivate = useCallback(() => {
+    if (window.uiMarker) {
+      window.uiMarker.deactivate();
+    }
+    setIsEnabled(false);
+    setIsActivated(false);
+    localStorage.setItem(UI_MARKER_KEY, "false");
+    console.log("[UIMarkerTool] UI Marker deactivated");
+  }, []);
 
+  // 如果未激活，显示红色激活按钮
+  if (!isActivated) {
+    return (
+      <button type="button" className={styles.item} onClick={activate}>
+        <span className={styles.menuIcon} style={{ color: "#ff4444" }}>●</span>
+        <span style={{ color: "#ff4444" }}>UI Marker</span>
+      </button>
+    );
+  }
+
+  // 已激活，显示开关
   return (
-    <IconButton
-      name="target"
-      label="UI Marker"
-      variant="ghost"
-      suffix={isEnabled ? "✓" : undefined}
-      onClick={toggle}
-      title={isEnabled ? "UI Marker: On (Ctrl+Shift+M)" : "UI Marker: Off"}
-    />
+    <button type="button" className={styles.item} onClick={deactivate}>
+      <span className={styles.menuIcon} style={{ color: "#ff4444" }}>●</span>
+      <span>UI Marker</span>
+      <span style={{ marginLeft: "auto", color: "#4CAF50" }}>✓</span>
+    </button>
   );
 }

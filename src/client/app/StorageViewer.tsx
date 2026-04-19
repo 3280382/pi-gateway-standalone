@@ -1,10 +1,11 @@
 /**
  * StorageViewer - LocalStorage 查看器
- * 放在全局 Footer 右下角
+ * 作为 ToolMenu 的菜单项
  */
 
 import { useState } from "react";
 import styles from "./StorageViewer.module.css";
+import menuStyles from "@/app/Tools/ToolMenu.module.css";
 
 export function StorageViewer() {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,18 +34,9 @@ export function StorageViewer() {
 
   return (
     <>
-      <button
-        type="button"
-        className={styles.storageBtn}
-        onClick={handleClick}
-        title="View LocalStorage"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-          <rect x="2" y="3" width="20" height="7" rx="2" />
-          <rect x="2" y="14" width="20" height="7" rx="2" />
-          <line x1="6" y1="6" x2="6.01" y2="6" />
-          <line x1="6" y1="17" x2="6.01" y2="17" />
-        </svg>
+      <button type="button" className={menuStyles.item} onClick={handleClick}>
+        <span className={menuStyles.menuIcon}>💾</span>
+        <span>Storage</span>
       </button>
 
       {isOpen && (

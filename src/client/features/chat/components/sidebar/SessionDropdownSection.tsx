@@ -207,14 +207,9 @@ export function SessionDropdownSection() {
                   onClick={() => handleSelect(session)}
                 >
                   <td className={styles.sessionTableCell}>
-                    <span className={styles.sessionId}>
+                    <span className={`${styles.sessionId} ${isSelected ? styles.sessionIdSelected : ""}`}>
                       {formatSessionId(session.id)}
                     </span>
-                    {isSelected && (
-                      <span className={styles.currentIndicator} title="Current session">
-                        ←
-                      </span>
-                    )}
                   </td>
                   <td className={styles.sessionTableCell}>
                     <span 

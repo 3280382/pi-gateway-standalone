@@ -6,8 +6,7 @@
 // ===== [ANCHOR:IMPORTS] =====
 
 import styles from "@/app/Footer.module.css";
-import { StorageViewer } from "@/app/StorageViewer";
-import { ToolMenu } from "@/app/Tools";
+import { ToolMenu } from "@/app/Tools/ToolMenu";
 import { IconButton, IconToggle } from "@/components/Icon/Icon";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useFileStore } from "@/features/files/stores";
@@ -91,10 +90,9 @@ export function Footer() {
         />
       </div>
 
-      {/* 右侧：工具菜单 + Storage 按钮 */}
+      {/* 右侧：工具菜单 */}
       <div className={styles.rightGroup}>
         <ToolMenu />
-        <StorageViewer />
       </div>
     </nav>
   );

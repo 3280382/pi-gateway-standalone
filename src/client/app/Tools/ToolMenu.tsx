@@ -8,6 +8,7 @@ import { SettingsModal } from "@/app/SettingsModal";
 import { DebugTool } from "@/app/Tools/DebugTool";
 import { PageAgentTool } from "@/app/Tools/PageAgentTool";
 import { UIMarkerTool } from "@/app/Tools/UIMarkerTool";
+import { StorageViewer } from "@/app/StorageViewer";
 import styles from "@/app/Tools/ToolMenu.module.css";
 import { IconButton } from "@/components/Icon/Icon";
 
@@ -48,6 +49,7 @@ export function ToolMenu() {
             <DebugTool />
             <PageAgentTool />
             <UIMarkerTool />
+            <StorageViewer />
             <div className={styles.divider} />
             <button type="button" className={styles.item} onClick={openSettings}>
               <span className={styles.menuIcon}>⚙️</span>
