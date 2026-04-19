@@ -37,7 +37,7 @@ export type {
 } from "./api/todoApi";
 export * as todoApi from "./api/todoApi";
 
-// Service 层（业务逻辑组合）
+// Service 层（业务逻辑Group合）
 export {
   getPersistedPath,
   initializeFilePath,

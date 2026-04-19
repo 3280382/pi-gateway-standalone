@@ -2,9 +2,9 @@
  * useSearchFilters - Search过滤逻辑 Hook
  *
  * Responsibilities:
- * - 管理Search查询和过滤器状态
+ * - 管理Search查询和Filter状态
  * - 处理Search查询变化
- * - 处理过滤器变化
+ * - 处理Filter变化
  */
 
 import { useCallback, useState } from "react";
@@ -61,7 +61,7 @@ export function useSearchFilters(options: UseSearchFiltersOptions = {}): UseSear
   const query = externalQuery ?? internalQuery;
   const filters = externalFilters ?? internalFilters;
 
-  // 计算活跃过滤器
+  // 计算活跃Filter
   const hasActiveFilters = Object.values(filters).some(Boolean);
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
@@ -77,12 +77,12 @@ export function useSearchFilters(options: UseSearchFiltersOptions = {}): UseSear
     [onQueryChange]
   );
 
-  // 清空查询
+  // Clear查询
   const clearQuery = useCallback(() => {
     setQuery("");
   }, [setQuery]);
 
-  // 切换过滤器
+  // 切换Filter
   const toggleFilter = useCallback(
     (key: keyof SearchFilters) => {
       const newFilters = { ...filters, [key]: !filters[key] };
@@ -95,7 +95,7 @@ export function useSearchFilters(options: UseSearchFiltersOptions = {}): UseSear
     [filters, onFiltersChange]
   );
 
-  // 设置过滤器
+  // 设置Filter
   const setFilter = useCallback(
     (key: keyof SearchFilters, value: boolean) => {
       const newFilters = { ...filters, [key]: value };
@@ -108,12 +108,12 @@ export function useSearchFilters(options: UseSearchFiltersOptions = {}): UseSear
     [filters, onFiltersChange]
   );
 
-  // 过滤器面板控制
+  // Filter面板控制
   const openFilterPanel = useCallback(() => setShowFilterPanel(true), []);
   const closeFilterPanel = useCallback(() => setShowFilterPanel(false), []);
   const toggleFilterPanel = useCallback(() => setShowFilterPanel((prev) => !prev), []);
 
-  // 重置过滤器
+  // 重置Filter
   const resetFilters = useCallback(() => {
     if (onFiltersChange) {
       onFiltersChange(DEFAULT_FILTERS);

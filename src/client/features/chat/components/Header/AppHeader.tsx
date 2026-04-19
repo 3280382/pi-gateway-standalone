@@ -456,7 +456,7 @@ const DEFAULT_EXCLUDED_DIRS = [
 
 // 检查是否应该排除某个directories
 function shouldExcludeDir(name: string): boolean {
-  // 排除隐藏directories（以.开头）
+  // 排除Hiddendirectories（以.开头）
   if (name.startsWith(".")) {
     // 但允许 .pi（特殊directories）
     return name !== ".pi";
@@ -489,7 +489,7 @@ function DirectoryPickerModal({
         body: JSON.stringify({ path: dirPath }),
       });
       const data = await response.json();
-      const dirs = data. items
+      const dirs = data.  items
         .filter((item: any) => item.isDirectory && !shouldExcludeDir(item.name))
         .map((item: any) => ({
           name: item.name,

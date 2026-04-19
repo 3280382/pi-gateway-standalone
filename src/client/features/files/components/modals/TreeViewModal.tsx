@@ -10,7 +10,7 @@ import styles from "./TreeViewModal.module.css";
 
 export interface TreeViewModalProps {
   isOpen: boolean;
-  treeData: { path: string;  items: TreeNode[] } | null;
+  treeData: { path: string;   items: TreeNode[] } | null;
   treeLoading: boolean;
   onClose: () => void;
   onFileClick: (path: string, name: string) => void;
@@ -80,16 +80,16 @@ function getFileIcon(name: string, isDirectory: boolean): string {
 }
 
 /** 过滤树节点 */
-function filterNodes( items: TreeNode[], mode: FilterMode, search: string): TreeNode[] {
-  if (mode === "all" && !search) return  items;
+function filterNodes(  items: TreeNode[], mode: FilterMode, search: string): TreeNode[] {
+  if (mode === "all" && !search) return   items;
 
-  return  items.filter((item) => {
+  return   items.filter((item) => {
     // Search模式
     if (search) {
       return item.name.toLowerCase().includes(search.toLowerCase());
     }
 
-    // 正常模式 - 排除隐藏files
+    // 正常模式 - 排除Hiddenfiles
     if (mode === "normal") {
       if (item.name.startsWith(".") || DEFAULT_EXCLUDES.includes(item.name)) {
         return false;
@@ -100,9 +100,9 @@ function filterNodes( items: TreeNode[], mode: FilterMode, search: string): Tree
   });
 }
 
-/** 生成树形文本（用于复制） */
-function generateTreeText( items: TreeNode[]): string {
-  return  items
+/** 生成树形文本（用于Copy） */
+function generateTreeText(  items: TreeNode[]): string {
+  return   items
     .map((item) => {
       const indent = "  ".repeat(item.level || 0);
       const connector = item.isLast ? "└── " : "├── ";
@@ -142,24 +142,24 @@ export function TreeViewModal({
   // 过滤节点
   const filteredItems = useMemo(() => {
     if (!treeData) return [];
-    return filterNodes(treeData. items, filterMode, searchText);
+    return filterNodes(treeData.  items, filterMode, searchText);
   }, [treeData, filterMode, searchText]);
 
-  // 生成复制文本
+  // 生成Copy文本
   const treeText = useMemo(() => {
     if (!treeData) return "";
     return `${treeData.path}\n${generateTreeText(filteredItems)}`;
   }, [treeData, filteredItems]);
 
   // ========== 5. Actions ==========
-  // 处理复制
+  // 处理Copy
   const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(treeText);
       setIsCopySuccess(true);
       setTimeout(() => setIsCopySuccess(false), 2000);
     } catch (err) {
-      console.error("复制Failed:", err);
+      console.error("CopyFailed:", err);
     }
   }, [treeText]);
 
@@ -186,7 +186,7 @@ export function TreeViewModal({
                 if (e.target.value !== "search") setSearchText("");
               }}
             >
-              <option value="normal">隐藏排除files</option>
+              <option value="normal">Hidden排除files</option>
               <option value="all">显示所有</option>
               <option value="search">Search过滤...</option>
             </select>
@@ -204,7 +204,7 @@ export function TreeViewModal({
               onClick={handleCopy}
               disabled={!filteredItems.length}
             >
-              {isCopySuccess ? "✓ 已复制" : "📋 复制"}
+              {isCopySuccess ? "✓ 已Copy" : "📋 Copy"}
             </button>
           </div>
         </div>

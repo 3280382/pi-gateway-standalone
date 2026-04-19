@@ -24,8 +24,8 @@ describe("File API", () => {
   });
 
   it("can delete file", async () => {
-    await reporter.runTest("删除files", async () => {
-      logger.info("删除files测试");
+    await reporter.runTest("Delete files", async () => {
+      logger.info("Delete files测试");
       expect(true).toBe(true);
     });
   });

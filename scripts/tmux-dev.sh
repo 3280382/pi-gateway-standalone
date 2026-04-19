@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 # Check if tmux is installed
 if ! command -v tmux &> /dev/null; then
     echo -e "${RED}Error: tmux not installed${NC}"
-    echo "Installation command: apt-get install tmux (Debian/Ubuntu) 或 brew install tmux (macOS)"
+    echo "Installation command: apt-get install tmux (Debian/Ubuntu) or brew install tmux (macOS)"
     exit 1
 fi
 
@@ -48,14 +48,14 @@ create_session() {
     # |      AI Interaction (pi)       |
     # +-----------------------+
     
-    # 配置Frontend窗格 (0)
-    tmux send-keys -t $SESSION_NAME:0.0 "cd $GATEWAY_DIR && echo '=== Frontend服务窗格 ===' && echo 'Waiting for start command...' && bash" C-m
+    # Configure Frontend pane (0)
+    tmux send-keys -t $SESSION_NAME:0.0 "cd $GATEWAY_DIR && echo '=== Frontend Service Pane ===' && echo 'Waiting for start command...' && bash" C-m
     
-    # 配置Backend窗格 (1)
-    tmux send-keys -t $SESSION_NAME:0.1 "cd $GATEWAY_DIR && echo '=== Backend服务窗格 ===' && echo 'Waiting for start command...' && bash" C-m
+    # Configure Backend pane (1)
+    tmux send-keys -t $SESSION_NAME:0.1 "cd $GATEWAY_DIR && echo '=== Backend Service Pane ===' && echo 'Waiting for start command...' && bash" C-m
     
     # Configure bottom pane (2) - AI Interaction (start pi)
-    tmux send-keys -t $SESSION_NAME:0.2 "cd $GATEWAY_DIR && echo '╔════════════════════════════════╗' && echo '║  🤖 AI 交互窗格 (pi)            ║' && echo '╠════════════════════════════════╣' && echo '║  Talk with AI here                 ║' && echo '║  Top two panes show service output         ║' && echo '╠════════════════════════════════╣' && echo '║  Exit: Ctrl+d or type exit       ║' && echo '║  Detach: Ctrl+b d (Service continues running)  ║' && echo '╚════════════════════════════════╝' && echo '' && pi" C-m
+    tmux send-keys -t $SESSION_NAME:0.2 "cd $GATEWAY_DIR && echo '╔════════════════════════════════╗' && echo '║  🤖 AI Interaction Pane (pi)            ║' && echo '╠════════════════════════════════╣' && echo '║  Talk with AI here                 ║' && echo '║  Top two panes show service output         ║' && echo '╠════════════════════════════════╣' && echo '║  Exit: Ctrl+d or type exit       ║' && echo '║  Detach: Ctrl+b d (Service continues running)  ║' && echo '╚════════════════════════════════╝' && echo '' && pi" C-m
     
     # Default activate bottom pane (AI interaction window)
     tmux select-pane -t $SESSION_NAME:0.2
@@ -65,87 +65,87 @@ create_session() {
     echo "Pane layout (top 1/3, bottom 2/3):"
     echo -e "${BLUE}┌───────────┬───────────┐${NC}"
     echo -e "${BLUE}│  ${GREEN}Frontend${BLUE}     │  ${GREEN}Backend${BLUE}     │${NC}  (Top 33% × 50%)"
-    echo -e "${BLUE}│  窗格 0   │  窗格 1   │${NC}"
+    echo -e "${BLUE}│  Pane 0   │  Pane 1   │${NC}"
     echo -e "${BLUE}├───────────┴───────────┤${NC}"
     echo -e "${BLUE}│      ${YELLOW}AI 交互(pi)${BLUE}      │${NC}  (Bottom 66% × 100%)"
-    echo -e "${BLUE}│        窗格 2         │${NC}"
+    echo -e "${BLUE}│        Pane 2         │${NC}"
     echo -e "${BLUE}└───────────────────────┘${NC}"
     echo ""
 }
 
-# 函数：启动Frontend
+# Function: Start Frontend
 start_frontend() {
-    echo -e "${BLUE}在Frontend窗格启动服务...${NC}"
+    echo -e "${BLUE}Starting service in Frontend pane...${NC}"
     tmux send-keys -t $SESSION_NAME:0.0 C-c
     sleep 0.5
-    # 创建简单的日志文件名
+    # Create simple log filename
     local frontend_log="$GATEWAY_DIR/logs/frontend_current.log"
     mkdir -p "$GATEWAY_DIR/logs"
-    # 重命名旧日志文件
+    # Rename old log files
     if [ -f "$frontend_log" ]; then
         local old_timestamp=$(date -r "$frontend_log" +%Y%m%d_%H%M%S 2>/dev/null || date +%Y%m%d_%H%M%S)
         mv "$frontend_log" "$GATEWAY_DIR/logs/frontend_${old_timestamp}.log" 2>/dev/null || true
     fi
-    tmux send-keys -t $SESSION_NAME:0.0 "cd $GATEWAY_DIR && echo 'Frontend日志: $frontend_log' && npx vite --host 127.0.0.1 --port 5173 2>&1 | tee -a '$frontend_log'" C-m
-    echo -e "${GREEN}✅ Frontend启动命令已发送 (当前日志: frontend_current.log)${NC}"
+    tmux send-keys -t $SESSION_NAME:0.0 "cd $GATEWAY_DIR && echo 'Frontend log: $frontend_log' && npx vite --host 127.0.0.1 --port 5173 2>&1 | tee -a '$frontend_log'" C-m
+    echo -e "${GREEN}✅ Frontend start command sent (Current log: frontend_current.log)${NC}"
 }
 
-# 函数：启动Backend
+# Function: Start Backend
 start_backend() {
-    echo -e "${BLUE}在Backend窗格启动服务...${NC}"
+    echo -e "${BLUE}Starting service in Backend pane...${NC}"
     tmux send-keys -t $SESSION_NAME:0.1 C-c
     sleep 0.5
-    # 创建简单的日志文件名
+    # Create simple log filename
     local backend_log="$GATEWAY_DIR/logs/backend_current.log"
     mkdir -p "$GATEWAY_DIR/logs"
-    # 重命名旧日志文件
+    # Rename old log files
     if [ -f "$backend_log" ]; then
         local old_timestamp=$(date -r "$backend_log" +%Y%m%d_%H%M%S 2>/dev/null || date +%Y%m%d_%H%M%S)
         mv "$backend_log" "$GATEWAY_DIR/logs/backend_${old_timestamp}.log" 2>/dev/null || true
     fi
-    tmux send-keys -t $SESSION_NAME:0.1 "cd $GATEWAY_DIR && echo 'Backend日志: $backend_log' && npx tsx watch src/server/server.ts 2>&1 | tee -a '$backend_log'" C-m
-    echo -e "${GREEN}✅ Backend启动命令已发送 (当前日志: backend_current.log)${NC}"
+    tmux send-keys -t $SESSION_NAME:0.1 "cd $GATEWAY_DIR && echo 'Backend log: $backend_log' && npx tsx watch src/server/server.ts 2>&1 | tee -a '$backend_log'" C-m
+    echo -e "${GREEN}✅ Backend start command sent (Current log: backend_current.log)${NC}"
 }
 
-# 函数：停止Frontend
+# Function: Stop Frontend
 stop_frontend() {
-    echo -e "${YELLOW}停止Frontend服务...${NC}"
+    echo -e "${YELLOW}Stopping Frontend service...${NC}"
     tmux send-keys -t $SESSION_NAME:0.0 C-c
     sleep 0.5
-    tmux send-keys -t $SESSION_NAME:0.0 "echo 'Frontend已停止'" C-m
+    tmux send-keys -t $SESSION_NAME:0.0 "echo 'Frontend stopped'" C-m
 }
 
-# 函数：停止Backend
+# Function: Stop Backend
 stop_backend() {
-    echo -e "${YELLOW}停止Backend服务...${NC}"
+    echo -e "${YELLOW}Stopping Backend service...${NC}"
     tmux send-keys -t $SESSION_NAME:0.1 C-c
     sleep 0.5
-    tmux send-keys -t $SESSION_NAME:0.1 "echo 'Backend已停止'" C-m
+    tmux send-keys -t $SESSION_NAME:0.1 "echo 'Backend stopped'" C-m
 }
 
-# 函数：重启Frontend
+# Function: Restart Frontend
 restart_frontend() {
-    echo -e "${YELLOW}重启Frontend...${NC}"
+    echo -e "${YELLOW}Restarting Frontend...${NC}"
     stop_frontend
     sleep 1
     start_frontend
 }
 
-# 函数：重启Backend
+# Function: Restart Backend
 restart_backend() {
-    echo -e "${YELLOW}重启Backend...${NC}"
+    echo -e "${YELLOW}Restarting Backend...${NC}"
     stop_backend
     sleep 1
     start_backend
 }
 
-# 函数：清除 Vite 缓存
+# Function:清除 Vite 缓存
 clear_cache() {
     echo -e "${YELLOW}清除 Vite 缓存...${NC}"
     tmux send-keys -t $SESSION_NAME:0.2 "cd $GATEWAY_DIR && rm -rf node_modules/.vite && echo 'Vite 缓存已清除'" C-m
 }
 
-# 函数：检查状态
+# Function:Check状态
 status() {
     echo -e "${BLUE}Checking service status...${NC}"
     
@@ -166,25 +166,25 @@ status() {
     fi
 }
 
-# 函数：在 AI 窗格执行命令
+# Function:在 AI 窗格ExecuteCommand
 run_in_ai_pane() {
     local cmd="$1"
     tmux send-keys -t $SESSION_NAME:0.2 "$cmd" C-m
 }
 
-# 函数：附加到会话
+# Function:附加到会话
 attach() {
     tmux attach-session -t $SESSION_NAME
 }
 
-# 函数：杀掉会话
+# Function:杀掉会话
 kill_session() {
     echo -e "${YELLOW}杀掉 tmux 会话...${NC}"
     tmux kill-session -t $SESSION_NAME 2>/dev/null
     echo -e "${GREEN}✅ 会话已终止${NC}"
 }
 
-# 主命令处理
+# 主Command处理
 case "${1:-}" in
     create)
         create_session
@@ -234,17 +234,17 @@ case "${1:-}" in
         kill_session
         ;;
     run)
-        # 在 AI 窗格运行命令
+        # 在 AI 窗格RunCommand
         shift
         run_in_ai_pane "$@"
         ;;
     *)
-        echo "Gateway Tmux 开发环境管理"
+        echo "Gateway Tmux Development Environment管理"
         echo ""
         echo "Usage: $0 <command>"
         echo ""
         echo "会话管理:"
-        echo "  create              创建新的 tmux 会话"
+        echo "  create              Create新的 tmux 会话"
         echo "  attach              附加到现有会话（用户观察用）"
         echo "  kill                杀掉会话"
         echo ""
@@ -252,17 +252,17 @@ case "${1:-}" in
         echo "  start               启动Frontend和Backend"
         echo "  start-frontend      仅启动Frontend"
         echo "  start-backend       仅启动Backend"
-        echo "  stop                停止Frontend和Backend"
-        echo "  restart             重启Frontend和Backend"
-        echo "  restart-frontend    仅重启Frontend"
-        echo "  restart-backend     仅重启Backend"
+        echo "  stop                StopFrontend和Backend"
+        echo "  restart             Restarting Frontend...ckend"
+        echo "  restart-frontend    仅RestartFrontend"
+        echo "  restart-backend     仅RestartBackend"
         echo ""
         echo "其他:"
         echo "  clear-cache         清除 Vite 缓存"
         echo "  status              Check service status"
-        echo "  run <command>       在 AI 窗格执行命令"
+        echo "  run <command>       在 AI 窗格ExecuteCommand"
         echo ""
-        echo "示例:"
+        echo "Example:"
         echo "  $0 create           # Create session"
         echo "  $0 start            # 启动所有服务"
         echo "  $0 attach           # 进入观察模式"

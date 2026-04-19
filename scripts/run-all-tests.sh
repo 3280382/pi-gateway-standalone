@@ -1,13 +1,13 @@
 #!/bin/bash
 #
-# Unified Test Runner - 统一测试运行脚本
+# Unified Test Runner - 统一测试RunScript
 # 规范：所有测试输出统一在 test-results/<timestamp>/ 目录
 #
 # Usage: bash scripts/run-all-tests.sh [unit|integration|terminal|e2e|all]
 
 set -e
 
-# ========== 颜色配置 ==========
+# ========== 颜色Configure ==========
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -25,11 +25,11 @@ log_section() {
     echo -e "${CYAN}═══════════════════════════════════════════════════════${NC}"
 }
 
-# ========== 配置 ==========
+# ========== Configure ==========
 TEST_TYPE="${1:-all}"
 PROJECT_ROOT="/root/pi-gateway-standalone"
 
-log_section "🧪 Pi Gateway 统一测试运行器"
+log_section "🧪 Pi Gateway 统一测试Run器"
 log_info "测试类型: $TEST_TYPE"
 
 # ========== Test ==========
@@ -66,10 +66,10 @@ if [ $EXIT_CODE -eq 0 ]; then
     echo "  截图: ls test-results/latest/screenshots/"
     exit 0
 else
-    log_error "Exists失败的测试"
+    log_error "ExistsFailed的测试"
     echo ""
-    echo "诊断命令:"
+    echo "诊断Command:"
     echo "  报告: cat test-results/latest/summary.md"
-    echo "  日志: tail -100 test-results/latest/backend/test.log"
+    echo "  Log: tail -100 test-results/latest/backend/test.log"
     exit 1
 fi

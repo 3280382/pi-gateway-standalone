@@ -3,7 +3,7 @@
  *
  * Responsibilities:
  * - 加载工作directories的todo列表
- * - 缓存并按files路径分组
+ * - 缓存并按files路径分Group
  * - 提供Refresh功能
  */
 
@@ -35,7 +35,7 @@ export function useTodos(options: UseTodosOptions): UseTodosResult {
       const todos = await todoApi.list(workingDir);
       setTodoList(todos);
 
-      // 按files路径分组
+      // 按files路径分Group
       const map = new Map<string, typeof todos>();
       for (const todo of todos) {
         const existing = map.get(todo.filePath) || [];
@@ -53,7 +53,7 @@ export function useTodos(options: UseTodosOptions): UseTodosResult {
   useEffect(() => {
     // 非激活状态或 Todo 模式Close时不加载
     if (!isActive || !isTodoModeActive) {
-      // 清空状态
+      // Clear状态
       if (lastLoadedDirRef.current) {
         setTodoList([]);
         setTodoMap(new Map());

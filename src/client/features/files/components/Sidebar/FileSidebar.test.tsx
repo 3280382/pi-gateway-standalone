@@ -69,17 +69,17 @@ describe("FileSidebar", () => {
     expect(screen.getByText("/")).toBeInTheDocument();
   });
 
-  it("renders tree structure with expandable  items", () => {
+  it("renders tree structure with expandable   items", () => {
     render(<FileSidebar />);
 
     // Root should be visible
     expect(screen.getByText("/")).toBeInTheDocument();
   });
 
-  it("expands and collapses directory  items", async () => {
+  it("expands and collapses directory   items", async () => {
     const { browseDirectory } = await import("@/services/api/fileApi");
     (browseDirectory as any).mockResolvedValue({
-       items: [
+        items: [
         { name: "file1.txt", path: "/test/file1.txt", isDirectory: false },
         { name: "subdir", path: "/test/subdir", isDirectory: true },
       ],
@@ -95,7 +95,7 @@ describe("FileSidebar", () => {
   it("calls setCurrentPath and loadFiles when directory is clicked", async () => {
     const { browseDirectory } = await import("@/services/api/fileApi");
     (browseDirectory as any).mockResolvedValue({
-       items: [],
+        items: [],
     });
 
     render(<FileSidebar />);
@@ -128,7 +128,7 @@ describe("FileSidebar", () => {
     expect(screen.getByText("...")).toBeInTheDocument();
 
     // Resolve the promise
-    resolveBrowse?.({  items: [] });
+    resolveBrowse?.({   items: [] });
 
     await waitFor(() => {
       expect(screen.queryByText("...")).not.toBeInTheDocument();
@@ -153,7 +153,7 @@ describe("FileSidebar", () => {
   it("shows empty state for directory with no children", async () => {
     const { browseDirectory } = await import("@/services/api/fileApi");
     (browseDirectory as any).mockResolvedValue({
-       items: [],
+        items: [],
     });
 
     render(<FileSidebar />);
@@ -187,15 +187,15 @@ describe("FileSidebar", () => {
     (browseDirectory as any).mockImplementation((path: string) => {
       if (path === "/") {
         return Promise.resolve({
-           items: [{ name: "home", path: "/home", isDirectory: true }],
+            items: [{ name: "home", path: "/home", isDirectory: true }],
         });
       }
       if (path === "/home") {
         return Promise.resolve({
-           items: [{ name: "user", path: "/home/user", isDirectory: true }],
+            items: [{ name: "user", path: "/home/user", isDirectory: true }],
         });
       }
-      return Promise.resolve({  items: [] });
+      return Promise.resolve({   items: [] });
     });
 
     render(<FileSidebar />);
@@ -220,7 +220,7 @@ describe("FileSidebar", () => {
   it("caches directory contents", async () => {
     const { browseDirectory } = await import("@/services/api/fileApi");
     (browseDirectory as any).mockResolvedValue({
-       items: [{ name: "file1.txt", path: "/test/file1.txt", isDirectory: false }],
+        items: [{ name: "file1.txt", path: "/test/file1.txt", isDirectory: false }],
     });
 
     render(<FileSidebar />);
@@ -240,7 +240,7 @@ describe("FileSidebar", () => {
   it("handles clear cache button", async () => {
     const { browseDirectory } = await import("@/services/api/fileApi");
     (browseDirectory as any).mockResolvedValue({
-       items: [],
+        items: [],
     });
 
     render(<FileSidebar />);
@@ -264,7 +264,7 @@ describe("FileSidebar", () => {
   it("handles special directory names", async () => {
     const { browseDirectory } = await import("@/services/api/fileApi");
     (browseDirectory as any).mockResolvedValue({
-       items: [
+        items: [
         { name: ".hidden", path: "/.hidden", isDirectory: true },
         { name: "normal", path: "/normal", isDirectory: true },
         { name: "with spaces", path: "/with spaces", isDirectory: true },
@@ -299,7 +299,7 @@ describe("FileSidebar", () => {
       "very_long_directory_name_that_should_be_truncated_with_ellipsis_in_the_sidebar";
     const { browseDirectory } = await import("@/services/api/fileApi");
     (browseDirectory as any).mockResolvedValue({
-       items: [{ name: longName, path: `/${longName}`, isDirectory: true }],
+        items: [{ name: longName, path: `/${longName}`, isDirectory: true }],
     });
 
     render(<FileSidebar />);
@@ -348,7 +348,7 @@ describe("FileSidebar", () => {
     (browseDirectory as any).mockImplementation(() => {
       callCount++;
       return Promise.resolve({
-         items: [
+          items: [
           {
             name: `dir${callCount}`,
             path: `/dir${callCount}`,

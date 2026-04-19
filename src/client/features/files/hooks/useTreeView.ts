@@ -1,7 +1,7 @@
 /**
- * useTreeView - 树形视图数据获取 Hook
+ * useTreeView - Tree view数据获取 Hook
  *
- * Responsibilities:为TreeView组件提供全量静态树形数据
+ * Responsibilities:为TreeViewGroup件提供全量静态树形数据
  * 服务端过滤（normal模式），客户端Search过滤
  */
 
@@ -27,10 +27,10 @@ export interface UseTreeViewResult {
 }
 
 /** 客户端Search过滤（服务端已完成排除项过滤） */
-function filterTreeNodes( items: TreeNode[], search: string): TreeNode[] {
-  if (!search) return  items;
+function filterTreeNodes(  items: TreeNode[], search: string): TreeNode[] {
+  if (!search) return   items;
 
-  return  items.filter((item) => {
+  return   items.filter((item) => {
     return item.name.toLowerCase().includes(search.toLowerCase());
   });
 }
@@ -63,7 +63,7 @@ export function useTreeView(options: UseTreeViewOptions = {}): UseTreeViewResult
     try {
       // 传递 filter 参数给服务端，在服务端进行过滤
       const response = await fileApi.tree(pathToLoad, filter);
-      setRawTreeData(response. items);
+      setRawTreeData(response.  items);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to load tree";
       setError(errorMsg);

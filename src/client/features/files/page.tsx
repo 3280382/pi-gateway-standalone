@@ -4,7 +4,7 @@
  * Responsibilities:files功能完整布局
  * - 包含 FileToolbar、FileSidebar、FileBrowser、Panel、BottomMenu
  * - 所有状态通过 Hooks 内部获取
- * - 实现 KeepAlive：首次激活才挂载，之后通过 display 控制显示隐藏
+ * - 实现 KeepAlive：首次激活才挂载，之后通过 display 控制显示Hidden
  * - 仅在files视图激活时加载数据
  */
 

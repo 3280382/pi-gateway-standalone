@@ -11,7 +11,7 @@ import * as fileApi from "./fileApi";
 export interface DirectoryData {
   workingDir: string;
   parentPath: string;
-   items: FileItem[];
+    items: FileItem[];
 }
 
 /**
@@ -20,7 +20,7 @@ export interface DirectoryData {
 export async function loadDirectoryContent(path: string): Promise<DirectoryData> {
   const data = await fileApi.browse(path);
 
-  const  itemsToSet = [
+  const   itemsToSet = [
     ...(data.parentPath !== data.workingDir
       ? [
           {
@@ -31,13 +31,13 @@ export async function loadDirectoryContent(path: string): Promise<DirectoryData>
           },
         ]
       : []),
-    ...data. items,
+    ...data.  items,
   ];
 
   return {
     workingDir: data.workingDir,
     parentPath: data.parentPath,
-     items:  itemsToSet,
+      items:   itemsToSet,
   };
 }
 
@@ -122,7 +122,7 @@ export async function executeFileByPath(
 export function getFriendlyErrorMessage(error: unknown, path: string): string {
   const errorMessage = error instanceof Error ? error.message : String(error);
 
-  // 权限错误
+  // Permissions错误
   if (errorMessage.includes("permission") || errorMessage.includes("Permission")) {
     return `Permission denied: Cannot access "${path}". You may need to check file permissions.`;
   }

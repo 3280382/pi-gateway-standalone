@@ -123,7 +123,7 @@ export function createLogger(namespace: string) {
       }
     },
 
-    // 分组
+    // 分Group
     group: (label: string) => {
       if (shouldLog(LogLevel.DEBUG)) {
         console.group(formatMessage(label));

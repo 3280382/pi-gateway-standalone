@@ -1,7 +1,7 @@
 /**
  * ChatPage - 聊天Pages面
  *
- * 实现 KeepAlive：首次激活才挂载，之后通过 display 控制显示隐藏
+ * 实现 KeepAlive：首次激活才挂载，之后通过 display 控制显示Hidden
  * 合并了原 ChatLayout 的布局逻辑
  */
 

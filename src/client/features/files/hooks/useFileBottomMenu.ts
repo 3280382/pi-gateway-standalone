@@ -3,7 +3,7 @@
  *
  * Responsibilities:管理底部菜单的所有业务逻辑
  * - 新建files
- * - 删除files
+ * - Delete files
  * - 树状视图
  */
 
@@ -97,7 +97,7 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
     setNewFileName("");
   }, []);
 
-  // 删除files
+  // Delete files
   const handleDeleteClick = useCallback(() => {
     if (selectedItems.length === 0) {
       if (!isMultiSelectMode) {

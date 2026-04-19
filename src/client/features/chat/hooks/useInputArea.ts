@@ -1,5 +1,5 @@
 /**
- * useInputArea - InputArea 组件业务逻辑 Hook
+ * useInputArea - InputArea Group件业务逻辑 Hook
  *
  * Responsibilities:
  * - 整合 useFilePicker, useImageUpload, useSlashCommands

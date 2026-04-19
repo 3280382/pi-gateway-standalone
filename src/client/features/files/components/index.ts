@@ -1,5 +1,5 @@
 /**
- * Files Components - files功能组件统一导出
+ * Files Components - files功能Group件统一导出
  */
 
 // BottomMenu

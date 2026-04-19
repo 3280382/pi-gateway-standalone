@@ -37,7 +37,7 @@ export interface ProcessInfo {
  */
 export async function getAllProcesses(): Promise<ProcessInfo[]> {
   try {
-    // 使用 ps 命令获取所有进程详细信息
+    // 使用 ps 命令获取所有进程Details
     const { stdout } = await execAsync(
       "ps -eo pid,ppid,uid,gid,pcpu,pmem,vsz,rss,tty,stat,start,time,comm,args --no-headers"
     );

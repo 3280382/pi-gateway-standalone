@@ -165,7 +165,7 @@ export function useChatInit(): { isConnecting: boolean } {
 
       console.log("[ChatInit] UI fully restored from server data");
     } catch (err) {
-      console.error("[ChatInit] 初始化错误:", err);
+      console.error("[ChatInit] 初始化Error:", err);
     } finally {
       setIsConnecting(false);
     }

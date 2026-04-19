@@ -2,7 +2,7 @@
  * useFileOperations - files操作逻辑 Hook
  *
  * Responsibilities:封装files增删改查的业务逻辑
- * - 批量删除
+ * - Batch delete
  * - 批量移动
  * - 创建files
  * - 执行files
@@ -42,7 +42,7 @@ export function useFileOperations(): UseFileOperationsResult {
   const refreshAfterOperation = useCallback(async () => {
     try {
       const data = await fileOperationsApi.loadDirectoryContent(currentBrowsePath);
-      setItems(data. items);
+      setItems(data.  items);
       setCurrentBrowsePath(data.workingDir);
       setParentPath(data.parentPath);
     } catch (error) {
@@ -52,7 +52,7 @@ export function useFileOperations(): UseFileOperationsResult {
   }, [currentBrowsePath, setItems, setCurrentBrowsePath, setParentPath, setError]);
 
   /**
-   * 批量删除选中的files
+   * Batch delete选中的files
    */
   const deleteSelected = useCallback(async () => {
     if (selectedItems.length === 0) return;
@@ -70,7 +70,7 @@ export function useFileOperations(): UseFileOperationsResult {
 
       fileBrowserDebug.info("批量Delete successful");
     } catch (error) {
-      fileBrowserDebug.error("批量删除Failed", { error });
+      fileBrowserDebug.error("Batch deleteFailed", { error });
       setError("Failed to delete selected files");
       throw error;
     }
@@ -97,7 +97,7 @@ export function useFileOperations(): UseFileOperationsResult {
         setSelectedItems([]);
         setIsMultiSelectMode(false);
 
-        fileBrowserDebug.info("批量移动成功");
+        fileBrowserDebug.info("批量移动Success");
       } catch (error) {
         fileBrowserDebug.error("批量移动Failed", { error });
         setError("Failed to move selected files");
@@ -119,7 +119,7 @@ export function useFileOperations(): UseFileOperationsResult {
         // Refreshdirectories
         await refreshAfterOperation();
 
-        fileBrowserDebug.info("创建files成功", { fileName });
+        fileBrowserDebug.info("创建filesSuccess", { fileName });
       } catch (error) {
         fileBrowserDebug.error("创建filesFailed", { error });
         setError("Failed to create file");
@@ -137,7 +137,7 @@ export function useFileOperations(): UseFileOperationsResult {
       try {
         fileBrowserDebug.info("执行files", { path });
         const output = await fileOperationsApi.executeFileByPath(path, onOutput);
-        fileBrowserDebug.info("执行files成功", { path });
+        fileBrowserDebug.info("执行filesSuccess", { path });
         return output;
       } catch (error) {
         fileBrowserDebug.error("执行filesFailed", { error });

@@ -250,7 +250,7 @@ export function FileViewer() {
   );
 }
 
-// Icon 组件
+// Icon Group件
 function CopyIcon() {
   return (
     <svg

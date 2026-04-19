@@ -3,7 +3,7 @@
  *
  * Responsibilities:管理files项的交互操作（点击、选择、拖拽、手势等）
  * - 所有交互逻辑封装在此
- * - 组件只负责渲染和绑定事件处理器
+ * - Group件只负责渲染和绑定事件处理器
  */
 
 import { useCallback, useRef, useState } from "react";
@@ -114,7 +114,7 @@ export function useFileItemActions(): UseFileItemActionsResult {
         // Todo 模式下，点击files或directories都弹出 Todo 输入框（新建）
         if (isTodoModeActive) {
           console.log("[useFileItemActions] Todo mode - selecting item:", item.path);
-          useFileStore.getState().setEditingTodo(null); // 清空编辑状态
+          useFileStore.getState().setEditingTodo(null); // Clear编辑状态
           setTodoInputFile({ path: item.path, name: item.name });
           return;
         }

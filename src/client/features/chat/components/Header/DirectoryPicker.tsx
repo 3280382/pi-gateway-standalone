@@ -1,5 +1,5 @@
 /**
- * DirectoryPicker - directories选择器组件
+ * DirectoryPicker - directories选择器Group件
  *
  * Responsibilities:
  * - 显示directories列表供用户选择
@@ -51,7 +51,7 @@ const HOME_DIR = "/root";
 
 // 检查是否应该排除某个directories
 function shouldExcludeDir(name: string): boolean {
-  // 排除隐藏directories（以.开头）
+  // 排除Hiddendirectories（以.开头）
   if (name.startsWith(".")) {
     // 但允许 .pi（特殊directories）
     return name !== ".pi";
@@ -99,7 +99,7 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
       const data = await response.json();
 
       // 过滤directories：只显示非排除的directories
-      const dirs = data. items
+      const dirs = data.  items
         .filter((item: any) => item.isDirectory && !shouldExcludeDir(item.name))
         .map((item: any) => ({
           name: item.name,

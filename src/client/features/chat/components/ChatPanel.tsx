@@ -3,8 +3,8 @@
  *
  * Responsibilities:
  * - 负责聊天面板的整体布局
- * - 协调 MessageList 和 InputArea 组件
- * - 不包含业务逻辑，只负责视图组合
+ * - 协调 MessageList 和 InputArea Group件
+ * - 不包含业务逻辑，只负责视图Group合
  */
 
 // ===== [ANCHOR:IMPORTS] =====

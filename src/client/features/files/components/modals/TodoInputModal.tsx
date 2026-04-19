@@ -31,7 +31,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
   const setTodoList = useFileStore((state) => state.setTodoList);
   const setTodoMap = useFileStore((state) => state.setTodoMap);
 
-  // 使用全局工作directories，确保所有 todo 都写在同一 items
+  // 使用全局工作directories，确保所有 todo 都写在同一  items
   const workingDir = useWorkspaceStore((state) => state.workingDir);
 
   const isEditing = !!editingTodo;
@@ -42,7 +42,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
       setTodoText(editingTodo.text);
       setTags(editingTodo.tags || []);
     } else if (!isOpen) {
-      // Close时清空
+      // Close时Clear
       setTodoText("");
       setTags([]);
       setTagInput("");
@@ -80,7 +80,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
         const todos = await todoApi.list(workingDir);
         setTodoList(todos);
 
-        // 按files路径分组
+        // 按files路径分Group
         const map = new Map<string, typeof todos>();
         for (const todo of todos) {
           const existing = map.get(todo.filePath) || [];
@@ -92,7 +92,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
         console.error("[TodoInput] Failed to refresh todos:", err);
       }
 
-      // 清空输入并Close
+      // Clear输入并Close
       setTodoText("");
       setTags([]);
       setEditingTodo(null);

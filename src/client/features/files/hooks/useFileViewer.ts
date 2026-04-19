@@ -6,7 +6,7 @@
  * - 加载files内容
  * - 保存files
  * - 执行files
- * - 复制路径
+ * - Copy路径
  */
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -215,7 +215,7 @@ export function useFileViewer(): UseFileViewerResult {
 
     try {
       const data = await fileApi.content(filePath);
-      fileViewerDebug.info("files加载成功", {
+      fileViewerDebug.info("files加载Success", {
         filePath,
         contentLength: data.content?.length,
       });
@@ -273,13 +273,13 @@ export function useFileViewer(): UseFileViewerResult {
     }
   }, [filePath, clearTerminal, setExecuting, appendTerminalOutput]);
 
-  // 复制路径
+  // Copy路径
   const copyPath = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(filePath);
-      fileViewerDebug.info("路径已复制", { filePath });
+      fileViewerDebug.info("路径已Copy", { filePath });
     } catch (err) {
-      fileViewerDebug.error("复制路径Failed", { error: err });
+      fileViewerDebug.error("Copy路径Failed", { error: err });
     }
   }, [filePath]);
 

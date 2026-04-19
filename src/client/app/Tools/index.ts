@@ -1,5 +1,5 @@
 /**
- * Tools - Footer 工具菜单组件
+ * Tools - Footer 工具菜单Group件
  */
 
 export { DebugTool } from "@/app/Tools/DebugTool";

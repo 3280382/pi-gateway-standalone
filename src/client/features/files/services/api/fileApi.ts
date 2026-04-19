@@ -29,7 +29,7 @@ export async function browse(path: string): Promise<BrowseResponse> {
 }
 
 // 获取files树
-// filter: "all" - 返回所有files, "normal" - 排除隐藏files和默认排除项
+// filter: "all" - 返回所有files, "normal" - 排除Hiddenfiles和默认排除项
 export async function tree(path: string, filter: "all" | "normal" = "all"): Promise<TreeResponse> {
   const response = await fetch(
     `/api/files/file/tree?path=${encodeURIComponent(path)}&filter=${filter}`
@@ -43,7 +43,7 @@ export async function tree(path: string, filter: "all" | "normal" = "all"): Prom
 
   // API returns nested tree structure with children, flatten it for UI
   // 同时计算 level, isLast, parentLastStack 等字段
-  const  items: TreeNode[] = [];
+  const   items: TreeNode[] = [];
   const rootPath = data.path || "";
 
   function flatten(
@@ -67,14 +67,14 @@ export async function tree(path: string, filter: "all" | "normal" = "all"): Prom
         ? relativePath.substring(0, relativePath.lastIndexOf("/"))
         : "";
 
-       items.push({
+        items.push({
         name: node.name,
         path: fullPath, // 使用完整绝对路径
         isDirectory: node.isDirectory,
         // 新增计算字段
         level: depth - 1, // level 从 0 开始（相对于根的直接子节点）
         isLast: isLast,
-        parentLastStack: [...parentLastStack], // 复制数组
+        parentLastStack: [...parentLastStack], // Copy数Group
         parentPath: parentPath,
       });
     }
@@ -110,7 +110,7 @@ export async function tree(path: string, filter: "all" | "normal" = "all"): Prom
     flatten(data, 0);
   }
 
-  return { path: data.path || path,  items };
+  return { path: data.path || path,   items };
 }
 
 // 读取files内容

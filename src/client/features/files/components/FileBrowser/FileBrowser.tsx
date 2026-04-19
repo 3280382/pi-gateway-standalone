@@ -1,5 +1,5 @@
 /**
- * FileBrowser - files浏览器主组件
+ * FileBrowser - files浏览器主Group件
  *
  * Responsibilities:UI 渲染
  * - 不包含业务逻辑
@@ -61,7 +61,7 @@ export function FileBrowser({
   const { filteredItems } = useFileFiltering();
 
   // ===== [ANCHOR:TREEVIEW] =====
-  // 树形视图数据 - 仅在 tree 视图模式下才加载
+  // Tree view数据 - 仅在 tree 视图模式下才加载
   const { treeData, isLoading: treeLoading } = useTreeView({
     isActive: isActive && viewMode === "tree",
   });
@@ -91,15 +91,15 @@ export function FileBrowser({
               <div className={styles.error}>{error}</div>
             ) : viewMode === "grid" ? (
               <FileBrowserErrorBoundary componentName="File Grid">
-                <FileGrid  items={filteredItems} />
+                <FileGrid   items={filteredItems} />
               </FileBrowserErrorBoundary>
             ) : viewMode === "list" ? (
               <FileBrowserErrorBoundary componentName="File List">
-                <FileList  items={filteredItems} />
+                <FileList   items={filteredItems} />
               </FileBrowserErrorBoundary>
             ) : (
               <FileBrowserErrorBoundary componentName="Tree View">
-                <TreeView  items={treeData} />
+                <TreeView   items={treeData} />
               </FileBrowserErrorBoundary>
             )}
           </div>

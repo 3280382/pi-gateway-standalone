@@ -3,7 +3,7 @@
  *
  * Responsibilities:
  * - 以表格形式显示所有历史 session
- * - 显示会话 ID、运行状态、消息数、最后修改时间
+ * - 显示会话 ID、运行状态、消息数、最后Modification time
  * - 只在侧边栏打开时定期通过 WebSocket 更新
  * - 支持切换 session
  *
@@ -143,7 +143,7 @@ export function SessionDropdownSection() {
       return aPriority - bPriority;
     }
 
-    // 3. 相同优先级按最后修改时间Sort（最新的在前）
+    // 3. 相同优先级按最后Modification timeSort（最新的在前）
     const aTime = new Date(a.lastModified).getTime();
     const bTime = new Date(b.lastModified).getTime();
     return bTime - aTime;

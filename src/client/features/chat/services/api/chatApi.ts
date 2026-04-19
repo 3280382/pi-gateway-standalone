@@ -226,11 +226,11 @@ export function useChatController(): EnhancedChatController {
 
     // 工具操作（占位符实现）
     expandToolOutput: (_toolId: string) => {
-      // 工具输出展开在组件状态中处理
+      // 工具输出展开在Group件状态中处理
     },
 
     collapseToolOutput: (_toolId: string) => {
-      // 工具输出折叠在组件状态中处理
+      // 工具输出折叠在Group件状态中处理
     },
 
     // 会话管理 - 使用 sessionManager 统一处理（包含 loading 和界面重建）
@@ -374,8 +374,8 @@ let handlersSetup = false;
  *
  * 【为什么 Service 直接操作 Store？】
  * 1. WebSocket 事件是"被动接收"，不是用户操作，不经过 UI 层
- * 2. 全局订阅必须在组件挂载前完成，避免初始消息丢失
- * 3. 放在 Hook 中会导致：组件卸载时事件处理中断、多个组件重复订阅
+ * 2. 全局订阅必须在Group件挂载前完成，避免初始消息丢失
+ * 3. 放在 Hook 中会导致：Group件卸载时事件处理中断、多个Group件重复订阅
  * 4. 这是 WebSocket 类服务的特殊处理模式，非通用做法
  *
  * 【正常数据流 vs WebSocket 事件流】

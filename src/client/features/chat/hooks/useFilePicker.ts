@@ -61,13 +61,13 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
     setIsLoading(true);
     try {
       const data = await fileApi.browse(workingDir);
-      const  items: FileItem[] = [
+      const   items: FileItem[] = [
         ...(data.parentPath !== data.workingDir
           ? [{ name: "..", path: data.parentPath, isDirectory: true }]
           : []),
-        ...data. items,
+        ...data.  items,
       ];
-      setFileList( items);
+      setFileList(  items);
     } catch (err) {
       console.error("[useFilePicker] Failed to load files:", err);
       setFileList([]);

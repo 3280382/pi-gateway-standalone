@@ -31,7 +31,7 @@ export async function browse(req: Request, res: Response) {
 
     // Fetch file status in parallel (limit concurrency)
     const concurrencyLimit = 10;
-    const  items = [];
+    const   items = [];
 
     for (let i = 0; i < entries.length; i += concurrencyLimit) {
       const batch = entries.slice(i, i + concurrencyLimit);
@@ -56,10 +56,10 @@ export async function browse(req: Request, res: Response) {
           };
         })
       );
-       items.push(...batchResults);
+        items.push(...batchResults);
     }
 
-     items.sort((a, b) => {
+      items.sort((a, b) => {
       if (a.isDirectory === b.isDirectory) {
         return a.name.localeCompare(b.name);
       }
@@ -69,17 +69,17 @@ export async function browse(req: Request, res: Response) {
     const response = {
       currentPath: targetPath,
       parentPath: path.dirname(targetPath),
-       items,
+        items,
       metadata: {
-        count:  items.length,
-        directories:  items.filter((i) => i.isDirectory).length,
-        files:  items.filter((i) => !i.isDirectory).length,
+        count:   items.length,
+        directories:   items.filter((i) => i.isDirectory).length,
+        files:   items.filter((i) => !i.isDirectory).length,
         processingTime: Date.now() - startTime,
       },
     };
 
     logger.info(
-      `[browse] Response successful: ${targetPath}, ${ items.length}  items (${ items.filter((i) => i.isDirectory).length} directories, ${ items.filter((i) => !i.isDirectory).length} files), Time taken: ${Date.now() - startTime}ms`
+      `[browse] Response successful: ${targetPath}, ${  items.length}   items (${  items.filter((i) => i.isDirectory).length} directories, ${  items.filter((i) => !i.isDirectory).length} files), Time taken: ${Date.now() - startTime}ms`
     );
     res.json(response);
   } catch (error) {
@@ -96,7 +96,7 @@ export async function browse(req: Request, res: Response) {
 }
 
 /**
- * Get directory tree - 对应 /api/files/tree
+ * Get directory tree - corresponds to /api/files/tree
  */
 export async function tree(req: Request, res: Response) {
   const rawPath = req.query.path as string;
@@ -203,7 +203,7 @@ export async function tree(req: Request, res: Response) {
     logger.info(`Get directory tree: ${targetPath}, filter: ${filterMode}`);
     res.json(tree);
   } catch (error) {
-    logger.error(`Get directory tree错误: ${error instanceof Error ? error.message : String(error)}`, {
+    logger.error(`Get directory tree error: ${error instanceof Error ? error.message : String(error)}`, {
       targetPath,
     });
     res.status(500).json({ error: String(error) });
@@ -211,7 +211,7 @@ export async function tree(req: Request, res: Response) {
 }
 
 /**
- * Get file content - 对应 /api/files/content
+ * Get file content - corresponds to /api/files/content
  */
 export async function content(req: Request, res: Response) {
   const rawPath = req.query.path as string;
@@ -256,7 +256,7 @@ export async function content(req: Request, res: Response) {
       binary: isBinaryFile(targetPath),
     });
   } catch (error) {
-    logger.error(`Get file content错误: ${error instanceof Error ? error.message : String(error)}`, {
+    logger.error(`Get file content error: ${error instanceof Error ? error.message : String(error)}`, {
       targetPath,
     });
     res.status(500).json({ error: String(error) });
@@ -264,7 +264,7 @@ export async function content(req: Request, res: Response) {
 }
 
 /**
- * Get raw file - 对应 /api/files/raw
+ * Get raw file - corresponds to /api/files/raw
  */
 export async function raw(req: Request, res: Response) {
   const rawPath = req.query.path as string;
@@ -300,7 +300,7 @@ export async function raw(req: Request, res: Response) {
     logger.info(`Get raw file: ${targetPath}, MIME type: ${mimeType}, Size: ${stats.size}bytes`);
     res.send(content);
   } catch (error) {
-    logger.error(`Get raw file错误: ${error instanceof Error ? error.message : String(error)}`, {
+    logger.error(`Get raw file error: ${error instanceof Error ? error.message : String(error)}`, {
       targetPath,
     });
     res.status(500).json({ error: String(error) });
@@ -308,7 +308,7 @@ export async function raw(req: Request, res: Response) {
 }
 
 /**
- * Write file content - 对应 /api/files/write
+ * Write file content - corresponds to /api/files/write
  */
 export async function write(req: Request, res: Response) {
   const { path: filePath, content } = req.body;
@@ -339,7 +339,7 @@ export async function write(req: Request, res: Response) {
     logger.info(`Write file: ${targetPath}, Size: ${content.length}chars`);
     res.json({ success: true, path: targetPath });
   } catch (error) {
-    logger.error(`Write file错误: ${error instanceof Error ? error.message : String(error)}`, {
+    logger.error(`Write file error: ${error instanceof Error ? error.message : String(error)}`, {
       targetPath,
     });
     res.status(500).json({ error: String(error) });
@@ -347,7 +347,7 @@ export async function write(req: Request, res: Response) {
 }
 
 /**
- * Batch delete files - 对应 /api/files/batch-delete
+ * Batch delete files - corresponds to /api/files/batch-delete
  */
 // Prohibited system-critical directories（Only system directories, not user directories）
 const PROTECTED_PATHS = [
@@ -382,7 +382,7 @@ export async function batchDelete(req: Request, res: Response) {
   // Quantity limit
   if (paths.length > MAX_DELETE_COUNT) {
     res.status(400).json({
-      error: `Can only delete max ${MAX_DELETE_COUNT}  items`,
+      error: `Can only delete max ${MAX_DELETE_COUNT}   items`,
       maxAllowed: MAX_DELETE_COUNT,
       requested: paths.length,
     });
@@ -451,18 +451,18 @@ export async function batchDelete(req: Request, res: Response) {
     }
 
     // Stage 2: Execute deletion
-    logger.info(`Start batch delete: ${validatedPaths.length}  items, 总Size: ${totalSize} bytes`);
+    logger.info(`Start batch delete: ${validatedPaths.length}   items, Total size: ${totalSize} bytes`);
 
     for (const { originalPath, resolvedPath, isDirectory, size } of validatedPaths) {
       try {
         if (isDirectory) {
           // Recursively delete directories
           await rmdir(resolvedPath, { recursive: true });
-          logger.info(`删除directories成功: ${resolvedPath}`);
+          logger.info(`Delete directory successful: ${resolvedPath}`);
         } else {
-          // 删除files
+          // Delete files
           await unlink(resolvedPath);
-          logger.info(`删除files成功: ${resolvedPath}, Size: ${size} bytes`);
+          logger.info(`Delete filesSuccess: ${resolvedPath}, Size: ${size} bytes`);
         }
 
         results.push({
@@ -474,16 +474,16 @@ export async function batchDelete(req: Request, res: Response) {
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
         errors.push({ path: originalPath, error: errorMsg });
-        logger.error(`Delete failed: ${resolvedPath}, 错误: ${errorMsg}`);
+        logger.error(`Delete failed: ${resolvedPath}, Error: ${errorMsg}`);
       }
     }
 
-    // 记录完整结果
+    // Log complete results
     const success = errors.length === 0;
     const statusCode = success ? 200 : errors.length < paths.length ? 207 : 400;
 
     logger.info(
-      `Batch delete complete: ${results.length} 成功, ${errors.length} Failed, 总Size: ${totalSize} bytes`
+      `Batch delete complete: ${results.length} Success, ${errors.length} Failed, Total size: ${totalSize} bytes`
     );
 
     res.status(statusCode).json({
@@ -495,16 +495,16 @@ export async function batchDelete(req: Request, res: Response) {
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error) {
-    logger.error(`批量删除系统错误: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(`Batch delete系统Error: ${error instanceof Error ? error.message : String(error)}`);
     res.status(500).json({
-      error: "删除操作Failed",
+      error: "Delete operation failed",
       details: error instanceof Error ? error.message : String(error),
     });
   }
 }
 
 /**
- * 批量移动files - 对应 /api/files/batch-move
+ * Batch move files - corresponds to /api/files/batch-move
  */
 export async function batchMove(req: Request, res: Response) {
   const { paths, targetPath } = req.body;
@@ -515,14 +515,14 @@ export async function batchMove(req: Request, res: Response) {
   }
 
   if (!targetPath) {
-    res.status(400).json({ error: "targetPath参数必填" });
+    res.status(400).json({ error: "targetPath parameter required" });
     return;
   }
 
   const expandedTarget = expandPath(targetPath);
 
   if (!isPathAllowed(expandedTarget)) {
-    res.status(403).json({ error: "目标路径Access denied" });
+    res.status(403).json({ error: "Target path access denied" });
     return;
   }
 
@@ -532,15 +532,15 @@ export async function batchMove(req: Request, res: Response) {
   try {
     const { rename, stat, mkdir } = await import("node:fs/promises");
 
-    // 确保目标directories存在
+    // Ensure target directory exists
     try {
       const targetStats = await stat(expandedTarget);
       if (!targetStats.isDirectory()) {
-        res.status(400).json({ error: "目标路径必须是directories" });
+        res.status(400).json({ error: "Target path must be directory" });
         return;
       }
     } catch {
-      // directories不存在，创建它
+      // Directory doesn't exist, create it
       await mkdir(expandedTarget, { recursive: true });
     }
 
@@ -548,7 +548,7 @@ export async function batchMove(req: Request, res: Response) {
       const sourcePath = expandPath(filePath);
 
       if (!isPathAllowed(sourcePath)) {
-        errors.push({ path: filePath, error: "源路径Access denied" });
+        errors.push({ path: filePath, error: "Source path access denied" });
         continue;
       }
 
@@ -556,10 +556,10 @@ export async function batchMove(req: Request, res: Response) {
         const fileName = path.basename(sourcePath);
         const destPath = path.join(expandedTarget, fileName);
 
-        // 检查目标是否已存在
+        // Check if target exists
         try {
           await stat(destPath);
-          // Files已存在，添加数字后缀
+          // File exists, add numeric suffix
           const ext = path.extname(fileName);
           const base = path.basename(fileName, ext);
           let newDestPath = destPath;
@@ -583,7 +583,7 @@ export async function batchMove(req: Request, res: Response) {
             destination: newDestPath,
           });
         } catch {
-          // 目标不存在，直接移动
+          // Target doesn't exist, move directly
           await rename(sourcePath, destPath);
           results.push({
             path: filePath,
@@ -592,22 +592,22 @@ export async function batchMove(req: Request, res: Response) {
           });
         }
 
-        logger.info(`移动成功: ${sourcePath} -> ${expandedTarget}`);
+        logger.info(`移动Success: ${sourcePath} -> ${expandedTarget}`);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
         errors.push({ path: filePath, error: errorMsg });
-        logger.error(`移动Failed: ${sourcePath}, 错误: ${errorMsg}`);
+        logger.error(`移动Failed: ${sourcePath}, Error: ${errorMsg}`);
       }
     }
 
-    logger.info(`批量移动完成: ${results.length} 成功, ${errors.length} Failed`);
+    logger.info(`批量移动完成: ${results.length} Success, ${errors.length} Failed`);
     res.json({
       success: errors.length === 0,
       moved: results.length,
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error) {
-    logger.error(`批量移动错误: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(`批量移动Error: ${error instanceof Error ? error.message : String(error)}`);
     res.status(500).json({ error: String(error) });
   }
 }
@@ -664,7 +664,7 @@ export async function execute(req: Request, res: Response) {
       });
 
       child.on("error", (error: Error) => {
-        res.write(`[执行错误: ${error.message}]\n`);
+        res.write(`[执行Error: ${error.message}]\n`);
         res.end();
       });
 
@@ -702,7 +702,7 @@ export async function execute(req: Request, res: Response) {
       });
 
       child.on("error", (error: Error) => {
-        logger.error(`执行命令错误: ${error.message}`, { command, workingDir });
+        logger.error(`执行命令Error: ${error.message}`, { command, workingDir });
         res.json({
           success: false,
           output: error.message,

@@ -73,7 +73,7 @@ function matchesSearchText(item: FileItem, searchText: string): boolean {
 }
 
 /**
- * 比较两 items项进行Sort
+ * 比较两  items项进行Sort
  */
 function compareItems(a: FileItem, b: FileItem, sortMode: string): number {
   // ".." 始终排在Page一位
@@ -105,10 +105,10 @@ function compareItems(a: FileItem, b: FileItem, sortMode: string): number {
 }
 
 export function useFileFiltering(): UseFileFilteringResult {
-  const {  items, filterText, filterType, sortMode } = useFileStore();
+  const {   items, filterText, filterType, sortMode } = useFileStore();
 
   const result = useMemo(() => {
-    let filtered = [... items];
+    let filtered = [...  items];
 
     // 应用Search过滤
     if (filterText) {
@@ -128,9 +128,9 @@ export function useFileFiltering(): UseFileFilteringResult {
     return {
       filteredItems: filtered,
       hasActiveFilter,
-      filterCount:  items.length - filtered.length,
+      filterCount:   items.length - filtered.length,
     };
-  }, [ items, filterText, filterType, sortMode]);
+  }, [  items, filterText, filterType, sortMode]);
 
   return result;
 }

@@ -269,7 +269,7 @@ export function logError(
   additionalContext?: Partial<DebugContext>
 ) {
   debuggerInstance.error(
-    `函数错误: ${functionName}`,
+    `函数Error: ${functionName}`,
     {
       error: error.message,
       stack: error.stack,

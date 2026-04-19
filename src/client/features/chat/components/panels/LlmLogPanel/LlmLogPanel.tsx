@@ -109,7 +109,7 @@ export function LlmLogPanel({ height, onClose, onHeightChange }: LlmLogPanelProp
         intervalRef.current = null;
       }
     };
-  }, []); // 空依赖数组,只在挂载时运行
+  }, []); // 空依赖数Group,只在挂载时运行
 
   // Auto-scroll to bottom
   useEffect(() => {

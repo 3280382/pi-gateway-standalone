@@ -12,14 +12,14 @@ vi.mock("./FileToolbar", () => ({
 }));
 
 vi.mock("./FileGrid", () => ({
-  FileGrid: ({  items }: {  items: FileItem[] }) => (
-    <div data-testid="file-grid">{ items.length}  items</div>
+  FileGrid: ({   items }: {   items: FileItem[] }) => (
+    <div data-testid="file-grid">{  items.length}   items</div>
   ),
 }));
 
 vi.mock("./FileList", () => ({
-  FileList: ({  items }: {  items: FileItem[] }) => (
-    <div data-testid="file-list">{ items.length}  items</div>
+  FileList: ({   items }: {   items: FileItem[] }) => (
+    <div data-testid="file-list">{  items.length}   items</div>
   ),
 }));
 
@@ -33,12 +33,12 @@ vi.mock("./FileActionBar", () => ({
 
 // Simple FileBrowser for testing
 function FileBrowser({
-   items,
+    items,
   isLoading,
   error,
   viewMode,
 }: {
-   items: FileItem[];
+    items: FileItem[];
   isLoading: boolean;
   error: string | null;
   viewMode: "grid" | "list";
@@ -51,7 +51,7 @@ function FileBrowser({
     return <div data-testid="error">{error}</div>;
   }
 
-  if ( items.length === 0) {
+  if (  items.length === 0) {
     return <div data-testid="empty">No files</div>;
   }
 
@@ -61,9 +61,9 @@ function FileBrowser({
       <div data-testid="file-sidebar">Sidebar</div>
       <div data-testid="file-actionbar">ActionBar</div>
       {viewMode === "grid" ? (
-        <div data-testid="file-grid">{ items.length}  items</div>
+        <div data-testid="file-grid">{  items.length}   items</div>
       ) : (
-        <div data-testid="file-list">{ items.length}  items</div>
+        <div data-testid="file-list">{  items.length}   items</div>
       )}
     </div>
   );
@@ -87,52 +87,52 @@ const mockFiles: FileItem[] = [
 
 describe("FileBrowser", () => {
   it("renders loading state", () => {
-    render(<FileBrowser  items={[]} isLoading={true} error={null} viewMode="list" />);
+    render(<FileBrowser   items={[]} isLoading={true} error={null} viewMode="list" />);
 
     expect(screen.getByTestId("loading")).toHaveTextContent("Loading...");
   });
 
   it("renders error state", () => {
-    render(<FileBrowser  items={[]} isLoading={false} error="Failed to load" viewMode="list" />);
+    render(<FileBrowser   items={[]} isLoading={false} error="Failed to load" viewMode="list" />);
 
     expect(screen.getByTestId("error")).toHaveTextContent("Failed to load");
   });
 
   it("renders empty state", () => {
-    render(<FileBrowser  items={[]} isLoading={false} error={null} viewMode="list" />);
+    render(<FileBrowser   items={[]} isLoading={false} error={null} viewMode="list" />);
 
     expect(screen.getByTestId("empty")).toHaveTextContent("No files");
   });
 
   it("renders file browser with toolbar", () => {
-    render(<FileBrowser  items={mockFiles} isLoading={false} error={null} viewMode="list" />);
+    render(<FileBrowser   items={mockFiles} isLoading={false} error={null} viewMode="list" />);
 
     expect(screen.getByTestId("file-browser")).toBeInTheDocument();
     expect(screen.getByTestId("file-toolbar")).toBeInTheDocument();
   });
 
   it("renders sidebar", () => {
-    render(<FileBrowser  items={mockFiles} isLoading={false} error={null} viewMode="list" />);
+    render(<FileBrowser   items={mockFiles} isLoading={false} error={null} viewMode="list" />);
 
     expect(screen.getByTestId("file-sidebar")).toBeInTheDocument();
   });
 
   it("renders action bar", () => {
-    render(<FileBrowser  items={mockFiles} isLoading={false} error={null} viewMode="list" />);
+    render(<FileBrowser   items={mockFiles} isLoading={false} error={null} viewMode="list" />);
 
     expect(screen.getByTestId("file-actionbar")).toBeInTheDocument();
   });
 
   it("renders grid view when viewMode is grid", () => {
-    render(<FileBrowser  items={mockFiles} isLoading={false} error={null} viewMode="grid" />);
+    render(<FileBrowser   items={mockFiles} isLoading={false} error={null} viewMode="grid" />);
 
-    expect(screen.getByTestId("file-grid")).toHaveTextContent("2  items");
+    expect(screen.getByTestId("file-grid")).toHaveTextContent("2   items");
   });
 
   it("renders list view when viewMode is list", () => {
-    render(<FileBrowser  items={mockFiles} isLoading={false} error={null} viewMode="list" />);
+    render(<FileBrowser   items={mockFiles} isLoading={false} error={null} viewMode="list" />);
 
-    expect(screen.getByTestId("file-list")).toHaveTextContent("2  items");
+    expect(screen.getByTestId("file-list")).toHaveTextContent("2   items");
   });
 });
 

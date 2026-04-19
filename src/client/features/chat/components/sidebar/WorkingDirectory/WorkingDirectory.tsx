@@ -68,7 +68,7 @@ export function WorkingDirectory() {
   );
 }
 
-// directories选择器组件
+// directories选择器Group件
 function DirectoryPicker({
   currentPath,
   onSelect,
@@ -96,7 +96,7 @@ function DirectoryPicker({
       const data = await response.json();
 
       // 过滤只显示directories
-      const dirs = data. items
+      const dirs = data.  items
         .filter((item: any) => item.isDirectory)
         .map((item: any) => ({
           name: item.name,

@@ -138,7 +138,7 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
   // 6. 清理流式状态和运行状态（完全切换到新 session）
   stores.chat.abortStreaming();
   stores.chat.setIsRunning(false);
-  // 清空输入框，确保新 session 从干净状态开始
+  // Clear输入框，确保新 session 从干净状态开始
   stores.chat.clearInput();
 }
 
@@ -149,14 +149,14 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
 /**
  * 切换工作directories
  * 使用与RefreshPages面完全相同的 initChatWorkingDirectory API
- * 使用覆盖式 loading，不清空界面直到服务器返回
+ * 使用覆盖式 loading，不Clear界面直到服务器返回
  */
 async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}): Promise<void> {
   const stores = getStores();
 
   console.log("[SessionManager.switchDirectory] targetDir=", targetDir);
 
-  // 设置加载状态（覆盖式，不清空界面）
+  // 设置加载状态（覆盖式，不Clear界面）
   stores.sidebar.setLoading(true);
   console.log("[SessionManager.switchDirectory] 显示 loading");
 
@@ -191,7 +191,7 @@ async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}
 /**
  * 选择指定 session
  * 使用与RefreshPages面完全相同的 initChatWorkingDirectory API
- * 使用覆盖式 loading，不清空界面直到服务器返回
+ * 使用覆盖式 loading，不Clear界面直到服务器返回
  */
 async function selectSession(sessionId: string): Promise<void> {
   console.log("SELECTSESSION STARTED:", sessionId);
@@ -227,7 +227,7 @@ async function selectSession(sessionId: string): Promise<void> {
 
   console.log("[SessionManager.selectSession] sessionId=", sessionId);
 
-  // 设置加载状态（覆盖式，不清空界面）
+  // 设置加载状态（覆盖式，不Clear界面）
   stores.sidebar.setLoading(true);
   console.log("[SessionManager.selectSession] 显示 loading");
 
@@ -271,12 +271,12 @@ async function selectSession(sessionId: string): Promise<void> {
 /**
  * 创建新 session
  * 轻量级实现：只添加新 session 到列表并选中，不重建整个界面
- * 使用覆盖式 loading，不清空界面直到服务器返回
+ * 使用覆盖式 loading，不Clear界面直到服务器返回
  */
 async function createNewSession(): Promise<void> {
   const stores = getStores();
 
-  // 设置加载状态（覆盖式，不清空界面）
+  // 设置加载状态（覆盖式，不Clear界面）
   stores.sidebar.setLoading(true);
   console.log("[SessionManager.createNewSession] 开始创建，显示 loading");
 
@@ -327,12 +327,12 @@ async function createNewSession(): Promise<void> {
     stores.session.setCurrentSessionFile(newSession.path);
     console.log("[SessionManager.createNewSession] 已选中:", newSession.id);
 
-    // 5. 清空聊天消息区域并重置所有状态（新 session 从干净状态开始）
+    // 5. Clear聊天消息区域并重置所有状态（新 session 从干净状态开始）
     stores.chat.setMessages([]);
     stores.chat.abortStreaming();
     stores.chat.setIsRunning(false);
     stores.chat.clearInput();
-    console.log("[SessionManager.createNewSession] 已清空消息区域并重置状态");
+    console.log("[SessionManager.createNewSession] 已Clear消息区域并重置状态");
 
     // 6. 如果服务端返回了完整列表，使用服务端的（确保同步）
     if (createResponse.allSessions && createResponse.allSessions.length > 0) {
@@ -349,7 +349,7 @@ async function createNewSession(): Promise<void> {
 
     console.log("[SessionManager.createNewSession] 完成");
   } catch (error) {
-    console.error("[SessionManager.createNewSession] 错误:", error);
+    console.error("[SessionManager.createNewSession] Error:", error);
     throw error;
   } finally {
     // 结束 loading

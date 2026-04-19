@@ -265,14 +265,14 @@ export async function add(req: Request, res: Response): Promise<void> {
     };
     const todoLine = generateTodoLine(newTodo);
 
-    // 检查是否已存在该files的分组
+    // 检查是否已存在该files的分Group
     const fileHeaderPattern = new RegExp(
       `^### \\[${filePath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\]$`,
       "m"
     );
 
     if (fileHeaderPattern.test(content)) {
-      // 在现有分组下添加
+      // 在现有分Group下添加
       const lines = content.split("\n");
       const newLines: string[] = [];
       let inTargetSection = false;
@@ -284,7 +284,7 @@ export async function add(req: Request, res: Response): Promise<void> {
         if (line.match(fileHeaderPattern)) {
           inTargetSection = true;
         } else if (inTargetSection && line.startsWith("### ") && !line.match(fileHeaderPattern)) {
-          // 新的分组开始，在当前位置插入
+          // 新的分Group开始，在当前位置插入
           newLines.splice(newLines.length - 1, 0, todoLine);
           inTargetSection = false;
           sectionEnded = true;
@@ -302,7 +302,7 @@ export async function add(req: Request, res: Response): Promise<void> {
 
       content = newLines.join("\n");
     } else {
-      // 创建新分组
+      // 创建新分Group
       const insertPosition = content.indexOf("## TODO\n") + "## TODO\n".length;
       const newSection = `### [${filePath}]\n${todoLine}\n`;
       content = content.slice(0, insertPosition) + newSection + content.slice(insertPosition);

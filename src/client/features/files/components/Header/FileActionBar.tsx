@@ -6,7 +6,7 @@ import { useFileViewer } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import styles from "../FileBrowser/FileBrowser.module.css";
 
-// 可执行files扩展名列表
+// Executablefiles扩展名列表
 const EXECUTABLE_EXTENSIONS = [
   "sh",
   "bash",
@@ -51,7 +51,7 @@ export function FileActionBar({ onExecute, onOpenBottomPanel }: FileActionBarPro
 
   const ext = selectedActionFile.split(".").pop()?.toLowerCase() || "";
 
-  // 判断files是否可执行
+  // 判断files是否Executable
   const isExecutable =
     EXECUTABLE_EXTENSIONS.some((ext) =>
       selectedActionFileName?.toLowerCase().endsWith(`.${ext}`)

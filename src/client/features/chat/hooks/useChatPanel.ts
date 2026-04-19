@@ -1,5 +1,5 @@
 /**
- * useChatPanel - ChatPanel 组件业务逻辑 Hook
+ * useChatPanel - ChatPanel Group件业务逻辑 Hook
  *
  * Responsibilities:
  * - 管理消息列表自动滚动逻辑
@@ -357,7 +357,7 @@ export function useChatPanel(): UseChatPanelReturn {
         hasMore: response.hasMore,
       });
 
-      // 清空旧消息并设置新消息
+      // Clear旧消息并设置新消息
       const { normalizeSessionMessages } = await import("@/features/chat/utils/messageUtils");
       const formattedMessages = normalizeSessionMessages(response.messages);
       chatStore.setMessages(formattedMessages);

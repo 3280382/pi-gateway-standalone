@@ -1,5 +1,5 @@
 /**
- * TreeView - 树形directories浏览组件
+ * TreeView - 树形directories浏览Group件
  * 作为files浏览器的一个视图模式（类似grid和list）
  * 显示紧凑的全量静态树，支持过滤
  */
@@ -14,7 +14,7 @@ import type { TreeNode } from "@/features/files/types";
 import styles from "./TreeView.module.css";
 
 interface TreeViewProps {
-   items: TreeNode[];
+    items: TreeNode[];
 }
 
 /** 转义正则表达式特殊chars */
@@ -62,7 +62,7 @@ function getFileIcon(name: string, isDirectory: boolean): string {
   return icons[ext] || "📄";
 }
 
-export const TreeView = memo<TreeViewProps>(({  items }) => {
+export const TreeView = memo<TreeViewProps>(({   items }) => {
   // ========== 1. Hooks ==========
   const { selectedItems, getItemHandlers } = useFileItemActions();
   const {
@@ -79,7 +79,7 @@ export const TreeView = memo<TreeViewProps>(({  items }) => {
   const { currentBrowsePath } = useFileStore();
   useTreeGitStatus({
     isActive: true,
-    treeData:  items,
+    treeData:   items,
     workingDir: currentBrowsePath,
   });
 
@@ -104,11 +104,11 @@ export const TreeView = memo<TreeViewProps>(({  items }) => {
   // ========== 3. Render ==========
   return (
     <div className={styles.treeView}>
-      { items.length === 0 ? (
+      {  items.length === 0 ? (
         <div className={styles.empty}>No files found</div>
       ) : (
         <div className={styles.tree}>
-          { items.map((node) => {
+          {  items.map((node) => {
             const icon = getFileIcon(node.name, node.isDirectory);
             const level = node.level || 0;
             const isLast = node.isLast || false;

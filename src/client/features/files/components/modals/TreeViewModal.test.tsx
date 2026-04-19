@@ -46,9 +46,9 @@ const mockClipboard = {
 Object.assign(navigator, { clipboard: mockClipboard });
 
 // 测试数据
-const createTestTree = (): { path: string;  items: TreeNode[] } => ({
+const createTestTree = (): { path: string;   items: TreeNode[] } => ({
   path: "/project",
-   items: [
+    items: [
     {
       path: "/project/src",
       name: "src",
@@ -128,7 +128,7 @@ describe("TreeViewModal", () => {
     });
 
     it("filterNodes 应该正确过滤节点", () => {
-      const tree = createTestTree(). items;
+      const tree = createTestTree().  items;
 
       // 正常模式 - 排除 node_modules 和 .git
       const normal = filterNodes(tree, "normal", "");
@@ -147,11 +147,11 @@ describe("TreeViewModal", () => {
       expect(search.length).toBe(1);
       expect(search[0].name).toBe("src"); // 返回根节点，包含匹配的路径
       // 注意：filterNodes 返回过滤后的树，保持原有结构
-      // 组件负责递归渲染子节点
+      // Group件负责递归渲染子节点
     });
 
     it("generateTreeText 应该生成正确的树形文本", () => {
-      const tree = createTestTree(). items.slice(0, 1);
+      const tree = createTestTree().  items.slice(0, 1);
       const text = generateTreeText(tree);
 
       expect(text).toContain("src");
@@ -160,7 +160,7 @@ describe("TreeViewModal", () => {
     });
   });
 
-  describe("组件渲染", () => {
+  describe("Group件渲染", () => {
     it("isOpen=false 时不应该渲染", () => {
       render(
         <TreeViewModal
@@ -191,7 +191,7 @@ describe("TreeViewModal", () => {
       render(
         <TreeViewModal
           isOpen={true}
-          treeData={{ path: "/empty",  items: [] }}
+          treeData={{ path: "/empty",   items: [] }}
           treeLoading={false}
           onClose={mockOnClose}
           onFileClick={mockOnFileClick}
@@ -241,7 +241,7 @@ describe("TreeViewModal", () => {
       // 创建明确的嵌套结构
       const nestedTree = {
         path: "/test",
-         items: [
+          items: [
           {
             path: "/test/level0",
             name: "level0",
@@ -352,7 +352,7 @@ describe("TreeViewModal", () => {
       expect(mockOnFileClick).toHaveBeenCalledWith("/project/package.json", "package.json");
     });
 
-    it("复制按钮应该复制树形文本", async () => {
+    it("Copy按钮应该Copy树形文本", async () => {
       render(
         <TreeViewModal
           isOpen={true}
@@ -363,12 +363,12 @@ describe("TreeViewModal", () => {
         />
       );
 
-      const copyBtn = screen.getByText("📋 复制");
+      const copyBtn = screen.getByText("📋 Copy");
       fireEvent.click(copyBtn);
 
       await waitFor(() => {
         expect(mockClipboard.writeText).toHaveBeenCalled();
-        expect(screen.getByText("✓ 已复制")).toBeInTheDocument();
+        expect(screen.getByText("✓ 已Copy")).toBeInTheDocument();
       });
     });
 
@@ -384,7 +384,7 @@ describe("TreeViewModal", () => {
       );
 
       // 切换到Search模式
-      const select = screen.getByDisplayValue("隐藏排除files");
+      const select = screen.getByDisplayValue("Hidden排除files");
       fireEvent.change(select, { target: { value: "search" } });
 
       // 输入Search词

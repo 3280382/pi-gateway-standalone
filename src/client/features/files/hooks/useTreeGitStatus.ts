@@ -1,7 +1,7 @@
 /**
  * useTreeGitStatus - TreeView 专用 Git 状态管理 Hook
  *
- * Responsibilities:为 TreeView 组件管理整棵树的 Git 状态
+ * Responsibilities:为 TreeView Group件管理整棵树的 Git 状态
  * - 当 Git 模式激活且 TreeView 激活时，获取整棵树的 Git 状态
  * - 将 Git 状态映射到树中的所有files节点
  * - 相比 useGitStatus，这个 hook 获取的是整棵树而不仅仅是当前directories
@@ -56,7 +56,7 @@ export function useTreeGitStatus(options: UseTreeGitStatusOptions) {
     // 非激活状态不执行
     if (!isActive) return;
 
-    // Git 模式Close时，清空状态
+    // Git 模式Close时，Clear状态
     if (!isGitModeActive) {
       setTreeGitStatusMap(new Map());
       lastFetchedDirRef.current = "";

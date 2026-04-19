@@ -60,7 +60,7 @@ export function FileBottomMenu() {
   return (
     <>
       <div className={styles.menu}>
-        {/* 导航按钮组 */}
+        {/* 导航按钮Group */}
         <button
           type="button"
           className={`${styles.btn} ${styles.navBtn}`}

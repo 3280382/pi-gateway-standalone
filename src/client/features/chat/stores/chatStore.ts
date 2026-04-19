@@ -8,7 +8,7 @@
  * 【数据流】
  * 1. 用户发送消息: UI → useChat/useChatController → websocketService.send()
  * 2. 接收AI响应: WebSocket → setupWebSocketListeners() → chatStore (本files)
- * 3. 组件更新: chatStore → React re-render → UI
+ * 3. Group件更新: chatStore → React re-render → UI
  *
  * 【特殊设计】
  * - WebSocket 事件处理在 setupWebSocketListeners() (chatApi.ts)
@@ -106,7 +106,7 @@ const ORDER = {
 } as const;
 
 /**
- * 构建思考内容部分 - 只使用当前流式思考，不使用已固化的思考数组
+ * 构建思考内容部分 - 只使用当前流式思考，不使用已固化的思考数Group
  * 已固化的思考已经在 existingContent 中
  */
 function buildThinkingContent(singleThinking: string): ContentPartWithOrder[] {
@@ -197,7 +197,7 @@ function buildToolContent(
 }
 
 /**
- * 构建内容数组，保持时序顺序
+ * 构建内容数Group，保持时序顺序
  * 顺序：thinking -> tools -> text
  * 注意：只构建当前流式内容，已固化的内容在 existingContent 中
  */
@@ -269,7 +269,7 @@ function buildFinalMessage(
 ): { finalMessage: any | null; finalContent: any[] } {
   const existingContent = state.currentStreamingMessage?.content || [];
 
-  // 构建剩余的流式内容（endContentBlock 后可能还有未清空的）
+  // 构建剩余的流式内容（endContentBlock 后可能还有未Clear的）
   const remainingContent: ContentPart[] = [];
 
   if (state.streamingThinking || finalThinkingToApply) {
@@ -680,7 +680,7 @@ export const useChatStore = create<
         );
       },
 
-      // 结束内容块 - 将流式内容固化到 currentStreamingMessage.content，然后清空流式状态
+      // 结束内容块 - 将流式内容固化到 currentStreamingMessage.content，然后Clear流式状态
       endContentBlock: (type: "text" | "thinking" | "tool_use", index?: number, meta?: any) => {
         console.log(`[ChatStore] endContentBlock: type=${type}, index=${index ?? "?"}`, meta);
 
@@ -742,7 +742,7 @@ export const useChatStore = create<
 
       // 开始新的轮次 - 在 turn_start 时调用
       startNewTurn: () => {
-        // 清空 RAF 批处理的待处理更新，避免旧内容被重复添加
+        // Clear RAF 批处理的待处理更新，避免旧内容被重复添加
         pendingContentUpdates = {};
 
         set(
@@ -774,9 +774,9 @@ export const useChatStore = create<
                 // 保留之前轮次 + 当前轮次（避免重复）
                 content: [...previousRounds, ...currentContent],
               },
-              // 清空当前轮次的流式状态，开始新一轮
+              // Clear当前轮次的流式状态，开始新一轮
               streamingThinking: "",
-              streamingThinkings: [], // 清空多轮思考
+              streamingThinkings: [], // Clear多轮思考
               streamingContent: "",
               streamingToolCalls: new Map(),
               activeTools: new Map(),

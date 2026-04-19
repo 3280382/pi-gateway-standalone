@@ -1,5 +1,5 @@
 /**
- * FileItem - files项组件
+ * FileItem - files项Group件
  *
  * Responsibilities:纯 UI 渲染
  * - 无业务逻辑，只接收绑定好的处理器
@@ -90,7 +90,7 @@ export const FileItem = memo<FileItemProps>(
       ? todoApi.getPriorityColor(pendingTodos[0].tags)
       : "#8b949e";
 
-    // 组合样式
+    // Group合样式
     const itemClassName = [
       isGrid ? styles.gridItem : styles.listItem,
       item.isDirectory ? styles.directory : "",

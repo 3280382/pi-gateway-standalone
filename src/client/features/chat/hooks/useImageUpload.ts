@@ -105,7 +105,7 @@ export function useImageUpload(): UseImageUploadReturn {
     setImages((prev) => prev.filter((img) => img.id !== id));
   }, []);
 
-  // 清空所有图片
+  // Clear所有图片
   const clearImages = useCallback(() => {
     setImages([]);
   }, []);
@@ -120,7 +120,7 @@ export function useImageUpload(): UseImageUploadReturn {
     setShowPreview(true);
   }, []);
 
-  // 隐藏预览栏
+  // Hidden预览栏
   const hidePreviewBar = useCallback(() => {
     setShowPreview(false);
   }, []);
