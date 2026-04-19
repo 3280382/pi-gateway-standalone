@@ -65,11 +65,7 @@ export function SidebarPanel({ currentView = "chat" }: SidebarPanelProps) {
           </div>
         )}
         <CompactWorkspacesSection maxItems={3} />
-        <div style={{ border: '2px solid red', padding: '10px' }}>
-          <p>Before SessionDropdownSection</p>
-          <SessionDropdownSection />
-          <p>After SessionDropdownSection</p>
-        </div>
+        <SessionDropdownSection />
         {currentView === "chat" && <ModelParamsSection />}
         {currentView === "chat" && <ChatSettingsSection />}
       </div>

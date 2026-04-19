@@ -117,9 +117,10 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
     console.log("[handleInitResponse] Setting messages:", currentSession.messages.length);
     const { normalizeSessionMessages } = await import("@/features/chat/utils/messageUtils");
     const formattedMessages = normalizeSessionMessages(currentSession.messages);
-    console.log("[handleInitResponse] Formatted messages:", formattedMessages.length);
+    console.log("[handleInitResponse] Formatted messages:", formattedMessages.length, "stores.chat:", typeof stores.chat);
+    console.log("[handleInitResponse] About to call setMessages");
     stores.chat.setMessages(formattedMessages);
-    console.log("[handleInitResponse] Messages set to store");
+    console.log("[handleInitResponse] Messages set to store, current messages count:", stores.chat.messages?.length);
   } else {
     console.log("[handleInitResponse] No messages, clearing");
     stores.chat.setMessages([]);
@@ -225,6 +226,9 @@ async function selectSession(sessionId: string): Promise<void> {
     });
 
     // 重建界面（更新所有状态）
+    console.log("[SessionManager.selectSession] 调用 handleInitResponse, stores.chat:", {
+      hasSetMessages: typeof stores.chat?.setMessages === 'function',
+    });
     await handleInitResponse(response, stores);
 
     console.log("[SessionManager.selectSession] 界面重建完成");
