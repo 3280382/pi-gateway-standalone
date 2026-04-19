@@ -1015,6 +1015,11 @@ export class PiAgentSession {
       } else {
         // Same cwd, use switchSession
         const result = await this.session.switchSession(sessionPath);
+        // Update shortId after successful switch
+        if (result) {
+          this.shortId = extractShortSessionId(sessionPath);
+          console.log(`[PiAgentSession] Switched to session: ${this.shortId}, path: ${sessionPath}`);
+        }
         return { success: result, cwdChanged: false };
       }
     } catch (error) {

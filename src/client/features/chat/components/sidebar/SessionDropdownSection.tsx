@@ -112,22 +112,32 @@ export function SessionDropdownSection() {
   );
 
   // ========== 4. Computed ==========
-  // 对会话进行排序：当前选中的在前，然后是活跃的，其他按最后修改时间排序
+  // 对会话进行排序：选中 > waiting > thinking > tooling > idle > history
+  const getStatusPriority = (status: string | undefined): number => {
+    switch (status) {
+      case "waiting": return 1;
+      case "thinking": return 2;
+      case "tooling": return 3;
+      case "idle": return 4;
+      case "history": return 5;
+      default: return 6; // unknown status
+    }
+  };
+
   const sortedSessions = [...sessions].sort((a, b) => {
-    // 1. 当前选中的会话优先
+    // 1. 当前选中的会话优先（最高优先级）
     if (a.id === currentSessionId) return -1;
     if (b.id === currentSessionId) return 1;
 
-    // 2. 有运行状态的会话（非 idle）优先
-    const aStatus = runtimeStatus[a.id];
-    const bStatus = runtimeStatus[b.id];
-    const aActive = aStatus && aStatus !== "idle";
-    const bActive = bStatus && bStatus !== "idle";
-    
-    if (aActive && !bActive) return -1;
-    if (!aActive && bActive) return 1;
-    
-    // 3. 按最后修改时间排序（最新的在前）
+    // 2. 按状态优先级排序：waiting > thinking > tooling > idle > history
+    const aPriority = getStatusPriority(runtimeStatus[a.id]);
+    const bPriority = getStatusPriority(runtimeStatus[b.id]);
+
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority;
+    }
+
+    // 3. 相同优先级按最后修改时间排序（最新的在前）
     const aTime = new Date(a.lastModified).getTime();
     const bTime = new Date(b.lastModified).getTime();
     return bTime - aTime;
