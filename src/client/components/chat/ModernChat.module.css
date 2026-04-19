@@ -1,0 +1,173 @@
+/**
+ * ModernChat Styles
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+/* ========== Messages Area ========== */
+.messagesArea {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+.messagesList {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--space-4);
+}
+
+/* ========== Load More ========== */
+.loadMore {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.loadMoreButton {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.loadMoreButton:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-light);
+}
+
+.loadMoreButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ========== Scroll Button ========== */
+.scrollButton {
+  position: fixed;
+  right: var(--space-4);
+  bottom: calc(var(--input-height) + var(--space-4));
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  z-index: var(--z-sticky);
+  animation: fadeIn var(--transition-fast);
+}
+
+.scrollButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== Input Area ========== */
+.inputArea {
+  flex-shrink: 0;
+  background: var(--bg-primary);
+}
+
+.modelIndicator {
+  text-align: center;
+  padding: var(--space-2) 0;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.modelIndicator strong {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ========== Mobile ========== */
+@media (max-width: 768px) {
+  .scrollButton {
+    right: var(--space-3);
+    bottom: calc(var(--input-height-mobile) + var(--space-3));
+    width: 36px;
+    height: 36px;
+  }
+  
+  .messagesList {
+    padding-bottom: var(--space-2);
+  }
+}
+
+/* ========== Empty State ========== */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.emptyState h2 {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.emptyState p {
+  font-size: var(--text-sm);
+  max-width: 400px;
+}
+
+.emptyStateCommands {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  max-width: 400px;
+}
+
+.emptyStateCommand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.emptyStateCommand code {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  font-weight: 500;
+}
