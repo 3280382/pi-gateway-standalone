@@ -1,6 +1,6 @@
 /**
- * Workspace Controller - 工作区API控制器
- * 对应 /api/workspace/* 路由
+ * Workspace Controller - Workspace API controller
+ * Corresponds to /api/workspace/* routes
  */
 
 import type { Request, Response } from "express";

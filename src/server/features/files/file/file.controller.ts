@@ -613,7 +613,7 @@ export async function batchMove(req: Request, res: Response) {
 }
 
 /**
- * 执行命令 - 对应 /api/execute
+ * Execute command - corresponds to /api/execute
  */
 export async function execute(req: Request, res: Response) {
   const { command, cwd, streaming } = req.body;
@@ -633,20 +633,20 @@ export async function execute(req: Request, res: Response) {
   try {
     const { spawn } = await import("node:child_process");
 
-    // 解析命令
+    // Parse command
     const [cmd, ...args] = command
       .split(" ")
       .map((s: string) => s.replace(/^"|"$/g, "").replace(/^'|'$/g, ""));
 
     if (streaming) {
-      // 流式执行
+      // Stream execution
       const child = spawn(cmd, args, {
         cwd: workingDir,
         env: process.env,
         shell: false,
       });
 
-      // 设置流式响应
+      // Set streaming response
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       res.setHeader("Transfer-Encoding", "chunked");
 
@@ -670,7 +670,7 @@ export async function execute(req: Request, res: Response) {
 
       logger.info(`Streaming execute command: ${command}, Working directory: ${workingDir}`);
     } else {
-      // 非流式执行
+      // 非Stream execution
       const child = spawn(cmd, args, {
         cwd: workingDir,
         env: process.env,

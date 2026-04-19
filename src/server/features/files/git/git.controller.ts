@@ -1,6 +1,6 @@
 /**
- * Git Controller - Git API控制器
- * 对应 /api/git/* 路由
+ * Git Controller - Git API controller
+ * Corresponds to /api/git/* routes
  */
 
 import { exec } from "node:child_process";
@@ -20,7 +20,7 @@ export interface GitCommit {
 }
 
 /**
- * 获取 Git 仓库根directories
+ * Get Git repository root directory
  */
 async function getGitRoot(workingDir: string): Promise<string | null> {
   try {
@@ -34,7 +34,7 @@ async function getGitRoot(workingDir: string): Promise<string | null> {
 }
 
 /**
- * 检查directories是否是 Git 仓库
+ * Check if directory is Git repository
  */
 async function isGitRepo(workingDir: string): Promise<boolean> {
   const root = await getGitRoot(workingDir);
@@ -42,30 +42,30 @@ async function isGitRepo(workingDir: string): Promise<boolean> {
 }
 
 /**
- * 获取files相对于 Git 仓库根directories的路径
+ * Get file path relative to Git repository root
  */
 function getRelativePath(gitRoot: string, filePath: string): string {
-  // 如果 filePath 是绝对路径，计算相对路径
+  // If filePath is absolute, calculate relative path
   if (filePath.startsWith("/")) {
     return relative(gitRoot, filePath);
   }
-  // 如果已经是相对路径，直接返回
+  // If already relative path, return directly
   return filePath;
 }
 
 /**
- * 检查files在工作区是否有未提交的修改
+ * Check if file has uncommitted modifications in working tree
  */
 async function hasWorkingTreeChanges(gitRoot: string, relativePath: string): Promise<boolean> {
   try {
-    // 检查工作区是否有修改（未暂存的修改）
+    // Check if working tree has modifications (unstaged)
     const { stdout } = await execAsync(`git diff --quiet "${relativePath}" || echo "modified"`, {
       cwd: gitRoot,
     });
     if (stdout.trim() === "modified") {
       return true;
     }
-    // 检查暂存区是否有修改
+    // Check if staging area has modifications
     const { stdout: stagedStdout } = await execAsync(
       `git diff --cached --quiet "${relativePath}" || echo "staged"`,
       { cwd: gitRoot }
@@ -77,8 +77,8 @@ async function hasWorkingTreeChanges(gitRoot: string, relativePath: string): Pro
 }
 
 /**
- * Get git history for a file - 对应 /api/git/history
- * 如果有未提交的修改，在历史列表顶部添加"工作区"Items目
+ * Get git history for a file - corresponds to /api/git/history
+ * If uncommitted changes, add "Working Tree" item to top of history
  */
 async function getGitHistory(workingDir: string, filePath: string): Promise<GitCommit[]> {
   const gitRoot = await getGitRoot(workingDir);
@@ -97,10 +97,10 @@ async function getGitHistory(workingDir: string, filePath: string): Promise<GitC
 
     const commits: GitCommit[] = [];
 
-    // 检查是否有未提交的修改
+    // Check for uncommitted modifications
     const hasChanges = await hasWorkingTreeChanges(gitRoot, relativePath);
     if (hasChanges) {
-      // 添加"工作区"Items目到历史列表顶部
+      // Add "Working Tree" item to top of history list
       commits.push({
         hash: "WORKING",
         shortHash: "WORKING",
@@ -138,7 +138,7 @@ async function getGitHistory(workingDir: string, filePath: string): Promise<GitC
 }
 
 /**
- * Get file content at specific commit or working tree - 对应 /api/git/content
+ * Get file content at specific commit or working tree - corresponds to /api/git/content
  */
 async function getFileContent(
   workingDir: string,
@@ -156,13 +156,13 @@ async function getFileContent(
   );
 
   try {
-    // 如果是工作区，读取实际files
+    // If working tree, read actual file
     if (commitHash === "WORKING") {
       const fullPath = join(gitRoot, relativePath);
       const { stdout } = await execAsync(`cat "${fullPath}"`);
       return stdout;
     }
-    // 否则从 git 读取
+    // Otherwise read from git
     const { stdout } = await execAsync(`git show "${commitHash}:${relativePath}"`, {
       cwd: gitRoot,
     });
@@ -179,8 +179,8 @@ async function getFileContent(
 }
 
 /**
- * Get diff between commit and working tree - 对应 /api/git/diff
- * 如果 commitHash 是 "WORKING"，则比较前一个提交与工作区
+ * Get diff between commit and working tree - corresponds to /api/git/diff
+ * If commitHash is "WORKING", compare previous commit with working tree
  */
 async function getFileDiff(
   workingDir: string,
@@ -200,13 +200,13 @@ async function getFileDiff(
   try {
     let stdout = "";
     if (commitHash === "WORKING") {
-      // 工作区 vs HEAD（最新提交）
+      // Working tree vs HEAD (latest commit)
       const result = await execAsync(`git diff HEAD -- "${relativePath}"`, {
         cwd: gitRoot,
       });
       stdout = result.stdout;
     } else {
-      // commit vs 工作区（而不是 HEAD）
+      // Commit vs working tree (not HEAD)
       const result = await execAsync(`git diff "${commitHash}" -- "${relativePath}"`, {
         cwd: gitRoot,
       });
@@ -354,41 +354,41 @@ export async function status(req: Request, res: Response): Promise<void> {
   }
 
   try {
-    // 检查是否为git仓库
+    // Check if git repository
     const gitRoot = await getGitRoot(workingDir);
     if (!gitRoot) {
       res.json({ statuses: {} });
       return;
     }
 
-    // 获取git状态（简洁格式）
+    // Get git status (short format)
     const { stdout } = await execAsync("git status --porcelain", {
       cwd: gitRoot,
     });
 
     const statuses: Record<string, string> = {};
 
-    // 解析porcelain格式的输出
-    // 格式: XY PATH
-    // 其中X为暂存区状态，Y为工作区状态
+    // Parse porcelain format output
+    // Format: XY PATH
+    // Where X is staging status, Y is working tree status
     const lines = stdout.trim().split("\n");
     for (const line of lines) {
       if (line.trim() === "") continue;
 
-      // 解析状态代码和files路径
-      // Git porcelain格式: XY PATH
-      // 但有时X可能是空格，导致格式不一致
-      // 更好的方法：找到Page二个空格后的所有内容
+      // Parse status code and file path
+      // Git porcelainFormat: XY PATH
+      // But sometimes X may be space, causing inconsistent format
+      // Better method: find all content after second space
       const firstSpaceIndex = line.indexOf(" ");
       let status, path;
 
       if (firstSpaceIndex >= 0) {
-        // Page一个空格后的下一个chars开始是状态代码的Page二部分
-        // 状态代码是前2个chars
+        // Next chars after first space is second part of status code
+        // Status code is first 2 chars
         status = line.substring(0, 2);
 
-        // 找到状态代码后的空格
-        // 状态代码后可能有一个或多个空格
+        // Find space after status code
+        // There may be one or more spaces after status code
         let pathStart = 2;
         while (pathStart < line.length && line[pathStart] === " ") {
           pathStart++;

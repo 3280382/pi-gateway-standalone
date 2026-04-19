@@ -72,7 +72,7 @@ export async function diff(
 }
 
 /**
- * 检查directories是否是 Git 仓库
+ * Check if directory is Git repository
  */
 export async function check(workingDir: string): Promise<boolean> {
   const response = await fetchApi<GitCheckResponse>(
