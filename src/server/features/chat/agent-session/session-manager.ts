@@ -6,7 +6,6 @@
 import { WebSocket } from "ws";
 import type { LlmLogManager } from "../llm/log-manager";
 import { PiAgentSession } from "./piAgentSession";
-import { loadSessionMetadata, saveSessionMetadata } from "./session-metadata";
 
 /**
  * Extract short session ID from session file path (fixed 8 characters)
@@ -275,7 +274,7 @@ export class ServerSessionManager {
     const session = new PiAgentSession(client, this.llmLogManager);
     await session.initialize(workingDir, sessionFile);
 
-    await this.registerSession(session, shortId, workingDir, sessionFile, client);
+    this.registerSession(session, shortId, workingDir, sessionFile, client);
     this.setupCallbacks(session);
 
     return session;
@@ -298,29 +297,25 @@ export class ServerSessionManager {
   private updateEntryClient(entry: SessionEntry, client: WebSocket): void {
     entry.client = client;
     entry.lastActivity = new Date();
-    entry.runtimeStatus = "idle";
+    // 保持原有 runtimeStatus，不重置（waiting 应该保持 waiting）
     this.clientToShortId.set(client, entry.shortId);
   }
 
-  private async registerSession(
+  private registerSession(
     session: PiAgentSession,
     shortId: string,
     workingDir: string,
     sessionFile: string,
     client: WebSocket
-  ): Promise<void> {
-    // Try to load persisted status from metadata file
-    const metadata = await loadSessionMetadata(sessionFile);
-    const initialStatus = metadata?.runtimeStatus || "idle";
-
+  ): void {
     this.sessions.set(shortId, {
       session,
       shortId,
       workingDir,
       sessionFile,
       client,
-      lastActivity: metadata?.lastActivity ? new Date(metadata.lastActivity) : new Date(),
-      runtimeStatus: initialStatus as SessionStatus,
+      lastActivity: new Date(),
+      runtimeStatus: "idle",
     });
 
     this.sessionFileToShortId.set(sessionFile, shortId);
@@ -651,14 +646,6 @@ export class ServerSessionManager {
       if (oldStatus !== status) {
         this.broadcastRuntimeStatus(entry.workingDir);
       }
-
-      // Persist status to metadata file (async, non-blocking)
-      saveSessionMetadata(entry.sessionFile, {
-        runtimeStatus: status,
-        lastActivity: entry.lastActivity.toISOString(),
-      }).catch(() => {
-        // Fail silently - metadata is best-effort
-      });
     }
   }
 
