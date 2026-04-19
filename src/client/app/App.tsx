@@ -9,7 +9,6 @@ import { ErrorBoundary } from "@/app/ErrorBoundary";
 import { Footer } from "@/app/Footer";
 import { LoadingScreen } from "@/app/LoadingScreen";
 import { useAppStore } from "@/stores/appStore";
-import "@/styles/global.css";
 import styles from "@/app/App.module.css";
 
 // 懒加载页面
