@@ -9,7 +9,7 @@
 
 // ===== [ANCHOR:IMPORTS] =====
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useInputArea } from "@/features/chat/hooks/useInputArea";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import styles from "./InputArea.module.css";
@@ -34,6 +34,9 @@ interface InputAreaProps {
     }>
   ) => void;
   onNewSession?: () => void;
+  // Session operations
+  onCompactSession?: () => void;
+  onExportSession?: () => void;
   // 自动滚屏相关
   shouldScrollToBottom?: boolean;
   onToggleScroll?: () => void;
@@ -56,6 +59,8 @@ export function InputArea({
   onSlashCommand,
   onSendWithImages,
   onNewSession,
+  onCompactSession,
+  onExportSession,
   // 自动滚屏相关
   shouldScrollToBottom = true,
   onToggleScroll,
@@ -80,6 +85,9 @@ export function InputArea({
     onSlashCommand,
     onSendWithImages,
   });
+
+  // ===== [ANCHOR:MENU_STATE] =====
+  const [showToolsMenu, setShowToolsMenu] = useState(false);
 
   // ===== [ANCHOR:EFFECTS] =====
   useEffect(() => {
@@ -113,26 +121,34 @@ export function InputArea({
         }}
       />
 
-      {/* Slash Commands Menu */}
-      {inputArea.slashCommands.isOpen && (
+      {/* Tools Menu - 替换Slash Commands */}
+      {showToolsMenu && (
         <div className={styles.commandMenu}>
-          {inputArea.slashCommands.filteredCommands.length > 0 ? (
-            inputArea.slashCommands.filteredCommands.map((cmd, index) => (
-              <button
-                type="button"
-                key={cmd.name}
-                className={`${styles.commandItem} ${
-                  index === inputArea.slashCommands.selectedIndex ? styles.selected : ""
-                }`}
-                onClick={() => inputArea.slashCommands.selectCurrent()}
-                onMouseEnter={() => inputArea.slashCommands.setSelectedIndex(index)}
-              >
-                <span className={styles.commandIcon}>{cmd.icon}</span>
-                <span className={styles.commandName}>{cmd.name}</span>
-              </button>
-            ))
-          ) : (
-            <div className={styles.loadingItem}>No commands found</div>
+          {onCompactSession && (
+            <button
+              type="button"
+              className={styles.commandItem}
+              onClick={() => {
+                onCompactSession()?.catch(console.error);
+                setShowToolsMenu(false);
+              }}
+            >
+              <span className={styles.commandIcon}>⚡</span>
+              <span className={styles.commandName}>compact</span>
+            </button>
+          )}
+          {onExportSession && (
+            <button
+              type="button"
+              className={styles.commandItem}
+              onClick={() => {
+                onExportSession()?.catch(console.error);
+                setShowToolsMenu(false);
+              }}
+            >
+              <span className={styles.commandIcon}>📦</span>
+              <span className={styles.commandName}>export</span>
+            </button>
           )}
         </div>
       )}
@@ -261,7 +277,7 @@ export function InputArea({
         <button
           type="button"
           className={styles.toolbarBtn}
-          onClick={() => inputArea.slashCommands.open()}
+          onClick={() => setShowToolsMenu(!showToolsMenu)}
           title="Slash command (/)"
           disabled={isStreaming}
         >

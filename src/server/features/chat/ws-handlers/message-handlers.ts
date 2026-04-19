@@ -37,6 +37,36 @@ export async function handleCommand(ctx: WSContext, payload: { text: string }): 
 }
 
 // ============================================================================
+// Compact Session Handler
+// ============================================================================
+
+/**
+ * Handle compact_session message - Compact session via SDK
+ */
+export async function handleCompactSession(
+  ctx: WSContext,
+  payload: { customInstructions?: string }
+): Promise<void> {
+  const result = await ctx.session.compactSession(payload.customInstructions);
+  sendSuccess(ctx, "compact_result", result);
+}
+
+// ============================================================================
+// Export Session Handler
+// ============================================================================
+
+/**
+ * Handle export_session message - Export session via SDK
+ */
+export async function handleExportSession(
+  ctx: WSContext,
+  payload: { outputPath?: string }
+): Promise<void> {
+  const result = await ctx.session.exportSession(payload.outputPath);
+  sendSuccess(ctx, "export_result", result);
+}
+
+// ============================================================================
 // List Models Handler
 // ============================================================================
 
@@ -282,6 +312,16 @@ export const handleAbortWrapped = createHandler(handleAbort, {
 
 export const handleCommandWrapped = createHandler(handleCommand, {
   name: "command",
+  requireSession: true,
+});
+
+export const handleCompactSessionWrapped = createHandler(handleCompactSession, {
+  name: "compact_session",
+  requireSession: true,
+});
+
+export const handleExportSessionWrapped = createHandler(handleExportSession, {
+  name: "export_session",
   requireSession: true,
 });
 

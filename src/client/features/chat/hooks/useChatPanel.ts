@@ -429,32 +429,17 @@ export function useChatPanel(): UseChatPanelReturn {
     (command: string, args: string) => {
       setShouldScrollToBottom(true);
 
+      // Build full command text
+      const cmdText = args ? `/${command} ${args}` : `/${command}`;
+
+      // Handle UI-only commands
       if (command === "clear" || command === "new") {
         chatController.clearMessages();
         return;
       }
 
-      if (
-        command !== "bash" &&
-        command !== "read" &&
-        command !== "write" &&
-        command !== "edit" &&
-        command !== "ls" &&
-        command !== "grep" &&
-        command !== "tree" &&
-        command !== "git"
-      ) {
-        chatController.sendMessage(`/${command} ${args}`.trim());
-        return;
-      }
-
-      const isNoArgsCommand = command === "ls" || command === "tree";
-      if (!args && !isNoArgsCommand) return;
-
-      const cmdText = args ? `/${command} ${args}` : `/${command}`;
-      const executeCmd = cmdText.replace(/^\//, "");
-
-      executeCommandWithMessages(executeCmd, cmdText, chatController.executeCommand);
+      // Unknown command - send to LLM as regular text (no longer processing /compact /export here)
+      chatController.sendMessage(cmdText);
     },
     [chatController]
   );

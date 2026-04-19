@@ -83,6 +83,8 @@ export function ChatPanel() {
           onBashCommand={chatPanel.handleBashCommand}
           onSlashCommand={chatPanel.handleSlashCommand}
           onNewSession={chatPanel.handleNewSession}
+          onCompactSession={chatController.compactSession}
+          onExportSession={chatController.exportSession}
           // 自动滚屏相关
           shouldScrollToBottom={chatPanel.shouldScrollToBottom}
           onToggleScroll={() => chatPanel.setShouldScrollToBottom(!chatPanel.shouldScrollToBottom)}

@@ -89,7 +89,7 @@ export function normalizeContentItem(item: any): any {
 /**
  * 生成系统消息
  */
-function createSystemMessage(text: string, id?: string): Message {
+function createSystemMessage(text: string, id?: string, kind?: Message["kind"]): Message {
   return {
     id: id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     role: "system",
@@ -98,6 +98,7 @@ function createSystemMessage(text: string, id?: string): Message {
     isStreaming: false,
     isThinkingCollapsed: true,
     isToolsCollapsed: true,
+    kind,
     isMessageCollapsed: false,
   };
 }
@@ -117,7 +118,8 @@ function convertSpecialEntryToMessage(entry: any): Message | null {
       const tokensBefore = entry.tokensBefore || 0;
       return createSystemMessage(
         `🗜️ 上下文压缩: ${summary}${tokensBefore > 0 ? ` (释放约 ${tokensBefore} tokens)` : ""}`,
-        entry.id
+        entry.id,
+        "compaction"
       );
     }
     case "thinking_level_change": {

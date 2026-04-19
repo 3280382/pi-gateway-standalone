@@ -35,6 +35,7 @@ export interface Message {
   isThinkingCollapsed?: boolean;
   isToolsCollapsed?: boolean;
   isMessageCollapsed?: boolean;
+  kind?: "compaction" | "export" | "system" | "usage"; // 特殊消息类型，用于样式区分
 }
 
 // ============================================================================
@@ -253,12 +254,39 @@ export interface TurnEndMessage {
   toolResults?: any[];
 }
 
+export interface QueueUpdateMessage {
+  type: "queue_update";
+  steering: readonly string[];
+  followUp: readonly string[];
+}
+
 export interface CompactionStartMessage {
   type: "compaction_start";
+  reason: "manual" | "threshold" | "overflow";
 }
 
 export interface CompactionEndMessage {
   type: "compaction_end";
+  reason: "manual" | "threshold" | "overflow";
+  result?: any;
+  aborted: boolean;
+  willRetry: boolean;
+  errorMessage?: string;
+}
+
+export interface AutoRetryStartMessage {
+  type: "auto_retry_start";
+  attempt: number;
+  maxAttempts: number;
+  delayMs: number;
+  errorMessage: string;
+}
+
+export interface AutoRetryEndMessage {
+  type: "auto_retry_end";
+  success: boolean;
+  attempt: number;
+  finalError?: string;
 }
 
 export interface RetryStartMessage {
@@ -282,8 +310,11 @@ export type ChatWebSocketMessage =
   | MessageEndMessage
   | TurnStartMessage
   | TurnEndMessage
+  | QueueUpdateMessage
   | CompactionStartMessage
   | CompactionEndMessage
+  | AutoRetryStartMessage
+  | AutoRetryEndMessage
   | RetryStartMessage
   | RetryEndMessage;
 

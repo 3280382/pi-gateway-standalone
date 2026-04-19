@@ -57,8 +57,11 @@ export type WebSocketEvent =
   | "tool_execution_update"
   | "tool_execution_end"
   // System Events
+  | "queue_update"
   | "compaction_start"
   | "compaction_end"
+  | "auto_retry_start"
+  | "auto_retry_end"
   | "retry_start"
   | "retry_end"
   | "session_updated"
@@ -73,6 +76,8 @@ export type WebSocketEvent =
   | "models_list"
   | "llm_log_set"
   | "command_result"
+  | "compact_result"
+  | "export_result"
   // Session Status Events
   | "runtime_status_broadcast"
   | "session_status"
@@ -354,8 +359,11 @@ export class WebSocketService {
       tool_execution_update: "tool_execution_update",
       tool_execution_end: "tool_execution_end",
       // System Events
+      queue_update: "queue_update",
       compaction_start: "compaction_start",
       compaction_end: "compaction_end",
+      auto_retry_start: "auto_retry_start",
+      auto_retry_end: "auto_retry_end",
       retry_start: "retry_start",
       retry_end: "retry_end",
       error: "error",
@@ -371,6 +379,8 @@ export class WebSocketService {
       models_list: "models_list",
       llm_log_set: "llm_log_set",
       command_result: "command_result",
+      compact_result: "compact_result",
+      export_result: "export_result",
       // Session Status
       runtime_status_broadcast: "runtime_status_broadcast",
       session_status: "session_status",
@@ -429,8 +439,11 @@ export class WebSocketService {
       "message_end",
       "turn_start",
       "turn_end",
+      "queue_update",
       "compaction_start",
       "compaction_end",
+      "auto_retry_start",
+      "auto_retry_end",
       "retry_start",
       "retry_end",
       "session_updated",

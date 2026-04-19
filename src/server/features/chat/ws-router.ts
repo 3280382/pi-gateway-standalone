@@ -280,6 +280,8 @@ export const loggingMiddleware: WSMiddleware = async (_ctx, payload, next) => {
 import {
   handleAbortWrapped,
   handleCommandWrapped,
+  handleCompactSessionWrapped,
+  handleExportSessionWrapped,
   handleListModelsWrapped,
   handleModelChangeWrapped,
   handlePromptWrapped,
@@ -324,6 +326,10 @@ export function registerAllWSHandlers(): void {
 
   // Bash command execution (via SDK)
   wsRouter.register("command", handleCommandWrapped);
+
+  // Session operations (via SDK)
+  wsRouter.register("compact_session", handleCompactSessionWrapped);
+  wsRouter.register("export_session", handleExportSessionWrapped);
 
   // LLM logs
   wsRouter.register("set_llm_log", handleSetLlmLogWrapped);

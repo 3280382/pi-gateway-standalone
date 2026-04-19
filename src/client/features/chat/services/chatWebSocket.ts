@@ -120,6 +120,20 @@ export function executeChatCommand(command: string): boolean {
 }
 
 /**
+ * Compact session（对应后端的 compact_session 类型）
+ */
+export function compactSession(customInstructions?: string): boolean {
+  return websocketService.send("compact_session", { customInstructions });
+}
+
+/**
+ * Export session（对应后端的 export_session 类型）
+ */
+export function exportSession(outputPath?: string): boolean {
+  return websocketService.send("export_session", { outputPath });
+}
+
+/**
  * 列出可用模型（对应后端的 list_models 类型）
  */
 export function listChatModels(): boolean {

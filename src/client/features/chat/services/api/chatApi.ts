@@ -5,8 +5,10 @@
 
 import {
   abortChatGeneration,
+  compactSession,
   createNewChatSession,
   executeChatCommand,
+  exportSession,
   initChatWorkingDirectory,
   listChatModels,
   listChatSessions,
@@ -56,6 +58,8 @@ export interface EnhancedChatController extends ChatController {
   setThinkingLevel: (level: string) => Promise<void>;
   listModels: () => Promise<any>;
   executeCommand: (command: string) => Promise<any>;
+  compactSession: (customInstructions?: string) => Promise<any>;
+  exportSession: (outputPath?: string) => Promise<any>;
   setLlmLogEnabled: (enabled: boolean) => Promise<void>;
   changeWorkingDir: (path: string) => Promise<void>;
 }
@@ -306,6 +310,28 @@ export function useChatController(): EnhancedChatController {
         eventName: "command_result",
         onSuccess: () => {},
         sendAction: () => executeChatCommand(command),
+      });
+    },
+
+    // Compact session
+    compactSession: async (customInstructions?: string) => {
+      return createPromiseWithTimeout({
+        timeoutMessage: "Compact session 超时",
+        eventName: "compact_result",
+        onSuccess: () => {},
+        sendAction: () => compactSession(customInstructions),
+        timeoutMs: 30000, // 30 seconds for compaction
+      });
+    },
+
+    // Export session
+    exportSession: async (outputPath?: string) => {
+      return createPromiseWithTimeout({
+        timeoutMessage: "Export session 超时",
+        eventName: "export_result",
+        onSuccess: () => {},
+        sendAction: () => exportSession(outputPath),
+        timeoutMs: 30000, // 30 seconds for export
       });
     },
 
@@ -680,6 +706,45 @@ export function setupWebSocketListeners(): void {
       content: [{ type: "text", text: "✅ Retry complete" }],
       timestamp: new Date(),
     });
+  });
+
+  // Queue update handler
+  websocketService.on("queue_update", (data: any) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] queue_update:`, data);
+    // 可以在这里更新 UI 显示队列状态
+  });
+
+  // Auto retry handlers
+  websocketService.on("auto_retry_start", (data: any) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] auto_retry_start:`, data);
+    store.addMessage({
+      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      role: "system",
+      content: [{ type: "text", text: `🔄 Auto-retrying (${data.attempt}/${data.maxAttempts})...` }],
+      timestamp: new Date(),
+    });
+  });
+
+  websocketService.on("auto_retry_end", (data: any) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] auto_retry_end:`, data);
+    if (data.success) {
+      store.addMessage({
+        id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        role: "system",
+        content: [{ type: "text", text: "✅ Auto-retry successful" }],
+        timestamp: new Date(),
+      });
+    } else {
+      store.addMessage({
+        id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        role: "system",
+        content: [{ type: "text", text: `❌ Auto-retry failed: ${data.finalError || "Unknown error"}` }],
+        timestamp: new Date(),
+      });
+    }
   });
 
   // Connection status handlers
