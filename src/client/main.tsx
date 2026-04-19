@@ -5,6 +5,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./app/App";
+import "./styles/global.css";
 
 // 全局错误处理 - 捕获未处理的错误
 let errorDiv: HTMLDivElement | null = null;

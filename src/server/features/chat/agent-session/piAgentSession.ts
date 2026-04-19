@@ -697,9 +697,9 @@ export class PiAgentSession {
       return;
     }
 
-    // Handle / commands via SDK executeBash
+    // Handle / commands (slash commands)
     if (text.startsWith("/")) {
-      await this.executeCommand(text);
+      await this.handleSlashCommand(text);
       return;
     }
 
@@ -728,6 +728,239 @@ export class PiAgentSession {
         error: error instanceof Error ? error.message : "Unknown error",
       });
     }
+  }
+
+  /**
+   * Handle slash commands (/command)
+   * Maps slash commands to SDK methods based on pi-coding-agent BUILTIN_SLASH_COMMANDS
+   */
+  private async handleSlashCommand(text: string): Promise<void> {
+    if (!this.session) {
+      this.send({ type: "error", error: "Session not initialized" });
+      return;
+    }
+
+    const cmd = text.slice(1).trim(); // Remove leading /
+    const [commandName, ...argsParts] = cmd.split(/\s+/);
+    const args = argsParts.join(" ");
+
+    console.log(`[PiAgentSession.handleSlashCommand] Command: ${commandName}, Args: ${args}`);
+
+    try {
+      switch (commandName) {
+        // ===== Commands that work in web mode =====
+
+        case "compact":
+          // Compact session context
+          await this.session.compact(args || undefined);
+          this.send({
+            type: "command_result",
+            command: text,
+            output: "Session compaction started",
+            isError: false,
+          });
+          return;
+
+        case "export": {
+          // Export session to HTML or JSONL
+          const outputPath = args || undefined;
+          if (outputPath?.endsWith(".jsonl")) {
+            const filePath = this.session.exportToJsonl(outputPath);
+            this.send({
+              type: "command_result",
+              command: text,
+              output: `Session exported to: ${filePath}`,
+              isError: false,
+            });
+          } else {
+            const filePath = await this.session.exportToHtml(outputPath);
+            this.send({
+              type: "command_result",
+              command: text,
+              output: `Session exported to: ${filePath}`,
+              isError: false,
+            });
+          }
+          return;
+        }
+
+        case "session": {
+          // Show session info and stats
+          const stats = this.session.getSessionStats();
+          const info = `
+Session: ${stats.sessionId}
+File: ${stats.sessionFile ?? "In-memory"}
+Messages: ${stats.totalMessages} (User: ${stats.userMessages}, Assistant: ${stats.assistantMessages})
+Tokens: ${stats.tokens.total.toLocaleString()}
+Cost: $${stats.cost.toFixed(4)}
+          `.trim();
+          this.send({
+            type: "command_result",
+            command: text,
+            output: info,
+            isError: false,
+          });
+          return;
+        }
+
+        case "name": {
+          // Set session display name
+          const name = args.trim();
+          if (name) {
+            this.session.setSessionName(name);
+            this.send({
+              type: "command_result",
+              command: text,
+              output: `Session name set to: ${name}`,
+              isError: false,
+            });
+          } else {
+            this.send({
+              type: "command_result",
+              command: text,
+              output: "Usage: /name <session-name>",
+              isError: true,
+            });
+          }
+          return;
+        }
+
+        case "copy": {
+          // Get last assistant message
+          const lastText = this.session.getLastAssistantText();
+          if (lastText) {
+            this.send({
+              type: "command_result",
+              command: text,
+              output: lastText,
+              isError: false,
+            });
+          } else {
+            this.send({
+              type: "command_result",
+              command: text,
+              output: "No assistant message to copy",
+              isError: true,
+            });
+          }
+          return;
+        }
+
+        case "clear":
+        case "new": {
+          // Start new session
+          await this.newSession();
+          this.send({
+            type: "command_result",
+            command: text,
+            output: "New session started",
+            isError: false,
+          });
+          return;
+        }
+
+        // ===== Bash execution commands =====
+        case "bash":
+        case "ls":
+        case "tree":
+        case "cat":
+        case "grep":
+        case "find":
+        case "pwd":
+        case "ps":
+        case "head":
+        case "tail":
+        case "wc":
+        case "sort":
+        case "uniq":
+        case "diff":
+        case "git":
+        case "npm":
+        case "node":
+        case "python":
+        case "python3": {
+          // Execute as bash command via SDK
+          const bashCmd = args ? `${commandName} ${args}` : commandName;
+          const result = await this.session.executeBash(bashCmd);
+          this.send({
+            type: "command_result",
+            command: text,
+            output: result.output || "(no output)",
+            isError: result.exitCode !== 0,
+            exitCode: result.exitCode,
+          });
+          return;
+        }
+
+        // ===== Commands that require UI (not available in web mode) =====
+        case "settings":
+        case "model":
+        case "scoped-models":
+        case "import":
+        case "share":
+        case "changelog":
+        case "hotkeys":
+        case "fork":
+        case "login":
+        case "logout":
+        case "resume":
+        case "reload":
+        case "quit": {
+          this.send({
+            type: "command_result",
+            command: text,
+            output: `Command /${commandName} requires interactive UI and is not available in web mode`,
+            isError: true,
+          });
+          return;
+        }
+
+        // ===== Unknown command =====
+        default: {
+          // Try to execute as bash command if it looks like one
+          if (this.isCommonShellCommand(commandName)) {
+            const bashCmd = args ? `${commandName} ${args}` : commandName;
+            const result = await this.session.executeBash(bashCmd);
+            this.send({
+              type: "command_result",
+              command: text,
+              output: result.output || "(no output)",
+              isError: result.exitCode !== 0,
+              exitCode: result.exitCode,
+            });
+          } else {
+            // Unknown command - send to LLM as regular message (without the /)
+            await this.session.prompt(cmd);
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`[PiAgentSession.handleSlashCommand] Error:`, error);
+      this.send({
+        type: "command_result",
+        command: text,
+        output: error instanceof Error ? error.message : "Command execution failed",
+        isError: true,
+      });
+    }
+  }
+
+  /**
+   * Check if a command name is a common shell command
+   */
+  private isCommonShellCommand(cmd: string): boolean {
+    const commonCommands = new Set([
+      "ls", "ll", "la", "pwd", "cd", "cat", "less", "more", "head", "tail",
+      "grep", "find", "awk", "sed", "cut", "sort", "uniq", "wc", "xargs",
+      "ps", "top", "htop", "df", "du", "free", "uptime", "whoami", "id",
+      "echo", "printf", "touch", "mkdir", "rm", "rmdir", "cp", "mv", "ln",
+      "chmod", "chown", "chgrp", "tar", "zip", "unzip", "gzip", "gunzip",
+      "git", "npm", "yarn", "pnpm", "node", "python", "python3", "pip",
+      "docker", "kubectl", "terraform", "ansible",
+      "curl", "wget", "ping", "netstat", "ss", "lsof",
+      "vim", "vi", "nano", "code", "which", "whereis", "file",
+    ]);
+    return commonCommands.has(cmd.toLowerCase());
   }
 
   /**
