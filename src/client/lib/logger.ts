@@ -1,11 +1,11 @@
 /**
- * 前端日志管理器
- * 按模块区分日志级别：
- * - React渲染相关: debug级别
- * - WebSocket消息: info级别
+ * Frontend log manager
+ * 按模块区分Log level：
+ * - React rendering related: debug level
+ * - WebSocket messages: info level
  */
 
-// 日志级别
+// Log level
 export enum LogLevel {
   NONE = 0,
   ERROR = 1,
@@ -15,9 +15,9 @@ export enum LogLevel {
   VERBOSE = 5,
 }
 
-// 模块日志级别配置
+// 模块Log level配置
 const MODULE_LEVELS: Record<string, LogLevel> = {
-  // React渲染相关模块 - debug级别
+  // React rendering related modules - debug level
   React: LogLevel.DEBUG,
   Render: LogLevel.DEBUG,
   Component: LogLevel.DEBUG,
@@ -27,7 +27,7 @@ const MODULE_LEVELS: Record<string, LogLevel> = {
   ChatPanel: LogLevel.DEBUG,
   InputArea: LogLevel.DEBUG,
 
-  // WebSocket相关模块 - info级别
+  // WebSocket相关模块 - info level
   WebSocket: LogLevel.INFO,
   WS: LogLevel.INFO,
   Gateway: LogLevel.INFO,
@@ -40,7 +40,7 @@ const MODULE_LEVELS: Record<string, LogLevel> = {
 const isDev = process.env.NODE_ENV !== "production";
 
 /**
- * 获取模块的日志级别
+ * 获取模块的Log level
  */
 function getModuleLevel(namespace: string): LogLevel {
   // 精确匹配

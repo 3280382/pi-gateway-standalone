@@ -400,18 +400,18 @@ export async function status(req: Request, res: Response): Promise<void> {
         path = line.substring(3);
       }
 
-      console.log("[Git] 解析行:", { line, status, path, firstSpaceIndex });
+      console.log("[Git] Parse line:", { line, status, path, firstSpaceIndex });
 
-      // 如果路径被引号包裹，去除引号
+      // 如果Path wrapped in quotes, removing quotes
       let filePath = path.trim();
-      console.log("[Git] 修剪后路径:", filePath);
+      console.log("[Git] Trimmed path:", filePath);
 
       if (filePath.startsWith('"') && filePath.endsWith('"')) {
-        console.log("[Git] 路径被引号包裹，去除引号");
+        console.log("[Git] Path wrapped in quotes, removing quotes");
         filePath = filePath.slice(1, -1);
       }
 
-      console.log("[Git] 处理后files路径:", filePath);
+      console.log("[Git] Processed file path:", filePath);
 
       // 将状态映射为更易读的格式
       let displayStatus = "";

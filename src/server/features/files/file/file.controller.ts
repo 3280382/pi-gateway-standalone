@@ -495,7 +495,7 @@ export async function batchDelete(req: Request, res: Response) {
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error) {
-    logger.error(`Batch delete系统Error: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(`Batch delete system error: ${error instanceof Error ? error.message : String(error)}`);
     res.status(500).json({
       error: "Delete operation failed",
       details: error instanceof Error ? error.message : String(error),
@@ -592,22 +592,22 @@ export async function batchMove(req: Request, res: Response) {
           });
         }
 
-        logger.info(`移动Success: ${sourcePath} -> ${expandedTarget}`);
+        logger.info(`Move success: ${sourcePath} -> ${expandedTarget}`);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
         errors.push({ path: filePath, error: errorMsg });
-        logger.error(`移动Failed: ${sourcePath}, Error: ${errorMsg}`);
+        logger.error(`Move failed: ${sourcePath}, Error: ${errorMsg}`);
       }
     }
 
-    logger.info(`批量移动完成: ${results.length} Success, ${errors.length} Failed`);
+    logger.info(`Batch move complete: ${results.length} Success, ${errors.length} Failed`);
     res.json({
       success: errors.length === 0,
       moved: results.length,
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error) {
-    logger.error(`批量移动Error: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(`Batch move error: ${error instanceof Error ? error.message : String(error)}`);
     res.status(500).json({ error: String(error) });
   }
 }
@@ -668,7 +668,7 @@ export async function execute(req: Request, res: Response) {
         res.end();
       });
 
-      logger.info(`流式执行命令: ${command}, 工作directories: ${workingDir}`);
+      logger.info(`Streaming execute command: ${command}, Working directory: ${workingDir}`);
     } else {
       // 非流式执行
       const child = spawn(cmd, args, {
@@ -692,7 +692,7 @@ export async function execute(req: Request, res: Response) {
         const isError = code !== 0;
         const result = errorOutput ? `${output}\n${errorOutput}`.trim() : output.trim();
 
-        logger.info(`执行命令: ${command}, 工作directories: ${workingDir}, 退出代码: ${code}`);
+        logger.info(`Execute command: ${command}, Working directory: ${workingDir}, Exit code: ${code}`);
         res.json({
           success: !isError,
           output: result || "(无输出)",
@@ -702,7 +702,7 @@ export async function execute(req: Request, res: Response) {
       });
 
       child.on("error", (error: Error) => {
-        logger.error(`执行命令Error: ${error.message}`, { command, workingDir });
+        logger.error(`Execute command error: ${error.message}`, { command, workingDir });
         res.json({
           success: false,
           output: error.message,
@@ -712,7 +712,7 @@ export async function execute(req: Request, res: Response) {
       });
     }
   } catch (error) {
-    logger.error(`执行命令异常: ${error instanceof Error ? error.message : String(error)}`, {
+    logger.error(`Execute command exception: ${error instanceof Error ? error.message : String(error)}`, {
       command,
       workingDir,
     });
