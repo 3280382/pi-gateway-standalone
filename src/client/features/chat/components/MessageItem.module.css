@@ -415,3 +415,47 @@ em {
   color: #e2e8f0;
   font-style: italic;
 }
+
+/* Compaction消息 - 青绿色 */
+.compaction {
+  background: rgba(20, 184, 166, 0.1);
+}
+
+.compaction:hover {
+  background: rgba(20, 184, 166, 0.15);
+}
+
+.compactionDot {
+  background: #14b8a6 !important;
+}
+
+/* Export消息 - 蓝色 */
+.export {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.export:hover {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.exportDot {
+  background: #3b82f6 !important;
+}
+
+/* Usage消息 - 紫色 */
+.usage {
+  background: rgba(168, 85, 247, 0.1);
+}
+
+.usage:hover {
+  background: rgba(168, 85, 247, 0.15);
+}
+
+.usageDot {
+  background: #a855f7 !important;
+}
+
+/* System消息容器 */
+.compactionContainer {
+  border-left: 2px solid rgba(20, 184, 166, 0.5);
+}

@@ -40,6 +40,7 @@ interface GlassCardProps {
   isNewMessage?: boolean; // true=流式消息(默认展开), false=历史消息(思考/工具默认折叠)
   showThinking: boolean;
   showTools?: boolean;
+  messageKind?: Message["kind"];
 }
 
 // ============================================================================
@@ -196,8 +197,11 @@ export const MessageItem = memo(
       );
     }
 
+    // 检测是否为compaction消息
+    const isCompaction = message.kind === "compaction";
+    
     return (
-      <div className={styles.aiContainer}>
+      <div className={`${styles.aiContainer} ${isCompaction ? styles.compactionContainer : ""}`}>
         {blocks.map((block, idx) => (
           <GlassCard
             key={`${block.type}-${idx}`}
@@ -206,6 +210,7 @@ export const MessageItem = memo(
             isNewMessage={message.isStreaming} // 流式消息视为新消息
             showThinking={showThinking}
             showTools={showTools ?? true}
+            messageKind={message.kind}
           />
         ))}
       </div>
@@ -229,6 +234,7 @@ function GlassCard({
   isNewMessage = false,
   showThinking,
   showTools = true,
+  messageKind,
 }: GlassCardProps) {
   // ========== 1. State ==========
   // 默认展开规则：
@@ -487,15 +493,20 @@ function GlassCard({
         );
       }
       
+      // 根据messageKind确定标签
+      const label = messageKind === "compaction" ? "Compaction" : 
+                    messageKind === "export" ? "Export" :
+                    messageKind === "usage" ? "Usage" : "Assistant";
+      
       return (
         <div
-          className={`${styles.card} ${styles.output} ${isStreaming ? styles.streaming : ""}`}
+          className={`${styles.card} ${styles.output} ${isStreaming ? styles.streaming : ""} ${messageKind ? styles[messageKind] : ""}`}
           onMouseEnter={() => setIsCopyVisible(true)}
           onMouseLeave={() => setIsCopyVisible(false)}
         >
           <div className={styles.cardHeader}>
-            <span className={styles.dot} />
-            <span className={styles.label}>Assistant</span>
+            <span className={`${styles.dot} ${messageKind ? styles[messageKind + "Dot"] : ""}`} />
+            <span className={styles.label}>{label}</span>
             <div className={styles.actions}>
               <button
                 type="button"
