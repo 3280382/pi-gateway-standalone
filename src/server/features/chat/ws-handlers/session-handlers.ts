@@ -217,8 +217,16 @@ export async function handleLoadSession(
 
   try {
     // Use PiAgentSession's loadSession method
-    await ctx.session.loadSession(sessionPath);
-  
+    const loadResult = await ctx.session.loadSession(sessionPath);
+
+    if (!loadResult) {
+      throw new Error("Failed to load session - no session available");
+    }
+
+    if (!loadResult.success) {
+      throw new Error(loadResult.error || "Failed to load session");
+    }
+
     // Update client selected session for strict message routing
     const shortId = extractShortSessionId(sessionPath);
     if (shortId) {
@@ -226,9 +234,24 @@ export async function handleLoadSession(
       ctx.selectedSessionId = shortId;
       logger.info(`[handleLoadSession] Client switched to session: ${shortId}`);
     }
-  
-    // loadSession already sends response internally
-    logger.info(`[handleLoadSession] Session loaded: ${sessionPath}`);
+
+    // Build full response with messages using shared helper
+    const workingDir = ctx.session.workingDir;
+    const responseData = await buildSessionResponse(ctx.session, workingDir);
+
+    // Send session_loaded with full message list
+    sendSuccess(ctx, "session_loaded", {
+      success: true,
+      sessionId: responseData.currentSession.sessionId,
+      sessionFile: responseData.currentSession.sessionFile,
+      messages: responseData.currentSession.messages,
+      totalMessageCount: responseData.currentSession.totalMessageCount,
+      cwdChanged: loadResult.cwdChanged,
+      newCwd: loadResult.newCwd,
+      pid: process.pid,
+    });
+
+    logger.info(`[handleLoadSession] Session loaded: ${sessionPath}, messages: ${responseData.currentSession.messages.length}`);
   } catch (error) {
     logger.error("[handleLoadSession] Error:", {}, error instanceof Error ? error : undefined);
     sendSuccess(ctx, "session_loaded", {

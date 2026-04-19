@@ -993,9 +993,10 @@ export class PiAgentSession {
   /**
    * Load session
    * @param sessionPath Session file path
+   * @returns Object with success status and cwd change info, or null if no session
    */
-  async loadSession(sessionPath: string) {
-    if (!this.session) return;
+  async loadSession(sessionPath: string): Promise<{ success: boolean; cwdChanged: boolean; newCwd?: string; error?: string } | null> {
+    if (!this.session) return null;
     try {
       // Get target session's cwd from session file
       const targetSessionManager = SessionManager.open(
@@ -1009,34 +1010,19 @@ export class PiAgentSession {
         console.log(
           `[Gateway] Session cwd mismatch: ${this.workingDir} -> ${targetCwd}, reinitializing...`
         );
-        const info = await this.initialize(targetCwd);
-        this.send({
-          type: "session_loaded",
-          success: true,
-          sessionId: info.sessionId,
-          sessionFile: info.sessionFile,
-          cwdChanged: true,
-          newCwd: targetCwd,
-          pid: process.pid,
-        });
+        await this.initialize(targetCwd);
+        return { success: true, cwdChanged: true, newCwd: targetCwd };
       } else {
         // Same cwd, use switchSession
         const result = await this.session.switchSession(sessionPath);
-        this.send({
-          type: "session_loaded",
-          success: result,
-          sessionId: this.session.sessionId,
-          sessionFile: this.session.sessionFile,
-          cwdChanged: false,
-          pid: process.pid,
-        });
+        return { success: result, cwdChanged: false };
       }
     } catch (error) {
-      this.send({
-        type: "session_loaded",
+      return {
         success: false,
+        cwdChanged: false,
         error: error instanceof Error ? error.message : "Failed to load session",
-      });
+      };
     }
   }
 

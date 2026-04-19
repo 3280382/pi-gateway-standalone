@@ -236,7 +236,10 @@ export function useChatController(): EnhancedChatController {
         onSuccess: async (data) => {
           if (data.success) {
             chatStore.setSessionId(data.sessionId);
-            await chatStore.loadSession(sessionPath);
+            // Use messages from WebSocket response (already merged with buffer)
+            const messages = data.messages || [];
+            console.log("[ChatAPI] session_loaded with messages:", messages.length);
+            chatStore.setMessages(messages);
           } else {
             throw new Error(data.error || "加载会话失败");
           }
