@@ -806,20 +806,14 @@ export function setupWebSocketListeners(): void {
   });
 
   // More messages loaded handler - 加载更多历史消息
-  websocketService.on("more_messages_loaded", (data: any) => {
+  websocketService.on("more_messages_loaded", async (data: any) => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] more_messages_loaded:`, data);
 
     if (data?.messages && Array.isArray(data.messages)) {
-      // 转换消息格式并添加到开头
-      const formattedMessages = data.messages.map((msg: any) => ({
-        id: msg.id || `msg-${Date.now()}-${Math.random()}`,
-        role: msg.role,
-        content: msg.content,
-        timestamp: msg.timestamp || Date.now(),
-        name: msg.name,
-        model: msg.model,
-      }));
+      // 使用 normalizeSessionMessages 正确处理 session 文件格式
+      const { normalizeSessionMessages } = await import("@/features/chat/utils/messageUtils");
+      const formattedMessages = normalizeSessionMessages(data.messages);
 
       store.prependMessages(formattedMessages);
       console.log(`[${ts}] [more_messages_loaded] Prepended ${formattedMessages.length} messages, hasMore: ${data.hasMore}`);

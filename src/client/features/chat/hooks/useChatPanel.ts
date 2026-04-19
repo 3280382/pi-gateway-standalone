@@ -15,6 +15,7 @@ import { useChatController } from "@/features/chat/services/api/chatApi";
 import { loadMoreMessages } from "@/features/chat/services/chatWebSocket";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
+import { websocketService } from "@/services/websocket.service";
 import type { Message } from "@/features/chat/types/chat";
 
 // ===== [ANCHOR:HELPERS] =====
@@ -235,21 +236,94 @@ export function useChatPanel(): UseChatPanelReturn {
   }, []);
 
   // 重新加载所有消息
-  const reloadAllMessages = useCallback(() => {
+  const reloadAllMessages = useCallback(async () => {
     const sessionStore = useSessionStore.getState();
     const chatStore = useChatStore.getState();
     const currentSessionFile = sessionStore.currentSessionFile;
 
-    if (!currentSessionFile) return;
+    if (!currentSessionFile) {
+      console.warn("[useChatPanel] No current session file");
+      return;
+    }
 
-    // 清空当前消息，触发重新加载
-    chatStore.setMessages([]);
-    hasMoreRef.current = true;
-    setHasMoreMessages(true);
+    console.log("[useChatPanel] Reloading all messages for:", currentSessionFile);
 
-    // 使用 -1 表示加载所有
-    loadMoreMessages(currentSessionFile, 0, -1);
-    console.log("[useChatPanel] Reloading all messages");
+    // 设置加载状态
+    setIsLoadingMore(true);
+
+    try {
+      // 等待 more_messages_loaded 响应
+      const response = await new Promise<{
+        messages: any[];
+        hasMore: boolean;
+        totalCount: number;
+      }>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error("Reload messages timeout"));
+        }, 10000);
+
+        const unsubscribe = websocketService.on("more_messages_loaded", (data: any) => {
+          if (data?.sessionFile === currentSessionFile) {
+            clearTimeout(timeout);
+            cleanup();
+            resolve(data);
+          }
+        });
+
+        const unsubscribeError = websocketService.on("error", (data: any) => {
+          clearTimeout(timeout);
+          cleanup();
+          reject(new Error(`Server error: ${JSON.stringify(data)}`));
+        });
+
+        function cleanup() {
+          unsubscribe();
+          unsubscribeError();
+        }
+
+        // 发送请求
+        const sent = loadMoreMessages(currentSessionFile, 0, -1);
+        if (!sent) {
+          clearTimeout(timeout);
+          cleanup();
+          reject(new Error("Failed to send load_more_messages"));
+        }
+      });
+
+      console.log("[useChatPanel] Reload response:", {
+        messageCount: response.messages?.length,
+        totalCount: response.totalCount,
+        hasMore: response.hasMore,
+      });
+
+      // 清空旧消息并设置新消息
+      const { normalizeSessionMessages } = await import("@/features/chat/utils/messageUtils");
+      const formattedMessages = normalizeSessionMessages(response.messages);
+      chatStore.setMessages(formattedMessages);
+
+      hasMoreRef.current = response.hasMore;
+      setHasMoreMessages(response.hasMore);
+
+      console.log("[useChatPanel] Reloaded", formattedMessages.length, "messages");
+    } catch (error) {
+      console.error("[useChatPanel] Failed to reload messages:", error);
+      // 如果失败，尝试恢复原来的消息（通过重新初始化）
+      const messageLimit = sessionStore.defaultMessageLimit;
+      const { initChatWorkingDirectory } = await import("@/features/chat/services/chatWebSocket");
+      const response = await initChatWorkingDirectory(
+        sessionStore.workingDir,
+        currentSessionFile,
+        10000,
+        messageLimit
+      );
+      if (response?.currentSession?.messages) {
+        const { normalizeSessionMessages } = await import("@/features/chat/utils/messageUtils");
+        chatStore.setMessages(normalizeSessionMessages(response.currentSession.messages));
+      }
+    } finally {
+      setIsLoadingMore(false);
+    }
   }, []);
 
   const handleSend = useCallback(async () => {
