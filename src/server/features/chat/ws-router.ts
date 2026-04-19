@@ -299,6 +299,10 @@ import {
   handleNewSessionWrapped,
   handleSidebarVisibilityWrapped,
 } from "./ws-handlers/session-handlers";
+import {
+  handleGetProcessTreeWrapped,
+  handleGetProcessDetailsWrapped,
+} from "../system/ws-handlers";
 
 /**
  * Register all WebSocket handlers
@@ -333,6 +337,10 @@ export function registerAllWSHandlers(): void {
   wsRouter.register("sidebar_visibility", handleSidebarVisibilityWrapped);
   wsRouter.register("get_session_status", handleGetSessionStatusWrapped);
   wsRouter.register("load_more_messages", handleLoadMoreMessagesWrapped);
+
+  // System information
+  wsRouter.register("get_process_tree", handleGetProcessTreeWrapped);
+  wsRouter.register("get_process_details", handleGetProcessDetailsWrapped);
 
   logger.info(`[WSRouter] Registered ${wsRouter.getRegisteredTypes().length} handlers`);
 }

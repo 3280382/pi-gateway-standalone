@@ -1,0 +1,414 @@
+/**
+ * ProcessTreeViewer - 紧凑的进程树样式
+ */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.popup {
+  background: #1a1a2e;
+  border: 1px solid #2d2d44;
+  border-radius: 8px;
+  width: 95vw;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #2d2d44;
+  background: #16162a;
+  border-radius: 8px 8px 0 0;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #e4e4e7;
+  margin-right: 16px;
+}
+
+.stats {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  font-size: 10px;
+  color: #a1a1aa;
+}
+
+.stats span {
+  background: #252542;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.running {
+  color: #4ade80 !important;
+}
+
+.sleeping {
+  color: #60a5fa !important;
+}
+
+.server {
+  color: #fbbf24 !important;
+  font-weight: 600;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: #a1a1aa;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.closeBtn:hover {
+  background: #3f3f5f;
+  color: #fff;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 4px 8px;
+  background: #1e1e32;
+  border-bottom: 1px solid #2d2d44;
+}
+
+.tab {
+  background: #252542;
+  border: none;
+  color: #a1a1aa;
+  padding: 4px 12px;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.tab:hover {
+  background: #3f3f5f;
+}
+
+.tab.active {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.refreshBtn {
+  margin-left: auto;
+  background: #252542;
+  border: none;
+  color: #a1a1aa;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.refreshBtn:hover {
+  background: #3f3f5f;
+}
+
+.refreshBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Row */
+.headerRow {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: #252542;
+  border-bottom: 1px solid #2d2d44;
+  font-weight: 600;
+  color: #71717a;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Process List */
+.processList {
+  flex: 1;
+  overflow: auto;
+}
+
+/* Process Row */
+.processRow {
+  display: flex;
+  align-items: center;
+  padding: 2px 4px;
+  border-bottom: 1px solid #252538;
+  cursor: pointer;
+  color: #d4d4d8;
+  white-space: nowrap;
+}
+
+.processRow:hover {
+  background: #2a2a48;
+}
+
+.processRow.selected {
+  background: #3b82f620;
+  border-left: 2px solid #3b82f6;
+}
+
+.serverProcess {
+  background: #22c55e10 !important;
+  border-left: 2px solid #22c55e;
+}
+
+.sessionProcess {
+  background: #f59e0b10 !important;
+}
+
+.serverChild {
+  background: #3b82f605;
+}
+
+/* Columns */
+.expandBtn {
+  width: 16px;
+  text-align: center;
+  color: #71717a;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.pid {
+  width: 50px;
+  color: #60a5fa;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.ppid {
+  width: 50px;
+  color: #a1a1aa;
+  flex-shrink: 0;
+}
+
+.cpu {
+  width: 45px;
+  text-align: right;
+  color: #f87171;
+  flex-shrink: 0;
+}
+
+.mem {
+  width: 45px;
+  text-align: right;
+  color: #a78bfa;
+  flex-shrink: 0;
+}
+
+.vsz {
+  width: 55px;
+  text-align: right;
+  color: #71717a;
+  flex-shrink: 0;
+}
+
+.rss {
+  width: 55px;
+  text-align: right;
+  color: #71717a;
+  flex-shrink: 0;
+}
+
+.stat {
+  width: 40px;
+  text-align: center;
+  color: #34d399;
+  flex-shrink: 0;
+  font-size: 9px;
+}
+
+.time {
+  width: 50px;
+  text-align: right;
+  color: #a1a1aa;
+  flex-shrink: 0;
+  font-size: 9px;
+}
+
+.command {
+  flex: 1;
+  min-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #e4e4e7;
+  padding-left: 8px;
+}
+
+/* Server Children Section */
+.serverChildrenSection {
+  border-top: 2px solid #22c55e;
+  margin-top: 4px;
+}
+
+.sectionTitle {
+  padding: 4px 8px;
+  background: #22c55e20;
+  color: #22c55e;
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Details Panel */
+.detailsPanel {
+  border-top: 1px solid #2d2d44;
+  background: #16162a;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.detailsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: #252542;
+  color: #e4e4e7;
+  font-weight: 600;
+}
+
+.detailsHeader button {
+  background: none;
+  border: none;
+  color: #a1a1aa;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.detailsHeader button:hover {
+  color: #fff;
+}
+
+/* Threads */
+.threadsSection {
+  padding: 8px;
+  border-bottom: 1px solid #2d2d44;
+}
+
+.threadsList {
+  margin-top: 4px;
+}
+
+.threadRow {
+  display: flex;
+  gap: 12px;
+  padding: 2px 4px;
+  font-size: 10px;
+  color: #a1a1aa;
+  border-bottom: 1px solid #252538;
+}
+
+.tid {
+  width: 60px;
+  color: #60a5fa;
+}
+
+.threadCpu {
+  width: 40px;
+  text-align: right;
+  color: #f87171;
+}
+
+.threadStat {
+  width: 30px;
+  text-align: center;
+  color: #34d399;
+}
+
+.threadTime {
+  width: 40px;
+  text-align: right;
+}
+
+.threadCmd {
+  flex: 1;
+  color: #d4d4d8;
+}
+
+/* Open Files */
+.filesSection {
+  padding: 8px;
+}
+
+.filesList {
+  margin-top: 4px;
+  max-height: 100px;
+  overflow: auto;
+}
+
+.fileRow {
+  padding: 2px 4px;
+  font-size: 10px;
+  color: #a1a1aa;
+  border-bottom: 1px solid #252538;
+  font-family: "JetBrains Mono", monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Scrollbar */
+.content::-webkit-scrollbar,
+.processList::-webkit-scrollbar,
+.filesList::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.content::-webkit-scrollbar-track,
+.processList::-webkit-scrollbar-track,
+.filesList::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+
+.content::-webkit-scrollbar-thumb,
+.processList::-webkit-scrollbar-thumb,
+.filesList::-webkit-scrollbar-thumb {
+  background: #3f3f5f;
+  border-radius: 3px;
+}
+
+.content::-webkit-scrollbar-thumb:hover,
+.processList::-webkit-scrollbar-thumb:hover,
+.filesList::-webkit-scrollbar-thumb:hover {
+  background: #5f5f7f;
+}
