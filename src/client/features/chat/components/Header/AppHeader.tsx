@@ -280,7 +280,6 @@ export function AppHeader({
               className={styles.sessionInfo} 
               title={`Session: ${currentSessionId}${runtimeStatus ? ` (${runtimeStatus})` : ""}`}
             >
-              <span className={styles.sessionId}>{formatSessionId(currentSessionId)}</span>
               {runtimeStatus && (
                 <span className={`${styles.runtimeStatus} ${styles[runtimeStatus]}`}>
                   {runtimeStatus === "thinking" && "🤔"}
@@ -291,6 +290,7 @@ export function AppHeader({
                   {runtimeStatus === "error" && "❌"}
                 </span>
               )}
+              <span className={styles.sessionId}>{formatSessionId(currentSessionId)}</span>
             </div>
           )}
           <div className={styles.status} title={`${connectionStatus}${pid ? ` (PID: ${pid})` : ""}`}>
