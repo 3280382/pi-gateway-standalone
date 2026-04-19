@@ -58,7 +58,8 @@ export async function handleInit(
   }
 
   // 3. 构建响应数据
-  let responseData = await buildSessionResponse(session, workingDir);
+  // 传入 clientSessionFile 确保使用正确的 session 文件路径
+  let responseData = await buildSessionResponse(session, workingDir, 100, 10, clientSessionFile);
 
   // 4. 如果当前 session 没有消息，尝试加载最近的有消息的 session
   if (responseData.currentSession.messages.length === 0) {
