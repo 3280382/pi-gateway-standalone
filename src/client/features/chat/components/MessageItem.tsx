@@ -470,6 +470,23 @@ function GlassCard({
 
     case "text":
       if (!block.text) return null;
+      
+      // 检测是否是 usage 消息
+      const isUsageMessage = block.text.startsWith("📊 Usage:");
+      if (isUsageMessage) {
+        return (
+          <div className={`${styles.card} ${styles.usage}`}>
+            <div className={styles.usageHeader}>
+              <span className={styles.usageDot} />
+              <span className={styles.usageLabel}>Usage</span>
+            </div>
+            <div className={styles.usageContent}>
+              {block.text.replace("📊 Usage: ", "")}
+            </div>
+          </div>
+        );
+      }
+      
       return (
         <div
           className={`${styles.card} ${styles.output} ${isStreaming ? styles.streaming : ""}`}

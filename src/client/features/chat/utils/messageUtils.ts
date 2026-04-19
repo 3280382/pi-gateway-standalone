@@ -291,8 +291,8 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
       if (inputTokens || outputTokens) {
         usageMessage += ` (input: ${inputTokens.toLocaleString()}, output: ${outputTokens.toLocaleString()})`;
       }
-      if (cost) {
-        usageMessage += ` · $${cost.toFixed(4)}`;
+      if (cost && cost > 0) {
+        usageMessage += ` · $${Number(cost).toFixed(4)}`;
       }
       if (msg.model) {
         usageMessage += ` · ${msg.model}`;
