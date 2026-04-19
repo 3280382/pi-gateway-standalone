@@ -6,6 +6,7 @@
 import { WebSocket } from "ws";
 import type { LlmLogManager } from "../llm/log-manager";
 import { PiAgentSession } from "./piAgentSession";
+import { loadSessionMetadata, saveSessionMetadata } from "./session-metadata";
 
 /**
  * Extract short session ID from session file path (fixed 8 characters)
@@ -50,11 +51,11 @@ interface SessionEntry {
   /** Last activity timestamp */
   lastActivity: Date;
   /** Current runtime status */
-  runtimeStatus: SessionRuntimeStatus;
+  runtimeStatus: SessionStatus;
   /** Whether client's sidebar is visible (for optimizing broadcasts) */
   sidebarVisible?: boolean;
   /** Last broadcasted status (for detecting changes) */
-  lastBroadcastedStatus?: SessionRuntimeStatus;
+  lastBroadcastedStatus?: SessionStatus;
 }
 
 /**
@@ -274,7 +275,7 @@ export class ServerSessionManager {
     const session = new PiAgentSession(client, this.llmLogManager);
     await session.initialize(workingDir, sessionFile);
 
-    this.registerSession(session, shortId, workingDir, sessionFile, client);
+    await this.registerSession(session, shortId, workingDir, sessionFile, client);
     this.setupCallbacks(session);
 
     return session;
@@ -301,21 +302,25 @@ export class ServerSessionManager {
     this.clientToShortId.set(client, entry.shortId);
   }
 
-  private registerSession(
+  private async registerSession(
     session: PiAgentSession,
     shortId: string,
     workingDir: string,
     sessionFile: string,
     client: WebSocket
-  ): void {
+  ): Promise<void> {
+    // Try to load persisted status from metadata file
+    const metadata = await loadSessionMetadata(sessionFile);
+    const initialStatus = metadata?.runtimeStatus || "idle";
+
     this.sessions.set(shortId, {
       session,
       shortId,
       workingDir,
       sessionFile,
       client,
-      lastActivity: new Date(),
-      runtimeStatus: "idle",
+      lastActivity: metadata?.lastActivity ? new Date(metadata.lastActivity) : new Date(),
+      runtimeStatus: initialStatus as SessionStatus,
     });
 
     this.sessionFileToShortId.set(sessionFile, shortId);
@@ -332,7 +337,7 @@ export class ServerSessionManager {
       return this.hasClientSelectedSession(ws, shortId);
     });
     session.setStatusUpdateCallback((shortId, status) => {
-      this.updateRuntimeStatus(shortId, status as SessionRuntimeStatus);
+      this.updateRuntimeStatus(shortId, status as SessionStatus);
     });
   }
 
@@ -540,7 +545,7 @@ export class ServerSessionManager {
     sessionFile: string;
     hasClient: boolean;
     lastActivity: Date;
-    runtimeStatus: SessionRuntimeStatus;
+    runtimeStatus: SessionStatus;
   }> {
     return Array.from(this.sessions.entries()).map(([shortId, entry]) => ({
       shortId,
@@ -587,6 +592,7 @@ export class ServerSessionManager {
       sessionFile,
       client,
       lastActivity: new Date(),
+      runtimeStatus: "idle",
     });
 
     // Update lookup maps
@@ -634,17 +640,25 @@ export class ServerSessionManager {
    * @param shortId Short session ID
    * @param status New runtime status
    */
-  updateRuntimeStatus(shortId: string, status: SessionRuntimeStatus): void {
+  updateRuntimeStatus(shortId: string, status: SessionStatus): void {
     const entry = this.sessions.get(shortId);
     if (entry) {
       const oldStatus = entry.runtimeStatus;
       entry.runtimeStatus = status;
       entry.lastActivity = new Date();
-    
+
       // If status changed, immediately broadcast to sidebar-visible clients
       if (oldStatus !== status) {
         this.broadcastRuntimeStatus(entry.workingDir);
       }
+
+      // Persist status to metadata file (async, non-blocking)
+      saveSessionMetadata(entry.sessionFile, {
+        runtimeStatus: status,
+        lastActivity: entry.lastActivity.toISOString(),
+      }).catch(() => {
+        // Fail silently - metadata is best-effort
+      });
     }
   }
 
@@ -654,7 +668,7 @@ export class ServerSessionManager {
    * @param shortId Short session ID
    * @returns Runtime status or undefined
    */
-  getRuntimeStatus(shortId: string): SessionRuntimeStatus | undefined {
+  getRuntimeStatus(shortId: string): SessionStatus | undefined {
     return this.sessions.get(shortId)?.runtimeStatus;
   }
 

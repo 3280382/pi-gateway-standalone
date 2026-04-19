@@ -115,15 +115,18 @@ export function SessionDropdownSection() {
   );
 
   // ========== 4. Computed ==========
-  // 对会话进行排序：选中 > waiting > thinking > tooling > idle > history
+  // 对会话进行排序：选中 > streaming > thinking > tooling > waiting > idle > history
+  // streaming/thinking/tooling 是活跃状态，优先显示
   const getStatusPriority = (status: string | undefined): number => {
     switch (status) {
-      case "waiting": return 1;
-      case "thinking": return 2;
-      case "tooling": return 3;
-      case "idle": return 4;
-      case "history": return 5;
-      default: return 6; // unknown status
+      case "streaming": return 1;  // 最活跃：正在输出
+      case "thinking": return 2;   // AI 思考中
+      case "tooling": return 3;    // 使用工具
+      case "waiting": return 4;    // 等待用户输入
+      case "idle": return 5;       // 空闲
+      case "error": return 6;      // 错误状态
+      case "history": return 7;    // 历史会话
+      default: return 8; // unknown status
     }
   };
 
