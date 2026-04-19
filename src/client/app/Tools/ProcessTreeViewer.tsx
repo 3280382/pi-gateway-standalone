@@ -3,7 +3,7 @@
  * 紧凑设计，显示所有进程详细信息
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { websocketService } from "@/services/websocket.service";
 import menuStyles from "@/app/Tools/ToolMenu.module.css";
@@ -70,7 +70,6 @@ export function ProcessTreeViewer() {
   const [processDetails, setProcessDetails] = useState<ProcessDetails | null>(null);
   const [expandedPids, setExpandedPids] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
-  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const serverPid = useSessionStore((state) => state.serverPid);
 
   // 获取进程树数据
@@ -154,18 +153,11 @@ export function ProcessTreeViewer() {
     }
   }, []);
 
-  // 打开窗口时获取数据
+  // 打开窗口时获取一次数据（不自动刷新）
   useEffect(() => {
     if (isOpen) {
       fetchData();
-      // 自动刷新
-      refreshIntervalRef.current = setInterval(fetchData, 3000);
     }
-    return () => {
-      if (refreshIntervalRef.current) {
-        clearInterval(refreshIntervalRef.current);
-      }
-    };
   }, [isOpen, fetchData]);
 
   // 选中进程时获取详情
