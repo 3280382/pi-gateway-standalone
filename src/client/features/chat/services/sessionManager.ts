@@ -135,8 +135,11 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
     stores.chat.setMessages([]);
   }
 
-  // 6. 清理流式状态（中止可能正在进行的流式传输）
+  // 6. 清理流式状态和运行状态（完全切换到新 session）
   stores.chat.abortStreaming();
+  stores.chat.setIsRunning(false);
+  // 清空输入框，确保新 session 从干净状态开始
+  stores.chat.clearInput();
 }
 
 // ============================================================================
@@ -324,10 +327,12 @@ async function createNewSession(): Promise<void> {
     stores.session.setCurrentSessionFile(newSession.path);
     console.log("[SessionManager.createNewSession] 已选中:", newSession.id);
 
-    // 5. 清空聊天消息区域（新 session 没有历史消息）
+    // 5. 清空聊天消息区域并重置所有状态（新 session 从干净状态开始）
     stores.chat.setMessages([]);
     stores.chat.abortStreaming();
-    console.log("[SessionManager.createNewSession] 已清空消息区域");
+    stores.chat.setIsRunning(false);
+    stores.chat.clearInput();
+    console.log("[SessionManager.createNewSession] 已清空消息区域并重置状态");
 
     // 6. 如果服务端返回了完整列表，使用服务端的（确保同步）
     if (createResponse.allSessions && createResponse.allSessions.length > 0) {

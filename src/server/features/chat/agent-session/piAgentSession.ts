@@ -478,7 +478,8 @@ export class PiAgentSession {
 
         case "turn_end": {
           console.log(`[${timestamp}] [SEND] turn_end`);
-          this.updateRuntimeStatus("idle");
+          // AI 完成输出后进入 waiting 状态（等待用户输入），而不是 idle
+          this.updateRuntimeStatus("waiting");
           this.send({ type: "turn_end" });
           break;
         }
