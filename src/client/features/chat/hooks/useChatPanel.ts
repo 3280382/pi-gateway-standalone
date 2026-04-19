@@ -119,7 +119,7 @@ export function useChatPanel(): UseChatPanelReturn {
   const chatController = useChatController();
 
   // ===== [ANCHOR:EFFECTS] =====
-  // 首次加载时滚动到底部
+  // 首次加载时滚动到底部，并根据消息数量判断是否有更多历史消息
   useEffect(() => {
     const timer = setTimeout(() => {
       if (messagesRef.current) {
@@ -127,6 +127,14 @@ export function useChatPanel(): UseChatPanelReturn {
         lastScrollTimeRef.current = Date.now();
       }
     }, 100);
+
+    // 检查是否有更多历史消息（如果当前消息少于100条，认为已全部加载）
+    const messageLimit = useSessionStore.getState().defaultMessageLimit;
+    if (messages.length < messageLimit && messageLimit > 0) {
+      hasMoreRef.current = false;
+      setHasMoreMessages(false);
+    }
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -165,26 +173,25 @@ export function useChatPanel(): UseChatPanelReturn {
     };
   }, [shouldScrollToBottom, messages, streamingContent, streamingThinking]); // 添加流式内容依赖
 
-  // 当切换 session 或消息列表清空时，自动启用滚屏
+  // 当切换 session 或消息列表变化时，更新 hasMore 状态
   useEffect(() => {
     if (messages.length === 0) {
       setShouldScrollToBottom(true);
+      return;
+    }
+
+    // 根据消息数量和设置判断是否有更多历史消息
+    const messageLimit = useSessionStore.getState().defaultMessageLimit;
+    // 如果当前消息数少于限制，说明已全部加载
+    if (messages.length < messageLimit) {
+      hasMoreRef.current = false;
+      setHasMoreMessages(false);
+    } else {
+      // 达到限制，可能还有更多
+      hasMoreRef.current = true;
+      setHasMoreMessages(true);
     }
   }, [messages.length]);
-
-  // 监听 more_messages_loaded 事件
-  useEffect(() => {
-    const unsubscribe = useChatStore.subscribe((state) => {
-      // 检查是否有新加载的消息（通过消息数量变化判断）
-      const currentMessages = state.messages;
-      if (currentMessages.length > 0 && loadingMoreRef.current) {
-        loadingMoreRef.current = false;
-        setIsLoadingMore(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   // ===== [ANCHOR:HANDLERS] =====
   const handleScroll = useCallback(() => {
@@ -204,9 +211,10 @@ export function useChatPanel(): UseChatPanelReturn {
     }
   }, [shouldScrollToBottom]);
 
-  // 加载更多消息
-  const loadMore = useCallback(() => {
+  // 加载更多消息 - 滚动到顶部时加载所有历史消息
+  const loadMore = useCallback(async () => {
     const sessionStore = useSessionStore.getState();
+    const chatStore = useChatStore.getState();
     const currentSessionFile = sessionStore.currentSessionFile;
 
     if (!currentSessionFile || loadingMoreRef.current) return;
@@ -214,25 +222,77 @@ export function useChatPanel(): UseChatPanelReturn {
     loadingMoreRef.current = true;
     setIsLoadingMore(true);
 
-    const currentMessages = useChatStore.getState().messages;
-    const offset = currentMessages.length;
+    console.log(`[useChatPanel] Loading all history messages for: ${currentSessionFile}`);
 
-    console.log(`[useChatPanel] Loading more messages from offset ${offset}`);
+    try {
+      // 等待 more_messages_loaded 响应，加载所有历史消息（offset=0, limit=-1）
+      const response = await new Promise<{
+        messages: any[];
+        hasMore: boolean;
+        totalCount: number;
+      }>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error("Load messages timeout"));
+        }, 15000);
 
-    const success = loadMoreMessages(currentSessionFile, offset, 50);
+        const unsubscribe = websocketService.on("more_messages_loaded", (data: any) => {
+          if (data?.sessionFile === currentSessionFile) {
+            clearTimeout(timeout);
+            cleanup();
+            resolve(data);
+          }
+        });
 
-    if (!success) {
+        const unsubscribeError = websocketService.on("error", (data: any) => {
+          clearTimeout(timeout);
+          cleanup();
+          reject(new Error(`Server error: ${JSON.stringify(data)}`));
+        });
+
+        function cleanup() {
+          unsubscribe();
+          unsubscribeError();
+        }
+
+        // 发送请求加载所有历史消息（offset=0, limit=-1）
+        const sent = loadMoreMessages(currentSessionFile, 0, -1);
+        if (!sent) {
+          clearTimeout(timeout);
+          cleanup();
+          reject(new Error("Failed to send load_more_messages"));
+        }
+      });
+
+      console.log("[useChatPanel] All history loaded:", {
+        messageCount: response.messages?.length,
+        totalCount: response.totalCount,
+      });
+
+      // 合并消息：新加载的历史消息 + 当前已有的消息（避免重复）
+      const { normalizeSessionMessages } = await import("@/features/chat/utils/messageUtils");
+      const historyMessages = normalizeSessionMessages(response.messages);
+      const currentMessages = chatStore.messages;
+
+      // 去重：基于消息ID
+      const existingIds = new Set(currentMessages.map((m) => m.id));
+      const newMessages = historyMessages.filter((m) => !existingIds.has(m.id));
+
+      if (newMessages.length > 0) {
+        // 将历史消息添加到开头
+        chatStore.prependMessages(newMessages);
+        console.log("[useChatPanel] Prepended", newMessages.length, "history messages");
+      }
+
+      // 已加载所有消息，不再有更多
+      hasMoreRef.current = false;
+      setHasMoreMessages(false);
+    } catch (error) {
+      console.error("[useChatPanel] Failed to load history:", error);
+    } finally {
       loadingMoreRef.current = false;
       setIsLoadingMore(false);
     }
-
-    // 5秒后重置加载状态（防止卡住）
-    setTimeout(() => {
-      if (loadingMoreRef.current) {
-        loadingMoreRef.current = false;
-        setIsLoadingMore(false);
-      }
-    }, 5000);
   }, []);
 
   // 重新加载所有消息
