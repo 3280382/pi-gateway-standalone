@@ -37,7 +37,7 @@ export function FileViewer() {
   } = useFileViewerStore();
 
   // 从 hook 获取业务逻辑
-  const { fileTypes, saveFile, copyPath, stopExecution } = useFileViewer();
+  const { fileTypes, saveFile, copyPath, getLanguage, stopExecution } = useFileViewer();
 
   // ========== 2. Ref ==========
   const terminalRef = useRef<HTMLDivElement>(null);
@@ -51,6 +51,21 @@ export function FileViewer() {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
   }, []);
+
+  // 语法高亮 - 仅在查看模式下使用 Prism.js
+  useEffect(() => {
+    if (mode === "view" && content && !fileTypes.isImage && !fileTypes.isHtml) {
+      const timer = setTimeout(() => {
+        if ((window as any).Prism) {
+          const codeElement = document.querySelector("[data-prism-code]");
+          if (codeElement) {
+            (window as any).Prism.highlightElement(codeElement);
+          }
+        }
+      }, 10);
+      return () => clearTimeout(timer);
+    }
+  }, [content, mode, fileTypes.isImage, fileTypes.isHtml]);
 
   // 进入编辑模式后自动聚焦 textarea
   useEffect(() => {
@@ -73,6 +88,11 @@ export function FileViewer() {
   };
 
   // ========== 5. Computed ==========
+  // Prism.js 查看模式语言映射（tsx -> typescript）
+  const language = getLanguage();
+  const prismLanguage =
+    language === "tsx" ? "typescript" : language === "jsx" ? "javascript" : language;
+
   // 渲染带有非可视化符号的内容
   const renderContentWithInvisibleChars = (text: string): string => {
     if (!showInvisibleChars) return text;
@@ -179,8 +199,8 @@ export function FileViewer() {
               sandbox="allow-scripts allow-same-origin allow-forms"
             />
           ) : (
-            <pre className={styles.code}>
-              <code>
+            <pre className={`${styles.code} language-${prismLanguage}`}>
+              <code data-prism-code className={`language-${prismLanguage}`}>
                 {showInvisibleChars
                   ? renderContentWithInvisibleChars(
                       typeof content === "string" ? content : JSON.stringify(content, null, 2)
