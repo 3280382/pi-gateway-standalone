@@ -1362,20 +1362,22 @@ export class PiAgentSession {
     // Re-setup event handlers (re-subscribe to AgentSession events)
     this.setupEventHandlers();
 
-    // Flush buffered messages BEFORE sending reconnected notification
-    // This ensures cached events are sent in correct order
-    const flushedCount = this.flushMessageBuffer();
-    if (flushedCount > 0) {
-      console.log(`[PiAgentSession.reconnect] Flushed ${flushedCount} buffered messages to client`);
-    }
-
-    // Notify client that session is reconnected
+    // Notify client that session is reconnected FIRST
+    // This allows client to prepare for receiving buffered messages
+    const bufferSize = this.messageEventBuffer.length;
     this.send({
       type: "session_reconnected",
       message: "Session reconnected, resuming...",
       workingDir: this.workingDir,
-      flushedMessages: flushedCount, // Inform client how many messages were replayed
+      flushedMessages: bufferSize, // Inform client how many messages will be replayed
     });
+
+    // Flush buffered messages AFTER sending reconnected notification
+    // This ensures client is ready to handle potentially incomplete message sequences
+    const flushedCount = this.flushMessageBuffer();
+    if (flushedCount > 0) {
+      console.log(`[PiAgentSession.reconnect] Flushed ${flushedCount} buffered messages to client`);
+    }
 
     console.log(`[PiAgentSession.reconnect] ========== END ==========`);
   }
