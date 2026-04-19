@@ -23,6 +23,12 @@ import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { ChatController, Message, ToolExecution } from "@/features/chat/types/chat";
 import { websocketService } from "@/services/websocket.service";
 import { sessionManager } from "@/features/chat/services/sessionManager";
+import {
+  messageReconstructor,
+  isContentDeltaEvent,
+  isContentStartEvent,
+  getContentTypeFromDelta,
+} from "@/features/chat/services/messageReconstruction";
 
 // ============================================================================
 // Message ID Generator
@@ -373,8 +379,15 @@ export function setupWebSocketListeners(): void {
     const message = data?.message;
     console.log(`[${ts}] [RECV] message_start: ${message?.role}, id=${message?.id || "new"}`);
 
+    // 记录事件到重建器
+    messageReconstructor.recordEvent("message_start");
+    
+    // 重置重建器状态
+    messageReconstructor.reset();
+
     if (message?.role === "assistant") {
       store.createStreamingMessage(message.id);
+      messageReconstructor.startMessage(message.id);
     }
   });
 
@@ -383,9 +396,24 @@ export function setupWebSocketListeners(): void {
     const message = data?.message;
     console.log(`[${ts}] [RECV] message_end: ${message?.role}, id=${message?.id}`);
 
+    // 记录事件到重建器
+    messageReconstructor.recordEvent("message_end");
+    
+    // 检查并修复未结束的内容块
+    const fix = messageReconstructor.autoFix();
+    if (fix?.action === "end_pending_blocks") {
+      console.log(`[${ts}] [RECONSTRUCT] Auto-ending ${fix.data.length} pending blocks`);
+      for (const block of fix.data) {
+        store.endContentBlock(block.type, block.index);
+      }
+    }
+
     if (message?.role === "assistant") {
       store.finishStreaming();
     }
+    
+    // 结束重建器状态
+    messageReconstructor.endMessage();
   });
 
   // =========================================================================
