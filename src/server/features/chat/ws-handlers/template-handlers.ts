@@ -143,8 +143,10 @@ export async function handleListTemplates(
   _payload: unknown
 ): Promise<void> {
   const workingDir = ctx.session.workingDir;
+  const hasSession = !!ctx.session.session;
   
-  logger.info(`[handleListTemplates] Searching templates for: ${workingDir}`);
+  logger.info(`[handleListTemplates] Session initialized: ${hasSession}, workingDir: ${workingDir}`);
+  logger.info(`[handleListTemplates] Session object exists: ${!!ctx.session}, workingDir property: ${ctx.session?.workingDir}`);
   
   const templates = await findTemplateFiles(workingDir);
   
