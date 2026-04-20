@@ -14,16 +14,16 @@ cat << 'EOF'
     Resume: tmux attach -t gateway-dev
 
 2️⃣  Completely close all services (Frontend + Backend + pi)
-    Method A: In each pane press Ctrl+c Stop服务，then press exit
+    Method A: In each pane press Ctrl+c Stop service, then press exit
     Method B: Directly close terminal window
     Method C: Run in another terminal: bash scripts/tmux-dev.sh kill
 
 🎯 Switch pane
 
-    Ctrl+b + ↑    去Frontend Pane
+    Ctrl+b + ↑    Go to Frontend Pane
     Ctrl+b + ↓    Go to AI (pi) pane
-    Ctrl+b + ←    去Backend Pane
-    Ctrl+b + →    去Backend Pane
+    Ctrl+b + ←    Go to Backend Pane
+    Ctrl+b + →    Go to Backend Pane
 
 🎯 Common Operations
 
@@ -31,9 +31,9 @@ cat << 'EOF'
     Stop Backend:    Ctrl+b + ← then Ctrl+c
     Stop pi:     Ctrl+b + ↓ then Ctrl+d or type exit
 
-🎯 会话管理（在普通终端Execute）
+🎯 Session management (execute in normal terminal)
 
-    查看会话:    tmux ls
+    View sessions:    tmux ls
     Recover session:    tmux attach -t gateway-dev
     Kill session:    tmux kill-session -t gateway-dev
 
