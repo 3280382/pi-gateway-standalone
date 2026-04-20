@@ -13,6 +13,9 @@ import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
 import styles from "./Modals.module.css";
 
+// Home directory - in browser env we use a default
+const HOME_DIR = "/root";
+
 interface Template {
   name: string;
   source: "global" | "local";
@@ -121,7 +124,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
             <div className={styles.empty}>
               <p>No templates found.</p>
               <p className={styles.hint}>
-                Create .md files in ~/.pi/agent/prompts/ or {workingDir}/.pi/prompts/
+                Create .md files in {HOME_DIR}/.pi/agent/prompts/ or {workingDir}/.pi/prompts/
               </p>
             </div>
           ) : (
