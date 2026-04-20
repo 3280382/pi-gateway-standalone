@@ -211,6 +211,45 @@
   background: #2ea043;
 }
 
+/* 类型选择器 */
+.typeSelector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.typeBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid rgba(48, 54, 61, 0.5);
+  border-radius: 6px;
+  background: #0d1117;
+  color: #8b949e;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.typeBtn:hover {
+  border-color: rgba(88, 166, 255, 0.5);
+  color: #e6edf3;
+}
+
+.typeBtnActive {
+  background: rgba(88, 166, 255, 0.15);
+  border-color: #58a6ff;
+  color: #58a6ff;
+}
+
+.typeBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
 /* 删除对话框 */
 .deleteModal {
   background: #161b22;

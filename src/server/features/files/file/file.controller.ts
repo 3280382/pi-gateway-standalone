@@ -347,6 +347,42 @@ export async function write(req: Request, res: Response) {
 }
 
 /**
+ * Create directory - corresponds to /api/files/mkdir
+ */
+export async function mkdir(req: Request, res: Response) {
+  const { path: dirPath } = req.body;
+
+  if (!dirPath) {
+    res.status(400).json({ error: "path parameter required" });
+    return;
+  }
+
+  const targetPath = expandPath(dirPath);
+
+  if (!isPathAllowed(targetPath)) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  try {
+    const { mkdir: fsMkdir } = await import("node:fs/promises");
+
+    await fsMkdir(targetPath, { recursive: true });
+
+    logger.info(`Create directory: ${targetPath}`);
+    res.json({ success: true, path: targetPath });
+  } catch (error) {
+    logger.error(
+      `Create directory error: ${error instanceof Error ? error.message : String(error)}`,
+      {
+        targetPath,
+      }
+    );
+    res.status(500).json({ error: String(error) });
+  }
+}
+
+/**
  * Batch delete files - corresponds to /api/files/batch-delete
  */
 // Prohibited system-critical directories（Only system directories, not user directories）

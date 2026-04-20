@@ -18,6 +18,7 @@ export interface UseFileOperationsResult {
   deleteSelected: () => Promise<void>;
   moveSelected: (targetPath: string) => Promise<void>;
   createNewFile: (fileName: string) => Promise<void>;
+  createNewDirectory: (dirName: string) => Promise<void>;
   executeFile: (path: string, onOutput?: (output: string) => void) => Promise<string | undefined>;
   refreshAfterOperation: () => Promise<void>;
 }
@@ -130,6 +131,28 @@ export function useFileOperations(): UseFileOperationsResult {
   );
 
   /**
+   * 创建新directories
+   */
+  const createNewDirectory = useCallback(
+    async (dirName: string) => {
+      try {
+        fileBrowserDebug.info("创建新directories", { dirName, currentBrowsePath });
+        await fileOperationsApi.createDirectory(currentBrowsePath, dirName);
+
+        // Refreshdirectories
+        await refreshAfterOperation();
+
+        fileBrowserDebug.info("创建directoriesSuccess", { dirName });
+      } catch (error) {
+        fileBrowserDebug.error("创建directoriesFailed", { error });
+        setError("Failed to create directory");
+        throw error;
+      }
+    },
+    [currentBrowsePath, refreshAfterOperation, setError]
+  );
+
+  /**
    * 执Rowsfiles
    */
   const executeFile = useCallback(
@@ -156,6 +179,7 @@ export function useFileOperations(): UseFileOperationsResult {
     deleteSelected,
     moveSelected,
     createNewFile,
+    createNewDirectory,
     executeFile,
     refreshAfterOperation,
   };

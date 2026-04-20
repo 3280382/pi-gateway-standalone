@@ -14,17 +14,21 @@ import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { useFileOperations } from "./useFileOperations";
 
+export type NewItemType = "file" | "directory";
+
 export interface UseFileBottomMenuResult {
   // UI 状态
   isNewModalOpen: boolean;
   isDeleteModalOpen: boolean;
   isTreeModalOpen: boolean;
   newFileName: string;
+  newItemType: NewItemType;
   treeData: TreeResponse | null;
   treeLoading: boolean;
 
   // 状态设置
   setNewFileName: (name: string) => void;
+  setNewItemType: (type: NewItemType) => void;
 
   // Actions方法
   handleNewClick: () => void;
@@ -45,6 +49,7 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isTreeModalOpen, setIsTreeModalOpen] = useState(false);
   const [newFileName, setNewFileName] = useState("");
+  const [newItemType, setNewItemType] = useState<NewItemType>("file");
   const [treeData, setTreeData] = useState<TreeResponse | null>(null);
   const [isTreeLoading, setIsTreeLoading] = useState(false);
 
@@ -52,7 +57,7 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
   const { selectedItems, isMultiSelectMode, toggleMultiSelectMode, clearSelection, workingDir } =
     useFileStore();
 
-  const { createNewFile, deleteSelected } = useFileOperations();
+  const { createNewFile, createNewDirectory, deleteSelected } = useFileOperations();
   const { openViewer } = useFileViewerStore();
 
   // ========== 2. Ref ==========
@@ -78,19 +83,24 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
   // 简单Items件判断，无需useMemo
 
   // ========== 5. Actions ==========
-  // 新建files
+  // 新建files/directories
   const handleNewClick = useCallback(() => {
     setIsNewModalOpen(true);
     setNewFileName("");
+    setNewItemType("file");
   }, []);
 
   const handleConfirmNew = useCallback(async () => {
     if (!newFileName.trim()) return;
-    const fileName = newFileName.trim();
-    await createNewFile(fileName);
+    const name = newFileName.trim();
+    if (newItemType === "file") {
+      await createNewFile(name);
+    } else {
+      await createNewDirectory(name);
+    }
     setIsNewModalOpen(false);
     setNewFileName("");
-  }, [newFileName, createNewFile]);
+  }, [newFileName, newItemType, createNewFile, createNewDirectory]);
 
   const handleCancelNew = useCallback(() => {
     setIsNewModalOpen(false);
@@ -149,9 +159,11 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
     isDeleteModalOpen,
     isTreeModalOpen,
     newFileName,
+    newItemType,
     treeData,
     treeLoading: isTreeLoading,
     setNewFileName,
+    setNewItemType,
     handleNewClick,
     handleConfirmNew,
     handleCancelNew,

@@ -10,7 +10,7 @@ import type { Application } from "express";
  */
 export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
   // File controller
-  const { browse, tree, content, raw, write, batchDelete, batchMove, execute } = await import(
+  const { browse, tree, content, raw, write, mkdir, batchDelete, batchMove, execute } = await import(
     "./file/file.controller"
   );
 
@@ -32,6 +32,7 @@ export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
   app.get("/api/files/file/content", content);
   app.get("/api/files/file/raw", raw);
   app.post("/api/files/file/write", write);
+  app.post("/api/files/file/mkdir", mkdir);
   app.post("/api/files/file/batch-delete", batchDelete);
   app.post("/api/files/file/batch-move", batchMove);
   app.post("/api/files/file/execute", execute);

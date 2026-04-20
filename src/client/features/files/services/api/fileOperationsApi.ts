@@ -93,6 +93,23 @@ export async function createFile(workingDir: string, fileName: string): Promise<
 }
 
 /**
+ * 创建新directories
+ */
+export async function createDirectory(workingDir: string, dirName: string): Promise<void> {
+  const dirPath = `${workingDir}/${dirName}`.replace(/\/+/g, "/");
+
+  const response = await fetch("/api/files/file/mkdir", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ path: dirPath }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create directory");
+  }
+}
+
+/**
  * 执Rowsfiles
  */
 export async function executeFileByPath(
