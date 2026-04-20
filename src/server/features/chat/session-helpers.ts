@@ -176,14 +176,11 @@ export async function getSessionMessages(
       paginatedEntries = entries;
     }
 
-    // Server-side processing: merge toolResults into assistant messages
-    // This avoids expensive tree traversal on client side for large sessions
-    if (processMessages) {
-      const { messages } = processSessionEntries(paginatedEntries);
-      return messages;
-    }
+    // NOTE: Server-side processing disabled - let client handle message transformation
+    // to ensure all system events (compaction, retry, etc.) are properly preserved
+    // Server-side processing was filtering out some special entry types
 
-    // Return raw entries with kind field (for backward compatibility)
+    // Add kind field to all historical messages for client-side filtering
     return paginatedEntries.map(msg => ({
       ...msg,
       kind: detectMessageKind(msg)

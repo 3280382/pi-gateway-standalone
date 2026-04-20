@@ -38,10 +38,6 @@ export function handleServerMessages(
         (c.type === "text" && typeof c.text === "string")
     );
 
-  // Debug: count system messages
-  const systemMsgCount = serverMessages.filter((m: any) => m.role === "system").length;
-  console.log("[MessageProcessing] Server messages:", serverMessages.length, "System messages:", systemMsgCount);
-
   if (isProcessed) {
     console.log("[MessageProcessing] Using server-preprocessed messages:", serverMessages.length);
     return serverMessages as Message[];

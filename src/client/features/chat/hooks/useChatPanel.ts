@@ -267,8 +267,6 @@ export function useChatPanel(): UseChatPanelReturn {
       console.log("[useChatPanel] All history loaded:", {
         messageCount: response.messages?.length,
         totalCount: response.totalCount,
-        sampleMessage: response.messages?.[0],
-        systemMessages: response.messages?.filter((m: any) => m.role === "system").map((m: any) => ({ id: m.id, kind: m.kind, content: m.content?.[0]?.text?.slice(0, 50) })),
       });
 
       // 合并消息：新加载的历史消息 + 当前已有的消息（避免重复）

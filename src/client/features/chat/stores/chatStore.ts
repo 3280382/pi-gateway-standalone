@@ -1301,7 +1301,9 @@ function detectHierarchicalMessageType(message: Message): {
       // Use kind field or detect from content
       const kind = message.kind;
       if (kind) {
-        return { role: "system", contentType: kind };
+        // Convert snake_case kind to camelCase for contentTypes lookup
+        const camelKind = kind.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+        return { role: "system", contentType: camelKind };
       }
       
       // Fallback: detect from text content
@@ -1319,10 +1321,10 @@ function detectHierarchicalMessageType(message: Message): {
       if (text.includes("🔄 Retrying")) {
         return { role: "system", contentType: "retry" };
       }
-      if (text.includes("模型已切换为")) {
+      if (text.includes("模型已切换为") || text.includes("Model switched")) {
         return { role: "system", contentType: "modelChange" };
       }
-      if (text.includes("Thinking level已设置")) {
+      if (text.includes("Thinking level") || text.includes("Thinking level已设置")) {
         return { role: "system", contentType: "thinkingLevelChange" };
       }
       if (text.includes("📊") || text.includes("tokens") || text.includes("cost")) {
@@ -1366,16 +1368,8 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
   return messages.filter((message) => {
     const { role, contentType } = detectHierarchicalMessageType(message);
 
-    // Debug: log system messages
-    if (role === "system") {
-      console.log("[filterMessages] System message:", message.id, "kind:", message.kind, "contentType:", contentType);
-    }
-
     // Level 1: Role filtering
-    if (!safeFilters.roles[role]) {
-      if (role === "system") console.log("[filterMessages] Filtered out: role disabled");
-      return false;
-    }
+    if (!safeFilters.roles[role]) return false;
 
     // Level 2: Content type filtering (role-specific)
     switch (role) {
@@ -1407,16 +1401,10 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
         // System messages are special events
         if (contentType === "unknown") {
           // Unknown system messages are shown if system role is enabled
-          console.log("[filterMessages] System message passed (unknown type):", message.id);
           return true;
         }
         const typeKey = contentType as keyof typeof safeFilters.contentTypes;
-        const isEnabled = safeFilters.contentTypes[typeKey];
-        console.log("[filterMessages] System message typeKey:", typeKey, "enabled:", isEnabled);
-        if (!isEnabled) {
-          console.log("[filterMessages] System message filtered out:", message.id, "type:", contentType);
-          return false;
-        }
+        if (!safeFilters.contentTypes[typeKey]) return false;
         break;
       }
     }

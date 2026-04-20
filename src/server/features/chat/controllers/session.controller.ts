@@ -90,18 +90,15 @@ export async function loadSession(req: Request, res: Response) {
     // Extract session ID from session file path
     const sessionId = sessionPath.split("/").pop()?.replace(".jsonl", "") || "";
 
-    // Process entries on server side to merge tool results
-    // This avoids expensive tree traversal on client side for large sessions
-    const { entries: processedEntries, messages } = processSessionEntries(entries);
+    // NOTE: Server-side processing disabled - let client handle message transformation
+    // Server-side processSessionEntries was filtering out special entry types (compaction, retry, etc.)
+    // Client-side normalizeSessionMessages correctly handles all entry types
 
-    logger.info(
-      `Loaded session: ${sessionPath}, entries: ${entries.length}, messages: ${messages.length}`
-    );
+    logger.info(`Loaded session: ${sessionPath}, entries: ${entries.length}`);
     res.json({
       path: sessionPath,
       sessionId: sessionId,
-      entries: processedEntries,
-      messages,
+      entries,
     });
   } catch (error) {
     logger.error(
