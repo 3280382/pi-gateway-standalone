@@ -91,10 +91,10 @@ class SessionConfigManager {
   /**
    * Auto-initialize config from session file
    */
-  async autoInitialize(shortId: string, fullPath: string, workingDir: string): Promise<SessionConfig> {
+  async autoInitialize(shortId: string, fullPath: string, workingDir: string): Promise<SessionConfig | null> {
     await this.init();
     
-    // Already exists
+    // Already exists - return existing without logging
     if (this.config[shortId]) {
       return this.config[shortId];
     }
@@ -130,12 +130,19 @@ class SessionConfigManager {
   async ensureConfigs(sessions: Array<{ id: string; path: string }>, workingDir: string): Promise<void> {
     await this.init();
     
+    // Quick check: count missing configs first
+    const missingSessions = sessions.filter(s => !this.config[s.id]);
+    if (missingSessions.length === 0) {
+      // All sessions already have configs, skip processing
+      return;
+    }
+    
+    logger.info(`[SessionConfigManager] Found ${missingSessions.length} new sessions to initialize`);
+    
     let hasNew = false;
-    for (const session of sessions) {
-      if (!this.config[session.id]) {
-        await this.autoInitialize(session.id, session.path, workingDir);
-        hasNew = true;
-      }
+    for (const session of missingSessions) {
+      await this.autoInitialize(session.id, session.path, workingDir);
+      hasNew = true;
     }
     
     if (hasNew) {
