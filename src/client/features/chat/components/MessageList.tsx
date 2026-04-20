@@ -3,7 +3,7 @@
  */
 
 import { useMemo } from "react";
-import { useChatStore } from "@/features/chat/stores/chatStore";
+import { useChatStore, selectSearchFilters } from "@/features/chat/stores/chatStore";
 import type { Message, MessageContent } from "@/features/chat/types/chat";
 import { MessageItem } from "./MessageItem";
 import styles from "./MessageList.module.css";
@@ -38,6 +38,53 @@ export function MessageList({
   const streamingThinking = useChatStore((state) => state.streamingThinking);
   const streamingToolCalls = useChatStore((state) => state.streamingToolCalls);
   const activeTools = useChatStore((state) => state.activeTools);
+  
+  // Get search filters for hierarchical content filtering
+  const searchFilters = useChatStore(selectSearchFilters);
+  
+  // Compute visible content types based on active filters
+  const { visibleContentTypes, effectiveShowText, effectiveShowThinking, effectiveShowTools } = useMemo(() => {
+    // Default: show all content types
+    const defaultTypes = new Set(["prompt", "text", "thinking", "tool", "compaction", "retry", "autoRetry", "modelChange", "thinkingLevelChange", "usage"]);
+    
+    // If no filters or all filters active, show everything
+    const { roles, contentTypes } = searchFilters || {};
+    if (!roles || !contentTypes) {
+      return {
+        visibleContentTypes: defaultTypes,
+        effectiveShowText: true,
+        effectiveShowThinking: showThinking,
+        effectiveShowTools: showTools ?? true,
+      };
+    }
+    
+    // Build set of visible content types based on active role + content type combination
+    const visible = new Set<string>();
+    
+    if (roles.user && contentTypes.prompt) {
+      visible.add("prompt");
+    }
+    if (roles.assistant) {
+      if (contentTypes.text) visible.add("text");
+      if (contentTypes.thinking) visible.add("thinking");
+      if (contentTypes.tool) visible.add("tool");
+    }
+    if (roles.system) {
+      if (contentTypes.compaction) visible.add("compaction");
+      if (contentTypes.retry) visible.add("retry");
+      if (contentTypes.autoRetry) visible.add("autoRetry");
+      if (contentTypes.modelChange) visible.add("modelChange");
+      if (contentTypes.thinkingLevelChange) visible.add("thinkingLevelChange");
+      if (contentTypes.usage) visible.add("usage");
+    }
+    
+    return {
+      visibleContentTypes: visible,
+      effectiveShowText: roles.assistant && contentTypes.text,
+      effectiveShowThinking: showThinking && roles.assistant && contentTypes.thinking,
+      effectiveShowTools: (showTools ?? true) && roles.assistant && contentTypes.tool,
+    };
+  }, [searchFilters, showThinking, showTools]);
 
   // Build streaming message content
   const streamingMessageWithContent = useMemo(() => {
@@ -170,8 +217,10 @@ export function MessageList({
         <MessageItem
           key={message.id}
           message={message}
-          showThinking={showThinking}
-          showTools={showTools}
+          showThinking={effectiveShowThinking}
+          showTools={effectiveShowTools}
+          showText={effectiveShowText}
+          visibleContentTypes={visibleContentTypes}
           onToggleCollapse={() => onToggleMessageCollapse(message.id)}
           onToggleThinking={() => onToggleThinkingCollapse(message.id)}
           onToggleTools={() => onToggleToolsCollapse?.(message.id)}

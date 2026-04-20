@@ -22,6 +22,8 @@ interface MessageItemProps {
   message: Message;
   showThinking: boolean;
   showTools?: boolean;
+  showText?: boolean;  // Control text content display
+  visibleContentTypes?: Set<string>;  // Hierarchical filtering: which content types to show
   onToggleCollapse: () => void;
   onToggleThinking: () => void;
   onToggleTools?: () => void;
@@ -40,6 +42,7 @@ interface GlassCardProps {
   isNewMessage?: boolean; // true=streaming message (default expand), false=historical message(thinking/tool default collapse)
   showThinking: boolean;
   showTools?: boolean;
+  showText?: boolean;
   messageKind?: Message["kind"];
 }
 
@@ -174,7 +177,13 @@ function indexContentBlocks(content: MessageContent[]): IndexedContentBlock[] {
 // ============================================================================
 
 export const MessageItem = memo(
-  function MessageItem({ message, showThinking, showTools = true }: MessageItemProps) {
+  function MessageItem({ 
+    message, 
+    showThinking, 
+    showTools = true, 
+    showText = true,
+    visibleContentTypes 
+  }: MessageItemProps) {
     // ========== 4. Computed ==========
     const isUser = message.role === "user";
 
@@ -183,6 +192,31 @@ export const MessageItem = memo(
       // Add index to content blocks
       return indexContentBlocks(message.content);
     }, [message.content]);
+
+    // Filter blocks based on visibleContentTypes for hierarchical filtering
+    const filteredBlocks = useMemo(() => {
+      if (!visibleContentTypes || visibleContentTypes.size === 0) return blocks;
+      
+      return blocks.filter((block) => {
+        // Map block type to content type
+        switch (block.type) {
+          case "text":
+            // For assistant messages, text maps to "text" content type
+            // For user messages, text maps to "prompt" content type
+            if (message.role === "user") {
+              return visibleContentTypes.has("prompt");
+            }
+            return visibleContentTypes.has("text");
+          case "thinking":
+            return visibleContentTypes.has("thinking");
+          case "tool_use":
+          case "tool":
+            return visibleContentTypes.has("tool");
+          default:
+            return true;
+        }
+      });
+    }, [blocks, visibleContentTypes, message.role]);
 
     // ========== 5. Render ==========
     if (isUser) {
@@ -200,9 +234,12 @@ export const MessageItem = memo(
     // Detect if compaction message
     const isCompaction = message.kind === "compaction";
     
+    // Use filtered blocks for rendering
+    const displayBlocks = filteredBlocks.length > 0 ? filteredBlocks : blocks;
+    
     return (
       <div className={`${styles.aiContainer} ${isCompaction ? styles.compactionContainer : ""}`}>
-        {blocks.map((block, idx) => (
+        {displayBlocks.map((block, idx) => (
           <GlassCard
             key={`${block.type}-${idx}`}
             block={block}
@@ -210,6 +247,7 @@ export const MessageItem = memo(
             isNewMessage={message.isStreaming} // Streaming message treated as new
             showThinking={showThinking}
             showTools={showTools ?? true}
+            showText={showText}
             messageKind={message.kind}
           />
         ))}
@@ -234,6 +272,7 @@ function GlassCard({
   isNewMessage = false,
   showThinking,
   showTools = true,
+  showText = true,
   messageKind,
 }: GlassCardProps) {
   // ========== 1. State ==========
@@ -475,6 +514,7 @@ function GlassCard({
     }
 
     case "text":
+      if (!showText) return null;
       if (!block.text) return null;
       
       // Detect if usage message
