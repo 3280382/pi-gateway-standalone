@@ -17,7 +17,7 @@ export type Theme = "dark" | "light";
 export type FontSize = "tiny" | "small" | "medium" | "large";
 
 interface AppState {
-  // View状态
+  // View state
   currentView: ViewType;
   setCurrentView: (view: ViewType) => void;
 
@@ -36,7 +36,7 @@ export const useAppStore = create<AppState>()(
       // Initial state
       currentView: "chat",
 
-      // View操作
+      // View operations
       setCurrentView: (view) => set({ currentView: view }),
 
       // Global settings

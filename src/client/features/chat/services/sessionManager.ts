@@ -232,7 +232,7 @@ async function selectSession(sessionId: string): Promise<void> {
   console.log("[SessionManager.selectSession] 显示 loading");
 
   try {
-    // 使用统一的 init API（传入 sessionFile 用于精确匹配）
+    // 使用统一的 init API（传入 sessionFile 用于Exact match）
     console.log("[SessionManager.selectSession] Calling initChatWorkingDirectory...");
     const messageLimit = stores.session.defaultMessageLimit;
     const response = await initChatWorkingDirectory(stores.session.workingDir, session.path, 15000, messageLimit);

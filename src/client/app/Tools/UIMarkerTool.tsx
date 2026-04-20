@@ -1,6 +1,6 @@
 /**
  * UIMarkerTool - UI Marker tool
- * Responsibilities:点击红色按钮后显示 UI Marker 功能
+ * Responsibilities: Show UI Marker feature after clicking red button
  */
 
 import { useCallback, useState, useEffect } from "react";

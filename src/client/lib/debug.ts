@@ -232,7 +232,7 @@ export function logFunctionCall(
   additionalContext?: Partial<DebugContext>
 ) {
   debuggerInstance.debug(
-    `调用函数: ${functionName}`,
+    `Call function: ${functionName}`,
     {
       arguments: args.map((arg) => formatObject(arg)),
       argumentCount: args.length,
@@ -242,7 +242,7 @@ export function logFunctionCall(
 }
 
 /**
- * 工具函数：记录函数返回
+ * Utility: Log function return
  */
 export function logFunctionReturn(
   debuggerInstance: ReturnType<typeof createDebugger>,
@@ -251,7 +251,7 @@ export function logFunctionReturn(
   additionalContext?: Partial<DebugContext>
 ) {
   debuggerInstance.debug(
-    `函数返回: ${functionName}`,
+    `Function return: ${functionName}`,
     {
       returnValue: formatObject(returnValue),
     },
@@ -260,7 +260,7 @@ export function logFunctionReturn(
 }
 
 /**
- * 工具函数：记录错误
+ * Utility: Log error
  */
 export function logError(
   debuggerInstance: ReturnType<typeof createDebugger>,
@@ -269,7 +269,7 @@ export function logError(
   additionalContext?: Partial<DebugContext>
 ) {
   debuggerInstance.error(
-    `函数Error: ${functionName}`,
+    `Function error: ${functionName}`,
     {
       error: error.message,
       stack: error.stack,
@@ -280,7 +280,7 @@ export function logError(
 }
 
 /**
- * Height阶函数：包装函数以自动记录调用和返回
+ * Higher-order function: Wrap function to auto log calls and returns
  */
 export function withLogging<T extends (...args: any[]) => any>(
   debuggerInstance: ReturnType<typeof createDebugger>,
@@ -293,7 +293,7 @@ export function withLogging<T extends (...args: any[]) => any>(
     try {
       const result = fn(...args);
 
-      // 处理Promise
+      // Handle promise
       if (result && typeof result.then === "function") {
         return result.then(
           (resolved: any) => {

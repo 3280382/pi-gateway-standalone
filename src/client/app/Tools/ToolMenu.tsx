@@ -1,6 +1,6 @@
 /**
  * ToolMenu - Tool menu container
- * Responsibilities:管理工具菜单的Expand/收起，渲染工具Cols表
+ * Responsibilities: Manage tool menu expand/collapse, render tool list
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -61,7 +61,7 @@ export function ToolMenu() {
         )}
       </div>
 
-      {/* Settings Modal - 独立于菜单生命周期 */}
+      {/* Settings Modal - Independent of menu lifecycle */}
       {isSettingsOpen && (
         <div
           className={styles.overlay}

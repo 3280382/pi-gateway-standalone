@@ -49,7 +49,7 @@ export function switchChatSession(sessionId: string): boolean {
  * 返回 Promise 等待 initialized 响应
  *
  * @param path 工作directories路径
- * @param sessionFile Session files路径（可选，用于精确匹配 session）
+ * @param sessionFile Session files路径（可选，用于Exact match session）
  * @param timeoutMs 超时时间
  */
 export function initChatWorkingDirectory(

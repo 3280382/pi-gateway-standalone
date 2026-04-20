@@ -15,7 +15,7 @@ export enum LogLevel {
   VERBOSE = 5,
 }
 
-// 模块Log level配置
+// Module log level configuration
 const MODULE_LEVELS: Record<string, LogLevel> = {
   // React rendering related modules - debug level
   React: LogLevel.DEBUG,
@@ -27,23 +27,23 @@ const MODULE_LEVELS: Record<string, LogLevel> = {
   ChatPanel: LogLevel.DEBUG,
   InputArea: LogLevel.DEBUG,
 
-  // WebSocket相关模块 - info level
+  // WebSocket related modules - info level
   WebSocket: LogLevel.INFO,
   WS: LogLevel.INFO,
   Gateway: LogLevel.INFO,
 
-  // Others模块默认级别
+  // Other modules default level
   default: LogLevel.INFO,
 };
 
-// 从Environment variables读取是否启用日志
+// Read whether to enable logs from environment variables
 const isDev = process.env.NODE_ENV !== "production";
 
 /**
- * 获取模块的Log level
+ * Get module log level
  */
 function getModuleLevel(namespace: string): LogLevel {
-  // 精确匹配
+  // Exact match
   if (MODULE_LEVELS[namespace]) {
     return MODULE_LEVELS[namespace];
   }

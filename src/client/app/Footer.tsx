@@ -1,6 +1,6 @@
 /**
  * Footer - Global bottom navigation
- * Responsibilities:纯布局容器，根据当前视图操作对应 feature 的 sidebar/panel
+ * Responsibilities: Pure layout container, operate sidebar/panel based on current view
  */
 
 // ===== [ANCHOR:IMPORTS] =====
@@ -52,7 +52,7 @@ export function Footer() {
   // ===== [ANCHOR:RENDER] =====
   return (
     <nav className={styles.footer}>
-      {/* 左侧：Sidebar和面板切换 */}
+      {/* Left: Sidebar and panel toggle */}
       <div className={styles.leftGroup}>
         <IconToggle
           activeIcon="leftArrow"
@@ -72,7 +72,7 @@ export function Footer() {
         />
       </div>
 
-      {/* 中间：视图切换 */}
+      {/* Middle: View switch */}
       <div className={styles.centerGroup}>
         <IconButton
           name="chat"
@@ -90,7 +90,7 @@ export function Footer() {
         />
       </div>
 
-      {/* 右侧：工具菜单 */}
+      {/* Right: Tool menu */}
       <div className={styles.rightGroup}>
         <ToolMenu />
       </div>

@@ -1,11 +1,11 @@
 /**
  * Performance utilities for streaming message handling
- * 使用业界标准方案：批量更新 + 节流 + RAF调度
+ * Use industry standard: batch updates + throttle + RAF scheduling
  */
 
 import { useCallback, useRef } from "react";
 
-// 批量更新队Cols
+// Batch update queue
 interface UpdateQueue {
   content?: string;
   thinking?: string;
@@ -24,19 +24,19 @@ export class BatchedUpdater {
     this.callback = callback;
   }
 
-  // 批量添加内容更新
+  // Batch add content update
   queueContent(text: string) {
     this.queue.content = (this.queue.content || "") + text;
     this.scheduleUpdate();
   }
 
-  // 批量添加思考更新
+  // Batch add thinking update
   queueThinking(thinking: string) {
     this.queue.thinking = (this.queue.thinking || "") + thinking;
     this.scheduleUpdate();
   }
 
-  // 批量添加Tool call更新
+  // Batch add tool call update
   queueToolCall(id: string, name: string, delta: string) {
     if (!this.queue.toolCall) {
       this.queue.toolCall = { id, name, delta: "" };
@@ -45,20 +45,20 @@ export class BatchedUpdater {
     this.scheduleUpdate();
   }
 
-  // 批量添加工具输出更新
+  // Batch add tool output update
   queueToolOutput(id: string, output: string) {
     this.queue.toolOutput = { id, output };
     this.scheduleUpdate();
   }
 
-  // 使用RAF调度更新，确保在浏览器空闲时执Rows
+  // Use RAF scheduling, ensure execution when browser is idle
   private scheduleUpdate() {
     if (this.rafId !== null) return;
 
     const now = performance.now();
     const elapsed = now - this.lastUpdateTime;
 
-    // 如果距离上次更新太近，延迟执Rows
+    // If too close to last update, delay execution
     if (elapsed < this.MIN_UPDATE_INTERVAL) {
       setTimeout(() => {
         this.rafId = requestAnimationFrame(() => this.flush());
@@ -68,7 +68,7 @@ export class BatchedUpdater {
     }
   }
 
-  // 执Rows批量更新
+  // Execute batch update
   private flush() {
     if (Object.keys(this.queue).length === 0) {
       this.rafId = null;
@@ -83,7 +83,7 @@ export class BatchedUpdater {
     this.callback(updates);
   }
 
-  // 强制立即Refresh
+  // Force immediate refresh
   forceFlush() {
     if (this.rafId !== null) {
       cancelAnimationFrame(this.rafId);
@@ -91,7 +91,7 @@ export class BatchedUpdater {
     this.flush();
   }
 
-  // 销毁
+  // Destroy
   destroy() {
     if (this.rafId !== null) {
       cancelAnimationFrame(this.rafId);
@@ -132,7 +132,7 @@ export function useBatchedUpdates(onUpdate: (updates: UpdateQueue) => void) {
   };
 }
 
-// 节流函数 - 限制函数执Rows频率
+// Throttle function - limit function execution frequency
 export function throttle<T extends (...args: any[]) => void>(
   func: T,
   limit: number
@@ -147,7 +147,7 @@ export function throttle<T extends (...args: any[]) => void>(
   };
 }
 
-// 防抖函数 - 延迟执Rows直到停止调用
+// Debounce function - delay execution until stopped calling
 export function debounce<T extends (...args: any[]) => void>(
   func: T,
   wait: number
@@ -159,13 +159,13 @@ export function debounce<T extends (...args: any[]) => void>(
   };
 }
 
-// 测量渲染性能
+// Measure render performance
 export function measureRenderTime<T>(name: string, fn: () => T): T {
   const start = performance.now();
   const result = fn();
   const duration = performance.now() - start;
   if (duration > 16) {
-    // 超过一帧时间
+    // Exceeds one frame time
     console.warn(`[Performance] ${name} took ${duration.toFixed(2)}ms`);
   }
   return result;

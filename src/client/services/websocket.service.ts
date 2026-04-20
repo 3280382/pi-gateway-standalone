@@ -474,5 +474,5 @@ export class WebSocketService {
 
 // ===== [ANCHOR:EXPORTS] =====
 
-// 导出单例
+// Export singleton
 export const websocketService = new WebSocketService();

@@ -37,8 +37,8 @@ export const APP_STORAGE_VERSION = {
 
 export const APP_GLOBAL_PERSIST = ["currentView", "theme", "fontSize"] as const;
 
-/** App Workspace Store - 持久化字段（全局工作directories） */
-// 注意：currentBrowsePath 现在由 FileStore (pi:files:browser) 持久化
+/** App Workspace Store - Persistence fields (global working directory) */
+// Note: currentBrowsePath is now persisted by FileStore (pi:files:browser)
 // workspaceStore only keeps workingDir
 export const APP_WORKSPACE_PERSIST = ["workingDir"] as const;
 

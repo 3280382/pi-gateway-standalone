@@ -31,7 +31,7 @@ function getSessionStore() {
 }
 
 export interface WorkspaceState {
-  // Current working directory (project root)- 这是真正持久化的工作directories
+  // Current working directory (project root) - this is the truly persisted working directory
   workingDir: string;
 }
 
@@ -50,7 +50,7 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
         setWorkingDir: (workingDir) => {
           console.log("[WorkspaceStore] setWorkingDir called:", workingDir);
 
-          // Sync update sidebarStore workingDir（包含 path 和 displayName 的对象）
+          // Sync update sidebarStore workingDir (object containing path and displayName)
           try {
             const { useSidebarStore } = getSidebarStore();
             const sidebarState = useSidebarStore.getState();

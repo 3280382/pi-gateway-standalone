@@ -93,7 +93,7 @@ export function useChatInit(): { isConnecting: boolean } {
 
       const initResponse = await initChatWorkingDirectory(
         savedWorkingDir,
-        savedSessionFile, // 传递 sessionFile 用于精确匹配
+        savedSessionFile, // 传递 sessionFile 用于Exact match
         10000, // 10秒超时，因为需要加载files
         messageLimit
       ).catch((err) => {

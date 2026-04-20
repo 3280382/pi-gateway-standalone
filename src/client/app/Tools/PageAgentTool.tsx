@@ -1,6 +1,6 @@
 /**
  * PageAgentTool - Page Agent tool
- * Responsibilities:加载/控制 page-agent
+ * Responsibilities: Load/control page-agent
  */
 
 import { useCallback, useState } from "react";

@@ -187,7 +187,7 @@ export function IconButton({
 interface IconToggleProps extends Omit<IconButtonProps, "name" | "isActive"> {
   /** Active state icon */
   activeIcon: IconName;
-  /** 非Active state icon */
+  /** Inactive state icon */
   inactiveIcon: IconName;
   /** Currently active */
   isActive: boolean;

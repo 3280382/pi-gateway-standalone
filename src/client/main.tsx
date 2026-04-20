@@ -6,7 +6,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./app/App";
 
-// Global error handling - 捕获未处理的错误
+// Global error handling - catch unhandled errors
 let errorDiv: HTMLDivElement | null = null;
 
 function showErrorBanner(message: string, type: "error" | "promise" = "error") {

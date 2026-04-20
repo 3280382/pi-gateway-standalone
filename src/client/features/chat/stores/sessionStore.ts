@@ -88,7 +88,7 @@ export interface ChatSessionState {
 
   // 当前会话
   currentSessionId: string | null;
-  currentSessionFile: string | null; // session files路径，用于 init 时的精确匹配
+  currentSessionFile: string | null; // session files路径，用于 init 时的Exact match
 
   // 模型设置（从服务器获取，不持久化到 localStorage）
   currentModel: string | null;  // 当前实际使用的模型（优先 session 级别）
