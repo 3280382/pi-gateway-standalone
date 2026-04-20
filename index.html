@@ -25,17 +25,14 @@
   <!-- Local Fonts -->
   <link rel="stylesheet" href="fonts/inter.css">
   <link rel="stylesheet" href="fonts/jetbrains-mono.css">
-  <!-- Prism.js for syntax highlighting (local) -->
+  <!-- Prism.js for syntax highlighting (with autoloader for lazy loading) -->
   <link rel="stylesheet" href="vendor/prism/prism-tomorrow.min.css" />
   <script src="vendor/prism/prism.js"></script>
-  <script src="vendor/prism/components/prism-javascript.min.js"></script>
-  <script src="vendor/prism/components/prism-typescript.min.js"></script>
-  <script src="vendor/prism/components/prism-json.min.js"></script>
-  <script src="vendor/prism/components/prism-python.min.js"></script>
-  <script src="vendor/prism/components/prism-bash.min.js"></script>
-  <script src="vendor/prism/components/prism-yaml.min.js"></script>
-  <script src="vendor/prism/components/prism-css.min.js"></script>
-  <script src="vendor/prism/components/prism-markup.min.js"></script>
+  <script src="vendor/prism/plugins/autoloader/prism-autoloader.min.js"></script>
+  <script>
+    // Configure Prism Autoloader - languages will be loaded on-demand
+    Prism.plugins.autoloader.languages_path = 'vendor/prism/components/';
+  </script>
 </head>
 <body>
   <!-- React Application Mount Point -->

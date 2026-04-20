@@ -52,20 +52,24 @@ export function FileViewer() {
     }
   }, []);
 
-  // 语法Height亮 - 仅在查看模式下使用 Prism.js
+  // Syntax highlighting - only in view mode using Prism.js with autoloader
   useEffect(() => {
     if (mode === "view" && content && !fileTypes.isImage && !fileTypes.isHtml) {
-      const timer = setTimeout(() => {
+      const highlight = () => {
         if ((window as any).Prism) {
+          const Prism = (window as any).Prism;
           const codeElement = document.querySelector("[data-prism-code]");
           if (codeElement) {
-            (window as any).Prism.highlightElement(codeElement);
+            Prism.highlightElement(codeElement);
           }
         }
-      }, 10);
+      };
+
+      // Wait a bit for autoloader to fetch language if needed
+      const timer = setTimeout(highlight, 50);
       return () => clearTimeout(timer);
     }
-  }, [content, mode, fileTypes.isImage, fileTypes.isHtml]);
+  }, [content, mode, fileTypes.isImage, fileTypes.isHtml, prismLanguage]);
 
   // 进入编辑模式后自动聚焦 textarea
   useEffect(() => {
@@ -88,10 +92,13 @@ export function FileViewer() {
   };
 
   // ========== 5. Computed ==========
-  // Prism.js 查看模式语言映射（tsx -> typescript）
+  // Prism.js 查看模式语言映射
   const language = getLanguage();
   const prismLanguage =
-    language === "tsx" ? "typescript" : language === "jsx" ? "javascript" : language;
+    language === "tsx" ? "tsx" :
+    language === "jsx" ? "jsx" :
+    language === "md" || language === "markdown" ? "markdown" :
+    language;
 
   // 渲染带有非可视化符号的内容
   const renderContentWithInvisibleChars = (text: string): string => {
