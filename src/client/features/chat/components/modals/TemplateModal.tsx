@@ -1,13 +1,8 @@
 /**
- * TemplateModal - Compact dropdown-based template selector
- *
- * Features:
- * - No sidebar, uses compact dropdown for selection
- * - Maximized content preview area
- * - Clean, minimal design
+ * TemplateModal - Clean template selector with custom dropdown
  */
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { websocketService } from "@/services/websocket.service";
@@ -35,6 +30,19 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [previewContent, setPreviewContent] = useState<string>("");
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // WebSocket listeners
   useEffect(() => {
@@ -88,6 +96,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
     setTemplates([]);
     setSelectedTemplate(null);
     setPreviewContent("");
+    setDropdownOpen(false);
     websocketService.send("list_templates");
   }, [isTemplateModalOpen]);
 
@@ -97,14 +106,11 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
     websocketService.send("get_template", { name });
   }, []);
 
-  const handleSelectChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const name = e.target.value;
-    const template = templates.find((t) => t.name === name);
-    if (template) {
-      setSelectedTemplate(template);
-      loadTemplate(template.name);
-    }
-  }, [templates, loadTemplate]);
+  const handleSelect = useCallback((template: Template) => {
+    setSelectedTemplate(template);
+    loadTemplate(template.name);
+    setDropdownOpen(false);
+  }, [loadTemplate]);
 
   const handleInsert = useCallback(() => {
     if (onTemplateSelect && previewContent) {
@@ -120,91 +126,87 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         {/* Compact Header */}
         <div className={styles.header}>
-          <div className={styles.headerLeft}>
-            <span className={styles.title}>Template</span>
-            {templates.length > 0 && (
-              <select
-                className={styles.templateSelect}
-                value={selectedTemplate?.name || ""}
-                onChange={handleSelectChange}
-                disabled={loading}
+          <div className={styles.headerLeft} ref={dropdownRef}>
+            <span className={styles.label}>Template</span>
+            
+            {/* Custom Dropdown */}
+            <div className={styles.dropdown}>
+              <button 
+                className={styles.dropdownTrigger}
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                disabled={loading || templates.length === 0}
               >
-                {templates.map((t) => (
-                  <option key={t.path} value={t.name}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-            )}
+                <span className={styles.selectedName}>
+                  {selectedTemplate?.name || "Select..."}
+                </span>
+                <span className={`${styles.arrow} ${dropdownOpen ? styles.open : ""}`}>▼</span>
+              </button>
+              
+              {dropdownOpen && templates.length > 0 && (
+                <div className={styles.dropdownMenu}>
+                  {templates.map((t) => (
+                    <div
+                      key={t.path}
+                      className={`${styles.dropdownItem} ${
+                        selectedTemplate?.path === t.path ? styles.active : ""
+                      }`}
+                      onClick={() => handleSelect(t)}
+                    >
+                      <span className={styles.itemName}>{t.name}</span>
+                      <span className={`${styles.itemBadge} ${styles[t.source]}`}>
+                        {t.source[0]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {selectedTemplate && (
-              <span className={`${styles.badge} ${styles[selectedTemplate.source]}`}>
+              <span className={`${styles.sourceTag} ${styles[selectedTemplate.source]}`}>
                 {selectedTemplate.source}
               </span>
             )}
           </div>
 
-          <div className={styles.headerRight}>
-            <button className={styles.closeBtn} onClick={closeTemplateModal}>
-              ✕
-            </button>
-          </div>
+          <button className={styles.closeBtn} onClick={closeTemplateModal}>✕</button>
         </div>
 
-        {/* Content Area */}
+        {/* Content */}
         <div className={styles.content}>
           {loading ? (
-            <div className={styles.centerMessage}>Loading templates...</div>
+            <div className={styles.center}>Loading...</div>
           ) : error ? (
-            <div className={styles.centerMessage} style={{ color: "#f85149" }}>
-              {error}
-            </div>
+            <div className={styles.center} style={{ color: "#f85149" }}>{error}</div>
           ) : templates.length === 0 ? (
-            <div className={styles.centerMessage}>
-              <p>No templates found</p>
-              <span className={styles.hint}>
-                Create .md files in ~/.pi/agent/prompts/
-              </span>
+            <div className={styles.center}>
+              <p>No templates</p>
+              <span className={styles.hint}>Create .md in ~/.pi/agent/prompts/</span>
             </div>
           ) : (
             <>
-              {/* Preview */}
               <div className={styles.preview}>
                 {previewLoading ? (
-                  <div className={styles.spinnerBox}>
-                    <div className={styles.spinner} />
-                  </div>
+                  <div className={styles.spinner} />
                 ) : (
-                  <pre className={styles.code}>
-                    <code>{previewContent}</code>
-                  </pre>
+                  <pre className={styles.code}><code>{previewContent}</code></pre>
                 )}
               </div>
 
-              {/* Footer */}
               <div className={styles.footer}>
-                <div className={styles.footerLeft}>
+                <div className={styles.info}>
                   {selectedTemplate && (
                     <>
-                      <span className={styles.fileName}>
-                        {selectedTemplate.name}
-                      </span>
-                      <span className={styles.sep}>·</span>
+                      <span className={styles.name}>{selectedTemplate.name}</span>
+                      <span className={styles.dot}>·</span>
                       <span className={styles.stats}>
-                        {previewContent.length}c ·{" "}
-                        {previewContent.split(/\s+/).filter(Boolean).length}w ·{" "}
-                        {previewContent.split("\n").length}l
-                      </span>
-                      <span className={styles.sep}>·</span>
-                      <span className={styles.path} title={selectedTemplate.path}>
-                        {selectedTemplate.path.replace(HOME_DIR, "~")}
+                        {previewContent.length}c {previewContent.split(/\s+/).filter(Boolean).length}w {previewContent.split("\n").length}l
                       </span>
                     </>
                   )}
                 </div>
-                <div className={styles.footerRight}>
-                  <button className={styles.btnSecondary} onClick={closeTemplateModal}>
-                    Cancel
-                  </button>
+                <div className={styles.actions}>
+                  <button className={styles.btnSecondary} onClick={closeTemplateModal}>Cancel</button>
                   <button
                     className={styles.btnPrimary}
                     onClick={handleInsert}
