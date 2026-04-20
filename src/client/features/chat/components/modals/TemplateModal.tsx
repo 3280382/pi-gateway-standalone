@@ -1,12 +1,11 @@
 /**
- * TemplateModal - Full-screen Prompt Template Browser
+ * TemplateModal - Compact Prompt Template Browser
  *
  * Features:
- * - Full-screen modal with split-pane layout
- * - Left: Template list with folder navigation
- * - Right: Preview pane with syntax highlighting
- * - Select and preview before inserting
- * - WebSocket-based communication
+ * - Compact header with minimal controls
+ * - Collapsible sidebar for template selection
+ * - Maximized preview area
+ * - Clean, modern design
  */
 
 import { useEffect, useState, useCallback } from "react";
@@ -15,7 +14,6 @@ import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { websocketService } from "@/services/websocket.service";
 import styles from "./TemplateModal.module.css";
 
-// Home directory - in browser env we use a default
 const HOME_DIR = "/root";
 
 interface Template {
@@ -31,91 +29,81 @@ interface TemplateModalProps {
 export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
   const { isTemplateModalOpen, closeTemplateModal } = useModalStore();
   const workingDir = useWorkspaceStore((state) => state.workingDir) ?? "/root";
-  
-  // Template list state
+
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Selection state
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [previewContent, setPreviewContent] = useState<string>("");
   const [previewLoading, setPreviewLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"all" | "global" | "local">("all");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [filter, setFilter] = useState<"all" | "global" | "local">("all");
 
-  // Listen for WebSocket messages
+  // WebSocket listeners
   useEffect(() => {
     if (!isTemplateModalOpen) return;
 
     if (!websocketService.isConnected) {
-      setError("WebSocket not connected");
+      setError("Not connected");
       setLoading(false);
       return;
     }
 
-    // Subscribe to template events
-    const unsubscribeList = websocketService.on("templates_list", (data: any) => {
-      const loadedTemplates = data.templates || [];
-      setTemplates(loadedTemplates);
+    const unsubList = websocketService.on("templates_list", (data: any) => {
+      const list = data.templates || [];
+      setTemplates(list);
       setLoading(false);
-      
-      // Auto-select first template if none selected
-      if (loadedTemplates.length > 0 && !selectedTemplate) {
-        setSelectedTemplate(loadedTemplates[0]);
-        loadTemplateContent(loadedTemplates[0].name);
+      if (list.length > 0 && !selectedTemplate) {
+        setSelectedTemplate(list[0]);
+        loadTemplate(list[0].name);
       }
     });
 
-    const unsubscribeContent = websocketService.on("template_content", (data: any) => {
+    const unsubContent = websocketService.on("template_content", (data: any) => {
       setPreviewContent(data.content || "");
       setPreviewLoading(false);
     });
 
-    const unsubscribeError = websocketService.on("error", (data: any) => {
+    const unsubError = websocketService.on("error", (data: any) => {
       if (data.messageType?.includes("template")) {
-        setError(data.error || "Failed to load template");
+        setError(data.error || "Failed to load");
         setLoading(false);
         setPreviewLoading(false);
       }
     });
 
     return () => {
-      unsubscribeList();
-      unsubscribeContent();
-      unsubscribeError();
+      unsubList();
+      unsubContent();
+      unsubError();
     };
   }, [isTemplateModalOpen, selectedTemplate]);
 
-  // Request templates list when modal opens
+  // Load templates on open
   useEffect(() => {
     if (!isTemplateModalOpen) return;
-
     if (!websocketService.isConnected) {
-      setError("WebSocket not connected");
-      setLoading(false);
+      setError("Not connected");
       return;
     }
-
     setLoading(true);
     setError(null);
     setTemplates([]);
     setSelectedTemplate(null);
     setPreviewContent("");
-
     websocketService.send("list_templates");
   }, [isTemplateModalOpen]);
 
-  const loadTemplateContent = useCallback((templateName: string) => {
+  const loadTemplate = useCallback((name: string) => {
     if (!websocketService.isConnected) return;
-    
     setPreviewLoading(true);
-    websocketService.send("get_template", { name: templateName });
+    websocketService.send("get_template", { name });
   }, []);
 
-  const handleSelectTemplate = useCallback((template: Template) => {
+  const handleSelect = useCallback((template: Template) => {
     setSelectedTemplate(template);
-    loadTemplateContent(template.name);
-  }, [loadTemplateContent]);
+    loadTemplate(template.name);
+  }, [loadTemplate]);
 
   const handleInsert = useCallback(() => {
     if (onTemplateSelect && previewContent) {
@@ -124,243 +112,146 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
     closeTemplateModal();
   }, [onTemplateSelect, previewContent, closeTemplateModal]);
 
-  const handleDoubleClick = useCallback((template: Template) => {
-    handleSelectTemplate(template);
-    // Small delay to allow preview to load
-    setTimeout(() => {
-      if (onTemplateSelect) {
-        onTemplateSelect(previewContent);
-        closeTemplateModal();
-      }
-    }, 100);
-  }, [handleSelectTemplate, onTemplateSelect, previewContent, closeTemplateModal]);
-
   if (!isTemplateModalOpen) return null;
 
-  // Filter templates by tab
-  const filteredTemplates = templates.filter((t) => {
-    if (activeTab === "all") return true;
-    return t.source === activeTab;
-  });
-
-  // Group by source for display
-  const globalTemplates = filteredTemplates.filter((t) => t.source === "global");
-  const localTemplates = filteredTemplates.filter((t) => t.source === "local");
+  const filtered = templates.filter((t) =>
+    filter === "all" ? true : t.source === filter
+  );
 
   return (
     <div className={styles.overlay} onClick={closeTemplateModal}>
-      <div className={styles.fullscreenModal} onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        {/* Compact Header */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>
-            <h3>📄 Prompt Templates</h3>
-            <span className={styles.templateCount}>
-              {templates.length} templates available
-            </span>
+            <span className={styles.title}>Templates</span>
+            <span className={styles.count}>{templates.length}</span>
           </div>
-          
+
           <div className={styles.headerCenter}>
-            <div className={styles.tabButtons}>
-              <button
-                type="button"
-                className={`${styles.tabBtn} ${activeTab === "all" ? styles.active : ""}`}
-                onClick={() => setActiveTab("all")}
-              >
-                All
-              </button>
-              <button
-                type="button"
-                className={`${styles.tabBtn} ${activeTab === "global" ? styles.active : ""}`}
-                onClick={() => setActiveTab("global")}
-              >
-                Global
-              </button>
-              <button
-                type="button"
-                className={`${styles.tabBtn} ${activeTab === "local" ? styles.active : ""}`}
-                onClick={() => setActiveTab("local")}
-              >
-                Local
-              </button>
-            </div>
+            <select
+              className={styles.filterSelect}
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as any)}
+            >
+              <option value="all">All</option>
+              <option value="global">Global</option>
+              <option value="local">Local</option>
+            </select>
           </div>
 
           <div className={styles.headerRight}>
             <button
-              type="button"
-              className={styles.insertBtn}
-              disabled={!selectedTemplate || previewLoading}
-              onClick={handleInsert}
+              className={styles.iconBtn}
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
             >
-              Insert Template
+              {sidebarCollapsed ? "☰" : "✕"}
             </button>
-            <button type="button" className={styles.closeBtn} onClick={closeTemplateModal}>
+            <button className={styles.closeBtn} onClick={closeTemplateModal}>
               ✕
             </button>
           </div>
         </div>
 
-        {/* Main Content - Split Pane */}
-        <div className={styles.mainContent}>
-          {/* Left Sidebar - Template List */}
-          <div className={styles.sidebar}>
-            {loading && templates.length === 0 ? (
-              <div className={styles.loading}>Loading templates...</div>
-            ) : error ? (
-              <div className={styles.error}>{error}</div>
-            ) : templates.length === 0 ? (
-              <div className={styles.empty}>
-                <p>No templates found.</p>
-                <p className={styles.hint}>
-                  Create .md files in:
-                  <br />
-                  <code>{HOME_DIR}/.pi/agent/prompts/</code>
-                  <br />
-                  <code>{workingDir}/.pi/prompts/</code>
-                </p>
-              </div>
-            ) : (
-              <div className={styles.templateTree}>
-                {/* Local templates section */}
-                {(activeTab === "all" || activeTab === "local") && localTemplates.length > 0 && (
-                  <div className={styles.treeSection}>
-                    <div className={styles.treeSectionHeader}>
-                      <FolderIcon />
-                      <span>Local ({localTemplates.length})</span>
-                      <span className={styles.pathHint}>./.pi/prompts/</span>
+        {/* Main Content */}
+        <div className={styles.content}>
+          {/* Sidebar - Collapsible */}
+          {!sidebarCollapsed && (
+            <div className={styles.sidebar}>
+              {loading ? (
+                <div className={styles.loading}>Loading...</div>
+              ) : error ? (
+                <div className={styles.error}>{error}</div>
+              ) : templates.length === 0 ? (
+                <div className={styles.empty}>
+                  <p>No templates</p>
+                  <span className={styles.hint}>
+                    Create .md in ~/.pi/agent/prompts/
+                  </span>
+                </div>
+              ) : (
+                <div className={styles.list}>
+                  {filtered.map((t) => (
+                    <div
+                      key={t.path}
+                      className={`${styles.item} ${
+                        selectedTemplate?.path === t.path ? styles.active : ""
+                      }`}
+                      onClick={() => handleSelect(t)}
+                      title={t.path}
+                    >
+                      <span className={`${styles.badge} ${styles[t.source]}`}>
+                        {t.source[0].toUpperCase()}
+                      </span>
+                      <span className={styles.name}>{t.name}</span>
                     </div>
-                    {localTemplates.map((template) => (
-                      <div
-                        key={template.path}
-                        className={`${styles.treeItem} ${
-                          selectedTemplate?.path === template.path ? styles.selected : ""
-                        }`}
-                        onClick={() => handleSelectTemplate(template)}
-                        onDoubleClick={() => handleDoubleClick(template)}
-                      >
-                        <FileIcon />
-                        <span className={styles.fileName}>{template.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
-                {/* Global templates section */}
-                {(activeTab === "all" || activeTab === "global") && globalTemplates.length > 0 && (
-                  <div className={styles.treeSection}>
-                    <div className={styles.treeSectionHeader}>
-                      <FolderIcon />
-                      <span>Global ({globalTemplates.length})</span>
-                      <span className={styles.pathHint}>~/.pi/agent/prompts/</span>
-                    </div>
-                    {globalTemplates.map((template) => (
-                      <div
-                        key={template.path}
-                        className={`${styles.treeItem} ${
-                          selectedTemplate?.path === template.path ? styles.selected : ""
-                        }`}
-                        onClick={() => handleSelectTemplate(template)}
-                        onDoubleClick={() => handleDoubleClick(template)}
-                      >
-                        <FileIcon />
-                        <span className={styles.fileName}>{template.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Right Content - Preview */}
-          <div className={styles.previewPane}>
+          {/* Preview Area */}
+          <div className={styles.preview}>
             {selectedTemplate ? (
               <>
                 <div className={styles.previewHeader}>
-                  <div className={styles.previewTitle}>
-                    <FileIcon />
-                    <span>{selectedTemplate.name}</span>
-                    <span className={`${styles.sourceBadge} ${styles[selectedTemplate.source]}`}>
+                  <div className={styles.fileInfo}>
+                    <span className={styles.fileName}>
+                      {selectedTemplate.name}
+                    </span>
+                    <span className={`${styles.tag} ${styles[selectedTemplate.source]}`}>
                       {selectedTemplate.source}
                     </span>
                   </div>
-                  <div className={styles.previewActions}>
-                    <span className={styles.filePath}>{selectedTemplate.path}</span>
+                  <div className={styles.stats}>
+                    {previewContent && (
+                      <>
+                        <span>{previewContent.length}c</span>
+                        <span>{previewContent.split(/\s+/).filter(Boolean).length}w</span>
+                        <span>{previewContent.split("\n").length}l</span>
+                      </>
+                    )}
                   </div>
                 </div>
-                
-                <div className={styles.previewContent}>
+
+                <div className={styles.previewBody}>
                   {previewLoading ? (
-                    <div className={styles.previewLoading}>
+                    <div className={styles.spinnerBox}>
                       <div className={styles.spinner} />
-                      <span>Loading preview...</span>
                     </div>
                   ) : (
-                    <pre className={styles.codeBlock}>
+                    <pre className={styles.code}>
                       <code>{previewContent}</code>
                     </pre>
                   )}
                 </div>
 
                 <div className={styles.previewFooter}>
-                  <div className={styles.previewStats}>
-                    {previewContent && (
-                      <>
-                        <span>{previewContent.length} chars</span>
-                        <span>{previewContent.split(/\s+/).filter(Boolean).length} words</span>
-                        <span>{previewContent.split("\n").length} lines</span>
-                      </>
-                    )}
-                  </div>
-                  <div className={styles.previewButtons}>
-                    <button
-                      type="button"
-                      className={styles.cancelBtn}
-                      onClick={closeTemplateModal}
-                    >
+                  <span className={styles.path}>{selectedTemplate.path}</span>
+                  <div className={styles.actions}>
+                    <button className={styles.btnSecondary} onClick={closeTemplateModal}>
                       Cancel
                     </button>
                     <button
-                      type="button"
-                      className={styles.insertBtn}
-                      disabled={previewLoading}
+                      className={styles.btnPrimary}
                       onClick={handleInsert}
+                      disabled={!previewContent || previewLoading}
                     >
-                      Insert Template
+                      Insert
                     </button>
                   </div>
                 </div>
               </>
             ) : (
-              <div className={styles.emptyPreview}>
-                <div className={styles.emptyIcon}>📄</div>
-                <p>Select a template to preview</p>
-                <p className={styles.emptyHint}>
-                  Click on a template from the list to view its content
-                </p>
+              <div className={styles.placeholder}>
+                <span>Select a template</span>
               </div>
             )}
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-// Icons
-function FileIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-    </svg>
-  );
-}
-
-function FolderIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-      <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
-    </svg>
   );
 }
