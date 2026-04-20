@@ -19,6 +19,8 @@ export interface ModalState {
   isFileViewerOpen: boolean;
   // Filter面板
   isFilterPanelOpen: boolean;
+  // Template选择器
+  isTemplateModalOpen: boolean;
 }
 
 interface ModalActions {
@@ -40,6 +42,9 @@ interface ModalActions {
   // Filter面板
   openFilterPanel: () => void;
   closeFilterPanel: () => void;
+  // Template选择器
+  openTemplateModal: () => void;
+  closeTemplateModal: () => void;
   // Close所有
   closeAll: () => void;
 }
@@ -53,6 +58,7 @@ export const useModalStore = create<ModalState & ModalActions>()((set) => ({
   isDirectoryBrowserOpen: false,
   isFileViewerOpen: false,
   isFilterPanelOpen: false,
+  isTemplateModalOpen: false,
 
   // 系统提示
   openSystemPrompt: () => set({ isSystemPromptOpen: true }),
@@ -78,6 +84,10 @@ export const useModalStore = create<ModalState & ModalActions>()((set) => ({
   openFilterPanel: () => set({ isFilterPanelOpen: true }),
   closeFilterPanel: () => set({ isFilterPanelOpen: false }),
 
+  // Template选择器
+  openTemplateModal: () => set({ isTemplateModalOpen: true }),
+  closeTemplateModal: () => set({ isTemplateModalOpen: false }),
+
   // Close所有
   closeAll: () =>
     set({
@@ -88,5 +98,6 @@ export const useModalStore = create<ModalState & ModalActions>()((set) => ({
       isDirectoryBrowserOpen: false,
       isFileViewerOpen: false,
       isFilterPanelOpen: false,
+      isTemplateModalOpen: false,
     }),
 }));

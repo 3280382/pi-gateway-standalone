@@ -23,9 +23,11 @@ import {
   selectShowThinking,
   useChatStore,
 } from "@/features/chat/stores/chatStore";
+import { useModalStore } from "@/features/chat/stores/modalStore";
 import styles from "./ChatPanel.module.css";
 import { InputArea } from "./InputArea";
 import { MessageList } from "./MessageList";
+import { TemplateModal } from "./modals/TemplateModal";
 
 // ===== [ANCHOR:COMPONENT] =====
 
@@ -43,6 +45,7 @@ export function ChatPanel() {
   // ===== [ANCHOR:HOOKS] =====
   const chatPanel = useChatPanel();
   const chatController = useChatController();
+  const { openTemplateModal } = useModalStore();
 
   // ===== [ANCHOR:COMPUTED] =====
   const filteredMessages = filterMessages(messages, {
@@ -91,8 +94,18 @@ export function ChatPanel() {
           // Reload messages
           onReloadMessages={chatPanel.reloadAllMessages}
           isLoadingMore={chatPanel.isLoadingMore}
+          // Template insertion
+          onInsertTemplate={openTemplateModal}
         />
       </div>
+
+      <TemplateModal
+        onTemplateSelect={(content) => {
+          chatController.setInputText(
+            useChatStore.getState().inputText + content
+          );
+        }}
+      />
     </div>
   );
 }

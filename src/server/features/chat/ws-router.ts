@@ -305,6 +305,10 @@ import {
   handleGetProcessTreeWrapped,
   handleGetProcessDetailsWrapped,
 } from "../system/ws-handlers";
+import {
+  handleListTemplatesWrapped,
+  handleGetTemplateWrapped,
+} from "./ws-handlers/template-handlers";
 
 /**
  * Register all WebSocket handlers
@@ -347,6 +351,10 @@ export function registerAllWSHandlers(): void {
   // System information
   wsRouter.register("get_process_tree", handleGetProcessTreeWrapped);
   wsRouter.register("get_process_details", handleGetProcessDetailsWrapped);
+
+  // Template operations
+  wsRouter.register("list_templates", handleListTemplatesWrapped);
+  wsRouter.register("get_template", handleGetTemplateWrapped);
 
   logger.info(`[WSRouter] Registered ${wsRouter.getRegisteredTypes().length} handlers`);
 }
