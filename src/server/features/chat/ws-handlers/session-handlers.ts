@@ -6,7 +6,7 @@
 import { existsSync } from "node:fs";
 import { SessionManager } from "@mariozechner/pi-coding-agent";
 import { serverSessionManager, extractShortSessionId } from "../agent-session/session-manager";
-import { buildSessionResponse, getAllSessions, getSessionMessages } from "../session-helpers";
+import { buildSessionResponse, getAllSessions, getSessionMessages, getSessionMessageCount } from "../session-helpers";
 import { getLocalSessionsDir } from "../agent-session/utils";
 import type { WSContext } from "../ws-router";
 import { createHandler, checkPathExists, sendError, sendSuccess, logger } from "./handler-utils";
