@@ -347,10 +347,10 @@ export async function handleListSessions(
       activeSessions.map(s => [extractShortSessionId(s.sessionFile), s])
     );
 
-    // Sort sessions by modification time (newest first) and limit to 5
+    // Sort sessions by modification time (newest first) and limit to 15
     const sortedSessions = sessions
       .sort((a, b) => new Date(b.modified).getTime() - new Date(a.modified).getTime())
-      .slice(0, 5);
+      .slice(0, 15);
 
     // Ensure top 5 sessions have config entries (auto-initialize if missing)
     const sessionIds = sortedSessions.map(s => ({ id: extractShortSessionId(s.path), path: s.path }));
@@ -369,7 +369,8 @@ export async function handleListSessions(
         id: shortId,
         path: s.path,
         name: config?.name || s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
-        summary: config?.summary || "",
+        // Note: summary and firstUserPrompt are intentionally excluded from broadcast
+        // to reduce payload size (firstUserPrompt can be very long)
         messageCount: s.messageCount || 0,
         lastModified: s.modified.toISOString(),
         status: activeInfo?.runtimeStatus || "history",
