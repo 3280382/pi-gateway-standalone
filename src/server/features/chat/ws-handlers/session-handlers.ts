@@ -347,15 +347,20 @@ export async function handleListSessions(
       activeSessions.map(s => [extractShortSessionId(s.sessionFile), s])
     );
 
-    // Ensure all sessions have config entries (auto-initialize if missing)
-    const sessionIds = sessions.map(s => ({ id: extractShortSessionId(s.path), path: s.path }));
+    // Sort sessions by modification time (newest first) and limit to 5
+    const sortedSessions = sessions
+      .sort((a, b) => new Date(b.modified).getTime() - new Date(a.modified).getTime())
+      .slice(0, 5);
+
+    // Ensure top 5 sessions have config entries (auto-initialize if missing)
+    const sessionIds = sortedSessions.map(s => ({ id: extractShortSessionId(s.path), path: s.path }));
     await sessionConfigManager.ensureConfigs(sessionIds, workingDir);
 
     // Get all configs
     const configs = sessionConfigManager.getAllConfigs();
 
-    // Build sessions list with config data
-    const sessionsList = sessions.map((s) => {
+    // Build sessions list with config data (top 5 only)
+    const sessionsList = sortedSessions.map((s) => {
       const shortId = extractShortSessionId(s.path);
       const activeInfo = activeSessionMap.get(shortId);
       const config = configs[shortId];
@@ -374,7 +379,7 @@ export async function handleListSessions(
 
     sendSuccess(ctx, "sessions_list", { sessions: sessionsList });
 
-    logger.info(`[handleListSessions] Sent ${sessions.length} sessions with config`);
+    logger.info(`[handleListSessions] Sent ${sessionsList.length} sessions (from ${sessions.length} total)`);
   } catch (error) {
     logger.error("[handleListSessions] Error:", {}, error instanceof Error ? error : undefined);
     sendError(ctx, error instanceof Error ? error.message : "Failed to list sessions");

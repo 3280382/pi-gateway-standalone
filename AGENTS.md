@@ -83,9 +83,11 @@ refactor(core): optimize initialization
    - No console errors or warnings allowed
 
 2. **Functional Testing**: Verify the feature works correctly
-   - Test the feature manually in the browser
+   - **MANDATORY: Use browser automation tool (Playwright) to test UI changes** - DO NOT rely solely on manual inspection or code review
+   - Navigate to the affected UI components using Playwright and capture screenshots for verification
    - Verify WebSocket connections work (if applicable)
    - Check both success and error scenarios
+   - **Screenshots are REQUIRED** for any UI-related changes to prove visual correctness
 
 3. **Regression Testing**: Ensure no existing functionality is broken
    - Run `npm run test` for unit tests
@@ -517,6 +519,87 @@ TEST_LOG_LEVEL=debug|info|warn|error
 TEST_BROWSER=chromium
 TEST_PORT=3000+random
 ```
+
+### Headless Browser Testing Guide (MANDATORY for UI Changes)
+
+**When modifying any UI components, you MUST use Playwright to verify the visual result.**
+
+#### Quick Start - Run Browser Tests
+
+```bash
+# Run browser tests using the mobile config (recommended for responsive UI testing)
+npx playwright test --config=playwright.mobile.config.ts
+
+# Run with headed mode (visible browser - for debugging)
+npx playwright test --config=playwright.mobile.config.ts --headed
+
+# Run specific test file
+npx playwright test test/e2e/chat.spec.ts --config=playwright.mobile.config.ts
+
+# Run with UI mode (interactive debugging)
+npx playwright test --config=playwright.mobile.config.ts --ui
+```
+
+#### Using Playwright in Development
+
+1. **Basic screenshot verification**:
+```typescript
+import { test, expect } from "@playwright/test";
+
+test("UI component renders correctly", async ({ page }) => {
+  // Navigate to the page
+  await page.goto("http://localhost:5173");
+  
+  // Wait for component to be ready
+  await page.waitForSelector("[data-testid='message-list']");
+  
+  // Take screenshot for verification
+  await page.screenshot({ 
+    path: "test-results/screenshots/01-message-list.png",
+    fullPage: true 
+  });
+  
+  // Assert visual correctness
+  expect(await page.locator("[data-testid='message-list']").isVisible()).toBe(true);
+});
+```
+
+2. **Mobile viewport testing** (using mobile config):
+```bash
+# playwright.mobile.config.ts configures mobile viewport by default
+# It emulates a mobile device for responsive testing
+npx playwright test --config=playwright.mobile.config.ts
+```
+
+3. **Capture console logs and errors**:
+```typescript
+test.beforeEach(async ({ page }) => {
+  page.on("console", (msg) => {
+    console.log(`[${msg.type()}] ${msg.text()}`);
+  });
+  page.on("pageerror", (error) => {
+    console.error(`Page error: ${error.message}`);
+  });
+});
+```
+
+#### Available Configurations
+
+| Config File | Use Case |
+|-------------|----------|
+| `playwright.config.ts` | Default desktop testing |
+| `playwright.mobile.config.ts` | Mobile viewport testing (RECOMMENDED for UI components) |
+| `playwright.dev.config.ts` | Development debugging |
+
+#### Testing Checklist for UI Changes
+
+Before committing UI changes, verify:
+- [ ] Open browser using Playwright (`--config=playwright.mobile.config.ts`)
+- [ ] Navigate to affected page/component
+- [ ] Take at least one screenshot of the modified UI
+- [ ] Verify no console errors during rendering
+- [ ] Test responsive behavior if applicable
+- [ ] Verify WebSocket functionality if chat-related
 
 ### Testing Best Practices
 
