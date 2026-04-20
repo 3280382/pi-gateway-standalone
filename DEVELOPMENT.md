@@ -1,4 +1,4 @@
-# Development Guide y
+# Development Guide
  
 > **AI Assistants**: This is a supplementary document. Read [`AGENTS.md`](./AGENTS.md) first.
 

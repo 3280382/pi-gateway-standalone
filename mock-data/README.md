@@ -1,23 +1,23 @@
-# Mock 数据
+# Mock Data
 
-开发环境使用的模拟数据。
+Mock data for development environment.
 
-## 用途
+## Purpose
 
-Vite 开发服务器使用这些文件作为 Mock API 响应。
+Vite development server uses these files as Mock API responses.
 
-## 文件说明
+## File Descriptions
 
-| 文件 | 用途 |
-|------|------|
-| `api-responses/models.json` | 可用模型列表 |
-| `api-responses/system-prompt.json` | 系统提示词 |
-| `sessions/index.json` | 会话列表 |
-| `sessions/*.jsonl` | 会话消息数据 |
-| `files/*.json` | 文件浏览数据 |
+| File | Purpose |
+|------|---------|
+| `api-responses/models.json` | Available model list |
+| `api-responses/system-prompt.json` | System prompt |
+| `sessions/index.json` | Session list |
+| `sessions/*.jsonl` | Session message data |
+| `files/*.json` | File browsing data |
 
-## 使用
+## Usage
 
-开发模式下（`npm run dev:react`），Vite 会自动使用这些文件作为 API 响应。
+In development mode (`npm run dev:react`), Vite automatically uses these files as API responses.
 
-生产环境使用真实的后端 API。
+Production environment uses real backend APIs.

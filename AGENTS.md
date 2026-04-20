@@ -9,6 +9,17 @@
 - **GitHub**: https://github.com/3280382/pi-gateway-standalone
 - **Type**: Web gateway for Pi Coding Agent (React + Node.js)
 
+## Language Standards
+
+**All project documentation and code must be written in English.** This includes:
+- All documentation files (README, DEVELOPMENT, FEATURES, CHANGELOG, AGENTS)
+- Code comments and inline documentation
+- Variable names, function names, and type definitions
+- Commit messages and PR descriptions
+- Test descriptions and output messages
+
+This standard ensures the project is accessible to international contributors and maintains consistency across all development work.
+
 ## First Message Rule
 
 **If the user did not give a concrete task, ALWAYS read in parallel:**
@@ -48,8 +59,8 @@ shared/          → No runtime logic (types only)
 ### Code Commit Standards
 
 ```bash
-# Must run before committing
-npm run check  # Fix all errors and warnings
+# REQUIRED: Run full check before ANY commit
+npm run check  # Fix all errors and warnings - NO EXCEPTIONS
 
 # Commit format
 type(scope): subject
@@ -61,6 +72,43 @@ feat(chat): add message search
 fix(files): fix sidebar duplication
 refactor(core): optimize initialization
 ```
+
+### Code Quality Requirements (CRITICAL)
+
+**AI assistants MUST complete ALL of the following before marking a task as complete:**
+
+1. **Syntax Check**: Run `npm run check` and fix ALL errors and warnings
+   - Biome linting errors must be resolved
+   - TypeScript compilation must pass with `--noEmit`
+   - No console errors or warnings allowed
+
+2. **Functional Testing**: Verify the feature works correctly
+   - Test the feature manually in the browser
+   - Verify WebSocket connections work (if applicable)
+   - Check both success and error scenarios
+
+3. **Regression Testing**: Ensure no existing functionality is broken
+   - Run `npm run test` for unit tests
+   - Run `bash scripts/run-terminal-tests.sh` for integration tests
+   - Verify all related features still work
+
+4. **Commit Verification**: After committing, verify the changes
+   - Review the diff with `git show HEAD`
+   - Ensure commit message follows the format
+   - Confirm version number with `git log --oneline -1`
+
+**NEVER mark a task as complete with only syntax checking. Testing is MANDATORY.**
+
+### Quick Verification Checklist
+
+Before declaring a task complete, verify:
+- [ ] `npm run check` passes with 0 errors and 0 warnings
+- [ ] Feature works correctly in browser (manual test)
+- [ ] No console errors in browser DevTools
+- [ ] Related features still work (regression check)
+- [ ] Unit tests pass (`npm run test`)
+- [ ] Commit message follows `type(scope): subject` format
+- [ ] Version number noted for user reference
 
 ## Documentation Navigation
 
