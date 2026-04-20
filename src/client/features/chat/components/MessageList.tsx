@@ -67,7 +67,13 @@ export function MessageList({
     if (roles.assistant) {
       if (contentTypes.text) visible.add("text");
       if (contentTypes.thinking) visible.add("thinking");
-      if (contentTypes.tool) visible.add("tool");
+      // Add tool status variants
+      if (contentTypes.tool) {
+        visible.add("tool");
+        if (contentTypes.toolSuccess) visible.add("toolSuccess");
+        if (contentTypes.toolError) visible.add("toolError");
+        if (contentTypes.toolPending) visible.add("toolPending");
+      }
     }
     if (roles.system) {
       if (contentTypes.compaction) visible.add("compaction");

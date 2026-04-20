@@ -69,7 +69,10 @@ export interface ContentTypeFilters {
   prompt: boolean;           // User messages
   text: boolean;             // Assistant text
   thinking: boolean;         // AI thinking
-  tool: boolean;             // Tool calls
+  tool: boolean;             // Tool calls (all)
+  toolSuccess: boolean;      // Tool calls - success
+  toolError: boolean;        // Tool calls - error
+  toolPending: boolean;      // Tool calls - pending/executing
   compaction: boolean;       // Context compaction
   retry: boolean;            // Manual retry
   autoRetry: boolean;        // Auto-retry

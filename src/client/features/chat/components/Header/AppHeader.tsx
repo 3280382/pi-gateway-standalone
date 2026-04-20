@@ -282,6 +282,26 @@ export function AppHeader({
                     checked={safeFilters.contentTypes.tool}
                     onChange={() => handleContentTypeFilterChange("tool")}
                   />
+                  {/* Tool Status Sub-filters - shown when Tools is enabled */}
+                  {safeFilters.contentTypes.tool && (
+                    <div className={styles.subFilterGroup}>
+                      <FilterChip
+                        label="✓ Success"
+                        checked={safeFilters.contentTypes.toolSuccess}
+                        onChange={() => handleContentTypeFilterChange("toolSuccess")}
+                      />
+                      <FilterChip
+                        label="✗ Error"
+                        checked={safeFilters.contentTypes.toolError}
+                        onChange={() => handleContentTypeFilterChange("toolError")}
+                      />
+                      <FilterChip
+                        label="⏳ Pending"
+                        checked={safeFilters.contentTypes.toolPending}
+                        onChange={() => handleContentTypeFilterChange("toolPending")}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 

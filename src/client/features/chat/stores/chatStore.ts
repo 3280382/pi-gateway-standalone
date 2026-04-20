@@ -76,6 +76,9 @@ const createInitialState = () => ({
       text: true,
       thinking: true,
       tool: true,
+      toolSuccess: true,
+      toolError: true,
+      toolPending: true,
       compaction: true,
       retry: true,
       autoRetry: true,
@@ -1167,6 +1170,9 @@ export const useChatStore = create<
                 text: oldFilters.assistant ?? true,
                 thinking: oldFilters.thinking ?? true,
                 tool: oldFilters.tools ?? true,
+                toolSuccess: oldFilters.tools ?? true,
+                toolError: oldFilters.tools ?? true,
+                toolPending: oldFilters.tools ?? true,
                 compaction: oldFilters.compaction ?? true,
                 retry: oldFilters.retry ?? true,
                 autoRetry: oldFilters.autoRetry ?? true,
@@ -1176,6 +1182,29 @@ export const useChatStore = create<
               },
             },
           };
+        }
+
+        // Migrate from hierarchical structure without tool status filters
+        if (filters && typeof filters === "object" && "roles" in filters && "contentTypes" in filters) {
+          const contentTypes = (filters as any).contentTypes;
+          // Add missing tool status filters if not present
+          if (contentTypes && typeof contentTypes === "object") {
+            const needsMigration = !("toolSuccess" in contentTypes);
+            if (needsMigration) {
+              return {
+                ...state,
+                searchFilters: {
+                  ...filters,
+                  contentTypes: {
+                    ...contentTypes,
+                    toolSuccess: contentTypes.tool ?? true,
+                    toolError: contentTypes.tool ?? true,
+                    toolPending: contentTypes.tool ?? true,
+                  },
+                },
+              };
+            }
+          }
         }
 
         return persistedState;
@@ -1238,11 +1267,23 @@ function detectHierarchicalMessageType(message: Message): {
     case "assistant": {
       // Check content array for types
       const hasThinking = message.content.some((c) => c.type === "thinking");
-      const hasTool = message.content.some((c) => c.type === "tool" || c.type === "tool_use");
       const hasText = message.content.some((c) => c.type === "text");
       
-      // Priority: tool > thinking > text
-      if (hasTool) return { role: "assistant", contentType: "tool" };
+      // Check for tools and their statuses
+      const toolBlocks = message.content.filter((c) => c.type === "tool" || c.type === "tool_use");
+      const hasTool = toolBlocks.length > 0;
+      
+      if (hasTool) {
+        // Determine tool status for more granular filtering
+        // Priority: error > pending > success
+        const hasError = toolBlocks.some((c) => c.status === "error" || c.error);
+        const hasPending = toolBlocks.some((c) => c.status === "pending" || c.status === "executing");
+        
+        if (hasError) return { role: "assistant", contentType: "toolError" };
+        if (hasPending) return { role: "assistant", contentType: "toolPending" };
+        return { role: "assistant", contentType: "toolSuccess" };
+      }
+      
       if (hasThinking) return { role: "assistant", contentType: "thinking" };
       if (hasText) return { role: "assistant", contentType: "text" };
       return { role: "assistant", contentType: "text" }; // default
@@ -1308,6 +1349,7 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
     roles: filters?.roles ?? { user: true, assistant: true, system: true },
     contentTypes: filters?.contentTypes ?? {
       prompt: true, text: true, thinking: true, tool: true,
+      toolSuccess: true, toolError: true, toolPending: true,
       compaction: true, retry: true, autoRetry: true,
       modelChange: true, thinkingLevelChange: true, usage: true,
     },
@@ -1327,9 +1369,21 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
         break;
         
       case "assistant": {
-        // Assistant messages can be: text, thinking, tool
-        const typeKey = contentType as keyof typeof safeFilters.contentTypes;
-        if (!safeFilters.contentTypes[typeKey]) return false;
+        // Assistant messages can be: text, thinking, tool (with status variants)
+        // First check if the base type is enabled
+        if (contentType === "text" && !safeFilters.contentTypes.text) return false;
+        if (contentType === "thinking" && !safeFilters.contentTypes.thinking) return false;
+        
+        // For tools, check both base "tool" and specific status filters
+        if (contentType.startsWith("tool")) {
+          // If base tool filter is off, hide all tools
+          if (!safeFilters.contentTypes.tool) return false;
+          
+          // Check specific tool status filters
+          if (contentType === "toolSuccess" && !safeFilters.contentTypes.toolSuccess) return false;
+          if (contentType === "toolError" && !safeFilters.contentTypes.toolError) return false;
+          if (contentType === "toolPending" && !safeFilters.contentTypes.toolPending) return false;
+        }
         break;
       }
         

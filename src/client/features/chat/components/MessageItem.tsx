@@ -210,8 +210,18 @@ export const MessageItem = memo(
           case "thinking":
             return visibleContentTypes.has("thinking");
           case "tool_use":
-          case "tool":
-            return visibleContentTypes.has("tool");
+          case "tool": {
+            // Check base tool filter
+            if (!visibleContentTypes.has("tool")) return false;
+            
+            // Check tool status-specific filters
+            const status = block.status || (block.error ? "error" : block.output ? "success" : "pending");
+            if (status === "success" && !visibleContentTypes.has("toolSuccess")) return false;
+            if (status === "error" && !visibleContentTypes.has("toolError")) return false;
+            if ((status === "pending" || status === "executing") && !visibleContentTypes.has("toolPending")) return false;
+            
+            return true;
+          }
           default:
             return true;
         }
