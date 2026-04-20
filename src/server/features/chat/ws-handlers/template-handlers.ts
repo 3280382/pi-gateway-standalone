@@ -33,11 +33,34 @@ async function findTemplateFiles(workingDir: string): Promise<TemplateFile[]> {
   const templates: TemplateFile[] = [];
 
   // Global templates: ~/.pi/agent/prompts
-  // Use /root as default since process.env.HOME may not be set in all environments
-  const homeDir = process.env.HOME || "/root";
-  const globalPromptsDir = join(homeDir, ".pi", "agent", "prompts");
+  // Try multiple possible home directory locations
+  const possibleHomeDirs = [
+    process.env.HOME,
+    process.env.USERPROFILE,
+    "/root",
+    "/home/root",
+  ].filter(Boolean) as string[];
   
-  logger.info(`[findTemplateFiles] Checking global dir: ${globalPromptsDir} (HOME=${homeDir})`);
+  let globalPromptsDir = "";
+  let foundHomeDir = "";
+  
+  for (const homeDir of possibleHomeDirs) {
+    const dir = join(homeDir, ".pi", "agent", "prompts");
+    logger.info(`[findTemplateFiles] Trying global dir: ${dir}`);
+    if (existsSync(dir)) {
+      globalPromptsDir = dir;
+      foundHomeDir = homeDir;
+      logger.info(`[findTemplateFiles] Found valid global dir: ${dir}`);
+      break;
+    }
+  }
+  
+  // Fallback to /root if none found
+  if (!globalPromptsDir) {
+    foundHomeDir = "/root";
+    globalPromptsDir = join(foundHomeDir, ".pi", "agent", "prompts");
+    logger.info(`[findTemplateFiles] Using fallback global dir: ${globalPromptsDir}`);
+  }
   if (existsSync(globalPromptsDir)) {
     logger.info(`[findTemplateFiles] Global dir exists: ${globalPromptsDir}`);
     try {
