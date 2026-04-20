@@ -1,6 +1,6 @@
 /**
  * System WebSocket Handlers
- * 系统信息相关的 WebSocket 处理器
+ * System info WebSocket handlers
  */
 
 import type { WSContext } from "../chat/ws-router";

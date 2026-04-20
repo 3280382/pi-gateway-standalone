@@ -321,7 +321,7 @@ export async function add(req: Request, res: Response): Promise<void> {
 }
 
 /**
- * 获取所有 todo - 对应 /api/files/todo/list
+ * Get all todos - corresponds to /api/files/todo/list
  */
 export async function list(req: Request, res: Response): Promise<void> {
   const { workingDir } = req.query as { workingDir: string };
@@ -399,7 +399,7 @@ export async function toggle(req: Request, res: Response): Promise<void> {
 }
 
 /**
- * 根据files路径获取todos - 对应 /api/files/todo/file
+ * Get todos by file path - corresponds to /api/files/todo/file
  */
 export async function getByFile(req: Request, res: Response): Promise<void> {
   const { workingDir, filePath } = req.query as { workingDir: string; filePath: string };
@@ -431,7 +431,7 @@ export async function getByFile(req: Request, res: Response): Promise<void> {
 }
 
 /**
- * 更新 todo 项 - 对应 /api/files/todo/update
+ * Update todo item - corresponds to /api/files/todo/update
  */
 export async function update(req: Request, res: Response): Promise<void> {
   const { workingDir, todoId, todoText, tags, assignee, dueDate } = req.body as {
@@ -464,7 +464,7 @@ export async function update(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    // 解析所有 todos 找到要更新的Rows
+    // Parse all todos to find row to update
     const lines = content.split("\n");
     let currentId = 0;
     let targetLineIndex = -1;
@@ -473,7 +473,7 @@ export async function update(req: Request, res: Response): Promise<void> {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
-      // 检测files路径标题
+      // Detect file path header
       const pathMatch = line.match(/^### \[(.+)\]$/);
       if (pathMatch) {
         currentFilePath = pathMatch[1];
@@ -496,11 +496,11 @@ export async function update(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    // 保留原来的 checked 状态
+    // Keep original checked state
     const originalMatch = lines[targetLineIndex].match(/^- \[([ x])\] /);
     const checked = originalMatch ? originalMatch[1] === "x" : false;
 
-    // 构建更新后的 todo
+    // Build updated todo
     const updatedTodo: TodoItem = {
       id: todoId,
       checked,

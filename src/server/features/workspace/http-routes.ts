@@ -1,12 +1,12 @@
 /**
- * Workspace Feature HTTP 路由注册
- * 集中注册所有工作区相关的 HTTP API 路由
+ * Workspace Feature HTTP route registration
+ * Centralized registration of all workspace HTTP API routes
  */
 
 import type { Application } from "express";
 
 /**
- * 注册 Workspace Feature 的所有 HTTP 路由
+ * Register all HTTP routes for Workspace Feature
  */
 export async function registerWorkspaceHTTPRoutes(app: Application): Promise<void> {
   const { current, workingDir, recent, addRecent, clearRecent } = await import(

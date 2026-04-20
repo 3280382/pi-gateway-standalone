@@ -1,6 +1,6 @@
 /**
- * Process Tree - 系统进程树查看
- * 获取操作系统所有进程信息及树状关系
+ * Process Tree - System process tree viewer
+ * Get all OS process info and tree relationships
  */
 
 import { exec } from "node:child_process";
@@ -33,11 +33,11 @@ export interface ProcessInfo {
 }
 
 /**
- * 获取所有进程信息
+ * Get all process info
  */
 export async function getAllProcesses(): Promise<ProcessInfo[]> {
   try {
-    // 使用 ps Command获取所有进程Details
+    // Use ps command to get all process details
     const { stdout } = await execAsync(
       "ps -eo pid,ppid,uid,gid,pcpu,pmem,vsz,rss,tty,stat,start,time,comm,args --no-headers"
     );
@@ -90,18 +90,18 @@ export async function getAllProcesses(): Promise<ProcessInfo[]> {
 }
 
 /**
- * 构建进程树
+ * Build process tree
  */
 export function buildProcessTree(processes: ProcessInfo[]): ProcessInfo[] {
   const processMap = new Map<number, ProcessInfo>();
   const rootProcesses: ProcessInfo[] = [];
 
-  // 先创建映射
+  // First create mapping
   for (const proc of processes) {
     processMap.set(proc.pid, { ...proc, children: [] });
   }
 
-  // 构建树结构
+  // Build tree structure
   for (const proc of processMap.values()) {
     const parent = processMap.get(proc.ppid);
     if (parent && proc.pid !== proc.ppid) {
@@ -112,7 +112,7 @@ export function buildProcessTree(processes: ProcessInfo[]): ProcessInfo[] {
     }
   }
 
-  // 计算深度并Sort
+  // Calculate depth and sort
   const calculateDepth = (proc: ProcessInfo, depth: number) => {
     proc.depth = depth;
     if (proc.children) {
@@ -126,7 +126,7 @@ export function buildProcessTree(processes: ProcessInfo[]): ProcessInfo[] {
     calculateDepth(root, 0);
   }
 
-  // 按 PID Sort
+  // Sort by PID
   const sortByPid = (a: ProcessInfo, b: ProcessInfo) => a.pid - b.pid;
   rootProcesses.sort(sortByPid);
 
@@ -140,7 +140,7 @@ export function buildProcessTree(processes: ProcessInfo[]): ProcessInfo[] {
 }
 
 /**
- * 获取服务器进程及其Child processes
+ * Get server process and its child processes
  */
 export async function getServerProcessTree(serverPid: number): Promise<{
   server: ProcessInfo | null;
@@ -150,10 +150,10 @@ export async function getServerProcessTree(serverPid: number): Promise<{
   const allProcesses = await getAllProcesses();
   const processMap = new Map(allProcesses.map((p) => [p.pid, p]));
 
-  // 查找服务器进程
+  // Find server process
   const server = processMap.get(serverPid) || null;
 
-  // 查找所有Child processes
+  // Find all child processes
   const allChildren: ProcessInfo[] = [];
   const sessions: ProcessInfo[] = [];
 
@@ -162,7 +162,7 @@ export async function getServerProcessTree(serverPid: number): Promise<{
       if (proc.ppid === pid) {
         allChildren.push(proc);
 
-        // 检测是否是 session 相关进程
+        // Detect if session-related process
         if (proc.args.includes("pi-coding-agent") || proc.args.includes("tsx")) {
           proc.isSessionProcess = true;
           sessions.push(proc);
@@ -182,7 +182,7 @@ export async function getServerProcessTree(serverPid: number): Promise<{
 }
 
 /**
- * 获取进程Threads信息
+ * Get process thread info
  */
 export async function getProcessThreads(pid: number): Promise<
   {
@@ -230,7 +230,7 @@ export async function getProcessThreads(pid: number): Promise<
 }
 
 /**
- * 获取进程打开的files
+ * Get files opened by process
  */
 export async function getProcessOpenFiles(pid: number): Promise<string[]> {
   try {
@@ -240,7 +240,7 @@ export async function getProcessOpenFiles(pid: number): Promise<string[]> {
       .filter((line) => line.trim())
       .map((line) => {
         const parts = line.split(/\s+/);
-        return parts[parts.length - 1]; // 返回files路径
+        return parts[parts.length - 1]; // Return file path
       })
       .filter((path) => path && path.startsWith("/"));
   } catch {
@@ -249,7 +249,7 @@ export async function getProcessOpenFiles(pid: number): Promise<string[]> {
 }
 
 /**
- * 获取完整进程树数据（用于 WebSocket 响应）
+ * Get complete process tree data (for WebSocket response)
  */
 export async function getProcessTreeData(serverPid?: number): Promise<{
   processes: ProcessInfo[];
@@ -268,7 +268,7 @@ export async function getProcessTreeData(serverPid?: number): Promise<{
   const processes = await getAllProcesses();
   const tree = buildProcessTree(processes);
 
-  // 统计
+  // Statistics
   const stats = {
     total: processes.length,
     running: processes.filter((p) => p.stat.includes("R")).length,

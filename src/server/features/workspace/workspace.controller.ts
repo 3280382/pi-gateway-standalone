@@ -5,11 +5,11 @@
 
 import type { Request, Response } from "express";
 
-// 内存中存储最近工作区（重启后丢失，后续可改为持久化）
+// Store recent workspaces in memory (lost after restart, can be persistent later)
 const recentWorkspaces = new Map<string, { path: string; name: string; lastAccessed: string }>();
 
 /**
- * 获取当前工作区 - 对应 /api/workspace/current
+ * Get current workspace - corresponds to /api/workspace/current
  */
 export async function current(_req: Request, res: Response) {
   res.json({
@@ -22,7 +22,7 @@ export async function current(_req: Request, res: Response) {
 }
 
 /**
- * 获取工作directories - 对应 /api/workspace/working-dir
+ * Get working directory - corresponds to /api/workspace/working-dir
  */
 export async function workingDir(_req: Request, res: Response) {
   res.json({
@@ -31,7 +31,7 @@ export async function workingDir(_req: Request, res: Response) {
 }
 
 /**
- * 获取最近工作区 - 对应 /api/workspace/recent
+ * Get recent workspaces - corresponds to /api/workspace/recent
  */
 export async function recent(_req: Request, res: Response) {
   const workspaces = Array.from(recentWorkspaces.values())
@@ -41,7 +41,7 @@ export async function recent(_req: Request, res: Response) {
 }
 
 /**
- * 添加最近工作区 - 对应 /api/workspace/add-recent
+ * Add recent workspace - corresponds to /api/workspace/add-recent
  */
 export async function addRecent(req: Request, res: Response) {
   const { path } = req.body;
@@ -58,7 +58,7 @@ export async function addRecent(req: Request, res: Response) {
 }
 
 /**
- * 清除最近工作区 - 对应 /api/workspace/clear-recent
+ * Clear recent workspaces - corresponds to /api/workspace/clear-recent
  */
 export async function clearRecent(_req: Request, res: Response) {
   recentWorkspaces.clear();
