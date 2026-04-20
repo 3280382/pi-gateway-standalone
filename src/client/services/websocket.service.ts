@@ -392,6 +392,9 @@ export class WebSocketService {
       process_details: "process_details",
       // Usage
       usage: "usage",
+      // Templates
+      templates_list: "templates_list",
+      template_content: "template_content",
     };
 
     const event = eventMap[type];

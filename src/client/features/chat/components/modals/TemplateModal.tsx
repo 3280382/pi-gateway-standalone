@@ -52,29 +52,33 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
       return;
     }
 
-    // Subscribe to messages
-    const unsubscribe = websocketService.on("message", (data: any) => {
-      try {
-        if (data.type === "templates_list") {
-          setTemplates(data.templates || []);
-          setLoading(false);
-        } else if (data.type === "template_content") {
-          // Template content received, insert it
-          if (onTemplateSelect && data.content) {
-            onTemplateSelect(data.content);
-          }
-          closeTemplateModal();
-          setLoading(false);
-        } else if (data.type === "error" && data.messageType?.includes("template")) {
-          setError(data.error || "Failed to load template");
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error("[TemplateModal] Failed to parse message:", err);
+    // Subscribe to template events
+    const unsubscribeList = websocketService.on("templates_list", (data: any) => {
+      setTemplates(data.templates || []);
+      setLoading(false);
+    });
+
+    const unsubscribeContent = websocketService.on("template_content", (data: any) => {
+      // Template content received, insert it
+      if (onTemplateSelect && data.content) {
+        onTemplateSelect(data.content);
+      }
+      closeTemplateModal();
+      setLoading(false);
+    });
+
+    const unsubscribeError = websocketService.on("error", (data: any) => {
+      if (data.messageType?.includes("template")) {
+        setError(data.error || "Failed to load template");
+        setLoading(false);
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeList();
+      unsubscribeContent();
+      unsubscribeError();
+    };
   }, [isTemplateModalOpen, onTemplateSelect, closeTemplateModal]);
 
   // Request templates list when modal opens

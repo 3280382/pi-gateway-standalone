@@ -47,7 +47,11 @@ export type WebSocketEvent =
   // File events
   | "file_update"
   | "file_deleted"
-  | "file_created";
+  | "file_created"
+
+  // Template events
+  | "templates_list"
+  | "template_content";
 
 // ============================================================================
 // WebSocket Message Format
