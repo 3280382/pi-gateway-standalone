@@ -67,7 +67,7 @@ create_session() {
     echo -e "${BLUE}│  ${GREEN}Frontend${BLUE}     │  ${GREEN}Backend${BLUE}     │${NC}  (Top 33% × 50%)"
     echo -e "${BLUE}│  Pane 0   │  Pane 1   │${NC}"
     echo -e "${BLUE}├───────────┴───────────┤${NC}"
-    echo -e "${BLUE}│      ${YELLOW}AI 交互(pi)${BLUE}      │${NC}  (Bottom 66% × 100%)"
+    echo -e "${BLUE}│      ${YELLOW}AI Interaction (pi)${BLUE}      │${NC}  (Bottom 66% × 100%)"
     echo -e "${BLUE}│        Pane 2         │${NC}"
     echo -e "${BLUE}└───────────────────────┘${NC}"
     echo ""
@@ -139,17 +139,17 @@ restart_backend() {
     start_backend
 }
 
-# Function:清除 Vite 缓存
+# Function: Clear Vite cache
 clear_cache() {
-    echo -e "${YELLOW}清除 Vite 缓存...${NC}"
-    tmux send-keys -t $SESSION_NAME:0.2 "cd $GATEWAY_DIR && rm -rf node_modules/.vite && echo 'Vite 缓存已清除'" C-m
+    echo -e "${YELLOW}Clearing Vite cache...${NC}"
+    tmux send-keys -t $SESSION_NAME:0.2 "cd $GATEWAY_DIR && rm -rf node_modules/.vite && echo 'Vite cache cleared'" C-m
 }
 
-# Function:Check状态
+# Function: Check status
 status() {
     echo -e "${BLUE}Checking service status...${NC}"
     
-    # Frontend状态
+    # Frontend status
     FRONTEND_PID=$(pgrep -f "vite --host 127.0.0.1" | head -1)
     if [ -n "$FRONTEND_PID" ]; then
         echo -e "${GREEN}Frontend: Running (PID: $FRONTEND_PID)${NC}"
@@ -157,7 +157,7 @@ status() {
         echo -e "${RED}Frontend: Not running${NC}"
     fi
     
-    # Backend状态
+    # Backend status
     BACKEND_PID=$(pgrep -f "tsx watch src/server/server.ts" | head -1)
     if [ -n "$BACKEND_PID" ]; then
         echo -e "${GREEN}Backend: Running (PID: $BACKEND_PID)${NC}"
@@ -166,25 +166,25 @@ status() {
     fi
 }
 
-# Function:在 AI 窗格ExecuteCommand
+# Function: Execute command in AI pane
 run_in_ai_pane() {
     local cmd="$1"
     tmux send-keys -t $SESSION_NAME:0.2 "$cmd" C-m
 }
 
-# Function:附加到会话
+# Function: Attach to session
 attach() {
     tmux attach-session -t $SESSION_NAME
 }
 
-# Function:杀掉会话
+# Function: Kill session
 kill_session() {
-    echo -e "${YELLOW}杀掉 tmux 会话...${NC}"
+    echo -e "${YELLOW}Killing tmux session...${NC}"
     tmux kill-session -t $SESSION_NAME 2>/dev/null
-    echo -e "${GREEN}✅ 会话已终止${NC}"
+    echo -e "${GREEN}✅ Session terminated${NC}"
 }
 
-# 主Command处理
+# Main command handling
 case "${1:-}" in
     create)
         create_session
@@ -234,38 +234,38 @@ case "${1:-}" in
         kill_session
         ;;
     run)
-        # 在 AI 窗格RunCommand
+        # Run command in AI pane
         shift
         run_in_ai_pane "$@"
         ;;
     *)
-        echo "Gateway Tmux Development Environment管理"
+        echo "Gateway Tmux Development Environment Management"
         echo ""
         echo "Usage: $0 <command>"
         echo ""
-        echo "会话管理:"
-        echo "  create              Create新的 tmux 会话"
-        echo "  attach              附加到现有会话（用户观察用）"
-        echo "  kill                杀掉会话"
+        echo "Session management:"
+        echo "  create              Create new tmux session"
+        echo "  attach              Attach to existing session (for observation)"
+        echo "  kill                Kill session"
         echo ""
-        echo "服务控制:"
-        echo "  start               启动Frontend和Backend"
-        echo "  start-frontend      仅启动Frontend"
-        echo "  start-backend       仅启动Backend"
-        echo "  stop                StopFrontend和Backend"
+        echo "Service control:"
+        echo "  start               Start Frontend and Backend"
+        echo "  start-frontend      Start Frontend only"
+        echo "  start-backend       Start Backend only"
+        echo "  stop                Stop Frontend and Backend"
         echo "  restart             Restarting Frontend...ckend"
-        echo "  restart-frontend    仅RestartFrontend"
-        echo "  restart-backend     仅RestartBackend"
+        echo "  restart-frontend    Restart Frontend only"
+        echo "  restart-backend     Restart Backend only"
         echo ""
-        echo "其他:"
-        echo "  clear-cache         清除 Vite 缓存"
+        echo "Other:"
+        echo "  clear-cache         Clear Vite cache"
         echo "  status              Check service status"
-        echo "  run <command>       在 AI 窗格ExecuteCommand"
+        echo "  run <command>       Execute command in AI pane"
         echo ""
         echo "Example:"
         echo "  $0 create           # Create session"
-        echo "  $0 start            # 启动所有服务"
-        echo "  $0 attach           # 进入观察模式"
+        echo "  $0 start            # Start all services"
+        echo "  $0 attach           # Enter observation mode"
         echo ""
         ;;
 esac

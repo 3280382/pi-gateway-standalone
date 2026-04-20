@@ -40,7 +40,7 @@ else
 fi
 
 echo ""
-echo "=== 常用操作 ==="
+echo "=== Common Operations ==="
 echo "Restarting Frontend...pkill -f 'vite --host' && npx vite --host 127.0.0.1 --port 5173"
 echo "Restarting Backend...pkill -f 'tsx watch src/server' && npx tsx watch src/server/server.ts"
 echo "清缓存:    rm -rf node_modules/.vite"

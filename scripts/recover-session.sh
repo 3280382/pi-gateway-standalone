@@ -10,11 +10,11 @@ echo ""
 # Check会话是否Exists
 if tmux has-session -t $SESSION_NAME 2>/dev/null; then
     echo "✅ 会话 '$SESSION_NAME' Exists"
-    echo "尝试附加到会话..."
+    echo "尝试Attach to session..."
     
     # 尝试附加
     if tmux attach -t $SESSION_NAME 2>/dev/null; then
-        echo "✅ Success附加到会话"
+        echo "✅ SuccessAttach to session"
         exit 0
     else
         echo "⚠️ 附加Failed (权限问题)"
