@@ -103,7 +103,7 @@ export function MessageList({
 
     // Solidified content - tool_use display as-is，update status via status field
     if (currentStreamingMessage.content?.length) {
-      const processedContent = currentStreamingMessage.content.map((c) => {
+      const processedContent = currentStreamingMessage.content.map((c, index) => {
         // If tool_use in content has activeTool，update its status
         if (c.type === "tool_use" && c.toolCallId && completedToolIds.has(c.toolCallId)) {
           const tool = activeTools.get(c.toolCallId);
@@ -120,6 +120,21 @@ export function MessageList({
             ...c,
             status: "pending" as const,
           };
+        }
+        // FIX: Handle tool_use without toolCallId by using index to match with streamingToolCalls
+        if (c.type === "tool_use" && !c.toolCallId) {
+          const toolCallIds = Array.from(streamingToolCalls.keys());
+          const matchedToolCallId = toolCallIds[index];
+          if (matchedToolCallId && completedToolIds.has(matchedToolCallId)) {
+            const tool = activeTools.get(matchedToolCallId);
+            return {
+              ...c,
+              toolCallId: matchedToolCallId,
+              status: tool?.status || (tool?.error ? "error" : tool?.output ? "success" : "executing"),
+              output: tool?.output,
+              error: tool?.error,
+            };
+          }
         }
         return c;
       });
