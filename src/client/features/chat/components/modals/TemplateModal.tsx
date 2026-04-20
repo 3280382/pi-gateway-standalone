@@ -10,6 +10,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useChatStore } from "@/features/chat/stores/chatStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import styles from "./Modals.module.css";
 
 interface Template {
@@ -25,6 +26,7 @@ interface TemplateModalProps {
 export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
   const { isTemplateModalOpen, closeTemplateModal } = useModalStore();
   const ws = useChatStore((state) => state.ws);
+  const workingDir = useWorkspaceStore((state) => state.workingDir) ?? "/root";
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -119,7 +121,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
             <div className={styles.empty}>
               <p>No templates found.</p>
               <p className={styles.hint}>
-                Create .md files in ~/.pi/agent/prompts/ or {`{workingDir}`}/.pi/prompts/
+                Create .md files in ~/.pi/agent/prompts/ or {workingDir}/.pi/prompts/
               </p>
             </div>
           ) : (
