@@ -27,7 +27,7 @@ export function ChatPage() {
   const closeBottomPanel = useSidebarStore((state) => state.closeBottomPanel ?? (() => {}));
   const setBottomPanelHeight = useSidebarStore((state) => state.setBottomPanelHeight ?? (() => {}));
 
-  // 渲染底部面板
+  // 渲染Bottom panel
   const renderBottomPanel = useCallback(() => {
     if (!isBottomPanelOpen) return null;
 

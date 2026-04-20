@@ -328,7 +328,7 @@ export function InputArea({
           </button>
         )}
 
-        {/* New Session button - place at bottom right，与其他toolbar按钮同宽 */}
+        {/* New Session button - place at bottom right，与其他toolbar按钮同Width */}
         {onNewSession && (
           <button
             type="button"

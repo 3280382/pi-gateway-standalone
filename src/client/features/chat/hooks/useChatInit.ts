@@ -10,7 +10,7 @@
  * - pid: 顶部菜单显示
  * - workingDir: 当前工作directories
  * - currentSession: { sessionId, sessionFile, messages } - 聊天界面历史消息
- * - allSessions: 左侧面板所有 session 列表
+ * - allSessions: 左侧面板所有 session Cols表
  * - currentModel: 当前模型
  * - allModels: 左侧面板所有Model list
  * - thinkingLevel: Thinking level

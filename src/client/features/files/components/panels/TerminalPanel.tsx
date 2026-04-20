@@ -3,7 +3,7 @@
  *
  * Responsibilities:
  * - 提供真实的 xterm.js 终端体验
- * - 支持命令执行、全屏模式
+ * - 支持Command执Rows、全屏模式
  * - 合并了原 useXTerm hook 的所有逻辑
  *
  * Structure:State → Ref → Effects → Computed → Actions → Render

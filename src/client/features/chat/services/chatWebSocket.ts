@@ -113,7 +113,7 @@ export function steerChat(text: string): boolean {
 }
 
 /**
- * 执行命令（对应后端的 command 类型）
+ * 执RowsCommand（对应后端的 command 类型）
  */
 export function executeChatCommand(command: string): boolean {
   return websocketService.send("command", { text: command });
@@ -134,7 +134,7 @@ export function exportSession(outputPath?: string): boolean {
 }
 
 /**
- * 列出Available models（对应后端的 list_models 类型）
+ * Cols出Available models（对应后端的 list_models 类型）
  */
 export function listChatModels(): boolean {
   return websocketService.send("list_models");
@@ -148,14 +148,14 @@ export function setChatLlmLogEnabled(enabled: boolean): boolean {
 }
 
 /**
- * 列出会话（对应后端的 list_sessions 类型）
+ * Cols出会话（对应后端的 list_sessions 类型）
  */
 export function listChatSessions(cwd: string): boolean {
   return websocketService.send("list_sessions", { cwd });
 }
 
 /**
- * 加载更多历史消息（对应后端的 load_more_messages 类型）
+ * Load more历史消息（对应后端的 load_more_messages 类型）
  * 当用户滚动到消息顶部时调用
  */
 export function loadMoreMessages(sessionFile: string, offset: number, limit: number = 50): boolean {

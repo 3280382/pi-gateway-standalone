@@ -1,8 +1,8 @@
 /**
- * useTodos - Todo列表管理 Hook
+ * useTodos - TodoCols表管理 Hook
  *
  * Responsibilities:
- * - 加载工作directories的todo列表
+ * - 加载工作directories的todoCols表
  * - 缓存并按files路径分Group
  * - 提供Refresh功能
  */

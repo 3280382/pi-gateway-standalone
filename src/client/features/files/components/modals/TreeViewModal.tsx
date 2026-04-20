@@ -222,7 +222,7 @@ export function TreeViewModal({
                 const level = node.level || 0;
                 const isLast = node.isLast || false;
 
-                // Search高亮
+                // SearchHeight亮
                 let displayName: React.ReactNode = node.name;
                 if (searchText) {
                   const escaped = escapeRegExp(searchText);

@@ -1,7 +1,7 @@
 /**
  * GitHistoryModal - Git 历史版本浏览弹窗（美化版）
  *
- * Content 使用 FileViewer（带代码高亮）
+ * Content 使用 FileViewer（带代码Height亮）
  * Diff 使用内置窗口（彩色 diff 显示）
  */
 
@@ -119,7 +119,7 @@ export function GitHistoryModal({ isOpen, filePath, fileName, onClose }: GitHist
     return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
   };
 
-  // 解析 diff 为行
+  // 解析 diff 为Rows
   const parseDiffLines = (diff: string) => {
     return diff.split("\n").map((line, index) => {
       let type = "normal";
@@ -141,7 +141,7 @@ export function GitHistoryModal({ isOpen, filePath, fileName, onClose }: GitHist
 
   return (
     <>
-      {/* 主窗口 - Git History 列表 */}
+      {/* 主窗口 - Git History Cols表 */}
       <div className={styles.overlay} onClick={onClose}>
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <div className={styles.header}>

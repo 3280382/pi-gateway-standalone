@@ -53,7 +53,7 @@ export function useTreeGitStatus(options: UseTreeGitStatusOptions) {
   const isInitialMount = useRef(true);
 
   useEffect(() => {
-    // 非激活状态不执行
+    // 非激活状态不执Rows
     if (!isActive) return;
 
     // Git 模式Close时，Clear状态
@@ -64,7 +64,7 @@ export function useTreeGitStatus(options: UseTreeGitStatusOptions) {
       return;
     }
 
-    // 无树数据时不执行
+    // 无树数据时不执Rows
     if (treeData.length === 0) return;
 
     // 检查是否需要获取 Git 状态

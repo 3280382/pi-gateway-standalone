@@ -1,5 +1,5 @@
 /**
- * Modal Store - 模态框状态管理
+ * Modal Store - Modal状态管理
  */
 
 import { create } from "zustand";

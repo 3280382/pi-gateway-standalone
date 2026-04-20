@@ -52,7 +52,7 @@ export function Footer() {
   // ===== [ANCHOR:RENDER] =====
   return (
     <nav className={styles.footer}>
-      {/* 左侧：侧边栏和面板切换 */}
+      {/* 左侧：Sidebar和面板切换 */}
       <div className={styles.leftGroup}>
         <IconToggle
           activeIcon="leftArrow"

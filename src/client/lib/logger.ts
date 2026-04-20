@@ -36,7 +36,7 @@ const MODULE_LEVELS: Record<string, LogLevel> = {
   default: LogLevel.INFO,
 };
 
-// 从环境变量读取是否启用日志
+// 从Environment variables读取是否启用日志
 const isDev = process.env.NODE_ENV !== "production";
 
 /**

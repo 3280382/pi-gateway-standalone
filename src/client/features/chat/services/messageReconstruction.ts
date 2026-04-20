@@ -1,7 +1,7 @@
 /**
  * Message Reconstruction Service
  * 
- * 处理RefreshPages面后的消息重建，确保缓冲消息和流式消息无缝衔接
+ * 处理RefreshPages面后的消息重建，确保缓冲消息和Streaming message无缝衔接
  * 主要解决以下问题：
  * 1. 缺失 message_start 事件 - 自动创建消息容器
  * 2. 缺失 content block start 事件 - 自动补充开始标记
@@ -41,7 +41,7 @@ class MessageReconstructor {
   private maxSequenceLength = 20;
 
   /**
-   * 记录事件并检查序列完整性
+   * 记录事件并检查序Cols完整性
    */
   recordEvent(eventType: string): void {
     this.eventSequence.push(eventType);
@@ -182,7 +182,7 @@ class MessageReconstructor {
       isStreaming: false,
     };
 
-    // 重置状态
+    // Reset state
     this.reset();
 
     return message;
@@ -210,7 +210,7 @@ class MessageReconstructor {
   }
 
   /**
-   * 重置状态
+   * Reset state
    */
   reset(): void {
     this.state = {
@@ -238,8 +238,8 @@ class MessageReconstructor {
   }
 
   /**
-   * 自动修复消息序列
-   * 当检测到异常序列时自动修复
+   * 自动修复消息序Cols
+   * 当检测到异常序Cols时自动修复
    */
   autoFix(): { action: string; data?: any } | null {
     const seq = this.eventSequence;

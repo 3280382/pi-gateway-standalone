@@ -2,7 +2,7 @@
  * ChatPanel - Main Chat Container
  *
  * Responsibilities:
- * - 负责聊天面板的整体布局
+ * - 负责Chat panel的整体布局
  * - 协调 MessageList 和 InputArea Group件
  * - 不包含业务逻辑，只负责视图Group合
  */

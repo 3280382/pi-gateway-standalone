@@ -3,7 +3,7 @@
  *
  * Responsibilities:
  * - 管理directories选择器状态
- * - 加载directories列表
+ * - 加载directoriesCols表
  * - 处理directories选择
  */
 

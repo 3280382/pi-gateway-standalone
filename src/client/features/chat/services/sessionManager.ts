@@ -8,7 +8,7 @@
  *
  * 统一原则：
  * - 所有场景（RefreshPages面、切换directories、选择 session）都使用 initChatWorkingDirectory
- * - 都使用 normalizeSessionMessages 处理消息
+ * - 都使用 normalizeSessionMessages Handle messages
  * - 都更新相同的 store 字段
  */
 
@@ -98,7 +98,7 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
   stores.session.setThinkingLevel(thinkingLevel as any);
   stores.session.setAvailableModels(allModels || []);
 
-  // 3. 更新 sessions 列表
+  // 3. 更新 sessions Cols表
   stores.sidebar.setSessions(allSessions || []);
   // 使用服务器返回的短 ID 作为选中 session ID（确保与 sidebar 中的 session.id 一致）
   const shortSessionId = (currentSession as any)?.shortId || null;
@@ -135,7 +135,7 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
     stores.chat.setMessages([]);
   }
 
-  // 6. 清理流式状态和运行状态（完全切换到新 session）
+  // 6. 清理流式状态和运Rows状态（完全切换到新 session）
   stores.chat.abortStreaming();
   stores.chat.setIsRunning(false);
   // Clear输入框，确保新 session 从干净状态开始
@@ -210,7 +210,7 @@ async function selectSession(sessionId: string): Promise<void> {
 
   // 如果点击的是当前已选中的 session，直接返回
   const currentSelectedId = stores.sidebar.selectedSessionId;
-  // 统一使用短ID进行比较
+  // 统一使用短ID进Rows比较
   const currentShortId = extractShortSessionId(currentSelectedId || "");
   const targetShortId = extractShortSessionId(session.path);
   console.log("CHECKING SELECTED:", {
@@ -270,7 +270,7 @@ async function selectSession(sessionId: string): Promise<void> {
 
 /**
  * 创建新 session
- * 轻量级实现：只添加新 session 到列表并选中，不重建整个界面
+ * 轻量级实现：只添加新 session 到Cols表并选中，不重建整个界面
  * 使用覆盖式 loading，不Clear界面直到服务器返回
  */
 async function createNewSession(): Promise<void> {
@@ -313,13 +313,13 @@ async function createNewSession(): Promise<void> {
       lastModified: new Date().toISOString(),
     };
 
-    // 3. 添加到 session 列表最前面（避免重复）
+    // 3. 添加到 session Cols表最前面（避免重复）
     const existingSessions = stores.sidebar.sessions;
     const filteredSessions = existingSessions.filter((s) => s.path !== newSession.path);
     const updatedSessions = [newSession, ...filteredSessions];
 
     stores.sidebar.setSessions(updatedSessions);
-    console.log("[SessionManager.createNewSession] 已添加到列表:", newSession.path);
+    console.log("[SessionManager.createNewSession] 已添加到Cols表:", newSession.path);
 
     // 4. 选中新 session
     stores.sidebar.setSelectedSessionId(newSession.id);
@@ -332,9 +332,9 @@ async function createNewSession(): Promise<void> {
     stores.chat.abortStreaming();
     stores.chat.setIsRunning(false);
     stores.chat.clearInput();
-    console.log("[SessionManager.createNewSession] 已Clear消息区域并重置状态");
+    console.log("[SessionManager.createNewSession] 已Clear消息区域并Reset state");
 
-    // 6. 如果服务端返回了完整列表，使用服务端的（确保同步）
+    // 6. 如果服务端返回了完整Cols表，使用服务端的（确保同步）
     if (createResponse.allSessions && createResponse.allSessions.length > 0) {
       const serverSessions = createResponse.allSessions.map((s: any) => ({
         id: s.path || s.id,
@@ -344,7 +344,7 @@ async function createNewSession(): Promise<void> {
         lastModified: s.modified || s.lastModified || new Date().toISOString(),
       }));
       stores.sidebar.setSessions(serverSessions);
-      console.log("[SessionManager.createNewSession] 已同步服务端列表:", serverSessions.length);
+      console.log("[SessionManager.createNewSession] 已同步服务端Cols表:", serverSessions.length);
     }
 
     console.log("[SessionManager.createNewSession] 完成");

@@ -2,7 +2,7 @@
  * DirectoryPicker - directories选择器Group件
  *
  * Responsibilities:
- * - 显示directories列表供用户选择
+ * - 显示directoriesCols表供用户选择
  * - 支持进入子directories和返回上级
  * - 过滤不必要的directories（node_modules, .git 等）
  * - 每次打开从 home directories开始
@@ -56,7 +56,7 @@ function shouldExcludeDir(name: string): boolean {
     // 但允许 .pi（特殊directories）
     return name !== ".pi";
   }
-  // 排除默认列表中的directories
+  // 排除默认Cols表中的directories
   return DEFAULT_EXCLUDED_DIRS.includes(name.toLowerCase());
 }
 

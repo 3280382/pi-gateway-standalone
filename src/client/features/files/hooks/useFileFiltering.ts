@@ -1,7 +1,7 @@
 /**
  * useFileFiltering - files过滤和Sort逻辑 Hook
  *
- * Responsibilities:管理files列表的过滤和Sort逻辑
+ * Responsibilities:管理filesCols表的过滤和Sort逻辑
  */
 
 import { useMemo } from "react";
@@ -73,7 +73,7 @@ function matchesSearchText(item: FileItem, searchText: string): boolean {
 }
 
 /**
- * 比较两  items项进行Sort
+ * 比较两  items项进RowsSort
  */
 function compareItems(a: FileItem, b: FileItem, sortMode: string): number {
   // ".." 始终排在Page一位

@@ -114,7 +114,7 @@ export const TreeView = memo<TreeViewProps>(({   items }) => {
             const isLast = node.isLast || false;
             const isSelected = selectedItems.includes(node.path);
 
-            // Search高亮
+            // SearchHeight亮
             let displayName: React.ReactNode = node.name;
             if (treeFilterText) {
               const escaped = escapeRegExp(treeFilterText);
@@ -157,7 +157,7 @@ export const TreeView = memo<TreeViewProps>(({   items }) => {
                 className={`${styles.node} ${isSelected ? styles.selected : ""}`}
                 style={{ paddingLeft: `${level * 16}px` }}
               >
-                {/* 主行 */}
+                {/* 主Rows */}
                 <div className={styles.nodeMain} onClick={() => handleFileClick(node)}>
                   {/* 连接线 */}
                   <span className={styles.connector}>{isLast ? "└── " : "├── "}</span>

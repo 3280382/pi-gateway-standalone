@@ -3,8 +3,8 @@
  *
  * Responsibilities:
  * - 以表格形式显示所有历史 session
- * - 显示会话 ID、运行状态、消息数、最后Modification time
- * - 只在侧边栏打开时定期通过 WebSocket 更新
+ * - 显示会话 ID、运Rows状态、消息数、最后Modification time
+ * - 只在Sidebar打开时定期通过 WebSocket 更新
  * - 支持切换 session
  *
  * 注意：新建会话的唯一入口是聊天输入框右侧的新建按钮
@@ -40,7 +40,7 @@ function formatRelativeTime(dateString: string): string {
   return date.toLocaleDateString();
 }
 
-// 获取状态图标和Color类名
+// Get state图标和Color类名
 function getStatusInfo(status: string | undefined): { icon: string; className: string; label: string } {
   switch (status) {
     case "history":
@@ -75,7 +75,7 @@ export function SessionDropdownSection() {
   const lastFetchRef = useRef<number>(0);
 
   // ========== 2. Effects ==========
-  // 只在侧边栏打开时定期请求会话列表更新
+  // 只在Sidebar打开时定期请求会话Cols表更新
   useEffect(() => {
     if (!workingDir || !isSidebarVisible) return;
 
@@ -101,12 +101,12 @@ export function SessionDropdownSection() {
     async (session: Session) => {
       console.log("CLICKED SESSION:", session.id, session.path);
       
-      // 执行实际的session切换（让sessionManager处理状态更新）
+      // 执Rows实际的session切换（让sessionManager处理状态更新）
       console.log("About to call sessionManager.selectSession...");
       await sessionManager.selectSession(session.id);
       console.log("sessionManager.selectSession DONE!");
       
-      // 切换后立即Refreshsession列表（获取最新状态）
+      // 切换后立即RefreshsessionCols表（获取最新状态）
       if (workingDir) {
         listChatSessions(workingDir);
       }
@@ -115,7 +115,7 @@ export function SessionDropdownSection() {
   );
 
   // ========== 4. Computed ==========
-  // 对会话进行Sort：选中 > streaming > thinking > tooling > waiting > idle > history
+  // 对会话进RowsSort：选中 > streaming > thinking > tooling > waiting > idle > history
   // streaming/thinking/tooling 是活跃状态，优先显示
   const getStatusPriority = (status: string | undefined): number => {
     switch (status) {
@@ -131,7 +131,7 @@ export function SessionDropdownSection() {
   };
 
   const sortedSessions = [...sessions].sort((a, b) => {
-    // 1. 当前选中的会话优先（最高优先级）
+    // 1. 当前选中的会话优先（最Height优先级）
     if (a.id === currentSessionId) return -1;
     if (b.id === currentSessionId) return 1;
 

@@ -42,14 +42,14 @@ export interface SidebarState {
   isBottomPanelOpen: boolean;
   bottomPanelHeight: number;
 
-  // 运行时状态（全部来自 WebSocket，不持久化到 localStorage）
+  // 运Rows时状态（全部来自 WebSocket，不持久化到 localStorage）
   workingDir: WorkingDirectory | null;
   sessions: Session[];
   isLoading: boolean;
   error: string | null;
   selectedSessionId: string | null;
 
-  // 运行时状态映射（sessionId -> status）
+  // 运Rows时状态映射（sessionId -> status）
   runtimeStatus: Record<string, string>;
 }
 
@@ -66,7 +66,7 @@ export interface SidebarController {
   changeWorkingDir: (path: string) => Promise<void>;
   selectSession: (id: string) => void;
   createNewSession: () => Promise<void>;
-  listSessions: () => void; // 通过 WebSocket 请求会话列表
+  listSessions: () => void; // 通过 WebSocket 请求会话Cols表
 
   // Error Handling
   clearError: () => void;

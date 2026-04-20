@@ -280,7 +280,7 @@ export function logError(
 }
 
 /**
- * 高阶函数：包装函数以自动记录调用和返回
+ * Height阶函数：包装函数以自动记录调用和返回
  */
 export function withLogging<T extends (...args: any[]) => any>(
   debuggerInstance: ReturnType<typeof createDebugger>,

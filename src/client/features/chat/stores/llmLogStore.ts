@@ -23,7 +23,7 @@ export interface LlmLogState {
   config: LlmLogConfig;
   // Log entry
   logs: LlmLogEntry[];
-  // 模态框状态
+  // Modal状态
   isModalOpen: boolean;
 }
 
@@ -35,7 +35,7 @@ interface LlmLogActions {
   // 日志操作
   addLog: (entry: LlmLogEntry) => void;
   clearLogs: () => void;
-  // 模态框操作
+  // Modal操作
   openModal: () => void;
   closeModal: () => void;
 }
@@ -74,7 +74,7 @@ export const useLlmLogStore = create<LlmLogState & LlmLogActions>()(
         }),
       clearLogs: () => set({ logs: [] }),
 
-      // 模态框操作
+      // Modal操作
       openModal: () => set({ isModalOpen: true }),
       closeModal: () => set({ isModalOpen: false }),
     }),

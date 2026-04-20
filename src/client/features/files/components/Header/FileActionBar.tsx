@@ -6,7 +6,7 @@ import { useFileViewer } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import styles from "../FileBrowser/FileBrowser.module.css";
 
-// Executablefiles扩展名列表
+// Executablefiles扩展名Cols表
 const EXECUTABLE_EXTENSIONS = [
   "sh",
   "bash",
@@ -24,7 +24,7 @@ const EXECUTABLE_EXTENSIONS = [
   "rs",
 ];
 
-// 不可编辑的files扩展名列表
+// 不可编辑的files扩展名Cols表
 const NON_EDITABLE_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "webp", "ico", "pdf"];
 
 interface FileActionBarProps {
@@ -71,7 +71,7 @@ export function FileActionBar({ onExecute, onOpenBottomPanel }: FileActionBarPro
     editFile(selectedActionFile, selectedActionFileName || "");
   };
 
-  // 处理执行
+  // 处理执Rows
   const handleExecute = async () => {
     await executeFileStream(
       selectedActionFile,

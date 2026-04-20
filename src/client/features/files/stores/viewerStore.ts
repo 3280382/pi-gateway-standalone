@@ -2,8 +2,8 @@
  * Viewer Store - files查看器和终端状态管理
  *
  * Responsibilities:
- * - 管理files查看器状态（查看、编辑、执行模式）
- * - 管理终端状态（输出、命令执行）
+ * - 管理files查看器状态（查看、编辑、执Rows模式）
+ * - 管理终端状态（输出、Command执Rows）
  * - 合并原 fileViewerStore 和 terminalStore
  *
  * Structure:State → Actions

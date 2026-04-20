@@ -75,7 +75,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
         });
       }
 
-      // 重新加载 todo 列表以更新角标显示
+      // 重新加载 todo Cols表以更新角标显示
       try {
         const todos = await todoApi.list(workingDir);
         setTodoList(todos);
@@ -184,7 +184,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
               </button>
             </div>
 
-            {/* 标签列表 */}
+            {/* 标签Cols表 */}
             {tags.length > 0 && (
               <div className={styles.tagList}>
                 {tags.map((tag) => (

@@ -5,7 +5,7 @@
 
 import { useCallback, useRef } from "react";
 
-// 批量更新队列
+// 批量更新队Cols
 interface UpdateQueue {
   content?: string;
   thinking?: string;
@@ -36,7 +36,7 @@ export class BatchedUpdater {
     this.scheduleUpdate();
   }
 
-  // 批量添加工具调用更新
+  // 批量添加Tool call更新
   queueToolCall(id: string, name: string, delta: string) {
     if (!this.queue.toolCall) {
       this.queue.toolCall = { id, name, delta: "" };
@@ -51,14 +51,14 @@ export class BatchedUpdater {
     this.scheduleUpdate();
   }
 
-  // 使用RAF调度更新，确保在浏览器空闲时执行
+  // 使用RAF调度更新，确保在浏览器空闲时执Rows
   private scheduleUpdate() {
     if (this.rafId !== null) return;
 
     const now = performance.now();
     const elapsed = now - this.lastUpdateTime;
 
-    // 如果距离上次更新太近，延迟执行
+    // 如果距离上次更新太近，延迟执Rows
     if (elapsed < this.MIN_UPDATE_INTERVAL) {
       setTimeout(() => {
         this.rafId = requestAnimationFrame(() => this.flush());
@@ -68,7 +68,7 @@ export class BatchedUpdater {
     }
   }
 
-  // 执行批量更新
+  // 执Rows批量更新
   private flush() {
     if (Object.keys(this.queue).length === 0) {
       this.rafId = null;
@@ -132,7 +132,7 @@ export function useBatchedUpdates(onUpdate: (updates: UpdateQueue) => void) {
   };
 }
 
-// 节流函数 - 限制函数执行频率
+// 节流函数 - 限制函数执Rows频率
 export function throttle<T extends (...args: any[]) => void>(
   func: T,
   limit: number
@@ -147,7 +147,7 @@ export function throttle<T extends (...args: any[]) => void>(
   };
 }
 
-// 防抖函数 - 延迟执行直到停止调用
+// 防抖函数 - 延迟执Rows直到停止调用
 export function debounce<T extends (...args: any[]) => void>(
   func: T,
   wait: number

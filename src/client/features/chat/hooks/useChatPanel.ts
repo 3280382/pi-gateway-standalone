@@ -2,9 +2,9 @@
  * useChatPanel - ChatPanel Group件业务逻辑 Hook
  *
  * Responsibilities:
- * - 管理消息列表自动滚动逻辑
- * - 处理消息发送协调
- * - 处理 bash/slash 命令
+ * - 管理消息Cols表自动滚动逻辑
+ * - Handle messages发送协调
+ * - 处理 bash/slash Command
  * - 管理新会话创建
  */
 
@@ -75,7 +75,7 @@ export interface UseChatPanelReturn {
   setShouldScrollToBottom: (value: boolean) => void;
   handleScroll: () => void;
 
-  // 加载更多消息
+  // Load more消息
   isLoadingMore: boolean;
   hasMoreMessages: boolean;
   loadMore: () => void;
@@ -173,7 +173,7 @@ export function useChatPanel(): UseChatPanelReturn {
     };
   }, [shouldScrollToBottom, messages, streamingContent, streamingThinking]); // 添加流式内容依赖
 
-  // 当切换 session 或消息列表变化时，更新 hasMore 状态
+  // 当切换 session 或消息Cols表变化时，更新 hasMore 状态
   useEffect(() => {
     if (messages.length === 0) {
       setShouldScrollToBottom(true);
@@ -204,14 +204,14 @@ export function useChatPanel(): UseChatPanelReturn {
         setShouldScrollToBottom(false);
       }
 
-      // 滚动到顶部时自动加载更多消息
+      // 滚动到顶部时自动Load more消息
       if (isAtTop && hasMoreRef.current && !loadingMoreRef.current) {
         loadMore();
       }
     }
   }, [shouldScrollToBottom]);
 
-  // 加载更多消息 - 滚动到顶部时加载所有历史消息
+  // Load more消息 - 滚动到顶部时加载所有历史消息
   const loadMore = useCallback(async () => {
     const sessionStore = useSessionStore.getState();
     const chatStore = useChatStore.getState();

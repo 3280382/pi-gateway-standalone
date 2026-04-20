@@ -142,16 +142,16 @@ export function raw(path: string): string {
   return `/api/files/file/raw?path=${encodeURIComponent(path)}`;
 }
 
-// 执行files
+// 执Rowsfiles
 export async function execute(path: string): Promise<ReadableStream<Uint8Array>> {
   // 获取files所在directories作为工作directories
   const dir = path.split("/").slice(0, -1).join("/") || "/";
   const fileName = path.split("/").pop() || "";
 
-  // 构建执行命令
+  // 构建执RowsCommand
   let command = `./${fileName}`;
 
-  // 根据files类型调整命令
+  // 根据files类型调整Command
   if (fileName.endsWith(".py")) {
     command = `python3 "${path}"`;
   } else if (fileName.endsWith(".js")) {

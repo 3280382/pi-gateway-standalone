@@ -37,7 +37,7 @@ export interface ProcessInfo {
  */
 export async function getAllProcesses(): Promise<ProcessInfo[]> {
   try {
-    // 使用 ps 命令获取所有进程Details
+    // 使用 ps Command获取所有进程Details
     const { stdout } = await execAsync(
       "ps -eo pid,ppid,uid,gid,pcpu,pmem,vsz,rss,tty,stat,start,time,comm,args --no-headers"
     );
@@ -140,7 +140,7 @@ export function buildProcessTree(processes: ProcessInfo[]): ProcessInfo[] {
 }
 
 /**
- * 获取服务器进程及其子进程
+ * 获取服务器进程及其Child processes
  */
 export async function getServerProcessTree(serverPid: number): Promise<{
   server: ProcessInfo | null;
@@ -153,7 +153,7 @@ export async function getServerProcessTree(serverPid: number): Promise<{
   // 查找服务器进程
   const server = processMap.get(serverPid) || null;
 
-  // 查找所有子进程
+  // 查找所有Child processes
   const allChildren: ProcessInfo[] = [];
   const sessions: ProcessInfo[] = [];
 
@@ -182,7 +182,7 @@ export async function getServerProcessTree(serverPid: number): Promise<{
 }
 
 /**
- * 获取进程线程信息
+ * 获取进程Threads信息
  */
 export async function getProcessThreads(pid: number): Promise<
   {

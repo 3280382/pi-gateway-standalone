@@ -40,7 +40,7 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
   const isInitialMount = useRef(true);
 
   useEffect(() => {
-    // 非激活状态不执行任何操作
+    // 非激活状态不执Rows任何操作
     if (!isActive) return;
 
     // Git模式Close时，Clear状态并重置 ref
@@ -55,7 +55,7 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
       return;
     }
 
-    // 无files项时不执行操作
+    // 无files项时不执Rows操作
     if (  items.length === 0) return;
 
     // 检查是否需要获取git状态

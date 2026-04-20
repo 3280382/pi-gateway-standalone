@@ -3,8 +3,8 @@
  *
  * Responsibilities:
  * - 管理 slash command 选择器状态
- * - 过滤命令列表
- * - 处理命令选择
+ * - 过滤CommandCols表
+ * - 处理Command选择
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -48,7 +48,7 @@ export function useSlashCommands(options: UseSlashCommandsOptions): UseSlashComm
   const [filter, setFilter] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // 过滤命令列表
+  // 过滤CommandCols表
   const filteredCommands = useMemo(() => {
     if (!filter) return SLASH_COMMANDS;
     const lowerFilter = filter.toLowerCase();
@@ -71,7 +71,7 @@ export function useSlashCommands(options: UseSlashCommandsOptions): UseSlashComm
     }
   }, [value]);
 
-  // 打开命令选择器
+  // 打开Command选择器
   const open = useCallback(() => {
     const newValue = `${value}/`;
     onChange(newValue);
@@ -81,12 +81,12 @@ export function useSlashCommands(options: UseSlashCommandsOptions): UseSlashComm
     onFocusInput?.();
   }, [value, onChange, onFocusInput]);
 
-  // Close命令选择器
+  // CloseCommand选择器
   const close = useCallback(() => {
     setIsOpen(false);
   }, []);
 
-  // 选择命令
+  // 选择Command
   const selectCommand = useCallback(
     (command: SlashCommand) => {
       const commandText = `${command.name} `;
@@ -115,7 +115,7 @@ export function useSlashCommands(options: UseSlashCommandsOptions): UseSlashComm
     return text.trimStart().startsWith("/");
   }, []);
 
-  // 获取当前激活的命令
+  // 获取当前激活的Command
   const getActiveCommand = useCallback((text: string): SlashCommand | undefined => {
     const trimmed = text.trimStart();
     if (!trimmed.startsWith("/")) return undefined;

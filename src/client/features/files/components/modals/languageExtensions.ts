@@ -15,7 +15,7 @@ import { xml } from "@codemirror/lang-xml";
 import { yaml } from "@codemirror/lang-yaml";
 import { StreamLanguage } from "@codemirror/language";
 
-// 简单的 shell 语法高亮
+// 简单的 shell 语法Height亮
 const shellLanguage = StreamLanguage.define({
   name: "shell",
   startState: () => ({ inString: false }),
@@ -52,7 +52,7 @@ const shellLanguage = StreamLanguage.define({
       return "variableName";
     }
 
-    // 命令/关键字
+    // Command/关键字
     if (stream.sol()) {
       stream.eatWhile(/[^\s]/);
       return "keyword";
@@ -63,7 +63,7 @@ const shellLanguage = StreamLanguage.define({
   },
 });
 
-// 简单 Java 语法高亮
+// 简单 Java 语法Height亮
 const javaLanguage = StreamLanguage.define({
   name: "java",
   startState: () => ({ inString: false }),
@@ -113,7 +113,7 @@ const javaLanguage = StreamLanguage.define({
   },
 });
 
-// 简单 C/C++ 语法高亮
+// 简单 C/C++ 语法Height亮
 const cppLanguage = StreamLanguage.define({
   name: "cpp",
   startState: () => ({ inString: false }),
@@ -159,7 +159,7 @@ const cppLanguage = StreamLanguage.define({
   },
 });
 
-// 简单 Go 语法高亮
+// 简单 Go 语法Height亮
 const goLanguage = StreamLanguage.define({
   name: "go",
   startState: () => ({ inString: false }),

@@ -93,7 +93,7 @@ export async function createFile(workingDir: string, fileName: string): Promise<
 }
 
 /**
- * 执行files
+ * 执Rowsfiles
  */
 export async function executeFileByPath(
   path: string,

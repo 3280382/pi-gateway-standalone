@@ -1,6 +1,6 @@
 /**
  * ToolMenu - Tool menu container
- * Responsibilities:管理工具菜单的展开/收起，渲染工具列表
+ * Responsibilities:管理工具菜单的Expand/收起，渲染工具Cols表
  */
 
 import { useEffect, useRef, useState } from "react";

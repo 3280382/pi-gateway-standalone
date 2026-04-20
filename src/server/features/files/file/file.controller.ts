@@ -619,7 +619,7 @@ export async function execute(req: Request, res: Response) {
   const { command, cwd, streaming } = req.body;
 
   if (!command) {
-    res.status(400).json({ error: "command参数必填" });
+    res.status(400).json({ error: "command parameter required" });
     return;
   }
 
@@ -659,18 +659,18 @@ export async function execute(req: Request, res: Response) {
       });
 
       child.on("close", (code: number | null) => {
-        res.write(`\n\n[进程退出，代码: ${code ?? "未知"}]\n`);
+        res.write(`\n\n[Process exited, code: ${code ?? "unknown"}]\n`);
         res.end();
       });
 
       child.on("error", (error: Error) => {
-        res.write(`[执行Error: ${error.message}]\n`);
+        res.write(`[Execute error: ${error.message}]\n`);
         res.end();
       });
 
       logger.info(`Streaming execute command: ${command}, Working directory: ${workingDir}`);
     } else {
-      // 非Stream execution
+      // Non-streaming execution
       const child = spawn(cmd, args, {
         cwd: workingDir,
         env: process.env,
@@ -695,7 +695,7 @@ export async function execute(req: Request, res: Response) {
         logger.info(`Execute command: ${command}, Working directory: ${workingDir}, Exit code: ${code}`);
         res.json({
           success: !isError,
-          output: result || "(无输出)",
+          output: result || "(no output)",
           exitCode: code,
           isError,
         });

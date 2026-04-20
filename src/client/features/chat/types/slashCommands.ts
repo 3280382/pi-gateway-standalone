@@ -1,5 +1,5 @@
 /**
- * Slash Commands - 27个斜杠命令定义
+ * Slash Commands - 27个斜杠Command定义
  */
 
 export interface SlashCommand {

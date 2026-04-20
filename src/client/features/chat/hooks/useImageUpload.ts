@@ -4,7 +4,7 @@
  * Responsibilities:
  * - 管理图片上传状态
  * - 处理files选择和 base64 转换
- * - 执行 OCR 文本识别
+ * - 执Rows OCR 文本识别
  */
 
 import { useCallback, useState } from "react";
@@ -80,7 +80,7 @@ export function useImageUpload(): UseImageUploadReturn {
 
         setImages((prev) => [...prev, newImage]);
 
-        // 对图片执行 OCR
+        // 对图片执Rows OCR
         if (file.type.startsWith("image/")) {
           try {
             const ocrText = await performOCR(base64, file.type);

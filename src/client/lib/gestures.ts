@@ -29,7 +29,7 @@ export const GESTURE_CONFIG = {
 } as const;
 
 /**
- * 计算两点间距离
+ * 计算两点Spacing离
  */
 export function getDistance(p1: Point, p2: Point): number {
   return Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
@@ -56,7 +56,7 @@ export function getTouchInfo(touch: Touch | React.Touch): TouchInfo {
 }
 
 /**
- * 获取双指间距离
+ * 获取双指Spacing离
  */
 export function getPinchDistance(touches: TouchList | React.TouchList): number {
   if (touches.length < 2) return 0;

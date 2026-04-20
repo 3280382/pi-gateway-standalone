@@ -88,7 +88,7 @@ export function AppHeader({
   const searchQuery = externalSearchQuery ?? chatStoreQuery;
   const filters = externalSearchFilters ?? chatStoreFilters;
 
-  // 当前会话 ID 和运行状态
+  // 当前会话 ID 和运Rows状态
   const sidebarStore = useSidebarStore();
   const currentSessionId = sidebarStore.selectedSessionId;
   const runtimeStatus = currentSessionId ? sidebarStore.runtimeStatus[currentSessionId] : null;
@@ -160,9 +160,9 @@ export function AppHeader({
   // ========== 6. Render ==========
   return (
     <div className={styles.topBar}>
-      {/* Row 1: 工作directories（最大宽度） */}
+      {/* Row 1: 工作directories（最大Width度） */}
       <div className={styles.topRow}>
-        {/* 工作directories按钮 - 宽度最大 */}
+        {/* 工作directories按钮 - Width度最大 */}
         <button
           type="button"
           className={`${styles.workingDirBtn} ${styles.workingDirBtnFullWidth}`}
@@ -273,7 +273,7 @@ export function AppHeader({
 
         <div className={styles.spacer} />
 
-        {/* 会话 ID + 运行状态 + 连接状态 + PID */}
+        {/* 会话 ID + 运Rows状态 + 连接状态 + PID */}
         <div className={styles.statusGroup}>
           {currentSessionId && (
             <div 
@@ -461,7 +461,7 @@ function shouldExcludeDir(name: string): boolean {
     // 但允许 .pi（特殊directories）
     return name !== ".pi";
   }
-  // 排除默认列表中的directories
+  // 排除默认Cols表中的directories
   return DEFAULT_EXCLUDED_DIRS.includes(name.toLowerCase());
 }
 

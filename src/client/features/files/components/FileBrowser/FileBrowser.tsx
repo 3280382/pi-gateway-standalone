@@ -83,7 +83,7 @@ export function FileBrowser({
             <span className={styles.pathText}>{currentBrowsePath || workingDir}</span>
           </div>
 
-          {/* files列表区域 */}
+          {/* filesCols表区域 */}
           <div className={styles.contentArea}>
             {isLoading || (viewMode === "tree" && treeLoading) ? (
               <div className={styles.loading}>Loading...</div>
@@ -106,7 +106,7 @@ export function FileBrowser({
         </div>
       </div>
 
-      {/* files查看器模态框 */}
+      {/* files查看器Modal */}
       <FileViewer />
     </section>
   );

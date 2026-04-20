@@ -10,8 +10,8 @@ const reporter = new TestReporter("file-store");
 
 describe("File Store", () => {
   it("initializes with empty file list", async () => {
-    await reporter.runTest("空files列表初始化", async () => {
-      logger.info("空files列表初始化测试");
+    await reporter.runTest("空filesCols表初始化", async () => {
+      logger.info("空filesCols表初始化测试");
       expect(true).toBe(true);
     });
   });

@@ -6,7 +6,7 @@
  * - 错误处理
  * - 与 store 和 service 协调
  *
- * 注意：使用 currentBrowsePath 进行directories浏览，不改变全局 workingDir
+ * 注意：使用 currentBrowsePath 进Rowsdirectories浏览，不改变全局 workingDir
  */
 
 // ===== [ANCHOR:IMPORTS] =====
@@ -53,7 +53,7 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
       setCurrentBrowsePath(path);
     }
     isInitializedRef.current = true;
-  }, [isActive]); // 只在 isActive 变化时执行一次
+  }, [isActive]); // 只在 isActive 变化时执Rows一次
 
   /**
    * 加载directories内容
@@ -93,7 +93,7 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
 
   /**
    * 路径变化时自动加载
-   * 仅在激活状态下执行
+   * 仅在激活状态下执Rows
    */
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {

@@ -87,7 +87,7 @@ export function normalizeContentItem(item: any): any {
 }
 
 /**
- * 生成系统消息
+ * 生成System message
  */
 function createSystemMessage(text: string, id?: string, kind?: Message["kind"]): Message {
   return {
@@ -104,7 +104,7 @@ function createSystemMessage(text: string, id?: string, kind?: Message["kind"]):
 }
 
 /**
- * 将特殊 entry 类型转换为系统消息文本
+ * 将特殊 entry 类型转换为System message文本
  */
 function convertSpecialEntryToMessage(entry: any): Message | null {
   switch (entry.type) {
@@ -169,14 +169,14 @@ function convertSpecialEntryToMessage(entry: any): Message | null {
  * 统一的 Session 消息转换函数
  *
  * 处理流程：
- * 1. Page一遍遍历：收集所有 toolCall 的参数
+ * 1. Page一遍遍历：收集所有 toolCall 的Arguments
  * 2. Page二遍遍历：转换消息，处理 toolResult 和特殊 entry 类型
  *
  * @param entries Session files中的 entries 数Group（JSONL 解析后的）
  * @returns 转换后的 Message 数Group
  */
 export function normalizeSessionMessages(entries: any[]): Message[] {
-  // Page一遍：收集所有 toolCall 的参数
+  // Page一遍：收集所有 toolCall 的Arguments
   const toolCallArgsMap = new Map<string, any>();
   entries.forEach((entry: any) => {
     if (

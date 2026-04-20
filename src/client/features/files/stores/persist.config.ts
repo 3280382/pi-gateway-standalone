@@ -1,7 +1,7 @@
 /**
  * Persist Config - Files Feature
  *
- * Files 功能相关的持久化配置
+ * Files 功能相关的Persistence config
  */
 
 // ============================================================================

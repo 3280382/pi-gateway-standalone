@@ -3,7 +3,7 @@
  *
  * Responsibilities:
  * - 管理 @mention files选择器的状态
- * - 加载files列表
+ * - 加载filesCols表
  * - 过滤files
  * - 处理files选择
  */
@@ -56,7 +56,7 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // 加载files列表
+  // 加载filesCols表
   const loadFileList = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     try {
@@ -76,7 +76,7 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
     }
   }, [workingDir]);
 
-  // 过滤files列表
+  // 过滤filesCols表
   const filteredFiles = useMemo(() => {
     if (!filter) return fileList;
     const lowerFilter = filter.toLowerCase();
@@ -151,7 +151,7 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
     [filteredFiles.length]
   );
 
-  // Refreshfiles列表
+  // RefreshfilesCols表
   const refreshFileList = useCallback(async () => {
     await loadFileList();
   }, [loadFileList]);

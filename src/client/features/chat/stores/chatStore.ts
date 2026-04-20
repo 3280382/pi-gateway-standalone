@@ -1,24 +1,24 @@
 /**
  * Chat Store - Zustand State Management with Performance Optimizations
- * 使用批量更新和RAF调度优化流式消息性能
+ * 使用批量更新和RAF调度优化Streaming message性能
  *
  * 【架构设计说明】
  * 本 Store 是 Chat Feature 的核心状态管理中心。
  *
  * 【数据流】
- * 1. 用户发送消息: UI → useChat/useChatController → websocketService.send()
+ * 1. 用户Send message: UI → useChat/useChatController → websocketService.send()
  * 2. 接收AI响应: WebSocket → setupWebSocketListeners() → chatStore (本files)
  * 3. Group件更新: chatStore → React re-render → UI
  *
  * 【特殊设计】
  * - WebSocket 事件处理在 setupWebSocketListeners() (chatApi.ts)
- * - 该处理器直接调用本 Store 的方法更新状态，这是 WebSocket 服务的特例
+ * - 该处理器直接调用本 Store 的方法Update state，这是 WebSocket 服务的特例
  * - 详情见 chatApi.ts 中的架构注释
  *
  * 【性能优化】
- * - 使用 RAF (requestAnimationFrame) 批量处理流式消息
+ * - 使用 RAF (requestAnimationFrame) 批量处理Streaming message
  * - 使用 Zustand selectors 避免不必要的重渲染
- * - 工具调用使用 Map 存储，支持快速查找
+ * - Tool call使用 Map 存储，支持快速查找
  */
 
 // ===== [ANCHOR:IMPORTS] =====
@@ -106,7 +106,7 @@ const ORDER = {
 } as const;
 
 /**
- * 构建思考内容部分 - 只使用当前流式思考，不使用已固化的思考数Group
+ * 构建Thinking content部分 - 只使用当前流式思考，不使用已固化的思考数Group
  * 已固化的思考已经在 existingContent 中
  */
 function buildThinkingContent(singleThinking: string): ContentPartWithOrder[] {
@@ -312,7 +312,7 @@ function buildFinalMessage(
 }
 
 /**
- * 合并工具参数（保留流式参数）
+ * 合并工具Arguments（保留流式Arguments）
  */
 function mergeToolArgs(tool: ToolExecution, streamingArgs?: string): Record<string, unknown> {
   return streamingArgs ? { ...tool.args, _streamingArgs: streamingArgs } : tool.args;
@@ -377,7 +377,7 @@ function applyToolCompletion(
   }
 
   // 只更新 activeTools，不修改 currentStreamingMessage.content
-  // MessageList 会基于 activeTools 动态渲染工具结果
+  // MessageList 会基于 activeTools 动态渲染Tool result
   return { activeTools: newTools };
 }
 
@@ -499,7 +499,7 @@ export const useChatStore = create<
     // Message Actions
     addMessage: (message: Message) => void;
     setMessages: (messages: Message[]) => void;
-    prependMessages: (messages: Message[]) => void;  // 加载更多历史消息时用到
+    prependMessages: (messages: Message[]) => void;  // Load more历史消息时用到
     clearMessages: () => void;
 
     // Running State (Pi coding agent turn)
@@ -601,8 +601,8 @@ export const useChatStore = create<
           content: [],
           timestamp: new Date(),
           isStreaming: true,
-          isThinkingCollapsed: true, // 默认折叠思考内容
-          isToolsCollapsed: true, // 默认折叠工具内容
+          isThinkingCollapsed: true, // 默认CollapseThinking content
+          isToolsCollapsed: true, // 默认Collapse工具内容
         };
         set(
           {
@@ -619,7 +619,7 @@ export const useChatStore = create<
         );
       },
 
-      // 创建流式消息（使用服务器提供的ID）
+      // 创建Streaming message（使用服务器提供的ID）
       createStreamingMessage: (messageId?: string) => {
         const streamingMessage: Message = {
           id: messageId || generateMessageId(),
@@ -661,7 +661,7 @@ export const useChatStore = create<
                 // 文本块在 content_delta 时处理
                 return {};
               case "tool_use":
-                // 工具调用块在 toolcall_delta 时初始化
+                // Tool call块在 toolcall_delta 时初始化
                 if (meta?.toolCallId && meta?.toolName) {
                   const newToolCalls = new Map(state.streamingToolCalls);
                   newToolCalls.set(meta.toolCallId, {
@@ -857,7 +857,7 @@ export const useChatStore = create<
           const currentState = get();
           const activeTool = currentState.activeTools.get(tool.id);
           if (activeTool && activeTool.status === "executing" && !activeTool.endTime) {
-            // 工具执行超时，标记为警告状态
+            // 工具执Rows超时，标记为警告状态
             console.warn(`[ChatStore] Tool execution timeout: ${tool.name} (${tool.id})`);
             set(
               (state) => {
@@ -867,7 +867,7 @@ export const useChatStore = create<
                   newTools.set(tool.id, {
                     ...t,
                     status: "timeout",
-                    error: "工具执行超时，可能仍在后台运行...",
+                    error: "工具执Rows超时，可能仍在后台运Rows...",
                   });
                 }
                 return { activeTools: newTools };
@@ -887,7 +887,7 @@ export const useChatStore = create<
         );
       },
 
-      // 检查工具执行状态（用于手动触发检查）
+      // 检查工具执Rows状态（用于手动触发检查）
       checkToolExecutionStatus: () => {
         const state = get();
         const now = new Date();
@@ -899,7 +899,7 @@ export const useChatStore = create<
             const elapsedSeconds = Math.floor(elapsed / 1000);
           
             if (elapsed > 30000) { // 超过30秒
-              warnings.push(`${tool.name}: 已执行 ${elapsedSeconds} 秒`);
+              warnings.push(`${tool.name}: 已执Rows ${elapsedSeconds} 秒`);
             }
           }
         });
@@ -1191,10 +1191,10 @@ function detectMessageTypes(message: Message): {
 }
 
 /**
- * 过滤消息列表
- * @param messages 消息列表
+ * 过滤消息Cols表
+ * @param messages 消息Cols表
  * @param options 过滤选项
- * @returns 过滤后的消息列表
+ * @returns 过滤后的消息Cols表
  */
 export function filterMessages(messages: Message[], options: FilterOptions): Message[] {
   const { query, filters } = options;
@@ -1216,13 +1216,13 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
     // 如果消息包含 tools 但 filters.tools 为 false，过滤掉
     if (hasTools && !filters.tools) return false;
 
-    // 3. 按特殊系统消息类型过滤
+    // 3. 按特殊System message类型过滤
     if (isModelChange && !filters.modelChange) return false;
     if (isCompaction && !filters.compaction) return false;
     if (isThinkingLevelChange && !filters.thinkingLevelChange) return false;
     if (isUsage && !filters.usage) return false;
 
-    // 4. 普通系统消息（非特殊类型）如果 system 为 false 已经被过滤
+    // 4. 普通System message（非特殊类型）如果 system 为 false 已经被过滤
     // 但如果 system 为 true，但特殊类型为 false，需要检查
     if (message.role === "system") {
       // 如果是特殊类型且都被Close了，或者不是特殊类型

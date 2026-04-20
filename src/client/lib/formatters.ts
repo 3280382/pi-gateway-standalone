@@ -91,15 +91,15 @@ export function formatMarkdown(text: string): string {
 
   return (
     text
-      // 代码块
+      // Code block
       .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="code-block"><code>$2</code></pre>')
-      // 行内代码
+      // Rows内代码
       .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
       // 粗体
       .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
       // 斜体
       .replace(/\*([^*]+)\*/g, "<em>$1</em>")
-      // 换行
+      // 换Rows
       .replace(/\n/g, "<br />")
   );
 }

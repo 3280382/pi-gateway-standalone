@@ -1,7 +1,7 @@
 /**
  * useFileTree - files树逻辑 Hook
  *
- * Responsibilities:管理files侧边栏的directories树逻辑
+ * Responsibilities:管理filesSidebar的directories树逻辑
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -141,7 +141,7 @@ export function useFileTree(): UseFileTreeResult {
       setTree((_prev) => updateNodeInTree(node.path, (n) => ({ ...n, loading: true })));
 
       try {
-        // 并行加载所有子directories
+        // 并Rows加载所有子directories
         const childNodes = await Promise.all(
           node.childPaths.map((childPath) =>
             loadDirectoryNode(childPath).catch((err) => {
@@ -187,16 +187,16 @@ export function useFileTree(): UseFileTreeResult {
   );
 
   /**
-   * 切换节点展开/折叠
+   * 切换节点Expand/Collapse
    */
   const toggleNode = useCallback(
     (node: TreeNode) => {
-      fileSidebarDebug.debug("切换节点展开状态", {
+      fileSidebarDebug.debug("切换节点Expand状态", {
         path: node.path,
         currentExpanded: node.expanded,
       });
 
-      // 如果已加载，直接切换展开状态
+      // 如果已加载，直接切换Expand状态
       if (node.loaded) {
         setTree((_prev) =>
           updateNodeInTree(node.path, (n) => ({
@@ -205,7 +205,7 @@ export function useFileTree(): UseFileTreeResult {
           }))
         );
       }
-      // 否则加载子directories（loadNodeChildren 会处理展开）
+      // 否则加载子directories（loadNodeChildren 会处理Expand）
     },
     [updateNodeInTree]
   );

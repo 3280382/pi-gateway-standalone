@@ -143,7 +143,7 @@ export function useChatController(): EnhancedChatController {
         );
       }
 
-      // 添加用户消息
+      // 添加User message
       const userMessage: Message = {
         id: generateMessageId(),
         role: "user",
@@ -155,7 +155,7 @@ export function useChatController(): EnhancedChatController {
       chatStore.clearInput();
       chatStore.startStreaming();
 
-      // 通过WebSocket发送消息
+      // 通过WebSocketSend message
       const success = sendChatMessage(text, undefined, undefined, images);
 
       if (!success) {
@@ -172,7 +172,7 @@ export function useChatController(): EnhancedChatController {
     steer: (text: string) => {
       if (!text.trim()) return;
     
-      // 添加用户消息到列表（类似 sendMessage）
+      // 添加User message到Cols表（类似 sendMessage）
       const userMessage: Message = {
         id: generateMessageId(),
         role: "user",
@@ -224,13 +224,13 @@ export function useChatController(): EnhancedChatController {
       chatStore.setShowThinking(show);
     },
 
-    // 工具操作（占位符实现）
+    // 工具操作（Placeholder实现）
     expandToolOutput: (_toolId: string) => {
-      // 工具输出展开在Group件状态中处理
+      // 工具输出Expand在Group件状态中处理
     },
 
     collapseToolOutput: (_toolId: string) => {
-      // 工具输出折叠在Group件状态中处理
+      // 工具输出Collapse在Group件状态中处理
     },
 
     // 会话管理 - 使用 sessionManager 统一处理（包含 loading 和界面重建）
@@ -296,17 +296,17 @@ export function useChatController(): EnhancedChatController {
 
     listModels: async () => {
       return createPromiseWithTimeout({
-        timeoutMessage: "列出模型超时",
+        timeoutMessage: "Cols出模型超时",
         eventName: "models_list",
         onSuccess: () => {},
         sendAction: listChatModels,
       });
     },
 
-    // 系统命令
+    // 系统Command
     executeCommand: async (command: string) => {
       return createPromiseWithTimeout({
-        timeoutMessage: "执行命令超时",
+        timeoutMessage: "执RowsCommand超时",
         eventName: "command_result",
         onSuccess: () => {},
         sendAction: () => executeChatCommand(command),
@@ -674,7 +674,7 @@ export function setupWebSocketListeners(): void {
   websocketService.on("compaction_end", () => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] compaction_end`);
-    // 添加系统消息到消息列表
+    // 添加System message到消息Cols表
     store.addMessage({
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: "system",
@@ -687,7 +687,7 @@ export function setupWebSocketListeners(): void {
   websocketService.on("retry_start", () => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] retry_start`);
-    // 添加系统消息到消息列表
+    // 添加System message到消息Cols表
     store.addMessage({
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: "system",
@@ -699,7 +699,7 @@ export function setupWebSocketListeners(): void {
   websocketService.on("retry_end", () => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] retry_end`);
-    // 添加系统消息到消息列表
+    // 添加System message到消息Cols表
     store.addMessage({
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: "system",
@@ -712,7 +712,7 @@ export function setupWebSocketListeners(): void {
   websocketService.on("queue_update", (data: any) => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] queue_update:`, data);
-    // 可以在这里更新 UI 显示队列状态
+    // 可以在这里更新 UI 显示队Cols状态
   });
 
   // Auto retry handlers
@@ -834,7 +834,7 @@ export function setupWebSocketListeners(): void {
     }
   });
 
-  // Sessions list handler - 更新侧边栏会话列表
+  // Sessions list handler - 更新Sidebar会话Cols表
   websocketService.on("sessions_list", (data: any) => {
     console.log("[setupWebSocketListeners] sessions_list:", data);
     const sidebarStore = useSidebarStore.getState();
@@ -856,7 +856,7 @@ export function setupWebSocketListeners(): void {
     }
   });
 
-  // Runtime status broadcast handler - 更新会话运行状态
+  // Runtime status broadcast handler - 更新会话运Rows状态
   websocketService.on("runtime_status_broadcast", (data: any) => {
     try {
       console.log("[setupWebSocketListeners] runtime_status_broadcast:", data);
@@ -900,7 +900,7 @@ export function setupWebSocketListeners(): void {
     }
   });
 
-  // More messages loaded handler - 加载更多历史消息
+  // More messages loaded handler - Load more历史消息
   websocketService.on("more_messages_loaded", async (data: any) => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] more_messages_loaded:`, data);

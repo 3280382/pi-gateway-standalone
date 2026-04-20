@@ -63,7 +63,7 @@ export interface FileState {
   treeFilterMode: "normal" | "all" | "search";
   treeFilterText: string;
 
-  // Todo 列表缓存
+  // Todo Cols表缓存
   todoList: TodoItem[];
   todoMap: Map<string, TodoItem[]>; // filePath -> todos
 }
@@ -169,7 +169,7 @@ export const useFileStore = create<FileState & FileActions>()(
         treeFilterMode: "normal",
         treeFilterText: "",
 
-        // Todo 列表缓存
+        // Todo Cols表缓存
         todoList: [],
         todoMap: new Map(),
 

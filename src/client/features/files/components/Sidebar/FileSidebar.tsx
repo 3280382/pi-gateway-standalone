@@ -1,5 +1,5 @@
 /**
- * FileSidebar - files侧边栏（支持层级展开）
+ * FileSidebar - filesSidebar（支持层级Expand）
  */
 import type React from "react";
 import { useCallback } from "react";
@@ -15,7 +15,7 @@ interface FileSidebarProps {
 export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
   const { tree, loading, error, loadNodeChildren, toggleNode } = useFileTree();
 
-  // 处理节点点击 - 展开/折叠 + 导航
+  // 处理节点点击 - Expand/Collapse + 导航
   const handleNodeClick = useCallback(
     async (node: ReturnType<typeof useFileTree>["tree"][0], e: React.MouseEvent) => {
       fileSidebarDebug.debug("点击directories节点", { path: node.path });
@@ -34,7 +34,7 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
       if (!node.loaded) {
         await loadNodeChildren(node);
       } else {
-        // 已加载则切换展开状态
+        // 已加载则切换Expand状态
         toggleNode(node);
       }
     },
@@ -55,7 +55,7 @@ export function FileSidebar({ visible, onNavigate }: FileSidebarProps) {
             style={{ paddingLeft: `${depth * 12 + 8}px` }}
             onClick={(e) => handleNodeClick(node, e)}
           >
-            {/* 展开/折叠图标 */}
+            {/* Expand/Collapse图标 */}
             <span className={styles.treeNodeIcon}>
               {isLoading ? (
                 <svg

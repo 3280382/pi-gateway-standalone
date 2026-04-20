@@ -17,8 +17,8 @@ describe("Chat API", () => {
   });
 
   it("can send message", async () => {
-    await reporter.runTest("发送消息", async () => {
-      logger.info("发送消息测试");
+    await reporter.runTest("Send message", async () => {
+      logger.info("Send message测试");
       expect(true).toBe(true);
     });
   });

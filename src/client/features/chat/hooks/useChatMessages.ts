@@ -1,13 +1,13 @@
 /**
  * useChatMessages - 聊天消息处理 Hook
- * 处理消息过滤和Search
+ * Handle messages过滤和Search
  */
 
 import { useMemo } from "react";
 import { filterMessages, useChatStore } from "@/features/chat/stores/chatStore";
 
 export interface UseChatMessagesReturn {
-  // 消息列表
+  // 消息Cols表
   messages: ReturnType<typeof useChatStore.getState>["messages"];
   filteredMessages: ReturnType<typeof useChatStore.getState>["messages"];
   currentStreamingMessage: ReturnType<typeof useChatStore.getState>["currentStreamingMessage"];

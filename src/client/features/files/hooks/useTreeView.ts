@@ -61,7 +61,7 @@ export function useTreeView(options: UseTreeViewOptions = {}): UseTreeViewResult
     setError(null);
 
     try {
-      // 传递 filter 参数给服务端，在服务端进行过滤
+      // 传递 filter Arguments给服务端，在服务端进Rows过滤
       const response = await fileApi.tree(pathToLoad, filter);
       setRawTreeData(response.  items);
     } catch (err) {
@@ -82,7 +82,7 @@ export function useTreeView(options: UseTreeViewOptions = {}): UseTreeViewResult
     if (!isActive || !currentBrowsePath) {
       return;
     }
-    // 根据 treeFilterMode 决定 filter 参数
+    // 根据 treeFilterMode 决定 filter Arguments
     const filter = treeFilterMode === "normal" ? "normal" : "all";
     refresh(currentBrowsePath, filter);
   }, [isActive, currentBrowsePath, treeFilterMode]);

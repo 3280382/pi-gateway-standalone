@@ -10,8 +10,8 @@ const reporter = new TestReporter("file-api");
 
 describe("File API", () => {
   it("can fetch file list", async () => {
-    await reporter.runTest("获取files列表", async () => {
-      logger.info("获取files列表测试");
+    await reporter.runTest("获取filesCols表", async () => {
+      logger.info("获取filesCols表测试");
       expect(true).toBe(true);
     });
   });

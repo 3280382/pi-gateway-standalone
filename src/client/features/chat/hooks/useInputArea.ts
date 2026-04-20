@@ -3,9 +3,9 @@
  *
  * Responsibilities:
  * - 整合 useFilePicker, useImageUpload, useSlashCommands
- * - 处理键盘事件（发送、命令选择、files选择）
+ * - 处理键盘事件（发送、Command选择、files选择）
  * - 处理输入文本变化
- * - 协调发送流程（普通消息、bash command、slash 命令、图片）
+ * - 协调发送流程（普通消息、bash command、slash Command、图片）
  */
 
 import { useCallback, useMemo, useRef } from "react";
@@ -157,7 +157,7 @@ export function useInputArea(options: UseInputAreaOptions): UseInputAreaReturn {
       return;
     }
 
-    // Slash 命令 - 直接发送完整文本给 SDK 处理
+    // Slash Command - 直接发送完整文本给 SDK 处理
     if (trimmedValue.startsWith("/")) {
       if (onSend) {
         onSend(trimmedValue);
@@ -224,7 +224,7 @@ export function useInputArea(options: UseInputAreaOptions): UseInputAreaReturn {
         }
       }
 
-      // Slash 命令选择器打开时的键盘处理
+      // Slash Command选择器打开时的键盘处理
       if (slashCommands.isOpen && slashCommands.filteredCommands.length > 0) {
         if (e.key === "ArrowDown") {
           e.preventDefault();

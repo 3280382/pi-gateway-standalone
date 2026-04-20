@@ -45,10 +45,10 @@ export function SidebarPanel({ currentView = "chat" }: SidebarPanelProps) {
   const error = useSidebarStore((state) => state.error);
   const clearError = useSidebarStore((state) => state.clearError);
 
-  // 以当前工作directories为参数，从服务器获取所有历史 session files
+  // 以当前工作directories为Arguments，从服务器获取所有历史 session files
   const { isLoading: isSessionsLoading } = useSidebarSessions();
 
-  // 通知服务器侧边栏可见性状态（用于优化状态广播）
+  // 通知服务器Sidebar可见性状态（用于优化状态广播）
   useSidebarVisibility();
 
   // ========== 5. Render ==========

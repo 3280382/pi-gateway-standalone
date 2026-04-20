@@ -5,7 +5,7 @@
  * - Batch delete
  * - 批量移动
  * - 创建files
- * - 执行files
+ * - 执Rowsfiles
  */
 
 import { useCallback } from "react";
@@ -130,17 +130,17 @@ export function useFileOperations(): UseFileOperationsResult {
   );
 
   /**
-   * 执行files
+   * 执Rowsfiles
    */
   const executeFile = useCallback(
     async (path: string, onOutput?: (output: string) => void) => {
       try {
-        fileBrowserDebug.info("执行files", { path });
+        fileBrowserDebug.info("执Rowsfiles", { path });
         const output = await fileOperationsApi.executeFileByPath(path, onOutput);
-        fileBrowserDebug.info("执行filesSuccess", { path });
+        fileBrowserDebug.info("执RowsfilesSuccess", { path });
         return output;
       } catch (error) {
-        fileBrowserDebug.error("执行filesFailed", { error });
+        fileBrowserDebug.error("执RowsfilesFailed", { error });
         const errorMessage = error instanceof Error ? error.message : "Failed to execute file";
         setError(errorMessage);
         if (onOutput) {

@@ -5,7 +5,7 @@
  * - files类型判断
  * - 加载files内容
  * - 保存files
- * - 执行files
+ * - 执Rowsfiles
  * - Copy路径
  */
 
@@ -117,8 +117,8 @@ const LANG_MAP: Record<string, string> = {
 
 // Prism.js 语言映射 - 用于查看模式（某些语言需要映射到 Prism 支持的名字）
 const _PRISM_LANG_MAP: Record<string, string> = {
-  tsx: "typescript", // Prism 使用 typescript 来高亮 TSX
-  jsx: "javascript", // Prism 使用 javascript 来高亮 JSX
+  tsx: "typescript", // Prism 使用 typescript 来Height亮 TSX
+  jsx: "javascript", // Prism 使用 javascript 来Height亮 JSX
 };
 
 export interface FileTypeInfo {
@@ -247,7 +247,7 @@ export function useFileViewer(): UseFileViewerResult {
     }
   }, [filePath, editedContent, setContent, setMode, setSaving, setError]);
 
-  // 执行files
+  // 执Rowsfiles
   const execute = useCallback(async () => {
     if (!filePath) return;
 
@@ -283,7 +283,7 @@ export function useFileViewer(): UseFileViewerResult {
     }
   }, [filePath]);
 
-  // 停止执行
+  // 停止执Rows
   const stopExecution = useCallback(() => {
     abortRef.current?.abort();
   }, []);

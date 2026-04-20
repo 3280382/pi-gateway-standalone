@@ -71,7 +71,7 @@ export function formatSystemPromptContent(data: SystemPromptResponse): string {
     sections.push("");
   }
 
-  // 技能列表
+  // 技能Cols表
   if (data.skills.length > 0) {
     sections.push(`# 可用技能 (${data.skills.length}个)`);
     for (const skill of data.skills) {

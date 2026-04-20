@@ -1,5 +1,5 @@
 /**
- * FileViewer - files查看器模态框
+ * FileViewer - files查看器Modal
  *
  * Responsibilities:纯 UI 渲染
  * - 不包含业务逻辑
@@ -15,7 +15,7 @@ import styles from "./FileViewer.module.css";
 
 export function FileViewer() {
   // ========== 1. State ==========
-  // 从 store 获取状态
+  // 从 store Get state
   const {
     isOpen,
     filePath,
@@ -52,7 +52,7 @@ export function FileViewer() {
     }
   }, []);
 
-  // 语法高亮 - 仅在查看模式下使用 Prism.js
+  // 语法Height亮 - 仅在查看模式下使用 Prism.js
   useEffect(() => {
     if (mode === "view" && content && !fileTypes.isImage && !fileTypes.isHtml) {
       const timer = setTimeout(() => {
@@ -101,7 +101,7 @@ export function FileViewer() {
     return text
       .replace(/\t/g, "→   ") // 制表符
       .replace(/ /g, "·") // 空格
-      .replace(/\n/g, "¶\n") // 换行符（在行尾添加）
+      .replace(/\n/g, "¶\n") // 换Rows符（在Rows尾添加）
       .replace(/\r/g, "↵"); // 回车符
   };
 

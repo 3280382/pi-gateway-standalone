@@ -107,7 +107,7 @@ function parseToolSummary(toolName: string, args: string | undefined): string {
 }
 
 /**
- * Formatter utilities参数显示
+ * Formatter utilitiesArguments显示
  * - First line shows brief info（path, command, etc）
  * - For file write tools，格式化show file path和内容
  * - Properly format content part（preserve newlines, code style）
@@ -399,7 +399,7 @@ function GlassCard({
     }
 
     case "tool": {
-      // tool type contains completed calls（参数 + 结果）
+      // tool type contains completed calls（Arguments + 结果）
       if (!showTools) return null;
 
       const toolName = block.toolName || "unknown";

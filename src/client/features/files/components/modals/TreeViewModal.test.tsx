@@ -187,7 +187,7 @@ describe("TreeViewModal", () => {
       expect(screen.getByText("Loading...")).toBeInTheDocument();
     });
 
-    it("应该显示空状态", () => {
+    it("应该显示Empty state", () => {
       render(
         <TreeViewModal
           isOpen={true}

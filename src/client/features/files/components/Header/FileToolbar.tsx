@@ -123,14 +123,14 @@ export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarPr
 
   return (
     <div className={styles.toolbarWrapper}>
-      {/* Page一行：路径 */}
+      {/* Page一Rows：路径 */}
       <div className={styles.toolbarRow}>
         <div className={styles.pathBar}>
           <PathIcon />
           <span>{workingDir}</span>
         </div>
       </div>
-      {/* Page二行：过滤 + Sort */}
+      {/* Page二Rows：过滤 + Sort */}
       <div className={styles.toolbarRow}>
         {/* 过滤 */}
         <div className={styles.filterCombo} ref={filterDropdownRef}>

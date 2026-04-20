@@ -395,14 +395,14 @@ export async function status(req: Request, res: Response): Promise<void> {
         }
         path = line.substring(pathStart);
       } else {
-        // 后备方案：使用原来的逻辑
+        // Fallback: use original logic
         status = line.substring(0, 2);
         path = line.substring(3);
       }
 
       console.log("[Git] Parse line:", { line, status, path, firstSpaceIndex });
 
-      // 如果Path wrapped in quotes, removing quotes
+      // If path wrapped in quotes, remove quotes
       let filePath = path.trim();
       console.log("[Git] Trimmed path:", filePath);
 
@@ -413,7 +413,7 @@ export async function status(req: Request, res: Response): Promise<void> {
 
       console.log("[Git] Processed file path:", filePath);
 
-      // 将状态映射为更易读的格式
+      // Map status to more readable format
       let displayStatus = "";
       if (status === "??") {
         displayStatus = "untracked";
@@ -433,10 +433,10 @@ export async function status(req: Request, res: Response): Promise<void> {
         displayStatus = "other";
       }
 
-      // 计算相对于 workingDir 的路径
+      // Calculate path relative to workingDir
       let relativePath = filePath;
 
-      // 规范化路径以处理尾部斜杠差异
+      // Normalize path to handle trailing slash differences
       const normalizedGitRoot = normalize(gitRoot);
       const normalizedWorkingDir = normalize(workingDir);
 
@@ -444,14 +444,14 @@ export async function status(req: Request, res: Response): Promise<void> {
         const absolutePath = join(normalizedGitRoot, filePath);
         relativePath = relative(normalizedWorkingDir, absolutePath);
 
-        // 如果相对路径以 ../ 开头，表示files不在 workingDir 下
-        // 这种情况可能发生在子模块或特殊情况下
-        // 暂时保持原始路径
+        // If relative path starts with ../, file is not under workingDir
+        // This may happen in submodules or special cases
+        // Keep original path for now
         if (relativePath.startsWith("../")) {
           relativePath = filePath;
         }
       } else {
-        // gitRoot 和 workingDir 相同，files路径已经是相对于根directories的
+        // gitRoot and workingDir same, file path already relative to root directory
         relativePath = filePath;
       }
 
