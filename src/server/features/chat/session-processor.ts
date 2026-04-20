@@ -22,6 +22,33 @@ interface SessionEntry {
 }
 
 /**
+ * Detect message kind based on content for historical messages
+ */
+function detectMessageKind(message: any): string | undefined {
+  if (!message || message.kind) return message?.kind;
+
+  // Only process system messages
+  if (message.role !== "system") return undefined;
+
+  const text =
+    message.content
+      ?.filter((c: any) => c.type === "text")
+      ?.map((c: any) => c.text || "")
+      ?.join(" ") || "";
+
+  // Check for special system message types
+  if (text.includes("🗜️ Compacting") || text.includes("上下文压缩")) return "compaction";
+  if (text.includes("🔄 Retrying") && text.includes("Auto-retrying")) return "auto_retry";
+  if (text.includes("🔄 Retrying")) return "retry";
+  if (text.includes("模型已切换为") || text.includes("Model switched")) return "model_change";
+  if (text.includes("Thinking level") || text.includes("Thinking level已设置"))
+    return "thinking_level_change";
+  if (text.includes("📊") || text.includes("tokens") || text.includes("Usage:")) return "usage";
+
+  return undefined;
+}
+
+/**
  * Process session entries on the server side
  * Merges toolResults into their parent assistant messages
  */
@@ -193,6 +220,9 @@ export function processSessionEntries(entries: SessionEntry[]): {
       }
     }
 
+    // Detect message kind for system messages (compaction, retry, etc.)
+    const kind = msg.role === "system" ? detectMessageKind(msg) : undefined;
+
     const message: Message = {
       id: entry.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: msg.role as "user" | "assistant" | "system",
@@ -202,8 +232,11 @@ export function processSessionEntries(entries: SessionEntry[]): {
       model: msg.model,
       provider: msg.provider,
       stopReason: msg.stopReason,
+      isStreaming: false,
       isThinkingCollapsed: true,
       isToolsCollapsed: true,
+      isMessageCollapsed: false,
+      kind,
     };
 
     messages.push(message);
@@ -249,49 +282,81 @@ function normalizeContentItem(item: any): ContentPart {
 }
 
 function convertSpecialEntryToMessage(entry: SessionEntry): Message | null {
+  const baseMessage = {
+    id: entry.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    role: "system" as const,
+    timestamp: new Date(entry.timestamp || Date.now()),
+    isStreaming: false,
+    isThinkingCollapsed: true,
+    isToolsCollapsed: true,
+    isMessageCollapsed: false,
+  };
+
   switch (entry.type) {
     case "model_change":
       return {
+        ...baseMessage,
         id: entry.id || `model-${Date.now()}`,
-        role: "system",
         content: [
           {
-            type: "text",
-            text: `Model changed to ${entry.modelId} (${entry.provider})`,
+            type: "text" as const,
+            text: `🤖 Model switched to: ${entry.provider}/${entry.modelId}`,
           },
         ],
-        timestamp: new Date(entry.timestamp || Date.now()),
-        isThinkingCollapsed: true,
-        isToolsCollapsed: true,
+        kind: "model_change",
       };
     case "thinking_level_change":
       return {
+        ...baseMessage,
         id: entry.id || `thinking-${Date.now()}`,
-        role: "system",
         content: [
           {
-            type: "text",
-            text: `Thinking level changed to ${entry.thinkingLevel}`,
+            type: "text" as const,
+            text: `🧠 Thinking level set to: ${entry.thinkingLevel}`,
           },
         ],
-        timestamp: new Date(entry.timestamp || Date.now()),
-        isThinkingCollapsed: true,
-        isToolsCollapsed: true,
+        kind: "thinking_level_change",
       };
     case "compaction":
       return {
+        ...baseMessage,
         id: entry.id || `compact-${Date.now()}`,
-        role: "system",
         content: [
           {
-            type: "text",
-            text: `Context compacted: ${entry.summary?.slice(0, 100) || "N/A"}...`,
+            type: "text" as const,
+            text: `🗜️ Context compaction: ${entry.summary || "Context compressed"}${entry.tokensBefore > 0 ? ` (freed ~${entry.tokensBefore} tokens)` : ""}`,
           },
         ],
-        timestamp: new Date(entry.timestamp || Date.now()),
-        isThinkingCollapsed: true,
-        isToolsCollapsed: true,
+        kind: "compaction",
       };
+    case "usage": {
+      const usage = entry.usage;
+      if (usage) {
+        const inputTokens = usage.inputTokens || usage.input_tokens || 0;
+        const outputTokens = usage.outputTokens || usage.output_tokens || 0;
+        const totalTokens = usage.totalTokens || usage.total_tokens || (inputTokens + outputTokens);
+        const cost = usage.cost || usage.estimatedCost || 0;
+
+        let message = `📊 Usage: ${totalTokens.toLocaleString()} tokens`;
+        if (inputTokens || outputTokens) {
+          message += ` (input: ${inputTokens.toLocaleString()}, output: ${outputTokens.toLocaleString()})`;
+        }
+        if (cost) {
+          message += ` · $${cost.toFixed(4)}`;
+        }
+        if (usage.model) {
+          message += ` · ${usage.model}`;
+        }
+
+        return {
+          ...baseMessage,
+          id: entry.id || `usage-${Date.now()}`,
+          content: [{ type: "text" as const, text: message }],
+          kind: "usage",
+        };
+      }
+      return null;
+    }
     default:
       return null;
   }
