@@ -56,10 +56,47 @@ export interface ToolExecution {
 }
 
 // ============================================================================
-// Search Types
+// Search Types - Hierarchical Design
 // ============================================================================
 
+// Role-level filters
+export interface RoleFilters {
+  user: boolean;
+  assistant: boolean;
+  system: boolean;
+}
+
+// Content type filters (hierarchical under roles)
+export interface ContentTypeFilters {
+  // User content types
+  prompt: boolean;  // User messages (text content)
+  
+  // Assistant content types
+  text: boolean;           // Assistant text responses
+  thinking: boolean;       // AI thinking blocks
+  tool: boolean;           // Tool calls and results
+  
+  // System content types (special events)
+  compaction: boolean;     // Context compaction
+  retry: boolean;          // Manual retry
+  autoRetry: boolean;      // Auto-retry
+  modelChange: boolean;    // Model switch events
+  thinkingLevelChange: boolean; // Thinking level change
+  usage: boolean;          // Token usage stats
+}
+
+// Hierarchical filters
 export interface ChatSearchFilters {
+  roles: RoleFilters;
+  contentTypes: ContentTypeFilters;
+  dates?: {
+    from?: Date;
+    to?: Date;
+  };
+}
+
+// Legacy filter support (for backward compatibility)
+export type LegacyChatSearchFilters = {
   user: boolean;
   assistant: boolean;
   system: boolean;
@@ -68,14 +105,10 @@ export interface ChatSearchFilters {
   compaction: boolean;
   modelChange: boolean;
   thinkingLevelChange: boolean;
-  usage: boolean; // Usage/cost information
-  retry: boolean; // Retry messages
-  autoRetry: boolean; // Auto-retry messages
-  dates?: {
-    from?: Date;
-    to?: Date;
-  };
-}
+  usage: boolean;
+  retry: boolean;
+  autoRetry: boolean;
+};
 
 export interface SearchResult {
   messageId: string;

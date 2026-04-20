@@ -30,33 +30,9 @@ import styles from "./AppHeader.module.css";
 interface AppHeaderProps {
   currentView?: "chat" | "files";
   searchQuery?: string;
-  searchFilters?: {
-    user: boolean;
-    assistant: boolean;
-    system: boolean;
-    thinking: boolean;
-    tools: boolean;
-    compaction: boolean;
-    modelChange: boolean;
-    thinkingLevelChange: boolean;
-    usage: boolean;
-    retry: boolean;
-    autoRetry: boolean;
-  };
+  searchFilters?: ChatSearchFilters;
   onSearchQueryChange?: (query: string) => void;
-  onSearchFiltersChange?: (filters: {
-    user: boolean;
-    assistant: boolean;
-    system: boolean;
-    thinking: boolean;
-    tools: boolean;
-    compaction: boolean;
-    modelChange: boolean;
-    thinkingLevelChange: boolean;
-    usage: boolean;
-    retry: boolean;
-    autoRetry: boolean;
-  }) => void;
+  onSearchFiltersChange?: (filters: ChatSearchFilters) => void;
 }
 
 // ============================================================================
@@ -98,35 +74,29 @@ export function AppHeader({
   const runtimeStatus = currentSessionId ? sidebarStore.runtimeStatus[currentSessionId] : null;
 
   // ========== 3. Computed ==========
-  const hasActiveFilters = useMemo(
-    () =>
-      filters.user ||
-      filters.assistant ||
-      filters.system ||
-      filters.thinking ||
-      filters.tools ||
-      filters.compaction ||
-      filters.modelChange ||
-      filters.thinkingLevelChange ||
-      filters.usage,
-    [filters]
-  );
+  // Hierarchical filter state
+  const hasActiveFilters = useMemo(() => {
+    const { roles, contentTypes } = filters;
+    return (
+      Object.values(roles).some(Boolean) ||
+      Object.values(contentTypes).some(Boolean)
+    );
+  }, [filters]);
 
-  const activeFilterCount = useMemo(
-    () =>
-      [
-        filters.user,
-        filters.assistant,
-        filters.system,
-        filters.thinking,
-        filters.tools,
-        filters.compaction,
-        filters.modelChange,
-        filters.thinkingLevelChange,
-        filters.usage,
-      ].filter(Boolean).length,
-    [filters]
-  );
+  const activeFilterCount = useMemo(() => {
+    const { roles, contentTypes } = filters;
+    return [
+      ...Object.values(roles),
+      ...Object.values(contentTypes),
+    ].filter(Boolean).length;
+  }, [filters]);
+
+  // Check which roles are active to show relevant content types
+  const activeRoles = useMemo(() => ({
+    user: filters.roles.user,
+    assistant: filters.roles.assistant,
+    system: filters.roles.system,
+  }), [filters.roles]);
 
   // Directory browser modal
   const isDirectoryBrowserOpen = useModalStore((state) => state.isDirectoryBrowserOpen);
@@ -134,12 +104,39 @@ export function AppHeader({
   const closeDirectoryBrowser = useModalStore((state) => state.closeDirectoryBrowser);
 
   // ========== 4. Actions ==========
-  const handleFilterChange = useCallback(
-    (key: keyof ChatSearchFilters) => {
+  // Handle role filter changes
+  const handleRoleFilterChange = useCallback(
+    (role: keyof typeof filters.roles) => {
+      const newFilters = {
+        ...filters,
+        roles: {
+          ...filters.roles,
+          [role]: !filters.roles[role],
+        },
+      };
       if (onSearchFiltersChange) {
-        onSearchFiltersChange({ ...filters, [key]: !filters[key] });
+        onSearchFiltersChange(newFilters);
       } else {
-        chatStoreSetSearchFilters({ [key]: !filters[key] });
+        chatStoreSetSearchFilters({ roles: { [role]: !filters.roles[role] } });
+      }
+    },
+    [filters, onSearchFiltersChange, chatStoreSetSearchFilters]
+  );
+
+  // Handle content type filter changes
+  const handleContentTypeFilterChange = useCallback(
+    (contentType: keyof typeof filters.contentTypes) => {
+      const newFilters = {
+        ...filters,
+        contentTypes: {
+          ...filters.contentTypes,
+          [contentType]: !filters.contentTypes[contentType],
+        },
+      };
+      if (onSearchFiltersChange) {
+        onSearchFiltersChange(newFilters);
+      } else {
+        chatStoreSetSearchFilters({ contentTypes: { [contentType]: !filters.contentTypes[contentType] } });
       }
     },
     [filters, onSearchFiltersChange, chatStoreSetSearchFilters]
@@ -223,64 +220,97 @@ export function AppHeader({
             {hasActiveFilters && <span className={styles.filterCount}>{activeFilterCount}</span>}
           </button>
 
-          {/* Filter dropdown */}
+          {/* Hierarchical Filter Dropdown */}
           {isFiltersVisible && (
             <div className={styles.filterDropdown}>
-              <FilterChip
-                label="User"
-                checked={filters.user}
-                onChange={() => handleFilterChange("user")}
-              />
-              <FilterChip
-                label="Assistant"
-                checked={filters.assistant}
-                onChange={() => handleFilterChange("assistant")}
-              />
-              <FilterChip
-                label="System"
-                checked={filters.system}
-                onChange={() => handleFilterChange("system")}
-              />
-              <FilterChip
-                label="Thinking"
-                checked={filters.thinking}
-                onChange={() => handleFilterChange("thinking")}
-              />
-              <FilterChip
-                label="Tools"
-                checked={filters.tools}
-                onChange={() => handleFilterChange("tools")}
-              />
-              <FilterChip
-                label="Compaction"
-                checked={filters.compaction}
-                onChange={() => handleFilterChange("compaction")}
-              />
-              <FilterChip
-                label="Model Change"
-                checked={filters.modelChange}
-                onChange={() => handleFilterChange("modelChange")}
-              />
-              <FilterChip
-                label="Thinking Level"
-                checked={filters.thinkingLevelChange}
-                onChange={() => handleFilterChange("thinkingLevelChange")}
-              />
-              <FilterChip
-                label="Usage"
-                checked={filters.usage}
-                onChange={() => handleFilterChange("usage")}
-              />
-              <FilterChip
-                label="Retry"
-                checked={filters.retry}
-                onChange={() => handleFilterChange("retry")}
-              />
-              <FilterChip
-                label="Auto Retry"
-                checked={filters.autoRetry}
-                onChange={() => handleFilterChange("autoRetry")}
-              />
+              {/* Level 1: Role Filters */}
+              <div className={styles.filterSection}>
+                <div className={styles.filterSectionTitle}>Roles</div>
+                <FilterChip
+                  label="User"
+                  checked={filters.roles.user}
+                  onChange={() => handleRoleFilterChange("user")}
+                />
+                <FilterChip
+                  label="Assistant"
+                  checked={filters.roles.assistant}
+                  onChange={() => handleRoleFilterChange("assistant")}
+                />
+                <FilterChip
+                  label="System"
+                  checked={filters.roles.system}
+                  onChange={() => handleRoleFilterChange("system")}
+                />
+              </div>
+
+              {/* Level 2: Content Type Filters (shown based on active roles) */}
+              {activeRoles.user && (
+                <div className={styles.filterSection}>
+                  <div className={styles.filterSectionTitle}>User Content</div>
+                  <FilterChip
+                    label="Prompts"
+                    checked={filters.contentTypes.prompt}
+                    onChange={() => handleContentTypeFilterChange("prompt")}
+                  />
+                </div>
+              )}
+
+              {activeRoles.assistant && (
+                <div className={styles.filterSection}>
+                  <div className={styles.filterSectionTitle}>Assistant Content</div>
+                  <FilterChip
+                    label="Text"
+                    checked={filters.contentTypes.text}
+                    onChange={() => handleContentTypeFilterChange("text")}
+                  />
+                  <FilterChip
+                    label="Thinking"
+                    checked={filters.contentTypes.thinking}
+                    onChange={() => handleContentTypeFilterChange("thinking")}
+                  />
+                  <FilterChip
+                    label="Tools"
+                    checked={filters.contentTypes.tool}
+                    onChange={() => handleContentTypeFilterChange("tool")}
+                  />
+                </div>
+              )}
+
+              {activeRoles.system && (
+                <div className={styles.filterSection}>
+                  <div className={styles.filterSectionTitle}>System Events</div>
+                  <FilterChip
+                    label="Compaction"
+                    checked={filters.contentTypes.compaction}
+                    onChange={() => handleContentTypeFilterChange("compaction")}
+                  />
+                  <FilterChip
+                    label="Retry"
+                    checked={filters.contentTypes.retry}
+                    onChange={() => handleContentTypeFilterChange("retry")}
+                  />
+                  <FilterChip
+                    label="Auto Retry"
+                    checked={filters.contentTypes.autoRetry}
+                    onChange={() => handleContentTypeFilterChange("autoRetry")}
+                  />
+                  <FilterChip
+                    label="Model Change"
+                    checked={filters.contentTypes.modelChange}
+                    onChange={() => handleContentTypeFilterChange("modelChange")}
+                  />
+                  <FilterChip
+                    label="Thinking Level"
+                    checked={filters.contentTypes.thinkingLevelChange}
+                    onChange={() => handleContentTypeFilterChange("thinkingLevelChange")}
+                  />
+                  <FilterChip
+                    label="Usage"
+                    checked={filters.contentTypes.usage}
+                    onChange={() => handleContentTypeFilterChange("usage")}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -57,12 +57,30 @@ export interface ToolExecution {
 // Chat State Types (Frontend Use)
 // ============================================================================
 
-export interface ChatSearchFilters {
+// Hierarchical Role Filters
+export interface RoleFilters {
   user: boolean;
   assistant: boolean;
-  thinking: boolean;
-  tools: boolean;
-  usage: boolean; // Usage/cost information
+  system: boolean;
+}
+
+// Hierarchical Content Type Filters
+export interface ContentTypeFilters {
+  prompt: boolean;           // User messages
+  text: boolean;             // Assistant text
+  thinking: boolean;         // AI thinking
+  tool: boolean;             // Tool calls
+  compaction: boolean;       // Context compaction
+  retry: boolean;            // Manual retry
+  autoRetry: boolean;        // Auto-retry
+  modelChange: boolean;      // Model switch
+  thinkingLevelChange: boolean; // Thinking level
+  usage: boolean;            // Token usage
+}
+
+export interface ChatSearchFilters {
+  roles: RoleFilters;
+  contentTypes: ContentTypeFilters;
   dates?: {
     from?: Date;
     to?: Date;

@@ -66,17 +66,23 @@ const createInitialState = () => ({
   showTools: true,
   searchQuery: "",
   searchFilters: {
-    user: true,
-    assistant: true,
-    system: true,
-    thinking: true,
-    tools: true,
-    compaction: true,
-    modelChange: true,
-    thinkingLevelChange: true,
-    usage: true,
-    retry: true,
-    autoRetry: true,
+    roles: {
+      user: true,
+      assistant: true,
+      system: true,
+    },
+    contentTypes: {
+      prompt: true,
+      text: true,
+      thinking: true,
+      tool: true,
+      compaction: true,
+      retry: true,
+      autoRetry: true,
+      modelChange: true,
+      thinkingLevelChange: true,
+      usage: true,
+    },
   },
   searchResults: [] as SearchResult[],
   isSearching: false,
@@ -922,7 +928,11 @@ export const useChatStore = create<
       setSearchFilters: (filters: Partial<ChatSearchFilters>) => {
         set(
           (state) => ({
-            searchFilters: { ...state.searchFilters, ...filters },
+            searchFilters: {
+              roles: { ...state.searchFilters.roles, ...filters.roles },
+              contentTypes: { ...state.searchFilters.contentTypes, ...filters.contentTypes },
+              dates: filters.dates ?? state.searchFilters.dates,
+            },
           }),
           false,
           "setSearchFilters"
@@ -1167,96 +1177,126 @@ export interface FilterOptions {
 }
 
 /**
- * 检测消息内容类型
- * 优先使用 message.kind 字段，如果没有则通过文本内容推断
+ * Hierarchical Message Type Detection
+ * 
+ * Structure:
+ * - Role: user | assistant | system
+ *   - User: prompt (text content)
+ *   - Assistant: text | thinking | tool
+ *   - System: compaction | retry | autoRetry | modelChange | thinkingLevelChange | usage
  */
-function detectMessageTypes(message: Message): {
-  hasThinking: boolean;
-  hasTools: boolean;
-  isModelChange: boolean;
-  isCompaction: boolean;
-  isThinkingLevelChange: boolean;
-  isUsage: boolean;
-  isRetry: boolean;
-  isAutoRetry: boolean;
+function detectHierarchicalMessageType(message: Message): {
+  role: "user" | "assistant" | "system";
+  contentType: string;
 } {
-  // 优先使用 kind 字段（用于实时消息和已处理的历史消息）
-  if (message.kind) {
-    return {
-      hasThinking: message.content.some((c) => c.type === "thinking"),
-      hasTools: message.content.some((c) => c.type === "tool" || c.type === "tool_use"),
-      isModelChange: message.kind === "model_change",
-      isCompaction: message.kind === "compaction",
-      isThinkingLevelChange: message.kind === "thinking_level_change",
-      isUsage: message.kind === "usage",
-      isRetry: message.kind === "retry",
-      isAutoRetry: message.kind === "auto_retry",
-    };
+  const role = message.role;
+  
+  // Determine content type based on role and kind/content
+  switch (role) {
+    case "user":
+      return { role: "user", contentType: "prompt" };
+      
+    case "assistant": {
+      // Check content array for types
+      const hasThinking = message.content.some((c) => c.type === "thinking");
+      const hasTool = message.content.some((c) => c.type === "tool" || c.type === "tool_use");
+      const hasText = message.content.some((c) => c.type === "text");
+      
+      // Priority: tool > thinking > text
+      if (hasTool) return { role: "assistant", contentType: "tool" };
+      if (hasThinking) return { role: "assistant", contentType: "thinking" };
+      if (hasText) return { role: "assistant", contentType: "text" };
+      return { role: "assistant", contentType: "text" }; // default
+    }
+      
+    case "system": {
+      // Use kind field or detect from content
+      const kind = message.kind;
+      if (kind) {
+        return { role: "system", contentType: kind };
+      }
+      
+      // Fallback: detect from text content
+      const text = message.content
+        .filter((c) => c.type === "text")
+        .map((c) => c.text || "")
+        .join(" ");
+        
+      if (text.includes("🗜️ Compacting") || text.includes("上下文压缩")) {
+        return { role: "system", contentType: "compaction" };
+      }
+      if (text.includes("🔄 Auto-retrying")) {
+        return { role: "system", contentType: "autoRetry" };
+      }
+      if (text.includes("🔄 Retrying")) {
+        return { role: "system", contentType: "retry" };
+      }
+      if (text.includes("模型已切换为")) {
+        return { role: "system", contentType: "modelChange" };
+      }
+      if (text.includes("Thinking level已设置")) {
+        return { role: "system", contentType: "thinkingLevelChange" };
+      }
+      if (text.includes("📊") || text.includes("tokens") || text.includes("cost")) {
+        return { role: "system", contentType: "usage" };
+      }
+      
+      return { role: "system", contentType: "unknown" };
+    }
+      
+    default:
+      return { role: "system", contentType: "unknown" };
   }
-
-  // 通过文本内容推断（用于旧的历史消息）
-  const text = message.content
-    .filter((c) => c.type === "text")
-    .map((c) => c.text || "")
-    .join(" ");
-
-  return {
-    hasThinking: message.content.some((c) => c.type === "thinking"),
-    hasTools: message.content.some((c) => c.type === "tool" || c.type === "tool_use"),
-    isModelChange: message.role === "system" && text.includes("模型已切换为"),
-    isCompaction: message.role === "system" && text.includes("上下文压缩"),
-    isThinkingLevelChange: message.role === "system" && text.includes("Thinking level已设置"),
-    isUsage: message.role === "system" && (text.includes("📊") || text.includes("tokens") || text.includes("cost")),
-    isRetry: message.role === "system" && text.includes("🔄 Retrying"),
-    isAutoRetry: message.role === "system" && text.includes("🔄 Auto-retrying"),
-  };
 }
 
 /**
- * 过滤消息Cols表
- * @param messages 消息Cols表
- * @param options 过滤选项
- * @returns 过滤后的消息Cols表
+ * Hierarchical Message Filtering
+ * 
+ * Two-level filtering:
+ * 1. Role level: user | assistant | system
+ * 2. Content type level: depends on role
+ * 
+ * @param messages Array of messages
+ * @param options Filter options with hierarchical structure
+ * @returns Filtered messages
  */
 export function filterMessages(messages: Message[], options: FilterOptions): Message[] {
   const { query, filters } = options;
   const lowerQuery = query.toLowerCase().trim();
 
   return messages.filter((message) => {
-    const { hasThinking, hasTools, isModelChange, isCompaction, isThinkingLevelChange, isUsage, isRetry, isAutoRetry } =
-      detectMessageTypes(message);
+    const { role, contentType } = detectHierarchicalMessageType(message);
 
-    // 1. 按消息 role 过滤
-    if (message.role === "user" && !filters.user) return false;
-    if (message.role === "assistant" && !filters.assistant) return false;
-    if (message.role === "system" && !filters.system) return false;
+    // Level 1: Role filtering
+    if (!filters.roles[role]) return false;
 
-    // 2. 按内容类型过滤（独立判断，无依赖关系）
-    // 如果消息包含 thinking 但 filters.thinking 为 false，过滤掉
-    if (hasThinking && !filters.thinking) return false;
-
-    // 如果消息包含 tools 但 filters.tools 为 false，过滤掉
-    if (hasTools && !filters.tools) return false;
-
-    // 3. 按特殊System message类型过滤
-    if (isModelChange && !filters.modelChange) return false;
-    if (isCompaction && !filters.compaction) return false;
-    if (isThinkingLevelChange && !filters.thinkingLevelChange) return false;
-    if (isUsage && !filters.usage) return false;
-    if (isRetry && !filters.retry) return false;
-    if (isAutoRetry && !filters.autoRetry) return false;
-
-    // 4. 普通System message（非特殊类型）如果 system 为 false 已经被过滤
-    // 但如果 system 为 true，但特殊类型为 false，需要检查
-    if (message.role === "system") {
-      // 如果是特殊类型且都被Close了，或者不是特殊类型
-      const isSpecialType = isModelChange || isCompaction || isThinkingLevelChange || isUsage || isRetry || isAutoRetry;
-      // 特殊类型已经被上面的检查过滤了
-      // 如果不是特殊类型，但 system 为 false，已经在 role 检查中过滤
-      // 所以这里不需要额外处理
+    // Level 2: Content type filtering (role-specific)
+    switch (role) {
+      case "user":
+        // User messages are always "prompt" type
+        if (!filters.contentTypes.prompt) return false;
+        break;
+        
+      case "assistant": {
+        // Assistant messages can be: text, thinking, tool
+        const typeKey = contentType as keyof typeof filters.contentTypes;
+        if (!filters.contentTypes[typeKey]) return false;
+        break;
+      }
+        
+      case "system": {
+        // System messages are special events
+        if (contentType === "unknown") {
+          // Unknown system messages are shown if system role is enabled
+          return true;
+        }
+        const typeKey = contentType as keyof typeof filters.contentTypes;
+        if (!filters.contentTypes[typeKey]) return false;
+        break;
+      }
     }
 
-    // 5. 按Search关键词过滤（如果有关键词）
+    // Level 3: Text search filtering (if query exists)
     if (lowerQuery) {
       const messageText = message.content
         .map((c) => {
