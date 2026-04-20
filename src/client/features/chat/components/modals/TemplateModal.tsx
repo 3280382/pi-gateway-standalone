@@ -1,11 +1,10 @@
 /**
- * TemplateModal - Compact Prompt Template Browser
+ * TemplateModal - Compact dropdown-based template selector
  *
  * Features:
- * - Compact header with minimal controls
- * - Collapsible sidebar for template selection
- * - Maximized preview area
- * - Clean, modern design
+ * - No sidebar, uses compact dropdown for selection
+ * - Maximized content preview area
+ * - Clean, minimal design
  */
 
 import { useEffect, useState, useCallback } from "react";
@@ -36,8 +35,6 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [previewContent, setPreviewContent] = useState<string>("");
   const [previewLoading, setPreviewLoading] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [filter, setFilter] = useState<"all" | "global" | "local">("all");
 
   // WebSocket listeners
   useEffect(() => {
@@ -100,10 +97,14 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
     websocketService.send("get_template", { name });
   }, []);
 
-  const handleSelect = useCallback((template: Template) => {
-    setSelectedTemplate(template);
-    loadTemplate(template.name);
-  }, [loadTemplate]);
+  const handleSelectChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const name = e.target.value;
+    const template = templates.find((t) => t.name === name);
+    if (template) {
+      setSelectedTemplate(template);
+      loadTemplate(template.name);
+    }
+  }, [templates, loadTemplate]);
 
   const handleInsert = useCallback(() => {
     if (onTemplateSelect && previewContent) {
@@ -114,142 +115,107 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
 
   if (!isTemplateModalOpen) return null;
 
-  const filtered = templates.filter((t) =>
-    filter === "all" ? true : t.source === filter
-  );
-
   return (
     <div className={styles.overlay} onClick={closeTemplateModal}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         {/* Compact Header */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>
-            <span className={styles.title}>Templates</span>
-            <span className={styles.count}>{templates.length}</span>
-          </div>
-
-          <div className={styles.headerCenter}>
-            <select
-              className={styles.filterSelect}
-              value={filter}
-              onChange={(e) => setFilter(e.target.value as any)}
-            >
-              <option value="all">All</option>
-              <option value="global">Global</option>
-              <option value="local">Local</option>
-            </select>
+            <span className={styles.title}>Template</span>
+            {templates.length > 0 && (
+              <select
+                className={styles.templateSelect}
+                value={selectedTemplate?.name || ""}
+                onChange={handleSelectChange}
+                disabled={loading}
+              >
+                {templates.map((t) => (
+                  <option key={t.path} value={t.name}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            {selectedTemplate && (
+              <span className={`${styles.badge} ${styles[selectedTemplate.source]}`}>
+                {selectedTemplate.source}
+              </span>
+            )}
           </div>
 
           <div className={styles.headerRight}>
-            <button
-              className={styles.iconBtn}
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
-            >
-              {sidebarCollapsed ? "☰" : "✕"}
-            </button>
             <button className={styles.closeBtn} onClick={closeTemplateModal}>
               ✕
             </button>
           </div>
         </div>
 
-        {/* Main Content */}
+        {/* Content Area */}
         <div className={styles.content}>
-          {/* Sidebar - Collapsible */}
-          {!sidebarCollapsed && (
-            <div className={styles.sidebar}>
-              {loading ? (
-                <div className={styles.loading}>Loading...</div>
-              ) : error ? (
-                <div className={styles.error}>{error}</div>
-              ) : templates.length === 0 ? (
-                <div className={styles.empty}>
-                  <p>No templates</p>
-                  <span className={styles.hint}>
-                    Create .md in ~/.pi/agent/prompts/
-                  </span>
-                </div>
-              ) : (
-                <div className={styles.list}>
-                  {filtered.map((t) => (
-                    <div
-                      key={t.path}
-                      className={`${styles.item} ${
-                        selectedTemplate?.path === t.path ? styles.active : ""
-                      }`}
-                      onClick={() => handleSelect(t)}
-                      title={t.path}
-                    >
-                      <span className={`${styles.badge} ${styles[t.source]}`}>
-                        {t.source[0].toUpperCase()}
-                      </span>
-                      <span className={styles.name}>{t.name}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+          {loading ? (
+            <div className={styles.centerMessage}>Loading templates...</div>
+          ) : error ? (
+            <div className={styles.centerMessage} style={{ color: "#f85149" }}>
+              {error}
             </div>
-          )}
-
-          {/* Preview Area */}
-          <div className={styles.preview}>
-            {selectedTemplate ? (
-              <>
-                <div className={styles.previewHeader}>
-                  <div className={styles.fileInfo}>
-                    <span className={styles.fileName}>
-                      {selectedTemplate.name}
-                    </span>
-                    <span className={`${styles.tag} ${styles[selectedTemplate.source]}`}>
-                      {selectedTemplate.source}
-                    </span>
+          ) : templates.length === 0 ? (
+            <div className={styles.centerMessage}>
+              <p>No templates found</p>
+              <span className={styles.hint}>
+                Create .md files in ~/.pi/agent/prompts/
+              </span>
+            </div>
+          ) : (
+            <>
+              {/* Preview */}
+              <div className={styles.preview}>
+                {previewLoading ? (
+                  <div className={styles.spinnerBox}>
+                    <div className={styles.spinner} />
                   </div>
-                  <div className={styles.stats}>
-                    {previewContent && (
-                      <>
-                        <span>{previewContent.length}c</span>
-                        <span>{previewContent.split(/\s+/).filter(Boolean).length}w</span>
-                        <span>{previewContent.split("\n").length}l</span>
-                      </>
-                    )}
-                  </div>
-                </div>
+                ) : (
+                  <pre className={styles.code}>
+                    <code>{previewContent}</code>
+                  </pre>
+                )}
+              </div>
 
-                <div className={styles.previewBody}>
-                  {previewLoading ? (
-                    <div className={styles.spinnerBox}>
-                      <div className={styles.spinner} />
-                    </div>
-                  ) : (
-                    <pre className={styles.code}>
-                      <code>{previewContent}</code>
-                    </pre>
+              {/* Footer */}
+              <div className={styles.footer}>
+                <div className={styles.footerLeft}>
+                  {selectedTemplate && (
+                    <>
+                      <span className={styles.fileName}>
+                        {selectedTemplate.name}
+                      </span>
+                      <span className={styles.sep}>·</span>
+                      <span className={styles.stats}>
+                        {previewContent.length}c ·{" "}
+                        {previewContent.split(/\s+/).filter(Boolean).length}w ·{" "}
+                        {previewContent.split("\n").length}l
+                      </span>
+                      <span className={styles.sep}>·</span>
+                      <span className={styles.path} title={selectedTemplate.path}>
+                        {selectedTemplate.path.replace(HOME_DIR, "~")}
+                      </span>
+                    </>
                   )}
                 </div>
-
-                <div className={styles.previewFooter}>
-                  <span className={styles.path}>{selectedTemplate.path}</span>
-                  <div className={styles.actions}>
-                    <button className={styles.btnSecondary} onClick={closeTemplateModal}>
-                      Cancel
-                    </button>
-                    <button
-                      className={styles.btnPrimary}
-                      onClick={handleInsert}
-                      disabled={!previewContent || previewLoading}
-                    >
-                      Insert
-                    </button>
-                  </div>
+                <div className={styles.footerRight}>
+                  <button className={styles.btnSecondary} onClick={closeTemplateModal}>
+                    Cancel
+                  </button>
+                  <button
+                    className={styles.btnPrimary}
+                    onClick={handleInsert}
+                    disabled={!previewContent || previewLoading}
+                  >
+                    Insert
+                  </button>
                 </div>
-              </>
-            ) : (
-              <div className={styles.placeholder}>
-                <span>Select a template</span>
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>
