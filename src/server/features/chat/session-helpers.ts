@@ -108,6 +108,31 @@ export async function getAllModels(): Promise<
 }
 
 /**
+ * Detect message kind based on content for historical messages
+ */
+function detectMessageKind(message: any): string | undefined {
+  if (!message || message.kind) return message?.kind;
+  
+  // Only process system messages
+  if (message.role !== "system") return undefined;
+  
+  const text = message.content
+    ?.filter((c: any) => c.type === "text")
+    ?.map((c: any) => c.text || "")
+    ?.join(" ") || "";
+  
+  // Check for special system message types
+  if (text.includes("🗜️ Compacting") || text.includes("上下文压缩")) return "compaction";
+  if (text.includes("🔄 Retrying") && text.includes("Auto-retrying")) return "auto_retry";
+  if (text.includes("🔄 Retrying")) return "retry";
+  if (text.includes("模型已切换为") || text.includes("model")) return "model_change";
+  if (text.includes("Thinking level已设置")) return "thinking_level_change";
+  if (text.includes("📊") || text.includes("tokens") || text.includes("cost")) return "usage";
+  
+  return undefined;
+}
+
+/**
  * Read session file content (JSONL)
  * @param sessionFile Session file path
  * @param limit Maximum number of messages to return (from the end)
@@ -143,10 +168,20 @@ export async function getSessionMessages(
       const actualLimit = limit === -1 ? messages.length : (limit || messages.length);
       const startIndex = Math.max(0, messages.length - actualOffset - actualLimit);
       const endIndex = Math.max(0, messages.length - actualOffset);
-      return messages.slice(startIndex, endIndex);
+      const paginatedMessages = messages.slice(startIndex, endIndex);
+      
+      // Add kind field to historical messages
+      return paginatedMessages.map(msg => ({
+        ...msg,
+        kind: detectMessageKind(msg)
+      }));
     }
 
-    return messages;
+    // Add kind field to all historical messages
+    return messages.map(msg => ({
+      ...msg,
+      kind: detectMessageKind(msg)
+    }));
   } catch (e) {
     logger.error(`[getSessionMessages] Failed: ${e}`);
     return [];
