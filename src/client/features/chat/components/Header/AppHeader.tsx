@@ -74,29 +74,38 @@ export function AppHeader({
   const runtimeStatus = currentSessionId ? sidebarStore.runtimeStatus[currentSessionId] : null;
 
   // ========== 3. Computed ==========
-  // Hierarchical filter state
+  // Hierarchical filter state with defensive checks
+  const safeFilters = useMemo(() => ({
+    roles: filters?.roles ?? { user: true, assistant: true, system: true },
+    contentTypes: filters?.contentTypes ?? {
+      prompt: true, text: true, thinking: true, tool: true,
+      compaction: true, retry: true, autoRetry: true,
+      modelChange: true, thinkingLevelChange: true, usage: true,
+    },
+  }), [filters]);
+
   const hasActiveFilters = useMemo(() => {
-    const { roles, contentTypes } = filters;
+    const { roles, contentTypes } = safeFilters;
     return (
       Object.values(roles).some(Boolean) ||
       Object.values(contentTypes).some(Boolean)
     );
-  }, [filters]);
+  }, [safeFilters]);
 
   const activeFilterCount = useMemo(() => {
-    const { roles, contentTypes } = filters;
+    const { roles, contentTypes } = safeFilters;
     return [
       ...Object.values(roles),
       ...Object.values(contentTypes),
     ].filter(Boolean).length;
-  }, [filters]);
+  }, [safeFilters]);
 
   // Check which roles are active to show relevant content types
   const activeRoles = useMemo(() => ({
-    user: filters.roles.user,
-    assistant: filters.roles.assistant,
-    system: filters.roles.system,
-  }), [filters.roles]);
+    user: safeFilters.roles.user,
+    assistant: safeFilters.roles.assistant,
+    system: safeFilters.roles.system,
+  }), [safeFilters.roles]);
 
   // Directory browser modal
   const isDirectoryBrowserOpen = useModalStore((state) => state.isDirectoryBrowserOpen);
@@ -106,40 +115,40 @@ export function AppHeader({
   // ========== 4. Actions ==========
   // Handle role filter changes
   const handleRoleFilterChange = useCallback(
-    (role: keyof typeof filters.roles) => {
+    (role: keyof typeof safeFilters.roles) => {
       const newFilters = {
-        ...filters,
+        ...safeFilters,
         roles: {
-          ...filters.roles,
-          [role]: !filters.roles[role],
+          ...safeFilters.roles,
+          [role]: !safeFilters.roles[role],
         },
       };
       if (onSearchFiltersChange) {
         onSearchFiltersChange(newFilters);
       } else {
-        chatStoreSetSearchFilters({ roles: { [role]: !filters.roles[role] } });
+        chatStoreSetSearchFilters({ roles: { [role]: !safeFilters.roles[role] } });
       }
     },
-    [filters, onSearchFiltersChange, chatStoreSetSearchFilters]
+    [safeFilters, onSearchFiltersChange, chatStoreSetSearchFilters]
   );
 
   // Handle content type filter changes
   const handleContentTypeFilterChange = useCallback(
-    (contentType: keyof typeof filters.contentTypes) => {
+    (contentType: keyof typeof safeFilters.contentTypes) => {
       const newFilters = {
-        ...filters,
+        ...safeFilters,
         contentTypes: {
-          ...filters.contentTypes,
-          [contentType]: !filters.contentTypes[contentType],
+          ...safeFilters.contentTypes,
+          [contentType]: !safeFilters.contentTypes[contentType],
         },
       };
       if (onSearchFiltersChange) {
         onSearchFiltersChange(newFilters);
       } else {
-        chatStoreSetSearchFilters({ contentTypes: { [contentType]: !filters.contentTypes[contentType] } });
+        chatStoreSetSearchFilters({ contentTypes: { [contentType]: !safeFilters.contentTypes[contentType] } });
       }
     },
-    [filters, onSearchFiltersChange, chatStoreSetSearchFilters]
+    [safeFilters, onSearchFiltersChange, chatStoreSetSearchFilters]
   );
 
   // ========== 5. Effects ==========
@@ -228,17 +237,17 @@ export function AppHeader({
                 <div className={styles.filterSectionTitle}>Roles</div>
                 <FilterChip
                   label="User"
-                  checked={filters.roles.user}
+                  checked={safeFilters.roles.user}
                   onChange={() => handleRoleFilterChange("user")}
                 />
                 <FilterChip
                   label="Assistant"
-                  checked={filters.roles.assistant}
+                  checked={safeFilters.roles.assistant}
                   onChange={() => handleRoleFilterChange("assistant")}
                 />
                 <FilterChip
                   label="System"
-                  checked={filters.roles.system}
+                  checked={safeFilters.roles.system}
                   onChange={() => handleRoleFilterChange("system")}
                 />
               </div>
@@ -249,7 +258,7 @@ export function AppHeader({
                   <div className={styles.filterSectionTitle}>User Content</div>
                   <FilterChip
                     label="Prompts"
-                    checked={filters.contentTypes.prompt}
+                    checked={safeFilters.contentTypes.prompt}
                     onChange={() => handleContentTypeFilterChange("prompt")}
                   />
                 </div>
@@ -260,17 +269,17 @@ export function AppHeader({
                   <div className={styles.filterSectionTitle}>Assistant Content</div>
                   <FilterChip
                     label="Text"
-                    checked={filters.contentTypes.text}
+                    checked={safeFilters.contentTypes.text}
                     onChange={() => handleContentTypeFilterChange("text")}
                   />
                   <FilterChip
                     label="Thinking"
-                    checked={filters.contentTypes.thinking}
+                    checked={safeFilters.contentTypes.thinking}
                     onChange={() => handleContentTypeFilterChange("thinking")}
                   />
                   <FilterChip
                     label="Tools"
-                    checked={filters.contentTypes.tool}
+                    checked={safeFilters.contentTypes.tool}
                     onChange={() => handleContentTypeFilterChange("tool")}
                   />
                 </div>
@@ -281,32 +290,32 @@ export function AppHeader({
                   <div className={styles.filterSectionTitle}>System Events</div>
                   <FilterChip
                     label="Compaction"
-                    checked={filters.contentTypes.compaction}
+                    checked={safeFilters.contentTypes.compaction}
                     onChange={() => handleContentTypeFilterChange("compaction")}
                   />
                   <FilterChip
                     label="Retry"
-                    checked={filters.contentTypes.retry}
+                    checked={safeFilters.contentTypes.retry}
                     onChange={() => handleContentTypeFilterChange("retry")}
                   />
                   <FilterChip
                     label="Auto Retry"
-                    checked={filters.contentTypes.autoRetry}
+                    checked={safeFilters.contentTypes.autoRetry}
                     onChange={() => handleContentTypeFilterChange("autoRetry")}
                   />
                   <FilterChip
                     label="Model Change"
-                    checked={filters.contentTypes.modelChange}
+                    checked={safeFilters.contentTypes.modelChange}
                     onChange={() => handleContentTypeFilterChange("modelChange")}
                   />
                   <FilterChip
                     label="Thinking Level"
-                    checked={filters.contentTypes.thinkingLevelChange}
+                    checked={safeFilters.contentTypes.thinkingLevelChange}
                     onChange={() => handleContentTypeFilterChange("thinkingLevelChange")}
                   />
                   <FilterChip
                     label="Usage"
-                    checked={filters.contentTypes.usage}
+                    checked={safeFilters.contentTypes.usage}
                     onChange={() => handleContentTypeFilterChange("usage")}
                   />
                 </div>

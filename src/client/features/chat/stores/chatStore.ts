@@ -1141,6 +1141,45 @@ export const useChatStore = create<
         searchQuery: state.searchQuery,
         searchFilters: state.searchFilters,
       }),
+      migrate: (persistedState: unknown) => {
+        // Migrate from old flat filter structure to new hierarchical structure
+        if (!persistedState || typeof persistedState !== "object") {
+          return persistedState;
+        }
+
+        const state = persistedState as { searchFilters?: unknown };
+        const filters = state.searchFilters;
+
+        // Check if using old flat structure (has 'user' directly instead of 'roles')
+        if (filters && typeof filters === "object" && "user" in filters && !("roles" in filters)) {
+          const oldFilters = filters as Record<string, boolean>;
+          // Convert old flat structure to new hierarchical structure
+          return {
+            ...state,
+            searchFilters: {
+              roles: {
+                user: oldFilters.user ?? true,
+                assistant: oldFilters.assistant ?? true,
+                system: oldFilters.system ?? true,
+              },
+              contentTypes: {
+                prompt: oldFilters.user ?? true,
+                text: oldFilters.assistant ?? true,
+                thinking: oldFilters.thinking ?? true,
+                tool: oldFilters.tools ?? true,
+                compaction: oldFilters.compaction ?? true,
+                retry: oldFilters.retry ?? true,
+                autoRetry: oldFilters.autoRetry ?? true,
+                modelChange: oldFilters.modelChange ?? true,
+                thinkingLevelChange: oldFilters.thinkingLevelChange ?? true,
+                usage: oldFilters.usage ?? true,
+              },
+            },
+          };
+        }
+
+        return persistedState;
+      },
     }
   )
 );
@@ -1264,23 +1303,33 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
   const { query, filters } = options;
   const lowerQuery = query.toLowerCase().trim();
 
+  // Defensive: ensure filters has the expected structure
+  const safeFilters = {
+    roles: filters?.roles ?? { user: true, assistant: true, system: true },
+    contentTypes: filters?.contentTypes ?? {
+      prompt: true, text: true, thinking: true, tool: true,
+      compaction: true, retry: true, autoRetry: true,
+      modelChange: true, thinkingLevelChange: true, usage: true,
+    },
+  };
+
   return messages.filter((message) => {
     const { role, contentType } = detectHierarchicalMessageType(message);
 
     // Level 1: Role filtering
-    if (!filters.roles[role]) return false;
+    if (!safeFilters.roles[role]) return false;
 
     // Level 2: Content type filtering (role-specific)
     switch (role) {
       case "user":
         // User messages are always "prompt" type
-        if (!filters.contentTypes.prompt) return false;
+        if (!safeFilters.contentTypes.prompt) return false;
         break;
         
       case "assistant": {
         // Assistant messages can be: text, thinking, tool
-        const typeKey = contentType as keyof typeof filters.contentTypes;
-        if (!filters.contentTypes[typeKey]) return false;
+        const typeKey = contentType as keyof typeof safeFilters.contentTypes;
+        if (!safeFilters.contentTypes[typeKey]) return false;
         break;
       }
         
@@ -1290,8 +1339,8 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
           // Unknown system messages are shown if system role is enabled
           return true;
         }
-        const typeKey = contentType as keyof typeof filters.contentTypes;
-        if (!filters.contentTypes[typeKey]) return false;
+        const typeKey = contentType as keyof typeof safeFilters.contentTypes;
+        if (!safeFilters.contentTypes[typeKey]) return false;
         break;
       }
     }
