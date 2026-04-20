@@ -1081,6 +1081,16 @@
   color: #6b7280;
 }
 
+.statusRetrying {
+  background: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+}
+
+.statusCompacting {
+  background: rgba(14, 165, 233, 0.15);
+  color: #0ea5e9;
+}
+
 .messageCount {
   color: #c9d1d9;
   font-weight: 500;

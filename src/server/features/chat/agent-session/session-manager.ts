@@ -31,7 +31,9 @@ export type SessionStatus =
   | "tooling"
   | "streaming"
   | "waiting"
-  | "error";
+  | "error"
+  | "retrying"
+  | "compacting";
 
 /**
  * Session entry in the server-level registry

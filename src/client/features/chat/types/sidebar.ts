@@ -18,7 +18,7 @@ export interface Session {
   messageCount: number;
   lastModified: Date;
   firstMessage?: string;
-  status?: string;   // Runtime status: idle/thinking/tooling/streaming/waiting/error
+  status?: string;   // Runtime status: idle/thinking/tooling/streaming/waiting/error/retrying/compacting
   hasClient?: boolean;
 }
 

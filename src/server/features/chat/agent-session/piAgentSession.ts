@@ -104,7 +104,7 @@ export class PiAgentSession {
   shortId: string = "";
 
   /** Current runtime status */
-  runtimeStatus: "idle" | "thinking" | "tooling" | "streaming" | "waiting" | "error" = "idle";
+  runtimeStatus: "idle" | "thinking" | "tooling" | "streaming" | "waiting" | "error" | "retrying" | "compacting" = "idle";
 
   /** Active tool execution tracking */
   private activeToolExecution: { toolCallId: string; toolName: string; startTime: Date } | null = null;
@@ -497,6 +497,7 @@ export class PiAgentSession {
 
         case "compaction_start": {
           console.log(`[${timestamp}] [SEND] compaction_start: ${event.reason}`);
+          this.updateRuntimeStatus("compacting");
           this.send({
             type: "compaction_start",
             reason: event.reason,
@@ -506,6 +507,10 @@ export class PiAgentSession {
 
         case "compaction_end": {
           console.log(`[${timestamp}] [SEND] compaction_end: ${event.reason}`);
+          // Return to previous status or idle if not retrying
+          if (!event.willRetry) {
+            this.updateRuntimeStatus("idle");
+          }
           this.send({
             type: "compaction_end",
             reason: event.reason,
@@ -519,6 +524,7 @@ export class PiAgentSession {
 
         case "auto_retry_start": {
           console.log(`[${timestamp}] [SEND] auto_retry_start: attempt ${event.attempt}`);
+          this.updateRuntimeStatus("retrying");
           this.send({
             type: "auto_retry_start",
             attempt: event.attempt,
@@ -531,6 +537,10 @@ export class PiAgentSession {
 
         case "auto_retry_end": {
           console.log(`[${timestamp}] [SEND] auto_retry_end: success=${event.success}`);
+          // If retry failed, set error status
+          if (!event.success) {
+            this.updateRuntimeStatus("error");
+          }
           this.send({
             type: "auto_retry_end",
             success: event.success,

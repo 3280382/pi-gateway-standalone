@@ -57,6 +57,10 @@ function getStatusInfo(status: string | undefined): { icon: string; className: s
       return { icon: "❌", className: styles.statusError, label: "Error" };
     case "idle":
       return { icon: "💤", className: styles.statusIdle, label: "Idle" };
+    case "retrying":
+      return { icon: "🔄", className: styles.statusRetrying, label: "Retrying" };
+    case "compacting":
+      return { icon: "📦", className: styles.statusCompacting, label: "Compacting" };
     default:
       return { icon: "📜", className: styles.statusHistory, label: "History" };
   }
@@ -115,18 +119,20 @@ export function SessionDropdownSection() {
   );
 
   // ========== 4. Computed ==========
-  // 对会话进RowsSort：选中 > streaming > thinking > tooling > waiting > idle > history
-  // streaming/thinking/tooling 是活跃状态，优先显示
+  // Sort sessions: selected > streaming > thinking > tooling > retrying > compacting > waiting > idle > error > history
+  // streaming/thinking/tooling/retrying/compacting are active states, displayed first
   const getStatusPriority = (status: string | undefined): number => {
     switch (status) {
-      case "streaming": return 1;  // 最活跃：正在输出
-      case "thinking": return 2;   // AI 思考中
-      case "tooling": return 3;    // 使用工具
-      case "waiting": return 4;    // waiting for user input
-      case "idle": return 5;       // 空闲
-      case "error": return 6;      // 错误状态
-      case "history": return 7;    // 历史会话
-      default: return 8; // unknown status
+      case "streaming": return 1;  // Most active: outputting
+      case "thinking": return 2;   // AI thinking
+      case "tooling": return 3;    // Using tools
+      case "retrying": return 4;   // Retrying request
+      case "compacting": return 5; // Compacting session
+      case "waiting": return 6;    // Waiting for user input
+      case "idle": return 7;       // Idle
+      case "error": return 8;      // Error state
+      case "history": return 9;    // Historical session
+      default: return 10; // unknown status
     }
   };
 
