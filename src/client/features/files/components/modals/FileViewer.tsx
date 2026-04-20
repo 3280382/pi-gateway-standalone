@@ -69,7 +69,7 @@ export function FileViewer() {
       const timer = setTimeout(highlight, 50);
       return () => clearTimeout(timer);
     }
-  }, [content, mode, fileTypes.isImage, fileTypes.isHtml, prismLanguage]);
+  }, [content, mode, fileTypes.isImage, fileTypes.isHtml]);
 
   // 进入编辑模式后自动聚焦 textarea
   useEffect(() => {
