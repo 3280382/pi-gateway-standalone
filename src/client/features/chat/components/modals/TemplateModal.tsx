@@ -9,8 +9,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useModalStore } from "@/features/chat/stores/modalStore";
-import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
+import { websocketService } from "@/services/websocket.service";
 import styles from "./Modals.module.css";
 
 // Home directory - in browser env we use a default
@@ -28,21 +28,33 @@ interface TemplateModalProps {
 
 export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
   const { isTemplateModalOpen, closeTemplateModal } = useModalStore();
-  const ws = useChatStore((state) => state.ws);
   const workingDir = useWorkspaceStore((state) => state.workingDir) ?? "/root";
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [wsConnected, setWsConnected] = useState(false);
 
   // Listen for WebSocket messages
   useEffect(() => {
-    if (!ws || !isTemplateModalOpen) return;
+    if (!isTemplateModalOpen) return;
 
-    const handleMessage = (event: MessageEvent) => {
+    // Check WebSocket connection status
+    const checkConnection = () => {
+      const isConnected = websocketService.isConnected;
+      setWsConnected(isConnected);
+      return isConnected;
+    };
+
+    if (!checkConnection()) {
+      setError("WebSocket not connected");
+      setLoading(false);
+      return;
+    }
+
+    // Subscribe to messages
+    const unsubscribe = websocketService.on("message", (data: any) => {
       try {
-        const data = JSON.parse(event.data);
-        
         if (data.type === "templates_list") {
           setTemplates(data.templates || []);
           setLoading(false);
@@ -60,43 +72,43 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
       } catch (err) {
         console.error("[TemplateModal] Failed to parse message:", err);
       }
-    };
+    });
 
-    ws.addEventListener("message", handleMessage);
-    return () => ws.removeEventListener("message", handleMessage);
-  }, [ws, isTemplateModalOpen, onTemplateSelect, closeTemplateModal]);
+    return () => unsubscribe();
+  }, [isTemplateModalOpen, onTemplateSelect, closeTemplateModal]);
 
   // Request templates list when modal opens
   useEffect(() => {
-    if (!isTemplateModalOpen || !ws) return;
+    if (!isTemplateModalOpen) return;
+
+    // Check connection before sending
+    if (!websocketService.isConnected) {
+      setError("WebSocket not connected");
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     setError(null);
     setTemplates([]);
     setSelectedTemplate(null);
 
-    ws.send(
-      JSON.stringify({
-        type: "list_templates",
-      })
-    );
-  }, [isTemplateModalOpen, ws]);
+    websocketService.send("list_templates");
+  }, [isTemplateModalOpen]);
 
   const handleSelect = useCallback(
     (templateName: string) => {
-      if (!ws) return;
+      if (!websocketService.isConnected) {
+        setError("WebSocket not connected");
+        return;
+      }
 
       setSelectedTemplate(templateName);
       setLoading(true);
 
-      ws.send(
-        JSON.stringify({
-          type: "get_template",
-          name: templateName,
-        })
-      );
+      websocketService.send("get_template", { name: templateName });
     },
-    [ws]
+    []
   );
 
   if (!isTemplateModalOpen) return null;
