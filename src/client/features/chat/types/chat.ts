@@ -35,7 +35,7 @@ export interface Message {
   isThinkingCollapsed?: boolean;
   isToolsCollapsed?: boolean;
   isMessageCollapsed?: boolean;
-  kind?: "compaction" | "export" | "system" | "usage"; // 特殊消息类型，用于样式区分
+  kind?: "compaction" | "export" | "system" | "usage" | "retry" | "auto_retry" | "model_change" | "thinking_level_change"; // 特殊消息类型，用于样式区分和过滤
 }
 
 // ============================================================================
@@ -69,6 +69,8 @@ export interface ChatSearchFilters {
   modelChange: boolean;
   thinkingLevelChange: boolean;
   usage: boolean; // Usage/cost information
+  retry: boolean; // Retry messages
+  autoRetry: boolean; // Auto-retry messages
   dates?: {
     from?: Date;
     to?: Date;

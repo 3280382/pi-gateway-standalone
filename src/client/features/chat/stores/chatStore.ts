@@ -75,6 +75,8 @@ const createInitialState = () => ({
     modelChange: true,
     thinkingLevelChange: true,
     usage: true,
+    retry: true,
+    autoRetry: true,
   },
   searchResults: [] as SearchResult[],
   isSearching: false,
@@ -1166,6 +1168,7 @@ export interface FilterOptions {
 
 /**
  * 检测消息内容类型
+ * 优先使用 message.kind 字段，如果没有则通过文本内容推断
  */
 function detectMessageTypes(message: Message): {
   hasThinking: boolean;
@@ -1174,7 +1177,24 @@ function detectMessageTypes(message: Message): {
   isCompaction: boolean;
   isThinkingLevelChange: boolean;
   isUsage: boolean;
+  isRetry: boolean;
+  isAutoRetry: boolean;
 } {
+  // 优先使用 kind 字段（用于实时消息和已处理的历史消息）
+  if (message.kind) {
+    return {
+      hasThinking: message.content.some((c) => c.type === "thinking"),
+      hasTools: message.content.some((c) => c.type === "tool" || c.type === "tool_use"),
+      isModelChange: message.kind === "model_change",
+      isCompaction: message.kind === "compaction",
+      isThinkingLevelChange: message.kind === "thinking_level_change",
+      isUsage: message.kind === "usage",
+      isRetry: message.kind === "retry",
+      isAutoRetry: message.kind === "auto_retry",
+    };
+  }
+
+  // 通过文本内容推断（用于旧的历史消息）
   const text = message.content
     .filter((c) => c.type === "text")
     .map((c) => c.text || "")
@@ -1187,6 +1207,8 @@ function detectMessageTypes(message: Message): {
     isCompaction: message.role === "system" && text.includes("上下文压缩"),
     isThinkingLevelChange: message.role === "system" && text.includes("Thinking level已设置"),
     isUsage: message.role === "system" && (text.includes("📊") || text.includes("tokens") || text.includes("cost")),
+    isRetry: message.role === "system" && text.includes("🔄 Retrying"),
+    isAutoRetry: message.role === "system" && text.includes("🔄 Auto-retrying"),
   };
 }
 
@@ -1201,7 +1223,7 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
   const lowerQuery = query.toLowerCase().trim();
 
   return messages.filter((message) => {
-    const { hasThinking, hasTools, isModelChange, isCompaction, isThinkingLevelChange, isUsage } =
+    const { hasThinking, hasTools, isModelChange, isCompaction, isThinkingLevelChange, isUsage, isRetry, isAutoRetry } =
       detectMessageTypes(message);
 
     // 1. 按消息 role 过滤
@@ -1221,12 +1243,14 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
     if (isCompaction && !filters.compaction) return false;
     if (isThinkingLevelChange && !filters.thinkingLevelChange) return false;
     if (isUsage && !filters.usage) return false;
+    if (isRetry && !filters.retry) return false;
+    if (isAutoRetry && !filters.autoRetry) return false;
 
     // 4. 普通System message（非特殊类型）如果 system 为 false 已经被过滤
     // 但如果 system 为 true，但特殊类型为 false，需要检查
     if (message.role === "system") {
       // 如果是特殊类型且都被Close了，或者不是特殊类型
-      const isSpecialType = isModelChange || isCompaction || isThinkingLevelChange || isUsage;
+      const isSpecialType = isModelChange || isCompaction || isThinkingLevelChange || isUsage || isRetry || isAutoRetry;
       // 特殊类型已经被上面的检查过滤了
       // 如果不是特殊类型，但 system 为 false，已经在 role 检查中过滤
       // 所以这里不需要额外处理

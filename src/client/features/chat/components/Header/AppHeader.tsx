@@ -40,6 +40,8 @@ interface AppHeaderProps {
     modelChange: boolean;
     thinkingLevelChange: boolean;
     usage: boolean;
+    retry: boolean;
+    autoRetry: boolean;
   };
   onSearchQueryChange?: (query: string) => void;
   onSearchFiltersChange?: (filters: {
@@ -52,6 +54,8 @@ interface AppHeaderProps {
     modelChange: boolean;
     thinkingLevelChange: boolean;
     usage: boolean;
+    retry: boolean;
+    autoRetry: boolean;
   }) => void;
 }
 
@@ -266,6 +270,16 @@ export function AppHeader({
                 label="Usage"
                 checked={filters.usage}
                 onChange={() => handleFilterChange("usage")}
+              />
+              <FilterChip
+                label="Retry"
+                checked={filters.retry}
+                onChange={() => handleFilterChange("retry")}
+              />
+              <FilterChip
+                label="Auto Retry"
+                checked={filters.autoRetry}
+                onChange={() => handleFilterChange("autoRetry")}
               />
             </div>
           )}

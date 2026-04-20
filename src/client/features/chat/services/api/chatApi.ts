@@ -668,6 +668,7 @@ export function setupWebSocketListeners(): void {
       role: "system",
       content: [{ type: "text", text: "🗜️ Compacting context..." }],
       timestamp: new Date(),
+      kind: "compaction",
     });
   });
 
@@ -680,6 +681,7 @@ export function setupWebSocketListeners(): void {
       role: "system",
       content: [{ type: "text", text: "✅ Context compaction complete" }],
       timestamp: new Date(),
+      kind: "compaction",
     });
   });
 
@@ -693,6 +695,7 @@ export function setupWebSocketListeners(): void {
       role: "system",
       content: [{ type: "text", text: "🔄 Retrying..." }],
       timestamp: new Date(),
+      kind: "retry",
     });
   });
 
@@ -705,6 +708,7 @@ export function setupWebSocketListeners(): void {
       role: "system",
       content: [{ type: "text", text: "✅ Retry complete" }],
       timestamp: new Date(),
+      kind: "retry",
     });
   });
 
@@ -724,6 +728,7 @@ export function setupWebSocketListeners(): void {
       role: "system",
       content: [{ type: "text", text: `🔄 Auto-retrying (${data.attempt}/${data.maxAttempts})...` }],
       timestamp: new Date(),
+      kind: "auto_retry",
     });
   });
 
@@ -736,6 +741,7 @@ export function setupWebSocketListeners(): void {
         role: "system",
         content: [{ type: "text", text: "✅ Auto-retry successful" }],
         timestamp: new Date(),
+        kind: "auto_retry",
       });
     } else {
       store.addMessage({
@@ -743,6 +749,7 @@ export function setupWebSocketListeners(): void {
         role: "system",
         content: [{ type: "text", text: `❌ Auto-retry failed: ${data.finalError || "Unknown error"}` }],
         timestamp: new Date(),
+        kind: "auto_retry",
       });
     }
   });
