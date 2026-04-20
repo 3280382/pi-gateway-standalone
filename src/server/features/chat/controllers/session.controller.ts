@@ -8,6 +8,7 @@ import type { Request, Response } from "express";
 import { Logger, LogLevel } from "../../../lib/utils/logger";
 import { expandPath } from "../../files/utils";
 import { AGENT_DIR, getLocalSessionsDir } from "../agent-session/utils";
+import { processSessionEntries } from "../session-processor";
 
 const logger = new Logger({ level: LogLevel.INFO });
 
@@ -89,11 +90,18 @@ export async function loadSession(req: Request, res: Response) {
     // Extract session ID from session file path
     const sessionId = sessionPath.split("/").pop()?.replace(".jsonl", "") || "";
 
-    logger.info(`Loaded session: ${sessionPath}, entries: ${entries.length}`);
+    // Process entries on server side to merge tool results
+    // This avoids expensive tree traversal on client side for large sessions
+    const { entries: processedEntries, messages } = processSessionEntries(entries);
+
+    logger.info(
+      `Loaded session: ${sessionPath}, entries: ${entries.length}, messages: ${messages.length}`
+    );
     res.json({
       path: sessionPath,
       sessionId: sessionId,
-      entries,
+      entries: processedEntries,
+      messages,
     });
   } catch (error) {
     logger.error(

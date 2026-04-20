@@ -15,6 +15,40 @@
 import type { Message } from "@/features/chat/types/chat";
 
 /**
+ * Helper to handle server-preprocessed messages
+ * Detects if messages are already processed and returns them directly or processes them
+ */
+export function handleServerMessages(
+  serverMessages: any[],
+  normalizeFn: (entries: any[]) => Message[]
+): Message[] {
+  if (!serverMessages?.length) return [];
+
+  // Check if messages are already processed by server
+  // Server-processed messages have normalized content array with proper types
+  const firstMsg = serverMessages[0];
+  const isProcessed =
+    firstMsg?.content &&
+    Array.isArray(firstMsg.content) &&
+    firstMsg.content.some(
+      (c: any) =>
+        c.type === "tool" ||
+        c.type === "tool_use" ||
+        c.type === "thinking" ||
+        (c.type === "text" && typeof c.text === "string")
+    );
+
+  if (isProcessed) {
+    console.log("[MessageProcessing] Using server-preprocessed messages:", serverMessages.length);
+    return serverMessages as Message[];
+  }
+
+  // Raw entries need client-side processing
+  console.log("[MessageProcessing] Processing raw entries on client:", serverMessages.length);
+  return normalizeFn(serverMessages);
+}
+
+/**
  * Normalize content to array format
  */
 export function normalizeContent(rawContent: any): any[] {
@@ -197,6 +231,7 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
 
   // Collect toolResults by their parent assistant message id
   // parentId of toolResult points to the assistant message that made the tool call
+  // OR points to another toolResult (forming a chain)
   const toolResultsByParentId = new Map<string, any[]>();
   entries.forEach((entry: any) => {
     if (entry.type === "message" && entry.message?.role === "toolResult") {
@@ -209,6 +244,26 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
       }
     }
   });
+
+  // Helper function to recursively collect all toolResults that belong to a message
+  // This handles the chain structure where toolResults form a linked list via parentId
+  function collectAllToolResults(messageId: string, visited = new Set<string>()): any[] {
+    if (visited.has(messageId)) return []; // Prevent infinite loops
+    visited.add(messageId);
+
+    const directChildren = toolResultsByParentId.get(messageId) || [];
+    const allResults: any[] = [...directChildren];
+
+    // Recursively collect from each child (toolResults can have their own children)
+    for (const child of directChildren) {
+      if (child.id) {
+        const grandChildren = collectAllToolResults(child.id, visited);
+        allResults.push(...grandChildren);
+      }
+    }
+
+    return allResults;
+  }
 
   const messages: Message[] = [];
 
@@ -255,8 +310,9 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
       }
     });
 
-    // Find toolResults that belong to this message (children with parentId = this message id)
-    const toolResults = toolResultsByParentId.get(entry.id) || [];
+    // Find toolResults that belong to this message (including chained toolResults)
+    // Use recursive collection to handle the chain structure
+    const toolResults = entry.id ? collectAllToolResults(entry.id) : [];
     const toolResultByToolCallId = new Map<string, any>();
     toolResults.forEach((toolResultEntry: any) => {
       const toolCallId = toolResultEntry.message?.toolCallId;

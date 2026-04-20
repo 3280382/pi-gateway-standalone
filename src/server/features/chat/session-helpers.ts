@@ -13,6 +13,7 @@ import { readFile } from "node:fs/promises";
 import { SessionManager } from "@mariozechner/pi-coding-agent";
 import { Logger, LogLevel } from "../../lib/utils/logger";
 import { getLocalSessionsDir } from "./agent-session/utils";
+import { processSessionEntries } from "./session-processor";
 import type { PiAgentSession } from "./agent-session/piAgentSession";
 
 const logger = new Logger({ level: LogLevel.INFO });
@@ -142,7 +143,8 @@ function detectMessageKind(message: any): string | undefined {
 export async function getSessionMessages(
   sessionFile: string,
   limit?: number,
-  offset?: number
+  offset?: number,
+  processMessages: boolean = true
 ): Promise<any[]> {
   try {
     if (!existsSync(sessionFile)) {
@@ -150,7 +152,7 @@ export async function getSessionMessages(
     }
     const content = await readFile(sessionFile, "utf-8");
     const lines = content.split("\n").filter((line) => line.trim());
-    const messages = lines
+    const entries = lines
       .map((line) => {
         try {
           return JSON.parse(line);
@@ -162,23 +164,27 @@ export async function getSessionMessages(
 
     // Apply pagination (from the end)
     // limit: -1 means load all messages
+    let paginatedEntries;
     if (limit !== undefined || offset !== undefined) {
       const actualOffset = offset || 0;
       // limit = -1 means load all remaining messages
-      const actualLimit = limit === -1 ? messages.length : (limit || messages.length);
-      const startIndex = Math.max(0, messages.length - actualOffset - actualLimit);
-      const endIndex = Math.max(0, messages.length - actualOffset);
-      const paginatedMessages = messages.slice(startIndex, endIndex);
-      
-      // Add kind field to historical messages
-      return paginatedMessages.map(msg => ({
-        ...msg,
-        kind: detectMessageKind(msg)
-      }));
+      const actualLimit = limit === -1 ? entries.length : (limit || entries.length);
+      const startIndex = Math.max(0, entries.length - actualOffset - actualLimit);
+      const endIndex = Math.max(0, entries.length - actualOffset);
+      paginatedEntries = entries.slice(startIndex, endIndex);
+    } else {
+      paginatedEntries = entries;
     }
 
-    // Add kind field to all historical messages
-    return messages.map(msg => ({
+    // Server-side processing: merge toolResults into assistant messages
+    // This avoids expensive tree traversal on client side for large sessions
+    if (processMessages) {
+      const { messages } = processSessionEntries(paginatedEntries);
+      return messages;
+    }
+
+    // Return raw entries with kind field (for backward compatibility)
+    return paginatedEntries.map(msg => ({
       ...msg,
       kind: detectMessageKind(msg)
     }));

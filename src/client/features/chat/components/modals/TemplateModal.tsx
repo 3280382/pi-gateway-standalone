@@ -1,8 +1,8 @@
 /**
- * TemplateModal - Full-featured template editor
+ * TemplateModal - Full-featured template editor with create support
  *
  * Features:
- * - View/Edit modes (like FileViewer)
+ * - View/Edit/Create modes
  * - Save templates back to file
  * - Full-screen layout (like FileViewer)
  * - Syntax highlighting with Prism.js
@@ -26,7 +26,7 @@ interface TemplateModalProps {
   onTemplateSelect?: (content: string) => void;
 }
 
-type ViewMode = "view" | "edit";
+type ViewMode = "view" | "edit" | "create";
 
 export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
   const { isTemplateModalOpen, closeTemplateModal } = useModalStore();
@@ -43,6 +43,8 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [newFileName, setNewFileName] = useState("");
+  const [createSource, setCreateSource] = useState<"global" | "local">("local");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -57,9 +59,9 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Auto-resize textarea
+  // Auto-focus textarea in edit/create mode
   useEffect(() => {
-    if (mode === "edit" && textareaRef.current) {
+    if ((mode === "edit" || mode === "create") && textareaRef.current) {
       textareaRef.current.focus();
     }
   }, [mode]);
@@ -89,7 +91,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
       const list = data.templates || [];
       setTemplates(list);
       setLoading(false);
-      if (list.length > 0 && !selectedTemplate) {
+      if (list.length > 0 && !selectedTemplate && mode !== "create") {
         setSelectedTemplate(list[0]);
         loadTemplate(list[0].name);
       }
@@ -115,7 +117,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
       unsubContent();
       unsubError();
     };
-  }, [isTemplateModalOpen, selectedTemplate]);
+  }, [isTemplateModalOpen, selectedTemplate, mode]);
 
   // Load templates on open
   useEffect(() => {
@@ -131,6 +133,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
     setSelectedTemplate(null);
     setPreviewContent("");
     setEditedContent("");
+    setNewFileName("");
     setMode("view");
     setDropdownOpen(false);
     websocketService.send("list_templates");
@@ -139,18 +142,25 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
   const loadTemplate = useCallback((name: string) => {
     if (!websocketService.isConnected) return;
     setPreviewLoading(true);
-    setMode("view");
     websocketService.send("get_template", { name });
   }, []);
 
   const handleSelect = useCallback((template: Template) => {
     setSelectedTemplate(template);
     loadTemplate(template.name);
+    setMode("view");
     setDropdownOpen(false);
   }, [loadTemplate]);
 
   const handleInsert = useCallback(() => {
-    const contentToInsert = mode === "edit" ? editedContent : previewContent;
+    let contentToInsert = "";
+    if (mode === "edit") {
+      contentToInsert = editedContent;
+    } else if (mode === "create") {
+      contentToInsert = editedContent;
+    } else {
+      contentToInsert = previewContent;
+    }
     if (onTemplateSelect && contentToInsert) {
       onTemplateSelect(contentToInsert);
     }
@@ -158,40 +168,110 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
   }, [onTemplateSelect, previewContent, editedContent, mode, closeTemplateModal]);
 
   const handleSave = useCallback(async () => {
-    if (!selectedTemplate || !editedContent) return;
-    
-    setIsSaving(true);
-    setSaveError(null);
-
-    try {
-      const response = await fetch("/api/files/file/content", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: selectedTemplate.path,
-          content: editedContent,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save");
+    if (mode === "create") {
+      // Create new template
+      if (!newFileName.trim()) {
+        setSaveError("Filename is required");
+        return;
       }
+      
+      const fileName = newFileName.trim().endsWith(".md") 
+        ? newFileName.trim() 
+        : `${newFileName.trim()}.md`;
+      
+      const targetDir = createSource === "global" 
+        ? `${HOME_DIR}/.pi/agent/prompts`
+        : `${workingDir}/.pi/prompts`;
+      
+      const fullPath = `${targetDir}/${fileName}`;
+      
+      setIsSaving(true);
+      setSaveError(null);
 
-      setPreviewContent(editedContent);
-      setMode("view");
-    } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Save failed");
-    } finally {
-      setIsSaving(false);
+      try {
+        const response = await fetch("/api/files/file/content", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: fullPath,
+            content: editedContent || "# New Template\n\n",
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to create");
+        }
+
+        // Refresh template list
+        setNewFileName("");
+        websocketService.send("list_templates");
+        setMode("view");
+      } catch (err) {
+        setSaveError(err instanceof Error ? err.message : "Create failed");
+      } finally {
+        setIsSaving(false);
+      }
+    } else {
+      // Save existing template
+      if (!selectedTemplate || !editedContent) return;
+      
+      setIsSaving(true);
+      setSaveError(null);
+
+      try {
+        const response = await fetch("/api/files/file/content", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: selectedTemplate.path,
+            content: editedContent,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to save");
+        }
+
+        setPreviewContent(editedContent);
+        setMode("view");
+      } catch (err) {
+        setSaveError(err instanceof Error ? err.message : "Save failed");
+      } finally {
+        setIsSaving(false);
+      }
     }
-  }, [selectedTemplate, editedContent]);
+  }, [mode, newFileName, createSource, workingDir, editedContent, selectedTemplate]);
+
+  const handleNew = useCallback(() => {
+    setMode("create");
+    setNewFileName("");
+    setEditedContent("# New Template\n\n");
+    setSaveError(null);
+    setSelectedTemplate(null);
+  }, []);
+
+  const handleCancel = useCallback(() => {
+    if (mode === "create") {
+      setMode("view");
+      setNewFileName("");
+      // Select first template if available
+      if (templates.length > 0) {
+        setSelectedTemplate(templates[0]);
+        loadTemplate(templates[0].name);
+      }
+    } else {
+      setEditedContent(previewContent);
+      setMode("view");
+    }
+  }, [mode, templates, previewContent, loadTemplate]);
 
   // Handle Ctrl+S
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.ctrlKey && e.key === "s") {
       e.preventDefault();
-      if (mode === "edit") {
+      if (mode === "edit" || mode === "create") {
         handleSave();
       }
     }
@@ -200,6 +280,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
   if (!isTemplateModalOpen) return null;
 
   const hasChanges = mode === "edit" && editedContent !== previewContent;
+  const canSave = mode === "create" ? newFileName.trim() && editedContent : hasChanges;
 
   return (
     <div className={styles.modal}>
@@ -209,73 +290,107 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
           <div className={styles.headerLeft} ref={dropdownRef}>
             <span className={styles.label}>Template</span>
             
-            {/* Custom Dropdown */}
-            <div className={styles.dropdown}>
-              <button 
-                className={styles.dropdownTrigger}
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                disabled={loading || templates.length === 0}
-              >
-                <span className={styles.selectedName}>
-                  {selectedTemplate?.name || "Select..."}
-                </span>
-                <span className={`${styles.arrow} ${dropdownOpen ? styles.open : ""}`}>▼</span>
-              </button>
-              
-              {dropdownOpen && templates.length > 0 && (
-                <div className={styles.dropdownMenu}>
-                  {templates.map((t) => (
-                    <div
-                      key={t.path}
-                      className={`${styles.dropdownItem} ${
-                        selectedTemplate?.path === t.path ? styles.active : ""
-                      }`}
-                      onClick={() => handleSelect(t)}
-                    >
-                      <span className={styles.itemName}>{t.name}</span>
-                      <span className={`${styles.itemBadge} ${styles[t.source]}`}>
-                        {t.source[0]}
-                      </span>
+            {mode === "create" ? (
+              <div className={styles.createInputGroup}>
+                <input
+                  type="text"
+                  className={styles.filenameInput}
+                  placeholder="filename.md"
+                  value={newFileName}
+                  onChange={(e) => setNewFileName(e.target.value)}
+                  autoFocus
+                />
+                <select
+                  className={styles.sourceSelect}
+                  value={createSource}
+                  onChange={(e) => setCreateSource(e.target.value as "global" | "local")}
+                >
+                  <option value="local">Local</option>
+                  <option value="global">Global</option>
+                </select>
+              </div>
+            ) : (
+              <>
+                {/* Custom Dropdown */}
+                <div className={styles.dropdown}>
+                  <button 
+                    className={styles.dropdownTrigger}
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    disabled={loading || templates.length === 0}
+                  >
+                    <span className={styles.selectedName}>
+                      {selectedTemplate?.name || "Select..."}
+                    </span>
+                    <span className={`${styles.arrow} ${dropdownOpen ? styles.open : ""}`}>▼</span>
+                  </button>
+                  
+                  {dropdownOpen && templates.length > 0 && (
+                    <div className={styles.dropdownMenu}>
+                      {templates.map((t) => (
+                        <div
+                          key={t.path}
+                          className={`${styles.dropdownItem} ${
+                            selectedTemplate?.path === t.path ? styles.active : ""
+                          }`}
+                          onClick={() => handleSelect(t)}
+                        >
+                          <span className={styles.itemName}>{t.name}</span>
+                          <span className={`${styles.itemBadge} ${styles[t.source]}`}>
+                            {t.source[0]}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
 
-            {selectedTemplate && (
-              <span className={`${styles.sourceTag} ${styles[selectedTemplate.source]}`}>
-                {selectedTemplate.source}
-              </span>
-            )}
+                {selectedTemplate && (
+                  <span className={`${styles.sourceTag} ${styles[selectedTemplate.source]}`}>
+                    {selectedTemplate.source}
+                  </span>
+                )}
 
-            {mode === "edit" && hasChanges && (
-              <span className={styles.unsavedIndicator}>●</span>
+                {mode === "edit" && hasChanges && (
+                  <span className={styles.unsavedIndicator}>●</span>
+                )}
+              </>
             )}
           </div>
 
           <div className={styles.headerActions}>
-            {mode === "view" && selectedTemplate && (
-              <button 
-                className={styles.btnEdit}
-                onClick={() => setMode("edit")}
-                title="Edit template"
-              >
-                ✎ Edit
-              </button>
+            {mode === "view" && (
+              <>
+                <button 
+                  className={styles.btnNew}
+                  onClick={handleNew}
+                  title="Create new template"
+                >
+                  + New
+                </button>
+                {selectedTemplate && (
+                  <button 
+                    className={styles.btnEdit}
+                    onClick={() => setMode("edit")}
+                    title="Edit template"
+                  >
+                    ✎ Edit
+                  </button>
+                )}
+              </>
             )}
-            {mode === "edit" && (
+            {(mode === "edit" || mode === "create") && (
               <button 
                 className={styles.btnView}
-                onClick={() => setMode("view")}
-                title="View mode"
+                onClick={handleCancel}
+                title="Cancel"
               >
-                👁 View
+                Cancel
               </button>
             )}
             <button 
               className={styles.btnInsert}
               onClick={handleInsert}
-              disabled={!previewContent || previewLoading}
+              disabled={mode === "view" ? !previewContent || previewLoading : !editedContent}
               title="Insert into chat"
             >
               Insert
@@ -292,14 +407,14 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
             <div className={styles.center}>Loading...</div>
           ) : error ? (
             <div className={styles.center} style={{ color: "#f85149" }}>{error}</div>
-          ) : templates.length === 0 ? (
+          ) : templates.length === 0 && mode !== "create" ? (
             <div className={styles.center}>
               <p>No templates found</p>
               <span className={styles.hint}>
-                Create .md files in ~/.pi/agent/prompts/ or {workingDir}/.pi/prompts/
+                Click "New" to create a template
               </span>
             </div>
-          ) : mode === "edit" ? (
+          ) : mode === "edit" || mode === "create" ? (
             <textarea
               ref={textareaRef}
               className={styles.textarea}
@@ -307,6 +422,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
               onChange={(e) => setEditedContent(e.target.value)}
               onKeyDown={handleKeyDown}
               spellCheck={false}
+              placeholder={mode === "create" ? "# Your template content here..." : ""}
             />
           ) : previewLoading ? (
             <div className={styles.center}>
@@ -321,55 +437,29 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
           )}
         </div>
 
-        {/* Footer */}
-        <div className={styles.footer}>
-          <div className={styles.footerLeft}>
-            {selectedTemplate && (
-              <>
-                <span className={styles.fileName}>{selectedTemplate.name}</span>
-                <span className={styles.sep}>·</span>
-                <span className={styles.stats}>
-                  {(mode === "edit" ? editedContent : previewContent).length}c {" "}
-                  {(mode === "edit" ? editedContent : previewContent).split(/\s+/).filter(Boolean).length}w {" "}
-                  {(mode === "edit" ? editedContent : previewContent).split("\n").length}l
-                </span>
-                {saveError && (
-                  <span className={styles.saveError}>{saveError}</span>
-                )}
-              </>
-            )}
-          </div>
-          
-          <div className={styles.footerRight}>
-            {mode === "edit" ? (
-              <>
-                <button 
-                  className={styles.btnSecondary}
-                  onClick={() => {
-                    setEditedContent(previewContent);
-                    setMode("view");
-                  }}
-                >
-                  Cancel
-                </button>
-                <button 
-                  className={styles.btnPrimary}
-                  onClick={handleSave}
-                  disabled={isSaving || !hasChanges}
-                >
-                  {isSaving ? "Saving..." : "Save (Ctrl+S)"}
-                </button>
-              </>
-            ) : (
+        {/* Footer - Only show action buttons in edit/create mode */}
+        {(mode === "edit" || mode === "create") && (
+          <div className={styles.footer}>
+            <div className={styles.footerLeft}>
+              {saveError && <span className={styles.saveError}>{saveError}</span>}
+            </div>
+            <div className={styles.footerRight}>
               <button 
                 className={styles.btnSecondary}
-                onClick={closeTemplateModal}
+                onClick={handleCancel}
               >
-                Close
+                Cancel
               </button>
-            )}
+              <button 
+                className={styles.btnPrimary}
+                onClick={handleSave}
+                disabled={isSaving || !canSave}
+              >
+                {isSaving ? "Saving..." : mode === "create" ? "Create (Ctrl+S)" : "Save (Ctrl+S)"}
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

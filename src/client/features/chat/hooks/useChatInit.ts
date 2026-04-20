@@ -22,7 +22,10 @@ import { extractShortSessionId } from "@/features/chat/utils/sessionUtils";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
-import { normalizeSessionMessages } from "@/features/chat/utils/messageUtils";
+import {
+  normalizeSessionMessages,
+  handleServerMessages,
+} from "@/features/chat/utils/messageUtils";
 import { websocketService } from "@/services/websocket.service";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { setupWebSocketListeners } from "../services/api/chatApi";
@@ -151,11 +154,14 @@ export function useChatInit(): { isConnecting: boolean } {
       const shortId = (currentSession as any)?.shortId || null;
       useSidebarStore.getState().setSelectedSessionId(shortId);
 
-      // 5.4 聊天历史消息 - 使用统一的加载逻辑（参考 HTTP loadSession 的工具处理方式）
+      // 5.4 聊天历史消息
+      // 优先使用服务器预处理好的 messages（已合并 toolResults），避免客户端重复处理
       console.log("[ChatInit] Messages from server:", currentSession?.messages?.length || 0);
       if (currentSession?.messages?.length > 0) {
-        // 使用统一的 message 转换逻辑（与 loadSession 一致）
-        const formattedMessages = normalizeSessionMessages(currentSession.messages);
+        const formattedMessages = handleServerMessages(
+          currentSession.messages,
+          normalizeSessionMessages
+        );
         console.log("[ChatInit] Restored messages:", formattedMessages.length);
         useChatStore.getState().setMessages(formattedMessages);
       }

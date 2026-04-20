@@ -1112,12 +1112,20 @@ export const useChatStore = create<
           }
 
           const data = await response.json();
+
+          // 优先使用服务器预处理好的 messages（已合并 toolResults）
+          if (data.messages?.length > 0) {
+            console.log("[loadSession] Using server-processed messages:", data.messages.length);
+            set({ messages: data.messages, currentStreamingMessage: null }, false, "loadSession");
+            return data.messages.length;
+          }
+
+          // Fallback: 使用原始 entries 客户端处理（兼容旧服务器）
           if (!data.entries?.length) {
             set({ messages: [] }, false, "loadSession/empty");
             return 0;
           }
 
-          // 使用统一的消息转换函数（与 WebSocket init 一致）
           const { normalizeSessionMessages } = await import("@/features/chat/utils/messageUtils");
           const loadedMessages = normalizeSessionMessages(data.entries);
 
