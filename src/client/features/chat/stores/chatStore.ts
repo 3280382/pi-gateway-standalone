@@ -1366,8 +1366,16 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
   return messages.filter((message) => {
     const { role, contentType } = detectHierarchicalMessageType(message);
 
+    // Debug: log system messages
+    if (role === "system") {
+      console.log("[filterMessages] System message:", message.id, "kind:", message.kind, "contentType:", contentType);
+    }
+
     // Level 1: Role filtering
-    if (!safeFilters.roles[role]) return false;
+    if (!safeFilters.roles[role]) {
+      if (role === "system") console.log("[filterMessages] Filtered out: role disabled");
+      return false;
+    }
 
     // Level 2: Content type filtering (role-specific)
     switch (role) {
@@ -1399,10 +1407,16 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
         // System messages are special events
         if (contentType === "unknown") {
           // Unknown system messages are shown if system role is enabled
+          console.log("[filterMessages] System message passed (unknown type):", message.id);
           return true;
         }
         const typeKey = contentType as keyof typeof safeFilters.contentTypes;
-        if (!safeFilters.contentTypes[typeKey]) return false;
+        const isEnabled = safeFilters.contentTypes[typeKey];
+        console.log("[filterMessages] System message typeKey:", typeKey, "enabled:", isEnabled);
+        if (!isEnabled) {
+          console.log("[filterMessages] System message filtered out:", message.id, "type:", contentType);
+          return false;
+        }
         break;
       }
     }
