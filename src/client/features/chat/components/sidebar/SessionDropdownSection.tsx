@@ -130,7 +130,7 @@ function SessionRow({ session, isSelected, status, onSelect }: SessionRowProps) 
         
         <div className={styles.sessionMeta}>
           <span className={`${styles.statusBadge} ${statusInfo.className}`} title={statusInfo.label}>
-            {statusInfo.icon}
+            {statusInfo.icon} {statusInfo.label}
           </span>
           <span className={styles.messageCount}>{session.messageCount || 0}</span>
           <span className={styles.relativeTime}>{formatRelativeTime(session.lastModified)}</span>
