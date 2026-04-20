@@ -239,18 +239,26 @@ export const MessageItem = memo(
     
     return (
       <div className={`${styles.aiContainer} ${isCompaction ? styles.compactionContainer : ""}`}>
-        {displayBlocks.map((block, idx) => (
-          <GlassCard
-            key={`${block.type}-${idx}`}
-            block={block}
-            isStreaming={message.isStreaming}
-            isNewMessage={message.isStreaming} // Streaming message treated as new
-            showThinking={showThinking}
-            showTools={showTools ?? true}
-            showText={showText}
-            messageKind={message.kind}
-          />
-        ))}
+        {displayBlocks.map((block) => {
+          // Use stable key: toolCallId for tools, originalIndex for others
+          // This prevents React key collisions when filtering blocks
+          const stableKey = (block.type === "tool_use" || block.type === "tool") && block.toolCallId
+            ? `tool-${block.toolCallId}`
+            : `${block.type}-${block.originalIndex}`;
+          
+          return (
+            <GlassCard
+              key={stableKey}
+              block={block}
+              isStreaming={message.isStreaming}
+              isNewMessage={message.isStreaming} // Streaming message treated as new
+              showThinking={showThinking}
+              showTools={showTools ?? true}
+              showText={showText}
+              messageKind={message.kind}
+            />
+          );
+        })}
       </div>
     );
   },

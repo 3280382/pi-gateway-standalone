@@ -169,25 +169,51 @@ function convertSpecialEntryToMessage(entry: any): Message | null {
  * 统一的 Session 消息转换函数
  *
  * 处理流程：
- * 1. Page一遍遍历：收集所有 toolCall 的Arguments
- * 2. Page二遍遍历：转换消息，处理 toolResult 和特殊 entry 类型
+ * 1. Page一遍遍历：收集所有 toolCall 的Arguments 和 toolResult 结果
+ * 2. Page二遍遍历：转换消息，合并 toolCall 和 toolResult
  *
  * @param entries Session files中的 entries 数Group（JSONL 解析后的）
  * @returns 转换后的 Message 数Group
  */
 export function normalizeSessionMessages(entries: any[]): Message[] {
-  // Page一遍：收集所有 toolCall 的Arguments
+  // Page一遍：收集所有 toolCall 的Arguments 和 toolResult
   const toolCallArgsMap = new Map<string, any>();
+  const toolResultsMap = new Map<string, {
+    output?: string;
+    error?: string;
+    isError?: boolean;
+  }>();
+
   entries.forEach((entry: any) => {
-    if (
-      entry.type === "message" &&
-      entry.message?.role === "assistant" &&
-      Array.isArray(entry.message.content)
-    ) {
-      entry.message.content.forEach((item: any) => {
-        if (item.type === "toolCall" && item.id) {
+    if (entry.type !== "message" || !entry.message) return;
+
+    const msg = entry.message;
+
+    // 收集 toolCall 的 Arguments
+    if (msg.role === "assistant" && Array.isArray(msg.content)) {
+      msg.content.forEach((item: any) => {
+        if ((item.type === "toolCall" || item.type === "tool_use") && item.id) {
           toolCallArgsMap.set(item.id, item.arguments || {});
         }
+      });
+    }
+
+    // 收集 toolResult 结果
+    if (msg.role === "toolResult" && msg.toolCallId) {
+      let contentText = "";
+      if (Array.isArray(msg.content)) {
+        contentText = msg.content
+          .filter((c: any) => c.type === "text")
+          .map((c: any) => c.text)
+          .join("");
+      } else if (typeof msg.content === "string") {
+        contentText = msg.content;
+      }
+
+      toolResultsMap.set(msg.toolCallId, {
+        output: msg.isError ? undefined : contentText,
+        error: msg.isError ? contentText : undefined,
+        isError: msg.isError,
       });
     }
   });
@@ -207,39 +233,8 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
     const msg = entry.message;
     if (!msg) return;
 
-    // 特殊处理 toolResult 消息
+    // 跳过 toolResult - 已经合并到对应的 assistant 消息中
     if (msg.role === "toolResult") {
-      let contentText = "";
-      if (Array.isArray(msg.content)) {
-        contentText = msg.content
-          .filter((c: any) => c.type === "text")
-          .map((c: any) => c.text)
-          .join("");
-      } else if (typeof msg.content === "string") {
-        contentText = msg.content;
-      }
-
-      const args = toolCallArgsMap.get(msg.toolCallId) || {};
-
-      messages.push({
-        id: entry.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        role: "assistant" as const,
-        content: [
-          {
-            type: "tool" as const,
-            toolCallId: msg.toolCallId,
-            toolName: msg.toolName,
-            output: msg.isError ? undefined : contentText,
-            error: msg.isError ? contentText : undefined,
-            args: args,
-          },
-        ],
-        timestamp: new Date(msg.timestamp || entry.timestamp || Date.now()),
-        isStreaming: false,
-        isThinkingCollapsed: true,
-        isToolsCollapsed: true,
-        isMessageCollapsed: false,
-      });
       return;
     }
 
@@ -247,24 +242,34 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
     const rawContent = msg.content;
     const contentArray = normalizeContent(rawContent);
 
-    // 转换 content   items，保留 toolCall 并标记状态
+    // 转换 content items，合并 toolCall 和 toolResult
     const normalizedContent = contentArray.map((item: any) => {
       if (item.type === "toolCall" || item.type === "tool_use") {
         const toolCallId = item.id || item.toolCallId;
-        // 检查是否有对应的 toolResult
-        const hasResult = entries.some((e: any) => 
-          e.type === "message" && 
-          e.message?.role === "toolResult" && 
-          e.message?.toolCallId === toolCallId
-        );
-      
+        const toolResult = toolResultsMap.get(toolCallId);
+
+        // 如果有 toolResult，合并为一个完整的 tool block
+        if (toolResult) {
+          const args = toolCallArgsMap.get(toolCallId) || item.arguments || {};
+          return {
+            type: "tool" as const,
+            toolCallId: toolCallId || `tool-${Date.now()}`,
+            toolName: item.name || item.toolName || "unknown",
+            args: args,
+            output: toolResult.output,
+            error: toolResult.error,
+            status: toolResult.isError ? "error" : "success",
+          };
+        }
+
+        // 没有结果，显示为 tool_use (pending/executing)
         return {
           type: "tool_use" as const,
           toolCallId: toolCallId || `tool-${Date.now()}`,
           toolName: item.name || item.toolName || "unknown",
           partialArgs: item.arguments ? JSON.stringify(item.arguments, null, 2) : undefined,
           args: item.arguments,
-          status: hasResult ? "executing" : "pending",
+          status: "pending",
         };
       }
       return normalizeContentItem(item);
