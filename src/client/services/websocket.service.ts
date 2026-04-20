@@ -82,6 +82,7 @@ export type WebSocketEvent =
   | "runtime_status_broadcast"
   | "session_status"
   | "more_messages_loaded"
+  | "session_config_updated"
   // Reconnection Events
   | "session_reconnected"
   // System Events

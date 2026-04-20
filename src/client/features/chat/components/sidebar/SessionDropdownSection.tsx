@@ -2,19 +2,19 @@
  * SessionDropdownSection - Session table with rich information
  *
  * Responsibilities:
- * - 以表格形式显示所有历史 session
- * - 显示会话 ID、运Rows状态、消息数、最后Modification time
- * - 只在Sidebar打开时定期通过 WebSocket 更新
- * - 支持切换 session
- *
- * 注意：新建会话的唯一入口是聊天输入框右侧的新建按钮
+ * - Display sessions in a two-row compact format
+ * - Row 1: ID, Status, Message Count, Last Activity
+ * - Row 2: Editable Name and Summary
+ * - Support inline name editing with blur save
+ * - Auto-initialize session config on load
  */
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { sessionManager } from "@/features/chat/services/sessionManager";
 import { listChatSessions } from "@/features/chat/services/chatWebSocket";
+import { updateSessionName } from "@/features/chat/services/api/sessionConfigApi";
 import type { Session } from "@/features/chat/types/sidebar";
 import { formatSessionId } from "@/features/chat/utils/sessionUtils";
 import styles from "./SidebarPanel.module.css";
@@ -23,7 +23,7 @@ import styles from "./SidebarPanel.module.css";
 const REFRESH_INTERVAL_MS = 5000;
 const DEBOUNCE_MS = 3000;
 
-// 格式化时间为相对时间
+// Format relative time
 function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
@@ -34,13 +34,13 @@ function formatRelativeTime(dateString: string): string {
   const diffDay = Math.floor(diffHour / 24);
 
   if (diffSec < 60) return "just now";
-  if (diffMin < 60) return `${diffMin}m ago`;
-  if (diffHour < 24) return `${diffHour}h ago`;
-  if (diffDay < 7) return `${diffDay}d ago`;
+  if (diffMin < 60) return `${diffMin}m`;
+  if (diffHour < 24) return `${diffHour}h`;
+  if (diffDay < 7) return `${diffDay}d`;
   return date.toLocaleDateString();
 }
 
-// Get state图标和Color类名
+// Get status icon and class
 function getStatusInfo(status: string | undefined): { icon: string; className: string; label: string } {
   switch (status) {
     case "history":
@@ -48,7 +48,7 @@ function getStatusInfo(status: string | undefined): { icon: string; className: s
     case "thinking":
       return { icon: "🤔", className: styles.statusThinking, label: "Thinking" };
     case "tooling":
-      return { icon: "🔧", className: styles.statusTooling, label: "Using Tools" };
+      return { icon: "🔧", className: styles.statusTooling, label: "Tools" };
     case "streaming":
       return { icon: "📝", className: styles.statusStreaming, label: "Streaming" };
     case "waiting":
@@ -58,17 +58,115 @@ function getStatusInfo(status: string | undefined): { icon: string; className: s
     case "idle":
       return { icon: "💤", className: styles.statusIdle, label: "Idle" };
     case "retrying":
-      return { icon: "🔄", className: styles.statusRetrying, label: "Retrying" };
+      return { icon: "🔄", className: styles.statusRetrying, label: "Retry" };
     case "compacting":
-      return { icon: "📦", className: styles.statusCompacting, label: "Compacting" };
+      return { icon: "📦", className: styles.statusCompacting, label: "Compact" };
     default:
       return { icon: "📜", className: styles.statusHistory, label: "History" };
   }
 }
 
+// Single session row component with inline editing
+interface SessionRowProps {
+  session: Session;
+  isSelected: boolean;
+  status: string | undefined;
+  onSelect: () => void;
+}
+
+function SessionRow({ session, isSelected, status, onSelect }: SessionRowProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(session.name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const handleNameClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditing(true);
+    setEditName(session.name);
+  }, [session.name]);
+
+  const handleSave = useCallback(() => {
+    if (editName.trim() && editName !== session.name) {
+      updateSessionName(session.id, editName.trim());
+    }
+    setIsEditing(false);
+  }, [editName, session.id, session.name]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSave();
+    } else if (e.key === "Escape") {
+      setEditName(session.name);
+      setIsEditing(false);
+    }
+  }, [handleSave, session.name]);
+
+  const statusInfo = getStatusInfo(status);
+
+  return (
+    <div
+      className={`${styles.sessionRow} ${isSelected ? styles.sessionRowSelected : ""}`}
+      onClick={onSelect}
+    >
+      {/* Row 1: ID, Status, Count, Time */}
+      <div className={styles.sessionRowPrimary}>
+        <div className={styles.sessionIdContainer}>
+          <span className={`${styles.sessionId} ${isSelected ? styles.sessionIdSelected : ""}`}>
+            {formatSessionId(session.id)}
+          </span>
+          {session.hasClient && (
+            <span className={styles.clientIndicator} title="Active client connected">
+              ●
+            </span>
+          )}
+        </div>
+        
+        <div className={styles.sessionMeta}>
+          <span className={`${styles.statusBadge} ${statusInfo.className}`} title={statusInfo.label}>
+            {statusInfo.icon}
+          </span>
+          <span className={styles.messageCount}>{session.messageCount || 0}</span>
+          <span className={styles.relativeTime}>{formatRelativeTime(session.lastModified)}</span>
+        </div>
+      </div>
+
+      {/* Row 2: Name (editable) and Summary */}
+      <div className={styles.sessionRowSecondary}>
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            type="text"
+            className={styles.nameInput}
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onBlur={handleSave}
+            onKeyDown={handleKeyDown}
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <span className={styles.sessionName} onClick={handleNameClick} title="Click to edit name">
+            {session.name || "Untitled"}
+          </span>
+        )}
+        
+        {session.summary && !isEditing && (
+          <span className={styles.sessionSummary} title={session.summary}>
+            {session.summary.length > 60 ? session.summary.slice(0, 60) + "..." : session.summary}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function SessionDropdownSection() {
-  console.log("[SessionDropdownSection] Rendering");
-  
   // ========== 1. State ==========
   const sessions = useSidebarStore((state) => state.sessions);
   const currentSessionId = useSidebarStore((state) => state.selectedSessionId);
@@ -79,19 +177,15 @@ export function SessionDropdownSection() {
   const lastFetchRef = useRef<number>(0);
 
   // ========== 2. Effects ==========
-  // 只在Sidebar打开时定期请求会话Cols表更新
   useEffect(() => {
     if (!workingDir || !isSidebarVisible) return;
 
-    // Debounce: ensure at least DEBOUNCE_MS between requests
     const now = Date.now();
     if (now - lastFetchRef.current < DEBOUNCE_MS) return;
     lastFetchRef.current = now;
 
-    // Fetch immediately
     listChatSessions(workingDir);
 
-    // Refresh periodically
     const interval = setInterval(() => {
       listChatSessions(workingDir);
       lastFetchRef.current = Date.now();
@@ -103,14 +197,7 @@ export function SessionDropdownSection() {
   // ========== 3. Actions ==========
   const handleSelect = useCallback(
     async (session: Session) => {
-      console.log("CLICKED SESSION:", session.id, session.path);
-      
-      // 执Rows实际的session切换（让sessionManager处理状态更新）
-      console.log("About to call sessionManager.selectSession...");
       await sessionManager.selectSession(session.id);
-      console.log("sessionManager.selectSession DONE!");
-      
-      // 切换后立即RefreshsessionCols表（获取最新状态）
       if (workingDir) {
         listChatSessions(workingDir);
       }
@@ -119,29 +206,25 @@ export function SessionDropdownSection() {
   );
 
   // ========== 4. Computed ==========
-  // Sort sessions: selected > streaming > thinking > tooling > retrying > compacting > waiting > idle > error > history
-  // streaming/thinking/tooling/retrying/compacting are active states, displayed first
   const getStatusPriority = (status: string | undefined): number => {
     switch (status) {
-      case "streaming": return 1;  // Most active: outputting
-      case "thinking": return 2;   // AI thinking
-      case "tooling": return 3;    // Using tools
-      case "retrying": return 4;   // Retrying request
-      case "compacting": return 5; // Compacting session
-      case "waiting": return 6;    // Waiting for user input
-      case "idle": return 7;       // Idle
-      case "error": return 8;      // Error state
-      case "history": return 9;    // Historical session
-      default: return 10; // unknown status
+      case "streaming": return 1;
+      case "thinking": return 2;
+      case "tooling": return 3;
+      case "retrying": return 4;
+      case "compacting": return 5;
+      case "waiting": return 6;
+      case "idle": return 7;
+      case "error": return 8;
+      case "history": return 9;
+      default: return 10;
     }
   };
 
   const sortedSessions = [...sessions].sort((a, b) => {
-    // 1. 当前选中的会话优先（最Height优先级）
     if (a.id === currentSessionId) return -1;
     if (b.id === currentSessionId) return 1;
 
-    // 2. 按状态优先级Sort：waiting > thinking > tooling > idle > history
     const aPriority = getStatusPriority(runtimeStatus[a.id]);
     const bPriority = getStatusPriority(runtimeStatus[b.id]);
 
@@ -149,7 +232,6 @@ export function SessionDropdownSection() {
       return aPriority - bPriority;
     }
 
-    // 3. 相同优先级按最后Modification timeSort（最新的在前）
     const aTime = new Date(a.lastModified).getTime();
     const bTime = new Date(b.lastModified).getTime();
     return bTime - aTime;
@@ -180,7 +262,6 @@ export function SessionDropdownSection() {
 
   return (
     <section className={styles.section}>
-      {/* 覆盖式 Loading 遮罩 */}
       {isLoading && (
         <div className={styles.loadingOverlay}>
           <div className={styles.loadingSpinner} />
@@ -192,57 +273,16 @@ export function SessionDropdownSection() {
         <h3 className={styles.sectionTitle}>Sessions ({sessions.length})</h3>
       </div>
 
-      <div className={styles.sessionTableContainer}>
-        <table className={styles.sessionTable}>
-          <thead>
-            <tr>
-              <th className={styles.sessionTableHeader}>ID</th>
-              <th className={styles.sessionTableHeader}>Status</th>
-              <th className={styles.sessionTableHeader}>Messages</th>
-              <th className={styles.sessionTableHeader}>Last Activity</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedSessions.map((session) => {
-              const isSelected = session.id === currentSessionId;
-              const status = runtimeStatus[session.id];
-              const statusInfo = getStatusInfo(status);
-              
-              return (
-                <tr
-                  key={session.id}
-                  data-session-id={session.id}
-                  className={`${styles.sessionTableRow} ${isSelected ? styles.sessionTableRowSelected : ""}`}
-                  onClick={() => handleSelect(session)}
-                >
-                  <td className={styles.sessionTableCell}>
-                    <span className={`${styles.sessionId} ${isSelected ? styles.sessionIdSelected : ""}`}>
-                      {formatSessionId(session.id)}
-                    </span>
-                  </td>
-                  <td className={styles.sessionTableCell}>
-                    <span 
-                      className={`${styles.statusBadge} ${statusInfo.className}`}
-                      title={statusInfo.label}
-                    >
-                      {statusInfo.icon} {statusInfo.label}
-                    </span>
-                  </td>
-                  <td className={styles.sessionTableCell}>
-                    <span className={styles.messageCount}>
-                      {session.messageCount || 0}
-                    </span>
-                  </td>
-                  <td className={styles.sessionTableCell}>
-                    <span className={styles.relativeTime}>
-                      {formatRelativeTime(session.lastModified)}
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <div className={styles.sessionListContainer}>
+        {sortedSessions.map((session) => (
+          <SessionRow
+            key={session.id}
+            session={session}
+            isSelected={session.id === currentSessionId}
+            status={runtimeStatus[session.id]}
+            onSelect={() => handleSelect(session)}
+          />
+        ))}
       </div>
     </section>
   );

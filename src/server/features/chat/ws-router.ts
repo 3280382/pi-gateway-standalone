@@ -300,6 +300,7 @@ import {
   handleLoadSessionWrapped,
   handleNewSessionWrapped,
   handleSidebarVisibilityWrapped,
+  handleUpdateSessionConfigWrapped,
 } from "./ws-handlers/session-handlers";
 import {
   handleGetProcessTreeWrapped,
@@ -347,6 +348,7 @@ export function registerAllWSHandlers(): void {
   wsRouter.register("sidebar_visibility", handleSidebarVisibilityWrapped);
   wsRouter.register("get_session_status", handleGetSessionStatusWrapped);
   wsRouter.register("load_more_messages", handleLoadMoreMessagesWrapped);
+  wsRouter.register("update_session_config", handleUpdateSessionConfigWrapped);
 
   // System information
   wsRouter.register("get_process_tree", handleGetProcessTreeWrapped);

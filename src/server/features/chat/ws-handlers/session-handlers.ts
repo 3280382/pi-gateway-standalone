@@ -8,6 +8,7 @@ import { SessionManager } from "@mariozechner/pi-coding-agent";
 import { serverSessionManager, extractShortSessionId } from "../agent-session/session-manager";
 import { buildSessionResponse, getAllSessions, getSessionMessages, getSessionMessageCount } from "../session-helpers";
 import { getLocalSessionsDir } from "../agent-session/utils";
+import { sessionConfigManager } from "../session-config/sessionConfigManager";
 import type { WSContext } from "../ws-router";
 import { createHandler, checkPathExists, sendError, sendSuccess, logger } from "./handler-utils";
 
@@ -346,14 +347,24 @@ export async function handleListSessions(
       activeSessions.map(s => [extractShortSessionId(s.sessionFile), s])
     );
 
-    // Build sessions list with safe data access
+    // Ensure all sessions have config entries (auto-initialize if missing)
+    const sessionIds = sessions.map(s => ({ id: extractShortSessionId(s.path), path: s.path }));
+    await sessionConfigManager.ensureConfigs(sessionIds, workingDir);
+
+    // Get all configs
+    const configs = sessionConfigManager.getAllConfigs();
+
+    // Build sessions list with config data
     const sessionsList = sessions.map((s) => {
       const shortId = extractShortSessionId(s.path);
       const activeInfo = activeSessionMap.get(shortId);
+      const config = configs[shortId];
+      
       return {
         id: shortId,
         path: s.path,
-        name: s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
+        name: config?.name || s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
+        summary: config?.summary || "",
         messageCount: s.messageCount || 0,
         lastModified: s.modified.toISOString(),
         status: activeInfo?.runtimeStatus || "history",
@@ -363,7 +374,7 @@ export async function handleListSessions(
 
     sendSuccess(ctx, "sessions_list", { sessions: sessionsList });
 
-    logger.info(`[handleListSessions] Sent ${sessions.length} sessions`);
+    logger.info(`[handleListSessions] Sent ${sessions.length} sessions with config`);
   } catch (error) {
     logger.error("[handleListSessions] Error:", {}, error instanceof Error ? error : undefined);
     sendError(ctx, error instanceof Error ? error.message : "Failed to list sessions");
@@ -503,6 +514,48 @@ export const handleLoadMoreMessagesWrapped = createHandler(handleLoadMoreMessage
 
 export const handleGetSessionStatusWrapped = createHandler(handleGetSessionStatus, {
   name: "get_session_status",
+  requireSession: false,
+});
+
+// ============================================================================
+// Update Session Config Handler (WebSocket)
+// Updates session name and other metadata
+// ============================================================================
+
+/**
+ * Handle update_session_config message via WebSocket
+ */
+export async function handleUpdateSessionConfig(
+  ctx: WSContext,
+  payload: { sessionId: string; name?: string }
+): Promise<void> {
+  const { sessionId, name } = payload;
+
+  if (!sessionId) {
+    sendError(ctx, "sessionId is required");
+    return;
+  }
+
+  try {
+    if (name !== undefined) {
+      await sessionConfigManager.updateName(sessionId, name);
+    }
+
+    sendSuccess(ctx, "session_config_updated", { 
+      sessionId,
+      name,
+      success: true 
+    });
+
+    logger.info(`[handleUpdateSessionConfig] Updated ${sessionId}: name=${name}`);
+  } catch (error) {
+    logger.error("[handleUpdateSessionConfig] Error:", {}, error instanceof Error ? error : undefined);
+    sendError(ctx, error instanceof Error ? error.message : "Failed to update session config");
+  }
+}
+
+export const handleUpdateSessionConfigWrapped = createHandler(handleUpdateSessionConfig, {
+  name: "update_session_config",
   requireSession: false,
 });
 

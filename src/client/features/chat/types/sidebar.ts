@@ -15,6 +15,7 @@ export interface Session {
   id: string;        // Short ID
   path: string;      // Full path
   name: string;
+  summary?: string;  // Summary from first user prompt
   messageCount: number;
   lastModified: Date;
   firstMessage?: string;

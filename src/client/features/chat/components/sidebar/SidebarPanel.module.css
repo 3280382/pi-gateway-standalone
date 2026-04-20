@@ -1,1102 +1,166 @@
+
 /* ============================================
-   SidebarPanel - 合并所有Sidebar样式
+   NEW: Two-Row Compact Session List
    ============================================ */
 
-/* -------- Base Layout -------- */
-.sidebar {
-  width: 100%;
-  height: 100%;
-  background: #161b22;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.sidebarHidden {
-  display: none;
-}
-
-/* -------- Header -------- */
-.header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  border-bottom: 1px solid #30363d;
-  flex-shrink: 0;
-}
-
-.logo {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #58a6ff, #a371f7);
-  color: white;
-  font-size: var(--font-md);
-  font-weight: 700;
-  border-radius: 6px;
-}
-
-.title {
-  font-size: var(--font-md);
-  font-weight: 600;
-  color: #e6edf3;
-}
-
-/* -------- Content Area -------- */
-.content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px 0;
-}
-
-.content::-webkit-scrollbar {
-  width: 4px;
-}
-
-.content::-webkit-scrollbar-thumb {
-  background: #30363d;
-  border-radius: 2px;
-}
-
-/* -------- Error -------- */
-.error {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 8px 12px;
-  padding: 8px 12px;
-  background: rgba(248, 81, 73, 0.1);
-  border-radius: 6px;
-  color: #f85149;
-  font-size: var(--font-base);
-}
-
-.error button {
-  background: none;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-}
-
-.error button:hover {
-  background: rgba(248, 81, 73, 0.2);
-}
-
-/* -------- Section Base -------- */
-.section {
-  padding: 8px 12px;
-  border-bottom: 1px solid #21262d;
-}
-
-.sectionHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-}
-
-.sectionTitle {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.sectionAction {
-  display: flex;
-  gap: 4px;
-}
-
-/* -------- Common List/Item Styles -------- */
-.loading,
-.empty {
-  padding: 12px;
-  color: #7d8590;
-  font-size: var(--font-base);
-  text-align: center;
-}
-
-.list {
+.sessionListContainer {
   display: flex;
   flex-direction: column;
   gap: 2px;
-}
-
-.item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  color: #e6edf3;
-  font-size: var(--font-base);
-  cursor: pointer;
-  text-align: left;
-  width: 100%;
-  transition: all 0.1s ease;
-}
-
-.item:hover {
-  background: #21262d;
-}
-
-.item.active,
-.item.selected {
-  background: rgba(88, 166, 255, 0.15);
-  border-left: 3px solid #58a6ff;
-}
-
-.info {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+  padding: 4px 8px;
+  overflow-y: auto;
   flex: 1;
 }
 
-.name {
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* Session Row Container */
+.sessionRow {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
 }
 
-.path {
-  font-size: var(--font-xs);
-  color: #7d8590;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.sessionRow:hover {
+  background: rgba(88, 166, 255, 0.08);
+  border-color: rgba(88, 166, 255, 0.2);
 }
 
-.meta {
-  font-size: var(--font-xs);
-  opacity: 0.6;
+.sessionRowSelected {
+  background: rgba(88, 166, 255, 0.12);
+  border-color: rgba(88, 166, 255, 0.4);
 }
 
-.icon {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  opacity: 0.6;
+.sessionRowSelected:hover {
+  background: rgba(88, 166, 255, 0.15);
 }
 
-.item.selected .icon {
-  opacity: 1;
-}
-
-/* -------- Chat Settings Specific -------- */
-.section:has(.setting) {
-  margin-top: auto;
-  border-top: 1px solid var(--border-subtle);
-  border-bottom: none;
-}
-
-.setting {
+/* Row 1: ID, Status, Count, Time */
+.sessionRowPrimary {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 3px;
 }
 
-.setting:last-child {
-  margin-bottom: 0;
-}
-
-.label {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.controls {
-  display: flex;
-  gap: 4px;
-}
-
-.toggleBtn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
-  color: var(--text-secondary);
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.toggleBtn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-
-.toggleBtn.enabled {
-  background: rgba(35, 134, 54, 0.15);
-  border-color: var(--accent-green);
-  color: var(--accent-green);
-}
-
-.toggleBtn svg {
-  width: 14px;
-  height: 14px;
-}
-
-.viewBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.viewBtn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-
-.viewBtn svg {
-  width: 14px;
-  height: 14px;
-}
-
-.select {
-  padding: 4px 8px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
-  color: var(--text-primary);
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.select:focus {
-  outline: none;
-  border-color: var(--accent-blue);
-}
-
-/* -------- Session Model Specific -------- */
-.usingDefault {
-  color: var(--text-secondary);
-  font-style: italic;
-}
-
-.paramHint {
-  font-size: 11px;
-  color: var(--text-secondary);
-  font-style: italic;
-}
-
-.dropdownDivider {
-  height: 1px;
-  background: var(--border-subtle);
-  margin: 4px 0;
-}
-
-/* ===== 新增样式：紧凑工作目录 ===== */
-.compactList {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.compactItem {
+.sessionIdContainer {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
-  border: none;
-  background: transparent;
-  color: #c9d1d9;
-  text-align: left;
-  cursor: pointer;
-  border-radius: 3px;
-  transition: background 0.2s;
-  font-size: 12px;
-  line-height: 1.2;
 }
 
-.compactItem:hover {
-  background: #21262d;
-}
-
-.compactItem.active {
-  background: #1f6feb;
-  color: white;
-}
-
-.folderIcon {
-  font-size: 12px;
-  flex-shrink: 0;
-}
-
-.compactInfo {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.compactName {
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.2;
-}
-
-.compactPath {
-  font-size: 10px;
+.sessionId {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
   color: #8b949e;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.2;
+  letter-spacing: -0.3px;
 }
 
-.moreButton {
-  font-size: 10px;
+.sessionIdSelected {
   color: #58a6ff;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 2px 5px;
-  border-radius: 2px;
-  line-height: 1.2;
+  font-weight: 600;
 }
 
-.moreButton:hover {
-  background: #1f6feb;
-  color: white;
+.clientIndicator {
+  font-size: 8px;
+  color: #34d399;
+  animation: pulse 2s infinite;
 }
 
-.clearButton {
-  color: #f85149 !important;
-  font-size: 10px !important;
-}
-
-/* ===== 新增样式：会话下拉选择 ===== */
-.dropdownContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.sessionDropdown {
-  width: 100%;
-  padding: 6px 10px;
-  background: #0d1117;
-  border: 1px solid #30363d;
-  border-radius: 4px;
-  color: #c9d1d9;
-  font-size: 12px;
-  cursor: pointer;
-  line-height: 1.2;
-}
-
-.sessionDropdown:focus {
-  outline: none;
-  border-color: #1f6feb;
-}
-
-.sessionInfo {
-  padding: 6px 10px;
-  background: #0d1117;
-  border-radius: 4px;
-  border: 1px solid #30363d;
-  font-size: 11px;
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .sessionMeta {
   display: flex;
-  justify-content: space-between;
-  font-size: 10px;
-  color: #8b949e;
-  margin-bottom: 2px;
-}
-
-.sessionDescription {
-  font-size: 10px;
-  color: #c9d1d9;
-  line-height: 1.3;
-}
-
-.newSessionButton {
-  font-size: 10px;
-  color: #58a6ff;
-  background: transparent;
-  border: 1px solid #30363d;
-  cursor: pointer;
-  padding: 3px 6px;
-  border-radius: 3px;
-  line-height: 1.2;
-}
-
-.newSessionButton:hover {
-  background: #1f6feb;
-  color: white;
-  border-color: #1f6feb;
-}
-
-/* ===== 新增样式：模型参数 ===== */
-.paramsList {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.paramItem {
-  padding: 6px 10px;
-  background: #0d1117;
-  border-radius: 4px;
-  border: 1px solid #30363d;
-}
-
-.paramHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 3px;
-}
-
-.paramLabel {
-  font-size: 12px;
-  font-weight: 500;
-  color: #c9d1d9;
-  line-height: 1.2;
-}
-
-.paramDescription {
-  font-size: 10px;
-  color: #6e7681;
-  line-height: 1.2;
-}
-
-.paramValue {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.valueDisplay {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.valueText {
-  font-size: 12px;
-  color: #8b949e;
-  line-height: 1.2;
-}
-
-.editButton {
-  font-size: 10px;
-  color: #58a6ff;
-  background: transparent;
-  border: 1px solid #30363d;
-  cursor: pointer;
-  padding: 2px 5px;
-  border-radius: 2px;
-  line-height: 1.2;
-}
-
-.editButton:hover {
-  background: #1f6feb;
-  color: white;
-  border-color: #1f6feb;
-}
-
-.editContainer {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-}
-
-.editInput,
-.editSelect {
-  flex: 1;
-  padding: 3px 6px;
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 3px;
-  color: #c9d1d9;
-  font-size: 12px;
-  line-height: 1.2;
-}
-
-.editInput:focus,
-.editSelect:focus {
-  outline: none;
-  border-color: #1f6feb;
-}
-
-.editActions {
-  display: flex;
-  gap: 3px;
-}
-
-.saveButton,
-.cancelButton {
-  font-size: 10px;
-  padding: 2px 5px;
-  border-radius: 2px;
-  cursor: pointer;
-  border: none;
-  line-height: 1.2;
-}
-
-.saveButton {
-  background: #238636;
-  color: white;
-}
-
-.saveButton:hover {
-  background: #2ea043;
-}
-
-.cancelButton {
-  background: #6e7681;
-  color: white;
-}
-
-.cancelButton:hover {
-  background: #8b949e;
-}
-
-/* ===== 新增样式：节标题增强 ===== */
-.sectionSubtitle {
-  font-size: 10px;
-  color: #6e7681;
-  margin-top: 2px;
-  line-height: 1.2;
-}
-
-/* ===== 会话下拉选择器样式 ===== */
-.sessionSelector {
-  position: relative;
-  width: 100%;
-}
-
-.selectorBtn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 6px 10px;
-  background: #0d1117;
-  border: 1px solid #30363d;
-  border-radius: 4px;
-  color: #c9d1d9;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.selectorBtn:hover {
-  border-color: #1f6feb;
-}
-
-.selectorValue {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
-  text-align: left;
-}
-
-.dropdownIcon {
-  flex-shrink: 0;
-  opacity: 0.6;
-  transition: transform 0.15s;
-}
-
-.sessionDropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: 4px;
-  background: #0d1117;
-  border: 1px solid #30363d;
-  border-radius: 4px;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 100;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.dropdownItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 10px;
-  cursor: pointer;
-  transition: background 0.15s;
-  border-bottom: 1px solid #21262d;
-}
-
-.dropdownItem:last-child {
-  border-bottom: none;
-}
-
-.dropdownItem:hover {
-  background: #21262d;
-}
-
-.dropdownItem.active {
-  background: rgba(31, 111, 235, 0.2);
-}
-
-.sessionName {
-  font-size: 12px;
-  color: #c9d1d9;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
-}
-
-.sessionCount {
-  font-size: 10px;
-  color: #7d8590;
-  flex-shrink: 0;
-}
-
-/* ===== 新增样式：设置按钮 ===== */
-.settingsList {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.settingItem {
-  display: flex;
-  align-items: center;
-  padding: 6px 10px;
-  background: #0d1117;
-  border: 1px solid #30363d;
-  border-radius: 4px;
-  color: #c9d1d9;
-  font-size: 12px;
-  cursor: pointer;
-  text-align: left;
-  line-height: 1.2;
-  transition: all 0.2s;
-}
-
-.settingItem:hover {
-  background: #21262d;
-  border-color: #1f6feb;
-}
-
-.settingLabel {
-  flex: 1;
-}
-
-/* ===== 紧凑模型参数样式 ===== */
-.modelParamsCompact {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.paramRow {
-  display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.paramRow .paramLabel {
-  font-size: 11px;
-  color: #8b949e;
-  min-width: 36px;
-  flex-shrink: 0;
-}
-
-.selectWrapper {
-  flex: 1;
-  min-width: 0;
-  position: relative;
-}
-
-.paramSelect {
-  width: 100%;
-  max-width: 100%;
-  padding: 4px 20px 4px 8px;
-  background: #0d1117;
-  border: 1px solid #30363d;
-  border-radius: 4px;
-  color: #c9d1d9;
-  font-size: 11px;
-  cursor: pointer;
-  transition: border-color 0.15s;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 6px center;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.paramSelect:hover,
-.paramSelect:focus {
-  border-color: #1f6feb;
-  outline: none;
-}
-
-.paramSelect option {
-  background: #0d1117;
-  color: #c9d1d9;
-  font-size: 11px;
-}
-
-.modelInfoGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px 8px;
-  margin-top: 4px;
-  padding-top: 6px;
-  border-top: 1px solid #21262d;
-}
-
-.infoItem {
+.statusBadge {
   display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.infoLabel {
-  font-size: 10px;
-  color: #6e7681;
-}
-
-.infoValue {
-  font-size: 10px;
-  color: #8b949e;
-}
-
-/* ===== 紧凑样式覆盖 ===== */
-.section {
-  padding: 8px 10px !important;
-}
-
-.sectionHeader {
-  margin-bottom: 6px !important;
-}
-
-.sectionTitle {
-  font-size: 11px !important;
-  letter-spacing: 0.3px !important;
-}
-
-.compactList,
-.paramsList,
-.settingsList {
-  gap: 4px !important;
-}
-
-.compactItem,
-.paramItem,
-.settingItem {
-  padding: 5px 8px !important;
-  font-size: 11px !important;
-}
-
-.sessionDropdown,
-.editInput,
-.editSelect {
-  padding: 4px 8px !important;
-  font-size: 11px !important;
-}
-
-.paramLabel,
-.valueText {
-  font-size: 11px !important;
-}
-
-.paramDescription,
-.sessionMeta,
-.sessionDescription,
-.compactPath,
-.sectionSubtitle {
-  font-size: 9px !important;
-}
-
-.editButton,
-.moreButton,
-.newSessionButton,
-.saveButton,
-.cancelButton {
-  font-size: 9px !important;
-  padding: 1px 4px !important;
-}
-
-/* -------- Loading Overlay -------- */
-.loadingOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(22, 27, 34, 0.85);
-  backdrop-filter: blur(2px);
-  display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  z-index: 100;
-  border-radius: 8px;
-}
-
-.loadingSpinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid rgba(88, 166, 255, 0.2);
-  border-top-color: #58a6ff;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.loadingText {
-  font-size: 12px;
-  color: #8b949e;
-}
-
-/* Disabled button styles */
-.newSessionButton:disabled,
-.selectorBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Empty state text */
-.emptyText {
-  padding: 12px 16px;
-  font-size: 12px;
-  color: #6e7681;
-  text-align: center;
-}
-
-/* ===== 会话列表容器（固定显示4个，可滚动） ===== */
-.sessionListContainer {
-  width: 100%;
-  max-height: 160px; /* 4个会话项的高度，每个约40px */
-  overflow-y: auto;
-  border: 1px solid #30363d;
-  border-radius: 4px;
-  background: #0d1117;
-  /* 自定义滚动条 */
-  scrollbar-width: thin;
-  scrollbar-color: #30363d #0d1117;
-}
-
-.sessionListContainer::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sessionListContainer::-webkit-scrollbar-track {
-  background: #0d1117;
-  border-radius: 3px;
-}
-
-.sessionListContainer::-webkit-scrollbar-thumb {
-  background: #30363d;
-  border-radius: 3px;
-}
-
-.sessionListContainer::-webkit-scrollbar-thumb:hover {
-  background: #484f58;
-}
-
-/* Session Table Styles */
-.sessionTableContainer {
-  width: 100%;
-  max-height: 300px;
-  overflow-y: auto;
-  border: 1px solid #30363d;
-  border-radius: 4px;
-  background: #0d1117;
-}
-
-.sessionTableContainer::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sessionTableContainer::-webkit-scrollbar-track {
-  background: #0d1117;
-  border-radius: 3px;
-}
-
-.sessionTableContainer::-webkit-scrollbar-thumb {
-  background: #30363d;
-  border-radius: 3px;
-}
-
-.sessionTableContainer::-webkit-scrollbar-thumb:hover {
-  background: #484f58;
-}
-
-.sessionTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-
-.sessionTable thead {
-  background: #161b22;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-.sessionTableHeader {
-  padding: 8px 6px;
-  text-align: left;
-  font-weight: 600;
-  color: #8b949e;
-  border-bottom: 1px solid #30363d;
   font-size: 11px;
-  text-transform: uppercase;
-}
-
-.sessionTableRow {
-  cursor: pointer;
-  transition: background 0.15s;
-  border-bottom: 1px solid #21262d;
-}
-
-.sessionTableRow:last-child {
-  border-bottom: none;
-}
-
-.sessionTableRow:hover {
-  background: #21262d;
-}
-
-.sessionTableRowSelected {
-  background: rgba(31, 111, 235, 0.2);
-}
-
-.sessionTableRowSelected:hover {
-  background: rgba(31, 111, 235, 0.3);
-}
-
-.sessionTableCell {
-  padding: 8px 6px;
-  vertical-align: middle;
-}
-
-.sessionId {
-  font-family: "JetBrains Mono", monospace;
-  color: #58a6ff;
-  font-weight: 600;
-}
-
-.sessionIdSelected {
-  color: #4CAF50;
-  font-weight: 700;
-}
-
-.currentIndicator {
-  display: none;
-}
-
-.statusBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 6px;
-  border-radius: 12px;
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-.statusThinking {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fbbf24;
-}
-
-.statusTooling {
-  background: rgba(96, 165, 250, 0.15);
-  color: #60a5fa;
-}
-
-.statusStreaming {
-  background: rgba(167, 139, 250, 0.15);
-  color: #a78bfa;
-}
-
-.statusWaiting {
-  background: rgba(249, 115, 22, 0.15);
-  color: #f97316;
-}
-
-.statusError {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-}
-
-.statusHistory {
-  background: rgba(139, 148, 158, 0.15);
-  color: #8b949e;
-}
-
-.statusIdle {
-  background: rgba(107, 114, 128, 0.15);
-  color: #6b7280;
-}
-
-.statusRetrying {
-  background: rgba(234, 179, 8, 0.15);
-  color: #eab308;
-}
-
-.statusCompacting {
-  background: rgba(14, 165, 233, 0.15);
-  color: #0ea5e9;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
 }
 
 .messageCount {
+  font-size: 11px;
   color: #c9d1d9;
-  font-weight: 500;
+  min-width: 20px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 .relativeTime {
-  color: #8b949e;
-  font-size: 11px;
+  font-size: 10px;
+  color: #6e7681;
+  min-width: 32px;
+  text-align: right;
+}
+
+/* Row 2: Name and Summary */
+.sessionRowSecondary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 2px;
+}
+
+.sessionName {
+  font-size: 12px;
+  font-weight: 500;
+  color: #e6edf3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: text;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.sessionName:hover {
+  background: rgba(88, 166, 255, 0.15);
+  color: #58a6ff;
+}
+
+.sessionSummary {
+  font-size: 10px;
+  color: #6e7681;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+/* Inline Name Input */
+.nameInput {
+  font-size: 12px;
+  font-weight: 500;
+  color: #e6edf3;
+  background: #0d1117;
+  border: 1px solid #58a6ff;
+  border-radius: 4px;
+  padding: 3px 6px;
+  outline: none;
+  width: 100%;
+  min-width: 0;
+}
+
+.nameInput:focus {
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+}
+
+/* Legacy table styles (kept for compatibility) */
+.sessionTableContainer {
+  display: none;
 }

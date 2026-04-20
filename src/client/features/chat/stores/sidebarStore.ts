@@ -57,6 +57,9 @@ interface SidebarActions {
   setRuntimeStatus: (sessionId: string, status: string) => void;
   updateRuntimeStatusBulk: (statuses: Array<{ sessionId: string; status: string }>) => void;
 
+  // Session Config Actions
+  updateSessionName: (sessionId: string, name: string) => void;
+
   // Reset
   reset: () => void;
 }
@@ -156,6 +159,19 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
           },
           false,
           "updateRuntimeStatusBulk"
+        );
+      },
+
+      // Session Config Actions
+      updateSessionName: (sessionId: string, name: string) => {
+        set(
+          (state) => ({
+            sessions: state.sessions.map((s) =>
+              s.id === sessionId ? { ...s, name } : s
+            ),
+          }),
+          false,
+          "updateSessionName"
         );
       },
 
