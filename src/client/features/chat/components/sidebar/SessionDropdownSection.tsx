@@ -156,11 +156,7 @@ function SessionRow({ session, isSelected, status, onSelect }: SessionRowProps) 
           </span>
         )}
         
-        {session.summary && !isEditing && (
-          <span className={styles.sessionSummary} title={session.summary}>
-            {session.summary.length > 60 ? session.summary.slice(0, 60) + "..." : session.summary}
-          </span>
-        )}
+
       </div>
     </div>
   );
@@ -273,8 +269,8 @@ export function SessionDropdownSection() {
         <h3 className={styles.sectionTitle}>Sessions ({sessions.length})</h3>
       </div>
 
-      <div className={styles.sessionListContainer}>
-        {sortedSessions.map((session) => (
+      <div className={styles.sessionListContainer} style={{ maxHeight: '280px', overflowY: 'auto' }}>
+        {sortedSessions.slice(0, 5).map((session) => (
           <SessionRow
             key={session.id}
             session={session}
