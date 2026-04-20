@@ -63,6 +63,8 @@ export function InputArea({
   onNewSession,
   onCompactSession,
   onExportSession,
+  // Template insertion
+  onInsertTemplate,
   // Auto scroll related
   shouldScrollToBottom = true,
   onToggleScroll,
