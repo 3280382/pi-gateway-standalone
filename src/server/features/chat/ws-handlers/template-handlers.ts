@@ -33,10 +33,16 @@ async function findTemplateFiles(workingDir: string): Promise<TemplateFile[]> {
   const templates: TemplateFile[] = [];
 
   // Global templates: ~/.pi/agent/prompts
-  const globalPromptsDir = join(process.env.HOME || "/root", ".pi", "agent", "prompts");
+  // Use /root as default since process.env.HOME may not be set in all environments
+  const homeDir = process.env.HOME || "/root";
+  const globalPromptsDir = join(homeDir, ".pi", "agent", "prompts");
+  
+  logger.info(`[findTemplateFiles] Checking global dir: ${globalPromptsDir} (HOME=${homeDir})`);
   if (existsSync(globalPromptsDir)) {
+    logger.info(`[findTemplateFiles] Global dir exists: ${globalPromptsDir}`);
     try {
       const globalFiles = await readdir(globalPromptsDir);
+      logger.info(`[findTemplateFiles] Found ${globalFiles.length} files in global dir`);
       for (const file of globalFiles) {
         if (file.endsWith(".md")) {
           templates.push({
@@ -44,18 +50,25 @@ async function findTemplateFiles(workingDir: string): Promise<TemplateFile[]> {
             path: join(globalPromptsDir, file),
             source: "global",
           });
+          logger.info(`[findTemplateFiles] Added global template: ${file}`);
         }
       }
     } catch (error) {
-      logger.warn(`[findTemplateFiles] Error reading global prompts dir: ${error}`);
+      logger.error(`[findTemplateFiles] Error reading global prompts dir: ${error}`);
     }
+  } else {
+    logger.warn(`[findTemplateFiles] Global dir does not exist: ${globalPromptsDir}`);
   }
 
   // Local templates: {workingDir}/.pi/prompts
   const localPromptsDir = join(workingDir, ".pi", "prompts");
+  logger.info(`[findTemplateFiles] Checking local dir: ${localPromptsDir}`);
+  
   if (existsSync(localPromptsDir)) {
+    logger.info(`[findTemplateFiles] Local dir exists: ${localPromptsDir}`);
     try {
       const localFiles = await readdir(localPromptsDir);
+      logger.info(`[findTemplateFiles] Found ${localFiles.length} files in local dir`);
       for (const file of localFiles) {
         if (file.endsWith(".md")) {
           templates.push({
@@ -63,11 +76,14 @@ async function findTemplateFiles(workingDir: string): Promise<TemplateFile[]> {
             path: join(localPromptsDir, file),
             source: "local",
           });
+          logger.info(`[findTemplateFiles] Added local template: ${file}`);
         }
       }
     } catch (error) {
-      logger.warn(`[findTemplateFiles] Error reading local prompts dir: ${error}`);
+      logger.error(`[findTemplateFiles] Error reading local prompts dir: ${error}`);
     }
+  } else {
+    logger.info(`[findTemplateFiles] Local dir does not exist: ${localPromptsDir}`);
   }
 
   // Sort by name
