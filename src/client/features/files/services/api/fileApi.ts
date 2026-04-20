@@ -181,7 +181,7 @@ export async function execute(path: string): Promise<ReadableStream<Uint8Array>>
   return response.body;
 }
 
-// 格式化files大小
+// Format file size
 export function formatFileSize(bytes?: number): string {
   if (bytes === undefined || bytes === null) return "-";
   if (bytes === 0) return "0 B";

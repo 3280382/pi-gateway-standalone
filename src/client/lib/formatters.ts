@@ -1,10 +1,10 @@
 /**
- * Formatters - Formatter utilities函数库
- * 纯函数，便于测试和复用
+ * Formatters - Formatter utility functions
+ * Pure functions, easy to test and reuse
  */
 
 /**
- * 格式化files大小
+ * Format file size
  */
 export function formatFileSize(bytes?: number): string {
   if (bytes === undefined || bytes === null) return "";
@@ -16,7 +16,7 @@ export function formatFileSize(bytes?: number): string {
 }
 
 /**
- * 格式化日期
+ * Format date
  */
 export function formatDate(dateString?: string, options?: Intl.DateTimeFormatOptions): string {
   if (!dateString) return "";
@@ -35,7 +35,7 @@ export function formatDate(dateString?: string, options?: Intl.DateTimeFormatOpt
 }
 
 /**
- * 格式化时间为相对时间（如：2minutes ago）
+ * Format time as relative (e.g., 2 minutes ago)
  */
 export function formatTimeAgo(date: Date | string | number): string {
   const now = new Date();
@@ -52,11 +52,11 @@ export function formatTimeAgo(date: Date | string | number): string {
   if (diffDay > 0) return `${diffDay}days ago`;
   if (diffHour > 0) return `${diffHour}hours ago`;
   if (diffMin > 0) return `${diffMin}minutes ago`;
-  return diffSec < 10 ? "刚刚" : `${diffSec}seconds ago`;
+  return diffSec < 10 ? "Just now" : `${diffSec}seconds ago`;
 }
 
 /**
- * 格式化路径（显示最后两级）
+ * Format path (show last two levels)
  */
 export function formatPath(path: string, maxLength: number = 30): string {
   if (!path) return "";
@@ -69,7 +69,7 @@ export function formatPath(path: string, maxLength: number = 30): string {
 }
 
 /**
- * 截断文本
+ * Truncate text
  */
 export function truncateText(text: string, maxLength: number, suffix = "..."): string {
   if (!text || text.length <= maxLength) return text;
@@ -77,14 +77,14 @@ export function truncateText(text: string, maxLength: number, suffix = "..."): s
 }
 
 /**
- * 格式化数字（添加千分位）
+ * Format number (add thousand separators)
  */
 export function formatNumber(num: number): string {
   return num.toLocaleString();
 }
 
 /**
- * Markdown 简单格式化
+ * Markdown simple formatting
  */
 export function formatMarkdown(text: string): string {
   if (!text) return "";

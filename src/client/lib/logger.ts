@@ -48,7 +48,7 @@ function getModuleLevel(namespace: string): LogLevel {
     return MODULE_LEVELS[namespace];
   }
 
-  // 前缀匹配 (如 "WebSocket:connected" 匹配 "WebSocket")
+  // Prefix match (e.g., "WebSocket:connected" matches "WebSocket")
   for (const [prefix, level] of Object.entries(MODULE_LEVELS)) {
     if (namespace.startsWith(prefix) || namespace.includes(prefix)) {
       return level;
@@ -59,14 +59,14 @@ function getModuleLevel(namespace: string): LogLevel {
 }
 
 /**
- * 创建日志器
+ * Create logger
  */
 export function createLogger(namespace: string) {
   const moduleLevel = getModuleLevel(namespace);
 
   const shouldLog = (level: LogLevel): boolean => {
-    if (!isDev) return level >= LogLevel.ERROR; // 生产环境只显示error
-    return level <= moduleLevel; // 开发环境根据模块级别
+    if (!isDev) return level >= LogLevel.ERROR; // Production only shows error
+    return level <= moduleLevel; // Development based on module level
   };
 
   const formatMessage = (message: string, _data?: any): string => {
@@ -110,7 +110,7 @@ export function createLogger(namespace: string) {
       }
     },
 
-    // 性能计时
+    // Performance timing
     time: (label: string) => {
       if (shouldLog(LogLevel.DEBUG)) {
         console.time(`[${namespace}] ${label}`);
@@ -123,7 +123,7 @@ export function createLogger(namespace: string) {
       }
     },
 
-    // 分Group
+    // Group
     group: (label: string) => {
       if (shouldLog(LogLevel.DEBUG)) {
         console.group(formatMessage(label));
@@ -138,7 +138,7 @@ export function createLogger(namespace: string) {
   };
 }
 
-// 预定义的日志器实例
+// Predefined logger instances
 export const reactRenderLog = createLogger("React");
 export const componentLog = createLogger("Component");
 export const hookLog = createLogger("Hook");
@@ -146,5 +146,5 @@ export const wsLog = createLogger("WebSocket");
 export const gatewayLog = createLogger("Gateway");
 export const chatLog = createLogger("Chat");
 
-// 导出默认日志器
+// Export default logger
 export default createLogger;

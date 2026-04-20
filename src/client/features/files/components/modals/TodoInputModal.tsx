@@ -80,7 +80,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
         const todos = await todoApi.list(workingDir);
         setTodoList(todos);
 
-        // 按files路径分Group
+        // 按files路径Group
         const map = new Map<string, typeof todos>();
         for (const todo of todos) {
           const existing = map.get(todo.filePath) || [];

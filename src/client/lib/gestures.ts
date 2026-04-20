@@ -1,6 +1,6 @@
 /**
- * Gesture Utilities - 手势检测工具函数库
- * 纯函数，便于测试和复用
+ * Gesture Utilities - Gesture detection utility functions
+ * Pure functions, easy to test and reuse
  */
 
 export interface Point {
@@ -18,25 +18,25 @@ export interface GestureMetrics {
   velocity: number;
 }
 
-// 默认配置常量
+// Default configuration constants
 export const GESTURE_CONFIG = {
-  TAP_THRESHOLD: 10, // 单击最大移动距离 (px)
-  LONG_PRESS_DELAY: 500, // 长按延迟 (ms)
-  DOUBLE_TAP_DELAY: 300, // 双击间隔 (ms)
-  SWIPE_THRESHOLD: 30, // 滑动最小距离 (px)
-  SWIPE_VELOCITY: 0.5, // 滑动最小速度 (px/ms)
-  PINCH_THRESHOLD: 0.7, // 缩放阈值 (scale)
+  TAP_THRESHOLD: 10, // Tap max move distance (px)
+  LONG_PRESS_DELAY: 500, // Long press delay (ms)
+  DOUBLE_TAP_DELAY: 300, // Double tap interval (ms)
+  SWIPE_THRESHOLD: 30, // Swipe min distance (px)
+  SWIPE_VELOCITY: 0.5, // Swipe min velocity (px/ms)
+  PINCH_THRESHOLD: 0.7, // Pinch threshold (scale)
 } as const;
 
 /**
- * 计算两点Spacing离
+ * Calculate distance between two points
  */
 export function getDistance(p1: Point, p2: Point): number {
   return Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
 }
 
 /**
- * 计算两点间速度
+ * Calculate velocity between two points
  */
 export function getVelocity(start: TouchInfo, end: TouchInfo): number {
   const distance = getDistance(start, end);
@@ -45,7 +45,7 @@ export function getVelocity(start: TouchInfo, end: TouchInfo): number {
 }
 
 /**
- * 获取触摸点信息
+ * Get touch point info
  */
 export function getTouchInfo(touch: Touch | React.Touch): TouchInfo {
   return {
@@ -56,7 +56,7 @@ export function getTouchInfo(touch: Touch | React.Touch): TouchInfo {
 }
 
 /**
- * 获取双指Spacing离
+ * Get two-finger distance
  */
 export function getPinchDistance(touches: TouchList | React.TouchList): number {
   if (touches.length < 2) return 0;
@@ -66,21 +66,21 @@ export function getPinchDistance(touches: TouchList | React.TouchList): number {
 }
 
 /**
- * 计算缩放比例
+ * Calculate scale ratio
  */
 export function getPinchScale(startDistance: number, currentDistance: number): number {
   return startDistance > 0 ? currentDistance / startDistance : 1;
 }
 
 /**
- * 判断是否为单击
+ * Determine if tap
  */
 export function isTap(metrics: GestureMetrics, threshold = GESTURE_CONFIG.TAP_THRESHOLD): boolean {
   return metrics.distance < threshold;
 }
 
 /**
- * 判断是否为滑动
+ * Determine if swipe
  */
 export function isSwipe(
   metrics: GestureMetrics,
@@ -93,7 +93,7 @@ export function isSwipe(
 }
 
 /**
- * 获取滑动方向
+ * Get swipe direction
  */
 export function getSwipeDirection(start: Point, end: Point): "left" | "right" | "up" | "down" {
   const dx = end.x - start.x;
@@ -102,14 +102,14 @@ export function getSwipeDirection(start: Point, end: Point): "left" | "right" | 
 }
 
 /**
- * 判断是否为双击
+ * Determine if double tap
  */
 export function isDoubleTap(lastTapTime: number, delay = GESTURE_CONFIG.DOUBLE_TAP_DELAY): boolean {
   return Date.now() - lastTapTime < delay;
 }
 
 /**
- * 判断是否为长按
+ * Determine if long press
  */
 export function isLongPress(
   duration: number,
@@ -119,7 +119,7 @@ export function isLongPress(
 }
 
 /**
- * 完整手势分析
+ * Complete gesture analysis
  */
 export function analyzeGesture(
   start: TouchInfo,
