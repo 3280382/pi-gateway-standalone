@@ -237,8 +237,8 @@ export async function content(req: Request, res: Response) {
       return;
     }
 
-    // Limit content API file size to 10MB
-    if (stats.size > 10 * 1024 * 1024) {
+    // Limit content API file size to 50MB
+    if (stats.size > 50 * 1024 * 1024) {
       res.status(413).json({ error: "File too large, use /api/files/raw" });
       return;
     }
