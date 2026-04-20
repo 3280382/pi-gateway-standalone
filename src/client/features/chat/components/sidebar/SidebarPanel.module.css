@@ -1152,6 +1152,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
+  max-width: 45%;
 }
 
 .sessionId {
@@ -1159,6 +1161,9 @@
   font-size: 11px;
   color: #8b949e;
   letter-spacing: -0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sessionIdSelected {
@@ -1170,6 +1175,7 @@
   font-size: 8px;
   color: #34d399;
   animation: pulse 2s infinite;
+  flex-shrink: 0;
 }
 
 @keyframes pulse {
@@ -1181,16 +1187,18 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .statusBadge {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  width: 18px;
-  height: 18px;
+  font-size: 10px;
+  padding: 2px 6px;
   border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .messageCount {
