@@ -15,7 +15,7 @@ import { useWorkspaceStore } from "@/stores/workspaceStore";
  */
 export function getInitialPath(): string {
   if (typeof window === "undefined") return "/root";
-  return useWorkspaceStore.getState().workingDir;
+  return useWorkspaceStore.getState().currentPath;
 }
 
 /**

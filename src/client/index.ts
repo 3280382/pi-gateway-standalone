@@ -22,7 +22,7 @@ export type {
 } from "@/features/chat/types";
 // Files Feature
 export * as fileApi from "@/features/files/services/api/fileApi";
-export { useWorkspaceStore } from "@/features/files/stores";
+export { useWorkspaceStore } from "@/stores/workspaceStore";
 // Hooks
 export { useAppInitialization } from "@/hooks/useAppInitialization";
 export { fetchApi } from "@/services/client";

@@ -45,8 +45,8 @@ interface UseFilePickerOptions {
 
 export function useFilePicker(options: UseFilePickerOptions): UseFilePickerReturn {
   const { value, onChange, onFocusInput } = options;
-  // 使用全局 workspaceStore 的 workingDir
-  const workingDir = useWorkspaceStore((state) => state.workingDir);
+  // 使用全局 workspaceStore 的 currentPath
+  const currentPath = useWorkspaceStore((state) => state.currentPath);
 
   // 状态
   const [isOpen, setIsOpen] = useState(false);
@@ -59,7 +59,7 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
   const loadFileList = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     try {
-      const data = await fileApi.browse(workingDir);
+      const data = await fileApi.browse(currentPath);
       const items: FileItem[] = [
         ...(data.parentPath !== data.workingDir
           ? [{ name: "..", path: data.parentPath, isDirectory: true }]
@@ -73,7 +73,7 @@ export function useFilePicker(options: UseFilePickerOptions): UseFilePickerRetur
     } finally {
       setIsLoading(false);
     }
-  }, [workingDir]);
+  }, [currentPath]);
 
   // 过滤filesCols表
   const filteredFiles = useMemo(() => {

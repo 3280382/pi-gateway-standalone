@@ -7,7 +7,7 @@
  *
  * 架构：
  * - 所有初始化数据来自 WebSocket init 响应
- * - 只有 workingDir 保存在 localStorage
+ * - 只有 workspace 状态保存在 localStorage (workspaceStore)
  * - 其他所有数据（sessions、models 等）都从 WebSocket 获取
  */
 

@@ -52,9 +52,6 @@ export interface SidebarState {
 
   // 运Rows时状态映射（sessionId -> status）
   runtimeStatus: Record<string, string>;
-
-  // 最近工作directories列表（最多3个，用于快速切换）
-  recentWorkspaces: WorkingDirectory[];
 }
 
 // ============================================================================

@@ -16,6 +16,7 @@ import { loadMoreMessages } from "@/features/chat/services/chatWebSocket";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import type { Message } from "@/features/chat/types/chat";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { websocketService } from "@/services/websocket.service";
 
 // ===== [ANCHOR:HELPERS] =====
@@ -129,7 +130,7 @@ export function useChatPanel(): UseChatPanelReturn {
     }, 100);
 
     // 检查是否有更多历史消息（如果当前消息少于100Items，认为已全部加载）
-    const messageLimit = useSessionStore.getState().defaultMessageLimit;
+    const messageLimit = useWorkspaceStore.getState().defaultMessageLimit;
     if (messages.length < messageLimit && messageLimit > 0) {
       hasMoreRef.current = false;
       setHasMoreMessages(false);
@@ -181,7 +182,7 @@ export function useChatPanel(): UseChatPanelReturn {
     }
 
     // 根据消息数量和设置判断是否有更多历史消息
-    const messageLimit = useSessionStore.getState().defaultMessageLimit;
+    const messageLimit = useWorkspaceStore.getState().defaultMessageLimit;
     // 如果当前消息数少于限制，说明已全部加载
     if (messages.length < messageLimit) {
       hasMoreRef.current = false;
@@ -376,7 +377,7 @@ export function useChatPanel(): UseChatPanelReturn {
     } catch (error) {
       console.error("[useChatPanel] Failed to reload messages:", error);
       // 如果Failed，尝试恢复原来的消息（通过重新初始化）
-      const messageLimit = sessionStore.defaultMessageLimit;
+      const messageLimit = useWorkspaceStore.getState().defaultMessageLimit;
       const { initChatWorkingDirectory } = await import("@/features/chat/services/chatWebSocket");
       const response = await initChatWorkingDirectory(
         sessionStore.workingDir,

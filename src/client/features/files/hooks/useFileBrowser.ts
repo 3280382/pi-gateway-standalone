@@ -37,7 +37,7 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
   const { currentBrowsePath, setItems, setCurrentBrowsePath, setParentPath, setLoading, setError } =
     useFileStore();
 
-  const { workingDir } = useWorkspaceStore();
+  const { currentPath } = useWorkspaceStore();
 
   const lastLoadedPathRef = useRef<string>("");
   const isInitializedRef = useRef(false);
@@ -47,13 +47,13 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
   useEffect(() => {
     if (!isActive || isInitializedRef.current) return;
 
-    // 如果 FileStore 的 currentBrowsePath 为空，使用 workingDir
+    // 如果 FileStore 的 currentBrowsePath 为空，使用 currentPath
     if (!currentBrowsePath || currentBrowsePath === "/") {
-      const path = workingDir || "/root";
+      const path = currentPath || "/root";
       setCurrentBrowsePath(path);
     }
     isInitializedRef.current = true;
-  }, [isActive, currentBrowsePath, setCurrentBrowsePath, workingDir]); // 只在 isActive 变化时执Rows一次
+  }, [isActive, currentBrowsePath, setCurrentBrowsePath, currentPath]); // 只在 isActive 变化时执Rows一次
 
   /**
    * 加载directories内容

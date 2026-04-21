@@ -30,10 +30,10 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
   const { isActive = true, currentBrowsePath } = options;
 
   const { isGitModeActive, items, updateFileGitStatuses } = useFileStore();
-  const { workingDir: globalWorkingDir } = useWorkspaceStore();
+  const { currentPath: globalCurrentPath } = useWorkspaceStore();
 
-  // 使用当前浏览路径优先，回退到全局 workingDir
-  const workingDir = currentBrowsePath || globalWorkingDir;
+  // 使用当前浏览路径优先，回退到全局 currentPath
+  const workingDir = currentBrowsePath || globalCurrentPath;
 
   const lastFetchedPathRef = useRef<string>("");
   const itemsLengthRef = useRef<number>(0);

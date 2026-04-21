@@ -5,7 +5,7 @@
 
 import { useCallback } from "react";
 import { useLlmLogStore } from "@/features/chat/stores/llmLogStore";
-import { useSessionStore } from "@/features/chat/stores/sessionStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import styles from "./SidebarPanel.module.css";
 
 export function ChatSettingsSection() {
@@ -14,9 +14,9 @@ export function ChatSettingsSection() {
   const setLlmLogConfig = useLlmLogStore((state) => state.setConfig);
   const openLlmLogModal = useLlmLogStore((state) => state.openModal);
 
-  // Message limit setting
-  const defaultMessageLimit = useSessionStore((state) => state.defaultMessageLimit);
-  const setDefaultMessageLimit = useSessionStore((state) => state.setDefaultMessageLimit);
+  // Message limit setting (unified in workspaceStore)
+  const defaultMessageLimit = useWorkspaceStore((state) => state.defaultMessageLimit);
+  const setDefaultMessageLimit = useWorkspaceStore((state) => state.setDefaultMessageLimit);
 
   // ========== 2. Actions ==========
   const handleToggleLlmLog = useCallback(() => {

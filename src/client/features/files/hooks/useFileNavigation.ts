@@ -17,10 +17,10 @@ export interface UseFileNavigationResult {
 }
 
 export function useFileNavigation(): UseFileNavigationResult {
-  // currentBrowsePath: 当前浏览路径（在files浏览器中导航不改变全局 workingDir）
+  // currentBrowsePath: 当前浏览路径（在files浏览器中导航不改变全局 currentPath）
   const { currentBrowsePath, parentPath, setCurrentBrowsePath } = useFileStore();
-  // workingDir: 全局工作directories（项目根directories）
-  const { workingDir } = useWorkspaceStore();
+  // currentPath: 全局工作directories（项目根directories）
+  const { currentPath } = useWorkspaceStore();
 
   /**
    * 导航到指定路径
@@ -50,8 +50,8 @@ export function useFileNavigation(): UseFileNavigationResult {
    * 导航到主Pages（全局工作directories）
    */
   const navigateHome = useCallback(() => {
-    setCurrentBrowsePath(workingDir);
-  }, [workingDir, setCurrentBrowsePath]);
+    setCurrentBrowsePath(currentPath);
+  }, [currentPath, setCurrentBrowsePath]);
 
   /**
    * 是否可以向上导航

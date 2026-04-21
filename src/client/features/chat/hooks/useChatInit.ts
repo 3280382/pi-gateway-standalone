@@ -74,11 +74,16 @@ export function useChatInit(): { isConnecting: boolean } {
         return;
       }
 
-      // 2. 从全局 workspaceStore 读取当前工作目录，从 sessionStore 读取对应 sessionFile
-      const savedWorkspace = useWorkspaceStore.getState().workingDir;
-      const sessionStore = useSessionStore.getState();
-      const savedSessionFile = sessionStore.getSessionFileForWorkspace(savedWorkspace);
-      const messageLimit = sessionStore.defaultMessageLimit;
+      // 2. 从全局 workspaceStore 读取当前工作目录和对应 sessionFile
+      const workspaceStore = useWorkspaceStore.getState();
+      const savedWorkspace = workspaceStore.currentPath;
+      // 优先从 recentWorkspaces 获取 lastSessionFile，否则 fallback 到 sessionFiles 映射
+      const recentWorkspace = workspaceStore.recentWorkspaces.find(
+        (w) => w.path === savedWorkspace
+      );
+      const savedSessionFile =
+        recentWorkspace?.lastSessionFile ?? workspaceStore.getSessionFile(savedWorkspace);
+      const messageLimit = workspaceStore.defaultMessageLimit;
 
       console.log("[ChatInit] Restoring from localStorage:", {
         currentWorkspace: savedWorkspace,
@@ -123,13 +128,8 @@ export function useChatInit(): { isConnecting: boolean } {
 
       // 5. 恢复所有状态
 
-      // 5.1 全局工作目录（唯一权威来源）
-      useWorkspaceStore.getState().setWorkingDir(workingDir);
-
-      // 5.2 保存该 workspace 的 sessionFile 到持久化映射
-      if (currentSession?.sessionFile) {
-        useSessionStore.getState().setWorkspaceSessionFile(workingDir, currentSession.sessionFile);
-      }
+      // 5.1 全局工作目录（唯一权威来源，同时保存 sessionFile 到 recentWorkspaces）
+      useWorkspaceStore.getState().setCurrentPath(workingDir, currentSession?.sessionFile);
 
       // 5.3 Session 运行时状态
       useSessionStore.getState().setWorkingDir(workingDir);

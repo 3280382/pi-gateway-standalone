@@ -4,12 +4,12 @@
  * Responsibilities:
  * - 管理 Sidebar UI 状态
  * - 所有 session 数据来自服务器（WebSocket），不持久化到 localStorage
- * - 只有 workingDir 由全局 workspaceStore 管理
+ * - workingDir 由全局 workspaceStore 同步（运行时副本，不持久化）
+ * - recentWorkspaces 已统一到 workspaceStore
  */
 
 import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
-import { CHAT_SIDEBAR_PERSIST, CHAT_STORAGE_KEYS, CHAT_STORAGE_VERSION } from "./persist.config";
+import { devtools } from "zustand/middleware";
 import type { Session, SidebarState } from "@/features/chat/types/sidebar";
 
 // ============================================================================
@@ -26,7 +26,6 @@ const createInitialState = (): Omit<SidebarState, keyof SidebarActions> => ({
   error: null,
   selectedSessionId: null,
   runtimeStatus: {}, // Map of sessionId -> runtime status
-  recentWorkspaces: [], // 最近工作directories（最多3个）
 });
 
 // ============================================================================
@@ -47,8 +46,6 @@ interface SidebarActions {
   setWorkingDir: (path: string) => void;
   setSessions: (sessions: Session[]) => void;
   addSession: (session: Session) => void;
-  addRecentWorkspace: (path: string) => void;
-  setRecentWorkspaces: (paths: string[]) => void;
 
   // UI Actions
   setLoading: (loading: boolean) => void;
@@ -101,39 +98,7 @@ const sidebarStoreCreator = (set: any) => ({
   setWorkingDir: (path: string) => {
     const safePath = path || "";
     const displayName = safePath.split("/").pop() || safePath;
-    const newDir = { path: safePath, displayName };
-    set(
-      (state: any) => {
-        const filtered = state.recentWorkspaces.filter((w: any) => w.path !== safePath);
-        const recentWorkspaces = [newDir, ...filtered].slice(0, 3);
-        return { workingDir: newDir, recentWorkspaces };
-      },
-      false,
-      "setWorkingDir"
-    );
-  },
-
-  addRecentWorkspace: (path: string) => {
-    const safePath = path || "";
-    const displayName = safePath.split("/").pop() || safePath;
-    const newDir = { path: safePath, displayName };
-    set(
-      (state: any) => {
-        const filtered = state.recentWorkspaces.filter((w: any) => w.path !== safePath);
-        const recentWorkspaces = [newDir, ...filtered].slice(0, 3);
-        return { recentWorkspaces };
-      },
-      false,
-      "addRecentWorkspace"
-    );
-  },
-
-  setRecentWorkspaces: (paths: string[]) => {
-    const recentWorkspaces = paths
-      .filter((p) => p)
-      .map((p) => ({ path: p, displayName: p.split("/").pop() || p }))
-      .slice(0, 3);
-    set({ recentWorkspaces }, false, "setRecentWorkspaces");
+    set({ workingDir: { path: safePath, displayName } }, false, "setWorkingDir");
   },
 
   setSessions: (sessions: Session[]) => {
@@ -214,24 +179,7 @@ const sidebarStoreCreator = (set: any) => ({
 });
 
 export const useSidebarStore = create<SidebarState & SidebarActions>()(
-  devtools(
-    persist(sidebarStoreCreator, {
-      name: CHAT_STORAGE_KEYS.CHAT_SIDEBAR,
-      version: CHAT_STORAGE_VERSION.CHAT_SIDEBAR,
-      migrate: (persistedState: any, version: number) => {
-        if (version < 2) {
-          // 旧版本没有 recentWorkspaces，初始化为空数组
-          persistedState.recentWorkspaces = [];
-        }
-        return persistedState;
-      },
-      partialize: (state) =>
-        Object.fromEntries(
-          CHAT_SIDEBAR_PERSIST.map((key) => [key, (state as any)[key]])
-        ) as Partial<SidebarState & SidebarActions>,
-    }),
-    { name: "SidebarStore" }
-  )
+  devtools(sidebarStoreCreator, { name: "SidebarStore" })
 );
 
 // ============================================================================

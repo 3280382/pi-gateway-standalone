@@ -118,8 +118,9 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
   const { pid, workingDir, currentSession, allSessions, currentModel, allModels, thinkingLevel } =
     response;
 
-  // 1. 更新工作directories
-  stores.globalWorkspace.setWorkingDir(workingDir);
+  // 1. 更新工作directories（同时传入最近 sessionFile）
+  const sessionFile = currentSession?.sessionFile;
+  stores.globalWorkspace.setCurrentPath(workingDir, sessionFile);
   stores.sidebar.setWorkingDir(workingDir);
   stores.session.setWorkingDir(workingDir);
 
@@ -191,8 +192,10 @@ async function switchDirectory(targetDir: string, _options: SwitchDirOptions = {
 
   console.log("[SessionManager.switchDirectory] targetDir=", targetDir);
 
-  // 从持久化存储获取该 workspace 的 sessionFile
-  const sessionFile = stores.session.getSessionFileForWorkspace(targetDir);
+  // 从 recentWorkspaces 获取该 workspace 最近使用的 sessionFile
+  const recentWorkspace = stores.globalWorkspace.recentWorkspaces.find((w) => w.path === targetDir);
+  const sessionFile =
+    recentWorkspace?.lastSessionFile ?? stores.globalWorkspace.getSessionFile(targetDir);
   console.log("[SessionManager.switchDirectory] sessionFile for", targetDir, ":", sessionFile);
 
   // 设置加载状态（覆盖式，不Clear界面）
@@ -209,22 +212,14 @@ async function switchDirectory(targetDir: string, _options: SwitchDirOptions = {
       allSessionsCount: response.allSessions?.length,
     });
 
-    // 重建界面（更新所有状态）
+    // 重建界面（更新所有状态，包括 setCurrentPath 和 setSessionFile）
     await handleInitResponse(response, stores);
-
-    // 持久化：更新全局 workspaceStore 和该 workspace 的 sessionFile
-    const newWorkingDir = response.workingDir || targetDir;
-    const newSessionFile = response.currentSession?.sessionFile;
-    stores.globalWorkspace.setWorkingDir(newWorkingDir);
-    if (newSessionFile) {
-      stores.session.setWorkspaceSessionFile(newWorkingDir, newSessionFile);
-    }
 
     console.log("[SessionManager.switchDirectory] 界面重建完成");
   } catch (error) {
     console.error("[SessionManager.switchDirectory] error:", error);
     // 降级：至少更新工作目录
-    stores.globalWorkspace.setWorkingDir(targetDir);
+    stores.globalWorkspace.setCurrentPath(targetDir);
     stores.sidebar.setWorkingDir(targetDir);
     stores.session.setWorkingDir(targetDir);
     throw error;
@@ -304,18 +299,11 @@ async function selectSession(sessionId: string): Promise<void> {
       firstMessage: response.currentSession?.messages?.[0],
     });
 
-    // 重建界面（更新所有状态）
+    // 重建界面（更新所有状态，包括 setCurrentPath 和 setSessionFile）
     console.log("[SessionManager.selectSession] 调用 handleInitResponse, stores.chat:", {
       hasSetMessages: typeof stores.chat?.setMessages === "function",
     });
     await handleInitResponse(response, stores);
-
-    // 持久化：保存该 workspace 的 sessionFile
-    const workingDir = response.workingDir || stores.session.workingDir;
-    const newSessionFile = response.currentSession?.sessionFile;
-    if (newSessionFile) {
-      stores.session.setWorkspaceSessionFile(workingDir, newSessionFile);
-    }
 
     console.log("[SessionManager.selectSession] 界面重建完成");
   } catch (error) {

@@ -12,6 +12,7 @@ import type { TreeResponse } from "@/features/files/services/api/fileApi";
 import * as fileApi from "@/features/files/services/api/fileApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { useFileOperations } from "./useFileOperations";
 
 export type NewItemType = "file" | "directory";
@@ -54,8 +55,9 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
   const [isTreeLoading, setIsTreeLoading] = useState(false);
 
   // Domain 状态
-  const { selectedItems, isMultiSelectMode, toggleMultiSelectMode, clearSelection, workingDir } =
+  const { selectedItems, isMultiSelectMode, toggleMultiSelectMode, clearSelection } =
     useFileStore();
+  const { currentPath } = useWorkspaceStore();
 
   const { createNewFile, createNewDirectory, deleteSelected } = useFileOperations();
   const { openViewer } = useFileViewerStore();
@@ -136,21 +138,21 @@ export function useFileBottomMenu(): UseFileBottomMenuResult {
     setIsTreeModalOpen(true);
     setIsTreeLoading(true);
     try {
-      const data = await fileApi.tree(workingDir);
+      const data = await fileApi.tree(currentPath);
       setTreeData(data);
     } catch (error) {
       console.error("[TreeView] Failed to load file tree:", error);
     } finally {
       setIsTreeLoading(false);
     }
-  }, [workingDir]);
+  }, [currentPath]);
 
   const handleTreeFileClick = useCallback(
     (filePath: string, fileName: string) => {
-      const fullPath = workingDir ? `${workingDir}/${filePath}` : filePath;
+      const fullPath = currentPath ? `${currentPath}/${filePath}` : filePath;
       openViewer(fullPath, fileName, "view");
     },
-    [workingDir, openViewer]
+    [currentPath, openViewer]
   );
 
   // ========== 6. Return ==========

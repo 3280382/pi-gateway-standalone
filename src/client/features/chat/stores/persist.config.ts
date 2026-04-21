@@ -34,27 +34,20 @@ export const CHAT_STORAGE_VERSION = {
 
 /** Chat Session Store - 持久化字段
  *
- * 注意：
- * - 当前工作目录由全局 workspaceStore (pi:app:workspace) 统一管理，不重复存储
- * - workspaceSessionFiles: 每个 workspace 对应的 sessionFile，切换时自动恢复
- * - defaultMessageLimit: 用户设置
+ * 注意：所有 workspace 相关持久化字段已统一到全局 workspaceStore (pi:app:workspace)
+ * - sessionFiles -> workspaceStore.sessionFiles
+ * - defaultMessageLimit -> workspaceStore.defaultMessageLimit
+ * - workingDir -> workspaceStore.currentPath
  */
-export const CHAT_SESSION_PERSIST: string[] = [
-  "workspaceSessionFiles", // workspace → sessionFile 映射
-  "defaultMessageLimit", // 用户设置：默认加载历史消息Items数
-] as const;
+export const CHAT_SESSION_PERSIST: string[] = [] as const;
 
 /** Chat Sidebar Store - 持久化字段
  *
- * 注意：
- * - sessions 从服务器获取（以当前工作directories为Arguments）
- * - selectedSessionId 从服务器获取（init 响应）
- * - workingDir 已由全局 workspaceStore 管理
- * - recentWorkspaces 需要持久化，刷新后快速重建最近工作目录
+ * 注意：所有 workspace 相关持久化字段已统一到全局 workspaceStore (pi:app:workspace)
+ * - recentWorkspaces -> workspaceStore.recentWorkspaces
+ * - workingDir -> workspaceStore.currentPath
  */
-export const CHAT_SIDEBAR_PERSIST: string[] = [
-  "recentWorkspaces", // 最近工作directories（最多3个），刷新后快速切换
-] as const;
+export const CHAT_SIDEBAR_PERSIST: string[] = [] as const;
 
 /** Chat Store - 持久化字段
  *

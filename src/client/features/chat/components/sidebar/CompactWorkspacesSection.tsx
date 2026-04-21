@@ -9,11 +9,12 @@
 import { useCallback } from "react";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import styles from "./SidebarPanel.module.css";
 
 export function CompactWorkspacesSection() {
   const workingDir = useSidebarStore((state) => state.workingDir);
-  const recentWorkspaces = useSidebarStore((state) => state.recentWorkspaces);
+  const recentWorkspaces = useWorkspaceStore((state) => state.recentWorkspaces);
   const isLoading = useSidebarStore((state) => state.isLoading);
   const controller = useSidebarController();
 

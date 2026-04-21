@@ -1,0 +1,10 @@
+[
+  "[16:45:16] [WebSocket] WebSocket URL: ws://127.0.0.1:3000 undefined",
+  "[16:45:16] [WebSocket] Connecting to ws://127.0.0.1:3000 undefined",
+  "[ChatInit] WebSocket connected",
+  "[16:45:16] [WebSocket] Received: session_reconnected undefined",
+  "[16:45:16] [WebSocket] Received: runtime_status_broadcast undefined",
+  "[setupWebSocketListeners] runtime_status_broadcast: {type: runtime_status_broadcast, sessions: Array(4)}",
+  "[16:45:17] [WebSocket] Received: initialized undefined",
+  "[setupWebSocketListeners] initialized"
+]

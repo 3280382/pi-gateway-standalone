@@ -50,7 +50,7 @@ export function MultiSessionTerminalPanel({
   // Panel open state is managed by parent, but we read it for display purposes
   useTerminalStore((state) => state.isPanelOpen); // Subscribe to changes
   const panelHeight = useTerminalStore((state) => state.panelHeight);
-  const workingDir = useWorkspaceStore((s) => s.workingDir);
+  const currentPath = useWorkspaceStore((s) => s.currentPath);
 
   const {
     setActiveSession,
@@ -97,7 +97,7 @@ export function MultiSessionTerminalPanel({
           initialSessionCreatedRef.current = true;
           const store = useTerminalStore.getState();
           if (store.getSessionCount() === 0) {
-            store.createSession("Terminal 1", workingDir);
+            store.createSession("Terminal 1", currentPath);
           }
         }
       } catch (error) {
@@ -201,7 +201,7 @@ export function MultiSessionTerminalPanel({
       });
       terminalWebSocketService.disconnect();
     };
-  }, [appendOutput, markSessionActive, markSessionConnected, setConnected, setError, workingDir]);
+  }, [appendOutput, markSessionActive, markSessionConnected, setConnected, setError, currentPath]);
 
   // ========== 5. Terminal Initialization ==========
   // Track processed sessions to avoid infinite loops
@@ -423,7 +423,7 @@ export function MultiSessionTerminalPanel({
 
   const handleCreateSession = () => {
     const name = newSessionName.trim() || `Terminal ${sessions.length + 1}`;
-    createSession(name, workingDir);
+    createSession(name, currentPath);
     setNewSessionName("");
     setShowNewSessionDialog(false);
   };

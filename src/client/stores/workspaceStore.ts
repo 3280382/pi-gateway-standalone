@@ -1,11 +1,12 @@
 /**
- * Workspace Store - Global workspace state
+ * Workspace Store - Unified workspace state
  *
  * Responsibilities:
- * - Unified working directory (shared)
- * - Affects Chat session file selection
- * - Affects File todo root directory
- * - Persist to localStorage
+ * - Current workspace path (shared between chat and files)
+ * - Recent workspaces list (for sidebar and header dropdown)
+ * - Session file mapping per workspace
+ * - Chat settings (defaultMessageLimit)
+ * - Persist to localStorage as single source of truth
  */
 
 import { create } from "zustand";
@@ -30,73 +31,110 @@ function getSessionStore() {
   return sessionStore;
 }
 
+export interface WorkspaceItem {
+  path: string;
+  displayName: string;
+  /** 该 workspace 最近选择的 session file */
+  lastSessionFile?: string;
+}
+
 export interface WorkspaceState {
-  // Current working directory (project root) - this is the truly persisted working directory
-  workingDir: string;
+  /** Current workspace path (shared by chat header and files header) */
+  currentPath: string;
+  /** Recent workspaces (for sidebar and header dropdown, max 3) */
+  recentWorkspaces: WorkspaceItem[];
+  /** workspacePath -> sessionFile mapping */
+  sessionFiles: Record<string, string>;
+  /** Default message limit for chat history loading */
+  defaultMessageLimit: number;
 }
 
 export interface WorkspaceActions {
-  setWorkingDir: (path: string) => void;
+  setCurrentPath: (path: string, sessionFile?: string) => void;
+  setSessionFile: (workspace: string, sessionFile: string) => void;
+  getSessionFile: (workspace: string) => string | undefined;
+  setDefaultMessageLimit: (limit: number) => void;
 }
 
 export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
   devtools(
     persist(
-      (set) => ({
+      (set, get) => ({
         // Initial state
-        workingDir: "/root",
+        currentPath: "/root",
+        recentWorkspaces: [],
+        sessionFiles: {},
+        defaultMessageLimit: 100,
 
-        // Set working directory (sync to stores)
-        setWorkingDir: (workingDir) => {
-          console.log("[WorkspaceStore] setWorkingDir called:", workingDir);
+        // Set current workspace path (updates recentWorkspaces and syncs to stores)
+        setCurrentPath: (currentPath, sessionFile?: string) => {
+          const displayName = currentPath.split("/").pop() || currentPath;
+
+          set((state) => {
+            // 保留已有的 lastSessionFile（如果存在）或使用传入的 sessionFile
+            const existing = state.recentWorkspaces.find((w) => w.path === currentPath);
+            const lastSessionFile = sessionFile ?? existing?.lastSessionFile;
+            const newDir: WorkspaceItem = { path: currentPath, displayName, lastSessionFile };
+
+            const filtered = state.recentWorkspaces.filter((w) => w.path !== currentPath);
+            const recentWorkspaces = [newDir, ...filtered].slice(0, 3);
+            return { currentPath, recentWorkspaces };
+          });
 
           // Sync update sidebarStore workingDir (object containing path and displayName)
           try {
             const { useSidebarStore } = getSidebarStore();
             const sidebarState = useSidebarStore.getState();
-            if (sidebarState && sidebarState.workingDir?.path !== workingDir) {
-              const displayName = workingDir.split("/").pop() || workingDir;
+            if (sidebarState && sidebarState.workingDir?.path !== currentPath) {
               useSidebarStore.setState(
-                {
-                  workingDir: { path: workingDir, displayName },
-                },
+                { workingDir: { path: currentPath, displayName } },
                 false,
                 "workspaceStore/syncWorkingDir"
               );
             }
           } catch (e) {
             // sidebarStore may not be initialized
-            console.log("[WorkspaceStore] sidebarStore not ready:", e);
           }
 
           // Sync update sessionStore workingDir
           try {
             const { useSessionStore } = getSessionStore();
             const sessionState = useSessionStore.getState();
-            if (sessionState && sessionState.workingDir !== workingDir) {
+            if (sessionState && sessionState.workingDir !== currentPath) {
               useSessionStore.setState(
-                {
-                  workingDir,
-                },
+                { workingDir: currentPath },
                 false,
                 "workspaceStore/syncWorkingDir"
               );
             }
           } catch (e) {
             // sessionStore may not be initialized
-            console.log("[WorkspaceStore] sessionStore not ready:", e);
           }
-
-          const result = set({ workingDir });
-          console.log("[WorkspaceStore] set({ workingDir }) result:", result);
-          return result;
         },
+
+        setSessionFile: (workspace, sessionFile) =>
+          set((state) => {
+            // 同时更新 sessionFiles 映射和 recentWorkspaces 中的 lastSessionFile
+            const recentWorkspaces = state.recentWorkspaces.map((w) =>
+              w.path === workspace ? { ...w, lastSessionFile: sessionFile } : w
+            );
+            return {
+              sessionFiles: { ...state.sessionFiles, [workspace]: sessionFile },
+              recentWorkspaces,
+            };
+          }),
+
+        getSessionFile: (workspace) => get().sessionFiles[workspace],
+
+        setDefaultMessageLimit: (limit) => set({ defaultMessageLimit: limit }),
       }),
       {
         name: APP_STORAGE_KEYS.APP_WORKSPACE,
         version: APP_STORAGE_VERSION.APP_WORKSPACE,
         partialize: (state) =>
-          Object.fromEntries(APP_WORKSPACE_PERSIST.map((key) => [key, state[key]])),
+          Object.fromEntries(APP_WORKSPACE_PERSIST.map((key) => [key, state[key]])) as Partial<
+            WorkspaceState & WorkspaceActions
+          >,
       }
     ),
     { name: "WorkspaceStore" }

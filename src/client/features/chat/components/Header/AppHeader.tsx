@@ -48,8 +48,8 @@ export function AppHeader({
 }: AppHeaderProps) {
   // ========== 1. State (Domain State from Zustand) ==========
   const sessionStore = useSessionStore();
-  // 使用全局 workspaceStore 的 workingDir
-  const workingDir = useWorkspaceStore((state) => state.workingDir) ?? "/root";
+  // 使用全局 workspaceStore 的 currentPath
+  const currentPath = useWorkspaceStore((state) => state.currentPath) ?? "/root";
   const serverPid = sessionStore.serverPid;
   const isConnected = sessionStore.isConnected;
 
@@ -65,7 +65,7 @@ export function AppHeader({
   const workspaceDropdownRef = useRef<HTMLDivElement>(null);
 
   // 最近工作directories
-  const recentWorkspaces = useSidebarStore((state) => state.recentWorkspaces);
+  const recentWorkspaces = useWorkspaceStore((state) => state.recentWorkspaces);
   const sidebarController = useSidebarController();
 
   // ========== 2. Derived Values ==========
@@ -237,10 +237,10 @@ export function AppHeader({
             type="button"
             className={`${styles.workingDirBtn} ${styles.workingDirBtnFullWidth}`}
             onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
-            title={`Working Directory: ${workingDir || "Click to select"}`}
+            title={`Working Directory: ${currentPath || "Click to select"}`}
           >
             <FolderIcon />
-            <span className={styles.btnText}>{workingDir || "Select Directory"}</span>
+            <span className={styles.btnText}>{currentPath || "Select Directory"}</span>
             <span style={{ marginLeft: "auto", fontSize: "10px" }}>▼</span>
           </button>
 
@@ -264,7 +264,7 @@ export function AppHeader({
             >
               {recentWorkspaces.length > 0 ? (
                 recentWorkspaces.map((ws) => {
-                  const isActive = ws.path === workingDir;
+                  const isActive = ws.path === currentPath;
                   return (
                     <button
                       key={ws.path}
@@ -541,7 +541,10 @@ export function AppHeader({
 
       {/* Directory Picker Modal */}
       {isDirectoryBrowserOpen && (
-        <DirectoryPickerModal currentPath={workingDir || "/root"} onClose={closeDirectoryBrowser} />
+        <DirectoryPickerModal
+          currentPath={currentPath || "/root"}
+          onClose={closeDirectoryBrowser}
+        />
       )}
     </div>
   );

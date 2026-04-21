@@ -24,7 +24,6 @@ Object.defineProperty(window, "localStorage", {
 const createMockStore = () => ({
   // State
   workingDir: null,
-  recentWorkspaces: [],
   sessions: [],
   searchQuery: "",
   searchFilters: {
@@ -41,8 +40,6 @@ const createMockStore = () => ({
 
   // Actions
   setWorkingDir: vi.fn(),
-  setRecentWorkspaces: vi.fn(),
-  addRecentWorkspace: vi.fn(),
   setSessions: vi.fn(),
   setSearchQuery: vi.fn(),
   setSearchFilters: vi.fn(),
@@ -115,28 +112,6 @@ describe("SidebarController", () => {
       await controller.loadWorkingDir();
 
       expect(mockStore.setError).toHaveBeenCalledWith("Network error");
-    });
-  });
-
-  describe("loadRecentWorkspaces", () => {
-    it("should load from localStorage", async () => {
-      const workspaces = ["/project1", "/project2"];
-      localStorageMock.getItem.mockReturnValueOnce(JSON.stringify(workspaces));
-
-      const controller = createSidebarController();
-      await controller.loadRecentWorkspaces();
-
-      expect(localStorageMock.getItem).toHaveBeenCalledWith("recentWorkspaces");
-      expect(mockStore.setRecentWorkspaces).toHaveBeenCalledWith(workspaces);
-    });
-
-    it("should handle empty localStorage", async () => {
-      localStorageMock.getItem.mockReturnValueOnce(null);
-
-      const controller = createSidebarController();
-      await controller.loadRecentWorkspaces();
-
-      expect(mockStore.setRecentWorkspaces).toHaveBeenCalledWith([]);
     });
   });
 

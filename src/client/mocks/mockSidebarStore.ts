@@ -43,7 +43,6 @@ export const createMockSearchFilters = (overrides?: Partial<SearchFilters>): Sea
 
 export const createMockSidebarState = (overrides?: Partial<SidebarState>): SidebarState => ({
   workingDir: createMockWorkingDirectory(),
-  recentWorkspaces: ["/home/user/project", "/home/user/docs", "/home/user/experiments"],
   sessions: [
     createMockSession("1", { name: "API Integration", messageCount: 15 }),
     createMockSession("2", { name: "Bug Fix Session", messageCount: 8 }),
@@ -99,7 +98,6 @@ export const createMockSidebarStore = (initialState?: Partial<SidebarState>): Mo
 
 export const emptyMockState = createMockSidebarState({
   workingDir: null,
-  recentWorkspaces: [],
   sessions: [],
 });
 

@@ -32,7 +32,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
   const setTodoMap = useFileStore((state) => state.setTodoMap);
 
   // 使用全局工作directories，确保所有 todo 都写在同一  items
-  const workingDir = useWorkspaceStore((state) => state.workingDir);
+  const currentPath = useWorkspaceStore((state) => state.currentPath);
 
   const isEditing = !!editingTodo;
 
@@ -58,7 +58,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
       if (isEditing && editingTodo) {
         // 更新现有 todo
         await todoApi.update({
-          workingDir,
+          workingDir: currentPath,
           todoId: editingTodo.id,
           todoText: todoText.trim(),
           tags,
@@ -68,7 +68,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
       } else {
         // 新建 todo
         await todoApi.add({
-          workingDir,
+          workingDir: currentPath,
           filePath,
           todoText: todoText.trim(),
           tags,
@@ -77,7 +77,7 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
 
       // 重新加载 todo Cols表以更新角标显示
       try {
-        const todos = await todoApi.list(workingDir);
+        const todos = await todoApi.list(currentPath);
         setTodoList(todos);
 
         // 按files路径Group

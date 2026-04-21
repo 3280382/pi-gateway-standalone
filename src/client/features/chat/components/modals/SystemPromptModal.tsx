@@ -43,8 +43,8 @@ export function SystemPromptModal() {
   // Domain State
   const { isSystemPromptOpen, closeSystemPrompt } = useModalStore();
   const resourceFiles = useSessionStore((state) => state.resourceFiles);
-  // 使用全局 workspaceStore 的 workingDir
-  const workingDir = useWorkspaceStore((state) => state.workingDir);
+  // 使用全局 workspaceStore 的 currentPath
+  const currentPath = useWorkspaceStore((state) => state.currentPath);
 
   // UI State
   const [data, setData] = useState<SystemPromptData | null>(null);
@@ -66,7 +66,7 @@ export function SystemPromptModal() {
 
       try {
         // Fetch system prompt data
-        const cwd = workingDir || "/root";
+        const cwd = currentPath || "/root";
         const res = await fetch(`/api/system-prompt?cwd=${encodeURIComponent(cwd)}`);
 
         if (!res.ok) {
@@ -110,7 +110,7 @@ export function SystemPromptModal() {
     };
 
     load();
-  }, [isSystemPromptOpen, workingDir, resourceFiles]);
+  }, [isSystemPromptOpen, currentPath, resourceFiles]);
 
   if (!isSystemPromptOpen) return null;
 

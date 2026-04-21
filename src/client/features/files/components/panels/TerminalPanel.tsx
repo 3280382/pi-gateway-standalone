@@ -40,7 +40,7 @@ export function TerminalPanel({
   initialCommand,
 }: TerminalPanelProps) {
   // ========== 1. State ==========
-  const workingDir = useWorkspaceStore((state) => state.workingDir);
+  const currentPath = useWorkspaceStore((state) => state.currentPath);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // ========== 2. Refs ==========
@@ -78,7 +78,7 @@ export function TerminalPanel({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             command,
-            cwd: workingDir,
+            cwd: currentPath,
             streaming: true,
           }),
           signal: abortControllerRef.current.signal,
@@ -123,7 +123,7 @@ export function TerminalPanel({
         }
       }
     },
-    [workingDir]
+    [currentPath]
   );
 
   // ========== 4. Effects ==========

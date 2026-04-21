@@ -30,7 +30,7 @@ type ViewMode = "view" | "edit" | "create";
 
 export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
   const { isTemplateModalOpen, closeTemplateModal } = useModalStore();
-  const workingDir = useWorkspaceStore((state) => state.workingDir) ?? "/root";
+  const currentPath = useWorkspaceStore((state) => state.currentPath) ?? "/root";
 
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(false);
@@ -184,7 +184,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
         : `${newFileName.trim()}.md`;
 
       const targetDir =
-        createSource === "global" ? `${HOME_DIR}/.pi/agent/prompts` : `${workingDir}/.pi/prompts`;
+        createSource === "global" ? `${HOME_DIR}/.pi/agent/prompts` : `${currentPath}/.pi/prompts`;
 
       const fullPath = `${targetDir}/${fileName}`;
 
@@ -245,7 +245,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
         setIsSaving(false);
       }
     }
-  }, [mode, newFileName, createSource, workingDir, editedContent, selectedTemplate]);
+  }, [mode, newFileName, createSource, currentPath, editedContent, selectedTemplate]);
 
   const handleNew = useCallback(() => {
     setMode("create");

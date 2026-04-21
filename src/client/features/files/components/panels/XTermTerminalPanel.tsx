@@ -38,7 +38,7 @@ export function XTermTerminalPanel({ height, onClose, onHeightChange }: XTermTer
     setError,
   } = useTerminalStore();
 
-  const workingDir = useWorkspaceStore((s) => s.workingDir);
+  const currentPath = useWorkspaceStore((s) => s.currentPath);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showNewSessionDialog, setShowNewSessionDialog] = useState(false);
@@ -99,7 +99,7 @@ export function XTermTerminalPanel({ height, onClose, onHeightChange }: XTermTer
         setConnected(true);
 
         if (useTerminalStore.getState().getSessionCount() === 0) {
-          createSession("Terminal 1", workingDir);
+          createSession("Terminal 1", currentPath);
         }
       } catch (error) {
         setError(error instanceof Error ? error.message : "Connection failed");
@@ -235,7 +235,7 @@ export function XTermTerminalPanel({ height, onClose, onHeightChange }: XTermTer
       unsubscribers.forEach((unsub) => unsub());
       terminalWebSocketService.disconnect();
     };
-  }, [createSession, markSessionActive, setConnected, setError, workingDir]);
+  }, [createSession, markSessionActive, setConnected, setError, currentPath]);
 
   // ========== Terminal Initialization ==========
   useEffect(() => {
@@ -265,7 +265,7 @@ export function XTermTerminalPanel({ height, onClose, onHeightChange }: XTermTer
   }, [activeSession?.id, activeSession]);
 
   // ========== Terminal Helpers ==========
-  const initTerminal = async (sessionId: string) => {
+  async function initTerminal(sessionId: string) {
     const container = terminalRefs.current.get(sessionId);
     if (!container) return;
 
@@ -365,7 +365,7 @@ export function XTermTerminalPanel({ height, onClose, onHeightChange }: XTermTer
     term.focus();
   };
 
-  const disposeTerminal = (sessionId: string) => {
+  function disposeTerminal(sessionId: string) {
     const term = terminalInstances.current.get(sessionId);
     if (term) {
       term.dispose();
@@ -440,7 +440,7 @@ export function XTermTerminalPanel({ height, onClose, onHeightChange }: XTermTer
 
   const handleCreateSession = () => {
     const name = newSessionName.trim() || `Terminal ${sessions.length + 1}`;
-    createSession(name, workingDir);
+    createSession(name, currentPath);
     setNewSessionName("");
     setShowNewSessionDialog(false);
   };

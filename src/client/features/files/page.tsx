@@ -35,7 +35,7 @@ export function FilesPage() {
   const { isPanelOpen, panelHeight, setPanelOpen, setPanelHeight } = useTerminalStore();
 
   // 全局工作directories（用于 FileToolbar 显示）
-  const { workingDir } = useWorkspaceStore();
+  const { currentPath } = useWorkspaceStore();
 
   // ===== [ANCHOR:HOOKS] =====
   // 仅在激活状态下加载数据
@@ -47,7 +47,7 @@ export function FilesPage() {
     <div className={styles.layout}>
       {/* FileToolbar */}
       <header className={styles.header}>
-        <FileToolbar workingDir={workingDir} onRefresh={refresh} onNavigate={navigateTo} />
+        <FileToolbar workingDir={currentPath} onRefresh={refresh} onNavigate={navigateTo} />
       </header>
 
       {/* Body: FileSidebar + Content */}
