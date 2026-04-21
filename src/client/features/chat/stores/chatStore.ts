@@ -160,15 +160,17 @@ function buildTextContent(textContent: string): ContentPartWithOrder[] {
  */
 function collectToolEntries(state: State): Array<{ tool: any; isCompleted: boolean }> {
   const entries: Array<{ tool: any; isCompleted: boolean }> = [];
+  const activeTools = state.activeTools || new Map();
+  const streamingToolCalls = state.streamingToolCalls || new Map();
 
   // 添加已完成的工具
-  state.activeTools.forEach((tool) => {
+  activeTools.forEach((tool) => {
     entries.push({ tool, isCompleted: true });
   });
 
   // 添加流式中的工具（只添加没有完成版本的）
-  state.streamingToolCalls.forEach((tool) => {
-    if (!state.activeTools.get(tool.id)) {
+  streamingToolCalls.forEach((tool) => {
+    if (!activeTools.get(tool.id)) {
       entries.push({ tool, isCompleted: false });
     }
   });
@@ -291,7 +293,7 @@ function buildFinalMessage(
   finalThinkingToApply: string
 ): { finalMessage: any | null; finalContent: any[] } {
   const existingContent = state.currentStreamingMessage?.content || [];
-  const { activeTools } = state;
+  const activeTools = state.activeTools || new Map();
 
   // 构建剩余的流式内容（endContentBlock 后可能还有未Clear的）
   const remainingContent: ContentPart[] = [];
@@ -303,7 +305,7 @@ function buildFinalMessage(
     });
   }
 
-  state.streamingToolCalls.forEach((tool) => {
+  (state.streamingToolCalls || new Map()).forEach((tool) => {
     // 查找工具执行结果
     const toolExecution = activeTools.get(tool.id);
 
@@ -389,14 +391,14 @@ function mergeToolArgs(tool: ToolExecution, streamingArgs?: string): Record<stri
  * 工具执行状态与消息内容分离，避免流式过程中的重复渲染
  */
 function applyToolActivation(state: State, tool: ToolExecution): Partial<State> {
-  const streamingTool = state.streamingToolCalls.get(tool.id);
+  const streamingTool = state.streamingToolCalls?.get(tool.id);
   const mergedTool = {
     ...tool,
     args: mergeToolArgs(tool, streamingTool?.args),
   };
 
-  const newTools = new Map(state.activeTools).set(tool.id, mergedTool);
-  const newStreamingToolCalls = new Map(state.streamingToolCalls);
+  const newTools = new Map(state.activeTools || new Map()).set(tool.id, mergedTool);
+  const newStreamingToolCalls = new Map(state.streamingToolCalls || new Map());
   newStreamingToolCalls.delete(tool.id);
 
   // 优化：不更新 currentStreamingMessage.content，保持引用稳定
@@ -417,7 +419,7 @@ function applyToolCompletion(
   output: string,
   error?: string
 ): Partial<State> {
-  const newTools = new Map(state.activeTools);
+  const newTools = new Map(state.activeTools || new Map());
   const tool = newTools.get(toolId);
 
   if (tool) {
