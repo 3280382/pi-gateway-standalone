@@ -25,6 +25,7 @@ const createInitialState = (): Omit<SidebarState, keyof SidebarActions> => ({
   error: null,
   selectedSessionId: null,
   runtimeStatus: {}, // Map of sessionId -> runtime status
+  recentWorkspaces: [], // 最近工作directories（最多3个）
 });
 
 // ============================================================================
@@ -45,6 +46,8 @@ interface SidebarActions {
   setWorkingDir: (path: string) => void;
   setSessions: (sessions: Session[]) => void;
   addSession: (session: Session) => void;
+  addRecentWorkspace: (path: string) => void;
+  setRecentWorkspaces: (paths: string[]) => void;
 
   // UI Actions
   setLoading: (loading: boolean) => void;
@@ -99,7 +102,40 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
       setWorkingDir: (path: string) => {
         const safePath = path || "";
         const displayName = safePath.split("/").pop() || safePath;
-        set({ workingDir: { path: safePath, displayName } }, false, "setWorkingDir");
+        const newDir = { path: safePath, displayName };
+        set(
+          (state) => {
+            // 更新 recentWorkspaces：将新目录放到最前面，去重，最多保留3个
+            const filtered = state.recentWorkspaces.filter((w) => w.path !== safePath);
+            const recentWorkspaces = [newDir, ...filtered].slice(0, 3);
+            return { workingDir: newDir, recentWorkspaces };
+          },
+          false,
+          "setWorkingDir"
+        );
+      },
+
+      addRecentWorkspace: (path: string) => {
+        const safePath = path || "";
+        const displayName = safePath.split("/").pop() || safePath;
+        const newDir = { path: safePath, displayName };
+        set(
+          (state) => {
+            const filtered = state.recentWorkspaces.filter((w) => w.path !== safePath);
+            const recentWorkspaces = [newDir, ...filtered].slice(0, 3);
+            return { recentWorkspaces };
+          },
+          false,
+          "addRecentWorkspace"
+        );
+      },
+
+      setRecentWorkspaces: (paths: string[]) => {
+        const recentWorkspaces = paths
+          .filter((p) => p)
+          .map((p) => ({ path: p, displayName: p.split("/").pop() || p }))
+          .slice(0, 3);
+        set({ recentWorkspaces }, false, "setRecentWorkspaces");
       },
 
       setSessions: (sessions: Session[]) => {

@@ -8,7 +8,7 @@
  * Structure:State → Ref → Effects → Computed → Actions → Render
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 import {
   selectSearchFilters,
@@ -61,6 +61,12 @@ export function AppHeader({
 
   // UI State (Local)
   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
+  const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
+  const workspaceDropdownRef = useRef<HTMLDivElement>(null);
+
+  // 最近工作directories
+  const recentWorkspaces = useSidebarStore((state) => state.recentWorkspaces);
+  const sidebarController = useSidebarController();
 
   // ========== 2. Derived Values ==========
   const connectionStatus = isConnected ? "connected" : "disconnected";
@@ -205,21 +211,136 @@ export function AppHeader({
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
+  // Close workspace dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        isWorkspaceDropdownOpen &&
+        workspaceDropdownRef.current &&
+        !workspaceDropdownRef.current.contains(e.target as Node)
+      ) {
+        setIsWorkspaceDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isWorkspaceDropdownOpen]);
+
   // ========== 6. Render ==========
   return (
     <div className={styles.topBar}>
       {/* Row 1: 工作directories（最大Width度） */}
       <div className={styles.topRow}>
-        {/* 工作directories按钮 - Width度最大 */}
-        <button
-          type="button"
-          className={`${styles.workingDirBtn} ${styles.workingDirBtnFullWidth}`}
-          onClick={() => openDirectoryBrowser()}
-          title={`Working Directory: ${workingDir || "Click to select"}`}
-        >
-          <FolderIcon />
-          <span className={styles.btnText}>{workingDir || "Select Directory"}</span>
-        </button>
+        {/* 工作directories按钮 - 点击显示最近工作directories下拉 */}
+        <div ref={workspaceDropdownRef} style={{ position: "relative", flex: 1 }}>
+          <button
+            type="button"
+            className={`${styles.workingDirBtn} ${styles.workingDirBtnFullWidth}`}
+            onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
+            title={`Working Directory: ${workingDir || "Click to select"}`}
+          >
+            <FolderIcon />
+            <span className={styles.btnText}>{workingDir || "Select Directory"}</span>
+            <span style={{ marginLeft: "auto", fontSize: "10px" }}>▼</span>
+          </button>
+
+          {/* Workspace Dropdown */}
+          {isWorkspaceDropdownOpen && (
+            <div
+              style={{
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                right: 0,
+                marginTop: "4px",
+                background: "#161b22",
+                border: "1px solid rgba(48, 54, 61, 0.5)",
+                borderRadius: "6px",
+                boxShadow: "0 8px 24px rgba(0, 0, 0, 0.4)",
+                zIndex: 100,
+                maxHeight: "200px",
+                overflowY: "auto",
+              }}
+            >
+              {recentWorkspaces.length > 0 ? (
+                recentWorkspaces.map((ws) => {
+                  const isActive = ws.path === workingDir;
+                  return (
+                    <button
+                      key={ws.path}
+                      type="button"
+                      className={`${styles.dropdownItem} ${isActive ? styles.active : ""}`}
+                      onClick={() => {
+                        if (!isActive) {
+                          sidebarController.changeWorkingDir(ws.path);
+                        }
+                        setIsWorkspaceDropdownOpen(false);
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        width: "100%",
+                        padding: "8px 12px",
+                        border: "none",
+                        background: "transparent",
+                        color: "#c9d1d9",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        fontSize: "12px",
+                      }}
+                    >
+                      <span>{isActive ? "📂" : "📁"}</span>
+                      <span
+                        style={{
+                          flex: 1,
+                          minWidth: 0,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {ws.displayName}
+                      </span>
+                      {isActive && <span style={{ color: "#58a6ff", fontSize: "10px" }}>●</span>}
+                    </button>
+                  );
+                })
+              ) : (
+                <div style={{ padding: "8px 12px", fontSize: "12px", color: "#6e7681" }}>
+                  No recent workspaces
+                </div>
+              )}
+              <div
+                style={{
+                  borderTop: "1px solid rgba(48, 54, 61, 0.5)",
+                  padding: "6px",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsWorkspaceDropdownOpen(false);
+                    openDirectoryBrowser();
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "6px 12px",
+                    border: "none",
+                    background: "transparent",
+                    color: "#58a6ff",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    textAlign: "center",
+                    borderRadius: "3px",
+                  }}
+                >
+                  Browse...
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Row 2: Search框 + PID */}
