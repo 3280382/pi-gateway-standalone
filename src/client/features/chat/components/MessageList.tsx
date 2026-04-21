@@ -21,7 +21,7 @@
  */
 
 import { memo, useMemo, useRef } from "react";
-import type { Message, MessageContent, ToolExecution } from "@/features/chat/types/chat";
+import type { ChatSearchFilters, Message, MessageContent, ToolExecution } from "@/features/chat/types/chat";
 import { MessageItem } from "./MessageItem";
 import styles from "./MessageList.module.css";
 
@@ -30,6 +30,7 @@ interface MessageListProps {
   currentStreamingMessage: Message | null;
   showThinking: boolean;
   showTools?: boolean;
+  searchFilters?: ChatSearchFilters;
   onToggleMessageCollapse: (id: string) => void;
   onToggleThinkingCollapse: (id: string) => void;
   onToggleToolsCollapse?: (id: string) => void;
@@ -48,6 +49,7 @@ const StaticMessageItem = memo(function StaticMessageItem({
   showThinking,
   showTools,
   showText,
+  searchFilters,
   onToggleCollapse,
   onToggleThinking,
   onToggleTools,
@@ -58,6 +60,7 @@ const StaticMessageItem = memo(function StaticMessageItem({
   showThinking: boolean;
   showTools: boolean;
   showText: boolean;
+  searchFilters?: ChatSearchFilters;
   onToggleCollapse: () => void;
   onToggleThinking: () => void;
   onToggleTools?: () => void;
@@ -70,6 +73,7 @@ const StaticMessageItem = memo(function StaticMessageItem({
       showThinking={showThinking}
       showTools={showTools}
       showText={showText}
+      searchFilters={searchFilters}
       onToggleCollapse={onToggleCollapse}
       onToggleThinking={onToggleThinking}
       onToggleTools={onToggleTools}
@@ -230,6 +234,7 @@ export const MessageList = memo(function MessageList({
   currentStreamingMessage,
   showThinking,
   showTools,
+  searchFilters,
   onToggleMessageCollapse,
   onToggleThinkingCollapse,
   onToggleToolsCollapse,
@@ -299,6 +304,7 @@ export const MessageList = memo(function MessageList({
           showThinking={effectiveShowThinking}
           showTools={effectiveShowTools}
           showText={effectiveShowText}
+          searchFilters={searchFilters}
           onToggleCollapse={handlers[index].onToggleCollapse}
           onToggleThinking={handlers[index].onToggleThinking}
           onToggleTools={handlers[index].onToggleTools}
@@ -312,6 +318,7 @@ export const MessageList = memo(function MessageList({
           showThinking={effectiveShowThinking}
           showTools={effectiveShowTools}
           showText={effectiveShowText}
+          searchFilters={searchFilters}
           onToggleCollapse={() => onToggleMessageCollapse(streamingMessageWithContent.id)}
           onToggleThinking={() => onToggleThinkingCollapse(streamingMessageWithContent.id)}
           onToggleTools={

@@ -692,10 +692,9 @@ export function setupWebSocketListeners(): void {
           `[${ts}] [tool_execution_end] Check orphan: active=${!!activeTool}, streaming=${hasStreamingTool}, current=${hasCurrentMessage}`
         );
 
-        // 如果 activeTool 存在（正在流式中或 finishStreaming 前），结果已通过 updateToolOutput 保存
-        // 如果 finishStreaming 已调用清空了 activeTools，需要更新已固化的消息或创建独立消息
-        if (!activeTool && !hasStreamingTool && !hasCurrentMessage) {
-          // finishStreaming 已调用，尝试更新 messages 中已固化的消息
+        // Streaming message 已结束（finishStreaming 已调用）→ 需要更新已固化的 messages
+        // Streaming message 仍在 → updateToolOutput 已更新 activeTools，useStreamingMessage 会显示结果
+        if (!hasCurrentMessage) {
           const messages = state.messages;
           let messageUpdated = false;
 

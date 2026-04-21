@@ -23,6 +23,7 @@ interface MessageItemProps {
   showThinking: boolean;
   showTools?: boolean;
   showText?: boolean; // Control text content display
+  searchFilters?: import("@/features/chat/types/chat").ChatSearchFilters;
   onToggleCollapse: () => void;
   onToggleThinking: () => void;
   onToggleTools?: () => void;
@@ -208,14 +209,31 @@ export const MessageItem = memo(
     const isSysinfo = kind1 === "sysinfo";
     const isAssistant = kind1 === "assistant";
 
+    const { searchFilters } = props;
+
     const blocks = useMemo(() => {
       if (!message.content || !Array.isArray(message.content)) return [];
-      return indexContentBlocks(message.content);
-    }, [message.content]);
+      let content = message.content;
+
+      // Content-block-level filtering based on searchFilters
+      if (searchFilters?.kind2 && isAssistant) {
+        content = content.filter((block) => {
+          // Always show these types
+          if (block.type === "image" || block.type === "turn_marker") return true;
+          // Filter by kind2 settings
+          if (block.type === "thinking" && !searchFilters.kind2.thinking) return false;
+          if ((block.type === "tool" || block.type === "tool_use") && !searchFilters.kind2.tool) return false;
+          if (block.type === "text" && !searchFilters.kind2.response) return false;
+          return true;
+        });
+      }
+
+      return indexContentBlocks(content);
+    }, [message.content, searchFilters, isAssistant]);
 
     // ========== 5. Render ==========
     // Note: Message-level filtering is done in ChatPanel.tsx via filterMessages()
-    // MessageItem only handles content-block-level filtering (showText/showThinking/showTools)
+    // MessageItem also handles content-block-level filtering via searchFilters
 
     if (isUser) {
       const text = blocks
@@ -231,6 +249,11 @@ export const MessageItem = memo(
 
     // For system messages, if all content is filtered out, don't render
     if (isSysinfo && blocks.length === 0) {
+      return null;
+    }
+
+    // For assistant messages, if all content is filtered out, don't render
+    if (isAssistant && blocks.length === 0) {
       return null;
     }
 
@@ -308,9 +331,8 @@ function GlassCard({
   const [isExpanded, setIsExpanded] = useState(() => {
     if (isNewMessage) return true;
     if (block.type === "text") return true;
-    // 只有流式消息中的工具有结果时才默认展开
+    // 工具有结果时默认展开（无论是流式还是历史消息）
     if (
-      isNewMessage &&
       (block.type === "tool_use" || block.type === "tool") &&
       (block.output || block.error)
     )

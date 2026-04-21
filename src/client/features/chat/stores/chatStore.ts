@@ -1493,7 +1493,24 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
     if (!kind1 || !safeFilters.kind1[kind1]) return false;
 
     // Level 2: Kind2 filtering (prompt | response | thinking | tool | event)
+    // Also check message content blocks to ensure 1:1 filtering
     if (!kind2 || !safeFilters.kind2[kind2]) return false;
+
+    // Content-level filtering for assistant messages:
+    // A message should be hidden if it contains content blocks whose types are all disabled
+    if (kind1 === "assistant" && message.content?.length) {
+      const contentTypes = new Set(message.content.map((c) => c.type));
+      const hasThinking = contentTypes.has("thinking");
+      const hasTool = contentTypes.has("tool") || contentTypes.has("tool_use");
+      const hasText = contentTypes.has("text");
+
+      // If message contains thinking but thinking filter is off, hide it
+      if (hasThinking && !safeFilters.kind2.thinking) return false;
+      // If message contains tool but tool filter is off, hide it
+      if (hasTool && !safeFilters.kind2.tool) return false;
+      // If message contains text but response filter is off, hide it
+      if (hasText && !safeFilters.kind2.response) return false;
+    }
 
     // Level 3: Kind3 filtering for specific subtypes
     if (kind3) {

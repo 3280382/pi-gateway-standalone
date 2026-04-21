@@ -75,6 +75,7 @@ export function ChatPanel() {
           messages={filteredMessages}
           currentStreamingMessage={currentStreamingMessage}
           showThinking={showThinking}
+          searchFilters={searchFilters}
           onToggleMessageCollapse={chatController.toggleMessageCollapse}
           onToggleThinkingCollapse={chatController.toggleThinkingCollapse}
           onToggleToolsCollapse={chatController.toggleToolsCollapse}
