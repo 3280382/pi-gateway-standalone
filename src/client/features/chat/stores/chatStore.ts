@@ -280,6 +280,10 @@ function applyRafUpdate(state: State, pending: PendingUpdates): Partial<State> |
 /**
  * 构建最终消息内容
  * 使用已固化的 existingContent + 剩余流式状态
+ *
+ * 【工具结果合并】
+ * 将 activeTools 中的工具执行结果合并到对应的 tool_use 内容块中
+ * 转换为 type: "tool" 以与历史消息格式保持一致
  */
 function buildFinalMessage(
   state: State,
@@ -287,6 +291,7 @@ function buildFinalMessage(
   finalThinkingToApply: string
 ): { finalMessage: any | null; finalContent: any[] } {
   const existingContent = state.currentStreamingMessage?.content || [];
+  const { activeTools } = state;
 
   // 构建剩余的流式内容（endContentBlock 后可能还有未Clear的）
   const remainingContent: ContentPart[] = [];
@@ -299,12 +304,29 @@ function buildFinalMessage(
   }
 
   state.streamingToolCalls.forEach((tool) => {
-    remainingContent.push({
-      type: "tool_use",
-      toolCallId: tool.id,
-      toolName: tool.name,
-      partialArgs: tool.args,
-    });
+    // 查找工具执行结果
+    const toolExecution = activeTools.get(tool.id);
+
+    if (toolExecution?.output || toolExecution?.error) {
+      // 有结果，转换为 type: "tool" 以匹配历史消息格式
+      remainingContent.push({
+        type: "tool",
+        toolCallId: tool.id,
+        toolName: tool.name,
+        args: toolExecution.args,
+        output: toolExecution.output,
+        error: toolExecution.error,
+        status: toolExecution.status === "error" ? "error" : "success",
+      });
+    } else {
+      // 无结果，保持 tool_use
+      remainingContent.push({
+        type: "tool_use",
+        toolCallId: tool.id,
+        toolName: tool.name,
+        partialArgs: tool.args,
+      });
+    }
   });
 
   if (state.streamingContent || finalContentToApply) {
@@ -314,8 +336,27 @@ function buildFinalMessage(
     });
   }
 
-  // 合并已固化内容和剩余流式内容
-  const finalContent = [...existingContent, ...remainingContent];
+  // 合并已固化内容，并处理已固化内容中的 tool_use（如果后续有结果的话）
+  const mergedExistingContent = existingContent.map((block: ContentPart): ContentPart => {
+    if (block.type === "tool_use" && block.toolCallId) {
+      const toolExecution = activeTools.get(block.toolCallId);
+      if (toolExecution?.output || toolExecution?.error) {
+        // 转换为 tool 类型，合并结果
+        return {
+          type: "tool",
+          toolCallId: block.toolCallId,
+          toolName: block.toolName || toolExecution.name,
+          args: toolExecution.args,
+          output: toolExecution.output,
+          error: toolExecution.error,
+          status: toolExecution.status === "error" ? "error" : "success",
+        };
+      }
+    }
+    return block;
+  });
+
+  const finalContent = [...mergedExistingContent, ...remainingContent];
 
   const finalMessage = state.currentStreamingMessage
     ? {
@@ -790,37 +831,34 @@ export const useChatStore = create<
             (state) => {
               if (!state.currentStreamingMessage) return {};
 
-              // 先构建当前轮次的完整内容（包括工具）
-              const currentContent = buildContentArray(state);
+              // 构建当前轮次的流式内容（未固化的内容）
+              const currentStreamingContent = buildContentArray(state);
 
-              // 添加轮次分隔标记
-              currentContent.push({
-                type: "turn_marker",
-                turnNumber: currentContent.filter((c) => c.type === "turn_marker").length + 1,
-              });
-
-              // 获取之前已保存的内容
+              // 获取已固化的内容
               const existingContent = state.currentStreamingMessage.content || [];
 
-              // 找到最后一个 turn_marker，保留它及之前的内容（之前轮次）
-              const lastTurnMarkerIndex = existingContent
-                .map((c: any) => c.type)
-                .lastIndexOf("turn_marker");
-              const previousRounds =
-                lastTurnMarkerIndex >= 0 ? existingContent.slice(0, lastTurnMarkerIndex + 1) : []; // Page一轮不需要保留 existingContent，currentContent 已经包含了所有内容
+              // 添加轮次分隔标记（如果当前有流式内容）
+              if (currentStreamingContent.length > 0) {
+                currentStreamingContent.push({
+                  type: "turn_marker",
+                  turnNumber:
+                    currentStreamingContent.filter((c) => c.type === "turn_marker").length + 1,
+                });
+              }
 
               return {
                 currentStreamingMessage: {
                   ...state.currentStreamingMessage,
-                  // 保留之前轮次 + 当前轮次（避免重复）
-                  content: [...previousRounds, ...currentContent],
+                  // 保留所有已固化内容 + 当前流式内容
+                  content: [...existingContent, ...currentStreamingContent],
                 },
                 // Clear当前轮次的流式状态，开始新一轮
                 streamingThinking: "",
                 streamingThinkings: [], // Clear多轮思考
                 streamingContent: "",
                 streamingToolCalls: new Map(),
-                activeTools: new Map(),
+                // 【重要】保留 activeTools，不在这里清空
+                // activeTools 会在 finalizeStreaming 中处理并合并到消息内容
               };
             },
             false,

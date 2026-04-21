@@ -464,6 +464,10 @@ export function setupWebSocketListeners(): void {
       store.addMessage({
         id: `usage-${Date.now()}`,
         role: "system",
+        kind: "usage",
+        kind1: "sysinfo",
+        kind2: "event",
+        kind3: "usage",
         content: [{ type: "text", text: message }],
         timestamp: new Date(),
         isStreaming: false,
@@ -666,9 +670,12 @@ export function setupWebSocketListeners(): void {
     store.addMessage({
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: "system",
+      kind: "compaction",
+      kind1: "sysinfo",
+      kind2: "event",
+      kind3: "compaction",
       content: [{ type: "text", text: "🗜️ Compacting context..." }],
       timestamp: new Date(),
-      kind: "compaction",
     });
   });
 
@@ -679,9 +686,12 @@ export function setupWebSocketListeners(): void {
     store.addMessage({
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: "system",
+      kind: "compaction",
+      kind1: "sysinfo",
+      kind2: "event",
+      kind3: "compaction",
       content: [{ type: "text", text: "✅ Context compaction complete" }],
       timestamp: new Date(),
-      kind: "compaction",
     });
   });
 
@@ -693,9 +703,12 @@ export function setupWebSocketListeners(): void {
     store.addMessage({
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: "system",
+      kind: "retry",
+      kind1: "sysinfo",
+      kind2: "event",
+      kind3: "retry",
       content: [{ type: "text", text: "🔄 Retrying..." }],
       timestamp: new Date(),
-      kind: "retry",
     });
   });
 
@@ -706,9 +719,12 @@ export function setupWebSocketListeners(): void {
     store.addMessage({
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: "system",
+      kind: "retry",
+      kind1: "sysinfo",
+      kind2: "event",
+      kind3: "retry",
       content: [{ type: "text", text: "✅ Retry complete" }],
       timestamp: new Date(),
-      kind: "retry",
     });
   });
 
@@ -726,11 +742,14 @@ export function setupWebSocketListeners(): void {
     store.addMessage({
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: "system",
+      kind: "auto_retry",
+      kind1: "sysinfo",
+      kind2: "event",
+      kind3: "auto_retry",
       content: [
         { type: "text", text: `🔄 Auto-retrying (${data.attempt}/${data.maxAttempts})...` },
       ],
       timestamp: new Date(),
-      kind: "auto_retry",
     });
   });
 
@@ -741,19 +760,25 @@ export function setupWebSocketListeners(): void {
       store.addMessage({
         id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         role: "system",
+        kind: "auto_retry",
+        kind1: "sysinfo",
+        kind2: "event",
+        kind3: "auto_retry",
         content: [{ type: "text", text: "✅ Auto-retry successful" }],
         timestamp: new Date(),
-        kind: "auto_retry",
       });
     } else {
       store.addMessage({
         id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         role: "system",
+        kind: "auto_retry",
+        kind1: "sysinfo",
+        kind2: "event",
+        kind3: "auto_retry",
         content: [
           { type: "text", text: `❌ Auto-retry failed: ${data.finalError || "Unknown error"}` },
         ],
         timestamp: new Date(),
-        kind: "auto_retry",
       });
     }
   });
