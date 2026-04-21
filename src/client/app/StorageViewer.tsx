@@ -28,7 +28,14 @@ export function StorageViewer() {
         }
       }
     }
-    setStorageData(data);
+    // 按第一级 key 名称排序
+    const sortedData: Record<string, unknown> = {};
+    Object.keys(data)
+      .sort()
+      .forEach((key) => {
+        sortedData[key] = data[key];
+      });
+    setStorageData(sortedData);
     setIsOpen(true);
   };
 
