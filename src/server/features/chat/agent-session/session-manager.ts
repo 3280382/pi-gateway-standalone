@@ -248,17 +248,21 @@ export class ServerSessionManager {
 
     console.log(`[ServerSessionManager] Reusing session: ${shortId}`);
 
+    // 同一个 WebSocket 切回之前访问过的 session：不需要 reconnect，只更新映射
+    if (oldClient === newClient) {
+      console.log(`[ServerSessionManager] Same client reusing session ${shortId}, skip reconnect`);
+      this.updateEntryClient(entry, newClient);
+      this.setupCallbacks(session);
+      return session;
+    }
+
+    // 不同 WebSocket 接管 session（真正的重连场景）
     this.notifyClientReplaced(oldClient, shortId, workingDir);
     this.clientToShortId.delete(oldClient);
 
     session.reconnect(newClient);
     this.updateEntryClient(entry, newClient);
     this.setupCallbacks(session);
-
-    const flushed = session.flushMessageBuffer();
-    if (flushed > 0) {
-      console.log(`[ServerSessionManager] Flushed ${flushed} buffered messages for ${shortId}`);
-    }
 
     return session;
   }
