@@ -270,11 +270,9 @@ export function useChatPanel(): UseChatPanelReturn {
       });
 
       // 合并消息：新加载的历史消息 + 当前已有的消息（避免重复）
-      // 优先使用服务器预处理好的 messages
-      const { normalizeSessionMessages, handleServerMessages } = await import(
-        "@/features/chat/utils/messageUtils"
-      );
-      const historyMessages = handleServerMessages(response.messages, normalizeSessionMessages);
+      // 服务器已预处理所有消息
+      const { handleServerMessages } = await import("@/features/chat/utils/messageUtils");
+      const historyMessages = handleServerMessages(response.messages);
       const currentMessages = chatStore.messages;
 
       // 去重：基于消息ID
@@ -360,12 +358,9 @@ export function useChatPanel(): UseChatPanelReturn {
         hasMore: response.hasMore,
       });
 
-      // Clear旧消息并设置新消息
-      // 优先使用服务器预处理好的 messages
-      const { normalizeSessionMessages, handleServerMessages } = await import(
-        "@/features/chat/utils/messageUtils"
-      );
-      const formattedMessages = handleServerMessages(response.messages, normalizeSessionMessages);
+      // Clear旧消息并设置新消息（服务器已预处理）
+      const { handleServerMessages } = await import("@/features/chat/utils/messageUtils");
+      const formattedMessages = handleServerMessages(response.messages);
       chatStore.setMessages(formattedMessages);
 
       hasMoreRef.current = response.hasMore;
@@ -384,13 +379,8 @@ export function useChatPanel(): UseChatPanelReturn {
         messageLimit
       );
       if (response?.currentSession?.messages) {
-        const { normalizeSessionMessages, handleServerMessages } = await import(
-          "@/features/chat/utils/messageUtils"
-        );
-        const messages = handleServerMessages(
-          response.currentSession.messages,
-          normalizeSessionMessages
-        );
+        const { handleServerMessages } = await import("@/features/chat/utils/messageUtils");
+        const messages = handleServerMessages(response.currentSession.messages);
         chatStore.setMessages(messages);
       }
     } finally {

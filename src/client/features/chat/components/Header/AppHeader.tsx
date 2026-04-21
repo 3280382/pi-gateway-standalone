@@ -74,38 +74,57 @@ export function AppHeader({
   const runtimeStatus = currentSessionId ? sidebarStore.runtimeStatus[currentSessionId] : null;
 
   // ========== 3. Computed ==========
-  // Hierarchical filter state with defensive checks
-  const safeFilters = useMemo(() => ({
-    roles: filters?.roles ?? { user: true, assistant: true, system: true },
-    contentTypes: filters?.contentTypes ?? {
-      prompt: true, text: true, thinking: true, tool: true,
-      compaction: true, retry: true, autoRetry: true,
-      modelChange: true, thinkingLevelChange: true, usage: true,
-    },
-  }), [filters]);
+  // Hierarchical filter state with defensive checks (new 3-level kind system)
+  const safeFilters = useMemo(
+    () => ({
+      kind1: filters?.kind1 ?? { user: true, assistant: true, sysinfo: true },
+      kind2: filters?.kind2 ?? {
+        prompt: true,
+        response: true,
+        thinking: true,
+        tool: true,
+        event: true,
+      },
+      kind3: filters?.kind3 ?? {
+        compaction: true,
+        retry: true,
+        autoRetry: true,
+        modelChange: true,
+        thinkingLevelChange: true,
+        usage: true,
+        toolSuccess: true,
+        toolError: true,
+        toolPending: true,
+      },
+    }),
+    [filters]
+  );
 
   const hasActiveFilters = useMemo(() => {
-    const { roles, contentTypes } = safeFilters;
+    const { kind1, kind2, kind3 } = safeFilters;
     return (
-      Object.values(roles).some(Boolean) ||
-      Object.values(contentTypes).some(Boolean)
+      Object.values(kind1).some(Boolean) ||
+      Object.values(kind2).some(Boolean) ||
+      Object.values(kind3).some(Boolean)
     );
   }, [safeFilters]);
 
   const activeFilterCount = useMemo(() => {
-    const { roles, contentTypes } = safeFilters;
-    return [
-      ...Object.values(roles),
-      ...Object.values(contentTypes),
-    ].filter(Boolean).length;
+    const { kind1, kind2, kind3 } = safeFilters;
+    return [...Object.values(kind1), ...Object.values(kind2), ...Object.values(kind3)].filter(
+      Boolean
+    ).length;
   }, [safeFilters]);
 
-  // Check which roles are active to show relevant content types
-  const activeRoles = useMemo(() => ({
-    user: safeFilters.roles.user,
-    assistant: safeFilters.roles.assistant,
-    system: safeFilters.roles.system,
-  }), [safeFilters.roles]);
+  // Check which kind1 sources are active to show relevant content types
+  const activeKind1 = useMemo(
+    () => ({
+      user: safeFilters.kind1.user,
+      assistant: safeFilters.kind1.assistant,
+      sysinfo: safeFilters.kind1.sysinfo,
+    }),
+    [safeFilters.kind1]
+  );
 
   // Directory browser modal
   const isDirectoryBrowserOpen = useModalStore((state) => state.isDirectoryBrowserOpen);
@@ -113,42 +132,61 @@ export function AppHeader({
   const closeDirectoryBrowser = useModalStore((state) => state.closeDirectoryBrowser);
 
   // ========== 4. Actions ==========
-  // Handle role filter changes
-  const handleRoleFilterChange = useCallback(
-    (role: keyof typeof safeFilters.roles) => {
+  // Handle kind1 filter changes
+  const handleKind1FilterChange = useCallback(
+    (kind: keyof typeof safeFilters.kind1) => {
       const newFilters = {
-        ...safeFilters,
-        roles: {
-          ...safeFilters.roles,
-          [role]: !safeFilters.roles[role],
+        ...filters,
+        kind1: {
+          ...safeFilters.kind1,
+          [kind]: !safeFilters.kind1[kind],
         },
       };
       if (onSearchFiltersChange) {
         onSearchFiltersChange(newFilters);
       } else {
-        chatStoreSetSearchFilters({ roles: { [role]: !safeFilters.roles[role] } });
+        chatStoreSetSearchFilters({ kind1: { [kind]: !safeFilters.kind1[kind] } });
       }
     },
-    [safeFilters, onSearchFiltersChange, chatStoreSetSearchFilters]
+    [filters, safeFilters.kind1, onSearchFiltersChange, chatStoreSetSearchFilters]
   );
 
-  // Handle content type filter changes
-  const handleContentTypeFilterChange = useCallback(
-    (contentType: keyof typeof safeFilters.contentTypes) => {
+  // Handle kind2 filter changes
+  const handleKind2FilterChange = useCallback(
+    (kind2Type: keyof typeof safeFilters.kind2) => {
       const newFilters = {
-        ...safeFilters,
-        contentTypes: {
-          ...safeFilters.contentTypes,
-          [contentType]: !safeFilters.contentTypes[contentType],
+        ...filters,
+        kind2: {
+          ...safeFilters.kind2,
+          [kind2Type]: !safeFilters.kind2[kind2Type],
         },
       };
       if (onSearchFiltersChange) {
         onSearchFiltersChange(newFilters);
       } else {
-        chatStoreSetSearchFilters({ contentTypes: { [contentType]: !safeFilters.contentTypes[contentType] } });
+        chatStoreSetSearchFilters({ kind2: { [kind2Type]: !safeFilters.kind2[kind2Type] } });
       }
     },
-    [safeFilters, onSearchFiltersChange, chatStoreSetSearchFilters]
+    [filters, safeFilters.kind2, onSearchFiltersChange, chatStoreSetSearchFilters]
+  );
+
+  // Handle kind3 filter changes
+  const handleKind3FilterChange = useCallback(
+    (kind3Type: keyof typeof safeFilters.kind3) => {
+      const newFilters = {
+        ...filters,
+        kind3: {
+          ...safeFilters.kind3,
+          [kind3Type]: !safeFilters.kind3[kind3Type],
+        },
+      };
+      if (onSearchFiltersChange) {
+        onSearchFiltersChange(newFilters);
+      } else {
+        chatStoreSetSearchFilters({ kind3: { [kind3Type]: !safeFilters.kind3[kind3Type] } });
+      }
+    },
+    [filters, safeFilters.kind3, onSearchFiltersChange, chatStoreSetSearchFilters]
   );
 
   // ========== 5. Effects ==========
@@ -234,109 +272,109 @@ export function AppHeader({
             <div className={styles.filterDropdown}>
               {/* Level 1: Role Filters */}
               <div className={styles.filterSection}>
-                <div className={styles.filterSectionTitle}>Roles</div>
+                <div className={styles.filterSectionTitle}>Message Source</div>
                 <FilterChip
-                  label="User"
-                  checked={safeFilters.roles.user}
-                  onChange={() => handleRoleFilterChange("user")}
+                  label="👤 User"
+                  checked={safeFilters.kind1.user}
+                  onChange={() => handleKind1FilterChange("user")}
                 />
                 <FilterChip
-                  label="Assistant"
-                  checked={safeFilters.roles.assistant}
-                  onChange={() => handleRoleFilterChange("assistant")}
+                  label="🤖 Assistant"
+                  checked={safeFilters.kind1.assistant}
+                  onChange={() => handleKind1FilterChange("assistant")}
                 />
                 <FilterChip
-                  label="System"
-                  checked={safeFilters.roles.system}
-                  onChange={() => handleRoleFilterChange("system")}
+                  label="⚙️ Sysinfo"
+                  checked={safeFilters.kind1.sysinfo}
+                  onChange={() => handleKind1FilterChange("sysinfo")}
                 />
               </div>
 
-              {/* Level 2: Content Type Filters (shown based on active roles) */}
-              {activeRoles.user && (
+              {/* Level 2: Content Type Filters (shown based on active kind1) */}
+              {activeKind1.user && (
                 <div className={styles.filterSection}>
-                  <div className={styles.filterSectionTitle}>User Content</div>
+                  <div className={styles.filterSectionTitle}>User Content Types</div>
                   <FilterChip
                     label="Prompts"
-                    checked={safeFilters.contentTypes.prompt}
-                    onChange={() => handleContentTypeFilterChange("prompt")}
+                    checked={safeFilters.kind2.prompt}
+                    onChange={() => handleKind2FilterChange("prompt")}
                   />
                 </div>
               )}
 
-              {activeRoles.assistant && (
+              {activeKind1.assistant && (
                 <div className={styles.filterSection}>
-                  <div className={styles.filterSectionTitle}>Assistant Content</div>
+                  <div className={styles.filterSectionTitle}>Assistant Content Types</div>
                   <FilterChip
-                    label="Text"
-                    checked={safeFilters.contentTypes.text}
-                    onChange={() => handleContentTypeFilterChange("text")}
+                    label="Response"
+                    checked={safeFilters.kind2.response}
+                    onChange={() => handleKind2FilterChange("response")}
                   />
                   <FilterChip
                     label="Thinking"
-                    checked={safeFilters.contentTypes.thinking}
-                    onChange={() => handleContentTypeFilterChange("thinking")}
+                    checked={safeFilters.kind2.thinking}
+                    onChange={() => handleKind2FilterChange("thinking")}
                   />
                   <FilterChip
                     label="Tools"
-                    checked={safeFilters.contentTypes.tool}
-                    onChange={() => handleContentTypeFilterChange("tool")}
+                    checked={safeFilters.kind2.tool}
+                    onChange={() => handleKind2FilterChange("tool")}
                   />
                   {/* Tool Status Sub-filters - shown when Tools is enabled */}
-                  {safeFilters.contentTypes.tool && (
+                  {safeFilters.kind2.tool && (
                     <div className={styles.subFilterGroup}>
                       <FilterChip
                         label="✓ Success"
-                        checked={safeFilters.contentTypes.toolSuccess}
-                        onChange={() => handleContentTypeFilterChange("toolSuccess")}
+                        checked={safeFilters.kind3.toolSuccess}
+                        onChange={() => handleKind3FilterChange("toolSuccess")}
                       />
                       <FilterChip
                         label="✗ Error"
-                        checked={safeFilters.contentTypes.toolError}
-                        onChange={() => handleContentTypeFilterChange("toolError")}
+                        checked={safeFilters.kind3.toolError}
+                        onChange={() => handleKind3FilterChange("toolError")}
                       />
                       <FilterChip
                         label="⏳ Pending"
-                        checked={safeFilters.contentTypes.toolPending}
-                        onChange={() => handleContentTypeFilterChange("toolPending")}
+                        checked={safeFilters.kind3.toolPending}
+                        onChange={() => handleKind3FilterChange("toolPending")}
                       />
                     </div>
                   )}
                 </div>
               )}
 
-              {activeRoles.system && (
+              {activeKind1.sysinfo && (
                 <div className={styles.filterSection}>
-                  <div className={styles.filterSectionTitle}>System Events</div>
+                  <div className={styles.filterSectionTitle}>Sysinfo Event Types</div>
                   <FilterChip
                     label="Compaction"
-                    checked={safeFilters.contentTypes.compaction}
-                    onChange={() => handleContentTypeFilterChange("compaction")}
+                    checked={safeFilters.kind3.compaction}
+                    onChange={() => handleKind3FilterChange("compaction")}
                   />
                   <FilterChip
                     label="Retry"
-                    checked={safeFilters.contentTypes.retry}
-                    onChange={() => handleContentTypeFilterChange("retry")}
+                    checked={safeFilters.kind3.retry}
+                    onChange={() => handleKind3FilterChange("retry")}
                   />
                   <FilterChip
                     label="Auto Retry"
-                    checked={safeFilters.contentTypes.autoRetry}
-                    onChange={() => handleContentTypeFilterChange("autoRetry")}
+                    checked={safeFilters.kind3.autoRetry}
+                    onChange={() => handleKind3FilterChange("autoRetry")}
                   />
                   <FilterChip
                     label="Model Change"
-                    checked={safeFilters.contentTypes.modelChange}
-                    onChange={() => handleContentTypeFilterChange("modelChange")}
+                    checked={safeFilters.kind3.modelChange}
+                    onChange={() => handleKind3FilterChange("modelChange")}
                   />
                   <FilterChip
-                    label="Thinking Level"
-                    checked={safeFilters.contentTypes.thinkingLevelChange}
-                    onChange={() => handleContentTypeFilterChange("thinkingLevelChange")}
+                    label="Reasoning Level"
+                    checked={safeFilters.kind3.thinkingLevelChange}
+                    onChange={() => handleKind3FilterChange("thinkingLevelChange")}
                   />
                   <FilterChip
                     label="Usage"
-                    checked={safeFilters.contentTypes.usage}
-                    onChange={() => handleContentTypeFilterChange("usage")}
+                    checked={safeFilters.kind3.usage}
+                    onChange={() => handleKind3FilterChange("usage")}
                   />
                 </div>
               )}
@@ -349,8 +387,8 @@ export function AppHeader({
         {/* 会话 ID + 运Rows状态 + 连接状态 + PID */}
         <div className={styles.statusGroup}>
           {currentSessionId && (
-            <div 
-              className={styles.sessionInfo} 
+            <div
+              className={styles.sessionInfo}
               title={`Session: ${currentSessionId}${runtimeStatus ? ` (${runtimeStatus})` : ""}`}
             >
               {runtimeStatus && (
@@ -366,7 +404,10 @@ export function AppHeader({
               <span className={styles.sessionId}>{formatSessionId(currentSessionId)}</span>
             </div>
           )}
-          <div className={styles.status} title={`${connectionStatus}${pid ? ` (PID: ${pid})` : ""}`}>
+          <div
+            className={styles.status}
+            title={`${connectionStatus}${pid ? ` (PID: ${pid})` : ""}`}
+          >
             <span className={`${styles.statusDot} ${styles[connectionStatus]}`} />
             {pid && <span className={styles.pid}>{pid}</span>}
           </div>
@@ -562,7 +603,7 @@ function DirectoryPickerModal({
         body: JSON.stringify({ path: dirPath }),
       });
       const data = await response.json();
-      const dirs = data.  items
+      const dirs = data.items
         .filter((item: any) => item.isDirectory && !shouldExcludeDir(item.name))
         .map((item: any) => ({
           name: item.name,

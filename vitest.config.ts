@@ -6,6 +6,7 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["./test/setup.ts"],
+    globalSetup: ["./test/setup-server.ts"],
     maxWorkers: 1, // 限制并发为1
     minWorkers: 1, // 最小工作线程为1
     sequence: {
@@ -27,14 +28,17 @@ export default defineConfig({
       "**/test/integration/**/*.test.ts",
       "**/*.test.tsx",
       "**/stores/*.test.ts",
+      "**/services/**/*.test.ts",
       "src/server/**/*.test.ts",
-    ], // 包含单元测试、集成测试、React组件测试和Server测试
+      "src/client/**/*.test.ts",
+    ], // 包含单元测试、集成测试、React组件测试、Store测试、Service测试和Server测试
   },
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src/client"),
       "@shared": resolve(__dirname, "./src/shared"),
       "@server": resolve(__dirname, "./src/server"),
+      "@test": resolve(__dirname, "./test"),
     },
   },
 });

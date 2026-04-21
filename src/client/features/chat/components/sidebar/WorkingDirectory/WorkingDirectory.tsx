@@ -12,7 +12,6 @@ import styles from "./WorkingDirectory.module.css";
 export function WorkingDirectory() {
   // ========== 1. State ==========
   const workingDir = useSidebarStore((state) => state.workingDir);
-  const isLoading = useSidebarStore((state) => state.isLoading);
   const controller = useSidebarController();
   const [isPickerVisible, setIsPickerVisible] = useState(false);
 
@@ -46,14 +45,12 @@ export function WorkingDirectory() {
     <section className={styles.section}>
       <SectionHeader title="Working Directory" />
       <div
-        className={`${styles.directory} ${isLoading ? styles.loading : ""}`}
+        className={styles.directory}
         onClick={handleClick}
         title="Click to change working directory"
       >
         <FolderIcon className={styles.icon} />
-        <span className={styles.path}>
-          {isLoading ? "Loading..." : workingDir?.displayName || workingDir?.path || "~"}
-        </span>
+        <span className={styles.path}>{workingDir?.displayName || workingDir?.path || "~"}</span>
       </div>
 
       {/* Directory Picker Modal */}
@@ -96,7 +93,7 @@ function DirectoryPicker({
       const data = await response.json();
 
       // 过滤只显示directories
-      const dirs = data.  items
+      const dirs = data.items
         .filter((item: any) => item.isDirectory)
         .map((item: any) => ({
           name: item.name,
@@ -120,7 +117,7 @@ function DirectoryPicker({
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadDirectory(currentPath);

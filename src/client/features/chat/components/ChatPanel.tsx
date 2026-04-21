@@ -22,6 +22,10 @@ import {
   selectSearchQuery,
   selectShowThinking,
   useChatStore,
+  selectStreamingContent,
+  selectStreamingThinking,
+  selectStreamingToolCalls,
+  selectActiveTools,
 } from "@/features/chat/stores/chatStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import styles from "./ChatPanel.module.css";
@@ -41,6 +45,12 @@ export function ChatPanel() {
   const showThinking = useChatStore(selectShowThinking);
   const searchQuery = useChatStore(selectSearchQuery);
   const searchFilters = useChatStore(selectSearchFilters);
+
+  // Streaming state - passed to MessageList as props to control re-render frequency
+  const streamingContent = useChatStore(selectStreamingContent);
+  const streamingThinking = useChatStore(selectStreamingThinking);
+  const streamingToolCalls = useChatStore(selectStreamingToolCalls);
+  const activeTools = useChatStore(selectActiveTools);
 
   // ===== [ANCHOR:HOOKS] =====
   const chatPanel = useChatPanel();
@@ -70,6 +80,10 @@ export function ChatPanel() {
           onToggleToolsCollapse={chatController.toggleToolsCollapse}
           onDeleteMessage={chatController.deleteMessage}
           onRegenerateMessage={chatController.regenerateMessage}
+          streamingContent={streamingContent}
+          streamingThinking={streamingThinking}
+          streamingToolCalls={streamingToolCalls}
+          activeTools={activeTools}
         />
       </div>
 
@@ -101,9 +115,7 @@ export function ChatPanel() {
 
       <TemplateModal
         onTemplateSelect={(content) => {
-          chatController.setInputText(
-            useChatStore.getState().inputText + content
-          );
+          chatController.setInputText(useChatStore.getState().inputText + content);
         }}
       />
     </div>

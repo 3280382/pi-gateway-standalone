@@ -3,15 +3,24 @@
  * 规范：所有测试必须使用该工具库以确保输出一致性
  */
 
-import { mkdirSync, appendFileSync, writeFileSync, existsSync, readlinkSync, unlinkSync, cpSync } from "node:fs";
+import {
+  mkdirSync,
+  appendFileSync,
+  writeFileSync,
+  existsSync,
+  readlinkSync,
+  unlinkSync,
+  cpSync,
+} from "node:fs";
 import { dirname } from "node:path";
 
 // ========== 配置 ==========
 export const TEST_CONFIG = {
-  resultsDir: process.env.TEST_RESULTS_DIR 
-    || "/root/pi-gateway-standalone/test-results/latest",
+  resultsDir: process.env.TEST_RESULTS_DIR || "/root/pi-gateway-standalone/test-results/latest",
   timestamp: process.env.TEST_TIMESTAMP || new Date().toISOString(),
-  port: process.env.TEST_PORT ? parseInt(process.env.TEST_PORT, 10) : 3000 + Math.floor(Math.random() * 1000),
+  port: process.env.TEST_PORT
+    ? parseInt(process.env.TEST_PORT, 10)
+    : 3000 + Math.floor(Math.random() * 1000),
   logLevel: process.env.TEST_LOG_LEVEL || "info",
 };
 
@@ -24,7 +33,7 @@ export function initTestDirs() {
     `${TEST_CONFIG.resultsDir}/screenshots`,
     `${TEST_CONFIG.resultsDir}/vitest`,
   ];
-  
+
   for (const dir of dirs) {
     mkdirSync(dir, { recursive: true });
   }
@@ -38,13 +47,16 @@ export class TestLogger {
   constructor(component: string, subDir: string = "logs") {
     this.component = component;
     this.logFile = `${TEST_CONFIG.resultsDir}/${subDir}/${component}.log`;
-    
+
     // 确保目录存在
     mkdirSync(dirname(this.logFile), { recursive: true });
-    
+
     // 初始化日志文件
     if (!existsSync(this.logFile)) {
-      writeFileSync(this.logFile, `[${new Date().toISOString()}] [INIT] ${component} logger initialized\n`);
+      writeFileSync(
+        this.logFile,
+        `[${new Date().toISOString()}] [INIT] ${component} logger initialized\n`
+      );
     }
   }
 
@@ -52,21 +64,31 @@ export class TestLogger {
     const timestamp = new Date().toISOString();
     const dataStr = data ? ` ${JSON.stringify(data)}` : "";
     const entry = `[${timestamp}] [${level}] [${this.component}] ${message}${dataStr}\n`;
-    
+
     // 控制台输出
     if (TEST_CONFIG.logLevel === "debug" || level !== "DEBUG") {
       console.log(entry.trim());
     }
-    
+
     // 文件输出
     appendFileSync(this.logFile, entry);
   }
 
-  info(message: string, data?: unknown) { this.log("INFO", message, data); }
-  debug(message: string, data?: unknown) { this.log("DEBUG", message, data); }
-  warn(message: string, data?: unknown) { this.log("WARN", message, data); }
-  error(message: string, data?: unknown) { this.log("ERROR", message, data); }
-  success(message: string, data?: unknown) { this.log("SUCCESS", message, data); }
+  info(message: string, data?: unknown) {
+    this.log("INFO", message, data);
+  }
+  debug(message: string, data?: unknown) {
+    this.log("DEBUG", message, data);
+  }
+  warn(message: string, data?: unknown) {
+    this.log("WARN", message, data);
+  }
+  error(message: string, data?: unknown) {
+    this.log("ERROR", message, data);
+  }
+  success(message: string, data?: unknown) {
+    this.log("SUCCESS", message, data);
+  }
 }
 
 // ========== 测试结果追踪 ==========
@@ -91,7 +113,7 @@ export class TestReporter {
   async runTest(name: string, testFn: () => Promise<void>, category?: string): Promise<void> {
     this.logger.info(`开始测试: ${name}`);
     const startTime = Date.now();
-    
+
     try {
       await testFn();
       const duration = Date.now() - startTime;
@@ -107,8 +129,8 @@ export class TestReporter {
   }
 
   generateReport(): void {
-    const passed = this.results.filter(r => r.passed).length;
-    const failed = this.results.filter(r => !r.passed).length;
+    const passed = this.results.filter((r) => r.passed).length;
+    const failed = this.results.filter((r) => !r.passed).length;
     const totalDuration = Date.now() - this.startTime;
 
     const report = {
@@ -125,7 +147,7 @@ export class TestReporter {
 
     const reportPath = `${TEST_CONFIG.resultsDir}/vitest/report.json`;
     writeFileSync(reportPath, JSON.stringify(report, null, 2));
-    
+
     this.logger.info("测试报告已生成", { path: reportPath });
     this.logger.info(`摘要: ${passed}/${this.results.length} 通过, ${failed} 失败`, {
       duration: `${totalDuration}ms`,
@@ -147,7 +169,7 @@ export class BrowserTestHelper {
     this.logger = new TestLogger(testName, "browser");
     this.consoleLogFile = `${TEST_CONFIG.resultsDir}/browser/console.log`;
     this.wsLogFile = `${TEST_CONFIG.resultsDir}/browser/ws-messages.json`;
-    
+
     // 初始化 WebSocket 日志
     if (!existsSync(this.wsLogFile)) {
       writeFileSync(this.wsLogFile, "[]\n");
@@ -178,64 +200,83 @@ export class BrowserTestHelper {
 import { spawn, ChildProcess } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
 
+/**
+ * 【三窗口原则】TestServerManager 不再启动新服务器
+ * 只检查tmux中已运行的服务状态
+ */
 export class TestServerManager {
   private process: ChildProcess | null = null;
   private logger: TestLogger;
   private serverLogFile: string;
   private isStarted = false;
+  private port: number;
+  private useTmux: boolean = true; // 强制使用tmux服务
 
-  constructor() {
+  constructor(port?: number) {
     this.logger = new TestLogger("server-manager", "backend");
     this.serverLogFile = `${TEST_CONFIG.resultsDir}/backend/server.log`;
+    this.port = port || TEST_CONFIG.port;
   }
 
   async start(): Promise<void> {
     if (this.isStarted) return;
-    
-    this.logger.info("启动测试服务器...");
-    
-    return new Promise((resolve, reject) => {
-      const env = {
-        ...process.env,
-        PORT: String(TEST_CONFIG.port),
-        NODE_ENV: "test",
-      };
 
-      this.process = spawn("npx", ["tsx", "src/server/server.ts"], {
-        env,
-        cwd: "/root/pi-gateway-standalone",
-        stdio: ["ignore", "pipe", "pipe"],
+    // 【三窗口原则】检查tmux中的服务，不启动新服务
+    this.logger.info("检查tmux中的服务...", { port: 3000 });
+
+    const tmuxAvailable = await this.checkTmuxServices();
+    if (tmuxAvailable.backend) {
+      this.logger.info("✅ 使用tmux中的后端服务");
+      this.isStarted = true;
+      this.useTmux = true;
+      return;
+    }
+
+    this.logger.error("❌ tmux中的后端服务未运行！");
+    this.logger.error("请先启动tmux开发环境: bash scripts/start-tmux-dev.sh");
+    throw new Error("tmux后端服务未运行");
+  }
+
+  /**
+   * 【三窗口原则】检查tmux中的服务状态
+   */
+  private async checkTmuxServices(): Promise<{ frontend: boolean; backend: boolean }> {
+    const results = { frontend: false, backend: false };
+
+    // 检查前端 (Vite on 5173)
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2000);
+      const frontendRes = await fetch("http://127.0.0.1:5173/", {
+        method: "HEAD",
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
+      results.frontend = frontendRes.ok;
+    } catch {
+      results.frontend = false;
+    }
 
-      let output = "";
-
-      this.process.stdout?.on("data", (data) => {
-        const str = data.toString();
-        output += str;
-        appendFileSync(this.serverLogFile, str);
-        
-        if (output.includes("Web UI:")) {
-          this.isStarted = true;
-          this.logger.info("服务器已启动");
-          delay(2000).then(resolve); // 额外等待确保稳定
-        }
+    // 检查后端 (Node.js on 3000)
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2000);
+      const backendRes = await fetch("http://127.0.0.1:3000/api/health", {
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
+      results.backend = backendRes.ok;
+    } catch {
+      results.backend = false;
+    }
 
-      this.process.stderr?.on("data", (data) => {
-        const str = data.toString();
-        appendFileSync(this.serverLogFile, str);
-        this.logger.warn("服务器 stderr", str.substring(0, 200));
-      });
-
-      delay(30000).then(() => {
-        reject(new Error("服务器启动超时"));
-      });
-    });
+    return results;
   }
 
   async healthCheck(): Promise<boolean> {
+    // 【三窗口原则】检查tmux中的后端服务
     try {
-      const response = await fetch(`http://127.0.0.1:${TEST_CONFIG.port}/api/health`);
+      const response = await fetch("http://127.0.0.1:3000/api/health");
       return response.ok;
     } catch {
       return false;
@@ -243,29 +284,9 @@ export class TestServerManager {
   }
 
   async stop(): Promise<void> {
-    if (this.process) {
-      this.logger.info("停止测试服务器...");
-      
-      return new Promise((resolve) => {
-        // 设置超时
-        const timeout = setTimeout(() => {
-          this.logger.warn("服务器停止超时，强制终止");
-          this.process?.kill("SIGKILL");
-          this.process = null;
-          this.isStarted = false;
-          resolve();
-        }, 5000);
-        
-        this.process?.on("close", () => {
-          clearTimeout(timeout);
-          this.process = null;
-          this.isStarted = false;
-          resolve();
-        });
-        
-        this.process?.kill("SIGTERM");
-      });
-    }
+    // 【三窗口原则】不停止tmux中的服务
+    this.logger.info("保持tmux服务运行（不执行停止操作）");
+    this.isStarted = false;
   }
 }
 
@@ -330,9 +351,7 @@ export class TestWebSocketClient {
   ): Promise<Record<string, unknown>> {
     return new Promise((resolve, reject) => {
       // 检查已有消息
-      const existing = this.messages.find((m) => 
-        predicate(m as Record<string, unknown>)
-      );
+      const existing = this.messages.find((m) => predicate(m as Record<string, unknown>));
       if (existing) {
         resolve(existing as Record<string, unknown>);
         return;
@@ -343,9 +362,7 @@ export class TestWebSocketClient {
       }, timeout);
 
       const checkInterval = setInterval(() => {
-        const message = this.messages.find((m) =>
-          predicate(m as Record<string, unknown>)
-        );
+        const message = this.messages.find((m) => predicate(m as Record<string, unknown>));
         if (message) {
           clearTimeout(timeoutId);
           clearInterval(checkInterval);

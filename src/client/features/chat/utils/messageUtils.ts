@@ -16,36 +16,12 @@ import type { Message } from "@/features/chat/types/chat";
 
 /**
  * Helper to handle server-preprocessed messages
- * Detects if messages are already processed and returns them directly or processes them
+ * Server always returns preprocessed messages, use them directly
  */
-export function handleServerMessages(
-  serverMessages: any[],
-  normalizeFn: (entries: any[]) => Message[]
-): Message[] {
+export function handleServerMessages(serverMessages: any[]): Message[] {
   if (!serverMessages?.length) return [];
-
-  // Check if messages are already processed by server
-  // Server-processed messages have normalized content array with proper types
-  const firstMsg = serverMessages[0];
-  const isProcessed =
-    firstMsg?.content &&
-    Array.isArray(firstMsg.content) &&
-    firstMsg.content.some(
-      (c: any) =>
-        c.type === "tool" ||
-        c.type === "tool_use" ||
-        c.type === "thinking" ||
-        (c.type === "text" && typeof c.text === "string")
-    );
-
-  if (isProcessed) {
-    console.log("[MessageProcessing] Using server-preprocessed messages:", serverMessages.length);
-    return serverMessages as Message[];
-  }
-
-  // Raw entries need client-side processing
-  console.log("[MessageProcessing] Processing raw entries on client:", serverMessages.length);
-  return normalizeFn(serverMessages);
+  // Server always returns preprocessed messages
+  return serverMessages as Message[];
 }
 
 /**
@@ -167,9 +143,9 @@ function convertSpecialEntryToMessage(entry: any): Message | null {
       if (usage) {
         const inputTokens = usage.inputTokens || usage.input_tokens || 0;
         const outputTokens = usage.outputTokens || usage.output_tokens || 0;
-        const totalTokens = usage.totalTokens || usage.total_tokens || (inputTokens + outputTokens);
+        const totalTokens = usage.totalTokens || usage.total_tokens || inputTokens + outputTokens;
         const cost = usage.cost || usage.estimatedCost || 0;
-        
+
         let message = `📊 Usage: ${totalTokens.toLocaleString()} tokens`;
         if (inputTokens || outputTokens) {
           message += ` (input: ${inputTokens.toLocaleString()}, output: ${outputTokens.toLocaleString()})`;
@@ -202,10 +178,10 @@ function convertSpecialEntryToMessage(entry: any): Message | null {
 
 /**
  * Unified Session message conversion function
- * 
+ *
  * Uses parentId tree structure to properly associate tool results with their calls.
  * Single-pass processing with lookup maps for O(n) complexity.
- * 
+ *
  * @param entries Session file entries array (JSONL parsed)
  * @returns Converted Message array
  */
@@ -372,7 +348,7 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
     toolResults.forEach((toolResultEntry: any) => {
       const resultMsg = toolResultEntry.message;
       const toolCallId = resultMsg.toolCallId;
-      
+
       if (!processedToolCallIds.has(toolCallId)) {
         let contentText = "";
         if (Array.isArray(resultMsg.content)) {
@@ -412,8 +388,8 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
       const usage = msg.usage;
       const inputTokens = usage.input || usage.inputTokens || 0;
       const outputTokens = usage.output || usage.outputTokens || 0;
-      const totalTokens = usage.totalTokens || (inputTokens + outputTokens);
-      const cost = usage.cost?.total ?? (typeof usage.cost === 'number' ? usage.cost : 0);
+      const totalTokens = usage.totalTokens || inputTokens + outputTokens;
+      const cost = usage.cost?.total ?? (typeof usage.cost === "number" ? usage.cost : 0);
 
       let usageMessage = `📊 Usage: ${totalTokens.toLocaleString()} tokens`;
       if (inputTokens || outputTokens) {

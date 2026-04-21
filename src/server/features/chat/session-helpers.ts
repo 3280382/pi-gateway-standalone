@@ -4,7 +4,7 @@
  * These functions shared by WebSocket handlers and HTTP controllers
  * - getAllSessions: Get all session file lists in working directory
  * - getAllModels: Get model list
- * - getSessionMessages: Read session file content
+ * - getSessionMessages: Read session file content (SERVER-SIDE PROCESSED)
  * - buildInitResponse: Build unified initialization response
  */
 
@@ -14,7 +14,13 @@ import { SessionManager } from "@mariozechner/pi-coding-agent";
 import { Logger, LogLevel } from "../../lib/utils/logger";
 import { getLocalSessionsDir } from "./agent-session/utils";
 import { processSessionEntries } from "./session-processor";
+import { sessionConfigManager } from "./session-config/sessionConfigManager";
+import { extractShortSessionId, serverSessionManager } from "./agent-session/session-manager";
 import type { PiAgentSession } from "./agent-session/piAgentSession";
+import type {
+  SessionMessagesResponse,
+  Message,
+} from "../../../shared/types/session-messages.types";
 
 const logger = new Logger({ level: LogLevel.INFO });
 
@@ -34,6 +40,8 @@ export async function getAllSessions(
     name: string;
     messageCount: number;
     lastModified: string;
+    status?: string;
+    hasClient?: boolean;
   }>
 > {
   try {
@@ -48,15 +56,42 @@ export async function getAllSessions(
     // Apply pagination limit
     const limitedSessions = limit ? sortedSessions.slice(0, limit) : sortedSessions;
 
-    logger.info(`[getAllSessions] Found ${sortedSessions.length} sessions, returning ${limitedSessions.length} for ${workingDir}`);
+    logger.info(
+      `[getAllSessions] Found ${sortedSessions.length} sessions, returning ${limitedSessions.length} for ${workingDir}`
+    );
 
-    return limitedSessions.map((s) => ({
-      id: s.path,
+    // 【性能优化】获取运行时状态（与广播逻辑一致）
+    const activeSessions = serverSessionManager.getAllSessions();
+    const activeSessionMap = new Map(
+      activeSessions.map((s) => [extractShortSessionId(s.sessionFile), s])
+    );
+
+    // Ensure configs exist for top sessions and get all configs
+    const sessionIds = limitedSessions.map((s) => ({
+      id: extractShortSessionId(s.path),
       path: s.path,
-      name: s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
-      messageCount: s.messageCount || 0,
-      lastModified: s.modified.toISOString(),
     }));
+    await sessionConfigManager.ensureConfigs(sessionIds, workingDir);
+    const configs = sessionConfigManager.getAllConfigs();
+
+    return limitedSessions.map((s) => {
+      const shortId = extractShortSessionId(s.path);
+      const config = configs[shortId];
+      const activeInfo = activeSessionMap.get(shortId);
+
+      return {
+        id: s.path,
+        path: s.path,
+        // 【一致性保障】与 handleListSessions 使用相同的 name 生成逻辑
+        name:
+          config?.name || s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
+        messageCount: s.messageCount || 0,
+        lastModified: s.modified.toISOString(),
+        // 【状态一致性】从 serverSessionManager 获取 runtime status
+        status: activeInfo?.runtimeStatus || "history",
+        hasClient: activeInfo ? activeInfo.hasClient : false,
+      };
+    });
   } catch (e) {
     logger.error(`[getAllSessions] Failed: ${e}`);
     return [];
@@ -109,49 +144,38 @@ export async function getAllModels(): Promise<
 }
 
 /**
- * Detect message kind based on content for historical messages
- */
-function detectMessageKind(message: any): string | undefined {
-  if (!message || message.kind) return message?.kind;
-  
-  // Only process system messages
-  if (message.role !== "system") return undefined;
-  
-  const text = message.content
-    ?.filter((c: any) => c.type === "text")
-    ?.map((c: any) => c.text || "")
-    ?.join(" ") || "";
-  
-  // Check for special system message types
-  if (text.includes("🗜️ Compacting") || text.includes("上下文压缩")) return "compaction";
-  if (text.includes("🔄 Retrying") && text.includes("Auto-retrying")) return "auto_retry";
-  if (text.includes("🔄 Retrying")) return "retry";
-  if (text.includes("模型已切换为") || text.includes("model")) return "model_change";
-  if (text.includes("Thinking level已设置")) return "thinking_level_change";
-  if (text.includes("📊") || text.includes("tokens") || text.includes("cost")) return "usage";
-  
-  return undefined;
-}
-
-/**
- * Read session file content (JSONL)
+ * Read session file content (JSONL) - SERVER-SIDE PROCESSED
+ *
+ * 【性能优化】服务器端直接处理消息，返回标准化的 Message 数组
+ * 避免客户端进行昂贵的 normalizeSessionMessages 操作
+ *
  * @param sessionFile Session file path
- * @param limit Maximum number of messages to return (from the end)
+ * @param limit Maximum number of messages to return (from the end), -1 for all
  * @param offset Number of messages to skip from the end (for pagination)
- * @returns Array of messages
+ * @returns SessionMessagesResponse with pre-processed messages
  */
 export async function getSessionMessages(
   sessionFile: string,
   limit?: number,
-  offset?: number,
-  processMessages: boolean = true
-): Promise<any[]> {
+  offset?: number
+): Promise<SessionMessagesResponse> {
+  const startTime = Date.now();
+
   try {
     if (!existsSync(sessionFile)) {
-      return [];
+      return {
+        messages: [],
+        totalCount: 0,
+        processed: true,
+        sessionFile,
+      };
     }
+
+    // Read file content
     const content = await readFile(sessionFile, "utf-8");
     const lines = content.split("\n").filter((line) => line.trim());
+
+    // Parse all entries
     const entries = lines
       .map((line) => {
         try {
@@ -162,13 +186,14 @@ export async function getSessionMessages(
       })
       .filter(Boolean);
 
+    const totalCount = entries.length;
+
     // Apply pagination (from the end)
-    // limit: -1 means load all messages
     let paginatedEntries;
     if (limit !== undefined || offset !== undefined) {
       const actualOffset = offset || 0;
       // limit = -1 means load all remaining messages
-      const actualLimit = limit === -1 ? entries.length : (limit || entries.length);
+      const actualLimit = limit === -1 ? entries.length : limit || entries.length;
       const startIndex = Math.max(0, entries.length - actualOffset - actualLimit);
       const endIndex = Math.max(0, entries.length - actualOffset);
       paginatedEntries = entries.slice(startIndex, endIndex);
@@ -176,18 +201,34 @@ export async function getSessionMessages(
       paginatedEntries = entries;
     }
 
-    // NOTE: Server-side processing disabled - let client handle message transformation
-    // to ensure all system events (compaction, retry, etc.) are properly preserved
-    // Server-side processing was filtering out some special entry types
+    // 【关键优化】服务器端处理消息，转换为标准格式
+    const { messages } = processSessionEntries(paginatedEntries);
 
-    // Add kind field to all historical messages for client-side filtering
-    return paginatedEntries.map(msg => ({
-      ...msg,
-      kind: detectMessageKind(msg)
-    }));
+    const duration = Date.now() - startTime;
+    logger.info(
+      `[getSessionMessages] Processed ${messages.length} messages in ${duration}ms (total: ${totalCount})`
+    );
+
+    return {
+      messages,
+      totalCount,
+      processed: true, // Mark as server-processed
+      sessionFile,
+      pagination: {
+        offset: offset || 0,
+        limit: limit || messages.length,
+        hasMore: (offset || 0) + messages.length < totalCount,
+      },
+    };
   } catch (e) {
     logger.error(`[getSessionMessages] Failed: ${e}`);
-    return [];
+    return {
+      messages: [],
+      totalCount: 0,
+      processed: true,
+      sessionFile,
+      error: e instanceof Error ? e.message : String(e),
+    };
   }
 }
 
@@ -218,17 +259,32 @@ export async function getSessionModel(sessionFile: string): Promise<{
   fullId: string;
 } | null> {
   try {
-    const messages = await getSessionMessages(sessionFile);
+    // Use raw entries for model detection (don't need full processing)
+    if (!existsSync(sessionFile)) {
+      return null;
+    }
+    const content = await readFile(sessionFile, "utf-8");
+    const lines = content.split("\n").filter((line) => line.trim());
+
+    const entries = lines
+      .map((line) => {
+        try {
+          return JSON.parse(line);
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
 
     // Search backwards for last model_change
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const msg = messages[i];
-      if (msg.type === "model_change" && msg.provider && msg.modelId) {
-        logger.info(`[getSessionModel] Found session model: ${msg.provider}/${msg.modelId}`);
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const entry = entries[i];
+      if (entry.type === "model_change" && entry.provider && entry.modelId) {
+        logger.info(`[getSessionModel] Found session model: ${entry.provider}/${entry.modelId}`);
         return {
-          provider: msg.provider,
-          modelId: msg.modelId,
-          fullId: `${msg.provider}/${msg.modelId}`,
+          provider: entry.provider,
+          modelId: entry.modelId,
+          fullId: `${entry.provider}/${entry.modelId}`,
         };
       }
     }
@@ -251,14 +307,29 @@ export async function getSessionCurrentModel(
   defaultModel?: string | null
 ): Promise<string | null> {
   try {
-    const messages = await getSessionMessages(sessionFile);
+    // Use raw entries for model detection
+    if (!existsSync(sessionFile)) {
+      return defaultModel || null;
+    }
+    const content = await readFile(sessionFile, "utf-8");
+    const lines = content.split("\n").filter((line) => line.trim());
+
+    const entries = lines
+      .map((line) => {
+        try {
+          return JSON.parse(line);
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
 
     // Search backwards for last model_change
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const msg = messages[i];
-      if (msg.type === "model_change" && (msg.model || msg.modelId)) {
-        const modelId = msg.model || msg.modelId;
-        const provider = msg.provider || "";
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const entry = entries[i];
+      if (entry.type === "model_change" && (entry.model || entry.modelId)) {
+        const modelId = entry.model || entry.modelId;
+        const provider = entry.provider || "";
         const fullId = provider ? `${provider}/${modelId}` : modelId;
         logger.info(`[getSessionCurrentModel] Found session model: ${fullId}`);
         return fullId;
@@ -279,36 +350,29 @@ export async function getSessionCurrentModel(
 }
 
 /**
- * Build unified initialization/switch response
- *
- * Used for:
- * - init.ts initialized response
- * - change-dir.ts dir_changed response
- */
-/**
  * Build unified Session response
  * Used for:
  * - init.ts initialized response
  * - change-dir.ts dir_changed response
+ * - load_session response
  *
- * Optimizations:
- * - Default: only load recent 100 messages
- * - allSessions default: only load recent 10
+ * 【优化】返回服务器预处理的消息，客户端无需再执行 normalizeSessionMessages
  */
 export async function buildSessionResponse(
   session: PiAgentSession,
   workingDir: string,
   messageLimit: number = 100,
-  sessionLimit: number = 10,
-  explicitSessionFile?: string  // Optional: explicitly specify sessionFile（used after switchSession）
+  sessionLimit: number = 15,
+  explicitSessionFile?: string
 ): Promise<{
   pid: number;
   workingDir: string;
   currentSession: {
     sessionId: string;
     sessionFile: string;
-    messages: any[];
+    messages: Message[]; // Pre-processed messages
     totalMessageCount: number;
+    processed: boolean;
   };
   allSessions: Awaited<ReturnType<typeof getAllSessions>>;
   currentModel: string | null;
@@ -316,26 +380,34 @@ export async function buildSessionResponse(
   allModels: Awaited<ReturnType<typeof getAllModels>>;
   thinkingLevel: string;
 }> {
+  const buildStart = Date.now();
+
   // Get session info: prioritize explicit path，otherwise get from session object
   const sessionFile = explicitSessionFile || session.session?.sessionFile || "";
   const sessionId = sessionFile;
 
-  logger.info(`[buildSessionResponse] Loading messages for: ${sessionFile}, explicit: ${explicitSessionFile || 'none'}`);
+  logger.info(`[buildSessionResponse] Building response for: ${sessionFile}`);
 
-  // Get total message count and recent messages（Optimizations: only load recent 100）
-  const [fileMessages, totalMessageCount] = await Promise.all([
+  // 【关键优化】使用新的 getSessionMessages 获取预处理的消息
+  const [messagesResponse, totalMessageCount] = await Promise.all([
     getSessionMessages(sessionFile, messageLimit),
     getSessionMessageCount(sessionFile),
   ]);
 
-  logger.info(`[buildSessionResponse] Loaded ${fileMessages.length} messages (total: ${totalMessageCount})`);
+  let sessionMessages = messagesResponse.messages;
+  logger.info(
+    `[buildSessionResponse] Loaded ${sessionMessages.length} pre-processed messages in ${Date.now() - buildStart}ms`
+  );
 
   // Merge buffered messages (if any)- achieve seamless connection
   // Messages produced when session runs in background are buffered，need to merge with file messages
   const bufferedMessages = session.getBufferedMessages ? session.getBufferedMessages() : [];
-  const sessionMessages = bufferedMessages.length > 0
-    ? [...fileMessages, ...bufferedMessages]
-    : fileMessages;
+  if (bufferedMessages.length > 0) {
+    // Process buffered messages
+    const { messages: processedBuffered } = processSessionEntries(bufferedMessages);
+    sessionMessages = [...sessionMessages, ...processedBuffered];
+    logger.info(`[buildSessionResponse] Merged ${bufferedMessages.length} buffered messages`);
+  }
 
   // Get default model (from settings.json)
   const defaultModel = session.session?.model?.id || null;
@@ -343,11 +415,14 @@ export async function buildSessionResponse(
   // Get current actual model（priority: read from session, else use default）
   const currentModel = await getSessionCurrentModel(sessionFile, defaultModel);
 
-  // Fetch other data in parallel (Optimizations:only load recent 10 sessions)）
+  // Fetch other data in parallel
   const [allSessions, allModels] = await Promise.all([
     getAllSessions(workingDir, sessionLimit),
     getAllModels(),
   ]);
+
+  const totalDuration = Date.now() - buildStart;
+  logger.info(`[buildSessionResponse] Complete in ${totalDuration}ms`);
 
   return {
     pid: process.pid,
@@ -357,6 +432,7 @@ export async function buildSessionResponse(
       sessionFile,
       messages: sessionMessages,
       totalMessageCount,
+      processed: true, // Mark as server-processed
     },
     allSessions,
     currentModel,

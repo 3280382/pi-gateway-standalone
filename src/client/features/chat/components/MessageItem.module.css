@@ -21,7 +21,7 @@
 }
 
 /* AI消息容器 - 零间隙 */
-.aiContainer {
+.assistantContainer {
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -67,17 +67,26 @@
   opacity: 1;
 }
 
-/* 思考块 - 温暖琥珀色 */
+/* 思考块 - 温暖琥珀色（稍亮），经典低调 */
 .thinking {
-  background: rgba(251, 191, 36, 0.08);
+  background: rgba(251, 191, 36, 0.12);
 }
 
 .thinking:hover {
-  background: rgba(251, 191, 36, 0.12);
+  background: rgba(251, 191, 36, 0.18);
 }
 
 .thinking .dot {
   background: #fbbf24;
+}
+
+.thinking .content {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.thinking .content code {
+  font-size: 11px;
 }
 
 /* 工具调用块 - 清新翡翠色 */
@@ -212,7 +221,7 @@
   background: #f43f5e;
 }
 
-/* AI输出块 - 柔和天蓝色 */
+/* AI输出块 - 柔和天蓝色，字体和user一样 */
 .output {
   background: rgba(56, 189, 248, 0.06);
   cursor: default;
@@ -224,6 +233,15 @@
 
 .output .dot {
   background: #38bdf8;
+}
+
+.output .content {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.output .content code {
+  font-size: 13px;
 }
 
 /* Card Header - 紧凑 */
@@ -254,11 +272,7 @@
   font-size: 10px;
   color: #94a3b8;
   flex-shrink: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 200px;
-  margin-left: 4px;
+  margin-left: 8px;
   font-family: "JetBrains Mono", monospace;
 }
 
@@ -341,48 +355,6 @@
   color: #e2e8f0;
 }
 
-/* Usage 消息 - 紧凑青色 */
-.usage {
-  background: rgba(6, 182, 212, 0.08);
-  border-left: 2px solid #06b6d4;
-  padding: 2px 8px;
-  margin: 0;
-}
-
-.usage:hover {
-  background: rgba(6, 182, 212, 0.12);
-}
-
-.usageHeader {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin: 0;
-}
-
-.usageDot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #06b6d4;
-}
-
-.usageLabel {
-  font-size: 9px;
-  font-weight: 600;
-  color: #06b6d4;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.usageContent {
-  font-size: 11px;
-  color: #67e8f9;
-  font-family: "JetBrains Mono", monospace;
-  padding-left: 9px;
-  line-height: 1.3;
-}
-
 /* Text Content Styles */
 .line {
   margin: 1px 0;
@@ -425,37 +397,120 @@ em {
   background: rgba(20, 184, 166, 0.15);
 }
 
-.compactionDot {
-  background: #14b8a6 !important;
+/* System消息容器 - 使用与工具调用相同的布局结构 */
+.sysinfoContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0 8px;
+  margin: 0;
+}
+
+/* System消息卡片 - 与工具调用卡片相同的结构 */
+.sysinfoContainer .card {
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  cursor: default;
+  transition: background-color 0.15s;
+}
+
+/* Compaction消息 - 青绿色 */
+.compaction {
+  background: rgba(20, 184, 166, 0.08);
+}
+
+.compaction:hover {
+  background: rgba(20, 184, 166, 0.12);
+}
+
+.compaction .dot {
+  background: #14b8a6;
+}
+
+/* Model Change消息 - 橙色 */
+.model_change {
+  background: rgba(249, 115, 22, 0.08);
+}
+
+.model_change:hover {
+  background: rgba(249, 115, 22, 0.12);
+}
+
+.model_change .dot {
+  background: #f97316;
+}
+
+/* Thinking Level Change消息 - 青色 */
+.thinking_level_change {
+  background: rgba(6, 182, 212, 0.08);
+}
+
+.thinking_level_change:hover {
+  background: rgba(6, 182, 212, 0.12);
+}
+
+.thinking_level_change .dot {
+  background: #06b6d4;
+}
+
+/* Usage消息 - 低调经典深蓝灰 */
+.usage {
+  background: rgba(71, 85, 105, 0.15);
+}
+
+.usage:hover {
+  background: rgba(71, 85, 105, 0.22);
+}
+
+.usage .dot {
+  background: #475569;
+}
+
+/* Retry消息 - 黄色 */
+.retry {
+  background: rgba(234, 179, 8, 0.08);
+}
+
+.retry:hover {
+  background: rgba(234, 179, 8, 0.12);
+}
+
+.retry .dot {
+  background: #eab308;
+}
+
+/* Auto Retry消息 - 琥珀色 */
+.auto_retry {
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.auto_retry:hover {
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.auto_retry .dot {
+  background: #f59e0b;
 }
 
 /* Export消息 - 蓝色 */
 .export {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(59, 130, 246, 0.08);
 }
 
 .export:hover {
-  background: rgba(59, 130, 246, 0.15);
+  background: rgba(59, 130, 246, 0.12);
 }
 
-.exportDot {
-  background: #3b82f6 !important;
+.export .dot {
+  background: #3b82f6;
 }
 
-/* Usage消息 - 紫色 */
-.usage {
-  background: rgba(168, 85, 247, 0.1);
+/* Model Change消息 - 橙色 */
+.model_change {
+  background: rgba(249, 115, 22, 0.1);
 }
 
-.usage:hover {
-  background: rgba(168, 85, 247, 0.15);
-}
-
-.usageDot {
-  background: #a855f7 !important;
-}
-
-/* System消息容器 */
-.compactionContainer {
-  border-left: 2px solid rgba(20, 184, 166, 0.5);
+.model_change:hover {
+  background: rgba(249, 115, 22, 0.15);
 }

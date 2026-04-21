@@ -25,11 +25,6 @@
   border-color: var(--border-color);
 }
 
-.directory.loading {
-  opacity: 0.6;
-  cursor: wait;
-}
-
 .icon {
   width: 16px;
   height: 16px;

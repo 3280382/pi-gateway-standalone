@@ -35,7 +35,31 @@ export interface Message {
   isThinkingCollapsed?: boolean;
   isToolsCollapsed?: boolean;
   isMessageCollapsed?: boolean;
-  kind?: "compaction" | "export" | "system" | "usage" | "retry" | "auto_retry" | "model_change" | "thinking_level_change"; // 特殊消息类型，用于样式区分和过滤
+  kind?:
+    | "compaction"
+    | "export"
+    | "system"
+    | "usage"
+    | "retry"
+    | "auto_retry"
+    | "model_change"
+    | "thinking_level_change"; // 特殊消息类型，用于样式区分和过滤
+  // New 3-level classification (from server-side processing)
+  kind1?: "user" | "assistant" | "sysinfo"; // Message source
+  kind2?: "prompt" | "response" | "thinking" | "tool" | "event"; // Content type
+  kind3?:
+    | "text_prompt"
+    | "text_response"
+    | "thinking_block"
+    | "tool_call"
+    | "tool_result"
+    | "model_change"
+    | "thinking_level_change"
+    | "compaction"
+    | "retry"
+    | "auto_retry"
+    | "usage"
+    | "export"; // Specific subtype
 }
 
 // ============================================================================
@@ -56,39 +80,45 @@ export interface ToolExecution {
 }
 
 // ============================================================================
-// Search Types - Hierarchical Design
+// Search Types - Hierarchical Design (3-Level Classification)
 // ============================================================================
 
-// Role-level filters
-export interface RoleFilters {
+// Level 1: Message source filters
+export interface Kind1Filters {
   user: boolean;
   assistant: boolean;
-  system: boolean;
+  sysinfo: boolean;
 }
 
-// Content type filters (hierarchical under roles)
-export interface ContentTypeFilters {
-  // User content types
-  prompt: boolean;  // User messages (text content)
-  
-  // Assistant content types
-  text: boolean;           // Assistant text responses
-  thinking: boolean;       // AI thinking blocks
-  tool: boolean;           // Tool calls and results
-  
-  // System content types (special events)
-  compaction: boolean;     // Context compaction
-  retry: boolean;          // Manual retry
-  autoRetry: boolean;      // Auto-retry
-  modelChange: boolean;    // Model switch events
-  thinkingLevelChange: boolean; // Thinking level change
-  usage: boolean;          // Token usage stats
+// Level 2: Content type filters
+export interface Kind2Filters {
+  prompt: boolean; // User prompts
+  response: boolean; // Assistant text responses
+  thinking: boolean; // AI thinking blocks
+  tool: boolean; // Tool calls and results
+  event: boolean; // System events
 }
 
-// Hierarchical filters
+// Level 3: Specific subtype filters
+export interface Kind3Filters {
+  // System events
+  compaction: boolean;
+  retry: boolean;
+  autoRetry: boolean;
+  modelChange: boolean;
+  thinkingLevelChange: boolean;
+  usage: boolean;
+  // Tool statuses
+  toolSuccess: boolean;
+  toolError: boolean;
+  toolPending: boolean;
+}
+
+// Hierarchical filters (new 3-level system)
 export interface ChatSearchFilters {
-  roles: RoleFilters;
-  contentTypes: ContentTypeFilters;
+  kind1: Kind1Filters;
+  kind2: Kind2Filters;
+  kind3: Kind3Filters;
   dates?: {
     from?: Date;
     to?: Date;

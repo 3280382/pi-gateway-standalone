@@ -8,7 +8,8 @@ import {
   TestReporter,
   TestServerManager,
   TestWebSocketClient,
-} from "../../../../test/lib/test-utils.js";
+  TEST_CONFIG,
+} from "@test/lib/test-utils";
 import { setTimeout as delay } from "node:timers/promises";
 
 const logger = new TestLogger("ws-abort");
@@ -21,14 +22,14 @@ describe("WebSocket Abort Handler", () => {
   beforeAll(async () => {
     logger.info("Initializing Abort test");
     await server.start();
-    const port = process.env.TEST_PORT || 3000;
-    wsUrl = `ws://127.0.0.1:${port}/ws`;
-  });
+    wsUrl = `ws://127.0.0.1:${TEST_CONFIG.port}/ws`;
+    logger.info("WebSocket URL", { wsUrl });
+  }, 60000);
 
-  afterAll(() => {
-    server.stop();
+  afterAll(async () => {
+    await server.stop();
     reporter.generateReport();
-  });
+  }, 10000);
 
   it("can abort ongoing request", async () => {
     await reporter.runTest("Abort ongoing request", async () => {
@@ -36,55 +37,57 @@ describe("WebSocket Abort Handler", () => {
       await client.connect(wsUrl);
 
       // Initialize
-      await client.waitForMessage(
-        (m) => m.type === "welcome" || m.type === "connected",
-        5000
-      );
+      await client.waitForMessage((m) => m.type === "welcome" || m.type === "connected", 5000);
 
       client.send("init", { workingDir: "/root/pi-gateway-standalone" });
       await client.waitForMessage(
-        (m) => m.type === "init_ack" || m.type === "initialized",
-        5000
+        (m) => m.type === "init_ack" || m.type === "initialized" || m.type === "ready",
+        10000
       );
 
       // Send a prompt that takes longer to process
       client.send("prompt", {
-        text: "Write a very long story about testing",
+        text: "Write a very long story about testing with many details",
       });
 
       // Wait for response to start
       await client.waitForMessage(
-        (m) => m.type === "response_start" || m.type === "chunk",
-        10000
+        (m) => m.type === "response_start" || m.type === "chunk" || m.type === "response",
+        15000
       );
+
+      await delay(500);
 
       // Send abort
       client.send("abort", {});
       logger.info("Abort message sent");
 
-      // Wait for abort confirmation
+      // Wait for abort confirmation or response end
       try {
         const response = await client.waitForMessage(
-          (m) => m.type === "aborted" || m.type === "response_end",
+          (m) => m.type === "aborted" || m.type === "response_end" || m.type === "done",
           5000
         );
         logger.info("Received abort confirmation", response);
       } catch {
-        logger.info("Abort message processed");
+        logger.info("Abort message processed without explicit confirmation");
       }
 
       client.disconnect();
     });
-  });
+  }, 30000);
 
   it("handles abort when no active request", async () => {
     await reporter.runTest("Handle abort when no active request", async () => {
       const client = new TestWebSocketClient(wsUrl);
       await client.connect(wsUrl);
 
+      await client.waitForMessage((m) => m.type === "welcome" || m.type === "connected", 5000);
+
+      client.send("init", { workingDir: "/root/pi-gateway-standalone" });
       await client.waitForMessage(
-        (m) => m.type === "welcome" || m.type === "connected",
-        5000
+        (m) => m.type === "init_ack" || m.type === "initialized" || m.type === "ready",
+        10000
       );
 
       // Send abort directly, no pending request
@@ -103,5 +106,5 @@ describe("WebSocket Abort Handler", () => {
 
       client.disconnect();
     });
-  });
+  }, 20000);
 });

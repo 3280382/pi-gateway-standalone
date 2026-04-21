@@ -41,7 +41,11 @@ function formatRelativeTime(dateString: string): string {
 }
 
 // Get status icon and class
-function getStatusInfo(status: string | undefined): { icon: string; className: string; label: string } {
+function getStatusInfo(status: string | undefined): {
+  icon: string;
+  className: string;
+  label: string;
+} {
   switch (status) {
     case "history":
       return { icon: "📜", className: styles.statusHistory, label: "History" };
@@ -86,11 +90,24 @@ function SessionRow({ session, isSelected, status, onSelect }: SessionRowProps) 
     }
   }, [isEditing]);
 
-  const handleNameClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsEditing(true);
-    setEditName(session.name);
-  }, [session.name]);
+  // 点击编辑图标进入编辑状态，再次点击保存
+  const handleEditClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (isEditing) {
+        // 保存
+        if (editName.trim() && editName !== session.name) {
+          updateSessionName(session.id, editName.trim());
+        }
+        setIsEditing(false);
+      } else {
+        // 进入编辑状态
+        setIsEditing(true);
+        setEditName(session.name);
+      }
+    },
+    [isEditing, editName, session.name, session.id]
+  );
 
   const handleSave = useCallback(() => {
     if (editName.trim() && editName !== session.name) {
@@ -99,14 +116,17 @@ function SessionRow({ session, isSelected, status, onSelect }: SessionRowProps) 
     setIsEditing(false);
   }, [editName, session.id, session.name]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSave();
-    } else if (e.key === "Escape") {
-      setEditName(session.name);
-      setIsEditing(false);
-    }
-  }, [handleSave, session.name]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        handleSave();
+      } else if (e.key === "Escape") {
+        setEditName(session.name);
+        setIsEditing(false);
+      }
+    },
+    [handleSave, session.name]
+  );
 
   const statusInfo = getStatusInfo(status);
 
@@ -127,9 +147,12 @@ function SessionRow({ session, isSelected, status, onSelect }: SessionRowProps) 
             </span>
           )}
         </div>
-        
+
         <div className={styles.sessionMeta}>
-          <span className={`${styles.statusBadge} ${statusInfo.className}`} title={statusInfo.label}>
+          <span
+            className={`${styles.statusBadge} ${statusInfo.className}`}
+            title={statusInfo.label}
+          >
             {statusInfo.icon} {statusInfo.label}
           </span>
           <span className={styles.messageCount}>{session.messageCount || 0}</span>
@@ -151,12 +174,15 @@ function SessionRow({ session, isSelected, status, onSelect }: SessionRowProps) 
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <span className={styles.sessionName} onClick={handleNameClick} title="Click to edit name">
-            {session.name || "Untitled"}
-          </span>
+          <span className={styles.sessionName}>{session.name || "Untitled"}</span>
         )}
-        
-
+        <span
+          className={styles.editIcon}
+          onClick={handleEditClick}
+          title={isEditing ? "Save" : "Edit name"}
+        >
+          {isEditing ? "✓" : "✎"}
+        </span>
       </div>
     </div>
   );
@@ -204,16 +230,26 @@ export function SessionDropdownSection() {
   // ========== 4. Computed ==========
   const getStatusPriority = (status: string | undefined): number => {
     switch (status) {
-      case "streaming": return 1;
-      case "thinking": return 2;
-      case "tooling": return 3;
-      case "retrying": return 4;
-      case "compacting": return 5;
-      case "waiting": return 6;
-      case "idle": return 7;
-      case "error": return 8;
-      case "history": return 9;
-      default: return 10;
+      case "streaming":
+        return 1;
+      case "thinking":
+        return 2;
+      case "tooling":
+        return 3;
+      case "retrying":
+        return 4;
+      case "compacting":
+        return 5;
+      case "waiting":
+        return 6;
+      case "idle":
+        return 7;
+      case "error":
+        return 8;
+      case "history":
+        return 9;
+      default:
+        return 10;
     }
   };
 
@@ -258,19 +294,15 @@ export function SessionDropdownSection() {
 
   return (
     <section className={styles.section}>
-      {isLoading && (
-        <div className={styles.loadingOverlay}>
-          <div className={styles.loadingSpinner} />
-          <span className={styles.loadingText}>Updating...</span>
-        </div>
-      )}
-
       <div className={styles.sectionHeader}>
-        <h3 className={styles.sectionTitle}>Sessions ({sessions.length})</h3>
+        <h3 className={styles.sectionTitle}>
+          Sessions ({sessions.length})
+          {isLoading && <span className={styles.headerLoadingIndicator} />}
+        </h3>
       </div>
 
-      <div className={styles.sessionListContainer} style={{ maxHeight: '280px', overflowY: 'auto' }}>
-        {sortedSessions.slice(0, 5).map((session) => (
+      <div className={styles.sessionListContainer}>
+        {sortedSessions.slice(0, 15).map((session) => (
           <SessionRow
             key={session.id}
             session={session}

@@ -1,7 +1,5 @@
 # Feature Specification
 
-> **AI Assistants**: This is a supplementary document. Read [`AGENTS.md`](./AGENTS.md) first.
-
 ## Product Overview
 
 Pi Gateway is a web gateway for Pi Coding Agent, providing developers with an AI chat interface and file management functionality.
@@ -14,7 +12,7 @@ All views share a unified layout framework:
 
 ```
 ┌─────────────────────────────────────────────┐
-│ Header                                      │
+│ Header (76px)                               │
 │ ├─ Row 1: Working Directory | Status       │
 │ └─ Row 2: Search Box                        │
 ├──────────┬──────────────────────────────────┤
@@ -23,7 +21,8 @@ All views share a unified layout framework:
 │ (280px)  │  ├─ MessageList / FileBrowser   │
 │          │  └─ InputArea (Chat only)       │
 ├──────────┴──────────────────────────────────┤
-│ Footer (View Switcher)                      │
+│ Footer (44px)                               │
+│ └─ View Switcher (Chat | Files)            │
 └─────────────────────────────────────────────┘
 ```
 
@@ -37,8 +36,10 @@ All views share a unified layout framework:
 | **Streaming** | Typewriter effect for AI responses |
 | **Code Highlighting** | Syntax highlighting for code blocks |
 | **Thinking Blocks** | Collapsible reasoning sections |
-| **Tool Calls** | Display tool execution |
+| **Tool Calls** | Display tool execution with terminal-style formatting |
 | **Input Toolbar** | System Prompt, @ File, / Command, ! Shell, Image upload |
+| **Message Collapse** | Collapse/expand toggle (−/+) in message headers |
+| **Fullscreen Mode** | Double-click long messages for fullscreen view |
 
 ### 2. File Browser Feature
 
@@ -48,20 +49,15 @@ All views share a unified layout framework:
 | **View Modes** | Grid/List toggle |
 | **Batch Operations** | Multi-select files |
 | **File Preview** | Text file preview with syntax highlighting |
-| **Multi-Session Terminal** | WebSocket-based terminal with node-pty support |
+| **File Operations** | Create, delete files |
+| **Navigation** | Home, Refresh, Up buttons |
 
-#### Terminal Feature Details
+#### Terminal Feature
 
 - **Technology**: xterm.js + node-pty for full TTY support
 - **WebSocket Path**: `/ws/terminal` (separate from chat WebSocket)
-- **Multi-Session**: Single WebSocket connection manages multiple terminal sessions
+- **Multi-Session**: Tab-based session switching
 - **PTY Support**: Full TTY support for interactive programs (vim, top, pi, etc.)
-- **Features**:
-  - Tab-based session switching
-  - Streaming output display
-  - Terminal resize (cols/rows)
-  - Session persistence during navigation
-  - Input focus pushes interface up (like Chat InputArea)
 
 ### 3. Sidebar
 
@@ -70,29 +66,22 @@ All views share a unified layout framework:
 | **Workspaces** | Recent working directories |
 | **Sessions** | Session list for current directory |
 | **Model Settings** | Model selection and parameters |
-| **Chat Settings** | LLM Log, theme settings |
+| **Chat Settings** | Font size, theme (light/dark), LLM Log |
 
-## State Persistence
+#### Font Size Options
 
-### Frontend (localStorage)
+| Size | Base | Small | Extra Small |
+|------|------|-------|-------------|
+| Tiny | 11px | 10px | 9px |
+| Small | 13px | 12px | 11px |
+| Medium | 15px | 14px | 13px |
 
-- `currentDir`: Current working directory
-- `currentSessionId`: Current session ID
-- `currentModel`: Selected model
-- `thinkingLevel`: Thinking level
+### 4. State Persistence
 
-### Backend (Session File)
-
-- Session history stored in `.pi/sessions/`
-- Auto-save on WebSocket disconnect
-
-## Responsive Breakpoints
-
-| Breakpoint | Width | Behavior |
-|-----------|-------|----------|
-| Desktop | > 768px | Full layout with sidebar |
-| Tablet | 768px | Sidebar auto-hides |
-| Mobile | < 768px | Drawer sidebar, simplified header |
+| Location | Data | Storage |
+|----------|------|---------|
+| Frontend | currentDir, currentSessionId, currentModel, thinkingLevel | localStorage |
+| Backend | Session history | `.pi/sessions/` (auto-save on disconnect) |
 
 ## User Workflows
 
@@ -111,19 +100,58 @@ All views share a unified layout framework:
 4. Backend restarts pi process
 5. Load new session
 
+### Session Switching Flow
+
+1. User clicks session in sidebar
+2. Frontend loads session via REST API `/api/session/load`
+3. Parse JSONL format with metadata and messages
+4. Render all message types (user, assistant, tool calls)
+
 ## UI/UX Guidelines
 
-### Color Scheme
+### Color Scheme (Dark Theme)
 
-- **Primary**: `#58a6ff` (Blue)
-- **Success**: `#238636` (Green)
-- **Warning**: `#d29922` (Yellow)
-- **Error**: `#f85149` (Red)
-- **Background**: `#0d1117` (Dark)
+| Purpose | Color | Hex |
+|---------|-------|-----|
+| Primary | Blue | `#58a6ff` |
+| Success | Green | `#238636` |
+| Warning | Yellow | `#d29922` |
+| Error | Red | `#f85149` |
+| Background | Dark | `#0d1117` |
+| Surface | Gray | `#161b22` |
+| Border | Subtle | `rgba(48, 54, 61, 0.5)` |
 
 ### Spacing
 
-- Header: 76px (2 rows)
-- Sidebar: 280px
-- Footer: 44px
-- Standard padding: 12px-16px
+| Element | Size |
+|---------|------|
+| Header | 76px (38px × 2 rows) |
+| Sidebar | 280px |
+| Footer | 44px |
+| Standard padding | 12px–16px |
+| Icon buttons | 28×28px |
+| Icons | 15×15px |
+
+### Responsive Breakpoints
+
+| Breakpoint | Width | Behavior |
+|-----------|-------|----------|
+| Desktop | > 768px | Full layout with sidebar |
+| Tablet | 768px | Sidebar auto-hides |
+| Mobile | < 768px | Drawer sidebar, simplified header |
+
+### Button Styles
+
+- **Size**: 28×28px with 15×15px icons
+- **Border Radius**: 6px
+- **Border**: 1px solid `rgba(48, 54, 61, 0.5)`
+
+### Bottom Menu Button Themes
+
+| Button | Color Theme |
+|--------|-------------|
+| Home/Refresh/Up | Cyan |
+| Grid/List toggle | Purple-gray |
+| New File | Emerald |
+| Tree View | Amber |
+| Delete | Rose |

@@ -8,14 +8,17 @@
  *
  * 统一原则：
  * - 所有场景（RefreshPages面、切换directories、选择 session）都使用 initChatWorkingDirectory
- * - 都使用 normalizeSessionMessages Handle messages
  * - 都更新相同的 store 字段
+ *
+ * 性能优化：
+ * - 服务器已预处理所有消息，客户端直接使用，无需再调用 normalizeSessionMessages
  */
 
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
+import type { Message } from "@/features/chat/types/chat";
 import { websocketService } from "@/services/websocket.service";
 import { initChatWorkingDirectory } from "@/features/chat/services/chatWebSocket";
 import { extractShortSessionId } from "@/features/chat/utils/sessionUtils";
@@ -68,9 +71,38 @@ function getStores() {
   };
 }
 
+// 导出辅助函数供其他模块使用
+export { updateSessionsAndStatus, getStores };
+
 // ============================================================================
-// Unified Response Handler
+// Unified Helpers
 // ============================================================================
+
+/**
+ * 统一更新 sessions 列表和运行时状态
+ * 所有场景使用相同的逻辑：setSessions + updateRuntimeStatusBulk
+ */
+function updateSessionsAndStatus(
+  sidebarStore: ReturnType<typeof getStores>["sidebar"],
+  sessions: any[]
+) {
+  if (!sessions || sessions.length === 0) return;
+
+  // 更新 sessions 列表
+  sidebarStore.setSessions(sessions);
+
+  // 提取并更新运行时状态
+  const statusList = sessions
+    .filter((s: any) => s && s.id && s.status)
+    .map((s: any) => ({
+      sessionId: s.id,
+      status: s.status,
+    }));
+
+  if (statusList.length > 0) {
+    sidebarStore.updateRuntimeStatusBulk(statusList);
+  }
+}
 
 /**
  * 统一处理 init 响应
@@ -98,9 +130,10 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
   stores.session.setThinkingLevel(thinkingLevel as any);
   stores.session.setAvailableModels(allModels || []);
 
-  // 3. 更新 sessions Cols表
-  stores.sidebar.setSessions(allSessions || []);
-  // 使用服务器返回的短 ID 作为选中 session ID（确保与 sidebar 中的 session.id 一致）
+  // 3. 更新 sessions 列表和状态（统一使用辅助函数）
+  updateSessionsAndStatus(stores.sidebar, allSessions || []);
+
+  // 使用服务器返回的短 ID 作为选中 session ID
   const shortSessionId = (currentSession as any)?.shortId || null;
   stores.sidebar.setSelectedSessionId(shortSessionId);
 
@@ -114,11 +147,14 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
     shortId: currentSession?.shortId,
     messageCount: currentSession?.messages?.length,
     hasMessages: !!currentSession?.messages,
+    processed: currentSession?.processed,
   });
   if (currentSession?.messages?.length > 0) {
     console.log("LOADING MESSAGES:", currentSession.messages.length);
-    const { normalizeSessionMessages } = await import("@/features/chat/utils/messageUtils");
-    const formattedMessages = normalizeSessionMessages(currentSession.messages);
+
+    // 使用服务器预处理的消息（服务器已处理所有消息格式转换）
+    const formattedMessages: Message[] = currentSession.messages;
+
     console.log("FORMATTED MESSAGES:", formattedMessages.length);
     console.log("ABOUT TO CALL SETMESSAGES...");
     console.log("stores.chat object:", stores.chat);
@@ -135,10 +171,9 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
     stores.chat.setMessages([]);
   }
 
-  // 6. 清理流式状态和运Rows状态（完全切换到新 session）
+  // 6. 清理流式状态和运Rows状态
   stores.chat.abortStreaming();
   stores.chat.setIsRunning(false);
-  // Clear输入框，确保新 session 从干净状态开始
   stores.chat.clearInput();
 }
 
@@ -198,7 +233,7 @@ async function selectSession(sessionId: string): Promise<void> {
   const stores = getStores();
   console.log("STORES:", {
     hasChat: !!stores.chat,
-    hasSetMessages: typeof stores.chat?.setMessages === 'function',
+    hasSetMessages: typeof stores.chat?.setMessages === "function",
     chatMessages: stores.chat?.messages?.length,
   });
   const session = findSessionInList(stores.sidebar.sessions, sessionId);
@@ -227,15 +262,25 @@ async function selectSession(sessionId: string): Promise<void> {
 
   console.log("[SessionManager.selectSession] sessionId=", sessionId);
 
-  // 设置加载状态（覆盖式，不Clear界面）
-  stores.sidebar.setLoading(true);
-  console.log("[SessionManager.selectSession] 显示 loading");
+  // 【乐观更新】先立即更新 UI 为选中状态，让用户看到反馈
+  const shortId = extractShortSessionId(session.path);
+  const previousSelectedId = stores.sidebar.selectedSessionId;
+  stores.sidebar.setSelectedSessionId(shortId);
+  console.log("[SessionManager.selectSession] 乐观更新 UI 为选中状态:", shortId);
+
+  // 【UX优化】不显示全局loading，只在Sessions标题后显示小指示器
+  // workspace 部分保持正常显示，不受loading影响
 
   try {
     // 使用统一的 init API（传入 sessionFile 用于Exact match）
     console.log("[SessionManager.selectSession] Calling initChatWorkingDirectory...");
     const messageLimit = stores.session.defaultMessageLimit;
-    const response = await initChatWorkingDirectory(stores.session.workingDir, session.path, 15000, messageLimit);
+    const response = await initChatWorkingDirectory(
+      stores.session.workingDir,
+      session.path,
+      15000,
+      messageLimit
+    );
     console.log("[SessionManager.selectSession] initChatWorkingDirectory returned!");
 
     console.log("[SessionManager.selectSession] 服务器返回:", {
@@ -249,22 +294,17 @@ async function selectSession(sessionId: string): Promise<void> {
 
     // 重建界面（更新所有状态）
     console.log("[SessionManager.selectSession] 调用 handleInitResponse, stores.chat:", {
-      hasSetMessages: typeof stores.chat?.setMessages === 'function',
+      hasSetMessages: typeof stores.chat?.setMessages === "function",
     });
     await handleInitResponse(response, stores);
 
     console.log("[SessionManager.selectSession] 界面重建完成");
   } catch (error) {
     console.error("[SessionManager.selectSession] error:", error);
-    // 降级：只更新 UI 状态（使用短 ID）
-    const shortId = extractShortSessionId(session.path);
-    stores.sidebar.setSelectedSessionId(shortId);
-    stores.session.setCurrentSession(shortId);
-    stores.session.setCurrentSessionFile(session.path);
-  } finally {
-    // 结束 loading
-    stores.sidebar.setLoading(false);
-    console.log("[SessionManager.selectSession] loading 结束");
+    // 【错误回滚】恢复之前的选中状态
+    stores.sidebar.setSelectedSessionId(previousSelectedId);
+    console.log("[SessionManager.selectSession] 错误回滚，恢复选中状态:", previousSelectedId);
+    throw error;
   }
 }
 

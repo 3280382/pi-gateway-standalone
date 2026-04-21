@@ -15,6 +15,7 @@ export interface MessageContent {
   type: ContentType;
   text?: string;
   thinking?: string;
+  thinkingSignature?: string; // For thinking content
   toolName?: string;
   args?: Record<string, unknown>;
   partialArgs?: string;
@@ -23,7 +24,17 @@ export interface MessageContent {
   imageUrl?: string;
   signature?: string;
   toolCallId?: string;
+  status?: "pending" | "executing" | "success" | "error"; // For tool/tool_use content
 }
+
+export type MessageKind =
+  | "compaction"
+  | "retry"
+  | "auto_retry"
+  | "model_change"
+  | "thinking_level_change"
+  | "usage"
+  | undefined;
 
 export interface Message {
   id: string;
@@ -34,6 +45,17 @@ export interface Message {
   isThinkingCollapsed?: boolean;
   isToolsCollapsed?: boolean;
   isMessageCollapsed?: boolean;
+  kind?: MessageKind; // Special message type for styling and filtering
+  usage?: {
+    input?: number;
+    output?: number;
+    total?: number;
+    cost?: number;
+    model?: string;
+  };
+  model?: string;
+  provider?: string;
+  stopReason?: string;
 }
 
 // ============================================================================
@@ -66,19 +88,19 @@ export interface RoleFilters {
 
 // Hierarchical Content Type Filters
 export interface ContentTypeFilters {
-  prompt: boolean;           // User messages
-  text: boolean;             // Assistant text
-  thinking: boolean;         // AI thinking
-  tool: boolean;             // Tool calls (all)
-  toolSuccess: boolean;      // Tool calls - success
-  toolError: boolean;        // Tool calls - error
-  toolPending: boolean;      // Tool calls - pending/executing
-  compaction: boolean;       // Context compaction
-  retry: boolean;            // Manual retry
-  autoRetry: boolean;        // Auto-retry
-  modelChange: boolean;      // Model switch
+  prompt: boolean; // User messages
+  text: boolean; // Assistant text
+  thinking: boolean; // AI thinking
+  tool: boolean; // Tool calls (all)
+  toolSuccess: boolean; // Tool calls - success
+  toolError: boolean; // Tool calls - error
+  toolPending: boolean; // Tool calls - pending/executing
+  compaction: boolean; // Context compaction
+  retry: boolean; // Manual retry
+  autoRetry: boolean; // Auto-retry
+  modelChange: boolean; // Model switch
   thinkingLevelChange: boolean; // Thinking level
-  usage: boolean;            // Token usage
+  usage: boolean; // Token usage
 }
 
 export interface ChatSearchFilters {

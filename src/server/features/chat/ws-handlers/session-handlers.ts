@@ -6,7 +6,12 @@
 import { existsSync } from "node:fs";
 import { SessionManager } from "@mariozechner/pi-coding-agent";
 import { serverSessionManager, extractShortSessionId } from "../agent-session/session-manager";
-import { buildSessionResponse, getAllSessions, getSessionMessages, getSessionMessageCount } from "../session-helpers";
+import {
+  buildSessionResponse,
+  getAllSessions,
+  getSessionMessages,
+  getSessionMessageCount,
+} from "../session-helpers";
 import { getLocalSessionsDir } from "../agent-session/utils";
 import { sessionConfigManager } from "../session-config/sessionConfigManager";
 import type { WSContext } from "../ws-router";
@@ -27,7 +32,11 @@ export async function handleInit(
     messageLimit?: number;
   }
 ): Promise<void> {
-  const { workingDir: clientWorkingDir, sessionFile: clientSessionFile, messageLimit = 100 } = payload;
+  const {
+    workingDir: clientWorkingDir,
+    sessionFile: clientSessionFile,
+    messageLimit = 100,
+  } = payload;
 
   // 1. Determine working directory
   const workingDir = clientWorkingDir || process.cwd();
@@ -61,9 +70,17 @@ export async function handleInit(
 
   // 3. Build response data
   // Pass clientSessionFile to ensure correct session file path
-  logger.info(`[handleInit] Building response with sessionFile: ${clientSessionFile || 'none'}`);
-  let responseData = await buildSessionResponse(session, workingDir, messageLimit, 10, clientSessionFile);
-  logger.info(`[handleInit] Response built: ${responseData.currentSession.messages.length} messages`);
+  logger.info(`[handleInit] Building response with sessionFile: ${clientSessionFile || "none"}`);
+  let responseData = await buildSessionResponse(
+    session,
+    workingDir,
+    messageLimit,
+    15,
+    clientSessionFile
+  );
+  logger.info(
+    `[handleInit] Response built: ${responseData.currentSession.messages.length} messages`
+  );
 
   // 4. If current session has no messages, try loading recent session with messages
   if (responseData.currentSession.messages.length === 0) {
@@ -74,12 +91,13 @@ export async function handleInit(
       logger.info(
         `[handleInit] Switching to session with messages: ${recentSessionWithMessages.path}`
       );
-      // Load this session's messages
-      const messages = await getSessionMessages(recentSessionWithMessages.path);
+      // Load this session's messages (server-side processed)
+      const messagesResponse = await getSessionMessages(recentSessionWithMessages.path);
       responseData.currentSession.sessionFile = recentSessionWithMessages.path;
       // sessionId should be full path, not short ID
       responseData.currentSession.sessionId = recentSessionWithMessages.path;
-      responseData.currentSession.messages = messages;
+      responseData.currentSession.messages = messagesResponse.messages;
+      responseData.currentSession.processed = true;
     }
   }
 
@@ -89,7 +107,7 @@ export async function handleInit(
     ...responseData,
     currentSession: {
       ...responseData.currentSession,
-      shortId,           // 8-character short ID
+      shortId, // 8-character short ID
       sessionFile: responseData.currentSession.sessionFile, // Full path
     },
   };
@@ -97,9 +115,7 @@ export async function handleInit(
   // 6. Send response
   sendSuccess(ctx, "initialized", enhancedResponse);
 
-  logger.info(
-    `[handleInit] Success: pid=${process.pid}, shortId=${shortId}`
-  );
+  logger.info(`[handleInit] Success: pid=${process.pid}, shortId=${shortId}`);
 }
 
 /**
@@ -114,7 +130,7 @@ async function findRecentSessionWithMessages(
 
   for (const s of sortedSessions) {
     const msgs = await getSessionMessages(s.path);
-    if (msgs.length > 0) {
+    if (msgs.messages.length > 0) {
       return { path: s.path };
     }
   }
@@ -210,7 +226,9 @@ export async function handleNewSession(
 
   sendSuccess(ctx, "session_created", responsePayload);
 
-  logger.info(`[handleNewSession] Success: sessionId=${session.session.sessionId}, sessionFile=${responseData.currentSession.sessionFile}`);
+  logger.info(
+    `[handleNewSession] Success: sessionId=${session.session.sessionId}, sessionFile=${responseData.currentSession.sessionFile}`
+  );
 }
 
 // ============================================================================
@@ -234,43 +252,44 @@ export async function handleLoadSession(
   const { sessionPath } = payload;
 
   try {
-    // Use PiAgentSession's loadSession method
-    const loadResult = await ctx.session.loadSession(sessionPath);
-
-    if (!loadResult) {
-      throw new Error("Failed to load session - no session available");
-    }
-
-    if (!loadResult.success) {
-      throw new Error(loadResult.error || "Failed to load session");
-    }
-
-    // Update client selected session for strict message routing
+    // 【关键修复】使用 ServerSessionManager.switchSession 来切换 session
+    // 这样可以确保 serverSessionManager 中的 entry 被正确更新
     const shortId = extractShortSessionId(sessionPath);
+    const currentWorkingDir = ctx.session?.workingDir || process.cwd();
+
+    // 切换 session，这会更新 serverSessionManager 中的 entry
+    const newSession = await serverSessionManager.switchSession(
+      currentWorkingDir,
+      currentWorkingDir, // 同一工作目录
+      ctx.ws,
+      sessionPath
+    );
+
+    // 更新 ctx.session 为新的 session
+    ctx.session = newSession;
+
     if (shortId) {
-      serverSessionManager.setClientSelectedSession(ctx.ws, shortId);
       ctx.selectedSessionId = shortId;
       logger.info(`[handleLoadSession] Client switched to session: ${shortId}`);
     }
 
     // Build full response with messages using shared helper
-    // Pass explicit sessionPath as session.sessionFile may not be updated after switchSession
     const workingDir = ctx.session.workingDir;
-    const responseData = await buildSessionResponse(ctx.session, workingDir, 100, 10, sessionPath);
+    const responseData = await buildSessionResponse(ctx.session, workingDir, 100, 15, sessionPath);
 
     // Send session_loaded with full message list (unified naming convention)
     sendSuccess(ctx, "session_loaded", {
       success: true,
-      shortId,  // 8-character short ID
-      sessionFile: responseData.currentSession.sessionFile,  // Full path
+      shortId, // 8-character short ID
+      sessionFile: responseData.currentSession.sessionFile, // Full path
       messages: responseData.currentSession.messages,
       totalMessageCount: responseData.currentSession.totalMessageCount,
-      cwdChanged: loadResult.cwdChanged,
-      newCwd: loadResult.newCwd,
       pid: process.pid,
     });
 
-    logger.info(`[handleLoadSession] Session loaded: ${sessionPath}, messages: ${responseData.currentSession.messages.length}`);
+    logger.info(
+      `[handleLoadSession] Session loaded: ${sessionPath}, messages: ${responseData.currentSession.messages.length}`
+    );
   } catch (error) {
     logger.error("[handleLoadSession] Error:", {}, error instanceof Error ? error : undefined);
     sendSuccess(ctx, "session_loaded", {
@@ -343,8 +362,14 @@ export async function handleListSessions(
 
     // Get active sessions status from serverSessionManager
     const activeSessions = serverSessionManager.getAllSessions();
+
+    // 【调试日志】检查 active sessions
+    logger.info(
+      `[handleListSessions] Active sessions: ${activeSessions.length}, keys: ${activeSessions.map((s) => extractShortSessionId(s.sessionFile)).join(", ")}`
+    );
+
     const activeSessionMap = new Map(
-      activeSessions.map(s => [extractShortSessionId(s.sessionFile), s])
+      activeSessions.map((s) => [extractShortSessionId(s.sessionFile), s])
     );
 
     // Sort sessions by modification time (newest first) and limit to 15
@@ -352,23 +377,34 @@ export async function handleListSessions(
       .sort((a, b) => new Date(b.modified).getTime() - new Date(a.modified).getTime())
       .slice(0, 15);
 
-    // Ensure top 5 sessions have config entries (auto-initialize if missing)
-    const sessionIds = sortedSessions.map(s => ({ id: extractShortSessionId(s.path), path: s.path }));
+    // Ensure top 15 sessions have config entries (auto-initialize if missing)
+    const sessionIds = sortedSessions.map((s) => ({
+      id: extractShortSessionId(s.path),
+      path: s.path,
+    }));
     await sessionConfigManager.ensureConfigs(sessionIds, workingDir);
 
     // Get all configs
     const configs = sessionConfigManager.getAllConfigs();
 
-    // Build sessions list with config data (top 5 only)
+    // Build sessions list with config data (top 15)
     const sessionsList = sortedSessions.map((s) => {
       const shortId = extractShortSessionId(s.path);
       const activeInfo = activeSessionMap.get(shortId);
       const config = configs[shortId];
-      
+
+      // 【调试日志】检查第一个 session 的状态匹配情况
+      if (sortedSessions.indexOf(s) === 0) {
+        logger.info(
+          `[handleListSessions] First session: shortId=${shortId}, path=${s.path}, activeInfo=${activeInfo ? "found" : "not found"}, status=${activeInfo?.runtimeStatus || "history"}`
+        );
+      }
+
       return {
         id: shortId,
         path: s.path,
-        name: config?.name || s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
+        name:
+          config?.name || s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
         // Note: summary and firstUserPrompt are intentionally excluded from broadcast
         // to reduce payload size (firstUserPrompt can be very long)
         messageCount: s.messageCount || 0,
@@ -380,7 +416,9 @@ export async function handleListSessions(
 
     sendSuccess(ctx, "sessions_list", { sessions: sessionsList });
 
-    logger.info(`[handleListSessions] Sent ${sessionsList.length} sessions (from ${sessions.length} total)`);
+    logger.info(
+      `[handleListSessions] Sent ${sessionsList.length} sessions (from ${sessions.length} total)`
+    );
   } catch (error) {
     logger.error("[handleListSessions] Error:", {}, error instanceof Error ? error : undefined);
     sendError(ctx, error instanceof Error ? error.message : "Failed to list sessions");
@@ -408,7 +446,7 @@ export async function handleGetSessionStatus(
 
   try {
     const entry = serverSessionManager.getSessionByShortId(shortId);
-  
+
     if (!entry) {
       sendSuccess(ctx, "session_status", {
         sessionId: shortId,
@@ -419,14 +457,18 @@ export async function handleGetSessionStatus(
       return;
     }
 
-    const statusText = {
-      idle: "Idle",
-      thinking: "Thinking",
-      tooling: "Executing Tool",
-      streaming: "Streaming",
-      waiting: "Waiting for Input",
-      error: "Error Occurred",
-    }[entry.runtimeStatus] || entry.runtimeStatus;
+    const statusText =
+      {
+        idle: "Idle",
+        thinking: "Thinking",
+        tooling: "Executing Tool",
+        streaming: "Streaming",
+        waiting: "Waiting for Input",
+        error: "Error Occurred",
+        history: "History",
+        retrying: "Retrying",
+        compacting: "Compacting",
+      }[entry.runtimeStatus] || entry.runtimeStatus;
 
     sendSuccess(ctx, "session_status", {
       sessionId: shortId,
@@ -494,19 +536,21 @@ export async function handleLoadMoreMessages(
 
   try {
     // Load older messages (going back from the offset)
-    const messages = await getSessionMessages(sessionFile, limit, offset);
+    const response = await getSessionMessages(sessionFile, limit, offset);
     const totalCount = await getSessionMessageCount(sessionFile);
 
     sendSuccess(ctx, "more_messages_loaded", {
       sessionFile,
-      messages,
+      messages: response.messages,
       offset,
       limit,
       totalCount,
-      hasMore: offset + messages.length < totalCount,
+      hasMore: offset + response.messages.length < totalCount,
     });
 
-    logger.info(`[handleLoadMoreMessages] Loaded ${messages.length} messages from offset ${offset} for ${sessionFile}`);
+    logger.info(
+      `[handleLoadMoreMessages] Loaded ${response.messages.length} messages from offset ${offset} for ${sessionFile}`
+    );
   } catch (error) {
     logger.error("[handleLoadMoreMessages] Error:", {}, error instanceof Error ? error : undefined);
     sendError(ctx, error instanceof Error ? error.message : "Failed to load more messages");
@@ -547,15 +591,23 @@ export async function handleUpdateSessionConfig(
       await sessionConfigManager.updateName(sessionId, name);
     }
 
-    sendSuccess(ctx, "session_config_updated", { 
-      sessionId,
-      name,
-      success: true 
+    // Broadcast updated sessions list to all clients (confirms success)
+    const workingDir = ctx.workingDir || process.cwd();
+    const sessions = await getAllSessions(workingDir, 15);
+    serverSessionManager.broadcastToWorkingDir(workingDir, {
+      type: "sessions_list",
+      sessions,
     });
 
-    logger.info(`[handleUpdateSessionConfig] Updated ${sessionId}: name=${name}`);
+    logger.info(
+      `[handleUpdateSessionConfig] Updated ${sessionId}: name=${name}, broadcasted sessions_list`
+    );
   } catch (error) {
-    logger.error("[handleUpdateSessionConfig] Error:", {}, error instanceof Error ? error : undefined);
+    logger.error(
+      "[handleUpdateSessionConfig] Error:",
+      {},
+      error instanceof Error ? error : undefined
+    );
     sendError(ctx, error instanceof Error ? error.message : "Failed to update session config");
   }
 }
@@ -586,7 +638,9 @@ export async function handleSidebarVisibility(
     serverSessionManager.updateSidebarVisibility(ctx.session.shortId, isVisible);
   }
 
-  logger.info(`[handleSidebarVisibility] Connection ${ctx.connectionId}: sidebar ${isVisible ? "visible" : "hidden"}`);
+  logger.info(
+    `[handleSidebarVisibility] Connection ${ctx.connectionId}: sidebar ${isVisible ? "visible" : "hidden"}`
+  );
 }
 
 export const handleSidebarVisibilityWrapped = createHandler(handleSidebarVisibility, {

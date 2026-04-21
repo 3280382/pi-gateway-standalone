@@ -12,28 +12,26 @@ git clone https://github.com/3280382/pi-gateway-standalone.git
 cd pi-gateway-standalone
 npm install
 
-# Start development - see AGENTS.md for detailed environment setup
-bash scripts/start-tmux-dev.sh
+# Start development
+bash ./dev-start.sh
 ```
-
-> **Note**: For detailed development environment setup, auto-reload configuration, and troubleshooting, see [AGENTS.md](./AGENTS.md).
 
 ## Project Structure
 
 ```
 src/
 ├── client/features/     # Frontend features (chat/, files/)
-├── server/features/    # Backend features (chat/)
-└── shared/             # Shared types only
+├── server/features/     # Backend features (chat/)
+└── shared/              # Shared types only
 ```
 
 ## Documentation
 
 | Document | Audience | Purpose |
-|---------|---------|---------|
-| [`AGENTS.md`](./AGENTS.md) | **AI Assistants** | **Primary reference - read this first** |
-| [`DEVELOPMENT.md`](./DEVELOPMENT.md) | Developers | Development guide, architecture, coding standards |
-| [`FEATURES.md`](./FEATURES.md) | Developers/PM | Feature specification, UI/UX guidelines |
+|----------|----------|---------|
+| [`AGENTS.md`](./AGENTS.md) | **AI Assistants** | Primary reference for AI coding agents |
+| [`DEVELOPMENT.md`](./DEVELOPMENT.md) | Developers | Development guide and coding standards |
+| [`FEATURES.md`](./FEATURES.md) | Developers/PM | Feature specification and UI guidelines |
 | [`CHANGELOG.md`](./CHANGELOG.md) | Everyone | Version history |
 
 ## Common Commands
@@ -42,7 +40,8 @@ src/
 npm run dev              # Start dev server
 npm run check            # Code check (Biome + TypeScript)
 npm run build            # Production build
-npm test                 # Run tests
+npm test                 # Run unit tests
+bash scripts/run-terminal-tests.sh  # Run integration tests
 ```
 
 ## Browser Support

@@ -25,7 +25,7 @@ export function extractShortSessionId(sessionFile: string): string {
  * Session runtime status
  */
 export type SessionStatus =
-  | "history"  // No active PiAgentSession (file exists but not loaded)
+  | "history" // No active PiAgentSession (file exists but not loaded)
   | "idle"
   | "thinking"
   | "tooling"
@@ -109,7 +109,7 @@ export class ServerSessionManager {
   private broadcastAllRuntimeStatus(): void {
     // Group sessions by workingDir
     const workingDirMap = new Map<string, SessionEntry[]>();
-  
+
     for (const entry of this.sessions.values()) {
       if (!workingDirMap.has(entry.workingDir)) {
         workingDirMap.set(entry.workingDir, []);
@@ -119,7 +119,7 @@ export class ServerSessionManager {
 
     // Broadcast for each workingDir
     for (const [workingDir, entries] of workingDirMap) {
-      const statusList = entries.map(entry => ({
+      const statusList = entries.map((entry) => ({
         shortId: entry.shortId,
         status: entry.runtimeStatus,
         hasClient: this.isClientConnected(entry.client),
@@ -129,13 +129,15 @@ export class ServerSessionManager {
         if (!this.shouldBroadcastToClient(entry)) continue;
 
         try {
-          entry.client.send(JSON.stringify({
-            type: "runtime_status_broadcast",
-            workingDir,
-            sessions: statusList,
-            timestamp: new Date().toISOString(),
-          }));
-        
+          entry.client.send(
+            JSON.stringify({
+              type: "runtime_status_broadcast",
+              workingDir,
+              sessions: statusList,
+              timestamp: new Date().toISOString(),
+            })
+          );
+
           // Update last broadcasted status
           entry.lastBroadcastedStatus = entry.runtimeStatus;
         } catch (e) {
@@ -221,7 +223,7 @@ export class ServerSessionManager {
     client: WebSocket,
     sessionFile?: string
   ): Promise<PiAgentSession> {
-    const actualSessionFile = sessionFile || await this.findMostRecentSessionFile(workingDir);
+    const actualSessionFile = sessionFile || (await this.findMostRecentSessionFile(workingDir));
     const shortId = this.getShortId(actualSessionFile);
 
     console.log(
@@ -285,12 +287,14 @@ export class ServerSessionManager {
   private notifyClientReplaced(oldClient: WebSocket, shortId: string, workingDir: string): void {
     if (oldClient.readyState !== WebSocket.OPEN) return;
     try {
-      oldClient.send(JSON.stringify({
-        type: "session_replaced",
-        message: "Another client has taken over this session",
-        shortId,
-        workingDir,
-      }));
+      oldClient.send(
+        JSON.stringify({
+          type: "session_replaced",
+          message: "Another client has taken over this session",
+          shortId,
+          workingDir,
+        })
+      );
     } catch {
       // Ignore send errors
     }
@@ -404,9 +408,7 @@ export class ServerSessionManager {
     const entry = this.sessions.get(shortId);
     if (!entry || entry.client !== client) return;
 
-    console.log(
-      `[ServerSessionManager] Client disconnected: shortId=${shortId}`
-    );
+    console.log(`[ServerSessionManager] Client disconnected: shortId=${shortId}`);
     console.log(`[ServerSessionManager] Session preserved, Pi continues in background`);
 
     // Unsubscribe event handlers to prevent memory leaks
@@ -480,6 +482,40 @@ export class ServerSessionManager {
       }
     }
     return undefined;
+  }
+
+  /**
+   * Get active sessions for a working directory
+   *
+   * @param workingDir Working directory
+   * @returns Array of active session info
+   */
+  getActiveSessions(workingDir: string): Array<{
+    shortId: string;
+    sessionFile: string;
+    runtimeStatus: SessionStatus;
+    hasClient: boolean;
+    lastActivity: Date;
+  }> {
+    const sessions: SessionEntry[] = [];
+    const shortIds = this.workingDirToShortIds.get(workingDir);
+
+    if (shortIds) {
+      for (const shortId of shortIds) {
+        const entry = this.sessions.get(shortId);
+        if (entry) {
+          sessions.push(entry);
+        }
+      }
+    }
+
+    return sessions.map((entry) => ({
+      shortId: entry.shortId,
+      sessionFile: entry.sessionFile,
+      runtimeStatus: entry.runtimeStatus,
+      hasClient: this.isClientConnected(entry.client),
+      lastActivity: entry.lastActivity,
+    }));
   }
 
   /**
@@ -594,7 +630,7 @@ export class ServerSessionManager {
 
     // Update lookup maps
     this.sessionFileToShortId.set(sessionFile, shortId);
-  
+
     if (!this.workingDirToShortIds.has(workingDir)) {
       this.workingDirToShortIds.set(workingDir, new Set());
     }
@@ -673,7 +709,7 @@ export class ServerSessionManager {
     if (entry) {
       entry.sidebarVisible = visible;
       console.log(`[ServerSessionManager] Sidebar visibility for ${shortId}: ${visible}`);
-    
+
       // If sidebar is now visible, immediately broadcast current status
       if (visible) {
         this.broadcastRuntimeStatus(entry.workingDir);
@@ -691,14 +727,20 @@ export class ServerSessionManager {
   setClientSelectedSession(client: WebSocket, shortId: string): void {
     this.clientToSelectedSessionId.set(client, shortId);
     console.log(`[ServerSessionManager] Client selected session: ${shortId}`);
-  
+
     // Flush buffered messages for this session to the client
     const entry = this.sessions.get(shortId);
     if (entry && entry.session) {
       const flushedCount = entry.session.flushMessageBuffer();
       if (flushedCount > 0) {
-        console.log(`[ServerSessionManager] Flushed ${flushedCount} buffered messages to client for session ${shortId}`);
+        console.log(
+          `[ServerSessionManager] Flushed ${flushedCount} buffered messages to client for session ${shortId}`
+        );
       }
+
+      // 【状态同步】客户端选择session时，立即广播一次当前状态
+      // 确保客户端能立即看到正确的状态（而不是history）
+      this.broadcastRuntimeStatus(entry.workingDir);
     }
   }
 
@@ -732,20 +774,22 @@ export class ServerSessionManager {
    */
   broadcastRuntimeStatus(workingDir: string): void {
     const sessions = this.getSessionsByWorkingDir(workingDir);
-    const statusList = sessions.map(entry => ({
+    const statusList = sessions.map((entry) => ({
       shortId: entry.shortId,
       status: entry.runtimeStatus,
       hasClient: this.isClientConnected(entry.client),
     }));
 
     // Send to all clients in this working directory
-    sessions.forEach(entry => {
+    sessions.forEach((entry) => {
       if (this.isClientConnected(entry.client)) {
         try {
-          entry.client.send(JSON.stringify({
-            type: "runtime_status_broadcast",
-            sessions: statusList,
-          }));
+          entry.client.send(
+            JSON.stringify({
+              type: "runtime_status_broadcast",
+              sessions: statusList,
+            })
+          );
         } catch (e) {
           // Ignore send errors
         }

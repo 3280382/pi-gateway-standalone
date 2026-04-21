@@ -66,25 +66,33 @@ const createInitialState = () => ({
   showTools: true,
   searchQuery: "",
   searchFilters: {
-    roles: {
+    // Level 1: Message source (user | assistant | sysinfo)
+    kind1: {
       user: true,
       assistant: true,
-      system: true,
+      sysinfo: true,
     },
-    contentTypes: {
-      prompt: true,
-      text: true,
-      thinking: true,
-      tool: true,
-      toolSuccess: true,
-      toolError: true,
-      toolPending: true,
+    // Level 2: Content type (shown based on kind1 selection)
+    kind2: {
+      prompt: true, // user
+      response: true, // assistant
+      thinking: true, // assistant
+      tool: true, // assistant
+      event: true, // sysinfo
+    },
+    // Level 3: Specific subtypes (shown based on kind2 selection)
+    kind3: {
+      // System events
+      modelChange: true,
+      thinkingLevelChange: true,
       compaction: true,
       retry: true,
       autoRetry: true,
-      modelChange: true,
-      thinkingLevelChange: true,
       usage: true,
+      // Tool statuses
+      toolSuccess: true,
+      toolError: true,
+      toolPending: true,
     },
   },
   searchResults: [] as SearchResult[],
@@ -331,6 +339,13 @@ function mergeToolArgs(tool: ToolExecution, streamingArgs?: string): Record<stri
 
 /**
  * 应用工具激活
+ *
+ * 【性能优化】
+ * 不更新 currentStreamingMessage.content，只更新 activeTools 和 streamingToolCalls。
+ * MessageList 通过 activeTools prop 动态渲染工具执行状态，不触发历史消息重渲染。
+ *
+ * 【设计原则】
+ * 工具执行状态与消息内容分离，避免流式过程中的重复渲染
  */
 function applyToolActivation(state: State, tool: ToolExecution): Partial<State> {
   const streamingTool = state.streamingToolCalls.get(tool.id);
@@ -343,23 +358,10 @@ function applyToolActivation(state: State, tool: ToolExecution): Partial<State> 
   const newStreamingToolCalls = new Map(state.streamingToolCalls);
   newStreamingToolCalls.delete(tool.id);
 
-  if (!state.currentStreamingMessage) {
-    return { activeTools: newTools, streamingToolCalls: newStreamingToolCalls };
-  }
-
-  const contentArray = buildContentArray({
-    ...state,
-    activeTools: newTools,
-    streamingToolCalls: newStreamingToolCalls,
-  });
-
+  // 优化：不更新 currentStreamingMessage.content，保持引用稳定
   return {
     activeTools: newTools,
     streamingToolCalls: newStreamingToolCalls,
-    currentStreamingMessage: {
-      ...state.currentStreamingMessage,
-      content: contentArray,
-    },
   };
 }
 
@@ -425,6 +427,19 @@ function finalizeStreaming(
 
 /**
  * 应用批处理更新
+ *
+ * 【关键优化 - 性能核心】
+ * 流式过程中只更新流式状态（streamingContent, streamingThinking, streamingToolCalls），
+ * 不更新 currentStreamingMessage.content。这样可以避免每次流式更新都触发 MessageList 重新渲染。
+ *
+ * 【数据流设计】
+ * 1. 流式更新：只更新流式状态，currentStreamingMessage 引用保持不变
+ * 2. MessageList 通过 props 接收流式状态，在 useStreamingMessage hook 中本地合并显示
+ * 3. 内容固化：只有在 endContentBlock/finishStreaming 时才将内容添加到 currentStreamingMessage.content
+ * 4. 最终保存：流式结束时，currentStreamingMessage 被添加到 messages 数组
+ *
+ * 【警告】
+ * 修改此函数时需特别注意不要重建 currentStreamingMessage 对象，否则会触发不必要的重渲染
  */
 function applyBatchUpdates(
   state: State,
@@ -457,23 +472,14 @@ function applyBatchUpdates(
     }
   }
 
-  const contentArray = buildContentArray({
-    ...state,
-    streamingContent: newContent,
-    streamingThinking: newThinking,
-    streamingToolCalls: newToolCalls,
-  });
-
-  const preservedContent = getPreservedContent(state.currentStreamingMessage?.content || []);
-
+  // 优化：只更新流式状态，不更新 currentStreamingMessage.content
+  // 这样可以避免每次流式更新都触发 MessageList 重新渲染
   return {
     streamingContent: newContent,
     streamingThinking: newThinking,
     streamingToolCalls: newToolCalls,
-    currentStreamingMessage: {
-      ...state.currentStreamingMessage!,
-      content: [...preservedContent, ...contentArray],
-    },
+    // 保持 currentStreamingMessage 引用不变
+    currentStreamingMessage: state.currentStreamingMessage,
   };
 }
 
@@ -510,7 +516,7 @@ export const useChatStore = create<
     // Message Actions
     addMessage: (message: Message) => void;
     setMessages: (messages: Message[]) => void;
-    prependMessages: (messages: Message[]) => void;  // Load more历史消息时用到
+    prependMessages: (messages: Message[]) => void; // Load more历史消息时用到
     clearMessages: () => void;
 
     // Running State (Pi coding agent turn)
@@ -567,582 +573,596 @@ export const useChatStore = create<
   persist(
     devtools(
       (set, get) => ({
-      ...createInitialState(),
+        ...createInitialState(),
 
-      // Input Actions
-      setInputText: (text: string) => {
-        set({ inputText: text }, false, "setInputText");
-      },
+        // Input Actions
+        setInputText: (text: string) => {
+          set({ inputText: text }, false, "setInputText");
+        },
 
-      clearInput: () => {
-        set({ inputText: "" }, false, "clearInput");
-      },
+        clearInput: () => {
+          set({ inputText: "" }, false, "clearInput");
+        },
 
-      // Message Actions
-      addMessage: (message: Message) => {
-        set((state) => ({ messages: [...state.messages, message] }), false, "addMessage");
-      },
+        // Message Actions
+        addMessage: (message: Message) => {
+          set((state) => ({ messages: [...state.messages, message] }), false, "addMessage");
+        },
 
-      setMessages: (messages: Message[]) => {
-        console.log("[chatStore.setMessages] Setting messages:", messages.length);
-        console.log("[chatStore.setMessages] Current messages before:", get().messages.length);
-        set({ messages, currentStreamingMessage: null }, false, "setMessages");
-        console.log("[chatStore.setMessages] Current messages after:", get().messages.length);
-        console.log("[chatStore.setMessages] Messages set successfully");
-      },
+        setMessages: (messages: Message[]) => {
+          console.log("[chatStore.setMessages] Setting messages:", messages.length);
+          console.log("[chatStore.setMessages] Current messages before:", get().messages.length);
+          set({ messages, currentStreamingMessage: null }, false, "setMessages");
+          console.log("[chatStore.setMessages] Current messages after:", get().messages.length);
+          console.log("[chatStore.setMessages] Messages set successfully");
+        },
 
-      prependMessages: (messages: Message[]) => {
-        set((state) => ({ messages: [...messages, ...state.messages] }), false, "prependMessages");
-      },
+        prependMessages: (messages: Message[]) => {
+          set(
+            (state) => ({ messages: [...messages, ...state.messages] }),
+            false,
+            "prependMessages"
+          );
+        },
 
-      clearMessages: () => {
-        set({ messages: [] }, false, "clearMessages");
-      },
+        clearMessages: () => {
+          set({ messages: [] }, false, "clearMessages");
+        },
 
-      // Running State (Pi coding agent turn)
-      setIsRunning: (isRunning: boolean) => {
-        set({ isRunning }, false, "setIsRunning");
-      },
+        // Running State (Pi coding agent turn)
+        setIsRunning: (isRunning: boolean) => {
+          set({ isRunning }, false, "setIsRunning");
+        },
 
-      // Streaming Actions - Optimized with batch updates
-      startStreaming: () => {
-        const streamingMessage: Message = {
-          id: generateMessageId(),
-          role: "assistant",
-          content: [],
-          timestamp: new Date(),
-          isStreaming: true,
-          isThinkingCollapsed: true, // 默认CollapseThinking content
-          isToolsCollapsed: true, // 默认Collapse工具内容
-        };
-        set(
-          {
+        // Streaming Actions - Optimized with batch updates
+        startStreaming: () => {
+          const streamingMessage: Message = {
+            id: generateMessageId(),
+            role: "assistant",
+            kind1: "assistant",
+            kind2: "response",
+            kind3: "text_response",
+            content: [],
+            timestamp: new Date(),
             isStreaming: true,
-            streamingContent: "",
-            streamingThinking: "",
-            streamingThinkings: [], // Initialize多轮思考
-            streamingToolCalls: new Map(),
-            activeTools: new Map(), // 清理上一次的工具状态
-            currentStreamingMessage: streamingMessage,
-          },
-          false,
-          "startStreaming"
-        );
-      },
-
-      // 创建Streaming message（使用服务器提供的ID）
-      createStreamingMessage: (messageId?: string) => {
-        const streamingMessage: Message = {
-          id: messageId || generateMessageId(),
-          role: "assistant",
-          content: [],
-          timestamp: new Date(),
-          isStreaming: true,
-          isThinkingCollapsed: true,
-          isToolsCollapsed: true,
-        };
-        set(
-          {
-            isStreaming: true,
-            streamingContent: "",
-            streamingThinking: "",
-            streamingThinkings: [],
-            streamingToolCalls: new Map(),
-            activeTools: new Map(),
-            currentStreamingMessage: streamingMessage,
-          },
-          false,
-          "createStreamingMessage"
-        );
-      },
-
-      // 开始内容块
-      startContentBlock: (type: "text" | "thinking" | "tool_use", index?: number, meta?: any) => {
-        console.log(`[ChatStore] startContentBlock: type=${type}, index=${index ?? "?"}`, meta);
-        set(
-          (state) => {
-            if (!state.currentStreamingMessage) return {};
-
-            // 根据类型初始化相应的内容块
-            switch (type) {
-              case "thinking":
-                // 开始新的思考块
-                return { streamingThinking: "" };
-              case "text":
-                // 文本块在 content_delta 时处理
-                return {};
-              case "tool_use":
-                // Tool call块在 toolcall_delta 时初始化
-                if (meta?.toolCallId && meta?.toolName) {
-                  const newToolCalls = new Map(state.streamingToolCalls);
-                  newToolCalls.set(meta.toolCallId, {
-                    id: meta.toolCallId,
-                    name: meta.toolName,
-                    args: "",
-                  });
-                  return { streamingToolCalls: newToolCalls };
-                }
-                return {};
-            }
-            return {};
-          },
-          false,
-          "startContentBlock"
-        );
-      },
-
-      // 结束内容块 - 将流式内容固化到 currentStreamingMessage.content，然后Clear流式状态
-      endContentBlock: (type: "text" | "thinking" | "tool_use", index?: number, meta?: any) => {
-        console.log(`[ChatStore] endContentBlock: type=${type}, index=${index ?? "?"}`, meta);
-
-        set(
-          (state) => {
-            if (!state.currentStreamingMessage) return {};
-
-            const existingContent = state.currentStreamingMessage.content || [];
-            let newBlock: ContentPart | null = null;
-            const updates: Partial<State> = {};
-
-            switch (type) {
-              case "thinking":
-                if (state.streamingThinking) {
-                  newBlock = {
-                    type: "thinking",
-                    thinking: state.streamingThinking,
-                  };
-                  updates.streamingThinking = "";
-                }
-                break;
-              case "text":
-                if (state.streamingContent) {
-                  newBlock = { type: "text", text: state.streamingContent };
-                  updates.streamingContent = "";
-                }
-                break;
-              case "tool_use":
-                if (meta?.toolCallId) {
-                  const toolCall = state.streamingToolCalls.get(meta.toolCallId);
-                  if (toolCall) {
-                    newBlock = {
-                      type: "tool_use",
-                      toolCallId: toolCall.id,
-                      toolName: toolCall.name,
-                      partialArgs: toolCall.args,
-                    };
-                    const newToolCalls = new Map(state.streamingToolCalls);
-                    newToolCalls.delete(meta.toolCallId);
-                    updates.streamingToolCalls = newToolCalls;
-                  }
-                }
-                break;
-            }
-
-            if (newBlock) {
-              updates.currentStreamingMessage = {
-                ...state.currentStreamingMessage,
-                content: [...existingContent, newBlock],
-              };
-            }
-
-            return updates;
-          },
-          false,
-          "endContentBlock"
-        );
-      },
-
-      // 开始新的轮次 - 在 turn_start 时调用
-      startNewTurn: () => {
-        // Clear RAF 批处理的待处理更新，避免旧内容被重复添加
-        pendingContentUpdates = {};
-
-        set(
-          (state) => {
-            if (!state.currentStreamingMessage) return {};
-
-            // 先构建当前轮次的完整内容（包括工具）
-            const currentContent = buildContentArray(state);
-
-            // 添加轮次分隔标记
-            currentContent.push({
-              type: "turn_marker",
-              turnNumber: currentContent.filter((c) => c.type === "turn_marker").length + 1,
-            });
-
-            // 获取之前已保存的内容
-            const existingContent = state.currentStreamingMessage.content || [];
-
-            // 找到最后一个 turn_marker，保留它及之前的内容（之前轮次）
-            const lastTurnMarkerIndex = existingContent
-              .map((c: any) => c.type)
-              .lastIndexOf("turn_marker");
-            const previousRounds =
-              lastTurnMarkerIndex >= 0 ? existingContent.slice(0, lastTurnMarkerIndex + 1) : []; // Page一轮不需要保留 existingContent，currentContent 已经包含了所有内容
-
-            return {
-              currentStreamingMessage: {
-                ...state.currentStreamingMessage,
-                // 保留之前轮次 + 当前轮次（避免重复）
-                content: [...previousRounds, ...currentContent],
-              },
-              // Clear当前轮次的流式状态，开始新一轮
-              streamingThinking: "",
-              streamingThinkings: [], // Clear多轮思考
+            isThinkingCollapsed: true, // 默认CollapseThinking content
+            isToolsCollapsed: true, // 默认Collapse工具内容
+          };
+          set(
+            {
+              isStreaming: true,
               streamingContent: "",
+              streamingThinking: "",
+              streamingThinkings: [], // Initialize多轮思考
+              streamingToolCalls: new Map(),
+              activeTools: new Map(), // 清理上一次的工具状态
+              currentStreamingMessage: streamingMessage,
+            },
+            false,
+            "startStreaming"
+          );
+        },
+
+        // 创建Streaming message（使用服务器提供的ID）
+        createStreamingMessage: (messageId?: string) => {
+          const streamingMessage: Message = {
+            id: messageId || generateMessageId(),
+            role: "assistant",
+            kind1: "assistant",
+            kind2: "response",
+            kind3: "text_response",
+            content: [],
+            timestamp: new Date(),
+            isStreaming: true,
+            isThinkingCollapsed: true,
+            isToolsCollapsed: true,
+          };
+          set(
+            {
+              isStreaming: true,
+              streamingContent: "",
+              streamingThinking: "",
+              streamingThinkings: [],
               streamingToolCalls: new Map(),
               activeTools: new Map(),
-            };
-          },
-          false,
-          "startNewTurn"
-        );
-      },
-
-      // Batch update - 合并所有更新一次性处理
-      batchUpdateContent: (updates: {
-        content?: string;
-        thinking?: string;
-        toolCall?: { id: string; name: string; delta: string };
-      }) => {
-        const state = get();
-        if (!state.currentStreamingMessage) return;
-
-        const newState = applyBatchUpdates(state, updates);
-
-        set(newState, false, "batchUpdateContent");
-      },
-
-      // Streaming finalization helpers
-      abortStreaming: () => finalizeStreaming(set, "abortStreaming"),
-      finishStreaming: () => finalizeStreaming(set, "finishStreaming"),
-
-      // Tools visibility
-      showTools: true,
-      setShowTools: (show: boolean) => {
-        set({ showTools: show }, false, "setShowTools");
-      },
-      toggleToolsCollapse: (messageId: string) => {
-        console.log("[ChatStore] toggleToolsCollapse called:", messageId);
-        set(
-          (state) => {
-            const targetMsg = state.messages.find((m) => m.id === messageId);
-            console.log(
-              "[ChatStore] Target message found:",
-              !!targetMsg,
-              "current isToolsCollapsed:",
-              targetMsg?.isToolsCollapsed
-            );
-
-            const updatedMessages = state.messages.map((msg) =>
-              msg.id === messageId
-                ? { ...msg, isToolsCollapsed: msg.isToolsCollapsed === false }
-                : msg
-            );
-            const updatedMsg = updatedMessages.find((m) => m.id === messageId);
-            console.log("[ChatStore] Updated isToolsCollapsed:", updatedMsg?.isToolsCollapsed);
-
-            // 同时更新 currentStreamingMessage
-            const updatedStreamingMessage =
-              state.currentStreamingMessage?.id === messageId
-                ? {
-                    ...state.currentStreamingMessage,
-                    isToolsCollapsed: state.currentStreamingMessage.isToolsCollapsed === false,
-                  }
-                : state.currentStreamingMessage;
-            return {
-              messages: updatedMessages,
-              currentStreamingMessage: updatedStreamingMessage,
-            };
-          },
-          false,
-          "toggleToolsCollapse"
-        );
-      },
-      // Tool Actions
-      setActiveTool: (tool: ToolExecution) => {
-        set((state) => applyToolActivation(state, tool), false, "setActiveTool");
-      
-        // 启动超时检测
-        const TOOL_EXECUTION_TIMEOUT = 60000; // 60秒超时
-        setTimeout(() => {
-          const currentState = get();
-          const activeTool = currentState.activeTools.get(tool.id);
-          if (activeTool && activeTool.status === "executing" && !activeTool.endTime) {
-            // 工具执Rows超时，标记为警告状态
-            console.warn(`[ChatStore] Tool execution timeout: ${tool.name} (${tool.id})`);
-            set(
-              (state) => {
-                const newTools = new Map(state.activeTools);
-                const t = newTools.get(tool.id);
-                if (t && t.status === "executing") {
-                  newTools.set(tool.id, {
-                    ...t,
-                    status: "timeout",
-                    error: "工具执Rows超时，可能仍在后台运Rows...",
-                  });
-                }
-                return { activeTools: newTools };
-              },
-              false,
-              "toolExecutionTimeout"
-            );
-          }
-        }, TOOL_EXECUTION_TIMEOUT);
-      },
-
-      updateToolOutput: (toolId: string, output: string, error?: string) => {
-        set(
-          (state) => applyToolCompletion(state, toolId, output, error),
-          false,
-          "updateToolOutput"
-        );
-      },
-
-      // 检查工具执Rows状态（用于手动触发检查）
-      checkToolExecutionStatus: () => {
-        const state = get();
-        const now = new Date();
-        const warnings: string[] = [];
-      
-        state.activeTools.forEach((tool) => {
-          if (tool.status === "executing" && !tool.endTime) {
-            const elapsed = now.getTime() - tool.startTime.getTime();
-            const elapsedSeconds = Math.floor(elapsed / 1000);
-          
-            if (elapsed > 30000) { // 超过30秒
-              warnings.push(`${tool.name}: 已执Rows ${elapsedSeconds} 秒`);
-            }
-          }
-        });
-      
-        return warnings;
-      },
-
-      // UI State
-      setShowThinking: (show: boolean) => {
-        set({ showThinking: show }, false, "setShowThinking");
-      },
-
-      // Search
-      setSearchQuery: (query: string) => {
-        set({ searchQuery: query }, false, "setSearchQuery");
-      },
-
-      setSearchFilters: (filters: Partial<ChatSearchFilters>) => {
-        set(
-          (state) => ({
-            searchFilters: {
-              roles: { ...state.searchFilters.roles, ...filters.roles },
-              contentTypes: { ...state.searchFilters.contentTypes, ...filters.contentTypes },
-              dates: filters.dates ?? state.searchFilters.dates,
+              currentStreamingMessage: streamingMessage,
             },
-          }),
-          false,
-          "setSearchFilters"
-        );
-      },
+            false,
+            "createStreamingMessage"
+          );
+        },
 
-      setSearchResults: (results: SearchResult[]) => {
-        set(
-          {
-            searchResults: results,
-            currentSearchIndex: results.length > 0 ? 0 : -1,
-          },
-          false,
-          "setSearchResults"
-        );
-      },
+        // 开始内容块
+        startContentBlock: (type: "text" | "thinking" | "tool_use", index?: number, meta?: any) => {
+          console.log(`[ChatStore] startContentBlock: type=${type}, index=${index ?? "?"}`, meta);
+          set(
+            (state) => {
+              if (!state.currentStreamingMessage) return {};
 
-      setSearching: (searching: boolean) => {
-        set({ isSearching: searching }, false, "setSearching");
-      },
-
-      nextSearchResult: () => {
-        const { searchResults, currentSearchIndex } = get();
-        if (searchResults.length === 0) return;
-        set(
-          {
-            currentSearchIndex: (currentSearchIndex + 1) % searchResults.length,
-          },
-          false,
-          "nextSearchResult"
-        );
-      },
-
-      prevSearchResult: () => {
-        const { searchResults, currentSearchIndex } = get();
-        if (searchResults.length === 0) return;
-        set(
-          {
-            currentSearchIndex:
-              (currentSearchIndex - 1 + searchResults.length) % searchResults.length,
-          },
-          false,
-          "prevSearchResult"
-        );
-      },
-
-      clearSearch: () => {
-        set(
-          {
-            searchQuery: "",
-            searchResults: [],
-            currentSearchIndex: -1,
-            isSearching: false,
-          },
-          false,
-          "clearSearch"
-        );
-      },
-
-      // Session
-      setSessionId: (id: string | null) => {
-        set({ sessionId: id }, false, "setSessionId");
-      },
-
-      setCurrentModel: (model: string | null) => {
-        set({ currentModel: model }, false, "setCurrentModel");
-      },
-
-      // Reset
-      reset: () => {
-        set(createInitialState(), false, "reset");
-      },
-
-      // 直接同步更新流式状态，不用 RAF 批处理避免竞争
-      appendStreamingContent: (text: string) => {
-        set(
-          (state) => ({
-            streamingContent: state.streamingContent + text,
-          }),
-          false,
-          "appendStreamingContent"
-        );
-      },
-
-      appendStreamingThinking: (thinking: string) => {
-        set(
-          (state) => ({
-            streamingThinking: state.streamingThinking + thinking,
-          }),
-          false,
-          "appendStreamingThinking"
-        );
-      },
-
-      appendToolCallDelta: (id: string, name: string, delta: string) => {
-        set(
-          (state) => {
-            const newToolCalls = new Map(state.streamingToolCalls);
-            const existing = newToolCalls.get(id);
-            if (existing) {
-              newToolCalls.set(id, {
-                ...existing,
-                args: existing.args + delta,
-              });
-            } else {
-              newToolCalls.set(id, { id, name, args: delta });
-            }
-            return { streamingToolCalls: newToolCalls };
-          },
-          false,
-          "appendToolCallDelta"
-        );
-      },
-
-      // Message collapse toggle
-      toggleMessageCollapse: (messageId: string) => {
-        set(
-          (state) => ({
-            messages: state.messages.map((msg) =>
-              msg.id === messageId ? { ...msg, isMessageCollapsed: !msg.isMessageCollapsed } : msg
-            ),
-          }),
-          false,
-          "toggleMessageCollapse"
-        );
-      },
-
-      // Thinking collapse toggle
-      toggleThinkingCollapse: (messageId: string) => {
-        set(
-          (state) => {
-            const updatedMessages = state.messages.map((msg) =>
-              msg.id === messageId ? { ...msg, isThinkingCollapsed: !msg.isThinkingCollapsed } : msg
-            );
-            // 同时更新 currentStreamingMessage
-            const updatedStreamingMessage =
-              state.currentStreamingMessage?.id === messageId
-                ? {
-                    ...state.currentStreamingMessage,
-                    isThinkingCollapsed: !state.currentStreamingMessage.isThinkingCollapsed,
+              // 根据类型初始化相应的内容块
+              switch (type) {
+                case "thinking":
+                  // 开始新的思考块
+                  return { streamingThinking: "" };
+                case "text":
+                  // 文本块在 content_delta 时处理
+                  return {};
+                case "tool_use":
+                  // Tool call块在 toolcall_delta 时初始化
+                  if (meta?.toolCallId && meta?.toolName) {
+                    const newToolCalls = new Map(state.streamingToolCalls);
+                    newToolCalls.set(meta.toolCallId, {
+                      id: meta.toolCallId,
+                      name: meta.toolName,
+                      args: "",
+                    });
+                    return { streamingToolCalls: newToolCalls };
                   }
-                : state.currentStreamingMessage;
-            return {
-              messages: updatedMessages,
-              currentStreamingMessage: updatedStreamingMessage,
-            };
-          },
-          false,
-          "toggleThinkingCollapse"
-        );
-      },
+                  return {};
+              }
+              return {};
+            },
+            false,
+            "startContentBlock"
+          );
+        },
 
-      // Load session messages from server via HTTP (fallback method)
-      // Note: Main loading is now done via WebSocket init for consistency
-      loadSession: async (sessionPath: string) => {
-        console.log("[ChatStore] loadSession (HTTP fallback) called with path:", sessionPath);
-        try {
-          const response = await fetch("/api/session/load", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ sessionPath }),
+        // 结束内容块 - 将流式内容固化到 currentStreamingMessage.content，然后Clear流式状态
+        endContentBlock: (type: "text" | "thinking" | "tool_use", index?: number, meta?: any) => {
+          console.log(`[ChatStore] endContentBlock: type=${type}, index=${index ?? "?"}`, meta);
+
+          set(
+            (state) => {
+              if (!state.currentStreamingMessage) return {};
+
+              const existingContent = state.currentStreamingMessage.content || [];
+              let newBlock: ContentPart | null = null;
+              const updates: Partial<State> = {};
+
+              switch (type) {
+                case "thinking":
+                  if (state.streamingThinking) {
+                    newBlock = {
+                      type: "thinking",
+                      thinking: state.streamingThinking,
+                    };
+                    updates.streamingThinking = "";
+                  }
+                  break;
+                case "text":
+                  if (state.streamingContent) {
+                    newBlock = { type: "text", text: state.streamingContent };
+                    updates.streamingContent = "";
+                  }
+                  break;
+                case "tool_use":
+                  if (meta?.toolCallId) {
+                    const toolCall = state.streamingToolCalls.get(meta.toolCallId);
+                    if (toolCall) {
+                      newBlock = {
+                        type: "tool_use",
+                        toolCallId: toolCall.id,
+                        toolName: toolCall.name,
+                        partialArgs: toolCall.args,
+                      };
+                      const newToolCalls = new Map(state.streamingToolCalls);
+                      newToolCalls.delete(meta.toolCallId);
+                      updates.streamingToolCalls = newToolCalls;
+                    }
+                  }
+                  break;
+              }
+
+              if (newBlock) {
+                // Update kind2/kind3 based on content type
+                let kind2: Message["kind2"] = "response";
+                let kind3: Message["kind3"] = "text_response";
+
+                if (type === "thinking") {
+                  kind2 = "thinking";
+                  kind3 = "thinking_block";
+                } else if (type === "tool_use") {
+                  kind2 = "tool";
+                  kind3 = "tool_call";
+                }
+
+                updates.currentStreamingMessage = {
+                  ...state.currentStreamingMessage,
+                  content: [...existingContent, newBlock],
+                  kind2,
+                  kind3,
+                };
+              }
+
+              return updates;
+            },
+            false,
+            "endContentBlock"
+          );
+        },
+
+        // 开始新的轮次 - 在 turn_start 时调用
+        startNewTurn: () => {
+          // Clear RAF 批处理的待处理更新，避免旧内容被重复添加
+          pendingContentUpdates = {};
+
+          set(
+            (state) => {
+              if (!state.currentStreamingMessage) return {};
+
+              // 先构建当前轮次的完整内容（包括工具）
+              const currentContent = buildContentArray(state);
+
+              // 添加轮次分隔标记
+              currentContent.push({
+                type: "turn_marker",
+                turnNumber: currentContent.filter((c) => c.type === "turn_marker").length + 1,
+              });
+
+              // 获取之前已保存的内容
+              const existingContent = state.currentStreamingMessage.content || [];
+
+              // 找到最后一个 turn_marker，保留它及之前的内容（之前轮次）
+              const lastTurnMarkerIndex = existingContent
+                .map((c: any) => c.type)
+                .lastIndexOf("turn_marker");
+              const previousRounds =
+                lastTurnMarkerIndex >= 0 ? existingContent.slice(0, lastTurnMarkerIndex + 1) : []; // Page一轮不需要保留 existingContent，currentContent 已经包含了所有内容
+
+              return {
+                currentStreamingMessage: {
+                  ...state.currentStreamingMessage,
+                  // 保留之前轮次 + 当前轮次（避免重复）
+                  content: [...previousRounds, ...currentContent],
+                },
+                // Clear当前轮次的流式状态，开始新一轮
+                streamingThinking: "",
+                streamingThinkings: [], // Clear多轮思考
+                streamingContent: "",
+                streamingToolCalls: new Map(),
+                activeTools: new Map(),
+              };
+            },
+            false,
+            "startNewTurn"
+          );
+        },
+
+        // Batch update - 合并所有更新一次性处理
+        batchUpdateContent: (updates: {
+          content?: string;
+          thinking?: string;
+          toolCall?: { id: string; name: string; delta: string };
+        }) => {
+          const state = get();
+          if (!state.currentStreamingMessage) return;
+
+          const newState = applyBatchUpdates(state, updates);
+
+          set(newState, false, "batchUpdateContent");
+        },
+
+        // Streaming finalization helpers
+        abortStreaming: () => finalizeStreaming(set, "abortStreaming"),
+        finishStreaming: () => finalizeStreaming(set, "finishStreaming"),
+
+        // Tools visibility
+        showTools: true,
+        setShowTools: (show: boolean) => {
+          set({ showTools: show }, false, "setShowTools");
+        },
+        toggleToolsCollapse: (messageId: string) => {
+          console.log("[ChatStore] toggleToolsCollapse called:", messageId);
+          set(
+            (state) => {
+              const targetMsg = state.messages.find((m) => m.id === messageId);
+              console.log(
+                "[ChatStore] Target message found:",
+                !!targetMsg,
+                "current isToolsCollapsed:",
+                targetMsg?.isToolsCollapsed
+              );
+
+              const updatedMessages = state.messages.map((msg) =>
+                msg.id === messageId
+                  ? { ...msg, isToolsCollapsed: msg.isToolsCollapsed === false }
+                  : msg
+              );
+              const updatedMsg = updatedMessages.find((m) => m.id === messageId);
+              console.log("[ChatStore] Updated isToolsCollapsed:", updatedMsg?.isToolsCollapsed);
+
+              // 同时更新 currentStreamingMessage
+              const updatedStreamingMessage =
+                state.currentStreamingMessage?.id === messageId
+                  ? {
+                      ...state.currentStreamingMessage,
+                      isToolsCollapsed: state.currentStreamingMessage.isToolsCollapsed === false,
+                    }
+                  : state.currentStreamingMessage;
+              return {
+                messages: updatedMessages,
+                currentStreamingMessage: updatedStreamingMessage,
+              };
+            },
+            false,
+            "toggleToolsCollapse"
+          );
+        },
+        // Tool Actions
+        setActiveTool: (tool: ToolExecution) => {
+          set((state) => applyToolActivation(state, tool), false, "setActiveTool");
+
+          // 启动超时检测
+          const TOOL_EXECUTION_TIMEOUT = 60000; // 60秒超时
+          setTimeout(() => {
+            const currentState = get();
+            const activeTool = currentState.activeTools.get(tool.id);
+            if (activeTool && activeTool.status === "executing" && !activeTool.endTime) {
+              // 工具执Rows超时，标记为警告状态
+              console.warn(`[ChatStore] Tool execution timeout: ${tool.name} (${tool.id})`);
+              set(
+                (state) => {
+                  const newTools = new Map(state.activeTools);
+                  const t = newTools.get(tool.id);
+                  if (t && t.status === "executing") {
+                    newTools.set(tool.id, {
+                      ...t,
+                      status: "timeout",
+                      error: "工具执Rows超时，可能仍在后台运Rows...",
+                    });
+                  }
+                  return { activeTools: newTools };
+                },
+                false,
+                "toolExecutionTimeout"
+              );
+            }
+          }, TOOL_EXECUTION_TIMEOUT);
+        },
+
+        updateToolOutput: (toolId: string, output: string, error?: string) => {
+          set(
+            (state) => applyToolCompletion(state, toolId, output, error),
+            false,
+            "updateToolOutput"
+          );
+        },
+
+        // 检查工具执Rows状态（用于手动触发检查）
+        checkToolExecutionStatus: () => {
+          const state = get();
+          const now = new Date();
+          const warnings: string[] = [];
+
+          state.activeTools.forEach((tool) => {
+            if (tool.status === "executing" && !tool.endTime) {
+              const elapsed = now.getTime() - tool.startTime.getTime();
+              const elapsedSeconds = Math.floor(elapsed / 1000);
+
+              if (elapsed > 30000) {
+                // 超过30秒
+                warnings.push(`${tool.name}: 已执Rows ${elapsedSeconds} 秒`);
+              }
+            }
           });
 
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.error(
-              "[ChatStore] Failed to load session:",
-              response.status,
-              response.statusText,
-              errorData
-            );
+          return warnings;
+        },
+
+        // UI State
+        setShowThinking: (show: boolean) => {
+          set({ showThinking: show }, false, "setShowThinking");
+        },
+
+        // Search
+        setSearchQuery: (query: string) => {
+          set({ searchQuery: query }, false, "setSearchQuery");
+        },
+
+        setSearchFilters: (filters: Partial<ChatSearchFilters>) => {
+          set(
+            (state) => ({
+              searchFilters: {
+                kind1: { ...state.searchFilters.kind1, ...filters.kind1 },
+                kind2: { ...state.searchFilters.kind2, ...filters.kind2 },
+                kind3: { ...state.searchFilters.kind3, ...filters.kind3 },
+                dates: filters.dates ?? state.searchFilters.dates,
+              },
+            }),
+            false,
+            "setSearchFilters"
+          );
+        },
+
+        setSearchResults: (results: SearchResult[]) => {
+          set(
+            {
+              searchResults: results,
+              currentSearchIndex: results.length > 0 ? 0 : -1,
+            },
+            false,
+            "setSearchResults"
+          );
+        },
+
+        setSearching: (searching: boolean) => {
+          set({ isSearching: searching }, false, "setSearching");
+        },
+
+        nextSearchResult: () => {
+          const { searchResults, currentSearchIndex } = get();
+          if (searchResults.length === 0) return;
+          set(
+            {
+              currentSearchIndex: (currentSearchIndex + 1) % searchResults.length,
+            },
+            false,
+            "nextSearchResult"
+          );
+        },
+
+        prevSearchResult: () => {
+          const { searchResults, currentSearchIndex } = get();
+          if (searchResults.length === 0) return;
+          set(
+            {
+              currentSearchIndex:
+                (currentSearchIndex - 1 + searchResults.length) % searchResults.length,
+            },
+            false,
+            "prevSearchResult"
+          );
+        },
+
+        clearSearch: () => {
+          set(
+            {
+              searchQuery: "",
+              searchResults: [],
+              currentSearchIndex: -1,
+              isSearching: false,
+            },
+            false,
+            "clearSearch"
+          );
+        },
+
+        // Session
+        setSessionId: (id: string | null) => {
+          set({ sessionId: id }, false, "setSessionId");
+        },
+
+        setCurrentModel: (model: string | null) => {
+          set({ currentModel: model }, false, "setCurrentModel");
+        },
+
+        // Reset
+        reset: () => {
+          set(createInitialState(), false, "reset");
+        },
+
+        // 直接同步更新流式状态，不用 RAF 批处理避免竞争
+        appendStreamingContent: (text: string) => {
+          set(
+            (state) => ({
+              streamingContent: state.streamingContent + text,
+            }),
+            false,
+            "appendStreamingContent"
+          );
+        },
+
+        appendStreamingThinking: (thinking: string) => {
+          set(
+            (state) => ({
+              streamingThinking: state.streamingThinking + thinking,
+            }),
+            false,
+            "appendStreamingThinking"
+          );
+        },
+
+        appendToolCallDelta: (id: string, name: string, delta: string) => {
+          set(
+            (state) => {
+              const newToolCalls = new Map(state.streamingToolCalls);
+              const existing = newToolCalls.get(id);
+              if (existing) {
+                newToolCalls.set(id, {
+                  ...existing,
+                  args: existing.args + delta,
+                });
+              } else {
+                newToolCalls.set(id, { id, name, args: delta });
+              }
+              return { streamingToolCalls: newToolCalls };
+            },
+            false,
+            "appendToolCallDelta"
+          );
+        },
+
+        // Message collapse toggle
+        toggleMessageCollapse: (messageId: string) => {
+          set(
+            (state) => ({
+              messages: state.messages.map((msg) =>
+                msg.id === messageId ? { ...msg, isMessageCollapsed: !msg.isMessageCollapsed } : msg
+              ),
+            }),
+            false,
+            "toggleMessageCollapse"
+          );
+        },
+
+        // Thinking collapse toggle
+        toggleThinkingCollapse: (messageId: string) => {
+          set(
+            (state) => {
+              const updatedMessages = state.messages.map((msg) =>
+                msg.id === messageId
+                  ? { ...msg, isThinkingCollapsed: !msg.isThinkingCollapsed }
+                  : msg
+              );
+              // 同时更新 currentStreamingMessage
+              const updatedStreamingMessage =
+                state.currentStreamingMessage?.id === messageId
+                  ? {
+                      ...state.currentStreamingMessage,
+                      isThinkingCollapsed: !state.currentStreamingMessage.isThinkingCollapsed,
+                    }
+                  : state.currentStreamingMessage;
+              return {
+                messages: updatedMessages,
+                currentStreamingMessage: updatedStreamingMessage,
+              };
+            },
+            false,
+            "toggleThinkingCollapse"
+          );
+        },
+
+        // Load session messages from server via HTTP (fallback method)
+        // Note: Main loading is now done via WebSocket init for consistency
+        loadSession: async (sessionPath: string) => {
+          console.log("[ChatStore] loadSession (HTTP fallback) called with path:", sessionPath);
+          try {
+            const response = await fetch("/api/session/load", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ sessionPath }),
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              console.error(
+                "[ChatStore] Failed to load session:",
+                response.status,
+                response.statusText,
+                errorData
+              );
+              set({ messages: [] }, false, "loadSession/error");
+              return 0;
+            }
+
+            const data = await response.json();
+
+            // 使用服务器预处理好的 messages（服务器已处理所有消息格式转换）
+            const messages = data.messages || [];
+            console.log("[loadSession] Using server-processed messages:", messages.length);
+            set({ messages, currentStreamingMessage: null }, false, "loadSession");
+            return messages.length;
+          } catch (error) {
+            console.error("[ChatStore] Error loading session:", error);
             set({ messages: [] }, false, "loadSession/error");
             return 0;
           }
+        },
 
-          const data = await response.json();
-
-          // 优先使用服务器预处理好的 messages（已合并 toolResults）
-          if (data.messages?.length > 0) {
-            console.log("[loadSession] Using server-processed messages:", data.messages.length);
-            set({ messages: data.messages, currentStreamingMessage: null }, false, "loadSession");
-            return data.messages.length;
-          }
-
-          // Fallback: 使用原始 entries 客户端处理（兼容旧服务器）
-          if (!data.entries?.length) {
-            set({ messages: [] }, false, "loadSession/empty");
-            return 0;
-          }
-
-          const { normalizeSessionMessages } = await import("@/features/chat/utils/messageUtils");
-          const loadedMessages = normalizeSessionMessages(data.entries);
-
-          console.log("[loadSession] Loaded messages:", loadedMessages.length);
-          set({ messages: loadedMessages, currentStreamingMessage: null }, false, "loadSession");
-          return loadedMessages.length;
-        } catch (error) {
-          console.error("[ChatStore] Error loading session:", error);
-          set({ messages: [] }, false, "loadSession/error");
-          return 0;
-        }
-      },
-
-      // Stub methods for compatibility
-      updateMessage: () => {},
-      deleteMessage: () => {},
-      regenerateMessage: () => {},
+        // Stub methods for compatibility
+        updateMessage: () => {},
+        deleteMessage: () => {},
+        regenerateMessage: () => {},
       }),
       { name: "ChatStore" }
     ),
@@ -1193,7 +1213,12 @@ export const useChatStore = create<
         }
 
         // Migrate from hierarchical structure without tool status filters
-        if (filters && typeof filters === "object" && "roles" in filters && "contentTypes" in filters) {
+        if (
+          filters &&
+          typeof filters === "object" &&
+          "roles" in filters &&
+          "contentTypes" in filters
+        ) {
           const contentTypes = (filters as any).contentTypes;
           // Add missing tool status filters if not present
           if (contentTypes && typeof contentTypes === "object") {
@@ -1229,8 +1254,7 @@ export const selectCurrentStreamingMessage = (state: ReturnType<typeof useChatSt
 export const selectInputText = (state: ReturnType<typeof useChatStore.getState>) => state.inputText;
 export const selectIsStreaming = (state: ReturnType<typeof useChatStore.getState>) =>
   state.isStreaming;
-export const selectIsRunning = (state: ReturnType<typeof useChatStore.getState>) =>
-  state.isRunning;
+export const selectIsRunning = (state: ReturnType<typeof useChatStore.getState>) => state.isRunning;
 export const selectShowThinking = (state: ReturnType<typeof useChatStore.getState>) =>
   state.showThinking;
 export const selectShowTools = (state: ReturnType<typeof useChatStore.getState>) => state.showTools;
@@ -1245,6 +1269,16 @@ export const selectCurrentSearchIndex = (state: ReturnType<typeof useChatStore.g
 export const selectIsSearching = (state: ReturnType<typeof useChatStore.getState>) =>
   state.isSearching;
 
+// Streaming state selectors - passed to MessageList as props to control re-render frequency
+export const selectStreamingContent = (state: ReturnType<typeof useChatStore.getState>) =>
+  state.streamingContent;
+export const selectStreamingThinking = (state: ReturnType<typeof useChatStore.getState>) =>
+  state.streamingThinking;
+export const selectStreamingToolCalls = (state: ReturnType<typeof useChatStore.getState>) =>
+  state.streamingToolCalls;
+export const selectActiveTools = (state: ReturnType<typeof useChatStore.getState>) =>
+  state.activeTools;
+
 // ===== [ANCHOR:FILTER_HELPERS] =====
 
 export interface FilterOptions {
@@ -1254,7 +1288,7 @@ export interface FilterOptions {
 
 /**
  * Hierarchical Message Type Detection
- * 
+ *
  * Structure:
  * - Role: user | assistant | system
  *   - User: prompt (text content)
@@ -1266,37 +1300,39 @@ function detectHierarchicalMessageType(message: Message): {
   contentType: string;
 } {
   const role = message.role;
-  
+
   // Determine content type based on role and kind/content
   switch (role) {
     case "user":
       return { role: "user", contentType: "prompt" };
-      
+
     case "assistant": {
       // Check content array for types
       const hasThinking = message.content.some((c) => c.type === "thinking");
       const hasText = message.content.some((c) => c.type === "text");
-      
+
       // Check for tools and their statuses
       const toolBlocks = message.content.filter((c) => c.type === "tool" || c.type === "tool_use");
       const hasTool = toolBlocks.length > 0;
-      
+
       if (hasTool) {
         // Determine tool status for more granular filtering
         // Priority: error > pending > success
         const hasError = toolBlocks.some((c) => c.status === "error" || c.error);
-        const hasPending = toolBlocks.some((c) => c.status === "pending" || c.status === "executing");
-        
+        const hasPending = toolBlocks.some(
+          (c) => c.status === "pending" || c.status === "executing"
+        );
+
         if (hasError) return { role: "assistant", contentType: "toolError" };
         if (hasPending) return { role: "assistant", contentType: "toolPending" };
         return { role: "assistant", contentType: "toolSuccess" };
       }
-      
+
       if (hasThinking) return { role: "assistant", contentType: "thinking" };
       if (hasText) return { role: "assistant", contentType: "text" };
       return { role: "assistant", contentType: "text" }; // default
     }
-      
+
     case "system": {
       // Use kind field or detect from content
       const kind = message.kind;
@@ -1305,13 +1341,13 @@ function detectHierarchicalMessageType(message: Message): {
         const camelKind = kind.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
         return { role: "system", contentType: camelKind };
       }
-      
+
       // Fallback: detect from text content
       const text = message.content
         .filter((c) => c.type === "text")
         .map((c) => c.text || "")
         .join(" ");
-        
+
       if (text.includes("🗜️ Compacting") || text.includes("上下文压缩")) {
         return { role: "system", contentType: "compaction" };
       }
@@ -1330,10 +1366,10 @@ function detectHierarchicalMessageType(message: Message): {
       if (text.includes("📊") || text.includes("tokens") || text.includes("cost")) {
         return { role: "system", contentType: "usage" };
       }
-      
+
       return { role: "system", contentType: "unknown" };
     }
-      
+
     default:
       return { role: "system", contentType: "unknown" };
   }
@@ -1341,11 +1377,11 @@ function detectHierarchicalMessageType(message: Message): {
 
 /**
  * Hierarchical Message Filtering
- * 
+ *
  * Two-level filtering:
  * 1. Role level: user | assistant | system
  * 2. Content type level: depends on role
- * 
+ *
  * @param messages Array of messages
  * @param options Filter options with hierarchical structure
  * @returns Filtered messages
@@ -1358,10 +1394,19 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
   const safeFilters = {
     roles: filters?.roles ?? { user: true, assistant: true, system: true },
     contentTypes: filters?.contentTypes ?? {
-      prompt: true, text: true, thinking: true, tool: true,
-      toolSuccess: true, toolError: true, toolPending: true,
-      compaction: true, retry: true, autoRetry: true,
-      modelChange: true, thinkingLevelChange: true, usage: true,
+      prompt: true,
+      text: true,
+      thinking: true,
+      tool: true,
+      toolSuccess: true,
+      toolError: true,
+      toolPending: true,
+      compaction: true,
+      retry: true,
+      autoRetry: true,
+      modelChange: true,
+      thinkingLevelChange: true,
+      usage: true,
     },
   };
 
@@ -1377,18 +1422,18 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
         // User messages are always "prompt" type
         if (!safeFilters.contentTypes.prompt) return false;
         break;
-        
+
       case "assistant": {
         // Assistant messages can be: text, thinking, tool (with status variants)
         // First check if the base type is enabled
         if (contentType === "text" && !safeFilters.contentTypes.text) return false;
         if (contentType === "thinking" && !safeFilters.contentTypes.thinking) return false;
-        
+
         // For tools, check both base "tool" and specific status filters
         if (contentType.startsWith("tool")) {
           // If base tool filter is off, hide all tools
           if (!safeFilters.contentTypes.tool) return false;
-          
+
           // Check specific tool status filters
           if (contentType === "toolSuccess" && !safeFilters.contentTypes.toolSuccess) return false;
           if (contentType === "toolError" && !safeFilters.contentTypes.toolError) return false;
@@ -1396,7 +1441,7 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
         }
         break;
       }
-        
+
       case "system": {
         // System messages are special events
         if (contentType === "unknown") {

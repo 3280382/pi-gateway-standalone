@@ -24,7 +24,7 @@ import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { ChatController, Message, ToolExecution } from "@/features/chat/types/chat";
 import { websocketService } from "@/services/websocket.service";
-import { sessionManager } from "@/features/chat/services/sessionManager";
+import { sessionManager, updateSessionsAndStatus } from "@/features/chat/services/sessionManager";
 import {
   messageReconstructor,
   isContentDeltaEvent,
@@ -171,7 +171,7 @@ export function useChatController(): EnhancedChatController {
 
     steer: (text: string) => {
       if (!text.trim()) return;
-    
+
       // 添加User message到Cols表（类似 sendMessage）
       const userMessage: Message = {
         id: generateMessageId(),
@@ -181,7 +181,7 @@ export function useChatController(): EnhancedChatController {
       };
       chatStore.addMessage(userMessage);
       chatStore.clearInput();
-    
+
       steerChat(text);
     },
 
@@ -407,7 +407,7 @@ export function setupWebSocketListeners(): void {
 
     // 记录事件到重建器
     messageReconstructor.recordEvent("message_start");
-    
+
     // 重置重建器状态
     messageReconstructor.reset();
 
@@ -424,7 +424,7 @@ export function setupWebSocketListeners(): void {
 
     // 记录事件到重建器
     messageReconstructor.recordEvent("message_end");
-    
+
     // 检查并修复未结束的内容块
     const fix = messageReconstructor.autoFix();
     if (fix?.action === "end_pending_blocks") {
@@ -437,7 +437,7 @@ export function setupWebSocketListeners(): void {
     if (message?.role === "assistant") {
       store.finishStreaming();
     }
-    
+
     // 结束重建器状态
     messageReconstructor.endMessage();
   });
@@ -449,7 +449,7 @@ export function setupWebSocketListeners(): void {
 
     if (data?.usage) {
       const usage = data.usage;
-      const costValue = typeof usage.cost === 'number' ? usage.cost : (usage.cost?.total ?? 0);
+      const costValue = typeof usage.cost === "number" ? usage.cost : (usage.cost?.total ?? 0);
       let message = `📊 Usage: ${usage.totalTokens?.toLocaleString() || 0} tokens`;
       if (usage.inputTokens || usage.outputTokens) {
         message += ` (input: ${usage.inputTokens?.toLocaleString() || 0}, output: ${usage.outputTokens?.toLocaleString() || 0})`;
@@ -483,22 +483,22 @@ export function setupWebSocketListeners(): void {
   websocketService.on("text_delta", (data: { text?: string; index?: number }) => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] text_delta[${data?.index ?? "?"}]`);
-    
+
     // 容错：检查是否需要自动创建 message_start
     if (messageReconstructor.shouldCreateMessageStart()) {
       console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing message_start`);
       store.createStreamingMessage();
       messageReconstructor.startMessage();
-    };
-    
+    }
+
     // 容错：检查是否需要自动创建 text_start
     const index = data?.index ?? 0;
     if (messageReconstructor.shouldCreateContentBlockStart(index, "text")) {
       console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing text_start[${index}]`);
       store.startContentBlock("text", index);
       messageReconstructor.startContentBlock(index, "text");
-    };
-    
+    }
+
     if (data?.text) {
       store.appendStreamingContent(data.text);
     }
@@ -524,22 +524,22 @@ export function setupWebSocketListeners(): void {
   websocketService.on("thinking_delta", (data: { thinking?: string; index?: number }) => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] thinking_delta[${data?.index ?? "?"}]`);
-    
+
     // 容错：检查是否需要自动创建 message_start
     if (messageReconstructor.shouldCreateMessageStart()) {
       console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing message_start`);
       store.createStreamingMessage();
       messageReconstructor.startMessage();
-    };
-    
+    }
+
     // 容错：检查是否需要自动创建 thinking_start
     const thinkingIndex = data?.index ?? 0;
     if (messageReconstructor.shouldCreateContentBlockStart(thinkingIndex, "thinking")) {
       console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing thinking_start[${thinkingIndex}]`);
       store.startContentBlock("thinking", thinkingIndex);
       messageReconstructor.startContentBlock(thinkingIndex, "thinking");
-    };
-    
+    }
+
     if (data?.thinking) {
       store.appendStreamingThinking(data.thinking);
     }
@@ -577,14 +577,14 @@ export function setupWebSocketListeners(): void {
       console.log(
         `[${ts}] [RECV] toolcall_delta[${data?.index ?? "?"}]: ${data?.toolName || "unknown"}`
       );
-      
+
       // 容错：检查是否需要自动创建 message_start
       if (messageReconstructor.shouldCreateMessageStart()) {
         console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing message_start`);
         store.createStreamingMessage();
         messageReconstructor.startMessage();
-      };
-      
+      }
+
       // 容错：检查是否需要自动创建 toolcall_start
       const toolIndex = data?.index ?? 0;
       if (messageReconstructor.shouldCreateContentBlockStart(toolIndex, "tool_use")) {
@@ -597,8 +597,8 @@ export function setupWebSocketListeners(): void {
           toolCallId: data?.toolCallId,
           toolName: data?.toolName,
         });
-      };
-      
+      }
+
       if (data?.toolCallId && data?.toolName) {
         store.appendToolCallDelta(data.toolCallId, data.toolName, data.delta || "");
       }
@@ -726,7 +726,9 @@ export function setupWebSocketListeners(): void {
     store.addMessage({
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: "system",
-      content: [{ type: "text", text: `🔄 Auto-retrying (${data.attempt}/${data.maxAttempts})...` }],
+      content: [
+        { type: "text", text: `🔄 Auto-retrying (${data.attempt}/${data.maxAttempts})...` },
+      ],
       timestamp: new Date(),
       kind: "auto_retry",
     });
@@ -747,7 +749,9 @@ export function setupWebSocketListeners(): void {
       store.addMessage({
         id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         role: "system",
-        content: [{ type: "text", text: `❌ Auto-retry failed: ${data.finalError || "Unknown error"}` }],
+        content: [
+          { type: "text", text: `❌ Auto-retry failed: ${data.finalError || "Unknown error"}` },
+        ],
         timestamp: new Date(),
         kind: "auto_retry",
       });
@@ -762,10 +766,10 @@ export function setupWebSocketListeners(): void {
   websocketService.on("session_reconnected", (data: any) => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] session_reconnected:`, data);
-    
+
     // 重置消息重建器状态，准备接收缓冲消息
     messageReconstructor.reset();
-    
+
     // 如果 flushedMessages > 0，说明有缓冲消息即将到达
     if (data?.flushedMessages > 0) {
       console.log(`[${ts}] [RECONNECT] Expecting ${data.flushedMessages} buffered messages`);
@@ -796,99 +800,117 @@ export function setupWebSocketListeners(): void {
 
   // Initialized handler - 保存 resourceFiles、模型信息和会话 ID
   websocketService.on("initialized", (data: any) => {
-    console.log("[setupWebSocketListeners] initialized:", data);
+    console.log("[setupWebSocketListeners] initialized");
     const sessionStore = useSessionStore.getState();
     const sidebarStore = useSidebarStore.getState();
-  
+    const chatStore = useChatStore.getState();
+
     if (data?.resourceFiles) {
       sessionStore.setResourceFiles(data.resourceFiles);
     }
-  
+
     // 使用后端返回的 currentModel（已考虑 session 优先级）
     if (data?.currentModel) {
       sessionStore.setCurrentModel(data.currentModel);
       console.log("[initialized] Current model:", data.currentModel);
     }
-  
+
     // 保存Default model信息（用于显示）
     if (data?.defaultModel) {
       sessionStore.setDefaultModel(data.defaultModel);
     }
-  
+
+    // 保存可用模型列表
+    if (data?.allModels) {
+      sessionStore.setAvailableModels(data.allModels);
+      console.log("[initialized] Available models:", data.allModels.length);
+    }
+
     // 设置当前选中的会话 ID（短 ID）
     const shortId = data?.currentSession?.shortId || data?.sessionId;
     if (shortId) {
       sidebarStore.setSelectedSessionId(shortId);
       console.log("[initialized] Session ID:", shortId);
     }
+
+    // 处理消息
+    const messages = data?.currentSession?.messages || [];
+    if (messages.length > 0) {
+      chatStore.setMessages(messages);
+    }
+
+    // 【统一处理】使用辅助函数更新 sessions 列表和状态
+    updateSessionsAndStatus(sidebarStore, data?.allSessions || []);
+    console.log("[initialized] Updated sessions and status");
   });
 
   // Dir changed handler - 同样处理模型信息
   websocketService.on("dir_changed", (data: any) => {
     console.log("[setupWebSocketListeners] dir_changed:", data);
     const sessionStore = useSessionStore.getState();
-  
+    const sidebarStore = useSidebarStore.getState();
+
     if (data?.resourceFiles) {
       sessionStore.setResourceFiles(data.resourceFiles);
     }
-  
+
     if (data?.currentModel) {
       sessionStore.setCurrentModel(data.currentModel);
     }
-  
+
     if (data?.defaultModel) {
       sessionStore.setDefaultModel(data.defaultModel);
     }
+
+    // 保存可用模型列表
+    if (data?.allModels) {
+      sessionStore.setAvailableModels(data.allModels);
+    }
+
+    // 【统一处理】使用辅助函数更新 sessions 列表和状态
+    updateSessionsAndStatus(sidebarStore, data?.allSessions || []);
+    console.log("[dir_changed] Updated sessions and status");
   });
 
   // Sessions list handler - 更新Sidebar会话Cols表
   websocketService.on("sessions_list", (data: any) => {
     console.log("[setupWebSocketListeners] sessions_list:", data);
     const sidebarStore = useSidebarStore.getState();
-    if (data?.sessions) {
-      sidebarStore.setSessions(data.sessions);
-    
-      // Also update runtimeStatus from the status field in sessions
-      const statusList = data.sessions
-        .filter((s: any) => s && s.id && s.status)
-        .map((s: any) => ({
-          sessionId: s.id,
-          status: s.status,
-        }));
-    
-      if (statusList.length > 0) {
-        sidebarStore.updateRuntimeStatusBulk(statusList);
-        console.log("[sessions_list] Updated runtime status for", statusList.length, "sessions");
-      }
-    }
+    // 【统一处理】使用辅助函数更新 sessions 列表和状态
+    updateSessionsAndStatus(sidebarStore, data?.sessions || []);
+    console.log("[sessions_list] Updated sessions and status");
   });
 
   // Runtime status broadcast handler - 更新会话运Rows状态
   websocketService.on("runtime_status_broadcast", (data: any) => {
     try {
       console.log("[setupWebSocketListeners] runtime_status_broadcast:", data);
-      if (!data || typeof data !== 'object') {
+      if (!data || typeof data !== "object") {
         console.warn("[runtime_status_broadcast] Invalid data received:", data);
         return;
       }
-    
+
       const sidebarStore = useSidebarStore.getState();
       if (!sidebarStore) {
         console.warn("[runtime_status_broadcast] Sidebar store not available");
         return;
       }
-    
+
       if (Array.isArray(data.sessions)) {
         const statusList = data.sessions
-          .filter((s: any) => s && typeof s === 'object' && s.shortId)
+          .filter((s: any) => s && typeof s === "object" && s.shortId)
           .map((s: any) => ({
             sessionId: s.shortId,
-            status: s.status || 'idle',
+            status: s.status || "idle",
           }));
-      
+
         if (statusList.length > 0) {
           sidebarStore.updateRuntimeStatusBulk(statusList);
-          console.log("[runtime_status_broadcast] Updated status for", statusList.length, "sessions");
+          console.log(
+            "[runtime_status_broadcast] Updated status for",
+            statusList.length,
+            "sessions"
+          );
         }
       } else {
         console.warn("[runtime_status_broadcast] sessions is not an array:", data.sessions);
@@ -913,12 +935,11 @@ export function setupWebSocketListeners(): void {
     console.log(`[${ts}] [RECV] more_messages_loaded:`, data);
 
     if (data?.messages && Array.isArray(data.messages)) {
-      // 使用 normalizeSessionMessages 正确处理 session files格式
-      const { normalizeSessionMessages } = await import("@/features/chat/utils/messageUtils");
-      const formattedMessages = normalizeSessionMessages(data.messages);
-
-      store.prependMessages(formattedMessages);
-      console.log(`[${ts}] [more_messages_loaded] Prepended ${formattedMessages.length} messages, hasMore: ${data.hasMore}`);
+      // 服务器已预处理所有消息，直接使用
+      store.prependMessages(data.messages);
+      console.log(
+        `[${ts}] [more_messages_loaded] Prepended ${data.messages.length} messages, hasMore: ${data.hasMore}`
+      );
     }
   });
 

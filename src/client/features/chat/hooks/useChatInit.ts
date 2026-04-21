@@ -22,10 +22,7 @@ import { extractShortSessionId } from "@/features/chat/utils/sessionUtils";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
-import {
-  normalizeSessionMessages,
-  handleServerMessages,
-} from "@/features/chat/utils/messageUtils";
+import { handleServerMessages } from "@/features/chat/utils/messageUtils";
 import { websocketService } from "@/services/websocket.service";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { setupWebSocketListeners } from "../services/api/chatApi";
@@ -149,19 +146,17 @@ export function useChatInit(): { isConnecting: boolean } {
         currentSessionFile: currentSession?.sessionFile,
       });
       useSidebarStore.getState().setWorkingDir(workingDir);
-      useSidebarStore.getState().setSessions(allSessions || []);
+      // 使用 sessionManager 的辅助函数统一更新 sessions 和状态
+      const { updateSessionsAndStatus } = await import("@/features/chat/services/sessionManager");
+      updateSessionsAndStatus(useSidebarStore.getState(), allSessions || []);
       // 使用服务器返回的短 ID 作为选中 session ID（与 sidebar 中的 session.id 一致）
       const shortId = (currentSession as any)?.shortId || null;
       useSidebarStore.getState().setSelectedSessionId(shortId);
 
-      // 5.4 聊天历史消息
-      // 优先使用服务器预处理好的 messages（已合并 toolResults），避免客户端重复处理
+      // 5.4 聊天历史消息（服务器已预处理，直接使用）
       console.log("[ChatInit] Messages from server:", currentSession?.messages?.length || 0);
       if (currentSession?.messages?.length > 0) {
-        const formattedMessages = handleServerMessages(
-          currentSession.messages,
-          normalizeSessionMessages
-        );
+        const formattedMessages = handleServerMessages(currentSession.messages);
         console.log("[ChatInit] Restored messages:", formattedMessages.length);
         useChatStore.getState().setMessages(formattedMessages);
       }

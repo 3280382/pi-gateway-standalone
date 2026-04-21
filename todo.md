@@ -20,7 +20,7 @@ Generated: 2026-04-17T03:48:49.105Z
 
 ```bash
 # Tmux 3-pane mode - 同时启动前端、后端和监控
-bash scripts/start-tmux-dev.sh
+bash ./dev-start.sh
 ```
 
 ### 自动监控和热启动

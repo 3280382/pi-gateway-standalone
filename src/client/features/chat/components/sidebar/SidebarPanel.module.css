@@ -897,6 +897,19 @@
   color: #8b949e;
 }
 
+/* Header loading indicator - small spinner next to title */
+.headerLoadingIndicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+  border: 1.5px solid rgba(88, 166, 255, 0.2);
+  border-top-color: #58a6ff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+}
+
 /* Disabled button styles */
 .newSessionButton:disabled,
 .selectorBtn:disabled {
@@ -912,10 +925,10 @@
   text-align: center;
 }
 
-/* ===== 会话列表容器（固定显示4个，可滚动） ===== */
+/* ===== 会话列表容器（固定显示15个，可滚动） ===== */
 .sessionListContainer {
   width: 100%;
-  max-height: 160px; /* 4个会话项的高度，每个约40px */
+  max-height: 320px; /* 显示约5.5条，可滚动查看全部15条 */
   overflow-y: auto;
   border: 1px solid #30363d;
   border-radius: 4px;
@@ -1028,7 +1041,7 @@
 }
 
 .sessionIdSelected {
-  color: #4CAF50;
+  color: #4caf50;
   font-weight: 700;
 }
 
@@ -1157,7 +1170,7 @@
 }
 
 .sessionId {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
   font-size: 11px;
   color: #8b949e;
   letter-spacing: -0.3px;
@@ -1179,8 +1192,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .sessionMeta {
@@ -1219,8 +1237,9 @@
 /* Row 2: Name and Summary */
 .sessionRowSecondary {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
   padding-left: 2px;
 }
 
@@ -1231,16 +1250,33 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  cursor: text;
+  cursor: pointer;
   padding: 2px 4px;
   margin: -2px -4px;
   border-radius: 4px;
   transition: all 0.15s ease;
+  flex: 1;
 }
 
 .sessionName:hover {
   background: rgba(88, 166, 255, 0.15);
   color: #58a6ff;
+}
+
+.editIcon {
+  font-size: 11px;
+  color: #6e7681;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: all 0.15s ease;
+  opacity: 0.6;
+}
+
+.editIcon:hover {
+  color: #58a6ff;
+  opacity: 1;
+  background: rgba(88, 166, 255, 0.1);
 }
 
 .sessionSummary {

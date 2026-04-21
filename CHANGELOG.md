@@ -194,6 +194,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Input container now fixed at bottom using position: fixed
 - Chat container padding prevents content from being hidden behind input
 
-## [0.57.1] - 2026-03-19
+## [0.57.0] - 2025-03-19
 
 - Initial release
