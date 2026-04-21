@@ -3,6 +3,9 @@
  * 连接Zustand Store与后端WebSocket，实现所有后端支持的功能
  */
 
+// 【工具执行信息存储】用于在孤立工具结果时获取工具名称和参数
+const executingTools = new Map<string, { name: string; args: any }>();
+
 import {
   abortChatGeneration,
   compactSession,
@@ -632,8 +635,16 @@ export function setupWebSocketListeners(): void {
       const ts = new Date().toISOString().split("T")[1].split(".")[0];
       console.log(`[${ts}] [RECV] tool_execution_start: ${data?.toolName || "unknown"}`);
 
+      const toolCallId = data?.toolCallId || generateToolId();
+
+      // 【保存工具信息】用于孤立结果时显示
+      executingTools.set(toolCallId, {
+        name: data?.toolName || "unknown",
+        args: data?.args || {},
+      });
+
       const tool: ToolExecution = {
-        id: data?.toolCallId || generateToolId(),
+        id: toolCallId,
         name: data?.toolName || "unknown",
         args: data?.args || {},
         status: "executing",
@@ -657,7 +668,53 @@ export function setupWebSocketListeners(): void {
       const ts = new Date().toISOString().split("T")[1].split(".")[0];
       console.log(`[${ts}] [RECV] tool_execution_end: ${data?.toolCallId}`);
       const error = data?.isError ? "Tool execution failed" : undefined;
+
+      // 尝试更新关联的工具
       store.updateToolOutput(data.toolCallId, data?.result || "", error);
+
+      // 【兜底方案】检查是否成功关联到工具调用
+      // 如果 activeTools 中没有该工具，说明可能是孤立的结果，创建独立消息显示
+      const state = store.getState();
+      const activeTool = state.activeTools.get(data.toolCallId);
+      const hasStreamingTool = state.streamingToolCalls.has(data.toolCallId);
+      const hasCurrentMessage = state.currentStreamingMessage?.content?.some(
+        (c: any) => c.type === "tool_use" && c.toolCallId === data.toolCallId
+      );
+
+      if (!activeTool && !hasStreamingTool && !hasCurrentMessage) {
+        // 未找到关联，创建独立工具结果消息
+        console.log(
+          `[${ts}] [TOOL_ORPHAN] Creating standalone tool result message for ${data.toolCallId}`
+        );
+
+        // 获取保存的工具信息
+        const toolInfo = executingTools.get(data.toolCallId);
+
+        store.addMessage({
+          id: `tool-result-${Date.now()}`,
+          role: "assistant",
+          kind: "tool_result",
+          kind1: "assistant",
+          kind2: "tool",
+          kind3: "tool_result",
+          content: [
+            {
+              type: "tool",
+              toolCallId: data.toolCallId,
+              toolName: toolInfo?.name || "unknown",
+              args: toolInfo?.args || {},
+              output: data?.result || "",
+              error,
+              status: error ? "error" : "success",
+            },
+          ],
+          timestamp: new Date(),
+          isStreaming: false,
+        });
+      }
+
+      // 清理存储的工具信息
+      executingTools.delete(data.toolCallId);
     }
   );
 
