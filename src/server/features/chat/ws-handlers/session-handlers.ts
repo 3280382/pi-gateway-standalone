@@ -59,13 +59,13 @@ export async function handleInit(
     throw new Error("Failed to create or get session");
   }
 
-  // 2.5 Set client-selected session (for strict message routing)
+  // 2.5 Set viewing session (for message routing - background sessions continue running)
   const sessionShortId = extractShortSessionId(session.session?.sessionFile || "");
   if (sessionShortId) {
-    serverSessionManager.setClientSelectedSession(ctx.ws, sessionShortId);
+    serverSessionManager.setViewingSession(ctx.ws, sessionShortId);
     ctx.selectedSessionId = sessionShortId;
     ctx.workingDir = workingDir;
-    logger.info(`[handleInit] Client selected session: ${sessionShortId}`);
+    logger.info(`[handleInit] Client viewing session: ${sessionShortId}`);
   }
 
   // 3. Build response data
@@ -189,10 +189,10 @@ export async function handleNewSession(
     throw new Error("Failed to create session");
   }
 
-  // Key: Set client to new session association, else messages buffered
+  // Key: Set viewing session for message routing
   const shortId = extractShortSessionId(newSessionFile);
-  serverSessionManager.setClientSelectedSession(ctx.ws, shortId);
-  logger.info(`[handleNewSession] Client associated with new session: ${shortId}`);
+  serverSessionManager.setViewingSession(ctx.ws, shortId);
+  logger.info(`[handleNewSession] Client viewing new session: ${shortId}`);
 
   // 4. Use same response builder as init
   // Note: Need to refetch allSessions to include newly created session
@@ -252,15 +252,13 @@ export async function handleLoadSession(
   const { sessionPath } = payload;
 
   try {
-    // 【关键修复】使用 ServerSessionManager.switchSession 来切换 session
-    // 这样可以确保 serverSessionManager 中的 entry 被正确更新
     const shortId = extractShortSessionId(sessionPath);
     const currentWorkingDir = ctx.session?.workingDir || process.cwd();
 
-    // 切换 session，这会更新 serverSessionManager 中的 entry
-    const newSession = await serverSessionManager.switchSession(
+    // 【重构】后台并行运行模型：旧 session 不 dispose，只切换 viewing
+    // 获取或创建目标 session（后台 session 继续运行）
+    const newSession = await serverSessionManager.getSessionForFile(
       currentWorkingDir,
-      currentWorkingDir, // 同一工作目录
       ctx.ws,
       sessionPath
     );
@@ -268,9 +266,13 @@ export async function handleLoadSession(
     // 更新 ctx.session 为新的 session
     ctx.session = newSession;
 
+    // 设置客户端正在查看的 session（消息路由关键）
     if (shortId) {
+      serverSessionManager.setViewingSession(ctx.ws, shortId);
       ctx.selectedSessionId = shortId;
-      logger.info(`[handleLoadSession] Client switched to session: ${shortId}`);
+      logger.info(
+        `[handleLoadSession] Client viewing session: ${shortId} (background sessions continue running)`
+      );
     }
 
     // Build full response with messages using shared helper
@@ -321,7 +323,7 @@ export async function handleChangeDir(
   // Determine current working directory
   const oldWorkingDir = currentPath || ctx.session?.workingDir || null;
 
-  // Use ServerSessionManager to switch session
+  // Use ServerSessionManager to switch session (old session continues in background)
   const session = await serverSessionManager.switchSession(
     oldWorkingDir || newPath,
     newPath,
@@ -332,6 +334,12 @@ export async function handleChangeDir(
 
   if (!session.session) {
     throw new Error("Failed to create or get session");
+  }
+
+  // Set viewing session for message routing
+  const shortId = extractShortSessionId(session.sessionFile);
+  if (shortId) {
+    serverSessionManager.setViewingSession(ctx.ws, shortId);
   }
 
   // Use shared function to build response

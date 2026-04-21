@@ -76,8 +76,8 @@ export class ServerSessionManager {
   private clientToShortId: Map<WebSocket, string> = new Map();
   /** Maps sessionFile to shortId for file-based lookup */
   private sessionFileToShortId: Map<string, string> = new Map();
-  /** Maps WebSocket to selected session ID for strict message routing */
-  private clientToSelectedSessionId: Map<WebSocket, string> = new Map();
+  /** Maps WebSocket to currently VIEWING session ID (not exclusive, background sessions continue running) */
+  private clientToViewingSession: Map<WebSocket, string> = new Map();
   private llmLogManager: LlmLogManager | null = null;
   private statusBroadcastInterval: NodeJS.Timeout | null = null;
 
@@ -334,9 +334,6 @@ export class ServerSessionManager {
   }
 
   private setupCallbacks(session: PiAgentSession): void {
-    session.setSessionVerificationCallback((ws, shortId) => {
-      return this.hasClientSelectedSession(ws, shortId);
-    });
     session.setStatusUpdateCallback((shortId, status) => {
       this.updateRuntimeStatus(shortId, status as SessionStatus);
     });
@@ -367,7 +364,31 @@ export class ServerSessionManager {
   }
 
   /**
+   * Get or create session for a session file
+   * Background sessions are NOT disposed - they continue running
+   *
+   * @param workingDir Working directory
+   * @param client WebSocket client
+   * @param sessionFile Session file path
+   * @returns PiAgentSession instance
+   */
+  async getSessionForFile(
+    workingDir: string,
+    client: WebSocket,
+    sessionFile: string
+  ): Promise<PiAgentSession> {
+    const shortId = this.getShortId(sessionFile);
+    console.log(
+      `[ServerSessionManager] Getting session for file: ${sessionFile}, shortId=${shortId}`
+    );
+
+    // Get or create session - background sessions continue running
+    return this.getOrCreateSession(workingDir, client, sessionFile);
+  }
+
+  /**
    * Switch session to a new working directory or session file
+   * NOTE: Old session is NOT disposed - it continues running in background
    *
    * @param currentWorkingDir Current working directory
    * @param newWorkingDir New working directory
@@ -386,12 +407,8 @@ export class ServerSessionManager {
       `[ServerSessionManager] Switching session: from ${currentWorkingDir} to ${newWorkingDir}, shortId=${newShortId}`
     );
 
-    // End current session for this client
-    const currentShortId = this.clientToShortId.get(client);
-    if (currentShortId) {
-      console.log(`[ServerSessionManager] Ending old session: shortId=${currentShortId}`);
-      this.disposeSessionByShortId(currentShortId);
-    }
+    // NOTE: We NO LONGER dispose the old session - it continues running in background
+    // Messages from background sessions are buffered until client views them again
 
     // Get or create session for new working directory
     return this.getOrCreateSession(newWorkingDir, client, newSessionFile);
@@ -695,15 +712,15 @@ export class ServerSessionManager {
   }
 
   /**
-   * Set the selected session ID for a WebSocket client
-   * This is used for strict message routing - only messages from the selected session are sent
+   * Set which session the client is currently VIEWING
+   * Background sessions continue running, only viewing session messages are routed
    *
    * @param client WebSocket client
-   * @param shortId Selected session short ID
+   * @param shortId Session short ID being viewed
    */
-  setClientSelectedSession(client: WebSocket, shortId: string): void {
-    this.clientToSelectedSessionId.set(client, shortId);
-    console.log(`[ServerSessionManager] Client selected session: ${shortId}`);
+  setViewingSession(client: WebSocket, shortId: string): void {
+    this.clientToViewingSession.set(client, shortId);
+    console.log(`[ServerSessionManager] Client now viewing session: ${shortId}`);
 
     // Flush buffered messages for this session to the client
     const entry = this.sessions.get(shortId);
@@ -715,33 +732,19 @@ export class ServerSessionManager {
         );
       }
 
-      // 【状态同步】客户端选择session时，立即广播一次当前状态
-      // 确保客户端能立即看到正确的状态（而不是history）
+      // 立即广播当前状态，确保客户端看到正确状态
       this.broadcastRuntimeStatus(entry.workingDir);
     }
   }
 
   /**
-   * Get the selected session ID for a WebSocket client
+   * Get which session the client is currently VIEWING
    *
    * @param client WebSocket client
-   * @returns Selected session short ID or undefined
+   * @returns Viewing session short ID or undefined
    */
-  getClientSelectedSession(client: WebSocket): string | undefined {
-    return this.clientToSelectedSessionId.get(client);
-  }
-
-  /**
-   * Check if a client has selected a specific session
-   * Used for strict message routing
-   *
-   * @param client WebSocket client
-   * @param shortId Session short ID to check
-   * @returns true if client has selected this session
-   */
-  hasClientSelectedSession(client: WebSocket, shortId: string): boolean {
-    const selectedSessionId = this.clientToSelectedSessionId.get(client);
-    return selectedSessionId === shortId;
+  getViewingSession(client: WebSocket): string | undefined {
+    return this.clientToViewingSession.get(client);
   }
 
   /**

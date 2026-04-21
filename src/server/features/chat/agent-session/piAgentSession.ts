@@ -30,7 +30,7 @@ import {
 } from "@mariozechner/pi-coding-agent";
 import { WebSocket } from "ws";
 import type { LlmLogManager } from "../llm/log-manager";
-import { extractShortSessionId } from "./session-manager";
+import { extractShortSessionId, serverSessionManager } from "./session-manager";
 import { AGENT_DIR, getLocalSessionsDir } from "./utils";
 
 /**
@@ -149,18 +149,6 @@ export class PiAgentSession {
    */
   getRuntimeStatus(): typeof this.runtimeStatus {
     return this.runtimeStatus;
-  }
-
-  /**
-   * Set session verification callback
-   * This callback is called before sending each message to verify
-   * the client has selected this session for receiving messages
-   *
-   * @param callback Function that takes (ws, shortId) and returns true if client has selected this session
-   */
-  setSessionVerificationCallback(callback: (ws: WebSocket, shortId: string) => boolean): void {
-    this.sessionVerificationCallback = callback;
-    console.log(`[PiAgentSession] Session verification callback set for ${this.shortId}`);
   }
 
   /**
@@ -1263,12 +1251,6 @@ export class PiAgentSession {
    */
   private isBuffering: boolean = false;
 
-  /**
-   * Session verification callback
-   * Called before sending each message to verify the client has selected this session
-   * If returns false, message is buffered instead of sent
-   */
-  private sessionVerificationCallback: ((ws: WebSocket, shortId: string) => boolean) | null = null;
   private statusUpdateCallback: ((shortId: string, status: string) => void) | null = null;
 
   /**
@@ -1289,8 +1271,10 @@ export class PiAgentSession {
       return;
     }
 
-    if (!this.isClientSelected()) {
-      this.bufferMessage(message, `Client not selected session ${this.shortId}`);
+    // Route: only send if client is VIEWING this session
+    // Background sessions buffer messages until viewed again
+    if (!this.isClientViewing()) {
+      this.bufferMessage(message, `Client viewing other session, buffering for ${this.shortId}`);
       return;
     }
 
@@ -1316,9 +1300,12 @@ export class PiAgentSession {
     return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
   }
 
-  private isClientSelected(): boolean {
-    if (!this.sessionVerificationCallback || !this.shortId) return true;
-    return this.sessionVerificationCallback(this.ws!, this.shortId);
+  private isClientViewing(): boolean {
+    if (!this.shortId || !this.ws) return true;
+    const viewingShortId = serverSessionManager.getViewingSession(this.ws);
+    // If no viewing session set yet, allow send (backward compat)
+    if (!viewingShortId) return true;
+    return viewingShortId === this.shortId;
   }
 
   private bufferMessage(message: ServerMessage, reason: string): void {
