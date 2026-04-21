@@ -680,7 +680,6 @@ export function setupWebSocketListeners(): void {
         // 尝试更新关联的工具
         store.updateToolOutput(data.toolCallId, data?.result || "", error);
 
-        // 【兜底方案】检查是否成功关联到工具调用
         const state = store.getState();
         const activeTool = state.activeTools?.get(data.toolCallId);
         const hasStreamingTool = state.streamingToolCalls?.has(data.toolCallId) ?? false;
@@ -693,34 +692,79 @@ export function setupWebSocketListeners(): void {
           `[${ts}] [tool_execution_end] Check orphan: active=${!!activeTool}, streaming=${hasStreamingTool}, current=${hasCurrentMessage}`
         );
 
+        // 如果 activeTool 存在（正在流式中或 finishStreaming 前），结果已通过 updateToolOutput 保存
+        // 如果 finishStreaming 已调用清空了 activeTools，需要更新已固化的消息或创建独立消息
         if (!activeTool && !hasStreamingTool && !hasCurrentMessage) {
-          // 未找到关联，创建独立工具结果消息
-          console.log(`[${ts}] [TOOL_ORPHAN] Creating standalone message for ${data.toolCallId}`);
+          // finishStreaming 已调用，尝试更新 messages 中已固化的消息
+          const messages = state.messages;
+          let messageUpdated = false;
 
-          // 获取保存的工具信息
-          const toolInfo = executingTools.get(data.toolCallId);
+          // 从后向前查找包含该 toolCallId 的消息
+          for (let i = messages.length - 1; i >= 0; i--) {
+            const msg = messages[i];
+            const toolIndex = msg.content?.findIndex(
+              (c: any) =>
+                (c.type === "tool_use" || c.type === "tool") &&
+                (c.toolCallId === data.toolCallId || c.id === data.toolCallId)
+            );
 
-          store.addMessage({
-            id: `tool-result-${Date.now()}`,
-            role: "assistant",
-            kind: "tool_result",
-            kind1: "assistant",
-            kind2: "tool",
-            kind3: "tool_result",
-            content: [
-              {
+            if (toolIndex !== undefined && toolIndex >= 0) {
+              // 更新该消息中的工具块，将 tool_use 转换为 tool 并填充结果
+              const updatedContent = [...msg.content];
+              updatedContent[toolIndex] = {
+                ...updatedContent[toolIndex],
                 type: "tool",
-                toolCallId: data.toolCallId,
-                toolName: toolInfo?.name || "unknown",
-                args: toolInfo?.args || {},
                 output: data?.result || "",
                 error,
                 status: error ? "error" : "success",
-              },
-            ],
-            timestamp: new Date(),
-            isStreaming: false,
-          });
+              };
+
+              const updatedMessages = [...messages];
+              updatedMessages[i] = { ...msg, content: updatedContent };
+              store.setMessages(updatedMessages);
+              messageUpdated = true;
+
+              console.log(
+                `[${ts}] [tool_execution_end] Updated existing message ${msg.id} with tool result for ${data.toolCallId}`
+              );
+              break;
+            }
+          }
+
+          if (!messageUpdated) {
+            // 未找到关联消息，创建独立工具结果消息
+            console.log(
+              `[${ts}] [TOOL_ORPHAN] Creating standalone message for ${data.toolCallId}`
+            );
+
+            // 获取保存的工具信息
+            const toolInfo = executingTools.get(data.toolCallId);
+
+            // Determine kind3 based on tool execution result
+            const resultKind3 = error ? "tool_error" : "tool_success";
+
+            store.addMessage({
+              id: `tool-result-${Date.now()}`,
+              role: "assistant",
+              kind: resultKind3,
+              kind1: "assistant",
+              kind2: "tool",
+              kind3: resultKind3,
+              content: [
+                {
+                  type: "tool",
+                  toolCallId: data.toolCallId,
+                  toolName: toolInfo?.name || "unknown",
+                  args: toolInfo?.args || {},
+                  output: data?.result || "",
+                  error,
+                  status: error ? "error" : "success",
+                },
+              ],
+              timestamp: new Date(),
+              isStreaming: false,
+            });
+          }
         }
 
         // 清理存储的工具信息

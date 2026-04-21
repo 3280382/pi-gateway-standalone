@@ -53,6 +53,8 @@ export interface Message {
     | "thinking_block"
     | "tool_call"
     | "tool_result"
+    | "tool_success"
+    | "tool_error"
     | "model_change"
     | "thinking_level_change"
     | "compaction"

@@ -1508,7 +1508,13 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
       }
 
       // For tool messages, check tool status filters
-      if (kind2 === "tool" || kind3 === "tool_call" || kind3 === "tool_result") {
+      if (
+        kind2 === "tool" ||
+        kind3 === "tool_call" ||
+        kind3 === "tool_result" ||
+        kind3 === "tool_success" ||
+        kind3 === "tool_error"
+      ) {
         // Check if base tool filter is enabled
         if (!safeFilters.kind2.tool) return false;
 
