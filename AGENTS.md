@@ -219,6 +219,21 @@ If slow function has sub-calls, repeat the analysis flow for sub-calls.
 
 ## Debugging Tips
 
+### Runtime Verification Principle
+
+**When code review fails to find the bug:**
+
+After extensive code reading and modification, if the bug persists, the issue is likely not in your logic but in:
+- Environment differences
+- Data state mismatches
+- Hidden dependencies
+
+**Rule: Trust only observed execution.**
+
+Run the actual code. Inspect real data. Verify environment state. The bug lives in the gap between theory and reality—not in your understanding.
+
+### Standard Checks
+
 - **Frontend**: Vite auto-reloads, check DevTools
 - **Backend**: tsx watch auto-restarts, check `logs/backend_current.log`
 - **WebSocket**: Browser Network WS tab

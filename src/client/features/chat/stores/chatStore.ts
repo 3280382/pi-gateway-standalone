@@ -1434,11 +1434,12 @@ function detectHierarchicalMessageType(message: Message): {
 }
 
 /**
- * Hierarchical Message Filtering
+ * Hierarchical Message Filtering - 3-Level Kind System
  *
- * Two-level filtering:
- * 1. Role level: user | assistant | system
- * 2. Content type level: depends on role
+ * Three-level filtering:
+ * 1. Kind1 (Source): user | assistant | sysinfo
+ * 2. Kind2 (Category): prompt | response | thinking | tool | event
+ * 3. Kind3 (Subtype): model_change | thinking_level_change | compaction | retry | auto_retry | usage | toolSuccess | toolError | toolPending
  *
  * @param messages Array of messages
  * @param options Filter options with hierarchical structure
@@ -1448,10 +1449,121 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
   const { query, filters } = options;
   const lowerQuery = query.toLowerCase().trim();
 
+  // Defensive: ensure filters has the expected structure (new 3-level kind system)
+  const safeFilters = {
+    kind1: filters?.kind1 ?? { user: true, assistant: true, sysinfo: true },
+    kind2: filters?.kind2 ?? {
+      prompt: true,
+      response: true,
+      thinking: true,
+      tool: true,
+      event: true,
+    },
+    kind3: filters?.kind3 ?? {
+      modelChange: true,
+      thinkingLevelChange: true,
+      compaction: true,
+      retry: true,
+      autoRetry: true,
+      usage: true,
+      toolSuccess: true,
+      toolError: true,
+      toolPending: true,
+    },
+  };
+
+  return messages.filter((message) => {
+    // Use message's kind1/kind2/kind3 fields directly (from server)
+    const kind1 = message.kind1;
+    const kind2 = message.kind2;
+    const kind3 = message.kind3;
+
+    // Level 1: Kind1 filtering (user | assistant | sysinfo)
+    if (!kind1 || !safeFilters.kind1[kind1]) return false;
+
+    // Level 2: Kind2 filtering (prompt | response | thinking | tool | event)
+    if (!kind2 || !safeFilters.kind2[kind2]) return false;
+
+    // Level 3: Kind3 filtering for specific subtypes
+    if (kind3) {
+      // Map snake_case kind3 to camelCase for filter lookup
+      const camelKind3 = kind3.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+
+      // For sysinfo events, check specific event type filters
+      if (kind1 === "sysinfo" && kind2 === "event") {
+        const eventFilters = [
+          "modelChange",
+          "thinkingLevelChange",
+          "compaction",
+          "retry",
+          "autoRetry",
+          "usage",
+        ];
+        if (
+          eventFilters.includes(camelKind3) &&
+          !safeFilters.kind3[camelKind3 as keyof typeof safeFilters.kind3]
+        ) {
+          return false;
+        }
+      }
+
+      // For tool messages, check tool status filters
+      if (kind2 === "tool" || kind3 === "tool_call" || kind3 === "tool_result") {
+        // Check if base tool filter is enabled
+        if (!safeFilters.kind2.tool) return false;
+
+        // Determine tool status from message content
+        const toolBlocks =
+          message.content?.filter((c) => c.type === "tool" || c.type === "tool_use") || [];
+
+        if (toolBlocks.length > 0) {
+          // Check if any tool passes the status filter
+          const hasVisibleTool = toolBlocks.some((block) => {
+            const status = block.error ? "error" : block.output ? "success" : "pending";
+            const statusKey =
+              `tool${status.charAt(0).toUpperCase() + status.slice(1)}` as keyof typeof safeFilters.kind3;
+            return safeFilters.kind3[statusKey] ?? true;
+          });
+
+          if (!hasVisibleTool) return false;
+        }
+      }
+    }
+
+    // Level 4: Text search filtering (if query exists)
+    if (lowerQuery) {
+      const messageText =
+        message.content
+          ?.map((c) => {
+            if (c.type === "text") return c.text || "";
+            if (c.type === "thinking") return c.thinking || "";
+            if (c.type === "tool" || c.type === "tool_use") {
+              return `${c.toolName || ""} ${JSON.stringify(c.args || {})} ${c.output || ""}`;
+            }
+            return "";
+          })
+          .join(" ")
+          .toLowerCase() || "";
+
+      return messageText.includes(lowerQuery);
+    }
+
+    return true;
+  });
+}
+
+// Legacy filter function - kept for backward compatibility
+/**
+ * @deprecated Use filterMessages with kind1/kind2/kind3 structure instead
+ */
+export function filterMessagesLegacy(messages: Message[], options: FilterOptions): Message[] {
+  const { query, filters } = options;
+  const lowerQuery = query.toLowerCase().trim();
+
   // Defensive: ensure filters has the expected structure
   const safeFilters = {
-    roles: filters?.roles ?? { user: true, assistant: true, system: true },
-    contentTypes: filters?.contentTypes ?? {
+    roles: (filters as any)?.roles ?? { user: true, assistant: true, system: true },
+    contentTypes: (filters as any)?.contentTypes ?? {
       prompt: true,
       text: true,
       thinking: true,
