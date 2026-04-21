@@ -331,6 +331,7 @@ if (isMainModule) {
   appFactory
     .start()
     .then(() => {
+      // [DEV-TEST] tsx watch auto-reload test round 1
       console.log(`
 ╔════════════════════════════════════════════════════════╗
 ║                                                        ║

@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-04-21T13:38:17.172Z",
+  "config": {
+    "resultsDir": "/root/pi-gateway-standalone/test-results/latest",
+    "timestamp": "2026-04-21T13:38:17.136Z",
+    "port": 3020,
+    "logLevel": "info"
+  },
+  "summary": {
+    "total": 0,
+    "passed": 0,
+    "failed": 0,
+    "duration": 30
+  },
+  "results": []
+}

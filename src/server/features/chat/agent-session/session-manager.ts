@@ -104,7 +104,7 @@ export class ServerSessionManager {
 
   /**
    * Broadcast runtime status for all working directories
-   * Optimized: only broadcast to clients with visible sidebar or when status changes
+   * Only broadcasts to clients VIEWING that working directory
    */
   private broadcastAllRuntimeStatus(): void {
     // Group sessions by workingDir
@@ -125,8 +125,17 @@ export class ServerSessionManager {
         hasClient: this.isClientConnected(entry.client),
       }));
 
+      // Collect unique clients and check if they're viewing this workingDir
+      const seenClients = new Set<WebSocket>();
       for (const entry of entries) {
         if (!this.shouldBroadcastToClient(entry)) continue;
+        if (seenClients.has(entry.client)) continue;
+        seenClients.add(entry.client);
+
+        // Only broadcast to clients VIEWING this workingDir
+        const viewingShortId = this.clientToViewingSession.get(entry.client);
+        const viewingEntry = viewingShortId ? this.sessions.get(viewingShortId) : null;
+        if (viewingEntry?.workingDir !== workingDir) continue;
 
         try {
           entry.client.send(
@@ -752,31 +761,42 @@ export class ServerSessionManager {
   }
 
   /**
-   * Broadcast runtime status to all clients in a working directory
+   * Broadcast runtime status to all clients VIEWING a working directory
+   * Only sends to clients whose current viewing session belongs to this workingDir
    *
    * @param workingDir Working directory
    */
   broadcastRuntimeStatus(workingDir: string): void {
     const sessions = this.getSessionsByWorkingDir(workingDir);
+    if (sessions.length === 0) return;
+
     const statusList = sessions.map((entry) => ({
       shortId: entry.shortId,
       status: entry.runtimeStatus,
       hasClient: this.isClientConnected(entry.client),
     }));
 
-    // Send to all clients in this working directory
+    // Collect unique clients in this working directory
+    const seenClients = new Set<WebSocket>();
     sessions.forEach((entry) => {
-      if (this.isClientConnected(entry.client)) {
-        try {
-          entry.client.send(
-            JSON.stringify({
-              type: "runtime_status_broadcast",
-              sessions: statusList,
-            })
-          );
-        } catch (_e) {
-          // Ignore send errors
-        }
+      if (!this.isClientConnected(entry.client)) return;
+      if (seenClients.has(entry.client)) return;
+      seenClients.add(entry.client);
+
+      // Only send to clients currently VIEWING this workingDir
+      const viewingShortId = this.clientToViewingSession.get(entry.client);
+      const viewingEntry = viewingShortId ? this.sessions.get(viewingShortId) : null;
+      if (viewingEntry?.workingDir !== workingDir) return;
+
+      try {
+        entry.client.send(
+          JSON.stringify({
+            type: "runtime_status_broadcast",
+            sessions: statusList,
+          })
+        );
+      } catch (_e) {
+        // Ignore send errors
       }
     });
   }

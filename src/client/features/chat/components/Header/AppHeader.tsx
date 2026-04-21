@@ -270,9 +270,13 @@ export function AppHeader({
                       key={ws.path}
                       type="button"
                       className={`${styles.dropdownItem} ${isActive ? styles.active : ""}`}
-                      onClick={() => {
+                      onClick={async () => {
                         if (!isActive) {
-                          sidebarController.changeWorkingDir(ws.path);
+                          try {
+                            await sidebarController.changeWorkingDir(ws.path);
+                          } catch {
+                            // Error already logged in sessionManager
+                          }
                         }
                         setIsWorkspaceDropdownOpen(false);
                       }}
