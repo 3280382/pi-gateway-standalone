@@ -104,10 +104,19 @@ export class PiAgentSession {
   shortId: string = "";
 
   /** Current runtime status */
-  runtimeStatus: "idle" | "thinking" | "tooling" | "streaming" | "waiting" | "error" | "retrying" | "compacting" = "idle";
+  runtimeStatus:
+    | "idle"
+    | "thinking"
+    | "tooling"
+    | "streaming"
+    | "waiting"
+    | "error"
+    | "retrying"
+    | "compacting" = "idle";
 
   /** Active tool execution tracking */
-  private activeToolExecution: { toolCallId: string; toolName: string; startTime: Date } | null = null;
+  private activeToolExecution: { toolCallId: string; toolName: string; startTime: Date } | null =
+    null;
 
   /**
    * Create new PiAgentSession
@@ -148,14 +157,12 @@ export class PiAgentSession {
 
   /**
    * Set session verification callback
-   * This callback is called before sending each message to verify 
+   * This callback is called before sending each message to verify
    * the client has selected this session for receiving messages
-   * 
+   *
    * @param callback Function that takes (ws, shortId) and returns true if client has selected this session
    */
-  setSessionVerificationCallback(
-    callback: (ws: WebSocket, shortId: string) => boolean
-  ): void {
+  setSessionVerificationCallback(callback: (ws: WebSocket, shortId: string) => boolean): void {
     this.sessionVerificationCallback = callback;
     console.log(`[PiAgentSession] Session verification callback set for ${this.shortId}`);
   }
@@ -568,7 +575,7 @@ export class PiAgentSession {
           if (endMsg.role === "assistant" && this.messageStarted) {
             console.log(`[${timestamp}] [SEND] message_end: ${(endMsg as any).id}`);
             this.send({ type: "message_end", message: endMsg });
-            
+
             // Send usage information if available
             const assistantMsg = endMsg as any;
             if (assistantMsg.usage) {
@@ -583,7 +590,7 @@ export class PiAgentSession {
                 },
               });
             }
-            
+
             this.messageStarted = false;
           }
           break;
@@ -692,15 +699,17 @@ export class PiAgentSession {
 
         // Tool actual execution event
         case "tool_execution_start": {
+          // Use currentContentBlock's toolCallId to ensure consistency with toolcall_start
+          const toolCallId = this.currentContentBlock?.toolCallId || event.toolCallId;
           this.activeToolExecution = {
-            toolCallId: event.toolCallId,
+            toolCallId,
             toolName: event.toolName,
             startTime: new Date(),
           };
           this.updateRuntimeStatus("tooling");
           this.send({
             type: "tool_execution_start",
-            toolCallId: event.toolCallId,
+            toolCallId,
             toolName: event.toolName,
             args: event.args,
           });
@@ -709,6 +718,8 @@ export class PiAgentSession {
 
         case "tool_execution_end": {
           this.activeToolExecution = null;
+          // Use currentContentBlock's toolCallId to ensure consistency with toolcall_start
+          const toolCallId = this.currentContentBlock?.toolCallId || event.toolCallId;
           const toolResult = event.result;
           const toolName = event.toolName;
           const isWriteOperation =
@@ -721,19 +732,14 @@ export class PiAgentSession {
             const args = (event as any).args;
             const filePath = args?.path || args?.file_path || args?.filepath || args?.filePath;
             if (typeof filePath === "string") {
-              this.sendToolEndWithFileContent(
-                event.toolCallId,
-                toolResult,
-                event.isError,
-                filePath
-              );
+              this.sendToolEndWithFileContent(toolCallId, toolResult, event.isError, filePath);
               break;
             }
           }
 
           this.send({
             type: "tool_execution_end",
-            toolCallId: event.toolCallId,
+            toolCallId,
             result: toolResult,
             isError: event.isError,
           });
@@ -794,7 +800,9 @@ export class PiAgentSession {
    * Compact session via SDK
    * Called by WebSocket handler
    */
-  async compactSession(customInstructions?: string): Promise<{ success: boolean; output: string; isError: boolean }> {
+  async compactSession(
+    customInstructions?: string
+  ): Promise<{ success: boolean; output: string; isError: boolean }> {
     if (!this.session) {
       return { success: false, output: "Session not initialized", isError: true };
     }
@@ -817,7 +825,9 @@ export class PiAgentSession {
    * Export session via SDK
    * Called by WebSocket handler
    */
-  async exportSession(outputPath?: string): Promise<{ success: boolean; output: string; isError: boolean }> {
+  async exportSession(
+    outputPath?: string
+  ): Promise<{ success: boolean; output: string; isError: boolean }> {
     if (!this.session) {
       return { success: false, output: "Session not initialized", isError: true };
     }
@@ -1124,7 +1134,9 @@ export class PiAgentSession {
    * @param sessionPath Session file path
    * @returns Object with success status and cwd change info, or null if no session
    */
-  async loadSession(sessionPath: string): Promise<{ success: boolean; cwdChanged: boolean; newCwd?: string; error?: string } | null> {
+  async loadSession(
+    sessionPath: string
+  ): Promise<{ success: boolean; cwdChanged: boolean; newCwd?: string; error?: string } | null> {
     if (!this.session) return null;
     try {
       // Get target session's cwd from session file
@@ -1148,10 +1160,12 @@ export class PiAgentSession {
         if (result) {
           this.shortId = extractShortSessionId(sessionPath);
           // Update sessionFile reference if accessible
-          if (this.session && 'sessionFile' in this.session) {
+          if (this.session && "sessionFile" in this.session) {
             (this.session as any).sessionFile = sessionPath;
           }
-          console.log(`[PiAgentSession] Switched to session: ${this.shortId}, path: ${sessionPath}`);
+          console.log(
+            `[PiAgentSession] Switched to session: ${this.shortId}, path: ${sessionPath}`
+          );
         }
         return { success: result, cwdChanged: false };
       }
@@ -1180,9 +1194,8 @@ export class PiAgentSession {
     }
 
     // Remove leading ! or / if present
-    const cmd = command.startsWith("!") || command.startsWith("/") 
-      ? command.slice(1).trim() 
-      : command.trim();
+    const cmd =
+      command.startsWith("!") || command.startsWith("/") ? command.slice(1).trim() : command.trim();
     if (!cmd) {
       this.send({
         type: "command_result",
@@ -1241,14 +1254,14 @@ export class PiAgentSession {
   /** WebSocket connection state */
   private wsConnected: boolean = false;
 
-  /** 
+  /**
    * Message buffer for disconnected mode
    * When WebSocket is not connected, events are cached here
    * Cleared on each message_start, only keeps the most recent complete message
    */
   private messageEventBuffer: ServerMessage[] = [];
 
-  /** 
+  /**
    * Whether currently buffering messages (WebSocket not connected)
    * Set to true when disconnected, false when connected
    */
@@ -1257,7 +1270,7 @@ export class PiAgentSession {
   /** Track if we're currently inside a message (between message_start and message_end) */
   private insideMessage: boolean = false;
 
-  /** 
+  /**
    * Session verification callback
    * Called before sending each message to verify the client has selected this session
    * If returns false, message is buffered instead of sent
@@ -1345,12 +1358,14 @@ export class PiAgentSession {
     }
 
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.log(`[PiAgentSession.flushMessageBuffer] WebSocket not connected, keeping ${bufferSize} messages in buffer`);
+      console.log(
+        `[PiAgentSession.flushMessageBuffer] WebSocket not connected, keeping ${bufferSize} messages in buffer`
+      );
       return 0;
     }
 
     console.log(`[PiAgentSession.flushMessageBuffer] Flushing ${bufferSize} buffered messages`);
-  
+
     // Send all buffered messages
     for (const message of this.messageEventBuffer) {
       try {
@@ -1363,7 +1378,7 @@ export class PiAgentSession {
     // Clear the buffer after successful flush
     this.messageEventBuffer = [];
     this.isBuffering = false;
-  
+
     return bufferSize;
   }
 
