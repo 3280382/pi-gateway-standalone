@@ -74,9 +74,9 @@ export function useChatInit(): { isConnecting: boolean } {
         return;
       }
 
-      // 2. 从 sessionStore（localStorage）获取当前 workspace 和对应的 sessionFile
+      // 2. 从全局 workspaceStore 读取当前工作目录，从 sessionStore 读取对应 sessionFile
+      const savedWorkspace = useWorkspaceStore.getState().workingDir;
       const sessionStore = useSessionStore.getState();
-      const savedWorkspace = sessionStore.currentWorkspace;
       const savedSessionFile = sessionStore.getSessionFileForWorkspace(savedWorkspace);
       const messageLimit = sessionStore.defaultMessageLimit;
 
@@ -123,9 +123,8 @@ export function useChatInit(): { isConnecting: boolean } {
 
       // 5. 恢复所有状态
 
-      // 5.1 全局工作目录 + 持久化 currentWorkspace
+      // 5.1 全局工作目录（唯一权威来源）
       useWorkspaceStore.getState().setWorkingDir(workingDir);
-      useSessionStore.getState().setCurrentWorkspace(workingDir);
 
       // 5.2 保存该 workspace 的 sessionFile 到持久化映射
       if (currentSession?.sessionFile) {

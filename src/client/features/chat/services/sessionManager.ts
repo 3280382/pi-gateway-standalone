@@ -212,10 +212,10 @@ async function switchDirectory(targetDir: string, _options: SwitchDirOptions = {
     // 重建界面（更新所有状态）
     await handleInitResponse(response, stores);
 
-    // 持久化：更新 currentWorkspace 和该 workspace 的 sessionFile
+    // 持久化：更新全局 workspaceStore 和该 workspace 的 sessionFile
     const newWorkingDir = response.workingDir || targetDir;
     const newSessionFile = response.currentSession?.sessionFile;
-    stores.session.setCurrentWorkspace(newWorkingDir);
+    stores.globalWorkspace.setWorkingDir(newWorkingDir);
     if (newSessionFile) {
       stores.session.setWorkspaceSessionFile(newWorkingDir, newSessionFile);
     }

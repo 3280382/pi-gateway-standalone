@@ -35,12 +35,11 @@ export const CHAT_STORAGE_VERSION = {
 /** Chat Session Store - 持久化字段
  *
  * 注意：
- * - currentWorkspace: 当前工作目录，刷新后恢复
+ * - 当前工作目录由全局 workspaceStore (pi:app:workspace) 统一管理，不重复存储
  * - workspaceSessionFiles: 每个 workspace 对应的 sessionFile，切换时自动恢复
  * - defaultMessageLimit: 用户设置
  */
 export const CHAT_SESSION_PERSIST: string[] = [
-  "currentWorkspace", // 当前工作目录
   "workspaceSessionFiles", // workspace → sessionFile 映射
   "defaultMessageLimit", // 用户设置：默认加载历史消息Items数
 ] as const;

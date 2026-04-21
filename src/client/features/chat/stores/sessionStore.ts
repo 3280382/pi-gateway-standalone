@@ -2,15 +2,15 @@
  * Session Store - Chat Feature 会话状态管理
  * 管理聊天会话、模型设置、连接状态
  *
- * 持久化策略（v3）：
- * - currentWorkspace: 当前工作目录
+ * 持久化策略（v3 cleaned）：
  * - workspaceSessionFiles: 每个 workspace 对应的 sessionFile
  * - defaultMessageLimit: 用户设置
  *
+ * 注意：当前工作目录由全局 workspaceStore (pi:app:workspace) 统一管理
  * 刷新恢复流程：
- * 1. 从 localStorage 读取 currentWorkspace
+ * 1. 从 workspaceStore 读取 workingDir
  * 2. 从 workspaceSessionFiles 读取该 workspace 的 sessionFile
- * 3. 发送 init(currentWorkspace, sessionFile) 恢复界面
+ * 3. 发送 init(workingDir, sessionFile) 恢复界面
  */
 
 import { create } from "zustand";
@@ -83,13 +83,11 @@ export interface ModelInfo {
 
 export interface ChatSessionState {
   // ===== 持久化字段 =====
-  // 当前工作目录（刷新后恢复）
-  currentWorkspace: string;
   // workspacePath -> sessionFile 映射（每个 workspace 独立）
   workspaceSessionFiles: Record<string, string>;
 
   // ===== 运行时字段（不持久化）=====
-  // 当前工作目录（运行时副本，与 currentWorkspace 同步）
+  // 当前工作目录（运行时副本，从全局 workspaceStore 同步）
   workingDir: string;
   // 当前会话
   currentSessionId: string | null;
@@ -109,12 +107,11 @@ export interface ChatSessionState {
 }
 
 interface ChatSessionActions {
-  // Workspace 管理（持久化）
-  setCurrentWorkspace: (workspace: string) => void;
+  // Workspace session file 映射（持久化）
   setWorkspaceSessionFile: (workspace: string, sessionFile: string) => void;
   getSessionFileForWorkspace: (workspace: string) => string | undefined;
 
-  // 工作目录（运行时）
+  // 工作目录（运行时，从 workspaceStore 同步）
   setWorkingDir: (dir: string) => void;
 
   // 当前会话
@@ -143,7 +140,6 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
     devtools(
       (set, get) => ({
         // ===== Initial state =====
-        currentWorkspace: "/root",
         workspaceSessionFiles: {},
 
         workingDir: "/root",
@@ -158,10 +154,7 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
         resourceFiles: null,
         defaultMessageLimit: 100,
 
-        // ===== Workspace 管理（持久化）=====
-        setCurrentWorkspace: (workspace) =>
-          set({ currentWorkspace: workspace, workingDir: workspace }),
-
+        // ===== Workspace session file 映射（持久化）=====
         setWorkspaceSessionFile: (workspace, sessionFile) =>
           set((state) => ({
             workspaceSessionFiles: {
@@ -202,21 +195,22 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
 
         // v2 -> v3: 从单一 currentSessionFile 迁移到 per-workspace 映射
         if (version < 3) {
-          // 如果有旧的 currentSessionFile，迁移到当前 workingDir 下
           const oldSessionFile = state.currentSessionFile;
           const oldWorkingDir = state.workingDir || state.currentWorkspace || "/root";
 
-          state.currentWorkspace = oldWorkingDir;
           state.workspaceSessionFiles = {};
-
           if (oldSessionFile) {
             state.workspaceSessionFiles[oldWorkingDir] = oldSessionFile;
           }
 
-          // 清理旧字段
+          // 清理已废弃字段（currentWorkspace 由全局 workspaceStore 管理）
+          delete state.currentWorkspace;
           delete state.currentSessionFile;
-          delete state.workingDir; // workingDir 不持久化
+          delete state.workingDir;
         }
+
+        // v3 -> v3 cleaned: 删除残留的 currentWorkspace
+        delete state.currentWorkspace;
 
         // v1 -> v2/v3: 清除模型字段
         if (version < 2) {
