@@ -177,6 +177,15 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
     ),
     {
       name: CHAT_STORAGE_KEYS.CHAT_SESSION,
+      version: 2, // 版本升级：移除 currentModel/defaultModel 持久化
+      migrate: (persistedState: any, version: number) => {
+        if (version < 2) {
+          // 清除旧版本中的模型字段，强制从服务器重新获取
+          delete persistedState.currentModel;
+          delete persistedState.defaultModel;
+        }
+        return persistedState;
+      },
       partialize: (state) =>
         Object.fromEntries(
           Object.entries(state).filter(([key]) => CHAT_SESSION_PERSIST.includes(key))

@@ -48,6 +48,13 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Load template content (declared early to avoid TDZ in useEffect)
+  const loadTemplate = useCallback((name: string) => {
+    if (!websocketService.isConnected) return;
+    setPreviewLoading(true);
+    websocketService.send("get_template", { name });
+  }, []);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -138,12 +145,6 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
     setDropdownOpen(false);
     websocketService.send("list_templates");
   }, [isTemplateModalOpen]);
-
-  const loadTemplate = useCallback((name: string) => {
-    if (!websocketService.isConnected) return;
-    setPreviewLoading(true);
-    websocketService.send("get_template", { name });
-  }, []);
 
   const handleSelect = useCallback(
     (template: Template) => {

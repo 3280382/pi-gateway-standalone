@@ -1585,7 +1585,7 @@
     // 清理所有 UI
     clear() {
       // 移除 labels
-      this.elements.labels.forEach((l) => l.element.remove());
+      for (const l of this.elements.labels) l.element.remove();
       this.elements.labels = [];
 
       // 移除 overlay

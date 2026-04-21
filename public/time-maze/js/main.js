@@ -87,8 +87,8 @@ class InputHandler {
 }
 
 // -------------------- 状态记录器 --------------------
-class StateRecorder {
-  static captureState(player, entities, shadowClones) {
+const StateRecorder = {
+  captureState(player, entities, shadowClones) {
     const playerState = {
       x: player.x,
       y: player.y,
@@ -120,9 +120,9 @@ class StateRecorder {
       shadows: shadowStates,
       frame: 0,
     };
-  }
+  },
 
-  static applyState(state, player, entities, _shadowClones) {
+  applyState(state, player, entities, _shadowClones) {
     if (player && state.player) {
       player.x = state.player.x;
       player.y = state.player.y;
@@ -150,8 +150,8 @@ class StateRecorder {
         }
       });
     }
-  }
-}
+  },
+};
 
 // -------------------- 时间管理器 --------------------
 class TimeManager {
@@ -854,7 +854,7 @@ class LevelManager {
   }
 
   update() {
-    this.entities.forEach((e) => e.update());
+    for (const e of this.entities) e.update();
 
     const switches = this.entities.filter((e) => e.type === "switch");
     const doors = this.entities.filter((e) => e.type === "door");
@@ -895,7 +895,7 @@ class LevelManager {
   }
 
   render(ctx) {
-    this.entities.forEach((e) => e.render(ctx));
+    for (const e of this.entities) e.render(ctx);
   }
 }
 
@@ -1111,7 +1111,7 @@ class GameEngine {
     } else {
       this.levelManager.update();
 
-      this.shadowClones.forEach((shadow) => shadow.update(this.levelManager.entities));
+      for (const shadow of this.shadowClones) shadow.update(this.levelManager.entities);
       this.shadowClones = this.shadowClones.filter((s) => s.active);
 
       const entities = this.levelManager.getEntities();
@@ -1152,7 +1152,7 @@ class GameEngine {
       this.levelManager.render(ctx);
     }
 
-    this.shadowClones.forEach((shadow) => shadow.render(ctx));
+    for (const shadow of this.shadowClones) shadow.render(ctx);
 
     if (this.player) {
       this.player.render(ctx);

@@ -11,7 +11,7 @@
   var shouldLoad = true;
 
   try {
-    var value = localStorage.getItem("DEBUG_ERUDA");
+    const value = localStorage.getItem("DEBUG_ERUDA");
     // Only disable if explicitly set to "force"
     if (value === "force") {
       shouldLoad = false;
@@ -37,7 +37,7 @@
   var originalError = console.error;
   var originalWarn = console.warn;
 
-  function captureLog(type, args) {
+  var captureLog = (type, args) => {
     earlyLogs.push({
       time: new Date().toISOString(),
       type: type,
@@ -53,7 +53,7 @@
         .join(" "),
     });
     if (earlyLogs.length > 1000) earlyLogs.shift();
-  }
+  };
 
   console.log = (...args) => {
     captureLog("log", args);

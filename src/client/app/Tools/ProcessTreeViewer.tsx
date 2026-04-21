@@ -84,16 +84,17 @@ export function ProcessTreeViewer() {
           reject(new Error("Timeout"));
         }, 10000);
 
-        const handler = (data: any) => {
+        const handler = (data: unknown) => {
           clearTimeout(timeout);
           cleanup();
           resolve(data);
         };
 
-        const errorHandler = (data: any) => {
+        const errorHandler = (data: { message?: string } | unknown) => {
           clearTimeout(timeout);
           cleanup();
-          reject(new Error(data?.message || "Unknown error"));
+          const msg = (data as { message?: string })?.message || "Unknown error";
+          reject(new Error(msg));
         };
 
         const unsub = websocketService.on("process_tree_data", handler);

@@ -193,24 +193,6 @@ export function useChatPanel(): UseChatPanelReturn {
     }
   }, [messages.length]);
 
-  // ===== [ANCHOR:HANDLERS] =====
-  const handleScroll = useCallback(() => {
-    if (messagesRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = messagesRef.current;
-      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
-      const isAtTop = scrollTop < 50; // 距离顶部50px内认为是顶部
-
-      if (!isAtBottom && shouldScrollToBottom) {
-        setShouldScrollToBottom(false);
-      }
-
-      // 滚动到顶部时自动Load more消息
-      if (isAtTop && hasMoreRef.current && !loadingMoreRef.current) {
-        loadMore();
-      }
-    }
-  }, [shouldScrollToBottom, loadMore]);
-
   // Load more消息 - 滚动到顶部时加载所有历史消息
   const loadMore = useCallback(async () => {
     const sessionStore = useSessionStore.getState();
@@ -272,29 +254,53 @@ export function useChatPanel(): UseChatPanelReturn {
       // 合并消息：新加载的历史消息 + 当前已有的消息（避免重复）
       // 服务器已预处理所有消息
       const { handleServerMessages } = await import("@/features/chat/utils/messageUtils");
-      const historyMessages = handleServerMessages(response.messages);
-      const currentMessages = chatStore.messages;
 
-      // 去重：基于消息ID
-      const existingIds = new Set(currentMessages.map((m) => m.id));
-      const newMessages = historyMessages.filter((m) => !existingIds.has(m.id));
+      // 使用工具函数合并消息，避免重复
+      const merged = handleServerMessages(chatStore.messages, response.messages || []);
 
-      if (newMessages.length > 0) {
-        // 将历史消息添加到开头
-        chatStore.prependMessages(newMessages);
-        console.log("[useChatPanel] Prepended", newMessages.length, "history messages");
+      // 替换消息列表（保留流式消息在末尾）
+      const streamingMessage = chatStore.currentStreamingMessage;
+      if (streamingMessage) {
+        // 如果正在流式，保留流式消息
+        const nonStreaming = merged.filter((m) => m.id !== streamingMessage.id);
+        chatStore.setMessages([...nonStreaming, streamingMessage]);
+      } else {
+        chatStore.setMessages(merged);
       }
 
-      // 已加载所有消息，不再有更多
-      hasMoreRef.current = false;
-      setHasMoreMessages(false);
+      // 更新 hasMore 状态
+      hasMoreRef.current = response.hasMore ?? false;
+      setHasMoreMessages(response.hasMore ?? false);
+
+      // 加载完成后，稍微向下滚动一点，让用户知道加载了更多内容
+      if (messagesRef.current) {
+        messagesRef.current.scrollTop = 100;
+      }
     } catch (error) {
-      console.error("[useChatPanel] Failed to load history:", error);
+      console.error("[useChatPanel] Failed to load messages:", error);
     } finally {
       loadingMoreRef.current = false;
       setIsLoadingMore(false);
     }
   }, []);
+
+  // ===== [ANCHOR:HANDLERS] =====
+  const handleScroll = useCallback(() => {
+    if (messagesRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messagesRef.current;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
+      const isAtTop = scrollTop < 50; // 距离顶部50px内认为是顶部
+
+      if (!isAtBottom && shouldScrollToBottom) {
+        setShouldScrollToBottom(false);
+      }
+
+      // 滚动到顶部时自动Load more消息
+      if (isAtTop && hasMoreRef.current && !loadingMoreRef.current) {
+        loadMore();
+      }
+    }
+  }, [shouldScrollToBottom, loadMore]);
 
   // 重新加载所有消息
   const reloadAllMessages = useCallback(async () => {

@@ -47,8 +47,7 @@ export const CHAT_STORAGE_VERSION = {
 export const CHAT_SESSION_PERSIST: string[] = [
   "currentSessionFile", // 用于RefreshPages面后精确恢复 session
   "defaultMessageLimit", // 用户设置：默认加载历史消息Items数
-  "currentModel", // 当前选择的模型
-  "defaultModel", // 默认模型
+  // 注意：currentModel/defaultModel 不持久化，每个 session 的模型由服务器配置决定
 ] as const;
 
 /** Chat Sidebar Store - 持久化字段
