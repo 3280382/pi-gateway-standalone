@@ -379,6 +379,9 @@ function GlassCard({
   const [isExpanded, setIsExpanded] = useState(() => {
     if (isNewMessage) return true;
     if (block.type === "text") return true;
+    // 工具有结果时默认展开
+    if ((block.type === "tool_use" || block.type === "tool") && (block.output || block.error))
+      return true;
     if (block.type === "thinking") return false;
     return false;
   });
@@ -473,6 +476,7 @@ function GlassCard({
         pending: "Waiting...",
         timeout: "Execution timeout",
         error: "Execution failed",
+        success: "Completed",
       }[toolStatus] || toolStatus;
 
     return (
