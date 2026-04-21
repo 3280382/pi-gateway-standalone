@@ -24,8 +24,8 @@ export const CHAT_STORAGE_KEYS = {
 // ============================================================================
 
 export const CHAT_STORAGE_VERSION = {
-  CHAT_SESSION: 1,
-  CHAT_SIDEBAR: 1,
+  CHAT_SESSION: 2,
+  CHAT_SIDEBAR: 2, // version 2: add recentWorkspaces persistence
 } as const;
 
 // ============================================================================
@@ -56,11 +56,10 @@ export const CHAT_SESSION_PERSIST: string[] = [
  * - sessions 从服务器获取（以当前工作directories为Arguments）
  * - selectedSessionId 从服务器获取（init 响应）
  * - workingDir 已由全局 workspaceStore 管理
- *
- * Chat Sidebar Store 不再持久化任何字段，所有数据从服务器获取
+ * - recentWorkspaces 需要持久化，刷新后快速重建最近工作目录
  */
 export const CHAT_SIDEBAR_PERSIST: string[] = [
-  // 所有数据都从服务器获取，不持久化到 localStorage
+  "recentWorkspaces", // 最近工作directories（最多3个），刷新后快速切换
 ] as const;
 
 /** Chat Store - 持久化字段

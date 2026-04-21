@@ -8,7 +8,8 @@
  */
 
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
+import { CHAT_SIDEBAR_PERSIST, CHAT_STORAGE_KEYS, CHAT_STORAGE_VERSION } from "./persist.config";
 import type { Session, SidebarState } from "@/features/chat/types/sidebar";
 
 // ============================================================================
@@ -71,148 +72,163 @@ interface SidebarActions {
 // Store Creation
 // ============================================================================
 
+const sidebarStoreCreator = (set: any) => ({
+  ...createInitialState(),
+
+  // Visibility Actions
+  setIsVisible: (visible: boolean) => {
+    set({ isVisible: visible }, false, "setIsVisible");
+  },
+
+  toggleVisibility: () => {
+    set((state: any) => ({ isVisible: !state.isVisible }), false, "toggleVisibility");
+  },
+
+  // Bottom Panel Actions
+  setBottomPanelOpen: (open: boolean) => {
+    set({ isBottomPanelOpen: open }, false, "setBottomPanelOpen");
+  },
+
+  closeBottomPanel: () => {
+    set({ isBottomPanelOpen: false }, false, "closeBottomPanel");
+  },
+
+  setBottomPanelHeight: (height: number) => {
+    set({ bottomPanelHeight: height }, false, "setBottomPanelHeight");
+  },
+
+  // Data Actions
+  setWorkingDir: (path: string) => {
+    const safePath = path || "";
+    const displayName = safePath.split("/").pop() || safePath;
+    const newDir = { path: safePath, displayName };
+    set(
+      (state: any) => {
+        const filtered = state.recentWorkspaces.filter((w: any) => w.path !== safePath);
+        const recentWorkspaces = [newDir, ...filtered].slice(0, 3);
+        return { workingDir: newDir, recentWorkspaces };
+      },
+      false,
+      "setWorkingDir"
+    );
+  },
+
+  addRecentWorkspace: (path: string) => {
+    const safePath = path || "";
+    const displayName = safePath.split("/").pop() || safePath;
+    const newDir = { path: safePath, displayName };
+    set(
+      (state: any) => {
+        const filtered = state.recentWorkspaces.filter((w: any) => w.path !== safePath);
+        const recentWorkspaces = [newDir, ...filtered].slice(0, 3);
+        return { recentWorkspaces };
+      },
+      false,
+      "addRecentWorkspace"
+    );
+  },
+
+  setRecentWorkspaces: (paths: string[]) => {
+    const recentWorkspaces = paths
+      .filter((p) => p)
+      .map((p) => ({ path: p, displayName: p.split("/").pop() || p }))
+      .slice(0, 3);
+    set({ recentWorkspaces }, false, "setRecentWorkspaces");
+  },
+
+  setSessions: (sessions: Session[]) => {
+    set({ sessions }, false, "setSessions");
+  },
+
+  addSession: (session: Session) => {
+    set(
+      (state: any) => ({
+        sessions: [session, ...state.sessions],
+      }),
+      false,
+      "addSession"
+    );
+  },
+
+  // UI Actions
+  setLoading: (loading: boolean) => {
+    set({ isLoading: loading }, false, "setLoading");
+  },
+
+  setError: (error: string | null) => {
+    set({ error }, false, "setError");
+  },
+
+  selectSession: (id: string | null) => {
+    set({ selectedSessionId: id }, false, "selectSession");
+  },
+
+  setSelectedSessionId: (id: string | null) => {
+    set({ selectedSessionId: id }, false, "setSelectedSessionId");
+  },
+
+  clearError: () => {
+    set({ error: null }, false, "clearError");
+  },
+
+  // Runtime Status Actions
+  setRuntimeStatus: (sessionId: string, status: string) => {
+    set(
+      (state: any) => ({
+        runtimeStatus: { ...state.runtimeStatus, [sessionId]: status },
+      }),
+      false,
+      "setRuntimeStatus"
+    );
+  },
+
+  updateRuntimeStatusBulk: (statuses: Array<{ sessionId: string; status: string }>) => {
+    set(
+      (state: any) => {
+        const newStatus = { ...state.runtimeStatus };
+        statuses.forEach(({ sessionId, status }) => {
+          newStatus[sessionId] = status;
+        });
+        return { runtimeStatus: newStatus };
+      },
+      false,
+      "updateRuntimeStatusBulk"
+    );
+  },
+
+  // Session Config Actions
+  updateSessionName: (sessionId: string, name: string) => {
+    set(
+      (state: any) => ({
+        sessions: state.sessions.map((s: Session) => (s.id === sessionId ? { ...s, name } : s)),
+      }),
+      false,
+      "updateSessionName"
+    );
+  },
+
+  // Reset
+  reset: () => {
+    set(createInitialState(), false, "reset");
+  },
+});
+
 export const useSidebarStore = create<SidebarState & SidebarActions>()(
   devtools(
-    (set) => ({
-      ...createInitialState(),
-
-      // Visibility Actions
-      setIsVisible: (visible: boolean) => {
-        set({ isVisible: visible }, false, "setIsVisible");
+    persist(sidebarStoreCreator, {
+      name: CHAT_STORAGE_KEYS.CHAT_SIDEBAR,
+      version: CHAT_STORAGE_VERSION.CHAT_SIDEBAR,
+      migrate: (persistedState: any, version: number) => {
+        if (version < 2) {
+          // 旧版本没有 recentWorkspaces，初始化为空数组
+          persistedState.recentWorkspaces = [];
+        }
+        return persistedState;
       },
-
-      toggleVisibility: () => {
-        set((state) => ({ isVisible: !state.isVisible }), false, "toggleVisibility");
-      },
-
-      // Bottom Panel Actions
-      setBottomPanelOpen: (open: boolean) => {
-        set({ isBottomPanelOpen: open }, false, "setBottomPanelOpen");
-      },
-
-      closeBottomPanel: () => {
-        set({ isBottomPanelOpen: false }, false, "closeBottomPanel");
-      },
-
-      setBottomPanelHeight: (height: number) => {
-        set({ bottomPanelHeight: height }, false, "setBottomPanelHeight");
-      },
-
-      // Data Actions
-      setWorkingDir: (path: string) => {
-        const safePath = path || "";
-        const displayName = safePath.split("/").pop() || safePath;
-        const newDir = { path: safePath, displayName };
-        set(
-          (state) => {
-            // 更新 recentWorkspaces：将新目录放到最前面，去重，最多保留3个
-            const filtered = state.recentWorkspaces.filter((w) => w.path !== safePath);
-            const recentWorkspaces = [newDir, ...filtered].slice(0, 3);
-            return { workingDir: newDir, recentWorkspaces };
-          },
-          false,
-          "setWorkingDir"
-        );
-      },
-
-      addRecentWorkspace: (path: string) => {
-        const safePath = path || "";
-        const displayName = safePath.split("/").pop() || safePath;
-        const newDir = { path: safePath, displayName };
-        set(
-          (state) => {
-            const filtered = state.recentWorkspaces.filter((w) => w.path !== safePath);
-            const recentWorkspaces = [newDir, ...filtered].slice(0, 3);
-            return { recentWorkspaces };
-          },
-          false,
-          "addRecentWorkspace"
-        );
-      },
-
-      setRecentWorkspaces: (paths: string[]) => {
-        const recentWorkspaces = paths
-          .filter((p) => p)
-          .map((p) => ({ path: p, displayName: p.split("/").pop() || p }))
-          .slice(0, 3);
-        set({ recentWorkspaces }, false, "setRecentWorkspaces");
-      },
-
-      setSessions: (sessions: Session[]) => {
-        set({ sessions }, false, "setSessions");
-      },
-
-      addSession: (session: Session) => {
-        set(
-          (state) => ({
-            sessions: [session, ...state.sessions],
-          }),
-          false,
-          "addSession"
-        );
-      },
-
-      // UI Actions
-      setLoading: (loading: boolean) => {
-        set({ isLoading: loading }, false, "setLoading");
-      },
-
-      setError: (error: string | null) => {
-        set({ error }, false, "setError");
-      },
-
-      selectSession: (id: string | null) => {
-        set({ selectedSessionId: id }, false, "selectSession");
-      },
-
-      setSelectedSessionId: (id: string | null) => {
-        set({ selectedSessionId: id }, false, "setSelectedSessionId");
-      },
-
-      clearError: () => {
-        set({ error: null }, false, "clearError");
-      },
-
-      // Runtime Status Actions
-      setRuntimeStatus: (sessionId: string, status: string) => {
-        set(
-          (state) => ({
-            runtimeStatus: { ...state.runtimeStatus, [sessionId]: status },
-          }),
-          false,
-          "setRuntimeStatus"
-        );
-      },
-
-      updateRuntimeStatusBulk: (statuses: Array<{ sessionId: string; status: string }>) => {
-        set(
-          (state) => {
-            const newStatus = { ...state.runtimeStatus };
-            statuses.forEach(({ sessionId, status }) => {
-              newStatus[sessionId] = status;
-            });
-            return { runtimeStatus: newStatus };
-          },
-          false,
-          "updateRuntimeStatusBulk"
-        );
-      },
-
-      // Session Config Actions
-      updateSessionName: (sessionId: string, name: string) => {
-        set(
-          (state) => ({
-            sessions: state.sessions.map((s) => (s.id === sessionId ? { ...s, name } : s)),
-          }),
-          false,
-          "updateSessionName"
-        );
-      },
-
-      // Reset
-      reset: () => {
-        set(createInitialState(), false, "reset");
-      },
+      partialize: (state) =>
+        Object.fromEntries(
+          CHAT_SIDEBAR_PERSIST.map((key) => [key, (state as any)[key]])
+        ) as Partial<SidebarState & SidebarActions>,
     }),
     { name: "SidebarStore" }
   )
