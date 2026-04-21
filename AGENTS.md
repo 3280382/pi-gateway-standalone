@@ -1,5 +1,6 @@
 # Pi Gateway Standalone - AI Assistant Guide
 
+> **执行前，先判断。** (Judge before acting.)
 > **This is the primary reference document for AI Coding Agents**. Read this first before starting any task.
   **You should prioritize reasoning through research, making direct modifications, reading code directly, and fixing bugs immediately upon discovery. Do not rely on extensive trial-and-error testing as your primary approach. Testing is only a means for final verification, not a method of thinking.**
 ## Language Standards
@@ -27,8 +28,14 @@ shared/  → Types only (no runtime logic)
 ## Code Commit Standards
 
 ```bash
-# REQUIRED: Run before ANY commit
+# AI 开发时运行（只报 errors，约 466 个可逐步修复）
 npm run check
+
+# 提交前只检查本次改动的文件（最常用，通常 0 errors）
+npm run check:changed
+
+# CI 严格检查（errors + warnings）
+npm run check:ci
 
 # Commit format
 type(scope): subject

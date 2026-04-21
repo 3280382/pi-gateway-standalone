@@ -99,10 +99,21 @@ function useStreamingMessage(
     const completedToolIds = new Set(activeTools.keys());
 
     // Process solidified content
+    console.log(
+      "[useStreamingMessage] Processing content blocks:",
+      currentStreamingMessage.content?.length
+    );
     if (currentStreamingMessage.content?.length) {
       const processedContent = currentStreamingMessage.content.map((c, index) => {
+        console.log(
+          `[useStreamingMessage] Block ${index}: type=${c.type}, toolCallId=${(c as any).toolCallId}`
+        );
         if (c.type === "tool_use" && c.toolCallId && completedToolIds.has(c.toolCallId)) {
           const tool = activeTools.get(c.toolCallId);
+          console.log(
+            `[useStreamingMessage] Found matching tool for ${c.toolCallId}:`,
+            tool ? `output=${!!tool.output}` : "not found"
+          );
           return {
             ...c,
             status:

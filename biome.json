@@ -6,7 +6,20 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!!**/dist", "!public/fonts", "!public/vendor", "!node_modules"]
+    "includes": [
+      "src/**",
+      "test/**",
+      "public/debug-system.js",
+      "public/ui-marker.js",
+      "public/time-maze/**",
+      "public/*.html",
+      "public/*.css",
+      "scripts/**",
+      "*.ts",
+      "*.tsx",
+      "*.json",
+      "*.md"
+    ]
   },
   "formatter": {
     "enabled": true,

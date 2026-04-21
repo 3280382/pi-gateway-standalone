@@ -781,13 +781,31 @@ export const useChatStore = create<
                 case "tool_use":
                   if (meta?.toolCallId) {
                     const toolCall = state.streamingToolCalls.get(meta.toolCallId);
+                    // 检查是否有工具执行结果
+                    const toolExecution = state.activeTools?.get(meta.toolCallId);
+                    const hasResult = toolExecution?.output || toolExecution?.error;
+
                     if (toolCall) {
-                      newBlock = {
-                        type: "tool_use",
-                        toolCallId: toolCall.id,
-                        toolName: toolCall.name,
-                        partialArgs: toolCall.args,
-                      };
+                      if (hasResult) {
+                        // 有执行结果，转换为 tool 类型
+                        newBlock = {
+                          type: "tool",
+                          toolCallId: toolCall.id,
+                          toolName: toolCall.name,
+                          args: toolExecution.args,
+                          output: toolExecution.output,
+                          error: toolExecution.error,
+                          status: toolExecution.status === "error" ? "error" : "success",
+                        };
+                      } else {
+                        // 无结果，保持 tool_use
+                        newBlock = {
+                          type: "tool_use",
+                          toolCallId: toolCall.id,
+                          toolName: toolCall.name,
+                          partialArgs: toolCall.args,
+                        };
+                      }
                       const newToolCalls = new Map(state.streamingToolCalls);
                       newToolCalls.delete(meta.toolCallId);
                       updates.streamingToolCalls = newToolCalls;
