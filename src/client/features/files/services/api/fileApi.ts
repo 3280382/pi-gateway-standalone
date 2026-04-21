@@ -43,7 +43,7 @@ export async function tree(path: string, filter: "all" | "normal" = "all"): Prom
 
   // API returns nested tree structure with children, flatten it for UI
   // 同时计算 level, isLast, parentLastStack 等字段
-  const   items: TreeNode[] = [];
+  const items: TreeNode[] = [];
   const rootPath = data.path || "";
 
   function flatten(
@@ -67,7 +67,7 @@ export async function tree(path: string, filter: "all" | "normal" = "all"): Prom
         ? relativePath.substring(0, relativePath.lastIndexOf("/"))
         : "";
 
-        items.push({
+      items.push({
         name: node.name,
         path: fullPath, // 使用完整绝对路径
         isDirectory: node.isDirectory,
@@ -110,7 +110,7 @@ export async function tree(path: string, filter: "all" | "normal" = "all"): Prom
     flatten(data, 0);
   }
 
-  return { path: data.path || path,   items };
+  return { path: data.path || path, items };
 }
 
 // 读取files内容

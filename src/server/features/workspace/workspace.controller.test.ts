@@ -3,8 +3,8 @@
  * Uses global server from vitest globalSetup
  */
 
-import { describe, it, expect, beforeAll } from "vitest";
 import { TestLogger, TestReporter } from "@test/lib/test-utils";
+import { beforeAll, describe, expect, it } from "vitest";
 
 const logger = new TestLogger("workspace-controller");
 const reporter = new TestReporter("workspace-controller");

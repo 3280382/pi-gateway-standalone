@@ -14,14 +14,14 @@
  * - 服务器已预处理所有消息，客户端直接使用，无需再调用 normalizeSessionMessages
  */
 
+import { initChatWorkingDirectory } from "@/features/chat/services/chatWebSocket";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import type { Session } from "@/features/chat/types/sidebar";
 import type { Message } from "@/features/chat/types/chat";
-import { websocketService } from "@/services/websocket.service";
-import { initChatWorkingDirectory } from "@/features/chat/services/chatWebSocket";
+import type { Session } from "@/features/chat/types/sidebar";
 import { extractShortSessionId } from "@/features/chat/utils/sessionUtils";
+import { websocketService } from "@/services/websocket.service";
 import { useWorkspaceStore as useGlobalWorkspaceStore } from "@/stores/workspaceStore";
 import { createNewChatSession } from "./chatWebSocket";
 
@@ -72,7 +72,7 @@ function getStores() {
 }
 
 // 导出辅助函数供其他模块使用
-export { updateSessionsAndStatus, getStores };
+export { getStores, updateSessionsAndStatus };
 
 // ============================================================================
 // Unified Helpers
@@ -93,7 +93,7 @@ function updateSessionsAndStatus(
 
   // 提取并更新运行时状态
   const statusList = sessions
-    .filter((s: any) => s && s.id && s.status)
+    .filter((s: any) => s?.id && s.status)
     .map((s: any) => ({
       sessionId: s.id,
       status: s.status,
@@ -186,7 +186,7 @@ async function handleInitResponse(response: any, stores: ReturnType<typeof getSt
  * 使用与RefreshPages面完全相同的 initChatWorkingDirectory API
  * 使用覆盖式 loading，不Clear界面直到服务器返回
  */
-async function switchDirectory(targetDir: string, options: SwitchDirOptions = {}): Promise<void> {
+async function switchDirectory(targetDir: string, _options: SwitchDirOptions = {}): Promise<void> {
   const stores = getStores();
 
   console.log("[SessionManager.switchDirectory] targetDir=", targetDir);

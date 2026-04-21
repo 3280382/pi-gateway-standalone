@@ -4,9 +4,9 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
+import menuStyles from "@/app/Tools/ToolMenu.module.css";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { websocketService } from "@/services/websocket.service";
-import menuStyles from "@/app/Tools/ToolMenu.module.css";
 import styles from "./ProcessTreeViewer.module.css";
 
 interface ProcessInfo {
@@ -205,7 +205,13 @@ export function ProcessTreeViewer() {
           style={{ paddingLeft: `${indent * 12 + 4}px` }}
           onClick={() => setSelectedPid(proc.pid)}
         >
-          <span className={styles.expandBtn} onClick={(e) => { e.stopPropagation(); toggleExpand(proc.pid); }}>
+          <span
+            className={styles.expandBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleExpand(proc.pid);
+            }}
+          >
             {hasChildren ? (isExpanded ? "▼" : "▶") : " "}
           </span>
           <span className={styles.pid}>{proc.pid}</span>
@@ -233,9 +239,7 @@ export function ProcessTreeViewer() {
 
     return (
       <div className={styles.serverChildrenSection}>
-        <div className={styles.sectionTitle}>
-          Server Children ({data.serverChildren.length})
-        </div>
+        <div className={styles.sectionTitle}>Server Children ({data.serverChildren.length})</div>
         {data.serverChildren.map((proc) => (
           <div
             key={proc.pid}
@@ -294,7 +298,9 @@ export function ProcessTreeViewer() {
         <div className={styles.sectionTitle}>Open Files ({processDetails.openFiles.length})</div>
         <div className={styles.filesList}>
           {processDetails.openFiles.map((file, i) => (
-            <div key={i} className={styles.fileRow}>{file}</div>
+            <div key={i} className={styles.fileRow}>
+              {file}
+            </div>
           ))}
         </div>
       </div>
@@ -354,7 +360,12 @@ export function ProcessTreeViewer() {
               >
                 Flat
               </button>
-              <button type="button" className={styles.refreshBtn} onClick={fetchData} disabled={isLoading}>
+              <button
+                type="button"
+                className={styles.refreshBtn}
+                onClick={fetchData}
+                disabled={isLoading}
+              >
                 {isLoading ? "⏳" : "🔄"}
               </button>
             </div>
@@ -415,7 +426,9 @@ export function ProcessTreeViewer() {
                 <div className={styles.detailsPanel}>
                   <div className={styles.detailsHeader}>
                     <span>PID: {selectedPid}</span>
-                    <button type="button" onClick={() => setSelectedPid(null)}>✕</button>
+                    <button type="button" onClick={() => setSelectedPid(null)}>
+                      ✕
+                    </button>
                   </div>
                   {renderThreads()}
                   {renderOpenFiles()}

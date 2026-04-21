@@ -205,10 +205,7 @@ class SessionConfigManager {
 
             return { summary };
           }
-        } catch {
-          // Skip invalid lines
-          continue;
-        }
+        } catch {}
       }
 
       return { summary: "" };

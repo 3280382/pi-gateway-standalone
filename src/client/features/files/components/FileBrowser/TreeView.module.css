@@ -151,7 +151,7 @@
 }
 
 .todoAddBtn:hover {
-  opacity: 1 !important;
+  opacity: 1;
   background-color: var(--hover-bg, rgba(88, 166, 255, 0.1));
   border-color: var(--accent-blue, #58a6ff);
   color: var(--accent-blue, #58a6ff);

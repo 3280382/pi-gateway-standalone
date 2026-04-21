@@ -29,7 +29,10 @@ export interface TerminalWSContext {
   activeSessions: Set<string>; // Sessions this connection is attached to
 }
 
-export type TerminalHandler = (ctx: TerminalWSContext, payload: Record<string, unknown>) => void | Promise<void>;
+export type TerminalHandler = (
+  ctx: TerminalWSContext,
+  payload: Record<string, unknown>
+) => void | Promise<void>;
 
 export class TerminalWSRouter {
   private routes: Map<string, TerminalHandler> = new Map();
@@ -65,7 +68,11 @@ export class TerminalWSRouter {
   /**
    * Dispatch message to handler
    */
-  async dispatch(type: string, ctx: TerminalWSContext, payload: Record<string, unknown>): Promise<void> {
+  async dispatch(
+    type: string,
+    ctx: TerminalWSContext,
+    payload: Record<string, unknown>
+  ): Promise<void> {
     const handler = this.routes.get(type);
 
     if (!handler) {

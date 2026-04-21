@@ -334,7 +334,11 @@ export function InputArea({
             type="button"
             className={`${styles.toolbarBtn} ${shouldScrollToBottom ? styles.active : ""}`}
             onClick={onToggleScroll}
-            title={shouldScrollToBottom ? "Auto-scroll enabled (click to disable)" : "Auto-scroll disabled (click to enable)"}
+            title={
+              shouldScrollToBottom
+                ? "Auto-scroll enabled (click to disable)"
+                : "Auto-scroll disabled (click to enable)"
+            }
             // Scroll button available during AI processing，User should control scroll state
           >
             <ScrollIcon active={shouldScrollToBottom} />
@@ -368,7 +372,7 @@ function SendIcon() {
   );
 }
 
-function StopIcon() {
+function _StopIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
       <rect x="6" y="6" width="12" height="12" rx="2" />

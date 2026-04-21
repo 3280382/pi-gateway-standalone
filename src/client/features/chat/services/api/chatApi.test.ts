@@ -3,7 +3,7 @@
  * Tests for chatApi service functions
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TestLogger, TestReporter } from "../../../../../../test/lib/test-utils";
 
 const logger = new TestLogger("chat-api");

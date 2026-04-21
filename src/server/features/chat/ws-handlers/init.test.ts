@@ -2,14 +2,14 @@
  * WebSocket Init Handler Tests
  */
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import {
+  TEST_CONFIG,
   TestLogger,
   TestReporter,
   TestServerManager,
   TestWebSocketClient,
-  TEST_CONFIG,
 } from "@test/lib/test-utils";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const logger = new TestLogger("ws-init");
 const reporter = new TestReporter("ws-init");

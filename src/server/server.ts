@@ -115,7 +115,11 @@ server.on("upgrade", (request, socket, head) => {
 
   // Check origin for security (allow localhost/127.0.0.1 in development)
   const allowedOrigins = ["http://127.0.0.1:5173", "http://localhost:5173"];
-  const isAllowed = !origin || allowedOrigins.includes(origin) || origin.includes("localhost") || origin.includes("127.0.0.1");
+  const isAllowed =
+    !origin ||
+    allowedOrigins.includes(origin) ||
+    origin.includes("localhost") ||
+    origin.includes("127.0.0.1");
   if (!isAllowed) {
     logger.warn(`[WebSocket] Rejected connection from origin: ${origin}`);
     socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");

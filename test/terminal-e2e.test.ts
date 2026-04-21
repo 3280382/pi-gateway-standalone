@@ -3,10 +3,10 @@
  * Production build test - single server serves both API and static files
  */
 
-import { test, expect } from "@playwright/test";
 import { spawn } from "node:child_process";
-import { mkdirSync, appendFileSync } from "node:fs";
+import { appendFileSync, mkdirSync } from "node:fs";
 import { setTimeout as delay } from "node:timers/promises";
+import { expect, test } from "@playwright/test";
 
 // Test Configuration
 const TEST_PORT = 3456; // Fixed port for E2E tests
@@ -47,20 +47,20 @@ test.beforeAll(async () => {
 
   await new Promise<void>((resolve, reject) => {
     serverProcess = spawn("npx", ["tsx", "src/server/server.ts"], {
-      env: { 
-        ...process.env, 
+      env: {
+        ...process.env,
         PORT: String(TEST_PORT),
-        NODE_ENV: "production"
+        NODE_ENV: "production",
       },
       cwd: "/root/pi-gateway-standalone",
       stdio: ["ignore", "pipe", "pipe"],
     });
 
-    let output = "";
+    let _output = "";
 
     serverProcess.stdout?.on("data", (data) => {
       const text = data.toString();
-      output += text;
+      _output += text;
       log("DEBUG", "Server stdout", text);
       if (text.includes("Web UI:")) {
         log("INFO", "Server started successfully");
@@ -73,7 +73,7 @@ test.beforeAll(async () => {
     });
 
     // Timeout
-    const timeout = setTimeout(() => {
+    const _timeout = setTimeout(() => {
       reject(new Error("Server start timeout"));
     }, 30000);
   });
@@ -102,23 +102,22 @@ async function screenshot(page: any, name: string) {
 
 // Test Suite
 test.describe("Terminal E2E Tests", () => {
-  
   test("Page loads with file browser", async ({ page }) => {
     log("INFO", "Test 1: Page loads");
-    
+
     await page.goto(TEST_CONFIG.appUrl);
-    
+
     // Wait for page to load
     await page.waitForLoadState("networkidle");
     await delay(1000);
-    
+
     // Take screenshot
     await screenshot(page, "01-page-loaded");
-    
+
     // Verify page title or content
     const title = await page.title();
     log("INFO", `Page title: ${title}`);
-    
+
     // Check if body exists
     const body = await page.locator("body").count();
     expect(body).toBe(1);
@@ -126,25 +125,27 @@ test.describe("Terminal E2E Tests", () => {
 
   test("Terminal button opens panel", async ({ page }) => {
     log("INFO", "Test 2: Open terminal panel");
-    
+
     await page.goto(TEST_CONFIG.appUrl);
     await page.waitForLoadState("networkidle");
     await delay(1000);
-    
+
     // Find terminal button by title or class
-    const terminalBtn = page.locator("button[title*='Terminal' i], button[class*='terminalBtn' i]").first();
-    
+    const terminalBtn = page
+      .locator("button[title*='Terminal' i], button[class*='terminalBtn' i]")
+      .first();
+
     // Check if button exists
     const count = await terminalBtn.count();
     log("INFO", `Terminal button found: ${count > 0}`);
-    
+
     if (count > 0) {
       await terminalBtn.click();
       log("INFO", "Terminal button clicked");
       await delay(1000);
-      
+
       await screenshot(page, "02-terminal-panel-opened");
-      
+
       // Verify panel is visible (check for panel-related elements)
       const panel = page.locator("[class*='panel' i]").first();
       const isVisible = await panel.isVisible().catch(() => false);
@@ -158,33 +159,35 @@ test.describe("Terminal E2E Tests", () => {
 
   test("Create terminal session", async ({ page }) => {
     log("INFO", "Test 3: Create terminal session");
-    
+
     await page.goto(TEST_CONFIG.appUrl);
     await page.waitForLoadState("networkidle");
     await delay(1000);
-    
+
     // Open terminal panel
-    const terminalBtn = page.locator("button[title*='Terminal' i], button[class*='terminalBtn' i]").first();
-    if (await terminalBtn.count() > 0) {
+    const terminalBtn = page
+      .locator("button[title*='Terminal' i], button[class*='terminalBtn' i]")
+      .first();
+    if ((await terminalBtn.count()) > 0) {
       await terminalBtn.click();
       await delay(1000);
     }
-    
+
     await screenshot(page, "03-terminal-panel");
-    
+
     // Look for terminal-related elements
     const terminal = page.locator(".xterm, [class*='terminal' i], [class*='xterm' i]").first();
-    const hasTerminal = await terminal.count() > 0;
-    
+    const hasTerminal = (await terminal.count()) > 0;
+
     log("INFO", `Terminal element found: ${hasTerminal}`);
     expect(hasTerminal).toBe(true);
   });
 
   test("WebSocket connection established", async ({ page }) => {
     log("INFO", "Test 4: WebSocket connection");
-    
+
     const wsMessages: string[] = [];
-    
+
     // Listen to console for WebSocket logs
     page.on("console", (msg) => {
       const text = msg.text();
@@ -193,21 +196,23 @@ test.describe("Terminal E2E Tests", () => {
         log("INFO", `Console: ${text}`);
       }
     });
-    
+
     await page.goto(TEST_CONFIG.appUrl);
     await page.waitForLoadState("networkidle");
-    
+
     // Open terminal
-    const terminalBtn = page.locator("button[title*='Terminal' i], button[class*='terminalBtn' i]").first();
-    if (await terminalBtn.count() > 0) {
+    const terminalBtn = page
+      .locator("button[title*='Terminal' i], button[class*='terminalBtn' i]")
+      .first();
+    if ((await terminalBtn.count()) > 0) {
       await terminalBtn.click();
     }
-    
+
     await delay(3000);
     await screenshot(page, "04-websocket-test");
-    
+
     log("INFO", `WebSocket-related messages: ${wsMessages.length}`);
-    
+
     // Save captured messages
     const fs = await import("node:fs");
     fs.writeFileSync(
@@ -218,27 +223,29 @@ test.describe("Terminal E2E Tests", () => {
 
   test("Terminal UI elements", async ({ page }) => {
     log("INFO", "Test 5: Terminal UI elements");
-    
+
     await page.goto(TEST_CONFIG.appUrl);
     await page.waitForLoadState("networkidle");
     await delay(1000);
-    
+
     // Open terminal
-    const terminalBtn = page.locator("button[title*='Terminal' i], button[class*='terminalBtn' i]").first();
-    if (await terminalBtn.count() > 0) {
+    const terminalBtn = page
+      .locator("button[title*='Terminal' i], button[class*='terminalBtn' i]")
+      .first();
+    if ((await terminalBtn.count()) > 0) {
       await terminalBtn.click();
       await delay(1000);
     }
-    
+
     await screenshot(page, "05-terminal-ui");
-    
+
     // Check for various UI elements
     const elements = {
       tabs: await page.locator("[class*='tab' i]").count(),
       buttons: await page.locator("button").count(),
       headers: await page.locator("[class*='header' i]").count(),
     };
-    
+
     log("INFO", "UI elements found", elements);
   });
 });

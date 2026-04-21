@@ -7,15 +7,12 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./test",
-  testMatch: "**/*-dev.test.ts",  // 匹配 dev 测试文件
+  testMatch: "**/*-dev.test.ts", // 匹配 dev 测试文件
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1,
-  reporter: [
-    ["list"],
-    ["html", { outputFolder: "test-results/playwright-dev-report" }],
-  ],
+  reporter: [["list"], ["html", { outputFolder: "test-results/playwright-dev-report" }]],
   use: {
     // 使用开发服务器
     baseURL: "http://127.0.0.1:5173",
@@ -30,7 +27,7 @@ export default defineConfig({
     },
   ],
   timeout: 60000,
-  
+
   // 不启动 webServer，使用外部开发服务器
   // webServer: { ... }
 });

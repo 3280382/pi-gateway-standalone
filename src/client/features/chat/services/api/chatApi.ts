@@ -9,12 +9,10 @@ const executingTools = new Map<string, { name: string; args: any }>();
 import {
   abortChatGeneration,
   compactSession,
-  createNewChatSession,
   executeChatCommand,
   exportSession,
   initChatWorkingDirectory,
   listChatModels,
-  listChatSessions,
   sendChatMessage,
   setChatLlmLogEnabled,
   setChatModel,
@@ -22,18 +20,13 @@ import {
   steerChat,
   switchChatSession,
 } from "@/features/chat/services/chatWebSocket";
+import { messageReconstructor } from "@/features/chat/services/messageReconstruction";
+import { sessionManager, updateSessionsAndStatus } from "@/features/chat/services/sessionManager";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { ChatController, Message, ToolExecution } from "@/features/chat/types/chat";
 import { websocketService } from "@/services/websocket.service";
-import { sessionManager, updateSessionsAndStatus } from "@/features/chat/services/sessionManager";
-import {
-  messageReconstructor,
-  isContentDeltaEvent,
-  isContentStartEvent,
-  getContentTypeFromDelta,
-} from "@/features/chat/services/messageReconstruction";
 
 // ============================================================================
 // Message ID Generator

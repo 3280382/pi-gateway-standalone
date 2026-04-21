@@ -53,7 +53,7 @@ export function useDirectoryPicker(options: UseDirectoryPickerOptions): UseDirec
       });
       const data = await response.json();
 
-      const dirs = data.  items
+      const dirs = data.items
         .filter((item: any) => item.isDirectory)
         .map((item: any) => ({
           name: item.name,

@@ -6,12 +6,11 @@
  * - 通过 useFileViewer hook 获取所有逻辑
  */
 
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useFileViewer } from "@/features/files/hooks";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import { fileViewerDebug } from "@/lib/debug";
 import styles from "./FileViewer.module.css";
-
 
 export function FileViewer() {
   // ========== 1. State ==========
@@ -95,10 +94,13 @@ export function FileViewer() {
   // Prism.js 查看模式语言映射
   const language = getLanguage();
   const prismLanguage =
-    language === "tsx" ? "tsx" :
-    language === "jsx" ? "jsx" :
-    language === "md" || language === "markdown" ? "markdown" :
-    language;
+    language === "tsx"
+      ? "tsx"
+      : language === "jsx"
+        ? "jsx"
+        : language === "md" || language === "markdown"
+          ? "markdown"
+          : language;
 
   // 渲染带有非可视化符号的内容
   const renderContentWithInvisibleChars = (text: string): string => {
@@ -135,7 +137,7 @@ export function FileViewer() {
           <div className={styles.title}>
             <span>{fileName}</span>
             <span className={styles.type}>{mode.toUpperCase()}</span>
-  
+
             <button
               type="button"
               className={styles.btnCopyPath}

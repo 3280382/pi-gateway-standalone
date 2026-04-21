@@ -8,10 +8,10 @@
  * - Syntax highlighting with Prism.js
  */
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useModalStore } from "@/features/chat/stores/modalStore";
-import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { websocketService } from "@/services/websocket.service";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import styles from "./TemplateModal.module.css";
 
 const HOME_DIR = "/root";
@@ -117,7 +117,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
       unsubContent();
       unsubError();
     };
-  }, [isTemplateModalOpen, selectedTemplate, mode]);
+  }, [isTemplateModalOpen, selectedTemplate, mode, loadTemplate]);
 
   // Load templates on open
   useEffect(() => {
@@ -145,12 +145,15 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
     websocketService.send("get_template", { name });
   }, []);
 
-  const handleSelect = useCallback((template: Template) => {
-    setSelectedTemplate(template);
-    loadTemplate(template.name);
-    setMode("view");
-    setDropdownOpen(false);
-  }, [loadTemplate]);
+  const handleSelect = useCallback(
+    (template: Template) => {
+      setSelectedTemplate(template);
+      loadTemplate(template.name);
+      setMode("view");
+      setDropdownOpen(false);
+    },
+    [loadTemplate]
+  );
 
   const handleInsert = useCallback(() => {
     let contentToInsert = "";
@@ -174,17 +177,16 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
         setSaveError("Filename is required");
         return;
       }
-      
-      const fileName = newFileName.trim().endsWith(".md") 
-        ? newFileName.trim() 
+
+      const fileName = newFileName.trim().endsWith(".md")
+        ? newFileName.trim()
         : `${newFileName.trim()}.md`;
-      
-      const targetDir = createSource === "global" 
-        ? `${HOME_DIR}/.pi/agent/prompts`
-        : `${workingDir}/.pi/prompts`;
-      
+
+      const targetDir =
+        createSource === "global" ? `${HOME_DIR}/.pi/agent/prompts` : `${workingDir}/.pi/prompts`;
+
       const fullPath = `${targetDir}/${fileName}`;
-      
+
       setIsSaving(true);
       setSaveError(null);
 
@@ -215,7 +217,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
     } else {
       // Save existing template
       if (!selectedTemplate || !editedContent) return;
-      
+
       setIsSaving(true);
       setSaveError(null);
 
@@ -289,7 +291,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
         <div className={styles.header}>
           <div className={styles.headerLeft} ref={dropdownRef}>
             <span className={styles.label}>Template</span>
-            
+
             {mode === "create" ? (
               <div className={styles.createInputGroup}>
                 <input
@@ -298,7 +300,6 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
                   placeholder="filename.md"
                   value={newFileName}
                   onChange={(e) => setNewFileName(e.target.value)}
-                  autoFocus
                 />
                 <select
                   className={styles.sourceSelect}
@@ -313,7 +314,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
               <>
                 {/* Custom Dropdown */}
                 <div className={styles.dropdown}>
-                  <button 
+                  <button
                     className={styles.dropdownTrigger}
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                     disabled={loading || templates.length === 0}
@@ -323,7 +324,7 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
                     </span>
                     <span className={`${styles.arrow} ${dropdownOpen ? styles.open : ""}`}>▼</span>
                   </button>
-                  
+
                   {dropdownOpen && templates.length > 0 && (
                     <div className={styles.dropdownMenu}>
                       {templates.map((t) => (
@@ -360,15 +361,11 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
           <div className={styles.headerActions}>
             {mode === "view" && (
               <>
-                <button 
-                  className={styles.btnNew}
-                  onClick={handleNew}
-                  title="Create new template"
-                >
+                <button className={styles.btnNew} onClick={handleNew} title="Create new template">
                   + New
                 </button>
                 {selectedTemplate && (
-                  <button 
+                  <button
                     className={styles.btnEdit}
                     onClick={() => setMode("edit")}
                     title="Edit template"
@@ -379,15 +376,11 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
               </>
             )}
             {(mode === "edit" || mode === "create") && (
-              <button 
-                className={styles.btnView}
-                onClick={handleCancel}
-                title="Cancel"
-              >
+              <button className={styles.btnView} onClick={handleCancel} title="Cancel">
                 Cancel
               </button>
             )}
-            <button 
+            <button
               className={styles.btnInsert}
               onClick={handleInsert}
               disabled={mode === "view" ? !previewContent || previewLoading : !editedContent}
@@ -406,13 +399,13 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
           {loading ? (
             <div className={styles.center}>Loading...</div>
           ) : error ? (
-            <div className={styles.center} style={{ color: "#f85149" }}>{error}</div>
+            <div className={styles.center} style={{ color: "#f85149" }}>
+              {error}
+            </div>
           ) : templates.length === 0 && mode !== "create" ? (
             <div className={styles.center}>
               <p>No templates found</p>
-              <span className={styles.hint}>
-                Click "New" to create a template
-              </span>
+              <span className={styles.hint}>Click "New" to create a template</span>
             </div>
           ) : mode === "edit" || mode === "create" ? (
             <textarea
@@ -444,13 +437,10 @@ export function TemplateModal({ onTemplateSelect }: TemplateModalProps) {
               {saveError && <span className={styles.saveError}>{saveError}</span>}
             </div>
             <div className={styles.footerRight}>
-              <button 
-                className={styles.btnSecondary}
-                onClick={handleCancel}
-              >
+              <button className={styles.btnSecondary} onClick={handleCancel}>
                 Cancel
               </button>
-              <button 
+              <button
                 className={styles.btnPrimary}
                 onClick={handleSave}
                 disabled={isSaving || !canSave}

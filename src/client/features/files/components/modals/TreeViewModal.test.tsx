@@ -46,9 +46,9 @@ const mockClipboard = {
 Object.assign(navigator, { clipboard: mockClipboard });
 
 // 测试数据
-const createTestTree = (): { path: string;   items: TreeNode[] } => ({
+const createTestTree = (): { path: string; items: TreeNode[] } => ({
   path: "/project",
-    items: [
+  items: [
     {
       path: "/project/src",
       name: "src",
@@ -128,7 +128,7 @@ describe("TreeViewModal", () => {
     });
 
     it("filterNodes 应该正确过滤节点", () => {
-      const tree = createTestTree().  items;
+      const tree = createTestTree().items;
 
       // 正常模式 - 排除 node_modules 和 .git
       const normal = filterNodes(tree, "normal", "");
@@ -151,7 +151,7 @@ describe("TreeViewModal", () => {
     });
 
     it("generateTreeText 应该生成正确的树形文本", () => {
-      const tree = createTestTree().  items.slice(0, 1);
+      const tree = createTestTree().items.slice(0, 1);
       const text = generateTreeText(tree);
 
       expect(text).toContain("src");
@@ -191,7 +191,7 @@ describe("TreeViewModal", () => {
       render(
         <TreeViewModal
           isOpen={true}
-          treeData={{ path: "/empty",   items: [] }}
+          treeData={{ path: "/empty", items: [] }}
           treeLoading={false}
           onClose={mockOnClose}
           onFileClick={mockOnFileClick}
@@ -241,7 +241,7 @@ describe("TreeViewModal", () => {
       // 创建明确的嵌套结构
       const nestedTree = {
         path: "/test",
-          items: [
+        items: [
           {
             path: "/test/level0",
             name: "level0",

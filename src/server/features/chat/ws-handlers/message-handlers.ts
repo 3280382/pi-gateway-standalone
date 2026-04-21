@@ -5,13 +5,7 @@
 
 import { createCodingTools } from "@mariozechner/pi-coding-agent";
 import type { WSContext } from "../ws-router";
-import {
-  createHandler,
-  checkSessionInitialized,
-  sendError,
-  sendSuccess,
-  logger,
-} from "./handler-utils";
+import { createHandler, logger, sendError, sendSuccess } from "./handler-utils";
 
 // ============================================================================
 // Abort Handler

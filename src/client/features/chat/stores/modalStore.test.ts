@@ -3,7 +3,7 @@
  * Tests for modalStore state management
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { TestLogger, TestReporter } from "../../../../../test/lib/test-utils";
 
 const logger = new TestLogger("modal-store");

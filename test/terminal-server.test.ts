@@ -3,14 +3,14 @@
  * 规范：使用 test/lib/test-utils.ts 中的工具函数
  */
 
-import { 
-  TEST_CONFIG, 
-  TestLogger, 
-  TestReporter, 
+import { setTimeout as delay } from "node:timers/promises";
+import {
+  TEST_CONFIG,
+  TestLogger,
+  TestReporter,
   TestServerManager,
   TestWebSocketClient,
 } from "./lib/test-utils.js";
-import { setTimeout as delay } from "node:timers/promises";
 
 // ========== 初始化 ==========
 const logger = new TestLogger("terminal-server");
@@ -30,15 +30,13 @@ async function runTests(): Promise<void> {
     await reporter.runTest("WebSocket 连接", async () => {
       const client = new TestWebSocketClient(TEST_CONFIG.resultsDir);
       await client.connect(`ws://127.0.0.1:${TEST_CONFIG.port}/ws/terminal`);
-      
-      const welcomeMsg = await client.waitForMessage(
-        (m) => m.type === "terminal_connected"
-      );
-      
+
+      const welcomeMsg = await client.waitForMessage((m) => m.type === "terminal_connected");
+
       if (!welcomeMsg.connectionId) {
         throw new Error("欢迎消息中没有 connectionId");
       }
-      
+
       client.disconnect();
     });
 
@@ -55,16 +53,14 @@ async function runTests(): Promise<void> {
         rows: 24,
       });
 
-      const createdMsg = await client.waitForMessage(
-        (m) => m.type === "terminal_created"
-      );
-      
+      const createdMsg = await client.waitForMessage((m) => m.type === "terminal_created");
+
       if (!createdMsg.sessionId) {
         throw new Error("创建消息中没有 sessionId");
       }
 
       testState.sessionId = createdMsg.sessionId as string;
-      
+
       client.disconnect();
     });
 
@@ -76,9 +72,7 @@ async function runTests(): Promise<void> {
 
       // 先创建会话
       client.send("terminal_create", { name: "Cmd Test", workingDir: "/root" });
-      const created = await client.waitForMessage(
-        (m) => m.type === "terminal_created"
-      );
+      const created = await client.waitForMessage((m) => m.type === "terminal_created");
       const sessionId = created.sessionId as string;
 
       // 执行 echo 命令
@@ -108,9 +102,7 @@ async function runTests(): Promise<void> {
 
       client.send("terminal_list");
 
-      const listMsg = await client.waitForMessage(
-        (m) => m.type === "terminal_list"
-      );
+      const listMsg = await client.waitForMessage((m) => m.type === "terminal_list");
 
       if (!Array.isArray(listMsg.sessions)) {
         throw new Error("sessions 不是数组");
@@ -159,9 +151,7 @@ async function runTests(): Promise<void> {
       await client.waitForMessage((m) => m.type === "terminal_connected");
 
       client.send("terminal_create", { name: "Output Test" });
-      const created = await client.waitForMessage(
-        (m) => m.type === "terminal_created"
-      );
+      const created = await client.waitForMessage((m) => m.type === "terminal_created");
       const sessionId = created.sessionId as string;
 
       client.send("terminal_execute", {
@@ -186,9 +176,7 @@ async function runTests(): Promise<void> {
       await client.waitForMessage((m) => m.type === "terminal_connected");
 
       client.send("terminal_create", { name: "Resize Test" });
-      const created = await client.waitForMessage(
-        (m) => m.type === "terminal_created"
-      );
+      const created = await client.waitForMessage((m) => m.type === "terminal_created");
       const sessionId = created.sessionId as string;
 
       client.send("terminal_resize", {
@@ -209,9 +197,7 @@ async function runTests(): Promise<void> {
       await client.waitForMessage((m) => m.type === "terminal_connected");
 
       client.send("terminal_create", { name: "Close Test" });
-      const created = await client.waitForMessage(
-        (m) => m.type === "terminal_created"
-      );
+      const created = await client.waitForMessage((m) => m.type === "terminal_created");
       const sessionId = created.sessionId as string;
 
       client.send("terminal_execute", { sessionId, command: "exit" });
@@ -227,7 +213,6 @@ async function runTests(): Promise<void> {
 
       client.disconnect();
     });
-
   } finally {
     await server.stop();
   }

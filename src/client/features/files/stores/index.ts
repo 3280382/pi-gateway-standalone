@@ -7,14 +7,14 @@ export { useFileStore } from "@/features/files/stores/fileStore";
 
 // WebSocket Terminal Store (new multi-session terminal)
 export {
-  type TerminalSessionState,
-  type TerminalState,
-  type TerminalActions,
-  useTerminalStore,
-  selectSessions,
   selectActiveSession,
   selectIsPanelOpen,
   selectPanelHeight,
+  selectSessions,
+  type TerminalActions,
+  type TerminalSessionState,
+  type TerminalState,
+  useTerminalStore,
 } from "@/features/files/stores/terminalStore";
 
 // Legacy viewer store (keep for backward compatibility)

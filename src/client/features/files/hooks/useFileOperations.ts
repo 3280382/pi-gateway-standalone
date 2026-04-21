@@ -43,7 +43,7 @@ export function useFileOperations(): UseFileOperationsResult {
   const refreshAfterOperation = useCallback(async () => {
     try {
       const data = await fileOperationsApi.loadDirectoryContent(currentBrowsePath);
-      setItems(data.  items);
+      setItems(data.items);
       setCurrentBrowsePath(data.workingDir);
       setParentPath(data.parentPath);
     } catch (error) {

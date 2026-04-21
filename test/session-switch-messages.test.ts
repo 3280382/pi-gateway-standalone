@@ -1,6 +1,5 @@
-import { test, expect } from "@playwright/test";
-import { mkdirSync, appendFileSync } from "node:fs";
-import path from "node:path";
+import { appendFileSync, mkdirSync } from "node:fs";
+import { expect, test } from "@playwright/test";
 
 const RESULTS_DIR = process.env.TEST_RESULTS_DIR || "test-results/latest";
 mkdirSync(`${RESULTS_DIR}/browser`, { recursive: true });
@@ -29,20 +28,23 @@ test("切换 session 时消息应该正确加载", async ({ page }) => {
         const parsed = JSON.parse(data.payload as string);
         wsMessages.push({ type: "received", data: parsed, time: Date.now() });
         log("WS", `<- ${parsed.type}`);
-        
+
         if (parsed.type === "session_loaded") {
-          log("INFO", `session_loaded 收到: messages=${parsed.messages?.length}, shortId=${parsed.shortId}`);
+          log(
+            "INFO",
+            `session_loaded 收到: messages=${parsed.messages?.length}, shortId=${parsed.shortId}`
+          );
         }
-      } catch (e) {
+      } catch (_e) {
         // ignore
       }
     });
-    
+
     ws.on("framesent", (data) => {
       try {
         const parsed = JSON.parse(data.payload as string);
         log("WS", `-> ${parsed.type}`);
-      } catch (e) {
+      } catch (_e) {
         // ignore
       }
     });
@@ -63,7 +65,7 @@ test("切换 session 时消息应该正确加载", async ({ page }) => {
 
   // 3. 获取当前 session ID
   const currentSessionId = await page.evaluate(() => {
-    // @ts-ignore
+    // @ts-expect-error
     return window.__SESSION_ID__ || localStorage.getItem("currentSessionId") || "unknown";
   });
   log("INFO", `当前 session ID: ${currentSessionId}`);
@@ -90,17 +92,20 @@ test("切换 session 时消息应该正确加载", async ({ page }) => {
   await page.waitForTimeout(2000);
 
   // 7. 检查 session_loaded 消息
-  const sessionLoadedMsgs = wsMessages.filter(m => m.data.type === "session_loaded");
+  const sessionLoadedMsgs = wsMessages.filter((m) => m.data.type === "session_loaded");
   log("INFO", `收到 ${sessionLoadedMsgs.length} 个 session_loaded 消息`);
 
   if (sessionLoadedMsgs.length > 0) {
     const lastMsg = sessionLoadedMsgs[sessionLoadedMsgs.length - 1].data;
-    log("INFO", `session_loaded 内容: shortId=${lastMsg.shortId}, messages=${lastMsg.messages?.length}`);
-    
+    log(
+      "INFO",
+      `session_loaded 内容: shortId=${lastMsg.shortId}, messages=${lastMsg.messages?.length}`
+    );
+
     // 验证消息是否正确
     expect(lastMsg.success).toBe(true);
     expect(lastMsg.shortId).toBeDefined();
-    
+
     if (lastMsg.messages && lastMsg.messages.length > 0) {
       log("INFO", `✅ 消息加载成功: ${lastMsg.messages.length} 条`);
     } else {
@@ -115,9 +120,9 @@ test("切换 session 时消息应该正确加载", async ({ page }) => {
   log("INFO", `切换后消息数量: ${messagesAfter}`);
 
   // 截图
-  await page.screenshot({ 
+  await page.screenshot({
     path: `${RESULTS_DIR}/screenshots/session-switch-result.png`,
-    fullPage: true 
+    fullPage: true,
   });
 
   log("INFO", "测试完成");

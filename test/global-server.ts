@@ -8,8 +8,6 @@
  * - 后端: http://127.0.0.1:3000/ (Node.js server)
  */
 
-import { spawn } from "node:child_process";
-
 // 三窗口环境中的服务地址
 const DEV_FRONTEND_URL = "http://127.0.0.1:5173";
 const DEV_BACKEND_URL = "http://127.0.0.1:3000";

@@ -11,7 +11,7 @@ import * as fileApi from "./fileApi";
 export interface DirectoryData {
   workingDir: string;
   parentPath: string;
-    items: FileItem[];
+  items: FileItem[];
 }
 
 /**
@@ -20,7 +20,7 @@ export interface DirectoryData {
 export async function loadDirectoryContent(path: string): Promise<DirectoryData> {
   const data = await fileApi.browse(path);
 
-  const   itemsToSet = [
+  const itemsToSet = [
     ...(data.parentPath !== data.workingDir
       ? [
           {
@@ -31,13 +31,13 @@ export async function loadDirectoryContent(path: string): Promise<DirectoryData>
           },
         ]
       : []),
-    ...data.  items,
+    ...data.items,
   ];
 
   return {
     workingDir: data.workingDir,
     parentPath: data.parentPath,
-      items:   itemsToSet,
+    items: itemsToSet,
   };
 }
 

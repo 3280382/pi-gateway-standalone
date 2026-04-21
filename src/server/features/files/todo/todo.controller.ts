@@ -8,7 +8,7 @@
  * - Machine-parseable
  */
 
-import { appendFile, readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import type { Request, Response } from "express";
 
 const TODO_FILE = "todo.md";
@@ -114,7 +114,7 @@ function generateTodoLine(todo: TodoItem): string {
 
   // Add tags
   if (todo.tags && todo.tags.length > 0) {
-    line += " " + todo.tags.map((t) => `#${t}`).join(" ");
+    line += ` ${todo.tags.map((t) => `#${t}`).join(" ")}`;
   }
 
   // Add assignee

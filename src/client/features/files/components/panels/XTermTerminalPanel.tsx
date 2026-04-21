@@ -1,6 +1,6 @@
 /**
  * XTermTerminalPanel - 使用 xterm.js 的终端面板
- * 
+ *
  * 改进：
  * 1. WebSocket 输出直接写入 xterm，不经过 store 中转
  * 2. 支持正确的中文和特殊chars显示
@@ -22,17 +22,13 @@ interface XTermTerminalPanelProps {
   onHeightChange: (height: number) => void;
 }
 
-export function XTermTerminalPanel({
-  height,
-  onClose,
-  onHeightChange,
-}: XTermTerminalPanelProps) {
+export function XTermTerminalPanel({ height, onClose, onHeightChange }: XTermTerminalPanelProps) {
   // ========== State ==========
   const sessionsMap = useTerminalStore((state) => state.sessions);
   const sessions = Array.from(sessionsMap.values());
   const activeSessionId = useTerminalStore((state) => state.activeSessionId);
   const activeSession = activeSessionId ? sessionsMap.get(activeSessionId) : undefined;
-  
+
   const {
     setActiveSession,
     createSession,
@@ -68,7 +64,7 @@ export function XTermTerminalPanel({
         const viewportHeight = window.visualViewport.height;
         const windowHeight = window.innerHeight;
         const keyboardHeight = windowHeight - viewportHeight;
-        
+
         // If keyboard is open (> 150px), push panel up
         if (keyboardHeight > 150) {
           setIsInputActive(true);
@@ -101,7 +97,7 @@ export function XTermTerminalPanel({
       try {
         await terminalWebSocketService.connect();
         setConnected(true);
-        
+
         if (useTerminalStore.getState().getSessionCount() === 0) {
           createSession("Terminal 1", workingDir);
         }
@@ -118,7 +114,12 @@ export function XTermTerminalPanel({
     // Handle session created - init terminal
     unsubscribers.push(
       terminalWebSocketService.on("terminal_created", (data: unknown) => {
-        const typed = data as { sessionId: string; name: string; workingDir: string; createdAt: string };
+        const typed = data as {
+          sessionId: string;
+          name: string;
+          workingDir: string;
+          createdAt: string;
+        };
         console.log("[Terminal] Session created:", typed.sessionId);
         // Add to store
         useTerminalStore.setState((state) => {
@@ -145,7 +146,7 @@ export function XTermTerminalPanel({
     const flushBuffer = (sessionId: string) => {
       const buffer = outputBuffer.get(sessionId);
       if (!buffer || buffer.length === 0) return;
-      
+
       const term = terminalInstances.current.get(sessionId);
       if (term) {
         // Write in chunks to avoid blocking
@@ -168,15 +169,15 @@ export function XTermTerminalPanel({
       terminalWebSocketService.on("terminal_output", (data: unknown) => {
         const typed = data as { sessionId: string; data: string; isError?: boolean };
         const { sessionId, data: outputData } = typed;
-        
+
         // Add to buffer instead of writing immediately
         if (!outputBuffer.has(sessionId)) {
           outputBuffer.set(sessionId, []);
         }
-        outputBuffer.get(sessionId)!.push(outputData);
-        
+        outputBuffer.get(sessionId)?.push(outputData);
+
         // Flush if buffer gets too large
-        if (outputBuffer.get(sessionId)!.length > 100) {
+        if (outputBuffer.get(sessionId)?.length > 100) {
           flushBuffer(sessionId);
         }
       })
@@ -234,7 +235,7 @@ export function XTermTerminalPanel({
       unsubscribers.forEach((unsub) => unsub());
       terminalWebSocketService.disconnect();
     };
-  }, []);
+  }, [createSession, markSessionActive, setConnected, setError, workingDir]);
 
   // ========== Terminal Initialization ==========
   useEffect(() => {
@@ -251,7 +252,7 @@ export function XTermTerminalPanel({
         disposeTerminal(id);
       }
     });
-  }, [sessions.length]);
+  }, [disposeTerminal, initTerminal, sessions.forEach, sessions.map]);
 
   // Focus active terminal
   useEffect(() => {
@@ -261,7 +262,7 @@ export function XTermTerminalPanel({
         setTimeout(() => term.focus(), 100);
       }
     }
-  }, [activeSession?.id]);
+  }, [activeSession?.id, activeSession]);
 
   // ========== Terminal Helpers ==========
   const initTerminal = async (sessionId: string) => {
@@ -422,7 +423,7 @@ export function XTermTerminalPanel({
             const { cols, rows } = term;
             terminalWebSocketService.resizeTerminal(sessionId, cols, rows);
           }
-        } catch (e) {
+        } catch (_e) {
           // Ignore
         }
       });
@@ -475,7 +476,9 @@ export function XTermTerminalPanel({
             >
               <TerminalIcon className={styles.tabIcon} />
               <span className={styles.tabName}>{session.name}</span>
-              {!session.isConnected && <span className={styles.disconnectedIndicator} title="Disconnected" />}
+              {!session.isConnected && (
+                <span className={styles.disconnectedIndicator} title="Disconnected" />
+              )}
               <button
                 className={styles.closeTabBtn}
                 onClick={(e) => handleCloseSession(e, session.id)}
@@ -563,7 +566,15 @@ export function XTermTerminalPanel({
 // Icons
 function TerminalIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} width="14" height="14" className={className}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      width="14"
+      height="14"
+      className={className}
+    >
       <polyline points="4 17 10 11 4 5" />
       <line x1="12" y1="19" x2="20" y2="19" />
     </svg>
@@ -572,7 +583,14 @@ function TerminalIcon({ className }: { className?: string }) {
 
 function PlusIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="14" height="14">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      width="14"
+      height="14"
+    >
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
@@ -581,7 +599,14 @@ function PlusIcon() {
 
 function FullscreenIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="14" height="14">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      width="14"
+      height="14"
+    >
       <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
     </svg>
   );
@@ -589,7 +614,14 @@ function FullscreenIcon() {
 
 function ExitFullscreenIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="14" height="14">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      width="14"
+      height="14"
+    >
       <path d="M4 14h6m-6-4v6m16-6h-6m6 4v-6M10 4v6m4-6v6m-4 14v-6m4 6v-6" />
     </svg>
   );
@@ -597,7 +629,14 @@ function ExitFullscreenIcon() {
 
 function CloseIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="12" height="12">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      width="12"
+      height="12"
+    >
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>

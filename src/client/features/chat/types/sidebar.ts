@@ -12,14 +12,14 @@ export interface WorkingDirectory {
 }
 
 export interface Session {
-  id: string;        // Short ID
-  path: string;      // Full path
+  id: string; // Short ID
+  path: string; // Full path
   name: string;
-  summary?: string;  // Summary from first user prompt
+  summary?: string; // Summary from first user prompt
   messageCount: number;
   lastModified: Date;
   firstMessage?: string;
-  status?: string;   // Runtime status: idle/thinking/tooling/streaming/waiting/error/retrying/compacting
+  status?: string; // Runtime status: idle/thinking/tooling/streaming/waiting/error/retrying/compacting
   hasClient?: boolean;
 }
 

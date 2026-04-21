@@ -122,7 +122,7 @@ function DirectoryPicker({
   useEffect(() => {
     loadDirectory(currentPath);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPath]);
+  }, [currentPath, loadDirectory]);
 
   return (
     <div className={styles.pickerOverlay} onClick={onClose}>

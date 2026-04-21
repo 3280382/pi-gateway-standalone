@@ -2,14 +2,13 @@
  * Comprehensive Integration Tests
  */
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   TestLogger,
   TestReporter,
   TestServerManager,
   TestWebSocketClient,
 } from "../lib/test-utils.js";
-import { setTimeout as delay } from "node:timers/promises";
 
 const logger = new TestLogger("comprehensive");
 const reporter = new TestReporter("comprehensive");
@@ -48,18 +47,12 @@ describe("Comprehensive Integration Tests", () => {
       await client.connect(wsUrl);
 
       // 1. 等待连接
-      await client.waitForMessage(
-        (m) => m.type === "welcome" || m.type === "connected",
-        5000
-      );
+      await client.waitForMessage((m) => m.type === "welcome" || m.type === "connected", 5000);
       logger.info("1. 已连接");
 
       // 2. 初始化
       client.send("init", { workingDir: "/root" });
-      await client.waitForMessage(
-        (m) => m.type === "init_ack" || m.type === "initialized",
-        5000
-      );
+      await client.waitForMessage((m) => m.type === "init_ack" || m.type === "initialized", 5000);
       logger.info("2. 已初始化");
 
       // 3. 发送消息
@@ -83,10 +76,7 @@ describe("Comprehensive Integration Tests", () => {
       for (let i = 0; i < 3; i++) {
         const client = new TestWebSocketClient(wsUrl);
         await client.connect(wsUrl);
-        await client.waitForMessage(
-          (m) => m.type === "welcome" || m.type === "connected",
-          5000
-        );
+        await client.waitForMessage((m) => m.type === "welcome" || m.type === "connected", 5000);
         clients.push(client);
         logger.info(`客户端 ${i + 1} 已连接`);
       }

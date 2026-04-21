@@ -4,8 +4,8 @@
  */
 
 import { useState } from "react";
-import styles from "./StorageViewer.module.css";
 import menuStyles from "@/app/Tools/ToolMenu.module.css";
+import styles from "./StorageViewer.module.css";
 
 export function StorageViewer() {
   const [isOpen, setIsOpen] = useState(false);

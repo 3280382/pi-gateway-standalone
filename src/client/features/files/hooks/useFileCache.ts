@@ -10,7 +10,7 @@ import { useFileStore } from "@/features/files/stores/fileStore";
 
 export interface UseFileCacheResult {
   getCachedItems: (path: string) => FileItem[] | null;
-  setCachedItems: (path: string,   items: FileItem[]) => void;
+  setCachedItems: (path: string, items: FileItem[]) => void;
   clearCache: () => void;
   isCacheValid: (path: string) => boolean;
 }
@@ -37,7 +37,7 @@ export function useFileCache(): UseFileCacheResult {
         return null;
       }
 
-      return cached.  items;
+      return cached.items;
     },
     [pathCache, setPathCache]
   );
@@ -58,11 +58,11 @@ export function useFileCache(): UseFileCacheResult {
    * 设置缓存的directories项
    */
   const setCachedItems = useCallback(
-    (path: string,   items: FileItem[]) => {
+    (path: string, items: FileItem[]) => {
       const newCache = new Map(pathCache);
 
       // 添加新缓存
-      newCache.set(path, {   items, timestamp: Date.now() });
+      newCache.set(path, { items, timestamp: Date.now() });
 
       // 限制缓存大小（LRU策略）
       if (newCache.size > 50) {

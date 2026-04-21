@@ -9,10 +9,10 @@
 
 import { useCallback } from "react";
 import { sessionManager } from "@/features/chat/services/sessionManager";
-import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
-import { websocketService } from "@/services/websocket.service";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { SidebarController } from "@/features/chat/types/sidebar";
+import { websocketService } from "@/services/websocket.service";
 
 // ============================================================================
 // Controller Hook

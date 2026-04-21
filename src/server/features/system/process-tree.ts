@@ -70,7 +70,7 @@ export async function getAllProcesses(): Promise<ProcessInfo[]> {
         uid,
         gid,
         command: comm,
-        args: args.length > 100 ? args.substring(0, 100) + "..." : args,
+        args: args.length > 100 ? `${args.substring(0, 100)}...` : args,
         cpu,
         mem,
         vsz,
@@ -195,9 +195,7 @@ export async function getProcessThreads(pid: number): Promise<
   }[]
 > {
   try {
-    const { stdout } = await execAsync(
-      `ps -eLo tid,pid,pcpu,stat,time,comm | grep " ${pid} "`
-    );
+    const { stdout } = await execAsync(`ps -eLo tid,pid,pcpu,stat,time,comm | grep " ${pid} "`);
 
     const threads: {
       tid: number;
@@ -242,7 +240,7 @@ export async function getProcessOpenFiles(pid: number): Promise<string[]> {
         const parts = line.split(/\s+/);
         return parts[parts.length - 1]; // Return file path
       })
-      .filter((path) => path && path.startsWith("/"));
+      .filter((path) => path?.startsWith("/"));
   } catch {
     return [];
   }

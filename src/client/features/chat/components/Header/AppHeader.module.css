@@ -568,9 +568,21 @@
 }
 
 /* Runtime Status Colors */
-.runtimeStatus.thinking { color: #fbbf24; }
-.runtimeStatus.tooling { color: #60a5fa; }
-.runtimeStatus.streaming { color: #a78bfa; }
-.runtimeStatus.waiting { color: #f97316; }
-.runtimeStatus.idle { color: #6b7280; }
-.runtimeStatus.error { color: #ef4444; }
+.runtimeStatus.thinking {
+  color: #fbbf24;
+}
+.runtimeStatus.tooling {
+  color: #60a5fa;
+}
+.runtimeStatus.streaming {
+  color: #a78bfa;
+}
+.runtimeStatus.waiting {
+  color: #f97316;
+}
+.runtimeStatus.idle {
+  color: #6b7280;
+}
+.runtimeStatus.error {
+  color: #ef4444;
+}

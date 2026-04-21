@@ -18,9 +18,9 @@ import {
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import { useWorkspaceStore } from "@/stores/workspaceStore";
-import { formatSessionId } from "@/features/chat/utils/sessionUtils";
 import type { ChatSearchFilters } from "@/features/chat/types/chat";
+import { formatSessionId } from "@/features/chat/utils/sessionUtils";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import styles from "./AppHeader.module.css";
 
 // ============================================================================
@@ -523,7 +523,7 @@ function CheckIcon() {
   );
 }
 
-function DropdownIcon() {
+function _DropdownIcon() {
   return (
     <svg
       width="12"

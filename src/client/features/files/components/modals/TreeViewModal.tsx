@@ -10,7 +10,7 @@ import styles from "./TreeViewModal.module.css";
 
 export interface TreeViewModalProps {
   isOpen: boolean;
-  treeData: { path: string;   items: TreeNode[] } | null;
+  treeData: { path: string; items: TreeNode[] } | null;
   treeLoading: boolean;
   onClose: () => void;
   onFileClick: (path: string, name: string) => void;
@@ -80,10 +80,10 @@ function getFileIcon(name: string, isDirectory: boolean): string {
 }
 
 /** 过滤树节点 */
-function filterNodes(  items: TreeNode[], mode: FilterMode, search: string): TreeNode[] {
-  if (mode === "all" && !search) return   items;
+function filterNodes(items: TreeNode[], mode: FilterMode, search: string): TreeNode[] {
+  if (mode === "all" && !search) return items;
 
-  return   items.filter((item) => {
+  return items.filter((item) => {
     // Search模式
     if (search) {
       return item.name.toLowerCase().includes(search.toLowerCase());
@@ -101,8 +101,8 @@ function filterNodes(  items: TreeNode[], mode: FilterMode, search: string): Tre
 }
 
 /** 生成树形文本（用于Copy） */
-function generateTreeText(  items: TreeNode[]): string {
-  return   items
+function generateTreeText(items: TreeNode[]): string {
+  return items
     .map((item) => {
       const indent = "  ".repeat(item.level || 0);
       const connector = item.isLast ? "└── " : "├── ";
@@ -142,7 +142,7 @@ export function TreeViewModal({
   // 过滤节点
   const filteredItems = useMemo(() => {
     if (!treeData) return [];
-    return filterNodes(treeData.  items, filterMode, searchText);
+    return filterNodes(treeData.items, filterMode, searchText);
   }, [treeData, filterMode, searchText]);
 
   // 生成Copy文本

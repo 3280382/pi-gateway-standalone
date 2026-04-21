@@ -25,13 +25,13 @@
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { CHAT_STORAGE_KEYS } from "./persist.config";
 import type {
   ChatSearchFilters,
   Message,
   SearchResult,
   ToolExecution,
 } from "@/features/chat/types/chat";
+import { CHAT_STORAGE_KEYS } from "./persist.config";
 
 // ===== [ANCHOR:TYPES] =====
 
@@ -251,7 +251,7 @@ let pendingContentUpdates: PendingUpdates = {};
  * 获取需要保留的内容（已固化的内容块）
  * 保留所有非流式内容块（已固化的 thinking, text, tool_use）
  */
-function getPreservedContent(existingContent: any[]): any[] {
+function _getPreservedContent(existingContent: any[]): any[] {
   if (!existingContent || existingContent.length === 0) return [];
 
   // 保留所有已固化的内容（thinking, text, tool_use, tool, turn_marker）

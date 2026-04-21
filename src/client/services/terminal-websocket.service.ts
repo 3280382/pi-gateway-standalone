@@ -134,7 +134,7 @@ export class TerminalWebSocketService {
           clearTimeout(timeoutId);
           this._isConnected = false;
           this.connectionId = null;
-        
+
           // Only emit disconnected if we were previously connected
           if (this.reconnectAttempts === 0) {
             wsLog.info(`[TerminalWS] Disconnected: ${event.code} ${event.reason}`);
@@ -166,7 +166,7 @@ export class TerminalWebSocketService {
         this.ws.onerror = (error) => {
           clearTimeout(timeoutId);
           // Log error but don't reject here - let onclose handle reconnection
-          const errorType = (error as Event).type || 'unknown';
+          const errorType = (error as Event).type || "unknown";
           if (!isReconnect) {
             wsLog.warn(`[TerminalWS] Connection error (will retry): ${errorType}`);
           }

@@ -196,10 +196,12 @@ export function MultiSessionTerminalPanel({
     );
 
     return () => {
-      unsubscribers.forEach((unsub) => { unsub(); });
+      unsubscribers.forEach((unsub) => {
+        unsub();
+      });
       terminalWebSocketService.disconnect();
     };
-  }, []);
+  }, [appendOutput, markSessionActive, markSessionConnected, setConnected, setError, workingDir]);
 
   // ========== 5. Terminal Initialization ==========
   // Track processed sessions to avoid infinite loops
@@ -225,7 +227,12 @@ export function MultiSessionTerminalPanel({
         disposeTerminal(id);
       }
     });
-  }, [sessionsMap.size]); // Only depend on size, not the array itself
+  }, [
+    disposeTerminal,
+    initTerminal, // Initialize terminals for new sessions
+    sessions.forEach,
+    sessions.map,
+  ]); // Only depend on size, not the array itself
 
   // Focus active terminal
   useEffect(() => {
@@ -235,7 +242,7 @@ export function MultiSessionTerminalPanel({
         setTimeout(() => term.focus(), 100);
       }
     }
-  }, [activeSession?.id]);
+  }, [activeSession?.id, activeSession]);
 
   // ========== 6. Terminal Helpers ==========
   const initTerminal = async (sessionId: string) => {
@@ -525,7 +532,6 @@ export function MultiSessionTerminalPanel({
               onChange={(e) => setNewSessionName(e.target.value)}
               placeholder={`Terminal ${sessions.length + 1}`}
               onKeyDown={(e) => e.key === "Enter" && handleCreateSession()}
-              autoFocus
             />
             <div className={styles.dialogActions}>
               <button onClick={() => setShowNewSessionDialog(false)}>Cancel</button>

@@ -1,6 +1,6 @@
 /**
  * Message Reconstruction Service
- * 
+ *
  * 处理RefreshPages面后的消息重建，确保缓冲消息和Streaming message无缝衔接
  * 主要解决以下问题：
  * 1. 缺失 message_start 事件 - 自动创建消息容器
@@ -9,7 +9,7 @@
  * 4. 缓冲消息与实时消息衔接 - 确保连续性
  */
 
-import type { Message, ContentPart } from "@/features/chat/types/chat";
+import type { ContentPart, Message } from "@/features/chat/types/chat";
 
 interface ReconstructionState {
   currentMessage: Message | null;
@@ -58,20 +58,20 @@ class MessageReconstructor {
   shouldCreateMessageStart(): boolean {
     // 如果已经在消息内部，不需要创建
     if (this.state.isInsideMessage) return false;
-    
+
     // 如果上一个事件是 message_end，可能需要新消息
     if (this.state.lastEventType === "message_end") return true;
-    
+
     // 如果没有任何事件历史，需要创建
     if (!this.state.lastEventType) return true;
-    
+
     return false;
   }
 
   /**
    * 检查是否需要自动创建 content block start
    */
-  shouldCreateContentBlockStart(index: number, type: string): boolean {
+  shouldCreateContentBlockStart(index: number, _type: string): boolean {
     const block = this.state.pendingBlocks.get(index);
     if (!block) return true;
     if (block.started && block.ended) return true; // 需要新的 block
@@ -129,7 +129,7 @@ class MessageReconstructor {
    */
   endContentBlock(index: number): ContentPart | null {
     const block = this.state.pendingBlocks.get(index);
-    if (!block || !block.started) return null;
+    if (!block?.started) return null;
 
     block.ended = true;
 
@@ -159,10 +159,9 @@ class MessageReconstructor {
 
     // 结束所有未结束的块
     const content: ContentPart[] = [];
-    
+
     // 按索引Sort处理 blocks
-    const sortedBlocks = Array.from(this.state.pendingBlocks.entries())
-      .sort(([a], [b]) => a - b);
+    const sortedBlocks = Array.from(this.state.pendingBlocks.entries()).sort(([a], [b]) => a - b);
 
     for (const [index, block] of sortedBlocks) {
       if (block.started && !block.ended) {
@@ -244,7 +243,7 @@ class MessageReconstructor {
   autoFix(): { action: string; data?: any } | null {
     const seq = this.eventSequence;
     const last = seq[seq.length - 1];
-    const secondLast = seq[seq.length - 2];
+    const _secondLast = seq[seq.length - 2];
 
     // 情况1: 收到 delta 但没有 start
     if (last?.includes("_delta") && !this.state.pendingBlocks.size) {
@@ -254,8 +253,9 @@ class MessageReconstructor {
 
     // 情况2: 收到 message_end 但有未结束的块
     if (last === "message_end") {
-      const unendedBlocks = Array.from(this.state.pendingBlocks.values())
-        .filter(b => b.started && !b.ended);
+      const unendedBlocks = Array.from(this.state.pendingBlocks.values()).filter(
+        (b) => b.started && !b.ended
+      );
       if (unendedBlocks.length > 0) {
         return { action: "end_pending_blocks", data: unendedBlocks };
       }

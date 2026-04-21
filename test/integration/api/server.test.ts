@@ -2,12 +2,8 @@
  * Server API Integration Tests
  */
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import {
-  TestLogger,
-  TestReporter,
-  TestServerManager,
-} from "../../lib/test-utils.js";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { TestLogger, TestReporter, TestServerManager } from "../../lib/test-utils.js";
 
 const logger = new TestLogger("server-api");
 const reporter = new TestReporter("server-api");
@@ -46,7 +42,7 @@ describe("Server API Integration", () => {
         } else {
           logger.info("模型列表端点返回非 200 状态码");
         }
-      } catch (e) {
+      } catch (_e) {
         logger.info("模型列表端点可能不存在");
       }
     });
@@ -60,13 +56,13 @@ describe("Server API Integration", () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: "Hello" }),
         });
-        
+
         if (response.ok) {
           logger.info("聊天接口响应成功");
         } else {
           logger.info("聊天接口返回非 200 状态码");
         }
-      } catch (e) {
+      } catch (_e) {
         logger.info("聊天接口可能不存在或需要 WebSocket");
       }
     });

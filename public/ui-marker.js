@@ -14,9 +14,7 @@
  * 9. 持久化用户设置
  */
 
-(function () {
-  "use strict";
-
+(() => {
   // ============================================
   // 默认配置
   // ============================================
@@ -135,7 +133,7 @@
     // 截断文本
     truncate(str, length) {
       if (!str || str.length <= length) return str || "";
-      return str.slice(0, length) + "...";
+      return `${str.slice(0, length)}...`;
     },
 
     // 检查元素是否在视口内
@@ -543,7 +541,7 @@
         const maxDepth = 5;
 
         while (current && depth < maxDepth) {
-          let info = { depth };
+          const info = { depth };
 
           if (current.type) {
             // 函数或类组件
@@ -692,7 +690,7 @@
       // 2. 父元素层级（最多3级）
       const parentChain = this.getParentChain(context);
       if (parentChain.length > 0) {
-        parts.push("in " + parentChain.join(" > "));
+        parts.push(`in ${parentChain.join(" > ")}`);
       }
 
       // 3. 当前元素描述
@@ -702,13 +700,13 @@
       // 4. 关键标识符（ID 或 test id）
       const identifiers = this.getIdentifiers(context);
       if (identifiers.length > 0) {
-        parts.push("[" + identifiers.join(", ") + "]");
+        parts.push(`[${identifiers.join(", ")}]`);
       }
 
       // 5. 关键 CSS 类（过滤掉通用的，保留特征性的）
       const keyClasses = this.getKeyClasses(context);
       if (keyClasses.length > 0) {
-        parts.push("classes: " + keyClasses.join(" "));
+        parts.push(`classes: ${keyClasses.join(" ")}`);
       }
 
       return parts.join(" | ");
@@ -1559,8 +1557,8 @@
       shortcutBtns.forEach((btn) => {
         btn.addEventListener("click", () => {
           const current = textarea.value;
-          const prefix = current ? current + "，" : "";
-          textarea.value = prefix + btn.textContent + "：";
+          const prefix = current ? `${current}，` : "";
+          textarea.value = `${prefix + btn.textContent}：`;
           textarea.focus();
         });
       });

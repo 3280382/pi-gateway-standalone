@@ -1,14 +1,20 @@
 /**
  * Unified Test Runner - 统一测试运行器
  * 规范：所有测试通过此入口运行，确保输出一致性
- * 
+ *
  * Usage:
  *   npx tsx test/run-tests.ts [unit|integration|e2e|terminal|all]
  */
 
 import { spawn } from "node:child_process";
-import { mkdirSync, writeFileSync, appendFileSync, existsSync, cpSync, readlinkSync } from "node:fs";
-import { setTimeout as delay } from "node:timers/promises";
+import {
+  appendFileSync,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readlinkSync,
+  writeFileSync,
+} from "node:fs";
 
 // ========== 配置 ==========
 const TEST_TIMESTAMP = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
@@ -24,7 +30,9 @@ function getNextPort(): number {
 }
 
 const TEST_CONFIG = {
-  get port() { return getNextPort(); },
+  get port() {
+    return getNextPort();
+  },
   timestamp: TEST_TIMESTAMP,
   resultsDir: RESULTS_DIR,
 };
@@ -53,34 +61,43 @@ const colors = {
 
 function log(level: string, message: string, data?: unknown) {
   const timestamp = new Date().toISOString();
-  const color = level === "ERROR" ? colors.red : 
-                level === "SUCCESS" ? colors.green : 
-                level === "WARN" ? colors.yellow : colors.blue;
-  
+  const color =
+    level === "ERROR"
+      ? colors.red
+      : level === "SUCCESS"
+        ? colors.green
+        : level === "WARN"
+          ? colors.yellow
+          : colors.blue;
+
   const dataStr = data ? ` ${JSON.stringify(data)}` : "";
   const entry = `[${timestamp}] [${level}] ${message}${dataStr}`;
-  
+
   console.log(`${color}${entry}${colors.reset}`);
-  
+
   // 写入主日志（如果目录已存在）
   try {
     const logFile = `${RESULTS_DIR}/test-runner.log`;
-    appendFileSync(logFile, entry + "\n");
+    appendFileSync(logFile, `${entry}\n`);
   } catch {
     // 忽略写入错误
   }
 }
 
 function section(title: string) {
-  console.log(`\n${colors.cyan}═══════════════════════════════════════════════════════${colors.reset}`);
+  console.log(
+    `\n${colors.cyan}═══════════════════════════════════════════════════════${colors.reset}`
+  );
   console.log(`${colors.cyan}${title}${colors.reset}`);
-  console.log(`${colors.cyan}═══════════════════════════════════════════════════════${colors.reset}\n`);
+  console.log(
+    `${colors.cyan}═══════════════════════════════════════════════════════${colors.reset}\n`
+  );
 }
 
 // ========== 步骤 1: 备份和清理 ==========
 function backupPrevious() {
   section("步骤 1: 备份和清理");
-  
+
   // 备份上一次测试结果
   if (existsSync(LATEST_LINK)) {
     try {
@@ -95,68 +112,73 @@ function backupPrevious() {
       log("WARN", "备份上次结果失败", e);
     }
   }
-  
+
   // 清理旧的 latest 链接
   try {
     unlinkSync(LATEST_LINK);
   } catch {
     // 忽略错误
   }
-  
+
   // 创建新结果目录结构
   const dirs = ["backend", "frontend", "browser", "screenshots", "vitest", "e2e"];
   for (const dir of dirs) {
     mkdirSync(`${RESULTS_DIR}/${dir}`, { recursive: true });
   }
-  
+
   log("SUCCESS", `结果目录创建: ${RESULTS_DIR}`);
 }
 
 // ========== 步骤 2: 运行单元测试 ==========
 async function runUnitTests(): Promise<boolean> {
   section("步骤 2: 运行单元测试");
-  
+
   const startTime = Date.now();
-  
+
   return new Promise((resolve) => {
     const env = {
       ...process.env,
       TEST_RESULTS_DIR: RESULTS_DIR,
       TEST_TIMESTAMP: TEST_TIMESTAMP,
     };
-    
-    const child = spawn("npx", [
-      "vitest", "run",
-      "--reporter=verbose",
-      "--reporter=json",
-      `--outputFile=${RESULTS_DIR}/vitest/report.json`,
-      "test/unit",
-    ], {
-      env,
-      cwd: PROJECT_ROOT,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-    
-    let output = "";
-    
+
+    const child = spawn(
+      "npx",
+      [
+        "vitest",
+        "run",
+        "--reporter=verbose",
+        "--reporter=json",
+        `--outputFile=${RESULTS_DIR}/vitest/report.json`,
+        "test/unit",
+      ],
+      {
+        env,
+        cwd: PROJECT_ROOT,
+        stdio: ["ignore", "pipe", "pipe"],
+      }
+    );
+
+    let _output = "";
+
     child.stdout?.on("data", (data) => {
       const str = data.toString();
-      output += str;
+      _output += str;
       process.stdout.write(str);
     });
-    
+
     child.stderr?.on("data", (data) => {
       const str = data.toString();
       appendFileSync(`${RESULTS_DIR}/vitest/test.log`, str);
       process.stderr.write(str);
     });
-    
+
     child.on("close", async (code) => {
       const duration = Date.now() - startTime;
-      
+
       // 解析结果 - 使用延迟确保文件已写入
-      await new Promise(r => setTimeout(r, 100));
-      
+      await new Promise((r) => setTimeout(r, 100));
+
       if (existsSync(`${RESULTS_DIR}/vitest/report.json`)) {
         try {
           const fs = await import("node:fs");
@@ -169,7 +191,7 @@ async function runUnitTests(): Promise<boolean> {
           log("WARN", "解析测试报告失败", e);
         }
       }
-      
+
       if (code === 0) {
         log("SUCCESS", `单元测试通过 (${duration}ms)`);
         resolve(true);
@@ -184,39 +206,44 @@ async function runUnitTests(): Promise<boolean> {
 // ========== 步骤 3: 运行集成测试 ==========
 async function runIntegrationTests(): Promise<boolean> {
   section("步骤 3: 运行集成测试");
-  
+
   const startTime = Date.now();
-  
+
   return new Promise((resolve) => {
     const env = {
       ...process.env,
       TEST_RESULTS_DIR: RESULTS_DIR,
       TEST_TIMESTAMP: TEST_TIMESTAMP,
     };
-    
-    const child = spawn("npx", [
-      "vitest", "run",
-      "--reporter=verbose",
-      `--outputFile=${RESULTS_DIR}/vitest/integration.json`,
-      "test/integration",
-    ], {
-      env,
-      cwd: PROJECT_ROOT,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-    
+
+    const child = spawn(
+      "npx",
+      [
+        "vitest",
+        "run",
+        "--reporter=verbose",
+        `--outputFile=${RESULTS_DIR}/vitest/integration.json`,
+        "test/integration",
+      ],
+      {
+        env,
+        cwd: PROJECT_ROOT,
+        stdio: ["ignore", "pipe", "pipe"],
+      }
+    );
+
     child.stdout?.on("data", (data) => {
       process.stdout.write(data);
     });
-    
+
     child.stderr?.on("data", (data) => {
       appendFileSync(`${RESULTS_DIR}/vitest/integration.log`, data);
       process.stderr.write(data);
     });
-    
+
     child.on("close", (code) => {
       const duration = Date.now() - startTime;
-      
+
       if (code === 0) {
         log("SUCCESS", `集成测试通过 (${duration}ms)`);
         resolve(true);
@@ -232,13 +259,11 @@ async function runIntegrationTests(): Promise<boolean> {
 // ========== 步骤 4: 运行终端服务端测试 ==========
 async function runTerminalServerTests(): Promise<boolean> {
   section("步骤 4: 运行终端服务端测试");
-  
+
   const startTime = Date.now();
-  
+
   return new Promise((resolve) => {
-    const child = spawn("npx", [
-      "tsx", "test/terminal-server.test.ts",
-    ], {
+    const child = spawn("npx", ["tsx", "test/terminal-server.test.ts"], {
       env: {
         ...process.env,
         TEST_RESULTS_DIR: RESULTS_DIR,
@@ -249,19 +274,19 @@ async function runTerminalServerTests(): Promise<boolean> {
       cwd: PROJECT_ROOT,
       stdio: ["ignore", "pipe", "pipe"],
     });
-    
+
     child.stdout?.on("data", (data) => {
       process.stdout.write(data);
     });
-    
+
     child.stderr?.on("data", (data) => {
       appendFileSync(`${RESULTS_DIR}/backend/test.log`, data);
       process.stderr.write(data);
     });
-    
+
     child.on("close", (code) => {
       const duration = Date.now() - startTime;
-      
+
       if (code === 0) {
         log("SUCCESS", `终端服务端测试通过 (${duration}ms)`);
         resolve(true);
@@ -276,48 +301,55 @@ async function runTerminalServerTests(): Promise<boolean> {
 // ========== 步骤 5: 运行终端客户端测试 ==========
 async function runTerminalClientTests(): Promise<boolean> {
   section("步骤 5: 运行终端客户端测试");
-  
+
   const startTime = Date.now();
-  
+
   return new Promise((resolve) => {
-    const child = spawn("npx", [
-      "playwright", "test",
-      "test/terminal-client.test.ts",
-      "--project=chromium",
-      "--reporter=html,line",
-      `--output=${RESULTS_DIR}/playwright`,
-    ], {
-      env: {
-        ...process.env,
-        TEST_RESULTS_DIR: RESULTS_DIR,
-        TEST_TIMESTAMP: TEST_TIMESTAMP,
-        TEST_PORT: String(getNextPort()),
-        NODE_ENV: "test",
-      },
-      cwd: PROJECT_ROOT,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-    
+    const child = spawn(
+      "npx",
+      [
+        "playwright",
+        "test",
+        "test/terminal-client.test.ts",
+        "--project=chromium",
+        "--reporter=html,line",
+        `--output=${RESULTS_DIR}/playwright`,
+      ],
+      {
+        env: {
+          ...process.env,
+          TEST_RESULTS_DIR: RESULTS_DIR,
+          TEST_TIMESTAMP: TEST_TIMESTAMP,
+          TEST_PORT: String(getNextPort()),
+          NODE_ENV: "test",
+        },
+        cwd: PROJECT_ROOT,
+        stdio: ["ignore", "pipe", "pipe"],
+      }
+    );
+
     child.stdout?.on("data", (data) => {
       process.stdout.write(data);
     });
-    
+
     child.stderr?.on("data", (data) => {
       appendFileSync(`${RESULTS_DIR}/browser/test.log`, data);
       process.stderr.write(data);
     });
-    
+
     child.on("close", (code) => {
       const duration = Date.now() - startTime;
-      
+
       // 复制截图
       try {
         const { execSync } = require("node:child_process");
-        execSync(`find ${RESULTS_DIR}/playwright -name "*.png" -exec cp {} ${RESULTS_DIR}/screenshots/ \; 2>/dev/null || true`);
+        execSync(
+          `find ${RESULTS_DIR}/playwright -name "*.png" -exec cp {} ${RESULTS_DIR}/screenshots/ ; 2>/dev/null || true`
+        );
       } catch {
         // 忽略错误
       }
-      
+
       if (code === 0) {
         log("SUCCESS", `终端客户端测试通过 (${duration}ms)`);
         resolve(true);
@@ -332,19 +364,21 @@ async function runTerminalClientTests(): Promise<boolean> {
 // ========== 步骤 6: 生成报告 ==========
 function generateSummary() {
   section("步骤 6: 生成测试报告");
-  
+
   // 统计截图数量
   let screenshotCount = 0;
   try {
     const { readdirSync } = require("node:fs");
-    screenshotCount = readdirSync(`${RESULTS_DIR}/screenshots`).filter((f: string) => f.endsWith(".png")).length;
+    screenshotCount = readdirSync(`${RESULTS_DIR}/screenshots`).filter((f: string) =>
+      f.endsWith(".png")
+    ).length;
   } catch {
     // 忽略错误
   }
-  
+
   // 计算总耗时
   stats.duration = Date.now() - startTimeGlobal;
-  
+
   // 生成 Markdown 报告
   const summary = `# 测试报告
 
@@ -416,7 +450,7 @@ ${RESULTS_DIR}
 function updateLatestLink() {
   try {
     const { symlinkSync, unlinkSync, existsSync } = require("node:fs");
-    
+
     // 删除旧的链接（如果是符号链接）
     if (existsSync(LATEST_LINK)) {
       try {
@@ -432,7 +466,7 @@ function updateLatestLink() {
         log("WARN", "处理旧链接失败", e);
       }
     }
-    
+
     // 创建新的符号链接
     symlinkSync(RESULTS_DIR, LATEST_LINK, "dir");
     log("SUCCESS", `已更新 latest 链接 -> ${RESULTS_DIR}`);
@@ -444,7 +478,7 @@ function updateLatestLink() {
 // ========== 步骤 8: 输出最终摘要 ==========
 function printFinalSummary() {
   section("测试完成摘要");
-  
+
   console.log(`\n📂 结果目录: ${RESULTS_DIR}`);
   console.log(`📄 查看报告: cat ${RESULTS_DIR}/summary.md`);
   console.log(`📸 查看截图: ls ${RESULTS_DIR}/screenshots/`);
@@ -455,7 +489,7 @@ function printFinalSummary() {
   console.log(`  - ⚠️ 跳过: ${stats.skipped}`);
   console.log(`  - ⏱️ 耗时: ${stats.duration}ms`);
   console.log("");
-  
+
   if (stats.failed === 0) {
     log("SUCCESS", "所有测试通过! 🎉");
     process.exit(0);
@@ -473,35 +507,34 @@ let startTimeGlobal: number;
 
 async function main() {
   startTimeGlobal = Date.now();
-  
+
   section("🧪 Pi Gateway 统一测试运行器");
   log("INFO", `测试类型: ${TEST_TYPE}`);
   log("INFO", `时间戳: ${TEST_TIMESTAMP}`);
   log("INFO", `测试端口: ${TEST_CONFIG.port}`);
-  
+
   // 步骤 1: 备份和清理
   backupPrevious();
-  
+
   // 根据测试类型执行
-  let success = true;
-  
+  let _success = true;
+
   switch (TEST_TYPE) {
     case "unit":
-      success = await runUnitTests();
+      _success = await runUnitTests();
       break;
     case "integration":
-      success = await runIntegrationTests();
+      _success = await runIntegrationTests();
       break;
     case "terminal-server":
-      success = await runTerminalServerTests();
+      _success = await runTerminalServerTests();
       break;
     case "terminal-client":
-      success = await runTerminalClientTests();
+      _success = await runTerminalClientTests();
       break;
     case "terminal":
-      success = await runTerminalServerTests() && await runTerminalClientTests();
+      _success = (await runTerminalServerTests()) && (await runTerminalClientTests());
       break;
-    case "all":
     default:
       await runUnitTests();
       await runIntegrationTests();
@@ -509,11 +542,11 @@ async function main() {
       await runTerminalClientTests();
       break;
   }
-  
+
   // 生成报告
   generateSummary();
   updateLatestLink();
-  
+
   // 输出摘要
   printFinalSummary();
 }

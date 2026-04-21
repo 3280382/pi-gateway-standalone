@@ -11,16 +11,16 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { SessionManager } from "@mariozechner/pi-coding-agent";
-import { Logger, LogLevel } from "../../lib/utils/logger";
-import { getLocalSessionsDir } from "./agent-session/utils";
-import { processSessionEntries } from "./session-processor";
-import { sessionConfigManager } from "./session-config/sessionConfigManager";
-import { extractShortSessionId, serverSessionManager } from "./agent-session/session-manager";
-import type { PiAgentSession } from "./agent-session/piAgentSession";
 import type {
-  SessionMessagesResponse,
   Message,
+  SessionMessagesResponse,
 } from "../../../shared/types/session-messages.types";
+import { Logger, LogLevel } from "../../lib/utils/logger";
+import type { PiAgentSession } from "./agent-session/piAgentSession";
+import { extractShortSessionId, serverSessionManager } from "./agent-session/session-manager";
+import { getLocalSessionsDir } from "./agent-session/utils";
+import { sessionConfigManager } from "./session-config/sessionConfigManager";
+import { processSessionEntries } from "./session-processor";
 
 const logger = new Logger({ level: LogLevel.INFO });
 

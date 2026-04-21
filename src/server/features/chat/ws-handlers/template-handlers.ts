@@ -3,16 +3,11 @@
  * Handle prompt template-related WebSocket messages
  */
 
+import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { existsSync } from "node:fs";
 import type { WSContext } from "../ws-router";
-import {
-  createHandler,
-  sendError,
-  sendSuccess,
-  logger,
-} from "./handler-utils";
+import { createHandler, logger, sendError, sendSuccess } from "./handler-utils";
 
 // ============================================================================
 // Template Service
@@ -40,10 +35,10 @@ async function findTemplateFiles(workingDir: string): Promise<TemplateFile[]> {
     "/root",
     "/home/root",
   ].filter(Boolean) as string[];
-  
+
   let globalPromptsDir = "";
   let foundHomeDir = "";
-  
+
   for (const homeDir of possibleHomeDirs) {
     const dir = join(homeDir, ".pi", "agent", "prompts");
     logger.info(`[findTemplateFiles] Trying global dir: ${dir}`);
@@ -54,7 +49,7 @@ async function findTemplateFiles(workingDir: string): Promise<TemplateFile[]> {
       break;
     }
   }
-  
+
   // Fallback to /root if none found
   if (!globalPromptsDir) {
     foundHomeDir = "/root";
@@ -86,7 +81,7 @@ async function findTemplateFiles(workingDir: string): Promise<TemplateFile[]> {
   // Local templates: {workingDir}/.pi/prompts
   const localPromptsDir = join(workingDir, ".pi", "prompts");
   logger.info(`[findTemplateFiles] Checking local dir: ${localPromptsDir}`);
-  
+
   if (existsSync(localPromptsDir)) {
     logger.info(`[findTemplateFiles] Local dir exists: ${localPromptsDir}`);
     try {
@@ -138,18 +133,19 @@ async function readTemplateContent(templatePath: string): Promise<string> {
  * Handle list_templates message
  * Returns list of available prompt templates
  */
-export async function handleListTemplates(
-  ctx: WSContext,
-  _payload: unknown
-): Promise<void> {
+export async function handleListTemplates(ctx: WSContext, _payload: unknown): Promise<void> {
   const workingDir = ctx.session.workingDir;
   const hasSession = !!ctx.session.session;
-  
-  logger.info(`[handleListTemplates] Session initialized: ${hasSession}, workingDir: ${workingDir}`);
-  logger.info(`[handleListTemplates] Session object exists: ${!!ctx.session}, workingDir property: ${ctx.session?.workingDir}`);
-  
+
+  logger.info(
+    `[handleListTemplates] Session initialized: ${hasSession}, workingDir: ${workingDir}`
+  );
+  logger.info(
+    `[handleListTemplates] Session object exists: ${!!ctx.session}, workingDir property: ${ctx.session?.workingDir}`
+  );
+
   const templates = await findTemplateFiles(workingDir);
-  
+
   sendSuccess(ctx, "templates_list", {
     templates: templates.map((t) => ({
       name: t.name,
@@ -158,7 +154,7 @@ export async function handleListTemplates(
     })),
     count: templates.length,
   });
-  
+
   logger.info(`[handleListTemplates] Found ${templates.length} templates`);
 }
 
@@ -171,51 +167,51 @@ export async function handleGetTemplate(
   payload: { name?: string; path?: string }
 ): Promise<void> {
   const { name, path: templatePath } = payload;
-  
+
   if (!name && !templatePath) {
     sendError(ctx, "Template name or path is required");
     return;
   }
-  
+
   let targetPath = templatePath;
-  
+
   // If only name provided, search for it
   if (!targetPath && name) {
     const workingDir = ctx.session.workingDir;
     const templates = await findTemplateFiles(workingDir);
     const template = templates.find((t) => t.name === name);
-    
+
     if (!template) {
       sendError(ctx, `Template not found: ${name}`);
       return;
     }
-    
+
     targetPath = template.path;
   }
-  
+
   if (!targetPath) {
     sendError(ctx, "Could not resolve template path");
     return;
   }
-  
+
   // Security check: ensure the path is within allowed directories
   const globalPromptsDir = join(process.env.HOME || "/root", ".pi", "agent", "prompts");
   const localPromptsDir = join(ctx.session.workingDir, ".pi", "prompts");
-  
+
   if (!targetPath.startsWith(globalPromptsDir) && !targetPath.startsWith(localPromptsDir)) {
     sendError(ctx, "Invalid template path: access denied");
     return;
   }
-  
+
   try {
     const content = await readTemplateContent(targetPath);
-    
+
     sendSuccess(ctx, "template_content", {
       name: name || targetPath.split("/").pop()?.replace(".md", ""),
       path: targetPath,
       content,
     });
-    
+
     logger.info(`[handleGetTemplate] Sent template: ${targetPath}`);
   } catch (error) {
     sendError(ctx, error instanceof Error ? error.message : "Failed to read template");

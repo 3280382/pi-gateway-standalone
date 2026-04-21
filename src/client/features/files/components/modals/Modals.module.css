@@ -188,22 +188,22 @@
 
 /* 工作区条目特殊样式 */
 .item.working {
-  background: rgba(249, 226, 175, 0.12) !important;
+  background: rgba(249, 226, 175, 0.12);
   border: 1px solid rgba(249, 226, 175, 0.25);
 }
 
 .item.working:hover {
-  background: rgba(249, 226, 175, 0.18) !important;
+  background: rgba(249, 226, 175, 0.18);
 }
 
 .workingHash {
-  color: #f9e2af !important;
-  background: rgba(249, 226, 175, 0.2) !important;
+  color: #f9e2af;
+  background: rgba(249, 226, 175, 0.2);
   font-weight: 600;
 }
 
 .workingMsg {
-  color: #f9e2af !important;
+  color: #f9e2af;
   font-style: italic;
 }
 

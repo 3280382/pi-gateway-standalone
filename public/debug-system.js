@@ -6,10 +6,10 @@
  * - "force": do NOT load eruda (force disabled)
  */
 
-(function() {
+(() => {
   // Check localStorage first
   var shouldLoad = true;
-  
+
   try {
     var value = localStorage.getItem("DEBUG_ERUDA");
     // Only disable if explicitly set to "force"
@@ -17,7 +17,7 @@
       shouldLoad = false;
     }
     // null, "true", or any other value → load eruda
-  } catch (e) {
+  } catch (_e) {
     // Error reading localStorage → load eruda (safe default)
     shouldLoad = true;
   }
@@ -41,32 +41,35 @@
     earlyLogs.push({
       time: new Date().toISOString(),
       type: type,
-      message: Array.prototype.slice.call(args).map(function(arg) {
-        try {
-          return typeof arg === "object" ? JSON.stringify(arg) : String(arg);
-        } catch {
-          return String(arg);
-        }
-      }).join(" ")
+      message: Array.prototype.slice
+        .call(args)
+        .map((arg) => {
+          try {
+            return typeof arg === "object" ? JSON.stringify(arg) : String(arg);
+          } catch {
+            return String(arg);
+          }
+        })
+        .join(" "),
     });
     if (earlyLogs.length > 1000) earlyLogs.shift();
   }
 
-  console.log = function() {
-    captureLog("log", arguments);
-    originalLog.apply(console, arguments);
+  console.log = (...args) => {
+    captureLog("log", args);
+    originalLog.apply(console, args);
   };
-  console.error = function() {
-    captureLog("error", arguments);
-    originalError.apply(console, arguments);
+  console.error = (...args) => {
+    captureLog("error", args);
+    originalError.apply(console, args);
   };
-  console.warn = function() {
-    captureLog("warn", arguments);
-    originalWarn.apply(console, arguments);
+  console.warn = (...args) => {
+    captureLog("warn", args);
+    originalWarn.apply(console, args);
   };
 
   // Load eruda
-  function initEruda() {
+  var initEruda = () => {
     if (typeof eruda !== "undefined") {
       startEruda();
       return;
@@ -76,25 +79,25 @@
     script.src = "/eruda.min.js";
     script.async = false;
 
-    script.onload = function() {
+    script.onload = () => {
       if (typeof eruda !== "undefined") {
         startEruda();
       }
     };
 
-    script.onerror = function() {
+    script.onerror = () => {
       console.error("[DebugSystem] Failed to load eruda");
     };
 
     document.head.appendChild(script);
-  }
+  };
 
-  function startEruda() {
+  var startEruda = () => {
     try {
       eruda.init({
         tool: ["console", "network", "elements", "resources", "info"],
         useShadowDom: true,
-        autoScale: true
+        autoScale: true,
       });
 
       // Hide panel, show button only
@@ -102,21 +105,25 @@
 
       // Replay early logs
       if (earlyLogs.length > 0) {
-        earlyLogs.forEach(function(entry) {
+        earlyLogs.forEach((entry) => {
           var time = new Date(entry.time).toLocaleTimeString();
-          var msg = "[Early " + entry.type.toUpperCase() + " " + time + "] " + entry.message;
+          var msg = `[Early ${entry.type.toUpperCase()} ${time}] ${entry.message}`;
           eruda.get("console").log(msg);
         });
       }
 
       window.DebugSystem = {
-        show: function() { eruda.show(); },
-        hide: function() { eruda.hide(); }
+        show: () => {
+          eruda.show();
+        },
+        hide: () => {
+          eruda.hide();
+        },
       };
     } catch (e) {
       console.error("[DebugSystem] Failed to init eruda:", e);
     }
-  }
+  };
 
   // Run
   if (document.readyState === "loading") {

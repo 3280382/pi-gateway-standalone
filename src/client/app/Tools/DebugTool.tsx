@@ -3,7 +3,7 @@
  * Responsibilities: Toggle localStorage flag, control whether homepage loads eruda
  */
 
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { IconButton } from "@/components/Icon/Icon";
 
 const DEBUG_KEY = "DEBUG_ERUDA";

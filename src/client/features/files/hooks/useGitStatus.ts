@@ -29,14 +29,14 @@ export interface UseGitStatusOptions {
 export function useGitStatus(options: UseGitStatusOptions = {}) {
   const { isActive = true, currentBrowsePath } = options;
 
-  const { isGitModeActive,   items, updateFileGitStatuses } = useFileStore();
+  const { isGitModeActive, items, updateFileGitStatuses } = useFileStore();
   const { workingDir: globalWorkingDir } = useWorkspaceStore();
 
   // 使用当前浏览路径优先，回退到全局 workingDir
   const workingDir = currentBrowsePath || globalWorkingDir;
 
   const lastFetchedPathRef = useRef<string>("");
-  const   itemsLengthRef = useRef<number>(0);
+  const itemsLengthRef = useRef<number>(0);
   const isInitialMount = useRef(true);
 
   useEffect(() => {
@@ -45,23 +45,23 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
 
     // Git模式Close时，Clear状态并重置 ref
     if (!isGitModeActive) {
-      const hasGitStatus =   items.some((item) => item.gitStatus);
+      const hasGitStatus = items.some((item) => item.gitStatus);
       if (hasGitStatus) {
         updateFileGitStatuses({});
       }
       // 重置 ref，这样下次打开 Git 模式时会重新获取
       lastFetchedPathRef.current = "";
-        itemsLengthRef.current = 0;
+      itemsLengthRef.current = 0;
       return;
     }
 
     // 无files项时不执Rows操作
-    if (  items.length === 0) return;
+    if (items.length === 0) return;
 
     // 检查是否需要获取git状态
     const shouldFetchGitStatus =
       workingDir !== lastFetchedPathRef.current ||
-        items.length !==   itemsLengthRef.current ||
+      items.length !== itemsLengthRef.current ||
       isInitialMount.current;
 
     fileBrowserDebug.debug("Git状态检查", {
@@ -69,7 +69,7 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
       lastFetched: lastFetchedPathRef.current,
       shouldFetch: shouldFetchGitStatus,
       isGitModeActive: isGitModeActive,
-      itemCount:   items.length,
+      itemCount: items.length,
     });
 
     if (!shouldFetchGitStatus) return;
@@ -83,7 +83,7 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
         // 将状态映射转换为与files项路径匹配的格式
         const itemStatusMap: Record<string, string> = {};
 
-        for (const item of   items) {
+        for (const item of items) {
           if (item.name === "..") continue;
 
           let matchedStatus: string | undefined;
@@ -126,7 +126,7 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
 
         updateFileGitStatuses(itemStatusMap);
         lastFetchedPathRef.current = workingDir;
-          itemsLengthRef.current =   items.length;
+        itemsLengthRef.current = items.length;
         isInitialMount.current = false;
       } catch (error) {
         fileBrowserDebug.error("获取Git状态Failed", {
@@ -135,10 +135,10 @@ export function useGitStatus(options: UseGitStatusOptions = {}) {
         });
         updateFileGitStatuses({});
         lastFetchedPathRef.current = "";
-          itemsLengthRef.current = 0;
+        itemsLengthRef.current = 0;
       }
     };
 
     fetchGitStatus();
-  }, [isActive, isGitModeActive, workingDir,   items, updateFileGitStatuses]);
+  }, [isActive, isGitModeActive, workingDir, items, updateFileGitStatuses]);
 }

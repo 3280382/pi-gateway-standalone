@@ -8,7 +8,6 @@ import type { Request, Response } from "express";
 import { Logger, LogLevel } from "../../../lib/utils/logger";
 import { expandPath } from "../../files/utils";
 import { AGENT_DIR, getLocalSessionsDir } from "../agent-session/utils";
-import { processSessionEntries } from "../session-processor";
 
 const logger = new Logger({ level: LogLevel.INFO });
 
@@ -176,14 +175,14 @@ export async function getActiveSessions(req: Request, res: Response) {
   const workingDir = req.query.workingDir as string;
 
   if (!workingDir) {
-    return res.status(400).json({ 
-      error: "workingDir parameter is required" 
+    return res.status(400).json({
+      error: "workingDir parameter is required",
     });
   }
 
   try {
     const activeSessions = serverSessionManager.getActiveSessions(workingDir);
-  
+
     res.json({
       workingDir,
       activeSessions,
@@ -191,8 +190,8 @@ export async function getActiveSessions(req: Request, res: Response) {
     });
   } catch (error) {
     logger.error(`[getActiveSessions] Error: ${error}`);
-    res.status(500).json({ 
-      error: "Failed to get active sessions" 
+    res.status(500).json({
+      error: "Failed to get active sessions",
     });
   }
 }

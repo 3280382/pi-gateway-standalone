@@ -3,15 +3,7 @@
  * 规范：所有测试必须使用该工具库以确保输出一致性
  */
 
-import {
-  mkdirSync,
-  appendFileSync,
-  writeFileSync,
-  existsSync,
-  readlinkSync,
-  unlinkSync,
-  cpSync,
-} from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 
 // ========== 配置 ==========
@@ -184,7 +176,7 @@ export class BrowserTestHelper {
 
   logWebSocket(type: string, data: unknown): void {
     const entry = { type, data, time: Date.now() };
-    appendFileSync(this.wsLogFile, JSON.stringify(entry) + "\n");
+    appendFileSync(this.wsLogFile, `${JSON.stringify(entry)}\n`);
   }
 
   getScreenshotPath(name: string): string {
@@ -196,21 +188,14 @@ export class BrowserTestHelper {
   }
 }
 
-// ========== 服务器测试工具 ==========
-import { spawn, ChildProcess } from "node:child_process";
-import { setTimeout as delay } from "node:timers/promises";
-
 /**
  * 【三窗口原则】TestServerManager 不再启动新服务器
  * 只检查tmux中已运行的服务状态
  */
 export class TestServerManager {
-  private process: ChildProcess | null = null;
   private logger: TestLogger;
-  private serverLogFile: string;
   private isStarted = false;
   private port: number;
-  private useTmux: boolean = true; // 强制使用tmux服务
 
   constructor(port?: number) {
     this.logger = new TestLogger("server-manager", "backend");
@@ -299,7 +284,7 @@ export class TestWebSocketClient {
   private connected = false;
   private logger: TestLogger;
 
-  constructor(url: string) {
+  constructor(_url: string) {
     this.logger = new TestLogger("ws-client", "backend");
   }
 
@@ -323,7 +308,7 @@ export class TestWebSocketClient {
           const message = JSON.parse(data.toString());
           this.messages.push(message);
           this.logger.debug("收到消息", message);
-        } catch (e) {
+        } catch (_e) {
           this.logger.warn("解析消息失败", data.toString());
         }
       });

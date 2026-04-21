@@ -17,7 +17,6 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { AgentMessage } from "@mariozechner/pi-agent-core";
 import type { ImageContent } from "@mariozechner/pi-ai";
-import { extractShortSessionId } from "./session-manager";
 import {
   type AgentSession,
   type AgentSessionEvent,
@@ -31,6 +30,7 @@ import {
 } from "@mariozechner/pi-coding-agent";
 import { WebSocket } from "ws";
 import type { LlmLogManager } from "../llm/log-manager";
+import { extractShortSessionId } from "./session-manager";
 import { AGENT_DIR, getLocalSessionsDir } from "./utils";
 
 /**
@@ -113,10 +113,6 @@ export class PiAgentSession {
     | "error"
     | "retrying"
     | "compacting" = "idle";
-
-  /** Active tool execution tracking */
-  private activeToolExecution: { toolCallId: string; toolName: string; startTime: Date } | null =
-    null;
 
   /**
    * Create new PiAgentSession
@@ -1267,9 +1263,6 @@ export class PiAgentSession {
    */
   private isBuffering: boolean = false;
 
-  /** Track if we're currently inside a message (between message_start and message_end) */
-  private insideMessage: boolean = false;
-
   /**
    * Session verification callback
    * Called before sending each message to verify the client has selected this session
@@ -1336,7 +1329,7 @@ export class PiAgentSession {
 
   private doSend(message: ServerMessage): void {
     try {
-      this.ws!.send(JSON.stringify(message));
+      this.ws?.send(JSON.stringify(message));
       this.wsConnected = true;
       this.isBuffering = false;
     } catch (error) {

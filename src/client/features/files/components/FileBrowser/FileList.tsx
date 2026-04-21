@@ -13,10 +13,10 @@ import { FileItem } from "./FileItem";
 import styles from "./FileList.module.css";
 
 interface FileListProps {
-    items: FileItemType[];
+  items: FileItemType[];
 }
 
-export const FileList = memo<FileListProps>(({   items }) => {
+export const FileList = memo<FileListProps>(({ items }) => {
   // ========== 1. State ==========
   const { selectedItems, isMultiSelectMode, draggingItem, dropTarget, getItemHandlers } =
     useFileItemActions();
@@ -34,7 +34,7 @@ export const FileList = memo<FileListProps>(({   items }) => {
   // 通过 useFileItemActions 获取
 
   // ========== 6. Render ==========
-  if (  items.length === 0) return null;
+  if (items.length === 0) return null;
 
   return (
     <div className={styles.list}>
@@ -45,7 +45,7 @@ export const FileList = memo<FileListProps>(({   items }) => {
         <span className={styles.headerSize}>Size</span>
         <span className={styles.headerModified}>Modified</span>
       </div>
-      {  items.map((item) => {
+      {items.map((item) => {
         const handlers = getItemHandlers(item);
         return (
           <FileItem

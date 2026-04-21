@@ -64,7 +64,7 @@ export type BottomPanelType = "terminal" | "preview" | null;
 export interface BrowseResponse {
   workingDir: string;
   parentPath: string;
-    items: FileItem[];
+  items: FileItem[];
 }
 
 export interface FileContentResponse {
@@ -101,7 +101,7 @@ export interface TreeNode {
 
 export interface TreeResponse {
   path: string;
-    items: TreeNode[];
+  items: TreeNode[];
 }
 
 // ============================================================================

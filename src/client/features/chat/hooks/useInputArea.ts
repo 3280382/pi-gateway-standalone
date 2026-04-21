@@ -193,7 +193,6 @@ export function useInputArea(options: UseInputAreaOptions): UseInputAreaReturn {
     onAbort,
     onSteer,
     onBashCommand,
-    onSlashCommand,
     onSendWithImages,
     onChange,
   ]);

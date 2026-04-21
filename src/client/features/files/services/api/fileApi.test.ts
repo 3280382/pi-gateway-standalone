@@ -2,7 +2,7 @@
  * File API Service Tests
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { TestLogger, TestReporter } from "../../../../../test/lib/test-utils.js";
 
 const logger = new TestLogger("file-api");

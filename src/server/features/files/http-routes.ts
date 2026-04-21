@@ -10,9 +10,8 @@ import type { Application } from "express";
  */
 export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
   // File controller
-  const { browse, tree, content, raw, write, mkdir, batchDelete, batchMove, execute } = await import(
-    "./file/file.controller"
-  );
+  const { browse, tree, content, raw, write, mkdir, batchDelete, batchMove, execute } =
+    await import("./file/file.controller");
 
   // Git controller
   const {

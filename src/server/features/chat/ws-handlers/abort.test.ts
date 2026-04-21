@@ -2,15 +2,15 @@
  * WebSocket Abort Handler Tests
  */
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { setTimeout as delay } from "node:timers/promises";
 import {
+  TEST_CONFIG,
   TestLogger,
   TestReporter,
   TestServerManager,
   TestWebSocketClient,
-  TEST_CONFIG,
 } from "@test/lib/test-utils";
-import { setTimeout as delay } from "node:timers/promises";
+import { afterAll, beforeAll, describe, it } from "vitest";
 
 const logger = new TestLogger("ws-abort");
 const reporter = new TestReporter("ws-abort");

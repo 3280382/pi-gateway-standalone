@@ -19,10 +19,9 @@
  */
 
 import { useCallback } from "react";
+import { abortChatGeneration, sendChatMessage } from "@/features/chat/services/chatWebSocket";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import type { Message, ToolExecution } from "@/features/chat/types/chat";
-import { websocketService } from "@/services/websocket.service";
-import { sendChatMessage, abortChatGeneration } from "@/features/chat/services/chatWebSocket";
 
 // ============================================================================
 // Types

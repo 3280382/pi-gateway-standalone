@@ -1,5 +1,5 @@
-import { test, expect } from "@playwright/test";
-import { mkdirSync, appendFileSync } from "node:fs";
+import { appendFileSync, mkdirSync } from "node:fs";
+import { test } from "@playwright/test";
 
 const RESULTS_DIR = process.env.TEST_RESULTS_DIR || "test-results/latest";
 mkdirSync(`${RESULTS_DIR}/browser`, { recursive: true });
@@ -52,23 +52,23 @@ test("调试切换 session 消息加载", async ({ page }) => {
   // 先获取第二个 session 的 ID
   const secondSessionId = await page.evaluate(() => {
     // 从 DOM 中获取 session ID
-    const rows = document.querySelectorAll('table tbody tr');
+    const rows = document.querySelectorAll("table tbody tr");
     if (rows.length > 1) {
       const secondRow = rows[1];
       // 尝试获取 data-session-id 属性
-      const sessionId = secondRow.getAttribute('data-session-id');
+      const sessionId = secondRow.getAttribute("data-session-id");
       if (sessionId) return sessionId;
-      
+
       // 否则从文本中提取
-      const text = secondRow.textContent || '';
+      const text = secondRow.textContent || "";
       const match = text.match(/^[a-f0-9]+/);
       return match ? match[0] : null;
     }
     return null;
   });
-  
+
   log("IMPORTANT", `第二个 session ID: ${secondSessionId}`);
-  
+
   // 监听新的 initialized 消息
   let initializedReceived = false;
   let newMessageCount = 0;
@@ -77,27 +77,27 @@ test("调试切换 session 消息加载", async ({ page }) => {
     if (text.includes("Messages from server:")) {
       const match = text.match(/Messages from server:\s*(\d+)/);
       if (match) {
-        newMessageCount = parseInt(match[1]);
+        newMessageCount = parseInt(match[1], 10);
         log("IMPORTANT", `切换后收到 initialized，消息数: ${newMessageCount}`);
         initializedReceived = true;
       }
     }
   };
   page.on("console", checkInitialized);
-  
+
   // 使用 exposeFunction 来调用 sessionManager
   await page.evaluate((id) => {
     // 触发一个自定义事件，让应用处理
-    window.dispatchEvent(new CustomEvent('test-select-session', { detail: id }));
+    window.dispatchEvent(new CustomEvent("test-select-session", { detail: id }));
   }, secondSessionId);
-  
+
   log("IMPORTANT", "已发送 test-select-session 事件");
 
   // 5. 等待一段时间让消息加载
   await page.waitForTimeout(8000);
-  
+
   page.off("console", checkInitialized);
-  
+
   if (!initializedReceived) {
     log("WARN", "切换后没有收到新的 initialized 消息");
   }
@@ -107,9 +107,9 @@ test("调试切换 session 消息加载", async ({ page }) => {
   log("IMPORTANT", `切换后消息数量: ${messagesAfter}`);
 
   // 截图
-  await page.screenshot({ 
+  await page.screenshot({
     path: `${RESULTS_DIR}/screenshots/session-switch-debug-result.png`,
-    fullPage: true 
+    fullPage: true,
   });
 
   log("INFO", "测试完成");

@@ -99,7 +99,7 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
       const data = await response.json();
 
       // 过滤directories：只显示非排除的directories
-      const dirs = data.  items
+      const dirs = data.items
         .filter((item: any) => item.isDirectory && !shouldExcludeDir(item.name))
         .map((item: any) => ({
           name: item.name,

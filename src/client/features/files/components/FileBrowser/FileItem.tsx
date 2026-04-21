@@ -86,7 +86,7 @@ export const FileItem = memo<FileItemProps>(
     const pendingTodos = todos.filter((t) => !t.checked);
     const hasTodos = todos.length > 0;
     const hasPendingTodos = pendingTodos.length > 0;
-    const todoPriorityColor = hasPendingTodos
+    const _todoPriorityColor = hasPendingTodos
       ? todoApi.getPriorityColor(pendingTodos[0].tags)
       : "#8b949e";
 

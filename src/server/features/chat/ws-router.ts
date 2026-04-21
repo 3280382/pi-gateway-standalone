@@ -277,6 +277,7 @@ export const loggingMiddleware: WSMiddleware = async (_ctx, payload, next) => {
 // Handler Registration
 // ============================================================================
 
+import { handleGetProcessDetailsWrapped, handleGetProcessTreeWrapped } from "../system/ws-handlers";
 import {
   handleAbortWrapped,
   handleCommandWrapped,
@@ -303,12 +304,8 @@ import {
   handleUpdateSessionConfigWrapped,
 } from "./ws-handlers/session-handlers";
 import {
-  handleGetProcessTreeWrapped,
-  handleGetProcessDetailsWrapped,
-} from "../system/ws-handlers";
-import {
-  handleListTemplatesWrapped,
   handleGetTemplateWrapped,
+  handleListTemplatesWrapped,
 } from "./ws-handlers/template-handlers";
 
 /**

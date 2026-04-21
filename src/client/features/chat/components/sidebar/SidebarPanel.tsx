@@ -10,13 +10,8 @@
  * Structure: State → Ref → Effects → Computed → Actions → Render
  */
 
-import { useCallback } from "react";
 import { IconButton } from "@/components/Icon/Icon";
 import { useSidebarSessions, useSidebarVisibility } from "@/features/chat/hooks";
-import { useSidebarController } from "@/features/chat/services/api/sidebarApi";
-import { sessionManager } from "@/features/chat/services/sessionManager";
-import { useLlmLogStore } from "@/features/chat/stores/llmLogStore";
-import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { ChatSettingsSection } from "./ChatSettingsSection";
 import { CompactWorkspacesSection } from "./CompactWorkspacesSection";
@@ -39,7 +34,7 @@ interface SidebarPanelProps {
 
 export function SidebarPanel({ currentView = "chat" }: SidebarPanelProps) {
   console.log("[SidebarPanel] Rendering with currentView:", currentView);
-  
+
   // ========== 1. State (Domain State from Zustand) ==========
   const isVisible = useSidebarStore((state) => state.isVisible);
   const error = useSidebarStore((state) => state.error);

@@ -31,7 +31,7 @@ export async function browse(req: Request, res: Response) {
 
     // Fetch file status in parallel (limit concurrency)
     const concurrencyLimit = 10;
-    const   items = [];
+    const items = [];
 
     for (let i = 0; i < entries.length; i += concurrencyLimit) {
       const batch = entries.slice(i, i + concurrencyLimit);
@@ -56,10 +56,10 @@ export async function browse(req: Request, res: Response) {
           };
         })
       );
-        items.push(...batchResults);
+      items.push(...batchResults);
     }
 
-      items.sort((a, b) => {
+    items.sort((a, b) => {
       if (a.isDirectory === b.isDirectory) {
         return a.name.localeCompare(b.name);
       }
@@ -69,17 +69,17 @@ export async function browse(req: Request, res: Response) {
     const response = {
       currentPath: targetPath,
       parentPath: path.dirname(targetPath),
-        items,
+      items,
       metadata: {
-        count:   items.length,
-        directories:   items.filter((i) => i.isDirectory).length,
-        files:   items.filter((i) => !i.isDirectory).length,
+        count: items.length,
+        directories: items.filter((i) => i.isDirectory).length,
+        files: items.filter((i) => !i.isDirectory).length,
         processingTime: Date.now() - startTime,
       },
     };
 
     logger.info(
-      `[browse] Response successful: ${targetPath}, ${  items.length}   items (${  items.filter((i) => i.isDirectory).length} directories, ${  items.filter((i) => !i.isDirectory).length} files), Time taken: ${Date.now() - startTime}ms`
+      `[browse] Response successful: ${targetPath}, ${items.length}   items (${items.filter((i) => i.isDirectory).length} directories, ${items.filter((i) => !i.isDirectory).length} files), Time taken: ${Date.now() - startTime}ms`
     );
     res.json(response);
   } catch (error) {
@@ -203,9 +203,12 @@ export async function tree(req: Request, res: Response) {
     logger.info(`Get directory tree: ${targetPath}, filter: ${filterMode}`);
     res.json(tree);
   } catch (error) {
-    logger.error(`Get directory tree error: ${error instanceof Error ? error.message : String(error)}`, {
-      targetPath,
-    });
+    logger.error(
+      `Get directory tree error: ${error instanceof Error ? error.message : String(error)}`,
+      {
+        targetPath,
+      }
+    );
     res.status(500).json({ error: String(error) });
   }
 }
@@ -256,9 +259,12 @@ export async function content(req: Request, res: Response) {
       binary: isBinaryFile(targetPath),
     });
   } catch (error) {
-    logger.error(`Get file content error: ${error instanceof Error ? error.message : String(error)}`, {
-      targetPath,
-    });
+    logger.error(
+      `Get file content error: ${error instanceof Error ? error.message : String(error)}`,
+      {
+        targetPath,
+      }
+    );
     res.status(500).json({ error: String(error) });
   }
 }
@@ -487,7 +493,9 @@ export async function batchDelete(req: Request, res: Response) {
     }
 
     // Stage 2: Execute deletion
-    logger.info(`Start batch delete: ${validatedPaths.length}   items, Total size: ${totalSize} bytes`);
+    logger.info(
+      `Start batch delete: ${validatedPaths.length}   items, Total size: ${totalSize} bytes`
+    );
 
     for (const { originalPath, resolvedPath, isDirectory, size } of validatedPaths) {
       try {
@@ -531,7 +539,9 @@ export async function batchDelete(req: Request, res: Response) {
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error) {
-    logger.error(`Batch delete system error: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `Batch delete system error: ${error instanceof Error ? error.message : String(error)}`
+    );
     res.status(500).json({
       error: "Delete operation failed",
       details: error instanceof Error ? error.message : String(error),
@@ -728,7 +738,9 @@ export async function execute(req: Request, res: Response) {
         const isError = code !== 0;
         const result = errorOutput ? `${output}\n${errorOutput}`.trim() : output.trim();
 
-        logger.info(`Execute command: ${command}, Working directory: ${workingDir}, Exit code: ${code}`);
+        logger.info(
+          `Execute command: ${command}, Working directory: ${workingDir}, Exit code: ${code}`
+        );
         res.json({
           success: !isError,
           output: result || "(no output)",
@@ -748,10 +760,13 @@ export async function execute(req: Request, res: Response) {
       });
     }
   } catch (error) {
-    logger.error(`Execute command exception: ${error instanceof Error ? error.message : String(error)}`, {
-      command,
-      workingDir,
-    });
+    logger.error(
+      `Execute command exception: ${error instanceof Error ? error.message : String(error)}`,
+      {
+        command,
+        workingDir,
+      }
+    );
     res.status(500).json({ error: String(error) });
   }
 }

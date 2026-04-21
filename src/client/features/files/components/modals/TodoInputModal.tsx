@@ -155,7 +155,6 @@ export function TodoInputModal({ isOpen, filePath, fileName, onClose }: TodoInpu
             value={todoText}
             onChange={(e) => setTodoText(e.target.value)}
             onKeyDown={handleKeyDown}
-            autoFocus
           />
 
           {/* 标签输入 */}

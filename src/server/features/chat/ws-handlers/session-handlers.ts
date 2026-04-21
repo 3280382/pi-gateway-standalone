@@ -5,17 +5,17 @@
 
 import { existsSync } from "node:fs";
 import { SessionManager } from "@mariozechner/pi-coding-agent";
-import { serverSessionManager, extractShortSessionId } from "../agent-session/session-manager";
+import { extractShortSessionId, serverSessionManager } from "../agent-session/session-manager";
+import { getLocalSessionsDir } from "../agent-session/utils";
+import { sessionConfigManager } from "../session-config/sessionConfigManager";
 import {
   buildSessionResponse,
   getAllSessions,
-  getSessionMessages,
   getSessionMessageCount,
+  getSessionMessages,
 } from "../session-helpers";
-import { getLocalSessionsDir } from "../agent-session/utils";
-import { sessionConfigManager } from "../session-config/sessionConfigManager";
 import type { WSContext } from "../ws-router";
-import { createHandler, checkPathExists, sendError, sendSuccess, logger } from "./handler-utils";
+import { createHandler, logger, sendError, sendSuccess } from "./handler-utils";
 
 // ============================================================================
 // Init Handler
@@ -71,7 +71,7 @@ export async function handleInit(
   // 3. Build response data
   // Pass clientSessionFile to ensure correct session file path
   logger.info(`[handleInit] Building response with sessionFile: ${clientSessionFile || "none"}`);
-  let responseData = await buildSessionResponse(
+  const responseData = await buildSessionResponse(
     session,
     workingDir,
     messageLimit,

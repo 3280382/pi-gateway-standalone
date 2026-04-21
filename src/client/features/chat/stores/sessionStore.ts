@@ -5,7 +5,6 @@
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { CHAT_SESSION_PERSIST, CHAT_STORAGE_KEYS } from "./persist.config";
 
 export type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
@@ -91,8 +90,8 @@ export interface ChatSessionState {
   currentSessionFile: string | null; // session files路径，用于 init 时的Exact match
 
   // 模型设置（从服务器获取，不持久化到 localStorage）
-  currentModel: string | null;  // 当前实际使用的模型（优先 session 级别）
-  defaultModel: string | null;  // settings.json 中的Default model
+  currentModel: string | null; // 当前实际使用的模型（优先 session 级别）
+  defaultModel: string | null; // settings.json 中的Default model
   thinkingLevel: ThinkingLevel;
   availableModels: ModelInfo[];
 

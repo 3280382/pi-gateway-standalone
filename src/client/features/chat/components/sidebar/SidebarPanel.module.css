@@ -395,8 +395,8 @@
 }
 
 .clearButton {
-  color: #f85149 !important;
-  font-size: 10px !important;
+  color: #f85149;
+  font-size: 10px;
 }
 
 /* ===== 新增样式：会话下拉选择 ===== */
@@ -805,41 +805,41 @@
 
 /* ===== 紧凑样式覆盖 ===== */
 .section {
-  padding: 8px 10px !important;
+  padding: 8px 10px;
 }
 
 .sectionHeader {
-  margin-bottom: 6px !important;
+  margin-bottom: 6px;
 }
 
 .sectionTitle {
-  font-size: 11px !important;
-  letter-spacing: 0.3px !important;
+  font-size: 11px;
+  letter-spacing: 0.3px;
 }
 
 .compactList,
 .paramsList,
 .settingsList {
-  gap: 4px !important;
+  gap: 4px;
 }
 
 .compactItem,
 .paramItem,
 .settingItem {
-  padding: 5px 8px !important;
-  font-size: 11px !important;
+  padding: 5px 8px;
+  font-size: 11px;
 }
 
 .sessionDropdown,
 .editInput,
 .editSelect {
-  padding: 4px 8px !important;
-  font-size: 11px !important;
+  padding: 4px 8px;
+  font-size: 11px;
 }
 
 .paramLabel,
 .valueText {
-  font-size: 11px !important;
+  font-size: 11px;
 }
 
 .paramDescription,
@@ -847,7 +847,7 @@
 .sessionDescription,
 .compactPath,
 .sectionSubtitle {
-  font-size: 9px !important;
+  font-size: 9px;
 }
 
 .editButton,
@@ -855,8 +855,8 @@
 .newSessionButton,
 .saveButton,
 .cancelButton {
-  font-size: 9px !important;
-  padding: 1px 4px !important;
+  font-size: 9px;
+  padding: 1px 4px;
 }
 
 /* -------- Loading Overlay -------- */

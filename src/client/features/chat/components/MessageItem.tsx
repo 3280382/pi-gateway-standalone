@@ -67,7 +67,7 @@ function safeString(val: unknown): string {
 /**
  * Parse tool params, extract key infofor top display
  */
-function parseToolSummary(toolName: string, args: string | undefined): string {
+function _parseToolSummary(toolName: string, args: string | undefined): string {
   if (!args) return "";
 
   try {
@@ -619,7 +619,7 @@ function GlassCard({
 
     // System messages display (model_change, thinking_level_change, usage, compaction, etc.)
     if (kind1 === "sysinfo" && messageKind) {
-      let cleanText = block.text
+      const cleanText = block.text
         .replace(/^🤖\s*/, "")
         .replace(/^🧠\s*/, "")
         .replace(/^🗜️\s*/, "")
@@ -658,7 +658,7 @@ function GlassCard({
             onMouseLeave={() => setIsCopyVisible(false)}
           >
             <div className={styles.cardHeader}>
-              <span className={`${styles.dot} ${styles[messageKind + "Dot"]}`} />
+              <span className={`${styles.dot} ${styles[`${messageKind}Dot`]}`} />
               <span className={styles.label}>{subLabel}</span>
               <span className={styles.summary}>{headerLine}</span>
               <div className={styles.actions}>
@@ -693,7 +693,7 @@ function GlassCard({
           onMouseLeave={() => setIsCopyVisible(false)}
         >
           <div className={styles.cardHeader}>
-            <span className={`${styles.dot} ${styles[messageKind + "Dot"]}`} />
+            <span className={`${styles.dot} ${styles[`${messageKind}Dot`]}`} />
             <span className={styles.label}>{subLabel}</span>
             <div className={styles.actions}>
               <button

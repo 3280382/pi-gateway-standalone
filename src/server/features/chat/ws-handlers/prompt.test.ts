@@ -2,15 +2,15 @@
  * WebSocket Prompt Handler Tests
  */
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { setTimeout as delay } from "node:timers/promises";
 import {
+  TEST_CONFIG,
   TestLogger,
   TestReporter,
   TestServerManager,
   TestWebSocketClient,
-  TEST_CONFIG,
 } from "@test/lib/test-utils";
-import { setTimeout as delay } from "node:timers/promises";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const logger = new TestLogger("ws-prompt");
 const reporter = new TestReporter("ws-prompt");

@@ -306,7 +306,7 @@ export function processSessionEntries(entries: SessionEntry[]): {
     // Handle tool results - merge into current message's tool call
     if (msg.role === "toolResult") {
       const toolCallId = msg.toolCallId;
-      const toolName = msg.toolName;
+      const _toolName = msg.toolName;
 
       if (currentMessage && toolCallId) {
         // Find the tool call in current message
@@ -334,7 +334,7 @@ export function processSessionEntries(entries: SessionEntry[]): {
           );
 
           // Also update in messages array
-          const msgIndex = messages.findIndex((m) => m.id === currentMessage!.id);
+          const msgIndex = messages.findIndex((m) => m.id === currentMessage?.id);
           if (msgIndex >= 0) {
             messages[msgIndex] = { ...currentMessage };
           }
@@ -347,7 +347,7 @@ export function processSessionEntries(entries: SessionEntry[]): {
     const classification = buildClassification(entry, msg);
 
     // Normalize content and convert toolCall fields for client compatibility
-    let contentArray = normalizeContent(msg.content).map((block: any) => {
+    const contentArray = normalizeContent(msg.content).map((block: any) => {
       // Convert toolCall to tool_use and map fields for client
       if (block.type === "toolCall") {
         return {

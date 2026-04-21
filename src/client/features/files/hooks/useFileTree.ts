@@ -45,7 +45,7 @@ export function useFileTree(): UseFileTreeResult {
       const data = await fileApi.browse(path);
 
       // 只保留子directories路径
-      const childDirs = data.  items.filter((item) => item.isDirectory).map((item) => item.path);
+      const childDirs = data.items.filter((item) => item.isDirectory).map((item) => item.path);
 
       const node: TreeNode = {
         name: data.workingDir.split("/").pop() || "/",

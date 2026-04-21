@@ -45,10 +45,7 @@ export class TerminalSessionManager {
   /**
    * Create new terminal session with node-pty
    */
-  createSession(
-    ws: WebSocket,
-    options: TerminalSessionCreateOptions = {}
-  ): TerminalSessionInfo {
+  createSession(ws: WebSocket, options: TerminalSessionCreateOptions = {}): TerminalSessionInfo {
     const id = this.generateSessionId();
     const name = options.name || `Terminal ${this.idCounter}`;
     const workingDir = options.workingDir || process.cwd();
@@ -111,7 +108,7 @@ export class TerminalSessionManager {
     // Handle process exit
     ptyProcess.onExit(({ exitCode, signal }) => {
       logger.info(`[Terminal] Session ${id} exited with code ${exitCode}, signal ${signal}`);
-    
+
       this.broadcastToClients(session, {
         type: "terminal_ended",
         sessionId: id,
@@ -128,7 +125,7 @@ export class TerminalSessionManager {
    */
   private broadcastToClients(session: TerminalSessionInfo, message: unknown): void {
     const messageStr = JSON.stringify(message);
-  
+
     for (const client of session.clients) {
       if (client.readyState === WebSocket.OPEN) {
         try {
@@ -185,7 +182,7 @@ export class TerminalSessionManager {
     }
 
     try {
-      session.process.write(command + "\r");
+      session.process.write(`${command}\r`);
       logger.debug(`[Terminal] Command sent to session ${sessionId}: ${command.slice(0, 100)}`);
       return true;
     } catch (error) {
@@ -276,15 +273,15 @@ export class TerminalSessionManager {
    */
   cleanupAll(): void {
     logger.info(`[Terminal] Cleaning up ${this.sessions.size} sessions`);
-  
-    for (const [id, session] of this.sessions) {
+
+    for (const [_id, session] of this.sessions) {
       try {
         session.process.kill("SIGKILL");
       } catch {
         // Ignore
       }
     }
-  
+
     this.sessions.clear();
   }
 

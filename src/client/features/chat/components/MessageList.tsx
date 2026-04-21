@@ -21,8 +21,8 @@
  * - 流式更新应该只影响 currentStreamingMessage，不影响已固化的 messages
  */
 
-import { useMemo, memo, useRef, useEffect } from "react";
-import { useChatStore, selectSearchFilters } from "@/features/chat/stores/chatStore";
+import { memo, useMemo, useRef } from "react";
+import { selectSearchFilters, useChatStore } from "@/features/chat/stores/chatStore";
 import type { Message, MessageContent, ToolExecution } from "@/features/chat/types/chat";
 import { MessageItem } from "./MessageItem";
 import styles from "./MessageList.module.css";

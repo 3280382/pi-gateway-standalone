@@ -1,6 +1,6 @@
 /**
  * XTermTerminalPanel Styles
- * 
+ *
  * Features:
  * - Input active state pushes content up
  * - Smooth transitions
@@ -13,7 +13,9 @@
   background: #0d1117;
   border-top: 1px solid #30363d;
   position: relative;
-  transition: transform 0.3s ease, height 0.2s ease;
+  transition:
+    transform 0.3s ease,
+    height 0.2s ease;
   z-index: 100;
   will-change: transform;
 }
@@ -236,11 +238,11 @@
 
 /* xterm.js 样式覆盖 */
 .terminalWrapper :global(.xterm) {
-  height: 100% !important;
+  height: 100%;
 }
 
 .terminalWrapper :global(.xterm-viewport) {
-  background-color: #0d1117 !important;
+  background-color: #0d1117;
 }
 
 .terminalWrapper :global(.xterm-screen) {

@@ -11,7 +11,7 @@
 
 // ===== [ANCHOR:IMPORTS] =====
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import * as fileOperationsApi from "@/features/files/services/api/fileOperationsApi";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
@@ -53,7 +53,7 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
       setCurrentBrowsePath(path);
     }
     isInitializedRef.current = true;
-  }, [isActive]); // 只在 isActive 变化时执Rows一次
+  }, [isActive, currentBrowsePath, setCurrentBrowsePath, workingDir]); // 只在 isActive 变化时执Rows一次
 
   /**
    * 加载directories内容
@@ -71,7 +71,7 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
       try {
         const data = await fileOperationsApi.loadDirectoryContent(path);
         lastLoadedPathRef.current = path;
-        setItems(data.  items);
+        setItems(data.items);
         setParentPath(data.parentPath);
       } catch (err) {
         const friendlyMessage = fileOperationsApi.getFriendlyErrorMessage(err, path);
@@ -104,7 +104,7 @@ export function useFileBrowser(options: UseFileBrowserOptions = {}): UseFileBrow
     if (currentBrowsePath !== lastLoadedPathRef.current) {
       loadDirectory(currentBrowsePath);
     }
-  }, [isActive, currentBrowsePath]);
+  }, [isActive, currentBrowsePath, loadDirectory]);
 
   return {
     loadDirectory,

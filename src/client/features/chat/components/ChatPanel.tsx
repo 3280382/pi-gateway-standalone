@@ -13,6 +13,7 @@ import { useChatPanel } from "@/features/chat/hooks/useChatPanel";
 import { useChatController } from "@/features/chat/services/api/chatApi";
 import {
   filterMessages,
+  selectActiveTools,
   selectCurrentStreamingMessage,
   selectInputText,
   selectIsRunning,
@@ -21,11 +22,10 @@ import {
   selectSearchFilters,
   selectSearchQuery,
   selectShowThinking,
-  useChatStore,
   selectStreamingContent,
   selectStreamingThinking,
   selectStreamingToolCalls,
-  selectActiveTools,
+  useChatStore,
 } from "@/features/chat/stores/chatStore";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import styles from "./ChatPanel.module.css";

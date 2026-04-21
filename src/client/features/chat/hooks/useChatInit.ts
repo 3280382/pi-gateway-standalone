@@ -18,7 +18,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useChatStore } from "@/features/chat/stores/chatStore";
-import { extractShortSessionId } from "@/features/chat/utils/sessionUtils";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";

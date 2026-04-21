@@ -10,11 +10,11 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
-import { useSessionStore } from "@/features/chat/stores/sessionStore";
-import { sessionManager } from "@/features/chat/services/sessionManager";
-import { listChatSessions } from "@/features/chat/services/chatWebSocket";
 import { updateSessionName } from "@/features/chat/services/api/sessionConfigApi";
+import { listChatSessions } from "@/features/chat/services/chatWebSocket";
+import { sessionManager } from "@/features/chat/services/sessionManager";
+import { useSessionStore } from "@/features/chat/stores/sessionStore";
+import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Session } from "@/features/chat/types/sidebar";
 import { formatSessionId } from "@/features/chat/utils/sessionUtils";
 import styles from "./SidebarPanel.module.css";

@@ -13,10 +13,10 @@ import styles from "./FileGrid.module.css";
 import { FileItem } from "./FileItem";
 
 interface FileGridProps {
-    items: FileItemType[];
+  items: FileItemType[];
 }
 
-export const FileGrid = memo<FileGridProps>(({   items }) => {
+export const FileGrid = memo<FileGridProps>(({ items }) => {
   // ========== 1. State ==========
   const {
     selectedItems,
@@ -44,7 +44,7 @@ export const FileGrid = memo<FileGridProps>(({   items }) => {
   return (
     <>
       <div className={styles.grid} {...containerHandlers}>
-        {  items.map((item) => {
+        {items.map((item) => {
           const handlers = getItemHandlers(item);
           return (
             <FileItem

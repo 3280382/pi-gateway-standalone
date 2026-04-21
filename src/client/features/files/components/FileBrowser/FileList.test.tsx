@@ -92,7 +92,7 @@ describe("FileList", () => {
   });
 
   it("renders list header with correct columns", () => {
-    render(<FileList   items={mockFiles} />);
+    render(<FileList items={mockFiles} />);
 
     expect(screen.getByText("Name")).toBeInTheDocument();
     expect(screen.getByText("Size")).toBeInTheDocument();
@@ -100,7 +100,7 @@ describe("FileList", () => {
   });
 
   it("renders all file   items", () => {
-    render(<FileList   items={mockFiles} />);
+    render(<FileList items={mockFiles} />);
 
     expect(screen.getByText("file1.txt")).toBeInTheDocument();
     expect(screen.getByText("folder1")).toBeInTheDocument();
@@ -108,21 +108,21 @@ describe("FileList", () => {
   });
 
   it("shows directory icon for directories", () => {
-    render(<FileList   items={mockFiles} />);
+    render(<FileList items={mockFiles} />);
 
     const folderRow = screen.getByText("folder1").closest(".listItem");
     expect(folderRow).toHaveClass("directory");
   });
 
   it("shows file icon for files", () => {
-    render(<FileList   items={mockFiles} />);
+    render(<FileList items={mockFiles} />);
 
     const fileRow = screen.getByText("file1.txt").closest(".listItem");
     expect(fileRow).not.toHaveClass("directory");
   });
 
   it("formats file sizes correctly", () => {
-    render(<FileList   items={mockFiles} />);
+    render(<FileList items={mockFiles} />);
 
     expect(screen.getByText("1 KB")).toBeInTheDocument();
     expect(screen.getByText("2 KB")).toBeInTheDocument();
@@ -130,7 +130,7 @@ describe("FileList", () => {
   });
 
   it("formats dates correctly", () => {
-    render(<FileList   items={mockFiles} />);
+    render(<FileList items={mockFiles} />);
 
     // Should show formatted dates - look for any date-like content
     const allText = screen.getByTestId("file-list-container").textContent || "";
@@ -151,14 +151,14 @@ describe("FileList", () => {
       setSelectedActionFile: mockSetSelectedActionFile,
     });
 
-    render(<FileList   items={mockFiles} />);
+    render(<FileList items={mockFiles} />);
 
     const selectedRow = screen.getByText("file1.txt").closest(".listItem");
     expect(selectedRow).toHaveClass("selected");
   });
 
   it("calls selectForAction when a file is clicked", async () => {
-    render(<FileList   items={mockFiles} />);
+    render(<FileList items={mockFiles} />);
 
     const fileElement = screen.getByText("file1.txt");
     fireEvent.click(fileElement);
@@ -170,7 +170,7 @@ describe("FileList", () => {
   });
 
   it("calls selectForAction on single click", async () => {
-    render(<FileList   items={mockFiles} />);
+    render(<FileList items={mockFiles} />);
 
     const fileElement = screen.getByText("file1.txt");
     fireEvent.click(fileElement);
@@ -182,7 +182,7 @@ describe("FileList", () => {
   });
 
   it("handles double click to open viewer", async () => {
-    render(<FileList   items={mockFiles} />);
+    render(<FileList items={mockFiles} />);
 
     const fileElement = screen.getByText("file1.txt");
 
@@ -193,7 +193,7 @@ describe("FileList", () => {
   });
 
   it("handles directory double click differently", () => {
-    render(<FileList   items={mockFiles} />);
+    render(<FileList items={mockFiles} />);
 
     const folderElement = screen.getByText("folder1");
 
@@ -205,7 +205,7 @@ describe("FileList", () => {
   });
 
   it("shows empty state when no   items", () => {
-    render(<FileList   items={[]} />);
+    render(<FileList items={[]} />);
 
     expect(screen.queryByText("file1.txt")).not.toBeInTheDocument();
     expect(screen.queryByText("folder1")).not.toBeInTheDocument();
@@ -237,7 +237,7 @@ describe("FileList", () => {
       },
     ];
 
-    render(<FileList   items={specialFiles} />);
+    render(<FileList items={specialFiles} />);
 
     expect(screen.getByText("file with spaces.txt")).toBeInTheDocument();
     expect(screen.getByText("file-with-dashes.txt")).toBeInTheDocument();
@@ -257,7 +257,7 @@ describe("FileList", () => {
       },
     ];
 
-    render(<FileList   items={longFiles} />);
+    render(<FileList items={longFiles} />);
 
     const nameElement = screen.getByText(longFileName);
     expect(nameElement).toBeInTheDocument();
@@ -274,7 +274,7 @@ describe("FileList", () => {
       },
     ];
 
-    render(<FileList   items={noSizeFiles} />);
+    render(<FileList items={noSizeFiles} />);
 
     // Should handle missing size gracefully
     expect(screen.getByText("file1.txt")).toBeInTheDocument();
@@ -290,7 +290,7 @@ describe("FileList", () => {
       },
     ];
 
-    render(<FileList   items={noDateFiles} />);
+    render(<FileList items={noDateFiles} />);
 
     expect(screen.getByText("file1.txt")).toBeInTheDocument();
   });
@@ -306,7 +306,7 @@ describe("FileList", () => {
       },
     ];
 
-    render(<FileList   items={executableFiles} />);
+    render(<FileList items={executableFiles} />);
 
     const fileRow = screen.getByText("script.sh").closest(".listItem");
     expect(fileRow).toBeInTheDocument();
@@ -321,7 +321,7 @@ describe("FileList", () => {
       setCurrentPath: vi.fn(),
     });
 
-    render(<FileList   items={mockFiles} />);
+    render(<FileList items={mockFiles} />);
 
     const fileElement = screen.getByText("file1.txt");
     fireEvent.click(fileElement);

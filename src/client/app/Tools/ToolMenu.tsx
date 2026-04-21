@@ -5,12 +5,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { SettingsModal } from "@/app/SettingsModal";
+import { StorageViewer } from "@/app/StorageViewer";
 import { DebugTool } from "@/app/Tools/DebugTool";
 import { PageAgentTool } from "@/app/Tools/PageAgentTool";
-import { UIMarkerTool } from "@/app/Tools/UIMarkerTool";
-import { StorageViewer } from "@/app/StorageViewer";
 import { ProcessTreeViewer } from "@/app/Tools/ProcessTreeViewer";
 import styles from "@/app/Tools/ToolMenu.module.css";
+import { UIMarkerTool } from "@/app/Tools/UIMarkerTool";
 import { IconButton } from "@/components/Icon/Icon";
 
 export function ToolMenu() {

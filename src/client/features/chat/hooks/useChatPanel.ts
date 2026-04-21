@@ -15,8 +15,8 @@ import { useChatController } from "@/features/chat/services/api/chatApi";
 import { loadMoreMessages } from "@/features/chat/services/chatWebSocket";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
-import { websocketService } from "@/services/websocket.service";
 import type { Message } from "@/features/chat/types/chat";
+import { websocketService } from "@/services/websocket.service";
 
 // ===== [ANCHOR:HELPERS] =====
 
@@ -113,9 +113,9 @@ export function useChatPanel(): UseChatPanelReturn {
   // ===== [ANCHOR:STORE_SELECTORS] =====
   const inputText = useChatStore((state) => state.inputText);
   const messages = useChatStore((state) => state.messages);
-  const currentStreamingMessage = useChatStore((state) => state.currentStreamingMessage);
-  const streamingContent = useChatStore((state) => state.streamingContent);
-  const streamingThinking = useChatStore((state) => state.streamingThinking);
+  const _currentStreamingMessage = useChatStore((state) => state.currentStreamingMessage);
+  const _streamingContent = useChatStore((state) => state.streamingContent);
+  const _streamingThinking = useChatStore((state) => state.streamingThinking);
   const chatController = useChatController();
 
   // ===== [ANCHOR:EFFECTS] =====
@@ -136,7 +136,7 @@ export function useChatPanel(): UseChatPanelReturn {
     }
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [messages.length]);
 
   // 消息变化时自动滚动（包括流式内容变化）
   useEffect(() => {
@@ -171,7 +171,7 @@ export function useChatPanel(): UseChatPanelReturn {
         scrollTimeoutRef.current = null;
       }
     };
-  }, [shouldScrollToBottom, messages, streamingContent, streamingThinking]); // 添加流式内容依赖
+  }, [shouldScrollToBottom]); // 添加流式内容依赖
 
   // 当切换 session 或消息Cols表变化时，更新 hasMore 状态
   useEffect(() => {
@@ -209,7 +209,7 @@ export function useChatPanel(): UseChatPanelReturn {
         loadMore();
       }
     }
-  }, [shouldScrollToBottom]);
+  }, [shouldScrollToBottom, loadMore]);
 
   // Load more消息 - 滚动到顶部时加载所有历史消息
   const loadMore = useCallback(async () => {

@@ -201,7 +201,7 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
       if (!childrenByParentId.has(entry.parentId)) {
         childrenByParentId.set(entry.parentId, []);
       }
-      childrenByParentId.get(entry.parentId)!.push(entry);
+      childrenByParentId.get(entry.parentId)?.push(entry);
     }
   });
 
@@ -216,7 +216,7 @@ export function normalizeSessionMessages(entries: any[]): Message[] {
         if (!toolResultsByParentId.has(parentId)) {
           toolResultsByParentId.set(parentId, []);
         }
-        toolResultsByParentId.get(parentId)!.push(entry);
+        toolResultsByParentId.get(parentId)?.push(entry);
       }
     }
   });

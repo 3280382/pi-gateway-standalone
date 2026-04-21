@@ -199,7 +199,9 @@ export function FileBottomMenu() {
       {isNewModalOpen && (
         <div className={styles.modalOverlay} onClick={handleCancelNew}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalTitle}>New {newItemType === "file" ? "File" : "Directory"}</div>
+            <div className={styles.modalTitle}>
+              New {newItemType === "file" ? "File" : "Directory"}
+            </div>
             {/* 类型选择 */}
             <div className={styles.typeSelector}>
               <button
@@ -225,7 +227,9 @@ export function FileBottomMenu() {
                 className={styles.input}
                 value={newFileName}
                 onChange={(e) => setNewFileName(e.target.value)}
-                placeholder={newItemType === "file" ? "Enter file name..." : "Enter directory name..."}
+                placeholder={
+                  newItemType === "file" ? "Enter file name..." : "Enter directory name..."
+                }
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleConfirmNew();
                   if (e.key === "Escape") handleCancelNew();
@@ -324,9 +328,7 @@ function RefreshIcon() {
 }
 
 function UpIcon() {
-  return (
-    <span style={{ fontSize: "14px", fontWeight: "bold", lineHeight: "1" }}>..</span>
-  );
+  return <span style={{ fontSize: "14px", fontWeight: "bold", lineHeight: "1" }}>..</span>;
 }
 
 function ListIcon() {
@@ -364,7 +366,14 @@ function NewIcon() {
 
 function FileIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="16" height="16">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      width="16"
+      height="16"
+    >
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
       <polyline points="14 2 14 8 20 8" />
     </svg>
@@ -373,7 +382,14 @@ function FileIcon() {
 
 function FolderIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} width="16" height="16">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      width="16"
+      height="16"
+    >
       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
     </svg>
   );

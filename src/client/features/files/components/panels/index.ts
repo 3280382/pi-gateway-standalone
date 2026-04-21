@@ -1,3 +1,3 @@
-export { TerminalPanel } from "./TerminalPanel";
 export { MultiSessionTerminalPanel } from "./MultiSessionTerminalPanel";
+export { TerminalPanel } from "./TerminalPanel";
 export { XTermTerminalPanel } from "./XTermTerminalPanel";

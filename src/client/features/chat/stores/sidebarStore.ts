@@ -166,9 +166,7 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
       updateSessionName: (sessionId: string, name: string) => {
         set(
           (state) => ({
-            sessions: state.sessions.map((s) =>
-              s.id === sessionId ? { ...s, name } : s
-            ),
+            sessions: state.sessions.map((s) => (s.id === sessionId ? { ...s, name } : s)),
           }),
           false,
           "updateSessionName"

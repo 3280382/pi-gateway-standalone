@@ -114,7 +114,7 @@ export class ServerSessionManager {
       if (!workingDirMap.has(entry.workingDir)) {
         workingDirMap.set(entry.workingDir, []);
       }
-      workingDirMap.get(entry.workingDir)!.push(entry);
+      workingDirMap.get(entry.workingDir)?.push(entry);
     }
 
     // Broadcast for each workingDir
@@ -140,7 +140,7 @@ export class ServerSessionManager {
 
           // Update last broadcasted status
           entry.lastBroadcastedStatus = entry.runtimeStatus;
-        } catch (e) {
+        } catch (_e) {
           // Ignore send errors
         }
       }
@@ -330,7 +330,7 @@ export class ServerSessionManager {
     if (!this.workingDirToShortIds.has(workingDir)) {
       this.workingDirToShortIds.set(workingDir, new Set());
     }
-    this.workingDirToShortIds.get(workingDir)!.add(shortId);
+    this.workingDirToShortIds.get(workingDir)?.add(shortId);
   }
 
   private setupCallbacks(session: PiAgentSession): void {
@@ -455,21 +455,6 @@ export class ServerSessionManager {
   }
 
   /**
-   * Dispose a session by working directory
-   *
-   * @param workingDir Working directory
-   */
-  private disposeSession(workingDir: string): void {
-    // Find and dispose the first session for this workingDir
-    for (const [shortId, entry] of this.sessions) {
-      if (entry.workingDir === workingDir) {
-        this.disposeSessionByShortId(shortId);
-        break;
-      }
-    }
-  }
-
-  /**
    * Get session for a working directory (returns first match)
    *
    * @param workingDir Working directory
@@ -553,14 +538,6 @@ export class ServerSessionManager {
     return client.readyState === WebSocket.OPEN;
   }
 
-  private sendToClient(client: WebSocket, message: object): void {
-    try {
-      client.send(JSON.stringify(message));
-    } catch {
-      // Ignore send errors
-    }
-  }
-
   private shouldBroadcastToClient(entry: SessionEntry): boolean {
     if (!this.isClientConnected(entry.client)) return false;
     if (entry.sidebarVisible) return true;
@@ -634,7 +611,7 @@ export class ServerSessionManager {
     if (!this.workingDirToShortIds.has(workingDir)) {
       this.workingDirToShortIds.set(workingDir, new Set());
     }
-    this.workingDirToShortIds.get(workingDir)!.add(shortId);
+    this.workingDirToShortIds.get(workingDir)?.add(shortId);
 
     // Update reverse mapping
     this.clientToShortId.set(client, shortId);
@@ -730,7 +707,7 @@ export class ServerSessionManager {
 
     // Flush buffered messages for this session to the client
     const entry = this.sessions.get(shortId);
-    if (entry && entry.session) {
+    if (entry?.session) {
       const flushedCount = entry.session.flushMessageBuffer();
       if (flushedCount > 0) {
         console.log(
@@ -790,7 +767,7 @@ export class ServerSessionManager {
               sessions: statusList,
             })
           );
-        } catch (e) {
+        } catch (_e) {
           // Ignore send errors
         }
       }
