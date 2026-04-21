@@ -145,10 +145,11 @@ function useStreamingMessage(
       content.push({ type: "thinking", thinking: streamingThinking });
     }
 
-    // Tool calls in streaming
+    // Tool calls in streaming - skip if already in solidified content
     streamingToolCalls.forEach((tool) => {
       const existingIndex = content.findIndex(
-        (c) => c.type === "tool_use" && c.toolCallId === tool.id
+        (c) =>
+          (c.type === "tool_use" || c.type === "tool") && c.toolCallId === tool.id
       );
       const activeTool = activeTools.get(tool.id);
 
@@ -174,7 +175,7 @@ function useStreamingMessage(
       }
     });
 
-    // Completed tools not in streaming
+    // Completed tools not in streaming - skip if already in content
     console.log(
       "[useStreamingMessage] activeTools count:",
       activeTools.size,
@@ -183,7 +184,8 @@ function useStreamingMessage(
     );
     activeTools.forEach((tool) => {
       const existsInContent = content.some(
-        (c) => c.type === "tool_use" && c.toolCallId === tool.id
+        (c) =>
+          (c.type === "tool_use" || c.type === "tool") && c.toolCallId === tool.id
       );
       console.log(
         "[useStreamingMessage] Processing tool:",

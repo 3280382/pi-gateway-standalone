@@ -295,6 +295,14 @@ function buildFinalMessage(
   const existingContent = state.currentStreamingMessage?.content || [];
   const activeTools = state.activeTools || new Map();
 
+  // 收集已固化内容中已有的 toolCallId，避免重复
+  const existingToolIds = new Set<string>();
+  existingContent.forEach((block: ContentPart) => {
+    if ((block.type === "tool_use" || block.type === "tool") && block.toolCallId) {
+      existingToolIds.add(block.toolCallId);
+    }
+  });
+
   // 构建剩余的流式内容（endContentBlock 后可能还有未Clear的）
   const remainingContent: ContentPart[] = [];
 
@@ -306,6 +314,9 @@ function buildFinalMessage(
   }
 
   (state.streamingToolCalls || new Map()).forEach((tool) => {
+    // 跳过已在 existingContent 中固化的工具
+    if (existingToolIds.has(tool.id)) return;
+
     // 查找工具执行结果
     const toolExecution = activeTools.get(tool.id);
 
