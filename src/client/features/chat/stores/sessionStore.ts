@@ -1,11 +1,21 @@
 /**
  * Session Store - Chat Feature 会话状态管理
  * 管理聊天会话、模型设置、连接状态
+ *
+ * 持久化策略（v3）：
+ * - currentWorkspace: 当前工作目录
+ * - workspaceSessionFiles: 每个 workspace 对应的 sessionFile
+ * - defaultMessageLimit: 用户设置
+ *
+ * 刷新恢复流程：
+ * 1. 从 localStorage 读取 currentWorkspace
+ * 2. 从 workspaceSessionFiles 读取该 workspace 的 sessionFile
+ * 3. 发送 init(currentWorkspace, sessionFile) 恢复界面
  */
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { CHAT_SESSION_PERSIST, CHAT_STORAGE_KEYS } from "./persist.config";
+import { CHAT_SESSION_PERSIST, CHAT_STORAGE_KEYS, CHAT_STORAGE_VERSION } from "./persist.config";
 
 export type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
 
@@ -71,48 +81,45 @@ export interface ModelInfo {
   input?: ("text" | "image")[];
 }
 
-export interface ModelInfo {
-  id: string;
-  name: string;
-  provider?: string;
-  maxTokens?: number;
-  contextWindow?: number;
-  reasoning?: boolean;
-  input?: ("text" | "image")[];
-}
-
 export interface ChatSessionState {
-  // 当前工作directories
-  workingDir: string;
+  // ===== 持久化字段 =====
+  // 当前工作目录（刷新后恢复）
+  currentWorkspace: string;
+  // workspacePath -> sessionFile 映射（每个 workspace 独立）
+  workspaceSessionFiles: Record<string, string>;
 
+  // ===== 运行时字段（不持久化）=====
+  // 当前工作目录（运行时副本，与 currentWorkspace 同步）
+  workingDir: string;
   // 当前会话
   currentSessionId: string | null;
-  currentSessionFile: string | null; // session files路径，用于 init 时的Exact match
-
-  // 模型设置（从服务器获取，不持久化到 localStorage）
-  currentModel: string | null; // 当前实际使用的模型（优先 session 级别）
-  defaultModel: string | null; // settings.json 中的Default model
+  currentSessionFile: string | null;
+  // 模型设置（从服务器获取）
+  currentModel: string | null;
+  defaultModel: string | null;
   thinkingLevel: ThinkingLevel;
   availableModels: ModelInfo[];
-
   // 服务器状态
   serverPid: number | null;
   isConnected: boolean;
-
-  // 资源files路径
+  // 资源文件路径
   resourceFiles: ResourceFiles | null;
-
   // 消息加载设置
-  defaultMessageLimit: number; // 默认加载历史消息Items数，-1表示加载所有
+  defaultMessageLimit: number;
 }
 
 interface ChatSessionActions {
-  // 工作directories
+  // Workspace 管理（持久化）
+  setCurrentWorkspace: (workspace: string) => void;
+  setWorkspaceSessionFile: (workspace: string, sessionFile: string) => void;
+  getSessionFileForWorkspace: (workspace: string) => string | undefined;
+
+  // 工作目录（运行时）
   setWorkingDir: (dir: string) => void;
 
-  // 当前会话（用于 UI 显示当前选中的 session）
+  // 当前会话
   setCurrentSession: (id: string | null) => void;
-  setCurrentSessionFile: (path: string | null) => void; // 设置 session files路径
+  setCurrentSessionFile: (path: string | null) => void;
 
   // 模型设置
   setCurrentModel: (model: string | null) => void;
@@ -124,7 +131,7 @@ interface ChatSessionActions {
   setServerPid: (pid: number | null) => void;
   setIsConnected: (connected: boolean) => void;
 
-  // 资源files
+  // 资源文件
   setResourceFiles: (files: ResourceFiles | null) => void;
 
   // 消息加载设置
@@ -134,8 +141,11 @@ interface ChatSessionActions {
 export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
   persist(
     devtools(
-      (set) => ({
-        // Initial state
+      (set, get) => ({
+        // ===== Initial state =====
+        currentWorkspace: "/root",
+        workspaceSessionFiles: {},
+
         workingDir: "/root",
         currentSessionId: null,
         currentSessionFile: null,
@@ -146,49 +156,79 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
         serverPid: null,
         isConnected: false,
         resourceFiles: null,
-        defaultMessageLimit: 100, // 默认加载100Items，-1表示加载所有
+        defaultMessageLimit: 100,
 
-        // 工作directories
-        // 注意：此方法仅更新本地状态，全局 workspaceStore 的同步由调用方负责
-        // 或通过全局 workspaceStore.setWorkingDir 触发反向同步
+        // ===== Workspace 管理（持久化）=====
+        setCurrentWorkspace: (workspace) =>
+          set({ currentWorkspace: workspace, workingDir: workspace }),
+
+        setWorkspaceSessionFile: (workspace, sessionFile) =>
+          set((state) => ({
+            workspaceSessionFiles: {
+              ...state.workspaceSessionFiles,
+              [workspace]: sessionFile,
+            },
+          })),
+
+        getSessionFileForWorkspace: (workspace) => {
+          return get().workspaceSessionFiles[workspace];
+        },
+
+        // ===== 运行时操作 =====
         setWorkingDir: (dir) => set({ workingDir: dir }),
 
-        // 当前会话
         setCurrentSession: (id) => set({ currentSessionId: id }),
         setCurrentSessionFile: (path) => set({ currentSessionFile: path }),
 
-        // 模型设置
         setCurrentModel: (model) => set({ currentModel: model }),
         setDefaultModel: (model) => set({ defaultModel: model }),
         setThinkingLevel: (level) => set({ thinkingLevel: level }),
         setAvailableModels: (models) => set({ availableModels: models }),
 
-        // 服务器状态
         setServerPid: (pid) => set({ serverPid: pid }),
         setIsConnected: (connected) => set({ isConnected: connected }),
 
-        // 资源files
         setResourceFiles: (files) => set({ resourceFiles: files }),
 
-        // 消息加载设置
         setDefaultMessageLimit: (limit) => set({ defaultMessageLimit: limit }),
       }),
       { name: "ChatSessionStore" }
     ),
     {
       name: CHAT_STORAGE_KEYS.CHAT_SESSION,
-      version: 2, // 版本升级：移除 currentModel/defaultModel 持久化
+      version: CHAT_STORAGE_VERSION.CHAT_SESSION,
       migrate: (persistedState: any, version: number) => {
-        if (version < 2) {
-          // 清除旧版本中的模型字段，强制从服务器重新获取
-          delete persistedState.currentModel;
-          delete persistedState.defaultModel;
+        const state = persistedState;
+
+        // v2 -> v3: 从单一 currentSessionFile 迁移到 per-workspace 映射
+        if (version < 3) {
+          // 如果有旧的 currentSessionFile，迁移到当前 workingDir 下
+          const oldSessionFile = state.currentSessionFile;
+          const oldWorkingDir = state.workingDir || state.currentWorkspace || "/root";
+
+          state.currentWorkspace = oldWorkingDir;
+          state.workspaceSessionFiles = {};
+
+          if (oldSessionFile) {
+            state.workspaceSessionFiles[oldWorkingDir] = oldSessionFile;
+          }
+
+          // 清理旧字段
+          delete state.currentSessionFile;
+          delete state.workingDir; // workingDir 不持久化
         }
-        return persistedState;
+
+        // v1 -> v2/v3: 清除模型字段
+        if (version < 2) {
+          delete state.currentModel;
+          delete state.defaultModel;
+        }
+
+        return state;
       },
       partialize: (state) =>
         Object.fromEntries(
-          Object.entries(state).filter(([key]) => CHAT_SESSION_PERSIST.includes(key))
+          CHAT_SESSION_PERSIST.map((key) => [key, (state as any)[key]])
         ) as Partial<ChatSessionState & ChatSessionActions>,
     }
   )

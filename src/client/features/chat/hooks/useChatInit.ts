@@ -74,26 +74,23 @@ export function useChatInit(): { isConnecting: boolean } {
         return;
       }
 
-      // 2. 从 localStorage 获取当前工作directories
-      const savedWorkingDir = useWorkspaceStore.getState().workingDir;
-      console.log("[ChatInit] Sending init with workingDir:", savedWorkingDir);
+      // 2. 从 sessionStore（localStorage）获取当前 workspace 和对应的 sessionFile
+      const sessionStore = useSessionStore.getState();
+      const savedWorkspace = sessionStore.currentWorkspace;
+      const savedSessionFile = sessionStore.getSessionFileForWorkspace(savedWorkspace);
+      const messageLimit = sessionStore.defaultMessageLimit;
 
-      // 3. Send init 请求，传入当前工作directories和 sessionFile
-      // 从 localStorage 获取上次使用的 sessionFile
-      const savedSessionFile = useSessionStore.getState().currentSessionFile;
-      // 获取用户设置的消息限制
-      const messageLimit = useSessionStore.getState().defaultMessageLimit;
-
-      console.log("[ChatInit] Sending init with:", {
-        workingDir: savedWorkingDir,
+      console.log("[ChatInit] Restoring from localStorage:", {
+        currentWorkspace: savedWorkspace,
         sessionFile: savedSessionFile,
         messageLimit,
       });
 
+      // 3. Send init 请求，传入 workspace 和对应的 sessionFile
       const initResponse = await initChatWorkingDirectory(
-        savedWorkingDir,
-        savedSessionFile, // 传递 sessionFile 用于Exact match
-        10000, // 10秒超时，因为需要加载files
+        savedWorkspace,
+        savedSessionFile, // 传递该 workspace 的 sessionFile 用于精确恢复
+        10000,
         messageLimit
       ).catch((err) => {
         console.error("[ChatInit] init error:", err);
@@ -126,10 +123,16 @@ export function useChatInit(): { isConnecting: boolean } {
 
       // 5. 恢复所有状态
 
-      // 5.1 全局工作directories
+      // 5.1 全局工作目录 + 持久化 currentWorkspace
       useWorkspaceStore.getState().setWorkingDir(workingDir);
+      useSessionStore.getState().setCurrentWorkspace(workingDir);
 
-      // 5.2 Session 状态
+      // 5.2 保存该 workspace 的 sessionFile 到持久化映射
+      if (currentSession?.sessionFile) {
+        useSessionStore.getState().setWorkspaceSessionFile(workingDir, currentSession.sessionFile);
+      }
+
+      // 5.3 Session 运行时状态
       useSessionStore.getState().setWorkingDir(workingDir);
       useSessionStore.getState().setIsConnected(true);
       useSessionStore.getState().setServerPid(pid);

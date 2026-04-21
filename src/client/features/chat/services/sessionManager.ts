@@ -191,14 +191,18 @@ async function switchDirectory(targetDir: string, _options: SwitchDirOptions = {
 
   console.log("[SessionManager.switchDirectory] targetDir=", targetDir);
 
+  // 从持久化存储获取该 workspace 的 sessionFile
+  const sessionFile = stores.session.getSessionFileForWorkspace(targetDir);
+  console.log("[SessionManager.switchDirectory] sessionFile for", targetDir, ":", sessionFile);
+
   // 设置加载状态（覆盖式，不Clear界面）
   stores.sidebar.setLoading(true);
   console.log("[SessionManager.switchDirectory] 显示 loading");
 
   try {
-    // 使用统一的 init API（不传 sessionFile，让服务器选择新directories的默认 session）
+    // 使用统一的 init API，传入该 workspace 的 sessionFile 用于精确恢复
     const messageLimit = stores.session.defaultMessageLimit;
-    const response = await initChatWorkingDirectory(targetDir, undefined, 15000, messageLimit);
+    const response = await initChatWorkingDirectory(targetDir, sessionFile, 15000, messageLimit);
 
     console.log("[SessionManager.switchDirectory] 服务器返回:", {
       workingDir: response.workingDir,
@@ -208,10 +212,18 @@ async function switchDirectory(targetDir: string, _options: SwitchDirOptions = {
     // 重建界面（更新所有状态）
     await handleInitResponse(response, stores);
 
+    // 持久化：更新 currentWorkspace 和该 workspace 的 sessionFile
+    const newWorkingDir = response.workingDir || targetDir;
+    const newSessionFile = response.currentSession?.sessionFile;
+    stores.session.setCurrentWorkspace(newWorkingDir);
+    if (newSessionFile) {
+      stores.session.setWorkspaceSessionFile(newWorkingDir, newSessionFile);
+    }
+
     console.log("[SessionManager.switchDirectory] 界面重建完成");
   } catch (error) {
     console.error("[SessionManager.switchDirectory] error:", error);
-    // 降级：至少更新工作directories
+    // 降级：至少更新工作目录
     stores.globalWorkspace.setWorkingDir(targetDir);
     stores.sidebar.setWorkingDir(targetDir);
     stores.session.setWorkingDir(targetDir);
@@ -297,6 +309,13 @@ async function selectSession(sessionId: string): Promise<void> {
       hasSetMessages: typeof stores.chat?.setMessages === "function",
     });
     await handleInitResponse(response, stores);
+
+    // 持久化：保存该 workspace 的 sessionFile
+    const workingDir = response.workingDir || stores.session.workingDir;
+    const newSessionFile = response.currentSession?.sessionFile;
+    if (newSessionFile) {
+      stores.session.setWorkspaceSessionFile(workingDir, newSessionFile);
+    }
 
     console.log("[SessionManager.selectSession] 界面重建完成");
   } catch (error) {

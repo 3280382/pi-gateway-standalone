@@ -24,7 +24,7 @@ export const CHAT_STORAGE_KEYS = {
 // ============================================================================
 
 export const CHAT_STORAGE_VERSION = {
-  CHAT_SESSION: 2,
+  CHAT_SESSION: 3, // version 3: per-workspace session file persistence
   CHAT_SIDEBAR: 2, // version 2: add recentWorkspaces persistence
 } as const;
 
@@ -35,19 +35,14 @@ export const CHAT_STORAGE_VERSION = {
 /** Chat Session Store - 持久化字段
  *
  * 注意：
- * - workingDir 已由全局 workspaceStore 管理
- * - currentSessionId 从服务器获取（init 响应）
- * - currentModel 从服务器获取（init 响应）
- * - availableModels 从服务器获取（list_models）
- * - thinkingLevel 从服务器获取（init 响应）
- * - currentSessionFile 需要持久化，用于RefreshPages面后恢复 session
- *
- * 只有 currentSessionFile 需要持久化，用于Pages面Refresh后精确恢复 session
+ * - currentWorkspace: 当前工作目录，刷新后恢复
+ * - workspaceSessionFiles: 每个 workspace 对应的 sessionFile，切换时自动恢复
+ * - defaultMessageLimit: 用户设置
  */
 export const CHAT_SESSION_PERSIST: string[] = [
-  "currentSessionFile", // 用于RefreshPages面后精确恢复 session
+  "currentWorkspace", // 当前工作目录
+  "workspaceSessionFiles", // workspace → sessionFile 映射
   "defaultMessageLimit", // 用户设置：默认加载历史消息Items数
-  // 注意：currentModel/defaultModel 不持久化，每个 session 的模型由服务器配置决定
 ] as const;
 
 /** Chat Sidebar Store - 持久化字段
