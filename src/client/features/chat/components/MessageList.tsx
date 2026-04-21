@@ -169,9 +169,25 @@ function useStreamingMessage(
     });
 
     // Completed tools not in streaming
+    console.log(
+      "[useStreamingMessage] activeTools count:",
+      activeTools.size,
+      "ids:",
+      Array.from(activeTools.keys())
+    );
     activeTools.forEach((tool) => {
       const existsInContent = content.some(
         (c) => c.type === "tool_use" && c.toolCallId === tool.id
+      );
+      console.log(
+        "[useStreamingMessage] Processing tool:",
+        tool.id,
+        "exists:",
+        existsInContent,
+        "output:",
+        !!tool.output,
+        "error:",
+        !!tool.error
       );
       if (!existsInContent) {
         content.push({
@@ -183,6 +199,7 @@ function useStreamingMessage(
           output: tool.output,
           error: tool.error,
         });
+        console.log("[useStreamingMessage] Added tool to content:", tool.id);
       }
     });
 

@@ -186,6 +186,16 @@ export const MessageItem = memo(
     showText = true,
     visibleContentTypes,
   }: MessageItemProps) {
+    // DEBUG: Log message rendering
+    console.log(
+      "[MessageItem] Rendering message:",
+      message.id,
+      "kind1=",
+      message.kind1,
+      "content types=",
+      message.content?.map((c: any) => c.type)
+    );
+
     // ========== 4. Computed ==========
     // Use new kind1/kind2/kind3 fields, fallback to role/kind for backward compatibility
     // Map role="system" to kind1="sysinfo" to avoid confusion with API system role
@@ -292,6 +302,9 @@ export const MessageItem = memo(
     return (
       <div className={containerClass}>
         {blocks.map((block) => {
+          // DEBUG: Log block rendering
+          console.log("[MessageItem] Rendering block:", block.type, block.toolName || "");
+
           // Use stable key: toolCallId for tools, originalIndex for others
           // This prevents React key collisions when filtering blocks
           const stableKey =
@@ -445,19 +458,11 @@ function GlassCard({
 
   // Render tool_use block
   if (block.type === "tool_use") {
-    if (!showTools) return null;
+    // DEBUG: Always show tool_use blocks
+    console.log("[MessageItem] Rendering tool_use:", block.toolName, block.toolCallId);
 
-    // Check tool status filter
+    // Check tool status filter - DEBUG: bypass for now
     const toolStatus = block.status || (isStreaming ? "running" : "pending");
-    if (visibleContentTypes) {
-      const hasStatusFilter =
-        visibleContentTypes.has("tool_success") ||
-        visibleContentTypes.has("tool_error") ||
-        visibleContentTypes.has("tool_pending");
-      if (hasStatusFilter && !visibleContentTypes.has(`tool_${toolStatus}`)) {
-        return null;
-      }
-    }
 
     const toolName = block.toolName || "unknown";
     const toolArgs = block.partialArgs ?? block.args;
@@ -530,19 +535,17 @@ function GlassCard({
 
   // Render tool block
   if (block.type === "tool") {
-    if (!showTools) return null;
+    // DEBUG: Always show tool blocks
+    console.log(
+      "[MessageItem] Rendering tool:",
+      block.toolName,
+      "output=",
+      !!block.output,
+      "error=",
+      !!block.error
+    );
 
-    // Check tool status filter
     const status = block.error ? "error" : block.output ? "success" : "pending";
-    if (visibleContentTypes) {
-      const hasStatusFilter =
-        visibleContentTypes.has("tool_success") ||
-        visibleContentTypes.has("tool_error") ||
-        visibleContentTypes.has("tool_pending");
-      if (hasStatusFilter && !visibleContentTypes.has(`tool_${status}`)) {
-        return null;
-      }
-    }
 
     const toolName = block.toolName || "unknown";
     const toolArgs = block.args;
