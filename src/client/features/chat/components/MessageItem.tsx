@@ -23,7 +23,6 @@ interface MessageItemProps {
   showThinking: boolean;
   showTools?: boolean;
   showText?: boolean; // Control text content display
-  visibleContentTypes?: Set<string>; // Hierarchical filtering: which content types to show
   onToggleCollapse: () => void;
   onToggleThinking: () => void;
   onToggleTools?: () => void;
@@ -45,7 +44,6 @@ interface GlassCardProps {
   showText?: boolean;
   messageKind?: Message["kind"];
   kind1?: Message["kind1"]; // Message source for correct sysinfo identification
-  visibleContentTypes?: Set<string>; // For tool status filtering
 }
 
 // ============================================================================
@@ -215,65 +213,9 @@ export const MessageItem = memo(
       return indexContentBlocks(message.content);
     }, [message.content]);
 
-    // Check if message passes 3-level filtering
-    const isVisible = useMemo(() => {
-      if (!visibleContentTypes || visibleContentTypes.size === 0) return true;
-
-      // Level 1: Check kind1 (user/assistant/sysinfo) - must be explicitly enabled
-      if (!visibleContentTypes.has(kind1)) return false;
-
-      // Level 2: Check kind2 (prompt/response/thinking/tool/event) - must be explicitly enabled
-      if (!visibleContentTypes.has(kind2)) return false;
-
-      // Level 3: Only filter sysinfo subtypes if explicitly disabled
-      const sysinfoSubtypes = new Set([
-        "model_change",
-        "thinking_level_change",
-        "compaction",
-        "retry",
-        "auto_retry",
-        "usage",
-        "export",
-      ]);
-      if (
-        kind1 === "sysinfo" &&
-        kind3 &&
-        sysinfoSubtypes.has(kind3) &&
-        !visibleContentTypes.has(kind3)
-      ) {
-        return false;
-      }
-
-      // Level 3: Filter tool messages by status (if any tool status filter is set)
-      if (kind2 === "tool") {
-        // Check if any tool status filter is active
-        const hasStatusFilter =
-          visibleContentTypes.has("tool_success") ||
-          visibleContentTypes.has("tool_error") ||
-          visibleContentTypes.has("tool_pending");
-
-        if (hasStatusFilter) {
-          // Get all tool blocks in this message
-          const toolBlocks = blocks.filter((b) => b.type === "tool" || b.type === "tool_use");
-
-          // Check if at least one tool passes the filter
-          const hasVisibleTool = toolBlocks.some((block) => {
-            const status = block.error ? "error" : block.output ? "success" : "pending";
-            return visibleContentTypes.has(`tool_${status}`);
-          });
-
-          if (!hasVisibleTool) return false;
-        }
-      }
-
-      return true;
-    }, [visibleContentTypes, kind1, kind2, kind3, blocks]);
-
     // ========== 5. Render ==========
-    // If message not visible, render null (must be after all Hooks)
-    if (!isVisible) {
-      return null;
-    }
+    // Note: Message-level filtering is done in ChatPanel.tsx via filterMessages()
+    // MessageItem only handles content-block-level filtering (showText/showThinking/showTools)
 
     if (isUser) {
       const text = blocks
@@ -323,7 +265,6 @@ export const MessageItem = memo(
               showText={showText}
               messageKind={kind3}
               kind1={kind1}
-              visibleContentTypes={visibleContentTypes}
             />
           );
         })}
@@ -336,17 +277,6 @@ export const MessageItem = memo(
     if (prevProps.message.isStreaming !== nextProps.message.isStreaming) return false;
     if (prevProps.showThinking !== nextProps.showThinking) return false;
     if ((prevProps.showTools ?? true) !== (nextProps.showTools ?? true)) return false;
-
-    // Deep compare visibleContentTypes if provided
-    if (prevProps.visibleContentTypes || nextProps.visibleContentTypes) {
-      const prevSet = prevProps.visibleContentTypes;
-      const nextSet = nextProps.visibleContentTypes;
-      if (!prevSet || !nextSet) return false;
-      if (prevSet.size !== nextSet.size) return false;
-      for (const item of prevSet) {
-        if (!nextSet.has(item)) return false;
-      }
-    }
 
     // Compare message content length first (quick check)
     const prevContent = prevProps.message.content;
@@ -373,7 +303,6 @@ function GlassCard({
   showText = true,
   messageKind,
   kind1,
-  visibleContentTypes,
 }: GlassCardProps) {
   // ========== 1. State (ALL hooks must be called before any conditional returns) ==========
   const [isExpanded, setIsExpanded] = useState(() => {

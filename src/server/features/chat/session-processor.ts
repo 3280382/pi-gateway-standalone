@@ -103,7 +103,9 @@ function buildClassification(
   // Assistant messages
   if (msg?.role === "assistant") {
     const hasThinking = msg.content?.some((c: any) => c.type === "thinking");
-    const hasTool = msg.content?.some((c: any) => c.type === "toolCall" || c.type === "tool_use");
+    const hasTool = msg.content?.some((c: any) =>
+      c.type === "toolCall" || c.type === "tool_use" || c.type === "tool"
+    );
 
     if (hasTool) {
       return {
@@ -235,9 +237,9 @@ function findToolCallInMessage(message: Message, toolCallId: string): any | null
   if (!message.content || !Array.isArray(message.content)) return null;
 
   for (const block of message.content as any[]) {
-    // Check for toolCall type (used in JSONL) - raw data from JSONL has 'id' field
+    // Check for toolCall/tool_use/tool type - support all formats
     if (
-      (block.type === "toolCall" || block.type === "tool_use") &&
+      (block.type === "toolCall" || block.type === "tool_use" || block.type === "tool") &&
       (block.id === toolCallId || block.toolCallId === toolCallId)
     ) {
       return block;

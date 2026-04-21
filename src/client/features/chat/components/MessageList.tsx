@@ -6,8 +6,7 @@
  * 2. 流式过程不触发历史消息重渲染：流式状态（streamingContent, streamingThinking 等）通过 props 传入，
  *    在 useStreamingMessage hook 中本地合并显示，不修改 messages 数组
  * 3. 唯一触发历史消息重渲染的情况：
- *    - 搜索过滤（searchFilters 变化）
- *    - 内容类型过滤（visibleContentTypes 变化）
+ *    - 搜索过滤（searchFilters 变化）→ 过滤在 ChatPanel.tsx 的 filterMessages() 中完成
  *    - 加载更多消息（prependMessages）
  * 4. 服务器返回的消息已经是最终格式，客户端不做复杂转换
  *
@@ -22,7 +21,6 @@
  */
 
 import { memo, useMemo, useRef } from "react";
-import { selectSearchFilters, useChatStore } from "@/features/chat/stores/chatStore";
 import type { Message, MessageContent, ToolExecution } from "@/features/chat/types/chat";
 import { MessageItem } from "./MessageItem";
 import styles from "./MessageList.module.css";
@@ -50,7 +48,6 @@ const StaticMessageItem = memo(function StaticMessageItem({
   showThinking,
   showTools,
   showText,
-  visibleContentTypes,
   onToggleCollapse,
   onToggleThinking,
   onToggleTools,
@@ -61,7 +58,6 @@ const StaticMessageItem = memo(function StaticMessageItem({
   showThinking: boolean;
   showTools: boolean;
   showText: boolean;
-  visibleContentTypes: Set<string>;
   onToggleCollapse: () => void;
   onToggleThinking: () => void;
   onToggleTools?: () => void;
@@ -74,7 +70,6 @@ const StaticMessageItem = memo(function StaticMessageItem({
       showThinking={showThinking}
       showTools={showTools}
       showText={showText}
-      visibleContentTypes={visibleContentTypes}
       onToggleCollapse={onToggleCollapse}
       onToggleThinking={onToggleThinking}
       onToggleTools={onToggleTools}
@@ -245,84 +240,16 @@ export const MessageList = memo(function MessageList({
 }: MessageListProps) {
   const renderCount = useRef(0);
   renderCount.current++;
-  // Get search filters for hierarchical content filtering
-  const searchFilters = useChatStore(selectSearchFilters);
 
-  // Compute visible content types based on new 3-level filters
-  const { visibleContentTypes, effectiveShowText, effectiveShowThinking, effectiveShowTools } =
-    useMemo(() => {
-      // Default: show all (using snake_case to match server data)
-      const defaultTypes = new Set([
-        "user",
-        "assistant",
-        "sysinfo",
-        "prompt",
-        "response",
-        "thinking",
-        "tool",
-        "event",
-        "model_change",
-        "thinking_level_change",
-        "compaction",
-        "usage",
-        "retry",
-        "auto_retry",
-        "tool_call",
-        "tool_result",
-        "text_prompt",
-        "text_response",
-        "thinking_block",
-      ]);
-
-      const { kind1, kind2, kind3 } = searchFilters || {};
-      if (!kind1 || !kind2 || !kind3) {
-        return {
-          visibleContentTypes: defaultTypes,
-          effectiveShowText: true,
-          effectiveShowThinking: showThinking,
-          effectiveShowTools: showTools ?? true,
-        };
-      }
-
-      const visible = new Set<string>();
-
-      // Level 1: user | assistant | sysinfo
-      if (kind1.user) visible.add("user");
-      if (kind1.assistant) visible.add("assistant");
-      if (kind1.sysinfo) visible.add("sysinfo");
-
-      // Level 2: prompt | response | thinking | tool | event
-      if (kind2.prompt) visible.add("prompt");
-      if (kind2.response) visible.add("response");
-      if (kind2.thinking) visible.add("thinking");
-      if (kind2.tool) visible.add("tool");
-      if (kind2.event) visible.add("event");
-
-      // Level 3: specific subtypes (snake_case to match server)
-      if (kind3.modelChange) visible.add("model_change");
-      if (kind3.thinkingLevelChange) visible.add("thinking_level_change");
-      if (kind3.compaction) visible.add("compaction");
-      if (kind3.usage) visible.add("usage");
-      if (kind3.retry) visible.add("retry");
-      if (kind3.autoRetry) visible.add("auto_retry");
-      if (kind3.toolSuccess) visible.add("tool_success");
-      if (kind3.toolError) visible.add("tool_error");
-      if (kind3.toolPending) visible.add("tool_pending");
-
-      // Always allow common assistant/user subtypes (they follow kind1/kind2 filtering)
-      visible.add("thinking_block");
-      visible.add("text_response");
-      visible.add("text_prompt");
-      visible.add("tool_call");
-      visible.add("tool_result");
-
-      return {
-        visibleContentTypes: visible,
-        effectiveShowText: kind1.assistant && kind2.response,
-        effectiveShowThinking: showThinking && kind1.assistant && kind2.thinking,
-        effectiveShowTools: (showTools ?? true) && kind1.assistant && kind2.tool,
-      };
-    }, [searchFilters, showThinking, showTools]);
+  // Compute content block visibility based on showThinking/showTools settings
+  // Note: Message-level filtering is done in ChatPanel.tsx via filterMessages()
+  const { effectiveShowText, effectiveShowThinking, effectiveShowTools } = useMemo(() => {
+    return {
+      effectiveShowText: true,
+      effectiveShowThinking: showThinking,
+      effectiveShowTools: showTools ?? true,
+    };
+  }, [showThinking, showTools]);
 
   // Build streaming message
   const streamingMessageWithContent = useStreamingMessage(
@@ -370,7 +297,6 @@ export const MessageList = memo(function MessageList({
           showThinking={effectiveShowThinking}
           showTools={effectiveShowTools}
           showText={effectiveShowText}
-          visibleContentTypes={visibleContentTypes}
           onToggleCollapse={handlers[index].onToggleCollapse}
           onToggleThinking={handlers[index].onToggleThinking}
           onToggleTools={handlers[index].onToggleTools}
@@ -384,7 +310,6 @@ export const MessageList = memo(function MessageList({
           showThinking={effectiveShowThinking}
           showTools={effectiveShowTools}
           showText={effectiveShowText}
-          visibleContentTypes={visibleContentTypes}
           onToggleCollapse={() => onToggleMessageCollapse(streamingMessageWithContent.id)}
           onToggleThinking={() => onToggleThinkingCollapse(streamingMessageWithContent.id)}
           onToggleTools={

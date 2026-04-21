@@ -12,13 +12,14 @@ const PORT = 3456;
 export async function setup(): Promise<void> {
   console.log("[GlobalSetup] Starting test server on port", PORT);
 
-  // Kill any existing process on the port
+  // Kill any existing process on the test port only
   try {
     await new Promise((resolve) => {
-      const p = spawn("pkill", ["-f", `tsx.*server.ts`], { stdio: "ignore" });
+      // Only kill processes on the specific test port, not the dev server on port 3000
+      const p = spawn("sh", ["-c", `lsof -ti:${PORT} | xargs kill 2>/dev/null || true`], { stdio: "ignore" });
       p.on("close", resolve);
     });
-    await setTimeout(1000);
+    await setTimeout(500);
   } catch {
     // Ignore
   }
