@@ -11,7 +11,7 @@ import type { Application } from "express";
 export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
   // File controller
   const { browse, tree, content, raw, write, mkdir, batchDelete, batchMove, execute } =
-    await import("./file/file.controller");
+    await import("./file/file.controller.js");
 
   // Git controller
   const {
@@ -20,10 +20,10 @@ export async function registerFilesHTTPRoutes(app: Application): Promise<void> {
     diff,
     check,
     status,
-  } = await import("./git/git.controller");
+  } = await import("./git/git.controller.js");
 
   // Todo controller
-  const { add, list, toggle, getByFile, update } = await import("./todo/todo.controller");
+  const { add, list, toggle, getByFile, update } = await import("./todo/todo.controller.js");
 
   // File routes - /api/files/file/*
   app.post("/api/files/file/browse", browse);

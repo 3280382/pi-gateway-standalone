@@ -5,7 +5,7 @@
 
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
-import { Logger, LogLevel } from "../../lib/utils/logger";
+import { Logger, LogLevel } from "../../lib/utils/logger.js";
 
 const execAsync = promisify(exec);
 const logger = new Logger({ level: LogLevel.INFO });
@@ -84,7 +84,7 @@ export async function getAllProcesses(): Promise<ProcessInfo[]> {
 
     return processes;
   } catch (error) {
-    logger.error("[getAllProcesses] Failed:", error);
+    logger.error(`[getAllProcesses] Failed: ${error}`);
     return [];
   }
 }

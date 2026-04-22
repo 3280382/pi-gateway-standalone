@@ -9,12 +9,12 @@
  */
 
 import type { WebSocket } from "ws";
-import { Logger, LogLevel } from "../../lib/utils/logger";
-import { terminalSessionManager } from "./terminal-session";
+import { Logger, LogLevel } from "../../lib/utils/logger.js";
+import { terminalSessionManager } from "./terminal-session.js";
 import {
   createTerminalHandlers,
   handleTerminalClientDisconnect,
-} from "./ws-handlers/terminal-handlers";
+} from "./ws-handlers/terminal-handlers.js";
 
 const logger = new Logger({ level: LogLevel.INFO });
 

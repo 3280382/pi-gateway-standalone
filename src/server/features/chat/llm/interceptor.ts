@@ -7,9 +7,9 @@ import http from "node:http";
 import https from "node:https";
 import { URL } from "node:url";
 
-import { Logger, LogLevel } from "../../../lib/utils/logger";
-import type { LlmLogManager } from "./log-manager";
-import type { LlmInterceptorOptions, LlmRequestLog, LlmResponseLog } from "./types";
+import { Logger, LogLevel } from "../../../lib/utils/logger.js";
+import type { LlmLogManager } from "./log-manager.js";
+import type { LlmInterceptorOptions, LlmRequestLog, LlmResponseLog } from "./types.js";
 
 /**
  * Truncate request body content

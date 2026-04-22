@@ -3,7 +3,7 @@
  * Provides structured logging functionality
  */
 
-import { LogLevel } from "../../../shared/types/common.types";
+import { LogLevel } from "../../../shared/types/common.types.js";
 
 export { LogLevel };
 export interface LogEntry {

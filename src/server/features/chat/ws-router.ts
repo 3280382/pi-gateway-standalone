@@ -10,8 +10,8 @@
  */
 
 import type { WebSocket } from "ws";
-import { Logger, LogLevel } from "../../lib/utils/logger";
-import type { PiAgentSession } from "./agent-session/piAgentSession";
+import { Logger, LogLevel } from "../../lib/utils/logger.js";
+import type { PiAgentSession } from "./agent-session/piAgentSession.js";
 
 const logger = new Logger({ level: LogLevel.INFO });
 
@@ -277,7 +277,10 @@ export const loggingMiddleware: WSMiddleware = async (_ctx, payload, next) => {
 // Handler Registration
 // ============================================================================
 
-import { handleGetProcessDetailsWrapped, handleGetProcessTreeWrapped } from "../system/ws-handlers";
+import {
+  handleGetProcessDetailsWrapped,
+  handleGetProcessTreeWrapped,
+} from "../system/ws-handlers.js";
 import {
   handleAbortWrapped,
   handleCommandWrapped,
@@ -291,7 +294,7 @@ import {
   handleSteerWrapped,
   handleThinkingLevelChangeWrapped,
   handleToolRequestWrapped,
-} from "./ws-handlers/message-handlers";
+} from "./ws-handlers/message-handlers.js";
 import {
   handleChangeDirWrapped,
   handleGetSessionStatusWrapped,
@@ -302,11 +305,11 @@ import {
   handleNewSessionWrapped,
   handleSidebarVisibilityWrapped,
   handleUpdateSessionConfigWrapped,
-} from "./ws-handlers/session-handlers";
+} from "./ws-handlers/session-handlers.js";
 import {
   handleGetTemplateWrapped,
   handleListTemplatesWrapped,
-} from "./ws-handlers/template-handlers";
+} from "./ws-handlers/template-handlers.js";
 
 /**
  * Register all WebSocket handlers
@@ -354,6 +357,13 @@ export function registerAllWSHandlers(): void {
   // Template operations
   wsRouter.register("list_templates", handleListTemplatesWrapped);
   wsRouter.register("get_template", handleGetTemplateWrapped);
+
+  // Heartbeat - pong from client (no-op, just to prevent "unknown message type" error)
+  wsRouter.register("pong", async (_ctx, payload) => {
+    // Client received our ping and replied with pong - connection is healthy
+    logger.info(`[Heartbeat] Received pong from client`, payload);
+    // No action needed, just logging
+  });
 
   logger.info(`[WSRouter] Registered ${wsRouter.getRegisteredTypes().length} handlers`);
 }

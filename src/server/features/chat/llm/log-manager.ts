@@ -9,8 +9,8 @@ import * as path from "node:path";
 
 const { dirname } = path;
 
-import { Logger, LogLevel } from "../../../lib/utils/logger";
-import type { LlmLogEntry, LlmLogOptions } from "./types";
+import { Logger, LogLevel } from "../../../lib/utils/logger.js";
+import type { LlmLogEntry, LlmLogOptions } from "./types.js";
 
 export class LlmLogManager {
   private enabled: boolean;

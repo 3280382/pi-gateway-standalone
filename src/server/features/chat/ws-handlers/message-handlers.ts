@@ -4,8 +4,8 @@
  */
 
 import { createCodingTools } from "@mariozechner/pi-coding-agent";
-import type { WSContext } from "../ws-router";
-import { createHandler, logger, sendError, sendSuccess } from "./handler-utils";
+import type { WSContext } from "../ws-router.js";
+import { createHandler, logger, sendError, sendSuccess } from "./handler-utils.js";
 
 // ============================================================================
 // Abort Handler
@@ -70,7 +70,7 @@ export async function handleExportSession(
 export async function handleListModels(ctx: WSContext, _payload: unknown): Promise<void> {
   try {
     // Import dynamically to avoid circular dependencies
-    const { getAllModels } = await import("../session-helpers");
+    const { getAllModels } = await import("../session-helpers.js");
     const models = await getAllModels();
 
     sendSuccess(ctx, "models_list", { models });
@@ -178,7 +178,7 @@ export async function handleSetModel(
       settings.setDefaultModel(modelId);
       logger.info(`[handleSetModel] Settings.json default model updated to: ${modelId}`);
     } catch (settingsError) {
-      logger.warn("[handleSetModel] Failed to update settings.json:", settingsError);
+      logger.warn(`[handleSetModel] Failed to update settings.json: ${settingsError}`);
       // doesn't affect main flow, continue execution
     }
 

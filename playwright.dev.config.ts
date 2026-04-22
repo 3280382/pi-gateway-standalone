@@ -15,7 +15,7 @@ export default defineConfig({
   reporter: [["list"], ["html", { outputFolder: "test-results/playwright-dev-report" }]],
   use: {
     // 使用开发服务器
-    baseURL: "http://127.0.0.1:5173",
+    baseURL: "http://127.0.0.1:5273",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",

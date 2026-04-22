@@ -4,17 +4,17 @@
  */
 
 // Application modules
-export { registerRoutes } from "./app/routes";
+export { registerRoutes } from "./app/routes.js";
 // Configuration and utilities
-export { Config } from "./config";
+export { Config } from "./config/index.js";
 // Core modules
 export {
   PiAgentSession,
   type ServerMessage,
-} from "./features/chat/agent-session";
+} from "./features/chat/agent-session/index.js";
 // LLM related
-export { setupLlmInterceptors } from "./features/chat/llm";
-export { LlmLogManager } from "./features/chat/llm/log-manager";
+export { setupLlmInterceptors } from "./features/chat/llm/index.js";
+export { LlmLogManager } from "./features/chat/llm/log-manager.js";
 export type {
   WSContext,
   WSHandler,
@@ -22,7 +22,7 @@ export type {
   WSMiddleware,
   WSRoute,
   wsRouter,
-} from "./features/chat/ws-router";
-export { AppFactory } from "./lib/app-factory";
+} from "./features/chat/ws-router.js";
+export { AppFactory } from "./lib/app-factory.js";
 
 // WebSocket handlers are auto-registered when ws-router.ts is imported

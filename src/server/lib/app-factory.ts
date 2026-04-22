@@ -10,9 +10,9 @@ import cors from "cors";
 import express, { type Application, type NextFunction, type Request, type Response } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
-import { Config } from "../config";
-import { ApiError, ErrorFactory } from "./errors";
-import { Logger, LogLevel } from "./utils/logger";
+import { Config } from "../config/index.js";
+import { ApiError, ErrorFactory } from "./errors.js";
+import { Logger, LogLevel } from "./utils/logger.js";
 
 export interface AppOptions {
   enableStatic?: boolean;

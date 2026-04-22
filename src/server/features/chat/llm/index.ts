@@ -6,6 +6,6 @@ export {
   setupGlobalFetchInterceptor,
   setupHttpInterceptor,
   setupLlmInterceptors,
-} from "./interceptor";
-export { LlmLogManager } from "./log-manager";
-export * from "./types";
+} from "./interceptor.js";
+export { LlmLogManager } from "./log-manager.js";
+export * from "./types.js";

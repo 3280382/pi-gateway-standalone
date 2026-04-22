@@ -4,8 +4,8 @@
  */
 
 import type { WebSocket } from "ws";
-import { Logger, LogLevel } from "../../../lib/utils/logger";
-import { terminalSessionManager } from "../terminal-session";
+import { Logger, LogLevel } from "../../../lib/utils/logger.js";
+import { terminalSessionManager } from "../terminal-session.js";
 
 const logger = new Logger({ level: LogLevel.INFO });
 

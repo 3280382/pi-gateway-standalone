@@ -29,9 +29,9 @@ import {
   SettingsManager,
 } from "@mariozechner/pi-coding-agent";
 import { WebSocket } from "ws";
-import type { LlmLogManager } from "../llm/log-manager";
-import { extractShortSessionId, serverSessionManager } from "./session-manager";
-import { AGENT_DIR, getLocalSessionsDir } from "./utils";
+import type { LlmLogManager } from "../llm/log-manager.js";
+import { extractShortSessionId, serverSessionManager } from "./session-manager.js";
+import { AGENT_DIR, getLocalSessionsDir } from "./utils.js";
 
 /**
  * Server message interface
@@ -100,6 +100,13 @@ export class PiAgentSession {
   /** Track if message_start has been sent for current message */
   private messageStarted: boolean = false;
 
+  /** Active tool execution tracking */
+  private activeToolExecution: { toolCallId: string; toolName: string; startTime: Date } | null =
+    null;
+
+  /** Inside message flag for event handling */
+  private insideMessage: boolean = false;
+
   /** Short session ID */
   shortId: string = "";
 
@@ -123,7 +130,7 @@ export class PiAgentSession {
     this.ws = ws;
     this.llmLogManager = llmLogManager;
     this.authStorage = AuthStorage.create();
-    this.modelRegistry = new ModelRegistry(this.authStorage, "/root/.pi/agent/models.json");
+    this.modelRegistry = ModelRegistry.create(this.authStorage, "/root/.pi/agent/models.json");
     this.settingsManager = SettingsManager.create();
   }
 
@@ -281,7 +288,7 @@ export class PiAgentSession {
     this.setupEventHandlers();
 
     // Set short ID from session file
-    this.shortId = extractShortSessionId(session.sessionFile);
+    this.shortId = extractShortSessionId(session.sessionFile ?? "");
     this.updateRuntimeStatus("idle");
 
     console.log(
@@ -880,7 +887,7 @@ export class PiAgentSession {
         await this.initialize(this.workingDir);
       }
 
-      await this.session.newSession();
+      await (this.session as any).newSession();
       this.send({
         type: "session_info",
         sessionId: this.session.sessionId,
@@ -1139,7 +1146,7 @@ export class PiAgentSession {
         return { success: true, cwdChanged: true, newCwd: targetCwd };
       } else {
         // Same cwd, use switchSession
-        const result = await this.session.switchSession(sessionPath);
+        const result = await (this.session as any).switchSession(sessionPath);
         // Update session reference after successful switch
         if (result) {
           this.shortId = extractShortSessionId(sessionPath);
@@ -1221,7 +1228,7 @@ export class PiAgentSession {
    * Get current model
    * @returns Current model or null
    */
-  getCurrentModel() {
+  getCurrentModel(): any {
     if (!this.session) return null;
     return this.session.model;
   }
@@ -1232,7 +1239,7 @@ export class PiAgentSession {
    */
   getMessages(): AgentMessage[] {
     if (!this.session) return [];
-    return this.session.messages;
+    return this.session.messages as AgentMessage[];
   }
 
   /** WebSocket connection state */

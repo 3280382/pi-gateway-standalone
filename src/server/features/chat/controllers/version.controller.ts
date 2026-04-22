@@ -4,7 +4,7 @@
  */
 
 import type { Request, Response } from "express";
-import { Logger, LogLevel } from "../../../lib/utils/logger";
+import { Logger, LogLevel } from "../../../lib/utils/logger.js";
 
 const logger = new Logger({ level: LogLevel.INFO });
 

@@ -4,8 +4,8 @@
  */
 
 import { existsSync } from "node:fs";
-import { Logger, LogLevel } from "../../../lib/utils/logger";
-import type { WSContext } from "../ws-router";
+import { Logger, LogLevel } from "../../../lib/utils/logger.js";
+import type { WSContext } from "../ws-router.js";
 
 export const logger = new Logger({ level: LogLevel.INFO });
 

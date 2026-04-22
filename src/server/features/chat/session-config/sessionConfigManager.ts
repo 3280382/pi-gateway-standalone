@@ -10,7 +10,7 @@
 
 import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
-import { Logger, LogLevel } from "../../../lib/utils/logger";
+import { Logger, LogLevel } from "../../../lib/utils/logger.js";
 
 const logger = new Logger({ level: LogLevel.INFO });
 
@@ -57,7 +57,7 @@ class SessionConfigManager {
       }
       this.initialized = true;
     } catch (error) {
-      logger.error("[SessionConfigManager] Failed to init:", error);
+      logger.error(`[SessionConfigManager] Failed to init: ${error}`);
       this.config = {};
       this.initialized = true;
     }
@@ -210,7 +210,7 @@ class SessionConfigManager {
 
       return { summary: "" };
     } catch (error) {
-      logger.error(`[SessionConfigManager] Failed to extract from ${fullPath}:`, error);
+      logger.error(`[SessionConfigManager] Failed to extract from ${fullPath}: ${error}`);
       return { summary: "" };
     }
   }
@@ -251,7 +251,7 @@ class SessionConfigManager {
     try {
       await writeFile(CONFIG_PATH, JSON.stringify(this.config, null, 2), "utf-8");
     } catch (error) {
-      logger.error("[SessionConfigManager] Failed to save:", error);
+      logger.error(`[SessionConfigManager] Failed to save: ${error}`);
     }
   }
 }

@@ -5,7 +5,7 @@
 
 import * as pty from "node-pty";
 import { WebSocket } from "ws";
-import { Logger, LogLevel } from "../../lib/utils/logger";
+import { Logger, LogLevel } from "../../lib/utils/logger.js";
 
 const logger = new Logger({ level: LogLevel.INFO });
 

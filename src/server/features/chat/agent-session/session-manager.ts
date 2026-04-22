@@ -4,8 +4,8 @@
  */
 
 import { WebSocket } from "ws";
-import type { LlmLogManager } from "../llm/log-manager";
-import { PiAgentSession } from "./piAgentSession";
+import type { LlmLogManager } from "../llm/log-manager.js";
+import { PiAgentSession } from "./piAgentSession.js";
 
 /**
  * Extract short session ID from session file path (fixed 8 characters)
@@ -357,7 +357,7 @@ export class ServerSessionManager {
    */
   private async findMostRecentSessionFile(workingDir: string): Promise<string> {
     const { SessionManager } = await import("@mariozechner/pi-coding-agent");
-    const { getLocalSessionsDir } = await import("./utils");
+    const { getLocalSessionsDir } = await import("./utils.js");
 
     const localSessionsDir = getLocalSessionsDir(workingDir);
     const sessions = await SessionManager.list(workingDir, localSessionsDir);
@@ -605,6 +605,23 @@ export class ServerSessionManager {
   endSession(shortId: string): void {
     console.log(`[ServerSessionManager] Explicitly ending session: shortId=${shortId}`);
     this.disposeSessionByShortId(shortId);
+  }
+
+  /**
+   * Broadcast a message to all clients in a working directory
+   */
+  broadcastToWorkingDir(workingDir: string, message: any): void {
+    const entries = this.getSessionsByWorkingDir(workingDir);
+    const seenClients = new Set<WebSocket>();
+    for (const entry of entries) {
+      if (seenClients.has(entry.client)) continue;
+      seenClients.add(entry.client);
+      try {
+        entry.client.send(JSON.stringify(message));
+      } catch (_e) {
+        // Ignore send errors
+      }
+    }
   }
 
   /**

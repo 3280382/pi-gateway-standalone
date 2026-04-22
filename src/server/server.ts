@@ -13,10 +13,10 @@
 // ===== [ANCHOR:STEP1_IMPORTS_LLM] =====
 
 import path from "node:path";
-import { Config } from "./config";
-import { setupLlmInterceptors } from "./features/chat/llm";
-import { LlmLogManager } from "./features/chat/llm/log-manager";
-import { Logger, LogLevel } from "./lib/utils/logger";
+import { Config } from "./config/index.js";
+import { setupLlmInterceptors } from "./features/chat/llm/index.js";
+import { LlmLogManager } from "./features/chat/llm/log-manager.js";
+import { Logger, LogLevel } from "./lib/utils/logger.js";
 
 // Global LLM log manager
 const llmLogManager = new LlmLogManager({
@@ -34,16 +34,16 @@ setupLlmInterceptors(llmLogManager, {
 
 import { WebSocket, WebSocketServer } from "ws";
 import { z } from "zod";
-import { registerRoutes } from "./app/routes";
+import { registerRoutes } from "./app/routes.js";
 
 // WebSocket handlers are auto-registered when ws-router.ts is imported
-import { serverSessionManager } from "./features/chat/agent-session/session-manager";
-import { type WSContext, wsRouter } from "./features/chat/ws-router";
+import { serverSessionManager } from "./features/chat/agent-session/session-manager.js";
+import { type WSContext, wsRouter } from "./features/chat/ws-router.js";
 import {
   cleanupTerminalSessions,
   handleTerminalConnection,
-} from "./features/terminal/terminal-ws-router";
-import { AppFactory } from "./lib/app-factory";
+} from "./features/terminal/terminal-ws-router.js";
+import { AppFactory } from "./lib/app-factory.js";
 
 // ===== [ANCHOR:CONSTANTS] =====
 
@@ -160,6 +160,23 @@ wss.on("connection", (ws) => {
   // Track current working directory for this connection
   let currentWorkingDir: string | null = null;
 
+  // Heartbeat: Send ping every 30 seconds
+  const heartbeatInterval = setInterval(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(
+        JSON.stringify({
+          type: "ping",
+          timestamp: Date.now(),
+          connectionId,
+        })
+      );
+      logger.info(`[WebSocket] Ping sent to ${connectionId}`);
+    }
+  }, 30000); // 30 seconds
+
+  // Store interval for cleanup
+  (ws as any).heartbeatInterval = heartbeatInterval;
+
   // WebSocket message handling - using Router dispatch
   ws.on("message", async (data) => {
     let rawMessage: unknown;
@@ -240,6 +257,11 @@ wss.on("connection", (ws) => {
   // Connection close handling
   ws.on("close", () => {
     logger.info(`[WebSocket] Connection closed: ${connectionId}`);
+    // Clear heartbeat interval
+    if ((ws as any).heartbeatInterval) {
+      clearInterval((ws as any).heartbeatInterval);
+      logger.debug(`[WebSocket] Heartbeat cleared for ${connectionId}`);
+    }
     // Disconnect from server-level session (don't dispose - session persists)
     if (currentWorkingDir) {
       serverSessionManager.disconnectClient(currentWorkingDir, ws);
@@ -331,7 +353,6 @@ if (isMainModule) {
   appFactory
     .start()
     .then(() => {
-      // [DEV-TEST] tsx watch auto-reload test round 1
       console.log(`
 ╔════════════════════════════════════════════════════════╗
 ║                                                        ║

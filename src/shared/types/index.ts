@@ -3,7 +3,7 @@
  * Core type definitions shared between frontend and backend
  */
 
-export * from "./api.types";
-export * from "./chat.types";
-export * from "./common.types";
-export * from "./websocket.types";
+export * from "./api.types.js";
+export * from "./chat.types.js";
+export * from "./common.types.js";
+export * from "./websocket.types.js";

@@ -10,7 +10,7 @@ import type { Application } from "express";
  */
 export async function registerWorkspaceHTTPRoutes(app: Application): Promise<void> {
   const { current, workingDir, recent, addRecent, clearRecent } = await import(
-    "./workspace.controller"
+    "./workspace.controller.js"
   );
 
   app.get("/api/workspace/current", current);

@@ -5,9 +5,9 @@
 
 import { DefaultResourceLoader, SessionManager } from "@mariozechner/pi-coding-agent";
 import type { Request, Response } from "express";
-import { Logger, LogLevel } from "../../../lib/utils/logger";
-import { expandPath } from "../../files/utils";
-import { AGENT_DIR, getLocalSessionsDir } from "../agent-session/utils";
+import { Logger, LogLevel } from "../../../lib/utils/logger.js";
+import { expandPath } from "../../files/utils.js";
+import { AGENT_DIR, getLocalSessionsDir } from "../agent-session/utils.js";
 
 const logger = new Logger({ level: LogLevel.INFO });
 
@@ -166,7 +166,7 @@ You are Pi Coding Agent, an AI assistant that helps developers write, debug, and
   }
 }
 
-import { serverSessionManager } from "../agent-session/session-manager";
+import { serverSessionManager } from "../agent-session/session-manager.js";
 
 /**
  * Get active session list

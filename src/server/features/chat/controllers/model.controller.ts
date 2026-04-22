@@ -5,7 +5,7 @@
 
 import { AuthStorage, ModelRegistry } from "@mariozechner/pi-coding-agent";
 import type { Request, Response } from "express";
-import { Logger, LogLevel } from "../../../lib/utils/logger";
+import { Logger, LogLevel } from "../../../lib/utils/logger.js";
 
 const logger = new Logger({ level: LogLevel.INFO });
 
@@ -15,7 +15,7 @@ const logger = new Logger({ level: LogLevel.INFO });
 export async function getModels(_req: Request, res: Response) {
   try {
     const authStorage = AuthStorage.create();
-    const modelRegistry = new ModelRegistry(authStorage);
+    const modelRegistry = ModelRegistry.create(authStorage);
     const available = await modelRegistry.getAvailable();
 
     logger.info(`Retrieved model list, count: ${available.length}`);
@@ -25,7 +25,7 @@ export async function getModels(_req: Request, res: Response) {
         `First model: id=${JSON.stringify(available[0].id)}, typeof id=${typeof available[0].id}`
       );
     }
-    const models = available.map((m) => ({
+    const models = available.map((m: any) => ({
       id: typeof m.id === "object" ? (m.id as any).id || String(m.id) : m.id,
       provider: m.provider,
       name: m.name ?? (typeof m.id === "object" ? String(m.id) : m.id),

@@ -4,14 +4,14 @@
   "description": "Pi Gateway - Standalone version (independent from monorepo)",
   "type": "module",
   "bin": {
-    "pi-gateway": "dist/server.js"
+    "pi-gateway": "dist/server/server.js"
   },
-  "main": "./dist/server.js",
-  "types": "./dist/server.d.ts",
+  "main": "./dist/server/server.js",
+  "types": "./dist/server/server.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/server.d.ts",
-      "import": "./dist/server.js"
+      "types": "./dist/server/server.d.ts",
+      "import": "./dist/server/server.js"
     }
   },
   "files": [
@@ -20,19 +20,22 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "clean": "shx rm -rf dist",
-    "dev": "TSX_WATCH_USE_POLLING=true NODE_OPTIONS=--max-old-space-size=4096 tsx watch src/server/server.ts",
-    "dev:react": "vite",
-    "build": "vite build --logLevel warn",
-    "build:ci": "vite build --logLevel error --mode production",
+    "clean": "rm -rf dist",
+    "dev": "PORT=3000 TSX_WATCH_USE_POLLING=true NODE_OPTIONS=--max-old-space-size=4096 tsx watch src/server/server.ts",
+    "dev:react": "vite --port 5173",
+    "build": "npm run clean && vite build --logLevel warn && npm run build:server",
+    "build:ci": "vite build --logLevel error --mode production && npm run build:server",
     "build:server": "tsc -p tsconfig.json",
-    "start": "node dist/server.js",
+    "build:prod": "npm run clean && vite build --logLevel error --mode production && npm run build:server",
+    "start": "PORT=3300 NODE_ENV=production node dist/server/server.js",
+    "start:prod": "PORT=3300 NODE_ENV=production node dist/server/server.js",
     "check": "biome check . && tsc --noEmit --skipLibCheck",
     "check:ci": "biome check --error-on-warnings . && tsc --noEmit --skipLibCheck",
     "check:changed": "biome check $(git diff --name-only HEAD) && tsc --noEmit --skipLibCheck",
     "fix": "biome check --write .",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.react.json --noEmit",
-    "test": "vitest --run test/unit test/integration src/",
+    "test": "TEST_PORT=3200 vitest --run test/unit test/integration src/",
+    "test:terminal": "TEST_PORT=3200 bash scripts/run-terminal-tests.sh",
     "preview": "vite preview",
     "prepare": "husky"
   },

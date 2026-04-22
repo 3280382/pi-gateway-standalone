@@ -5,17 +5,17 @@
 
 import { existsSync } from "node:fs";
 import { SessionManager } from "@mariozechner/pi-coding-agent";
-import { extractShortSessionId, serverSessionManager } from "../agent-session/session-manager";
-import { getLocalSessionsDir } from "../agent-session/utils";
-import { sessionConfigManager } from "../session-config/sessionConfigManager";
+import { extractShortSessionId, serverSessionManager } from "../agent-session/session-manager.js";
+import { getLocalSessionsDir } from "../agent-session/utils.js";
+import { sessionConfigManager } from "../session-config/sessionConfigManager.js";
 import {
   buildSessionResponse,
   getAllSessions,
   getSessionMessageCount,
   getSessionMessages,
-} from "../session-helpers";
-import type { WSContext } from "../ws-router";
-import { createHandler, logger, sendError, sendSuccess } from "./handler-utils";
+} from "../session-helpers.js";
+import type { WSContext } from "../ws-router.js";
+import { createHandler, logger, sendError, sendSuccess } from "./handler-utils.js";
 
 // ============================================================================
 // Init Handler
@@ -161,7 +161,7 @@ export async function handleNewSession(
 
   // 2. Create new session file path (ensure completely new session)
   const { SessionManager } = await import("@mariozechner/pi-coding-agent");
-  const { getLocalSessionsDir } = await import("../agent-session/utils");
+  const { getLocalSessionsDir } = await import("../agent-session/utils.js");
   const localSessionsDir = getLocalSessionsDir(workingDir);
   const newSessionManager = SessionManager.create(workingDir, localSessionsDir);
   const newSessionFile = newSessionManager.getSessionFile();
@@ -337,7 +337,7 @@ export async function handleChangeDir(
   }
 
   // Set viewing session for message routing
-  const shortId = extractShortSessionId(session.sessionFile);
+  const shortId = extractShortSessionId((session as any).sessionFile || "");
   if (shortId) {
     serverSessionManager.setViewingSession(ctx.ws, shortId);
   }

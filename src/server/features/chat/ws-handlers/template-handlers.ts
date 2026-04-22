@@ -6,8 +6,8 @@
 import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { WSContext } from "../ws-router";
-import { createHandler, logger, sendError, sendSuccess } from "./handler-utils";
+import type { WSContext } from "../ws-router.js";
+import { createHandler, logger, sendError, sendSuccess } from "./handler-utils.js";
 
 // ============================================================================
 // Template Service

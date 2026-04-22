@@ -78,7 +78,7 @@ export class Config {
    */
   private loadConfig(): ServerConfig {
     const env = (process.env.NODE_ENV as Environment) || "development";
-    const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+    const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3300;
     const host = process.env.HOST || "127.0.0.1";
 
     // Find project root - check multiple possible locations

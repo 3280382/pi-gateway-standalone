@@ -4,7 +4,7 @@
  */
 
 import type { Application } from "express";
-import type { LlmLogManager } from "./llm/log-manager";
+import type { LlmLogManager } from "./llm/log-manager.js";
 
 /**
  * Register all Chat Feature HTTP routes
@@ -15,7 +15,7 @@ export async function registerChatHTTPRoutes(
   serverStartTime: number
 ): Promise<void> {
   // System / Version / Status API
-  const { createVersionController } = await import("./controllers/version.controller");
+  const { createVersionController } = await import("./controllers/version.controller.js");
   const versionController = createVersionController(serverStartTime);
 
   app.get("/api/version", versionController.getVersion);
@@ -35,13 +35,13 @@ export async function registerChatHTTPRoutes(
   });
 
   // LLM log API
-  const { createLlmLogController } = await import("./controllers/llm-log.controller");
+  const { createLlmLogController } = await import("./controllers/llm-log.controller.js");
   const llmLogController = createLlmLogController(llmLogManager);
   app.get("/api/llm-log", llmLogController.getLlmLog);
   app.post("/api/llm-log/enabled", llmLogController.setLlmLogEnabled);
 
   // Model API
-  const { getModels } = await import("./controllers/model.controller");
+  const { getModels } = await import("./controllers/model.controller.js");
   app.get("/api/models", getModels);
   app.post("/api/models", async (req, res) => {
     const { model, provider } = req.body;
@@ -50,7 +50,7 @@ export async function registerChatHTTPRoutes(
 
   // Session API
   const { getSessions, getSystemPrompt, loadSession, getActiveSessions } = await import(
-    "./controllers/session.controller"
+    "./controllers/session.controller.js"
   );
   app.get("/api/sessions", getSessions);
   app.get("/api/sessions/active", getActiveSessions);
@@ -58,10 +58,10 @@ export async function registerChatHTTPRoutes(
   app.get("/api/system-prompt", getSystemPrompt);
 
   // Extensions API
-  const { getExtensions } = await import("./controllers/extension.controller");
+  const { getExtensions } = await import("./controllers/extension.controller.js");
   app.get("/api/extensions", getExtensions);
 
   // OCR API
-  const { performOCR } = await import("./controllers/ocr.controller");
+  const { performOCR } = await import("./controllers/ocr.controller.js");
   app.post("/api/ocr", performOCR);
 }

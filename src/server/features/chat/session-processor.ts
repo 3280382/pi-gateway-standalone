@@ -11,7 +11,7 @@ import type {
   MessageKind1,
   MessageKind2,
   MessageKind3,
-} from "../../../shared/types/session-messages.types";
+} from "../../../shared/types/session-messages.types.js";
 
 interface SessionEntry {
   type: string;
@@ -103,8 +103,8 @@ function buildClassification(
   // Assistant messages
   if (msg?.role === "assistant") {
     const hasThinking = msg.content?.some((c: any) => c.type === "thinking");
-    const hasTool = msg.content?.some((c: any) =>
-      c.type === "toolCall" || c.type === "tool_use" || c.type === "tool"
+    const hasTool = msg.content?.some(
+      (c: any) => c.type === "toolCall" || c.type === "tool_use" || c.type === "tool"
     );
 
     if (hasTool) {
@@ -420,7 +420,7 @@ export function processSessionEntries(entries: SessionEntry[]): {
         kind1: "sysinfo",
         kind2: "event",
         kind3: "usage",
-        role: "system",
+        role: "sysinfo",
         kind: "usage",
         content: [{ type: "text" as const, text: fullText }],
         timestamp: new Date(entry.timestamp || Date.now()),

@@ -4,10 +4,10 @@
  */
 
 import type { Application } from "express";
-import { registerChatHTTPRoutes } from "../features/chat/http-routes";
-import type { LlmLogManager } from "../features/chat/llm/log-manager";
-import { registerFilesHTTPRoutes } from "../features/files/http-routes";
-import { registerWorkspaceHTTPRoutes } from "../features/workspace/http-routes";
+import { registerChatHTTPRoutes } from "../features/chat/http-routes.js";
+import type { LlmLogManager } from "../features/chat/llm/log-manager.js";
+import { registerFilesHTTPRoutes } from "../features/files/http-routes.js";
+import { registerWorkspaceHTTPRoutes } from "../features/workspace/http-routes.js";
 
 /**
  * Register all HTTP API routes

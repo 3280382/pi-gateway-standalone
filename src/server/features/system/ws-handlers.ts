@@ -3,9 +3,9 @@
  * System info WebSocket handlers
  */
 
-import { createHandler, sendError, sendSuccess } from "../chat/ws-handlers/handler-utils";
-import type { WSContext } from "../chat/ws-router";
-import { getProcessOpenFiles, getProcessThreads, getProcessTreeData } from "./process-tree";
+import { createHandler, sendError, sendSuccess } from "../chat/ws-handlers/handler-utils.js";
+import type { WSContext } from "../chat/ws-router.js";
+import { getProcessOpenFiles, getProcessThreads, getProcessTreeData } from "./process-tree.js";
 
 // ============================================================================
 // Get Process Tree Handler
