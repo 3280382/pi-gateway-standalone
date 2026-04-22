@@ -69,20 +69,22 @@ create_tmux_session() {
 # Start frontend in tmux
 start_tmux_frontend() {
   echo -e "${BLUE}Starting frontend in tmux...${NC}"
-  rotate_log "$GATEWAY_DIR/logs/frontend_current.log"
+  mkdir -p "$GATEWAY_DIR/logs/dev"
+  rotate_log "$GATEWAY_DIR/logs/dev/frontend_current.log"
   tmux send-keys -t $SESSION_NAME:0.0 C-c 2>/dev/null || true
   sleep 0.5
-  tmux send-keys -t $SESSION_NAME:0.0 "npm run dev:react 2>&1 | tee -a logs/frontend_current.log" C-m
+  tmux send-keys -t $SESSION_NAME:0.0 "npm run dev:react 2>&1 | tee -a logs/dev/frontend_current.log" C-m
   echo -e "${GREEN}Frontend started${NC}"
 }
 
 # Start backend in tmux
 start_tmux_backend() {
   echo -e "${BLUE}Starting backend in tmux...${NC}"
-  rotate_log "$GATEWAY_DIR/logs/backend_current.log"
+  mkdir -p "$GATEWAY_DIR/logs/dev"
+  rotate_log "$GATEWAY_DIR/logs/dev/backend_current.log"
   tmux send-keys -t $SESSION_NAME:0.1 C-c 2>/dev/null || true
   sleep 0.5
-  tmux send-keys -t $SESSION_NAME:0.1 "npm run dev 2>&1 | tee -a logs/backend_current.log" C-m
+  tmux send-keys -t $SESSION_NAME:0.1 "npm run dev 2>&1 | tee -a logs/dev/backend_current.log" C-m
   echo -e "${GREEN}Backend started${NC}"
 }
 

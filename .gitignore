@@ -25,10 +25,12 @@ Thumbs.db
 
 # Logs
 *.log
+logs/
 npm-debug.log*
 
 # Testing
 coverage/
+test-results/
 
 # Misc
 *.local

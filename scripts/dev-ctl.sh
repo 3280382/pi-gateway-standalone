@@ -41,10 +41,11 @@ rotate_log() {
 restart_frontend() {
   check_session
   echo -e "${BLUE}Restarting frontend...${NC}"
-  rotate_log "$GATEWAY_DIR/logs/frontend_current.log"
+  mkdir -p "$GATEWAY_DIR/logs/dev"
+  rotate_log "$GATEWAY_DIR/logs/dev/frontend_current.log"
   tmux send-keys -t "$SESSION_NAME:0.0" C-c 2>/dev/null || true
   sleep 0.5
-  tmux send-keys -t "$SESSION_NAME:0.0" "npm run dev:react 2>&1 | tee -a logs/frontend_current.log" C-m
+  tmux send-keys -t "$SESSION_NAME:0.0" "npm run dev:react 2>&1 | tee -a logs/dev/frontend_current.log" C-m
   echo -e "${GREEN}Frontend restart command sent to tmux pane 0.0${NC}"
 }
 
@@ -52,10 +53,11 @@ restart_frontend() {
 restart_backend() {
   check_session
   echo -e "${BLUE}Restarting backend...${NC}"
-  rotate_log "$GATEWAY_DIR/logs/backend_current.log"
+  mkdir -p "$GATEWAY_DIR/logs/dev"
+  rotate_log "$GATEWAY_DIR/logs/dev/backend_current.log"
   tmux send-keys -t "$SESSION_NAME:0.1" C-c 2>/dev/null || true
   sleep 0.5
-  tmux send-keys -t "$SESSION_NAME:0.1" "npm run dev 2>&1 | tee -a logs/backend_current.log" C-m
+  tmux send-keys -t "$SESSION_NAME:0.1" "npm run dev 2>&1 | tee -a logs/dev/backend_current.log" C-m
   echo -e "${GREEN}Backend restart command sent to tmux pane 0.1${NC}"
 }
 
@@ -105,11 +107,11 @@ show_status() {
   # Recent log activity
   echo ""
   echo -e "${BLUE}Recent Log Activity:${NC}"
-  if [ -f "$GATEWAY_DIR/logs/frontend_current.log" ]; then
+  if [ -f "$GATEWAY_DIR/logs/dev/frontend_current.log" ]; then
     local fsize
-    fsize=$(stat -c%s "$GATEWAY_DIR/logs/frontend_current.log" 2>/dev/null || echo 0)
+    fsize=$(stat -c%s "$GATEWAY_DIR/logs/dev/frontend_current.log" 2>/dev/null || echo 0)
     local ftime
-    ftime=$(stat -c%Y "$GATEWAY_DIR/logs/frontend_current.log" 2>/dev/null || echo 0)
+    ftime=$(stat -c%Y "$GATEWAY_DIR/logs/dev/frontend_current.log" 2>/dev/null || echo 0)
     local now
     now=$(date +%s)
     local fage=$((now - ftime))
@@ -118,11 +120,11 @@ show_status() {
     echo -e "  frontend_current.log: ${RED}not found${NC}"
   fi
 
-  if [ -f "$GATEWAY_DIR/logs/backend_current.log" ]; then
+  if [ -f "$GATEWAY_DIR/logs/dev/backend_current.log" ]; then
     local bsize
-    bsize=$(stat -c%s "$GATEWAY_DIR/logs/backend_current.log" 2>/dev/null || echo 0)
+    bsize=$(stat -c%s "$GATEWAY_DIR/logs/dev/backend_current.log" 2>/dev/null || echo 0)
     local btime
-    btime=$(stat -c%Y "$GATEWAY_DIR/logs/backend_current.log" 2>/dev/null || echo 0)
+    btime=$(stat -c%Y "$GATEWAY_DIR/logs/dev/backend_current.log" 2>/dev/null || echo 0)
     local now
     now=$(date +%s)
     local bage=$((now - btime))
@@ -139,17 +141,17 @@ show_logs() {
 
   case "$service" in
     frontend|fe)
-      if [ -f "$GATEWAY_DIR/logs/frontend_current.log" ]; then
+      if [ -f "$GATEWAY_DIR/logs/dev/frontend_current.log" ]; then
         echo -e "${BLUE}=== Frontend Logs (last ${lines} lines) ===${NC}"
-        tail -n "$lines" "$GATEWAY_DIR/logs/frontend_current.log"
+        tail -n "$lines" "$GATEWAY_DIR/logs/dev/frontend_current.log"
       else
         echo -e "${RED}frontend_current.log not found${NC}"
       fi
       ;;
     backend|be)
-      if [ -f "$GATEWAY_DIR/logs/backend_current.log" ]; then
+      if [ -f "$GATEWAY_DIR/logs/dev/backend_current.log" ]; then
         echo -e "${BLUE}=== Backend Logs (last ${lines} lines) ===${NC}"
-        tail -n "$lines" "$GATEWAY_DIR/logs/backend_current.log"
+        tail -n "$lines" "$GATEWAY_DIR/logs/dev/backend_current.log"
       else
         echo -e "${RED}backend_current.log not found${NC}"
       fi

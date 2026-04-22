@@ -8,7 +8,7 @@ import { dirname } from "node:path";
 
 // ========== 配置 ==========
 export const TEST_CONFIG = {
-  resultsDir: process.env.TEST_RESULTS_DIR || "/root/pi-gateway-standalone/test-results/latest",
+  resultsDir: process.env.TEST_RESULTS_DIR || "/root/pi-gateway-standalone/logs/test",
   timestamp: process.env.TEST_TIMESTAMP || new Date().toISOString(),
   port: process.env.TEST_PORT
     ? parseInt(process.env.TEST_PORT, 10)

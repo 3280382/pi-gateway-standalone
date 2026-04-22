@@ -12,7 +12,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1,
-  reporter: [["list"], ["html", { outputFolder: "test-results/playwright-mobile-report" }]],
+  outputDir: "logs/test/playwright",
+  reporter: [["list"], ["html", { outputFolder: "logs/test/playwright-mobile-report" }]],
   use: {
     baseURL: "http://127.0.0.1:5273",
     trace: "on-first-retry",
