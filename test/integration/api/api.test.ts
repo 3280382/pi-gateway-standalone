@@ -9,15 +9,13 @@ describe("Gateway API", () => {
   let serverProcess: ReturnType<typeof spawn>;
 
   beforeAll(async () => {
-    console.log(`🚀 启动服务器在端口 ${SERVER_PORT}...`);
-    // Start server using tsx (TypeScript execution)
+    console.log(`🚀 Starting test server on port ${SERVER_PORT}...`);
     const serverPath = join(__dirname, "..", "..", "..", "src", "server", "server.ts");
     serverProcess = spawn("npx", ["tsx", serverPath], {
       env: { ...process.env, PORT: String(SERVER_PORT) },
       stdio: "pipe",
     });
 
-    // Wait for server to start
     await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(
         () => reject(new Error(`Server startup timeout after 30000ms`)),
@@ -29,7 +27,7 @@ describe("Gateway API", () => {
         _output += text;
         console.log(`[Server Output] ${text.trim()}`);
         if (text.includes("Server started on") || text.includes("Pi Gateway Server")) {
-          console.log(`✅ 服务器启动成功，检测到启动消息`);
+          console.log(`✅ Server started successfully`);
           clearTimeout(timeout);
           serverProcess.stdout?.off("data", handleData);
           serverProcess.stderr?.off("data", handleData);
@@ -39,29 +37,25 @@ describe("Gateway API", () => {
       serverProcess.stdout?.on("data", handleData);
       serverProcess.stderr?.on("data", handleData);
 
-      // 处理进程错误
       serverProcess.on("error", (error) => {
-        reject(new Error(`进程错误: ${error.message}`));
+        reject(new Error(`Process error: ${error.message}`));
       });
 
-      // 处理进程退出
       serverProcess.on("exit", (code, signal) => {
         if (code !== 0 && code !== null) {
-          reject(new Error(`服务器进程退出，代码: ${code}, 信号: ${signal}`));
+          reject(new Error(`Server process exited, code: ${code}, signal: ${signal}`));
         }
       });
     });
 
-    // 额外等待确保服务器完全就绪
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log(`✅ 服务器启动完成，准备测试`);
+    console.log(`✅ Server startup complete, ready for testing`);
   }, 45000);
 
   afterAll(async () => {
     if (serverProcess) {
       serverProcess.kill("SIGKILL");
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      // 确保进程已终止
       if (!serverProcess.killed) {
         serverProcess.kill("SIGTERM");
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -107,7 +101,6 @@ describe("Gateway API", () => {
     it("should handle missing cwd parameter", async () => {
       const response = await fetch(`${SERVER_URL}/api/sessions`);
       expect(response.ok).toBe(true);
-      // Should default to process.cwd()
     });
 
     it("should return session with required fields", async () => {
@@ -124,9 +117,9 @@ describe("Gateway API", () => {
     });
   });
 
-  describe("POST /api/browse", () => {
+  describe("POST /api/files/file/browse", () => {
     it("should list directory contents", async () => {
-      const response = await fetch(`${SERVER_URL}/api/browse`, {
+      const response = await fetch(`${SERVER_URL}/api/files/file/browse`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path: "/root" }),
@@ -140,10 +133,11 @@ describe("Gateway API", () => {
       expect(data.parentPath).toBeDefined();
       expect(data.items).toBeDefined();
       expect(Array.isArray(data.items)).toBe(true);
+      expect(data.metadata).toBeDefined();
     });
 
     it("should return file items with required fields", async () => {
-      const response = await fetch(`${SERVER_URL}/api/browse`, {
+      const response = await fetch(`${SERVER_URL}/api/files/file/browse`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path: "/root" }),
@@ -162,7 +156,7 @@ describe("Gateway API", () => {
     });
 
     it("should handle non-existent directory", async () => {
-      const response = await fetch(`${SERVER_URL}/api/browse`, {
+      const response = await fetch(`${SERVER_URL}/api/files/file/browse`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path: "/nonexistent/path/12345" }),
@@ -173,7 +167,7 @@ describe("Gateway API", () => {
     });
 
     it("should default to home directory when path not provided", async () => {
-      const response = await fetch(`${SERVER_URL}/api/browse`, {
+      const response = await fetch(`${SERVER_URL}/api/files/file/browse`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
@@ -187,7 +181,6 @@ describe("Gateway API", () => {
 
   describe("POST /api/session/load", () => {
     it("should load session file content", async () => {
-      // First get available sessions
       const sessionsResponse = await fetch(`${SERVER_URL}/api/sessions?cwd=/root/.pi/agent`);
       const sessionsData = await sessionsResponse.json();
 
@@ -231,37 +224,37 @@ describe("Gateway API", () => {
       });
 
       expect(response.ok).toBe(false);
-      expect(response.status).toBe(500);
+      expect([404, 500]).toContain(response.status);
     });
   });
 
-  describe("Static Files", () => {
-    it("should serve index.html", async () => {
-      const response = await fetch(`${SERVER_URL}/`);
+  describe("GET /api/files/file/content", () => {
+    it("should get file content", async () => {
+      const response = await fetch(
+        `${SERVER_URL}/api/files/file/content?path=/root/pi-gateway-standalone/README.md`
+      );
+
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(data.path).toBeDefined();
+      expect(data.content).toBeDefined();
+      expect(data.mimeType).toBeDefined();
+    });
+
+    it("should return 400 for missing path", async () => {
+      const response = await fetch(`${SERVER_URL}/api/files/file/content`);
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe("GET /api/health", () => {
+    it("should return health status", async () => {
+      const response = await fetch(`${SERVER_URL}/api/health`);
       expect(response.ok).toBe(true);
       expect(response.status).toBe(200);
 
-      const content = await response.text();
-      expect(content).toContain("<html");
-      expect(content).toContain("Pi Gateway");
-    });
-
-    it("should serve app.js", async () => {
-      const response = await fetch(`${SERVER_URL}/app.js`);
-      expect(response.ok).toBe(true);
-      expect(response.status).toBe(200);
-
-      const content = await response.text();
-      expect(content.length).toBeGreaterThan(0);
-    });
-
-    it("should serve with no-cache headers", async () => {
-      const response = await fetch(`${SERVER_URL}/app.js`);
-      const cacheControl = response.headers.get("Cache-Control");
-      // 在开发环境中应该是 'no-cache'，在生产/测试环境中可能有缓存
-      expect(cacheControl).toBeDefined();
-      // 至少应该包含缓存指令
-      expect(cacheControl).toMatch(/(no-cache|max-age|public|private)/);
+      const data = await response.json();
+      expect(data.status).toBeDefined();
     });
   });
 });

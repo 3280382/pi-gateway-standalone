@@ -12,7 +12,7 @@ export const TEST_CONFIG = {
   timestamp: process.env.TEST_TIMESTAMP || new Date().toISOString(),
   port: process.env.TEST_PORT
     ? parseInt(process.env.TEST_PORT, 10)
-    : 3000 + Math.floor(Math.random() * 1000),
+    : 3200,
   logLevel: process.env.TEST_LOG_LEVEL || "info",
 };
 
@@ -195,7 +195,12 @@ export class BrowserTestHelper {
 export class TestServerManager {
   private logger: TestLogger;
   private isStarted = false;
+  // @ts-ignore properties used via dynamic assignment
   private port: number;
+  // @ts-ignore properties used via dynamic assignment
+  private serverLogFile: string;
+  // @ts-ignore properties used via dynamic assignment
+  private useTmux = false;
 
   constructor(port?: number) {
     this.logger = new TestLogger("server-manager", "backend");

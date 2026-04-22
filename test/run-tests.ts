@@ -23,16 +23,11 @@ const RESULTS_DIR = `${PROJECT_ROOT}/test-results/${TEST_TIMESTAMP}`;
 const BACKUP_DIR = `${PROJECT_ROOT}/test-results/backups`;
 const LATEST_LINK = `${PROJECT_ROOT}/test-results/latest`;
 
-// 使用递增端口避免冲突
-let currentPort = 3800;
-function getNextPort(): number {
-  return currentPort++;
-}
+// 测试固定端口
+const TEST_PORT = 3200;
 
 const TEST_CONFIG = {
-  get port() {
-    return getNextPort();
-  },
+  port: TEST_PORT,
   timestamp: TEST_TIMESTAMP,
   resultsDir: RESULTS_DIR,
 };
@@ -268,7 +263,7 @@ async function runTerminalServerTests(): Promise<boolean> {
         ...process.env,
         TEST_RESULTS_DIR: RESULTS_DIR,
         TEST_TIMESTAMP: TEST_TIMESTAMP,
-        TEST_PORT: String(getNextPort()),
+        TEST_PORT: String(TEST_PORT),
         NODE_ENV: "test",
       },
       cwd: PROJECT_ROOT,
@@ -320,7 +315,7 @@ async function runTerminalClientTests(): Promise<boolean> {
           ...process.env,
           TEST_RESULTS_DIR: RESULTS_DIR,
           TEST_TIMESTAMP: TEST_TIMESTAMP,
-          TEST_PORT: String(getNextPort()),
+          TEST_PORT: String(TEST_PORT),
           NODE_ENV: "test",
         },
         cwd: PROJECT_ROOT,

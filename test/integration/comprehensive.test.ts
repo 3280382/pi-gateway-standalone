@@ -21,7 +21,7 @@ describe("Comprehensive Integration Tests", () => {
   beforeAll(async () => {
     logger.info("初始化综合集成测试");
     await server.start();
-    const port = process.env.TEST_PORT || 3000;
+    const port = process.env.TEST_PORT || 3200;
     wsUrl = `ws://127.0.0.1:${port}/ws`;
     httpUrl = `http://127.0.0.1:${port}`;
   });

@@ -9,7 +9,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { expect, test } from "@playwright/test";
 
 // Test Configuration
-const TEST_PORT = 3456; // Fixed port for E2E tests
+const TEST_PORT = 3200; // Fixed port for E2E tests
 const TEST_CONFIG = {
   serverPort: TEST_PORT,
   appUrl: `http://127.0.0.1:${TEST_PORT}`,
