@@ -1497,19 +1497,17 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
     if (!kind2 || !safeFilters.kind2[kind2]) return false;
 
     // Content-level filtering for assistant messages:
-    // A message should be hidden if it contains content blocks whose types are all disabled
+    // Only intercept when a message's kind2 does NOT cover a disabled content type it contains.
+    // Prevents misclassified messages (e.g. kind2=tool but contains thinking) from escaping.
     if (kind1 === "assistant" && message.content?.length) {
       const contentTypes = new Set(message.content.map((c) => c.type));
       const hasThinking = contentTypes.has("thinking");
       const hasTool = contentTypes.has("tool") || contentTypes.has("tool_use");
-      const hasText = contentTypes.has("text");
 
-      // If message contains thinking but thinking filter is off, hide it
-      if (hasThinking && !safeFilters.kind2.thinking) return false;
-      // If message contains tool but tool filter is off, hide it
-      if (hasTool && !safeFilters.kind2.tool) return false;
-      // If message contains text but response filter is off, hide it
-      if (hasText && !safeFilters.kind2.response) return false;
+      if (kind2 === "tool" && hasThinking && !safeFilters.kind2.thinking) return false;
+      if (kind2 === "thinking" && hasTool && !safeFilters.kind2.tool) return false;
+      if (kind2 === "response" && hasThinking && !safeFilters.kind2.thinking) return false;
+      if (kind2 === "response" && hasTool && !safeFilters.kind2.tool) return false;
     }
 
     // Level 3: Kind3 filtering for specific subtypes
