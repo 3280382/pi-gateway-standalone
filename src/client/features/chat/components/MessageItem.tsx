@@ -183,6 +183,7 @@ export const MessageItem = memo(
     showThinking,
     showTools = true,
     showText = true,
+    searchFilters,
     visibleContentTypes,
   }: MessageItemProps) {
     // DEBUG: Log message rendering
@@ -208,8 +209,6 @@ export const MessageItem = memo(
     const isUser = kind1 === "user";
     const isSysinfo = kind1 === "sysinfo";
     const isAssistant = kind1 === "assistant";
-
-    const { searchFilters } = props;
 
     const blocks = useMemo(() => {
       if (!message.content || !Array.isArray(message.content)) return [];
