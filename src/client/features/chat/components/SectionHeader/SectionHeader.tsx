@@ -2,7 +2,7 @@
  * SectionHeader - Shared UI Component
  */
 
-import type { SectionHeaderProps } from "@/types/sidebar";
+import type { SectionHeaderProps } from "@/features/chat/types/sidebar";
 import styles from "./SectionHeader.module.css";
 
 export function SectionHeader({ title, action }: SectionHeaderProps) {

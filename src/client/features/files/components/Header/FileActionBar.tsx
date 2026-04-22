@@ -35,7 +35,11 @@ interface FileActionBarProps {
 export function FileActionBar({ onExecute, onOpenBottomPanel }: FileActionBarProps) {
   // ========== 1. State ==========
   const { selectedActionFile, selectedActionFileName } = useFileStore();
-  const { viewFile, editFile, executeFileStream } = useFileViewer();
+  const {
+    loadFile: viewFile,
+    saveFile: editFile,
+    execute: executeFileStream,
+  } = useFileViewer() as any;
 
   // ========== 2. Ref ==========
   // 暂无直接DOM引用

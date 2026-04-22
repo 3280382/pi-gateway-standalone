@@ -18,7 +18,7 @@ export interface UseInputAreaOptions {
   isStreaming: boolean;
   isRunning?: boolean;
   onChange: (text: string) => void;
-  onSend: () => void;
+  onSend: (text?: string) => void;
   onAbort: () => void;
   onSteer?: (text: string) => void;
   onBashCommand?: (command: string) => void;
@@ -92,7 +92,6 @@ export function useInputArea(options: UseInputAreaOptions): UseInputAreaReturn {
     onAbort,
     onSteer,
     onBashCommand,
-    onSlashCommand,
     onSendWithImages,
   } = options;
 
@@ -214,7 +213,7 @@ export function useInputArea(options: UseInputAreaOptions): UseInputAreaReturn {
         }
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
-          filePicker.selectCurrent();
+          filePicker.close();
           return;
         }
         if (e.key === "Escape") {
@@ -237,7 +236,7 @@ export function useInputArea(options: UseInputAreaOptions): UseInputAreaReturn {
         }
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
-          slashCommands.selectCurrent();
+          slashCommands.close();
           return;
         }
         if (e.key === "Escape") {
@@ -349,7 +348,5 @@ export function useInputArea(options: UseInputAreaOptions): UseInputAreaReturn {
     handleSend,
     insertTextAtCursor,
     focusInput,
-    // 暴露 ref 供外部使用
-    textareaRef: textareaRef as React.RefObject<HTMLTextAreaElement>,
   };
 }

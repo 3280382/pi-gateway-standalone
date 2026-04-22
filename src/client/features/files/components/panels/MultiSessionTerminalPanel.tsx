@@ -73,8 +73,9 @@ export function MultiSessionTerminalPanel({
   const terminalRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const terminalInstances = useRef<Map<string, Terminal>>(new Map());
   const fitAddons = useRef<Map<string, FitAddon>>(new Map());
-  const _resizeObserver = useRef<ResizeObserver | null>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const isResizing = useRef(false);
+  void resizeObserverRef; // referenced for potential future use
   const resizeStartY = useRef(0);
   const resizeStartHeight = useRef(height);
   // Use ref to avoid stale closure in xterm event handlers
@@ -227,12 +228,7 @@ export function MultiSessionTerminalPanel({
         disposeTerminal(id);
       }
     });
-  }, [
-    disposeTerminal,
-    initTerminal, // Initialize terminals for new sessions
-    sessions.forEach,
-    sessions.map,
-  ]); // Only depend on size, not the array itself
+  }, [sessions.forEach, sessions.map]); // Only depend on size, not the array itself
 
   // Focus active terminal
   useEffect(() => {

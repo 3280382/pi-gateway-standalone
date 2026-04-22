@@ -84,7 +84,7 @@ function createPromiseWithTimeout<T>({
       reject(new Error(timeoutMessage));
     }, timeoutMs);
 
-    const unsubscribe = websocketService.on(eventName, (data: T) => {
+    const unsubscribe = websocketService.on(eventName as any, (data: T) => {
       clearTimeout(timeout);
       onSuccess(data);
       unsubscribe();
@@ -143,6 +143,8 @@ export function useChatController(): EnhancedChatController {
       const userMessage: Message = {
         id: generateMessageId(),
         role: "user",
+        kind1: "user",
+        kind2: "prompt",
         content,
         timestamp: new Date(),
       };
@@ -172,6 +174,8 @@ export function useChatController(): EnhancedChatController {
       const userMessage: Message = {
         id: generateMessageId(),
         role: "user",
+        kind1: "user",
+        kind2: "prompt",
         content: [{ type: "text", text: text.trim() }],
         timestamp: new Date(),
       };
@@ -200,7 +204,7 @@ export function useChatController(): EnhancedChatController {
     },
 
     toggleToolsCollapse: (messageId: string) => {
-      chatStore.toggleToolsCollapse(messageId);
+      (chatStore as any).toggleToolsCollapse(messageId);
     },
 
     deleteMessage: (messageId: string) => {
@@ -341,9 +345,13 @@ export function useChatController(): EnhancedChatController {
       });
     },
 
+    setShowTools: (show: boolean) => {
+      (chatStore as any).setShowTools(show);
+    },
+
     // 工作directories
     changeWorkingDir: async (path: string) => {
-      await createPromiseWithTimeout<void>({
+      await createPromiseWithTimeout<any>({
         timeoutMessage: "更改工作directories超时",
         eventName: "dir_changed",
         onSuccess: (data) => {
@@ -680,7 +688,7 @@ export function setupWebSocketListeners(): void {
         // 尝试更新关联的工具
         store.updateToolOutput(data.toolCallId, data?.result || "", error);
 
-        const state = store.getState();
+        const state = (store as any).getState?.() ?? store;
         const activeTool = state.activeTools?.get(data.toolCallId);
         const hasStreamingTool = state.streamingToolCalls?.has(data.toolCallId) ?? false;
         const hasCurrentMessage =
@@ -732,15 +740,13 @@ export function setupWebSocketListeners(): void {
 
           if (!messageUpdated) {
             // 未找到关联消息，创建独立工具结果消息
-            console.log(
-              `[${ts}] [TOOL_ORPHAN] Creating standalone message for ${data.toolCallId}`
-            );
+            console.log(`[${ts}] [TOOL_ORPHAN] Creating standalone message for ${data.toolCallId}`);
 
             // 获取保存的工具信息
             const toolInfo = executingTools.get(data.toolCallId);
 
             // Determine kind3 based on tool execution result
-            const resultKind3 = error ? "tool_error" : "tool_success";
+            const resultKind3: any = error ? "tool_error" : "tool_success";
 
             store.addMessage({
               id: `tool-result-${Date.now()}`,
@@ -1087,6 +1093,23 @@ export function setupWebSocketListeners(): void {
     if (data?.resourceFiles) {
       useSessionStore.getState().setResourceFiles(data.resourceFiles);
     }
+  });
+
+  // =========================================================================
+  // Heartbeat Events - WebSocket Ping/Pong
+  // =========================================================================
+  websocketService.on("ping", () => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] ping`);
+    // Update ping time in session store
+    useSessionStore.getState().updateHeartbeatPing();
+  });
+
+  websocketService.on("pong", (data: any) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] pong`, data);
+    // Update pong time and latency in session store
+    useSessionStore.getState().updateHeartbeatPong();
   });
 
   // Agent end handler - 已在 setupWebSocketListeners 中处理

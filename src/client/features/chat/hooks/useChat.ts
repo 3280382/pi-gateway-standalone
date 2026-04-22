@@ -113,6 +113,8 @@ export function useChat(): UseChatReturn {
     const userMessage: Message = {
       id: generateMessageId(),
       role: "user",
+      kind1: "user",
+      kind2: "prompt",
       content: [{ type: "text", text: processed }],
       timestamp: new Date(),
     };
@@ -226,4 +228,5 @@ export function useChat(): UseChatReturn {
 // Re-export types
 // ============================================================================
 
-export type { Message, MessageContent, ToolExecution };
+export type { Message, ToolExecution };
+export type { MessageContent } from "@/features/chat/types/chat";

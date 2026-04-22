@@ -177,7 +177,8 @@ export function XTermTerminalPanel({ height, onClose, onHeightChange }: XTermTer
         outputBuffer.get(sessionId)?.push(outputData);
 
         // Flush if buffer gets too large
-        if (outputBuffer.get(sessionId)?.length > 100) {
+        const buffer = outputBuffer.get(sessionId);
+        if (buffer && buffer.length > 100) {
           flushBuffer(sessionId);
         }
       })
@@ -294,7 +295,6 @@ export function XTermTerminalPanel({ height, onClose, onHeightChange }: XTermTer
       rows: 40,
       cols: 120,
       tabStopWidth: 2,
-      fastScrollModifier: "alt",
       fastScrollSensitivity: 5,
     });
 
@@ -363,7 +363,7 @@ export function XTermTerminalPanel({ height, onClose, onHeightChange }: XTermTer
     terminalInstances.current.set(sessionId, term);
     fitAddons.current.set(sessionId, fitAddon);
     term.focus();
-  };
+  }
 
   function disposeTerminal(sessionId: string) {
     const term = terminalInstances.current.get(sessionId);
@@ -374,7 +374,7 @@ export function XTermTerminalPanel({ height, onClose, onHeightChange }: XTermTer
     fitAddons.current.delete(sessionId);
     terminalRefs.current.delete(sessionId);
     commandBuffers.current.delete(sessionId);
-  };
+  }
 
   // ========== Resize Handling ==========
   const handleResizeStart = useCallback(

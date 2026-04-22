@@ -14,7 +14,10 @@ export {
   createSidebarController,
   useSidebarController,
 } from "@/features/chat/services/api/sidebarApi";
-export { systemPromptApi } from "@/features/chat/services/api/systemPromptApi";
+export {
+  getSystemPrompt,
+  formatSystemPromptContent,
+} from "@/features/chat/services/api/systemPromptApi";
 export * as fileApi from "@/features/files/services/api/fileApi";
 
 // API Client

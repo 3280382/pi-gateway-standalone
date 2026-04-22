@@ -9,7 +9,7 @@
 import type React from "react";
 import { memo, useCallback, useRef, useState } from "react";
 import * as fileApi from "@/features/files/services/api/fileApi";
-import * as todoApi from "@/features/files/services/api/todoApi";
+// import * as todoApi from "@/features/files/services/api/todoApi";
 import type { FileItem as FileItemType } from "@/features/files/stores/fileStore";
 import { useFileStore } from "@/features/files/stores/fileStore";
 import { formatDate, formatFileSize } from "@/lib/formatters";
@@ -86,9 +86,7 @@ export const FileItem = memo<FileItemProps>(
     const pendingTodos = todos.filter((t) => !t.checked);
     const hasTodos = todos.length > 0;
     const hasPendingTodos = pendingTodos.length > 0;
-    const _todoPriorityColor = hasPendingTodos
-      ? todoApi.getPriorityColor(pendingTodos[0].tags)
-      : "#8b949e";
+    void hasPendingTodos; // used for conditional rendering logic
 
     // Group合样式
     const itemClassName = [

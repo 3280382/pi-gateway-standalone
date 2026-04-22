@@ -42,7 +42,11 @@ interface FileToolbarProps {
   onNavigate?: (path: string) => void;
 }
 
-export function FileToolbar({ workingDir, onRefresh, onNavigate }: FileToolbarProps) {
+export function FileToolbar({
+  workingDir,
+  onRefresh: _onRefresh,
+  onNavigate: _onNavigate,
+}: FileToolbarProps) {
   // ========== 1. State ==========
   const {
     viewMode,

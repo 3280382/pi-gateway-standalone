@@ -84,7 +84,7 @@ export function ProcessTreeViewer() {
           reject(new Error("Timeout"));
         }, 10000);
 
-        const handler = (data: unknown) => {
+        const handler = (data: ProcessTreeData) => {
           clearTimeout(timeout);
           cleanup();
           resolve(data);

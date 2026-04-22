@@ -36,12 +36,7 @@ export {
   MessageItem,
   MessageList,
   // Sidebar components
-  RecentWorkspaces,
-  Sessions,
-  Settings,
   SidebarPanel,
-  WorkingDirectory,
 } from "./components";
-// Layout & Page
-export { ChatLayout } from "./layout";
+// Page
 export { ChatPage } from "./page";

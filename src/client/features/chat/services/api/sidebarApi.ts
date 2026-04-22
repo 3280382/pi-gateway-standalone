@@ -38,8 +38,6 @@ export function useSidebarController(): SidebarController {
       (path: string) =>
         sessionManager.switchDirectory(path, {
           clearSessions: true,
-          loadSessions: true,
-          restoreLastSession: true,
         }),
       []
     ),
@@ -83,8 +81,6 @@ export function createSidebarController(): SidebarController {
     changeWorkingDir: (path: string) =>
       sessionManager.switchDirectory(path, {
         clearSessions: false,
-        loadSessions: false,
-        restoreLastSession: true,
       }),
 
     selectSession: (id: string) => sessionManager.selectSession(id),

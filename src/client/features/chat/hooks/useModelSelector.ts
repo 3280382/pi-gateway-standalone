@@ -35,7 +35,7 @@ interface UseModelSelectorOptions {
 }
 
 export function useModelSelector(options: UseModelSelectorOptions): UseModelSelectorReturn {
-  const { currentModel, onModelChange } = options;
+  const { currentModel: _currentModel, onModelChange } = options;
 
   const [isOpen, setIsOpen] = useState(false);
   const [models, setModels] = useState<Model[]>([]);

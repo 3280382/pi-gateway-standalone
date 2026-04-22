@@ -5,7 +5,7 @@
 
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { TreeNode } from "@/features/files/services/api/fileApi";
+import type { TreeNode } from "@/features/files/types";
 import styles from "./TreeViewModal.module.css";
 
 export interface TreeViewModalProps {

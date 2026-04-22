@@ -2,13 +2,13 @@
  * Files Feature Services
  */
 
-// 类型导出
+// 类型导出（从 types 模块重新导出）
 export type {
   BrowseResponse,
   FileContentResponse,
   TreeNode,
   TreeResponse,
-} from "./api/fileApi";
+} from "@/features/files/types";
 // 命名空间导出 - 避免命名冲突
 export * as fileApi from "./api/fileApi";
 // 工具函数保持直接导出（这些不会冲突）
@@ -38,7 +38,4 @@ export type {
 export * as todoApi from "./api/todoApi";
 
 // Service 层（业务逻辑Group合）
-export {
-  getPersistedPath,
-  initializeFilePath,
-} from "./initialization";
+export { getInitialPath } from "./initialization";

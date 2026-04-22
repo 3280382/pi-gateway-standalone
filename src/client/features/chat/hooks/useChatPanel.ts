@@ -25,6 +25,8 @@ function createUserMessage(text: string): Message {
   return {
     id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     role: "user",
+    kind1: "user",
+    kind2: "prompt",
     content: [{ type: "text", text }],
     timestamp: new Date(),
   };
@@ -34,6 +36,8 @@ function createSystemMessage(text: string): Message {
   return {
     id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     role: "system",
+    kind1: "sysinfo",
+    kind2: "event",
     content: [{ type: "text", text }],
     timestamp: new Date(),
   };
@@ -114,9 +118,7 @@ export function useChatPanel(): UseChatPanelReturn {
   // ===== [ANCHOR:STORE_SELECTORS] =====
   const inputText = useChatStore((state) => state.inputText);
   const messages = useChatStore((state) => state.messages);
-  const _currentStreamingMessage = useChatStore((state) => state.currentStreamingMessage);
-  const _streamingContent = useChatStore((state) => state.streamingContent);
-  const _streamingThinking = useChatStore((state) => state.streamingThinking);
+
   const chatController = useChatController();
 
   // ===== [ANCHOR:EFFECTS] =====
@@ -257,7 +259,7 @@ export function useChatPanel(): UseChatPanelReturn {
       const { handleServerMessages } = await import("@/features/chat/utils/messageUtils");
 
       // 使用工具函数合并消息，避免重复
-      const merged = handleServerMessages(chatStore.messages, response.messages || []);
+      const merged = handleServerMessages(response.messages || []);
 
       // 替换消息列表（保留流式消息在末尾）
       const streamingMessage = chatStore.currentStreamingMessage;

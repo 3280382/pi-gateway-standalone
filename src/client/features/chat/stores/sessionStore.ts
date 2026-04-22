@@ -79,6 +79,13 @@ export interface ModelInfo {
   input?: ("text" | "image")[];
 }
 
+export interface HeartbeatStatus {
+  lastPingTime: number | null;
+  lastPongTime: number | null;
+  latency: number | null; // ms
+  connectionQuality: "excellent" | "good" | "poor" | "disconnected";
+}
+
 export interface ChatSessionState {
   // 当前工作目录（运行时副本，从全局 workspaceStore 同步）
   workingDir: string;
@@ -93,6 +100,10 @@ export interface ChatSessionState {
   // 服务器状态
   serverPid: number | null;
   isConnected: boolean;
+  // 心跳状态
+  heartbeat: HeartbeatStatus;
+  // 心跳间隔配置（毫秒，默认30秒）
+  heartbeatInterval: number;
   // 资源文件路径
   resourceFiles: ResourceFiles | null;
 }
@@ -115,6 +126,13 @@ interface ChatSessionActions {
   setServerPid: (pid: number | null) => void;
   setIsConnected: (connected: boolean) => void;
 
+  // 心跳状态
+  updateHeartbeatPing: () => void;
+  updateHeartbeatPong: () => void;
+  setHeartbeatQuality: (quality: HeartbeatStatus["connectionQuality"]) => void;
+  setHeartbeatInterval: (interval: number) => void;
+  resetHeartbeat: () => void;
+
   // 资源文件
   setResourceFiles: (files: ResourceFiles | null) => void;
 }
@@ -132,6 +150,14 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
       availableModels: [],
       serverPid: null,
       isConnected: false,
+      // 心跳状态
+      heartbeat: {
+        lastPingTime: null,
+        lastPongTime: null,
+        latency: null,
+        connectionQuality: "disconnected",
+      },
+      heartbeatInterval: 30000, // 默认30秒
       resourceFiles: null,
 
       // ===== 运行时操作 =====
@@ -147,6 +173,46 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
 
       setServerPid: (pid) => set({ serverPid: pid }),
       setIsConnected: (connected) => set({ isConnected: connected }),
+
+      // 心跳状态更新
+      updateHeartbeatPing: () =>
+        set((state) => ({
+          heartbeat: {
+            ...state.heartbeat,
+            lastPingTime: Date.now(),
+          },
+        })),
+      updateHeartbeatPong: () =>
+        set((state) => {
+          const now = Date.now();
+          const latency = state.heartbeat.lastPingTime ? now - state.heartbeat.lastPingTime : null;
+          return {
+            heartbeat: {
+              ...state.heartbeat,
+              lastPongTime: now,
+              latency,
+              connectionQuality:
+                latency && latency < 100 ? "excellent" : latency && latency < 500 ? "good" : "poor",
+            },
+          };
+        }),
+      setHeartbeatQuality: (quality) =>
+        set((state) => ({
+          heartbeat: {
+            ...state.heartbeat,
+            connectionQuality: quality,
+          },
+        })),
+      setHeartbeatInterval: (interval) => set({ heartbeatInterval: interval }),
+      resetHeartbeat: () =>
+        set({
+          heartbeat: {
+            lastPingTime: null,
+            lastPongTime: null,
+            latency: null,
+            connectionQuality: "disconnected",
+          },
+        }),
 
       setResourceFiles: (files) => set({ resourceFiles: files }),
     }),

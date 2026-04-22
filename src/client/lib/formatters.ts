@@ -47,7 +47,7 @@ export function formatTimeAgo(date: Date | string | number): string {
   const diffDay = Math.floor(diffHour / 24);
 
   if (diffDay > 30) {
-    return formatDate(typeof date === "string" ? date : date.toISOString());
+    return formatDate(typeof date === "string" ? date : new Date(date).toISOString());
   }
   if (diffDay > 0) return `${diffDay}days ago`;
   if (diffHour > 0) return `${diffHour}hours ago`;

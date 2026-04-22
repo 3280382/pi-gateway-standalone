@@ -224,7 +224,7 @@ export interface ChatState {
 
 export interface ChatController {
   // Message Sending
-  sendMessage: (text: string) => Promise<void>;
+  sendMessage: (text: string, images?: any[]) => Promise<void>;
   abortGeneration: () => void;
 
   // Input

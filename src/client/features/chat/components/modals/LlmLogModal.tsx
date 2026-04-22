@@ -17,6 +17,7 @@ interface LogEntry {
 
 export function LlmLogModal() {
   const { isLlmLogOpen, closeLlmLog } = useModalStore();
+  const llmLogStore = useLlmLogStore() as any;
   const {
     enabled,
     refreshInterval,
@@ -26,7 +27,7 @@ export function LlmLogModal() {
     setRefreshInterval,
     setTruncate,
     setTruncateSize,
-  } = useLlmLogStore();
+  } = llmLogStore;
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(false);
 

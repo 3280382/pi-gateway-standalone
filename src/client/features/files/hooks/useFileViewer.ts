@@ -116,10 +116,10 @@ const LANG_MAP: Record<string, string> = {
 };
 
 // Prism.js 语言映射 - 用于查看模式（某些语言需要映射到 Prism 支持的名字）
-const _PRISM_LANG_MAP: Record<string, string> = {
-  tsx: "typescript", // Prism 使用 typescript 来Height亮 TSX
-  jsx: "javascript", // Prism 使用 javascript 来Height亮 JSX
-};
+// const PRISM_LANG_MAP: Record<string, string> = {
+//   tsx: "typescript",
+//   jsx: "javascript",
+// };
 
 export interface FileTypeInfo {
   isImage: boolean;

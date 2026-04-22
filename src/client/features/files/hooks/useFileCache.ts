@@ -67,7 +67,7 @@ export function useFileCache(): UseFileCacheResult {
       // 限制缓存大小（LRU策略）
       if (newCache.size > 50) {
         const firstKey = newCache.keys().next().value;
-        newCache.delete(firstKey);
+        if (firstKey) newCache.delete(firstKey);
       }
 
       setPathCache(newCache);

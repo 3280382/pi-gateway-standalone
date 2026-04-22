@@ -64,53 +64,6 @@ function safeString(val: unknown): string {
 }
 
 /**
- * Parse tool params, extract key infofor top display
- */
-function _parseToolSummary(toolName: string, args: string | undefined): string {
-  if (!args) return "";
-
-  try {
-    const parsed = JSON.parse(args);
-
-    // Files写入类工具 - show file path
-    if (["write_file", "create_file", "edit_file", "apply_diff"].includes(toolName)) {
-      const path = parsed.path || parsed.file_path || parsed.filepath || parsed.filePath;
-      if (path) {
-        // Simplify path display
-        const shortPath = path.split("/").pop() || path;
-        return `→ ${shortPath}`;
-      }
-    }
-
-    // bash command - show first 20 chars of command
-    if (toolName === "bash" && parsed.command) {
-      const cmd = parsed.command.slice(0, 25);
-      return cmd.length < parsed.command.length ? `${cmd}...` : cmd;
-    }
-
-    // read/grep etc - show path
-    if (["read", "grep", "find"].includes(toolName)) {
-      const path = parsed.path || parsed.file || parsed.pattern;
-      if (path) {
-        const shortPath = String(path).split("/").pop() || String(path);
-        return shortPath.slice(0, 25);
-      }
-    }
-
-    // Others工具 - show first string parameter
-    for (const key of Object.keys(parsed)) {
-      if (typeof parsed[key] === "string" && parsed[key].length > 0) {
-        return `${key}: ${parsed[key].slice(0, 25)}${parsed[key].length > 25 ? "..." : ""}`;
-      }
-    }
-  } catch (_e) {
-    // Parse failed: return first 30 chars
-    return args.slice(0, 30) + (args.length > 30 ? "..." : "");
-  }
-  return "";
-}
-
-/**
  * Formatter utilitiesArguments显示
  * - First line shows brief info（path, command, etc）
  * - For file write tools，格式化show file path和内容
@@ -184,7 +137,6 @@ export const MessageItem = memo(
     showTools = true,
     showText = true,
     searchFilters,
-    visibleContentTypes,
   }: MessageItemProps) {
     // DEBUG: Log message rendering
     console.log(
@@ -201,9 +153,6 @@ export const MessageItem = memo(
     // Map role="system" to kind1="sysinfo" to avoid confusion with API system role
     const kind1 =
       message.kind1 || (message.role === "system" ? "sysinfo" : message.role) || "sysinfo";
-    const kind2 =
-      message.kind2 ||
-      (message.role === "user" ? "prompt" : message.role === "assistant" ? "response" : "event");
     const kind3 = message.kind3 || message.kind;
 
     const isUser = kind1 === "user";
@@ -221,7 +170,8 @@ export const MessageItem = memo(
           if (block.type === "image" || block.type === "turn_marker") return true;
           // Filter by kind2 settings
           if (block.type === "thinking" && !searchFilters.kind2.thinking) return false;
-          if ((block.type === "tool" || block.type === "tool_use") && !searchFilters.kind2.tool) return false;
+          if ((block.type === "tool" || block.type === "tool_use") && !searchFilters.kind2.tool)
+            return false;
           if (block.type === "text" && !searchFilters.kind2.response) return false;
           return true;
         });
@@ -285,7 +235,7 @@ export const MessageItem = memo(
               showThinking={showThinking}
               showTools={showTools ?? true}
               showText={showText}
-              messageKind={kind3}
+              messageKind={kind3 as any}
               kind1={kind1}
             />
           );
@@ -321,23 +271,16 @@ function GlassCard({
   isStreaming = false,
   isNewMessage = false,
   showThinking,
-  showTools = true,
   showText = true,
   messageKind,
   kind1,
 }: GlassCardProps) {
   // ========== 1. State (ALL hooks must be called before any conditional returns) ==========
   const [isExpanded, setIsExpanded] = useState(() => {
-    if (isNewMessage) return true;
     if (block.type === "text") return true;
-    // 工具有结果时默认展开（无论是流式还是历史消息）
-    if (
-      (block.type === "tool_use" || block.type === "tool") &&
-      (block.output || block.error)
-    )
-      return true;
     if (block.type === "thinking") return false;
-    return false;
+    if (block.type === "tool_use" || block.type === "tool") return false;
+    return true;
   });
   const [isCopyVisible, setIsCopyVisible] = useState(false);
   const [sysinfoExpanded, setSysinfoExpanded] = useState(false);
@@ -427,6 +370,7 @@ function GlassCard({
     const statusText =
       {
         running: "Executing...",
+        executing: "Executing...",
         pending: "Waiting...",
         timeout: "Execution timeout",
         error: "Execution failed",

@@ -9,7 +9,8 @@
  * 4. 缓冲消息与实时消息衔接 - 确保连续性
  */
 
-import type { ContentPart, Message } from "@/features/chat/types/chat";
+import type { Message } from "@/features/chat/types/chat";
+type ContentPart = any;
 
 interface ReconstructionState {
   currentMessage: Message | null;
@@ -28,7 +29,7 @@ interface PendingBlock {
   meta?: any;
 }
 
-class MessageReconstructor {
+export class MessageReconstructor {
   private state: ReconstructionState = {
     currentMessage: null,
     pendingBlocks: new Map(),
@@ -243,7 +244,6 @@ class MessageReconstructor {
   autoFix(): { action: string; data?: any } | null {
     const seq = this.eventSequence;
     const last = seq[seq.length - 1];
-    const _secondLast = seq[seq.length - 2];
 
     // 情况1: 收到 delta 但没有 start
     if (last?.includes("_delta") && !this.state.pendingBlocks.size) {

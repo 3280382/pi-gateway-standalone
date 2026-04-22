@@ -4,7 +4,6 @@
  */
 
 // UI
-export { IconButton } from "@/components/IconButton/IconButton";
 export { SectionHeader } from "@/features/chat/components/SectionHeader/SectionHeader";
 // Chat Feature
 export { useChat } from "@/features/chat/hooks";
@@ -24,7 +23,6 @@ export type {
 export * as fileApi from "@/features/files/services/api/fileApi";
 export { useWorkspaceStore } from "@/stores/workspaceStore";
 // Hooks
-export { useAppInitialization } from "@/hooks/useAppInitialization";
 export { fetchApi } from "@/services/client";
 // Services
 export { ServiceError, websocketService } from "@/services/websocket.service";

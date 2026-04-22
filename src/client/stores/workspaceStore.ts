@@ -17,14 +17,14 @@ import { APP_STORAGE_KEYS, APP_STORAGE_VERSION, APP_WORKSPACE_PERSIST } from "./
 let sidebarStore: typeof import("@/features/chat/stores/sidebarStore") | null = null;
 let sessionStore: typeof import("@/features/chat/stores/sessionStore") | null = null;
 
-function getSidebarStore() {
+function getSidebarStore(): any {
   if (!sidebarStore) {
     sidebarStore = require("@/features/chat/stores/sidebarStore");
   }
   return sidebarStore;
 }
 
-function getSessionStore() {
+function getSessionStore(): any {
   if (!sessionStore) {
     sessionStore = require("@/features/chat/stores/sessionStore");
   }

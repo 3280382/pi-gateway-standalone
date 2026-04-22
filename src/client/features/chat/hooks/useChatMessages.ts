@@ -18,7 +18,6 @@ export interface UseChatMessagesReturn {
   // Actions
   toggleMessageCollapse: (messageId: string) => void;
   toggleThinkingCollapse: (messageId: string) => void;
-  toggleToolsCollapse: (messageId: string) => void;
 }
 
 export function useChatMessages(): UseChatMessagesReturn {
@@ -28,7 +27,6 @@ export function useChatMessages(): UseChatMessagesReturn {
   const showThinking = useChatStore((s) => s.showThinking);
   const toggleMessageCollapse = useChatStore((s) => s.toggleMessageCollapse);
   const toggleThinkingCollapse = useChatStore((s) => s.toggleThinkingCollapse);
-  const toggleToolsCollapse = useChatStore((s) => s.toggleToolsCollapse);
 
   // Search过滤
   const searchQuery = useChatStore((s) => s.searchQuery);
@@ -48,6 +46,5 @@ export function useChatMessages(): UseChatMessagesReturn {
     showThinking,
     toggleMessageCollapse,
     toggleThinkingCollapse,
-    toggleToolsCollapse,
   };
 }

@@ -133,7 +133,7 @@ export function InputArea({
               type="button"
               className={styles.commandItem}
               onClick={() => {
-                onCompactSession()?.catch(console.error);
+                Promise.resolve(onCompactSession()).catch(console.error);
                 setShowToolsMenu(false);
               }}
             >
@@ -146,7 +146,7 @@ export function InputArea({
               type="button"
               className={styles.commandItem}
               onClick={() => {
-                onExportSession()?.catch(console.error);
+                Promise.resolve(onExportSession()).catch(console.error);
                 setShowToolsMenu(false);
               }}
             >
@@ -368,14 +368,6 @@ function SendIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
       <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-    </svg>
-  );
-}
-
-function _StopIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <rect x="6" y="6" width="12" height="12" rx="2" />
     </svg>
   );
 }

@@ -41,7 +41,7 @@ export function SidebarPanel({ currentView = "chat" }: SidebarPanelProps) {
   const clearError = useSidebarStore((state) => state.clearError);
 
   // 以当前工作directories为Arguments，从服务器获取所有历史 session files
-  const { isLoading: isSessionsLoading } = useSidebarSessions();
+  useSidebarSessions();
 
   // 通知服务器Sidebar可见性状态（用于优化状态广播）
   useSidebarVisibility();
@@ -59,7 +59,7 @@ export function SidebarPanel({ currentView = "chat" }: SidebarPanelProps) {
             </button>
           </div>
         )}
-        <CompactWorkspacesSection maxItems={3} />
+        <CompactWorkspacesSection />
         <SessionDropdownSection />
         {currentView === "chat" && <ModelParamsSection />}
         {currentView === "chat" && <ChatSettingsSection />}
@@ -76,13 +76,13 @@ export function SidebarPanel({ currentView = "chat" }: SidebarPanelProps) {
  * Sidebar Header
  */
 function SidebarHeader() {
-  const toggleSidebar = useSidebarStore((state) => state.toggleSidebar);
+  const toggleSidebar = useSidebarStore((state) => state.toggleVisibility);
 
   return (
     <div className={styles.header}>
       <div className={styles.logo}>π</div>
       <h2 className={styles.title}>Pi Gateway</h2>
-      <IconButton name="chevron-left" onClick={toggleSidebar} title="Toggle Sidebar" />
+      <IconButton name="leftArrow" onClick={toggleSidebar} title="Toggle Sidebar" />
     </div>
   );
 }

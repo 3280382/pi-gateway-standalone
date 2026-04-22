@@ -204,7 +204,7 @@ async function switchDirectory(targetDir: string, _options: SwitchDirOptions = {
 
   try {
     // 使用统一的 init API，传入该 workspace 的 sessionFile 用于精确恢复
-    const messageLimit = stores.session.defaultMessageLimit;
+    const messageLimit = stores.globalWorkspace.defaultMessageLimit;
     const response = await initChatWorkingDirectory(targetDir, sessionFile, 15000, messageLimit);
 
     console.log("[SessionManager.switchDirectory] 服务器返回:", {
@@ -281,7 +281,7 @@ async function selectSession(sessionId: string): Promise<void> {
   try {
     // 使用统一的 init API（传入 sessionFile 用于Exact match）
     console.log("[SessionManager.selectSession] Calling initChatWorkingDirectory...");
-    const messageLimit = stores.session.defaultMessageLimit;
+    const messageLimit = stores.globalWorkspace.defaultMessageLimit;
     const response = await initChatWorkingDirectory(
       stores.session.workingDir,
       session.path,
@@ -357,7 +357,7 @@ async function createNewSession(): Promise<void> {
       path: createResponse.sessionFile,
       name: "New Session",
       messageCount: 0,
-      lastModified: new Date().toISOString(),
+      lastModified: new Date(),
     };
 
     // 3. 添加到 session Cols表最前面（避免重复）

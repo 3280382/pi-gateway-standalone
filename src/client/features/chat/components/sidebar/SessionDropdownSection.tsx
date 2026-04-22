@@ -24,7 +24,8 @@ const REFRESH_INTERVAL_MS = 5000;
 const DEBOUNCE_MS = 3000;
 
 // Format relative time
-function formatRelativeTime(dateString: string): string {
+function formatRelativeTime(dateInput: Date | string): string {
+  const dateString = dateInput instanceof Date ? dateInput.toISOString() : dateInput;
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();

@@ -36,7 +36,7 @@ import { CHAT_STORAGE_KEYS } from "./persist.config";
 // ===== [ANCHOR:TYPES] =====
 
 interface ContentPart {
-  type: "thinking" | "text" | "tool" | "tool_use" | "turn_marker";
+  type: "thinking" | "text" | "tool" | "tool_use" | "turn_marker" | "image";
   thinking?: string;
   text?: string;
   toolCallId?: string;
@@ -45,6 +45,8 @@ interface ContentPart {
   partialArgs?: string;
   output?: string;
   error?: string;
+  status?: string;
+  imageUrl?: string;
   turnNumber?: number;
 }
 
@@ -94,6 +96,7 @@ const createInitialState = () => ({
       toolError: true,
       toolPending: true,
     },
+    dates: undefined as { from?: Date; to?: Date } | undefined,
   },
   searchResults: [] as SearchResult[],
   isSearching: false,
@@ -244,40 +247,7 @@ interface PendingUpdates {
   toolCalls?: Map<string, { id: string; name: string; args: string }>;
 }
 
-let rafId: number | null = null;
 let pendingContentUpdates: PendingUpdates = {};
-
-/**
- * 获取需要保留的内容（已固化的内容块）
- * 保留所有非流式内容块（已固化的 thinking, text, tool_use）
- */
-function _getPreservedContent(existingContent: any[]): any[] {
-  if (!existingContent || existingContent.length === 0) return [];
-
-  // 保留所有已固化的内容（thinking, text, tool_use, tool, turn_marker）
-  // 这些是已经通过 endContentBlock 固化的内容
-  return existingContent.filter((c: any) =>
-    ["thinking", "text", "tool_use", "tool", "turn_marker"].includes(c.type)
-  );
-}
-
-/**
- * 应用 RAF 批处理更新
- * 只更新流式状态，不操作 currentStreamingMessage.content
- */
-function applyRafUpdate(state: State, pending: PendingUpdates): Partial<State> | null {
-  if (!state.currentStreamingMessage) return null;
-
-  const newContent = state.streamingContent + (pending.content || "");
-  const newThinking = state.streamingThinking + (pending.thinking || "");
-  const newToolCalls = pending.toolCalls || state.streamingToolCalls;
-
-  return {
-    streamingContent: newContent,
-    streamingThinking: newThinking,
-    streamingToolCalls: newToolCalls,
-  };
-}
 
 /**
  * 构建最终消息内容
@@ -292,7 +262,8 @@ function buildFinalMessage(
   finalContentToApply: string,
   finalThinkingToApply: string
 ): { finalMessage: any | null; finalContent: any[] } {
-  const existingContent = state.currentStreamingMessage?.content || [];
+  const existingContent: ContentPart[] = (state.currentStreamingMessage?.content ||
+    []) as ContentPart[];
   const activeTools = state.activeTools || new Map();
 
   // 收集已固化内容中已有的 toolCallId，避免重复
@@ -451,16 +422,13 @@ function applyToolCompletion(
 /**
  * 统一处理流式结束（abort 和 finish）
  */
-function finalizeStreaming(
-  set: (fn: (state: State) => Partial<State>, replace?: boolean, action?: string) => void,
-  actionName: "abortStreaming" | "finishStreaming"
-) {
+function finalizeStreaming(set: any, actionName: "abortStreaming" | "finishStreaming") {
   const finalContentToApply = pendingContentUpdates.content || "";
   const finalThinkingToApply = pendingContentUpdates.thinking || "";
   pendingContentUpdates = {};
 
   set(
-    (state) => {
+    (state: State) => {
       const { finalMessage } = buildFinalMessage(state, finalContentToApply, finalThinkingToApply);
 
       return {
@@ -535,28 +503,6 @@ function applyBatchUpdates(
     // 保持 currentStreamingMessage 引用不变
     currentStreamingMessage: state.currentStreamingMessage,
   };
-}
-
-/**
- * 调度 RAF 更新
- */
-function _scheduleRafUpdate(
-  getState: () => State,
-  set: (fn: (state: State) => Partial<State>, replace?: boolean, action?: string) => void
-) {
-  if (rafId !== null) return;
-
-  rafId = requestAnimationFrame(() => {
-    const state = getState();
-    const updates = applyRafUpdate(state, pendingContentUpdates);
-
-    if (updates) {
-      set(() => updates, false, "rafBatchUpdate");
-    }
-
-    pendingContentUpdates = {};
-    rafId = null;
-  });
 }
 
 // ===== [ANCHOR:STORE] =====
@@ -769,7 +715,8 @@ export const useChatStore = create<
             (state) => {
               if (!state.currentStreamingMessage) return {};
 
-              const existingContent = state.currentStreamingMessage.content || [];
+              const existingContent: ContentPart[] = (state.currentStreamingMessage.content ||
+                []) as ContentPart[];
               let newBlock: ContentPart | null = null;
               const updates: Partial<State> = {};
 
@@ -840,7 +787,7 @@ export const useChatStore = create<
 
                 updates.currentStreamingMessage = {
                   ...state.currentStreamingMessage,
-                  content: [...existingContent, newBlock],
+                  content: [...existingContent, newBlock as ContentPart] as any,
                   kind2,
                   kind3,
                 };
@@ -866,7 +813,8 @@ export const useChatStore = create<
               const currentStreamingContent = buildContentArray(state);
 
               // 获取已固化的内容
-              const existingContent = state.currentStreamingMessage.content || [];
+              const existingContent: ContentPart[] = (state.currentStreamingMessage.content ||
+                []) as ContentPart[];
 
               // 添加轮次分隔标记（如果当前有流式内容）
               if (currentStreamingContent.length > 0) {
@@ -881,7 +829,7 @@ export const useChatStore = create<
                 currentStreamingMessage: {
                   ...state.currentStreamingMessage,
                   // 保留所有已固化内容 + 当前流式内容
-                  content: [...existingContent, ...currentStreamingContent],
+                  content: [...existingContent, ...currentStreamingContent] as any,
                 },
                 // Clear当前轮次的流式状态，开始新一轮
                 streamingThinking: "",
@@ -960,33 +908,7 @@ export const useChatStore = create<
         // Tool Actions
         setActiveTool: (tool: ToolExecution) => {
           set((state) => applyToolActivation(state, tool), false, "setActiveTool");
-
-          // 启动超时检测
-          const TOOL_EXECUTION_TIMEOUT = 60000; // 60秒超时
-          setTimeout(() => {
-            const currentState = get();
-            const activeTool = currentState.activeTools.get(tool.id);
-            if (activeTool && activeTool.status === "executing" && !activeTool.endTime) {
-              // 工具执Rows超时，标记为警告状态
-              console.warn(`[ChatStore] Tool execution timeout: ${tool.name} (${tool.id})`);
-              set(
-                (state) => {
-                  const newTools = new Map(state.activeTools);
-                  const t = newTools.get(tool.id);
-                  if (t && t.status === "executing") {
-                    newTools.set(tool.id, {
-                      ...t,
-                      status: "timeout",
-                      error: "工具执Rows超时，可能仍在后台运Rows...",
-                    });
-                  }
-                  return { activeTools: newTools };
-                },
-                false,
-                "toolExecutionTimeout"
-              );
-            }
-          }, TOOL_EXECUTION_TIMEOUT);
+          // Note: Tool execution timeout is handled by server, client just waits
         },
 
         updateToolOutput: (toolId: string, output: string, error?: string) => {
@@ -1030,12 +952,12 @@ export const useChatStore = create<
 
         setSearchFilters: (filters: Partial<ChatSearchFilters>) => {
           set(
-            (state) => ({
+            (state: any) => ({
               searchFilters: {
                 kind1: { ...state.searchFilters.kind1, ...filters.kind1 },
                 kind2: { ...state.searchFilters.kind2, ...filters.kind2 },
                 kind3: { ...state.searchFilters.kind3, ...filters.kind3 },
-                dates: filters.dates ?? state.searchFilters.dates,
+                dates: (filters as any).dates ?? state.searchFilters.dates,
               },
             }),
             false,
@@ -1485,9 +1407,22 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
 
   return messages.filter((message) => {
     // Use message's kind1/kind2/kind3 fields directly (from server)
-    const kind1 = message.kind1;
-    const kind2 = message.kind2;
+    // Fallback for messages without kind fields (e.g. user-created messages)
+    let kind1 = message.kind1;
+    let kind2 = message.kind2;
     const kind3 = message.kind3;
+
+    // Infer kind1/kind2 from role for backward compatibility
+    if (!kind1 && message.role) {
+      if (message.role === "user") kind1 = "user";
+      else if (message.role === "assistant") kind1 = "assistant";
+      else if (message.role === "system") kind1 = "sysinfo";
+    }
+    if (!kind2 && kind1) {
+      if (kind1 === "user") kind2 = "prompt";
+      else if (kind1 === "assistant") kind2 = "response";
+      else if (kind1 === "sysinfo") kind2 = "event";
+    }
 
     // Level 1: Kind1 filtering (user | assistant | sysinfo)
     if (!kind1 || !safeFilters.kind1[kind1]) return false;

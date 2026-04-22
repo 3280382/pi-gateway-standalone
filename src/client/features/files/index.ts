@@ -3,7 +3,7 @@
  */
 
 // Services
-export { initializeFilePath } from "@/features/files/services/initialization";
+export { getInitialPath } from "@/features/files/services/initialization";
 // Stores
 export { useFileStore } from "@/features/files/stores/fileStore";
 // Components - BottomMenu

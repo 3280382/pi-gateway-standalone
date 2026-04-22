@@ -80,7 +80,11 @@ interface DirectoryPickerProps {
 // Component
 // ============================================================================
 
-export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPickerProps) {
+export function DirectoryPicker({
+  currentPath: _currentPath,
+  onSelect,
+  onClose,
+}: DirectoryPickerProps) {
   // ========== 1. State ==========
   // 每次打开都从 home directories开始
   const [path, setPath] = useState(HOME_DIR);
@@ -117,7 +121,7 @@ export function DirectoryPicker({ currentPath, onSelect, onClose }: DirectoryPic
       }
 
       // 添加快速导航到 home directories按钮（如果当前不在 home）
-      if (data.currentPath !== HOME_DIR && HOME_DIR !== "/") {
+      if (data.currentPath !== HOME_DIR) {
         dirs.unshift({
           name: "🏠 ~ (home)",
           path: HOME_DIR,

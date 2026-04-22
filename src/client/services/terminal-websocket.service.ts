@@ -76,7 +76,6 @@ export class TerminalWebSocketService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
   private reconnectDelay = 1000;
-  private connectionId: string | null = null;
   private _isConnected = false;
 
   constructor() {
@@ -133,7 +132,6 @@ export class TerminalWebSocketService {
         this.ws.onclose = (event) => {
           clearTimeout(timeoutId);
           this._isConnected = false;
-          this.connectionId = null;
 
           // Only emit disconnected if we were previously connected
           if (this.reconnectAttempts === 0) {
@@ -197,7 +195,6 @@ export class TerminalWebSocketService {
       this.ws.close(1000, "Normal closure");
       this.ws = null;
       this._isConnected = false;
-      this.connectionId = null;
     }
   }
 
@@ -285,7 +282,7 @@ export class TerminalWebSocketService {
   /**
    * Subscribe to event
    */
-  on(event: TerminalEvent, handler: (...args: unknown[]) => void): () => void {
+  on(event: TerminalEvent, handler: (data: any) => void): () => void {
     if (!this.eventHandlers.has(event)) {
       this.eventHandlers.set(event, new Set());
     }
@@ -327,7 +324,6 @@ export class TerminalWebSocketService {
 
     // Store connection info
     if (type === "terminal_connected" && message.connectionId) {
-      this.connectionId = message.connectionId;
     }
 
     // Route to specific event handlers
@@ -341,7 +337,7 @@ export class TerminalWebSocketService {
       terminal_attached: "terminal_attached",
     };
 
-    const event = eventMap[type];
+    const event = eventMap[type as string];
     if (event) {
       this.emit(event, message);
     } else {
@@ -382,7 +378,7 @@ export class TerminalWebSocketService {
    * Get WebSocket URL
    */
   private getWebSocketUrl(): string {
-    const backendHost = "127.0.0.1:3000";
+    const backendHost = window.location.host;
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     return `${protocol}//${backendHost}/ws/terminal`;
   }

@@ -217,8 +217,8 @@ export function formatObject(obj: any, maxDepth = 3): string {
       },
       2
     );
-  } catch (err) {
-    return `[Unserializable: ${err.message}]`;
+  } catch (err: any) {
+    return `[Unserializable: ${err?.message ?? String(err)}]`;
   }
 }
 

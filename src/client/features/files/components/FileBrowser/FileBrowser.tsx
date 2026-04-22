@@ -47,7 +47,7 @@ export function FileBrowser({
   const { viewMode, isLoading, error, currentBrowsePath } = useFileStore();
 
   // 使用全局 workspace store 的 workingDir（用于 todo 根directories）
-  const { workingDir } = useWorkspaceStore();
+  const { currentPath: workingDir } = useWorkspaceStore();
 
   // ===== [ANCHOR:HOOKS] =====
   // 仅在激活状态下获取数据

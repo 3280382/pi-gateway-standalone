@@ -137,7 +137,7 @@ export function useChatInit(): { isConnecting: boolean } {
       useSessionStore.getState().setServerPid(pid);
       useSessionStore.getState().setCurrentModel(currentModel);
       useSessionStore.getState().setThinkingLevel(thinkingLevel as any);
-      useSessionStore.getState().setAvailableModels(allModels || []);
+      useSessionStore.getState().setAvailableModels((allModels || []) as any);
       useSessionStore.getState().setCurrentSessionFile(currentSession?.sessionFile || null);
 
       // 5.3 Sidebar 状态
@@ -163,7 +163,7 @@ export function useChatInit(): { isConnecting: boolean } {
       }
 
       // 5.5 保存Model list到 sessionStore（用于 ModelParamsSection）
-      useSessionStore.setState({ availableModels: allModels || [] });
+      useSessionStore.setState({ availableModels: (allModels || []) as any });
 
       console.log("[ChatInit] UI fully restored from server data");
     } catch (err) {

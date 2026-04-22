@@ -18,7 +18,6 @@ export type {
 } from "./chat";
 export type {
   FontSize,
-  SearchFilters,
   Session,
   SidebarController,
   SidebarState,

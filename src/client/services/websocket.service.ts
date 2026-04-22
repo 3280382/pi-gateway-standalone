@@ -32,6 +32,9 @@ export type WebSocketEvent =
   | "disconnected"
   | "error"
   | "message"
+  // Heartbeat Events
+  | "ping"
+  | "pong"
   // Session Level Events
   | "agent_start"
   | "agent_end"
@@ -44,6 +47,7 @@ export type WebSocketEvent =
   | "text_start"
   | "text_delta"
   | "text_end"
+  | "content_delta"
   // Content Block Level Events - Thinking
   | "thinking_start"
   | "thinking_delta"
@@ -53,6 +57,9 @@ export type WebSocketEvent =
   | "toolcall_delta"
   | "toolcall_end"
   // Tool Execution Level Events (Actual tool running)
+  | "tool_start"
+  | "tool_update"
+  | "tool_end"
   | "tool_execution_start"
   | "tool_execution_update"
   | "tool_execution_end"
@@ -78,6 +85,8 @@ export type WebSocketEvent =
   | "command_result"
   | "compact_result"
   | "export_result"
+  | "templates_list"
+  | "template_content"
   // Session Status Events
   | "runtime_status_broadcast"
   | "session_status"
@@ -231,7 +240,9 @@ export class WebSocketService {
     }
 
     if (this.ws.readyState !== WebSocket.OPEN) {
-      console.warn(`[WebSocket] Cannot send message: WebSocket not OPEN`);
+      console.warn(
+        `[WebSocket] Cannot send message: WebSocket not OPEN, state: ${this.ws.readyState}`
+      );
       return false;
     }
 
@@ -242,6 +253,7 @@ export class WebSocketService {
       };
 
       const messageStr = JSON.stringify(message);
+      console.log(`[WebSocket] Sending message: ${type}`, messageStr.substring(0, 100));
       this.ws.send(messageStr);
       return true;
     } catch (error) {
@@ -303,9 +315,9 @@ export class WebSocketService {
    * Get WebSocket URL (for debugging)
    */
   getWebSocketUrl(): string {
-    const backendHost = "127.0.0.1:3000";
+    const backendHost = window.location.host;
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${backendHost}`;
+    const wsUrl = `${protocol}//${backendHost}/ws`;
     wsLog.info(`WebSocket URL: ${wsUrl}`);
     return wsUrl;
   }
@@ -316,6 +328,21 @@ export class WebSocketService {
   private handleIncomingMessage(message: any): void {
     const { type, timestamp, sessionId } = message;
     const data = message;
+
+    // Handle ping from server - immediately reply with pong
+    if (type === "ping") {
+      console.log("[WebSocket] Received ping, sending pong...");
+      const sent = this.send("pong", { timestamp: Date.now() });
+      console.log("[WebSocket] Pong sent:", sent);
+      this.emit("ping", data);
+      return;
+    }
+
+    // Handle pong from server
+    if (type === "pong") {
+      this.emit("pong", data);
+      return;
+    }
 
     // Only log for non-high-frequency events
     if (type !== "content_delta" && type !== "thinking_delta" && type !== "toolcall_delta") {
@@ -395,6 +422,9 @@ export class WebSocketService {
       // Templates
       templates_list: "templates_list",
       template_content: "template_content",
+      // Heartbeat
+      ping: "ping",
+      pong: "pong",
     };
 
     const event = eventMap[type];
@@ -465,6 +495,8 @@ export class WebSocketService {
       "process_tree_data",
       "process_details",
       "usage",
+      "ping",
+      "pong",
     ];
 
     events.forEach((event) => {

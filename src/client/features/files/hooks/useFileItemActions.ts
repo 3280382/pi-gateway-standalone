@@ -62,7 +62,6 @@ export function useFileItemActions(): UseFileItemActionsResult {
     setGitHistoryFile,
     setTodoInputFile,
     setCurrentBrowsePath,
-    setSelectedActionFile,
     toggleSelection: storeToggleSelection,
     setIsMultiSelectMode,
     setDraggedItem,
@@ -162,13 +161,6 @@ export function useFileItemActions(): UseFileItemActionsResult {
       storeToggleSelection(item.path);
     },
     [isMultiSelectMode, setIsMultiSelectMode, storeToggleSelection]
-  );
-
-  const _handleSelectForAction = useCallback(
-    (item: FileItem) => {
-      setSelectedActionFile(item.path, item.name);
-    },
-    [setSelectedActionFile]
   );
 
   // ===== 拖拽操作 =====

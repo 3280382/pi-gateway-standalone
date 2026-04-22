@@ -19,9 +19,6 @@ export {
 
 // Legacy viewer store (keep for backward compatibility)
 export {
-  type FileViewerState,
-  type TerminalActions as LegacyTerminalActions,
-  type TerminalState as LegacyTerminalState,
   useFileViewerStore,
   useTerminalStore as useLegacyTerminalStore,
   useViewerStore,

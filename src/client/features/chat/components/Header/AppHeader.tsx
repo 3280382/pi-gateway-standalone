@@ -40,7 +40,7 @@ interface AppHeaderProps {
 // ============================================================================
 
 export function AppHeader({
-  currentView = "chat",
+  currentView: _currentView = "chat",
   searchQuery: externalSearchQuery,
   searchFilters: externalSearchFilters,
   onSearchQueryChange,
@@ -52,6 +52,8 @@ export function AppHeader({
   const currentPath = useWorkspaceStore((state) => state.currentPath) ?? "/root";
   const serverPid = sessionStore.serverPid;
   const isConnected = sessionStore.isConnected;
+  // Use selector to ensure component re-renders when heartbeat changes
+  const heartbeat = useSessionStore((state) => state.heartbeat);
 
   // Search state from store
   const chatStoreQuery = useChatStore(selectSearchQuery);
@@ -62,15 +64,35 @@ export function AppHeader({
   // UI State (Local)
   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
+  const [showHeartbeatTooltip, setShowHeartbeatTooltip] = useState(false);
   const workspaceDropdownRef = useRef<HTMLDivElement>(null);
+  const heartbeatDotRef = useRef<HTMLSpanElement>(null);
 
   // 最近工作directories
   const recentWorkspaces = useWorkspaceStore((state) => state.recentWorkspaces);
   const sidebarController = useSidebarController();
 
   // ========== 2. Derived Values ==========
-  const connectionStatus = isConnected ? "connected" : "disconnected";
+  const connectionStatus = isConnected ? heartbeat.connectionQuality : "disconnected";
   const pid = serverPid;
+
+  // Format timestamp for display
+  const formatTimestamp = (ts: number | null) => {
+    if (!ts) return "-";
+    const date = new Date(ts);
+    return date.toLocaleTimeString("zh-CN", {
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  };
+
+  // Format latency for display
+  const formatLatency = (lat: number | null) => {
+    if (lat === null) return "-";
+    return `${lat}ms`;
+  };
   const searchQuery = externalSearchQuery ?? chatStoreQuery;
   const filters = externalSearchFilters ?? chatStoreFilters;
 
@@ -151,7 +173,7 @@ export function AppHeader({
       if (onSearchFiltersChange) {
         onSearchFiltersChange(newFilters);
       } else {
-        chatStoreSetSearchFilters({ kind1: { [kind]: !safeFilters.kind1[kind] } });
+        chatStoreSetSearchFilters({ kind1: { [kind]: !safeFilters.kind1[kind] } as any });
       }
     },
     [filters, safeFilters.kind1, onSearchFiltersChange, chatStoreSetSearchFilters]
@@ -170,7 +192,7 @@ export function AppHeader({
       if (onSearchFiltersChange) {
         onSearchFiltersChange(newFilters);
       } else {
-        chatStoreSetSearchFilters({ kind2: { [kind2Type]: !safeFilters.kind2[kind2Type] } });
+        chatStoreSetSearchFilters({ kind2: { [kind2Type]: !safeFilters.kind2[kind2Type] } as any });
       }
     },
     [filters, safeFilters.kind2, onSearchFiltersChange, chatStoreSetSearchFilters]
@@ -189,7 +211,7 @@ export function AppHeader({
       if (onSearchFiltersChange) {
         onSearchFiltersChange(newFilters);
       } else {
-        chatStoreSetSearchFilters({ kind3: { [kind3Type]: !safeFilters.kind3[kind3Type] } });
+        chatStoreSetSearchFilters({ kind3: { [kind3Type]: !safeFilters.kind3[kind3Type] } as any });
       }
     },
     [filters, safeFilters.kind3, onSearchFiltersChange, chatStoreSetSearchFilters]
@@ -221,10 +243,18 @@ export function AppHeader({
       ) {
         setIsWorkspaceDropdownOpen(false);
       }
+      // Close heartbeat tooltip when clicking outside
+      if (
+        showHeartbeatTooltip &&
+        heartbeatDotRef.current &&
+        !heartbeatDotRef.current.contains(e.target as Node)
+      ) {
+        setShowHeartbeatTooltip(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isWorkspaceDropdownOpen]);
+  }, [isWorkspaceDropdownOpen, showHeartbeatTooltip]);
 
   // ========== 6. Render ==========
   return (
@@ -529,12 +559,68 @@ export function AppHeader({
               <span className={styles.sessionId}>{formatSessionId(currentSessionId)}</span>
             </div>
           )}
-          <div
-            className={styles.status}
-            title={`${connectionStatus}${pid ? ` (PID: ${pid})` : ""}`}
-          >
-            <span className={`${styles.statusDot} ${styles[connectionStatus]}`} />
+          <div className={styles.status} style={{ position: "relative" }}>
+            <span
+              ref={heartbeatDotRef}
+              className={`${styles.statusDot} ${styles[connectionStatus]}`}
+              onClick={() => setShowHeartbeatTooltip(!showHeartbeatTooltip)}
+              title="Click to view connection status"
+            />
             {pid && <span className={styles.pid}>{pid}</span>}
+
+            {/* Heartbeat Tooltip */}
+            {showHeartbeatTooltip && (
+              <div className={styles.heartbeatTooltip}>
+                <div className={styles.heartbeatTitle}>Connection Status</div>
+                <div className={styles.heartbeatRow}>
+                  <span>Quality:</span>
+                  <span
+                    className={`${styles.heartbeatValue} ${styles[heartbeat.connectionQuality]}`}
+                  >
+                    {heartbeat.connectionQuality === "excellent"
+                      ? "Excellent"
+                      : heartbeat.connectionQuality === "good"
+                        ? "Good"
+                        : heartbeat.connectionQuality === "poor"
+                          ? "Poor"
+                          : "Disconnected"}
+                  </span>
+                </div>
+                <div className={styles.heartbeatRow}>
+                  <span>Latency:</span>
+                  <span className={styles.heartbeatValue}>{formatLatency(heartbeat.latency)}</span>
+                </div>
+                <div className={styles.heartbeatRow}>
+                  <span>Last Ping:</span>
+                  <span className={styles.heartbeatValue}>
+                    {formatTimestamp(heartbeat.lastPingTime)}
+                  </span>
+                </div>
+                <div className={styles.heartbeatRow}>
+                  <span>Last Pong:</span>
+                  <span className={styles.heartbeatValue}>
+                    {formatTimestamp(heartbeat.lastPongTime)}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowHeartbeatTooltip(false)}
+                  style={{
+                    position: "absolute",
+                    top: "6px",
+                    right: "6px",
+                    background: "transparent",
+                    border: "none",
+                    color: "#6e7681",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -651,21 +737,6 @@ function CheckIcon() {
   );
 }
 
-function _DropdownIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
-  );
-}
-
 // Directory Picker Modal
 // 默认排除的directories（与 TreeView 保持一致）
 const DEFAULT_EXCLUDED_DIRS = [
@@ -749,7 +820,7 @@ function DirectoryPickerModal({
       }
 
       // 添加快速导航到 home directories按钮（如果当前不在 home）
-      if (data.currentPath !== homeDir && homeDir !== "/") {
+      if (data.currentPath !== homeDir) {
         dirs.unshift({
           name: "🏠 ~ (home)",
           path: homeDir,
