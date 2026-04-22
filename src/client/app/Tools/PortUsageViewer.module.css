@@ -1,0 +1,388 @@
+/**
+ * PortUsageViewer - Port usage viewer styles
+ */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.popup {
+  background: #1a1a2e;
+  border: 1px solid #2d2d44;
+  border-radius: 8px;
+  width: 95vw;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #2d2d44;
+  background: #16162a;
+  border-radius: 8px 8px 0 0;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #e4e4e7;
+  margin-right: 16px;
+}
+
+.stats {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  font-size: 10px;
+  color: #a1a1aa;
+}
+
+.stats span {
+  background: #252542;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.tcpBadge {
+  color: #60a5fa;
+}
+
+.udpBadge {
+  color: #fbbf24;
+}
+
+.listenBadge {
+  color: #4ade80;
+}
+
+.estabBadge {
+  color: #a78bfa;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: #a1a1aa;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.closeBtn:hover {
+  background: #3f3f5f;
+  color: #fff;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #1e1e32;
+  border-bottom: 1px solid #2d2d44;
+  flex-wrap: wrap;
+}
+
+.filterGroup {
+  display: flex;
+  gap: 2px;
+}
+
+.filterBtn {
+  background: #252542;
+  border: none;
+  color: #a1a1aa;
+  padding: 4px 10px;
+  font-size: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-family: inherit;
+  text-transform: capitalize;
+}
+
+.filterBtn:hover {
+  background: #3f3f5f;
+}
+
+.filterBtn.active {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.searchInput {
+  background: #252542;
+  border: 1px solid #2d2d44;
+  color: #e4e4e7;
+  padding: 4px 8px;
+  font-size: 11px;
+  border-radius: 4px;
+  font-family: inherit;
+  min-width: 180px;
+  flex: 1;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.searchInput::placeholder {
+  color: #71717a;
+}
+
+.refreshBtn {
+  background: #252542;
+  border: none;
+  color: #a1a1aa;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.refreshBtn:hover {
+  background: #3f3f5f;
+}
+
+.refreshBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Row */
+.headerRow {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: #252542;
+  border-bottom: 1px solid #2d2d44;
+  font-weight: 600;
+  color: #71717a;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.headerRow button {
+  background: none;
+  border: none;
+  color: #71717a;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.headerRow button:hover {
+  color: #a1a1aa;
+}
+
+/* Port List */
+.portList {
+  flex: 1;
+  overflow: auto;
+}
+
+.emptyState {
+  padding: 40px;
+  text-align: center;
+  color: #71717a;
+  font-size: 12px;
+}
+
+/* Port Row */
+.portRow {
+  display: flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-bottom: 1px solid #252538;
+  cursor: pointer;
+  color: #d4d4d8;
+  white-space: nowrap;
+}
+
+.portRow:hover {
+  background: #2a2a48;
+}
+
+.portRow.selected {
+  background: #3b82f620;
+  border-left: 2px solid #3b82f6;
+}
+
+/* Columns */
+.colProtocol {
+  width: 45px;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.protoTcp {
+  color: #60a5fa;
+}
+
+.protoUdp {
+  color: #fbbf24;
+}
+
+.colState {
+  width: 70px;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 9px;
+}
+
+.stateListen {
+  color: #4ade80;
+}
+
+.stateEstablished {
+  color: #a78bfa;
+}
+
+.stateTimeWait {
+  color: #f87171;
+}
+
+.stateCloseWait {
+  color: #fb923c;
+}
+
+.colPort {
+  width: 55px;
+  text-align: right;
+  flex-shrink: 0;
+  color: #60a5fa;
+  font-weight: 600;
+}
+
+.colAddress {
+  width: 110px;
+  flex-shrink: 0;
+  padding-left: 8px;
+  color: #a1a1aa;
+}
+
+.colPid {
+  width: 50px;
+  text-align: right;
+  flex-shrink: 0;
+  color: #f87171;
+}
+
+.colProcess {
+  flex: 1;
+  min-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #e4e4e7;
+  padding-left: 12px;
+}
+
+/* Details Panel */
+.detailsPanel {
+  border-top: 1px solid #2d2d44;
+  background: #16162a;
+  max-height: 160px;
+  overflow: auto;
+  flex-shrink: 0;
+}
+
+.detailsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: #252542;
+  color: #e4e4e7;
+  font-weight: 600;
+}
+
+.detailsHeader button {
+  background: none;
+  border: none;
+  color: #a1a1aa;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.detailsHeader button:hover {
+  color: #fff;
+}
+
+.detailsBody {
+  padding: 8px 12px;
+}
+
+.detailRow {
+  display: flex;
+  gap: 8px;
+  padding: 2px 0;
+  font-size: 10px;
+}
+
+.detailLabel {
+  width: 70px;
+  color: #71717a;
+  flex-shrink: 0;
+}
+
+.detailValue {
+  color: #d4d4d8;
+  word-break: break-all;
+}
+
+/* Scrollbar */
+.content::-webkit-scrollbar,
+.portList::-webkit-scrollbar,
+.detailsPanel::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.content::-webkit-scrollbar-track,
+.portList::-webkit-scrollbar-track,
+.detailsPanel::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+
+.content::-webkit-scrollbar-thumb,
+.portList::-webkit-scrollbar-thumb,
+.detailsPanel::-webkit-scrollbar-thumb {
+  background: #3f3f5f;
+  border-radius: 3px;
+}
+
+.content::-webkit-scrollbar-thumb:hover,
+.portList::-webkit-scrollbar-thumb:hover,
+.detailsPanel::-webkit-scrollbar-thumb:hover {
+  background: #5f5f7f;
+}

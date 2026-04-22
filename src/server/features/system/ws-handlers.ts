@@ -5,6 +5,7 @@
 
 import { createHandler, sendError, sendSuccess } from "../chat/ws-handlers/handler-utils.js";
 import type { WSContext } from "../chat/ws-router.js";
+import { getPortUsageData } from "./port-usage.js";
 import { getProcessOpenFiles, getProcessThreads, getProcessTreeData } from "./process-tree.js";
 
 // ============================================================================
@@ -59,6 +60,20 @@ export async function handleGetProcessDetails(
 }
 
 // ============================================================================
+// Get Port Usage Handler
+// ============================================================================
+
+export async function handleGetPortUsage(ctx: WSContext, _payload: unknown): Promise<void> {
+  try {
+    const data = await getPortUsageData();
+
+    sendSuccess(ctx, "port_usage_data", data);
+  } catch (error) {
+    sendError(ctx, error instanceof Error ? error.message : "Failed to get port usage");
+  }
+}
+
+// ============================================================================
 // Wrapped Handlers
 // ============================================================================
 
@@ -69,5 +84,10 @@ export const handleGetProcessTreeWrapped = createHandler(handleGetProcessTree, {
 
 export const handleGetProcessDetailsWrapped = createHandler(handleGetProcessDetails, {
   name: "get_process_details",
+  requireSession: false,
+});
+
+export const handleGetPortUsageWrapped = createHandler(handleGetPortUsage, {
+  name: "get_port_usage",
   requireSession: false,
 });

@@ -278,6 +278,7 @@ export const loggingMiddleware: WSMiddleware = async (_ctx, payload, next) => {
 // ============================================================================
 
 import {
+  handleGetPortUsageWrapped,
   handleGetProcessDetailsWrapped,
   handleGetProcessTreeWrapped,
 } from "../system/ws-handlers.js";
@@ -353,16 +354,24 @@ export function registerAllWSHandlers(): void {
   // System information
   wsRouter.register("get_process_tree", handleGetProcessTreeWrapped);
   wsRouter.register("get_process_details", handleGetProcessDetailsWrapped);
+  wsRouter.register("get_port_usage", handleGetPortUsageWrapped);
 
   // Template operations
   wsRouter.register("list_templates", handleListTemplatesWrapped);
   wsRouter.register("get_template", handleGetTemplateWrapped);
 
-  // Heartbeat - pong from client (no-op, just to prevent "unknown message type" error)
-  wsRouter.register("pong", async (_ctx, payload) => {
-    // Client received our ping and replied with pong - connection is healthy
-    logger.info(`[Heartbeat] Received pong from client`, payload);
-    // No action needed, just logging
+  // Heartbeat - client sends ping, server replies with pong
+  wsRouter.register("ping", async (ctx, payload) => {
+    // Client sent ping, reply with pong immediately
+    const timestamp = (payload as any)?.timestamp || Date.now();
+    ctx.ws.send(
+      JSON.stringify({
+        type: "pong",
+        timestamp,
+        serverTime: Date.now(),
+      })
+    );
+    logger.debug(`[Heartbeat] Received ping, sent pong`);
   });
 
   logger.info(`[WSRouter] Registered ${wsRouter.getRegisteredTypes().length} handlers`);

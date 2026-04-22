@@ -96,6 +96,7 @@ export type WebSocketEvent =
   // System Events
   | "process_tree_data"
   | "process_details"
+  | "port_usage_data"
   // Usage Events
   | "usage";
 
@@ -167,6 +168,10 @@ export class WebSocketService {
           this.reconnectAttempts = 0;
 
           this.emit("connected", this.connectionStatus);
+
+          // Start heartbeat: send first ping immediately, then every 30 seconds
+          this.startHeartbeat();
+
           resolve();
         };
 
@@ -174,6 +179,9 @@ export class WebSocketService {
           clearTimeout(timeoutId);
           console.log(`[WebSocket] Disconnected: ${event.code} ${event.reason}`);
           this.connectionStatus.isConnected = false;
+
+          // Stop heartbeat
+          this.stopHeartbeat();
 
           this.emit("disconnected", { code: event.code, reason: event.reason });
 
@@ -253,7 +261,6 @@ export class WebSocketService {
       };
 
       const messageStr = JSON.stringify(message);
-      console.log(`[WebSocket] Sending message: ${type}`, messageStr.substring(0, 100));
       this.ws.send(messageStr);
       return true;
     } catch (error) {
@@ -323,24 +330,61 @@ export class WebSocketService {
   }
 
   /**
+   * Start heartbeat - send ping every 30 seconds
+   */
+  private startHeartbeat(): void {
+    // Send first ping immediately
+    this.sendPing().catch(console.error);
+
+    // Then every 30 seconds
+    (this as any).heartbeatInterval = setInterval(() => {
+      this.sendPing().catch(console.error);
+    }, 30000);
+
+    console.log("[WebSocket] Heartbeat started");
+  }
+
+  /**
+   * Stop heartbeat
+   */
+  private stopHeartbeat(): void {
+    if ((this as any).heartbeatInterval) {
+      clearInterval((this as any).heartbeatInterval);
+      (this as any).heartbeatInterval = null;
+      console.log("[WebSocket] Heartbeat stopped");
+    }
+  }
+
+  /**
+   * Send ping to server
+   */
+  private async sendPing(): Promise<void> {
+    if (this.isConnected) {
+      // Import store dynamically to avoid circular dependency
+      const { useSessionStore } = await import("@/features/chat/stores/sessionStore");
+      useSessionStore.setState((state: any) => ({
+        heartbeat: { ...state.heartbeat, isWaiting: true },
+      }));
+
+      this.send("ping", { timestamp: Date.now() });
+      console.log("[WebSocket] Ping sent");
+    }
+  }
+
+  /**
    * Handle incoming message
    */
   private handleIncomingMessage(message: any): void {
     const { type, timestamp, sessionId } = message;
     const data = message;
 
-    // Handle ping from server - immediately reply with pong
-    if (type === "ping") {
-      console.log("[WebSocket] Received ping, sending pong...");
-      const sent = this.send("pong", { timestamp: Date.now() });
-      console.log("[WebSocket] Pong sent:", sent);
-      this.emit("ping", data);
-      return;
-    }
-
-    // Handle pong from server
+    // Handle pong from server (response to our ping)
     if (type === "pong") {
-      this.emit("pong", data);
+      const now = Date.now();
+      const sentTime = data?.timestamp || now;
+      const latency = Math.max(0, now - sentTime);
+      console.log(`[WebSocket] Received pong, latency: ${latency}ms`);
+      this.emit("pong", { ...data, latency, receivedAt: now });
       return;
     }
 
@@ -417,6 +461,7 @@ export class WebSocketService {
       // System
       process_tree_data: "process_tree_data",
       process_details: "process_details",
+      port_usage_data: "port_usage_data",
       // Usage
       usage: "usage",
       // Templates
@@ -494,6 +539,7 @@ export class WebSocketService {
       "session_reconnected",
       "process_tree_data",
       "process_details",
+      "port_usage_data",
       "usage",
       "ping",
       "pong",

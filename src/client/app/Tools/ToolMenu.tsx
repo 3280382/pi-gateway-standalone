@@ -8,6 +8,7 @@ import { SettingsModal } from "@/app/SettingsModal";
 import { StorageViewer } from "@/app/StorageViewer";
 import { DebugTool } from "@/app/Tools/DebugTool";
 import { PageAgentTool } from "@/app/Tools/PageAgentTool";
+import { PortUsageViewer } from "@/app/Tools/PortUsageViewer";
 import { ProcessTreeViewer } from "@/app/Tools/ProcessTreeViewer";
 import styles from "@/app/Tools/ToolMenu.module.css";
 import { UIMarkerTool } from "@/app/Tools/UIMarkerTool";
@@ -52,6 +53,7 @@ export function ToolMenu() {
             <UIMarkerTool />
             <StorageViewer />
             <ProcessTreeViewer />
+            <PortUsageViewer />
             <div className={styles.divider} />
             <button type="button" className={styles.item} onClick={openSettings}>
               <span className={styles.menuIcon}>⚙️</span>
