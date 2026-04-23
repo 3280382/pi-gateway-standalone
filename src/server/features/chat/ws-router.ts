@@ -290,15 +290,11 @@ import {
   handleListModelsWrapped,
   handleModelChangeWrapped,
   handlePromptWrapped,
-  handleSetLlmLogWrapped,
   handleSetModelWrapped,
   handleSteerWrapped,
   handleThinkingLevelChangeWrapped,
-  handleToolRequestWrapped,
 } from "./ws-handlers/message-handlers.js";
 import {
-  handleChangeDirWrapped,
-  handleGetSessionStatusWrapped,
   handleInitWrapped,
   handleListSessionsWrapped,
   handleNewSessionWrapped,
@@ -325,9 +321,6 @@ export function registerAllWSHandlers(): void {
   wsRouter.register("list_models", handleListModelsWrapped);
   wsRouter.register("thinking_level_change", handleThinkingLevelChangeWrapped);
 
-  // Tool related
-  wsRouter.register("tool_request", handleToolRequestWrapped);
-
   // Bash command execution (via SDK)
   wsRouter.register("command", handleCommandWrapped);
 
@@ -335,16 +328,11 @@ export function registerAllWSHandlers(): void {
   wsRouter.register("compact_session", handleCompactSessionWrapped);
   wsRouter.register("export_session", handleExportSessionWrapped);
 
-  // LLM logs
-  wsRouter.register("set_llm_log", handleSetLlmLogWrapped);
-
   // Session management
   wsRouter.register("init", handleInitWrapped);
   wsRouter.register("new_session", handleNewSessionWrapped);
   wsRouter.register("list_sessions", handleListSessionsWrapped);
-  wsRouter.register("change_dir", handleChangeDirWrapped);
   wsRouter.register("sidebar_visibility", handleSidebarVisibilityWrapped);
-  wsRouter.register("get_session_status", handleGetSessionStatusWrapped);
   wsRouter.register("update_session_config", handleUpdateSessionConfigWrapped);
 
   // System information

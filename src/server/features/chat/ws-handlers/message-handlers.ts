@@ -3,7 +3,6 @@
  * Combined handlers for all message-related WebSocket messages
  */
 
-import { createCodingTools } from "@mariozechner/pi-coding-agent";
 import type { WSContext } from "../ws-router.js";
 import { createHandler, logger, sendError, sendSuccess } from "./handler-utils.js";
 
@@ -119,34 +118,6 @@ export async function handlePrompt(
 }
 
 // ============================================================================
-// Set LLM Log Handler
-// ============================================================================
-
-/**
- * Handle set_llm_log message
- */
-export async function handleSetLlmLog(
-  ctx: WSContext,
-  payload: { enabled: boolean }
-): Promise<void> {
-  const { enabled } = payload;
-
-  try {
-    // Get LLM log manager from session or global
-    if (ctx.session.llmLogManager) {
-      ctx.session.llmLogManager.setEnabled(enabled);
-    }
-
-    logger.info(`[handleSetLlmLog] LLM log ${enabled ? "enabled" : "disabled"}`);
-  } catch (error) {
-    logger.error(
-      `[handleSetLlmLog] Error: ${error instanceof Error ? error.message : String(error)}`
-    );
-    sendError(ctx, "Failed to set LLM log");
-  }
-}
-
-// ============================================================================
 // Set Model Handler
 // ============================================================================
 
@@ -237,44 +208,6 @@ export async function handleThinkingLevelChange(
 }
 
 // ============================================================================
-// Tool Request Handler
-// ============================================================================
-
-/**
- * Handle tool_request message
- */
-export async function handleToolRequest(
-  ctx: WSContext,
-  payload: {
-    toolName: string;
-    args: Record<string, unknown>;
-    toolCallId: string;
-  }
-): Promise<void> {
-  const { toolName, args, toolCallId } = payload;
-
-  const tools = createCodingTools(ctx.session.workingDir);
-  const tool = tools.find((t) => t.name === toolName);
-
-  if (!tool) {
-    logger.error(`[handleToolRequest] Tool "${toolName}" not found`);
-    return;
-  }
-
-  try {
-    // Execute tool
-    const result = await tool.execute(toolCallId, args as Record<string, string>);
-    logger.info(`[handleToolRequest] Tool executed: ${toolName}`);
-  } catch (error) {
-    logger.error(
-      `[handleToolRequest] Tool execution failed: ${toolName}`,
-      {},
-      error instanceof Error ? error : undefined
-    );
-  }
-}
-
-// ============================================================================
 // Wrapped Handlers for Registration
 // ============================================================================
 
@@ -308,11 +241,6 @@ export const handlePromptWrapped = createHandler(handlePrompt, {
   requireSession: true,
 });
 
-export const handleSetLlmLogWrapped = createHandler(handleSetLlmLog, {
-  name: "set_llm_log",
-  requireSession: true,
-});
-
 export const handleSetModelWrapped = createHandler(handleSetModel, {
   name: "set_model",
   requireSession: true,
@@ -330,10 +258,5 @@ export const handleSteerWrapped = createHandler(handleSteer, {
 
 export const handleThinkingLevelChangeWrapped = createHandler(handleThinkingLevelChange, {
   name: "thinking_level_change",
-  requireSession: true,
-});
-
-export const handleToolRequestWrapped = createHandler(handleToolRequest, {
-  name: "tool_request",
   requireSession: true,
 });

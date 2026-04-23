@@ -302,55 +302,6 @@ export async function handleLoadSession(
 }
 
 // ============================================================================
-// Change Directory Handler
-// ============================================================================
-
-/**
- * Handle change_dir message
- */
-export async function handleChangeDir(
-  ctx: WSContext,
-  payload: { path: string; currentPath?: string }
-): Promise<void> {
-  const { path: newPath, currentPath } = payload;
-
-  // Check if path exists
-  if (!existsSync(newPath)) {
-    sendError(ctx, `Path does not exist: ${newPath}`);
-    return;
-  }
-
-  // Determine current working directory
-  const oldWorkingDir = currentPath || ctx.session?.workingDir || null;
-
-  // Use ServerSessionManager to switch session (old session continues in background)
-  const session = await serverSessionManager.switchSession(
-    oldWorkingDir || newPath,
-    newPath,
-    ctx.ws
-  );
-
-  ctx.session = session;
-
-  if (!session.session) {
-    throw new Error("Failed to create or get session");
-  }
-
-  // Set viewing session for message routing
-  const shortId = extractShortSessionId((session as any).sessionFile || "");
-  if (shortId) {
-    serverSessionManager.setViewingSession(ctx.ws, shortId);
-  }
-
-  // Use shared function to build response
-  const responseData = await buildSessionResponse(session, newPath);
-
-  sendSuccess(ctx, "dir_changed", responseData);
-
-  logger.info(`[handleChangeDir] Success: sessionId="${session.session.sessionId}"`);
-}
-
-// ============================================================================
 // List Sessions Handler (WebSocket)
 // Replaces HTTP GET /api/sessions
 // ============================================================================
@@ -434,67 +385,6 @@ export async function handleListSessions(
 }
 
 // ============================================================================
-// Get Session Status Handler (WebSocket)
-// Replaces HTTP GET /api/sessions/active
-// ============================================================================
-
-/**
- * Handle get_session_status message via WebSocket
- */
-export async function handleGetSessionStatus(
-  ctx: WSContext,
-  payload: { sessionId?: string }
-): Promise<void> {
-  const shortId = payload.sessionId;
-
-  if (!shortId) {
-    sendError(ctx, "sessionId is required");
-    return;
-  }
-
-  try {
-    const entry = serverSessionManager.getSessionByShortId(shortId);
-
-    if (!entry) {
-      sendSuccess(ctx, "session_status", {
-        sessionId: shortId,
-        status: "idle",
-        statusText: "Session not found",
-        exists: false,
-      });
-      return;
-    }
-
-    const statusText =
-      {
-        idle: "Idle",
-        thinking: "Thinking",
-        tooling: "Executing Tool",
-        streaming: "Streaming",
-        waiting: "Waiting for Input",
-        error: "Error Occurred",
-        history: "History",
-        retrying: "Retrying",
-        compacting: "Compacting",
-      }[entry.runtimeStatus] || entry.runtimeStatus;
-
-    sendSuccess(ctx, "session_status", {
-      sessionId: shortId,
-      status: entry.runtimeStatus,
-      statusText,
-      exists: true,
-      hasClient: entry.client.readyState === WebSocket.OPEN,
-      lastActivity: entry.lastActivity.toISOString(),
-    });
-
-    logger.info(`[handleGetSessionStatus] Sent status for ${shortId}: ${entry.runtimeStatus}`);
-  } catch (error) {
-    logger.error("[handleGetSessionStatus] Error:", {}, error instanceof Error ? error : undefined);
-    sendError(ctx, error instanceof Error ? error.message : "Failed to get session status");
-  }
-}
-
-// ============================================================================
 // Wrapped Handlers for Registration
 // ============================================================================
 
@@ -510,15 +400,6 @@ export const handleNewSessionWrapped = createHandler(handleNewSession, {
 
 export const handleListSessionsWrapped = createHandler(handleListSessions, {
   name: "list_sessions",
-  requireSession: false,
-});
-
-export const handleChangeDirWrapped = createHandler(handleChangeDir, {
-  name: "change_dir",
-  requireSession: false,
-});
-export const handleGetSessionStatusWrapped = createHandler(handleGetSessionStatus, {
-  name: "get_session_status",
   requireSession: false,
 });
 
