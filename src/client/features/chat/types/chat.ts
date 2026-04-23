@@ -6,12 +6,8 @@
 // Message Types
 // ============================================================================
 
-export type MessageRole = "user" | "assistant" | "system";
-
-export type ContentType = "text" | "thinking" | "tool" | "tool_use" | "image" | "turn_marker";
-
 export interface MessageContent {
-  type: ContentType;
+  type: "text" | "thinking" | "tool" | "tool_use" | "image" | "turn_marker";
   text?: string;
   thinking?: string;
   signature?: string;
@@ -23,7 +19,7 @@ export interface MessageContent {
   error?: string;
   imageUrl?: string;
   turnNumber?: number;
-  status?: ToolStatus; // for tool/tool_use to show execution status
+  status?: "pending" | "executing" | "success" | "error" | "timeout"; // for tool/tool_use to show execution status
 }
 
 export interface Message {
@@ -68,8 +64,6 @@ export interface Message {
 // Tool Execution Types
 // ============================================================================
 
-export type ToolStatus = "pending" | "executing" | "success" | "error" | "timeout";
-
 export interface ToolExecution {
   id: string;
   name: string;
@@ -85,42 +79,21 @@ export interface ToolExecution {
 // Search Types - Hierarchical Design (3-Level Classification)
 // ============================================================================
 
-// Level 1: Message source filters
-export interface Kind1Filters {
-  user: boolean;
-  assistant: boolean;
-  sysinfo: boolean;
-}
-
-// Level 2: Content type filters
-export interface Kind2Filters {
-  prompt: boolean; // User prompts
-  response: boolean; // Assistant text responses
-  thinking: boolean; // AI thinking blocks
-  tool: boolean; // Tool calls and results
-  event: boolean; // System events
-}
-
-// Level 3: Specific subtype filters
-export interface Kind3Filters {
-  // System events
-  compaction: boolean;
-  retry: boolean;
-  autoRetry: boolean;
-  modelChange: boolean;
-  thinkingLevelChange: boolean;
-  usage: boolean;
-  // Tool statuses
-  toolSuccess: boolean;
-  toolError: boolean;
-  toolPending: boolean;
-}
-
 // Hierarchical filters (new 3-level system)
 export interface ChatSearchFilters {
-  kind1: Kind1Filters;
-  kind2: Kind2Filters;
-  kind3: Kind3Filters;
+  kind1: { user: boolean; assistant: boolean; sysinfo: boolean };
+  kind2: { prompt: boolean; response: boolean; thinking: boolean; tool: boolean; event: boolean };
+  kind3: {
+    compaction: boolean;
+    retry: boolean;
+    autoRetry: boolean;
+    modelChange: boolean;
+    thinkingLevelChange: boolean;
+    usage: boolean;
+    toolSuccess: boolean;
+    toolError: boolean;
+    toolPending: boolean;
+  };
   dates?: {
     from?: Date;
     to?: Date;
@@ -224,35 +197,10 @@ export interface ChatController {
 // Component Props
 // ============================================================================
 
-export interface MessageListProps {
-  messages: Message[];
-  currentStreamingMessage: Message | null;
-  showThinking: boolean;
-  onToggleMessageCollapse: (id: string) => void;
-  onToggleThinkingCollapse: (id: string) => void;
-  onDeleteMessage?: (id: string) => void;
-  onRegenerateMessage?: (id: string) => void;
-}
-
-export interface MessageItemProps {
-  message: Message;
-  showThinking: boolean;
-  onToggleCollapse: () => void;
-  onToggleThinking: () => void;
-  onDelete?: () => void;
-  onRegenerate?: () => void;
-}
-
 export interface InputAreaProps {
   value: string;
   isStreaming: boolean;
   onChange: (text: string) => void;
   onSend: () => void;
   onAbort: () => void;
-}
-
-export interface ToolExecutionProps {
-  tool: ToolExecution;
-  isExpanded: boolean;
-  onToggleExpand: () => void;
 }
