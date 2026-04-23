@@ -415,7 +415,7 @@ function GlassCard({
               <div className={styles.toolSection}>
                 <div className={styles.toolSectionLabel}>Output:</div>
                 <pre className={`${styles.toolCode} ${styles.toolOutput}`}>
-                  <code>{block.output}</code>
+                  <code>{safeString(block.output)}</code>
                 </pre>
               </div>
             )}
@@ -423,7 +423,7 @@ function GlassCard({
               <div className={styles.toolSection}>
                 <div className={styles.toolSectionLabel}>Error:</div>
                 <pre className={`${styles.toolCode} ${styles.toolErrorText}`}>
-                  <code>{block.error}</code>
+                  <code>{safeString(block.error)}</code>
                 </pre>
               </div>
             )}
@@ -450,7 +450,7 @@ function GlassCard({
     const toolName = block.toolName || "unknown";
     const toolArgs = block.args;
     const formattedArgs = formatToolArgs(toolName, toolArgs);
-    const resultOutput = block.output || block.error || "";
+    const resultOutput = safeString(block.output || block.error || "");
     const hasResult = !!resultOutput;
     const fullContent = hasResult
       ? `${formattedArgs}\n\n// Result:\n${resultOutput}`

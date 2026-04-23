@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
+import { websocketService } from "@/services/websocket.service";
 import styles from "./Modals.module.css";
 
 interface Model {
@@ -22,20 +23,17 @@ export function ModelSelectorModal() {
   useEffect(() => {
     if (!isModelSelectorOpen) return;
 
-    const load = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/models");
-        const data = await res.json();
-        setModels(data.models || []);
-      } catch (err) {
-        console.error("Failed to load models:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setLoading(true);
+    const unsubscribe = websocketService.on("models_list", (data: any) => {
+      setModels(data.models || []);
+      setLoading(false);
+    });
 
-    load();
+    websocketService.send("list_models");
+
+    return () => {
+      unsubscribe();
+    };
   }, [isModelSelectorOpen]);
 
   const handleSelect = (modelId: string) => {

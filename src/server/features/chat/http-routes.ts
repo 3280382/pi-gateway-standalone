@@ -40,13 +40,7 @@ export async function registerChatHTTPRoutes(
   app.get("/api/llm-log", llmLogController.getLlmLog);
   app.post("/api/llm-log/enabled", llmLogController.setLlmLogEnabled);
 
-  // Model API
-  const { getModels } = await import("./controllers/model.controller.js");
-  app.get("/api/models", getModels);
-  app.post("/api/models", async (req, res) => {
-    const { model, provider } = req.body;
-    res.json({ success: true, model, provider });
-  });
+  // Model API (WebSocket only: list_models, set_model)
 
   // Session API
   const { getSessions, getSystemPrompt, loadSession, getActiveSessions } = await import(

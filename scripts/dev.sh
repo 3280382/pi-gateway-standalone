@@ -67,34 +67,48 @@ is_process_alive() {
   [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null
 }
 
+# Kill entire process tree starting from a PID
+kill_tree() {
+  local pid="$1"
+  [ -z "$pid" ] && return
+  # Get all children recursively
+  local children
+  children=$(pgrep -P "$pid" 2>/dev/null || true)
+  for child in $children; do
+    kill_tree "$child"
+  done
+  kill -9 "$pid" 2>/dev/null || true
+}
+
 stop_service() {
   local name="$1"
   local pid_file="$2"
   local pid
   pid=$(get_pid "$pid_file")
 
-  if [ -n "$pid" ]; then
-    if is_process_alive "$pid"; then
-      log_info "Stopping $name (PID $pid)..."
-      kill "$pid" 2>/dev/null || true
-      local count=0
-      while is_process_alive "$pid" && [ $count -lt 10 ]; do
-        sleep 0.3
-        count=$((count + 1))
-      done
-      if is_process_alive "$pid"; then
-        kill -9 "$pid" 2>/dev/null || true
-      fi
-    fi
+  # Step 1: Kill entire process tree from PID file
+  if [ -n "$pid" ] && is_process_alive "$pid"; then
+    log_info "Stopping $name process tree (PID $pid)..."
+    kill_tree "$pid"
+    sleep 0.5
   fi
 
-  # Also kill by process pattern as fallback
+  # Step 2: Kill all matching DEV processes by pattern (including orphans)
+  # IMPORTANT: Do NOT kill production server (node dist/server/server.js on port 3300)
   case "$name" in
     backend)
+      # Only kill dev-mode processes (tsx watch / tsx loader), NOT production (node dist/server/server.js)
       pkill -9 -f "tsx watch.*server.ts" 2>/dev/null || true
+      pkill -9 -f "loader.mjs src/server/server.ts" 2>/dev/null || true
+      # Kill any npm dev processes
+      pkill -9 -f "npm run dev$" 2>/dev/null || true
+      # Free DEV port only (3000), NOT production port (3300)
+      fuser -k 3000/tcp 2>/dev/null || true
       ;;
     frontend)
       pkill -9 -f "vite.*--port 5173" 2>/dev/null || true
+      pkill -9 -f "npm run dev:react" 2>/dev/null || true
+      fuser -k 5173/tcp 2>/dev/null || true
       ;;
   esac
 
@@ -157,6 +171,7 @@ cmd_start() {
 
   log_info "Starting development services..."
 
+  # Always clean up before starting to prevent orphan processes
   if ! is_port_open 3000; then
     stop_service "backend" "$BACKEND_PID_FILE"
     start_backend
