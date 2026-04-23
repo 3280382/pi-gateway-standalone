@@ -22,6 +22,7 @@ import { generateMessageId, useChatStore } from "@/features/chat/stores/chatStor
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { ChatController, Message, ToolExecution } from "@/features/chat/types/chat";
+import { createUserMessage } from "@/features/chat/utils/messageUtils";
 import { websocketService } from "@/services/websocket.service";
 
 // ============================================================================
@@ -178,16 +179,7 @@ export function useChatController(): EnhancedChatController {
     steer: (text: string) => {
       if (!text.trim()) return;
 
-      // 添加User message到Cols表（类似 sendMessage）
-      const userMessage: Message = {
-        id: generateMessageId(),
-        role: "user",
-        kind1: "user",
-        kind2: "prompt",
-        content: [{ type: "text", text: text.trim() }],
-        timestamp: new Date(),
-      };
-      chatStore.addMessage(userMessage);
+      chatStore.addMessage(createUserMessage(text.trim()));
       chatStore.clearInput();
 
       steerChat(text);
