@@ -512,7 +512,7 @@ export const useChatStore = create<
     // Message Actions
     addMessage: (message: Message) => void;
     setMessages: (messages: Message[]) => void;
-    prependMessages: (messages: Message[]) => void; // Load more历史消息时用到
+
     clearMessages: () => void;
 
     // Running State (Pi coding agent turn)
@@ -583,14 +583,6 @@ export const useChatStore = create<
           set({ messages, currentStreamingMessage: null }, false, "setMessages");
           console.log("[chatStore.setMessages] Current messages after:", get().messages.length);
           console.log("[chatStore.setMessages] Messages set successfully");
-        },
-
-        prependMessages: (messages: Message[]) => {
-          set(
-            (state) => ({ messages: [...messages, ...state.messages] }),
-            false,
-            "prependMessages"
-          );
         },
 
         clearMessages: () => {

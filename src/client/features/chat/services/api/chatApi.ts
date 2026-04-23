@@ -826,20 +826,6 @@ export function setupWebSocketListeners(): void {
     }
   });
 
-  // More messages loaded handler - Load more历史消息
-  websocketService.on("more_messages_loaded", async (data: any) => {
-    const ts = new Date().toISOString().split("T")[1].split(".")[0];
-    console.log(`[${ts}] [RECV] more_messages_loaded:`, data);
-
-    if (data?.messages && Array.isArray(data.messages)) {
-      // 服务器已预处理所有消息，直接使用
-      store.prependMessages(data.messages);
-      console.log(
-        `[${ts}] [more_messages_loaded] Prepended ${data.messages.length} messages, hasMore: ${data.hasMore}`
-      );
-    }
-  });
-
   // =========================================================================
   // Heartbeat Events - WebSocket Ping/Pong
   // Client sends ping, server replies with pong
