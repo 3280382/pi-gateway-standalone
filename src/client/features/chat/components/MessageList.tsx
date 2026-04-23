@@ -7,7 +7,6 @@
  *    在 useStreamingMessage hook 中本地合并显示，不修改 messages 数组
  * 3. 唯一触发历史消息重渲染的情况：
  *    - 搜索过滤（searchFilters 变化）→ 过滤在 ChatPanel.tsx 的 filterMessages() 中完成
- *    - 加载更多消息（prependMessages）
  * 4. 服务器返回的消息已经是最终格式，客户端不做复杂转换
  *
  * Performance optimization:
