@@ -97,18 +97,15 @@ timeout 10s curl -s http://localhost:3000/api/health
 - Clean up after completion
 - Merge useful tests into existing suites
 
-**Environment isolation (see `test/setup-server.ts`):**
-```typescript
-const PORT = 3456; // Never use 3000/5173 (dev ports)
-await killPortOccupier(3456); // Only kill test port
-spawn("tsx", ["src/server/server.ts"], {
-  env: { PORT: "3456", NODE_ENV: "test" }
-});
-```
+**Environment**: All testing uses the shared development environment (tmux 3-pane).
+- Backend runs on port 3000, frontend on port 5173
+- Do NOT start separate test servers
+- Do NOT kill processes on ports 3000/5173
 
 **Anti-patterns:**
 - Creating one-off test scripts with duplicate logging
 - Killing processes on ports 3000/5173
+- Starting standalone test servers on alternate ports
 
 ### Quick Testing Reference
 
@@ -117,7 +114,7 @@ spawn("tsx", ["src/server/server.ts"], {
 | `bash scripts/run-all-tests.sh` | Run all tests |
 | `bash scripts/run-terminal-tests.sh all` | Integration tests |
 | `npm run test` | Unit tests |
-| `cat test-results/latest/summary.md` | View test report |
+| `cat logs/test/latest/summary.md` | View test report |
 
 ### Headless Browser Testing
 
@@ -159,9 +156,9 @@ console.log(`[PERF] ${Date.now() - start}ms`);
 
 **Step 3: Analyze Logs**
 ```bash
-cat test-results/latest/browser/console.log
-tail -100 test-results/latest/backend/server.log
-jq '.[] | {type, timestamp}' test-results/latest/browser/ws-messages.json
+cat logs/test/browser/console.log
+tail -100 logs/dev/backend_current.log
+jq '.[] | {type, timestamp}' logs/test/browser/ws-messages.json
 ```
 
 **Step 4: Identify Slow Functions**
@@ -203,6 +200,6 @@ When code review fails to find the bug, the issue is likely not in your logic bu
 ### Standard Checks
 
 - **Frontend**: Vite auto-reloads, check DevTools
-- **Backend**: tsx watch auto-restarts, check `logs/backend_current.log`
+- **Backend**: tsx watch auto-restarts, check `logs/dev/backend_current.log`
 - **WebSocket**: Browser Network WS tab
-- **Test Results**: `cat test-results/latest/summary.md`
+- **Test Results**: `cat logs/test/latest/summary.md`

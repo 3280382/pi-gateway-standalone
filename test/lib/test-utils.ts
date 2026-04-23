@@ -10,9 +10,7 @@ import { dirname } from "node:path";
 export const TEST_CONFIG = {
   resultsDir: process.env.TEST_RESULTS_DIR || "/root/pi-gateway-standalone/logs/test",
   timestamp: process.env.TEST_TIMESTAMP || new Date().toISOString(),
-  port: process.env.TEST_PORT
-    ? parseInt(process.env.TEST_PORT, 10)
-    : 3200,
+  port: 3000,
   logLevel: process.env.TEST_LOG_LEVEL || "info",
 };
 

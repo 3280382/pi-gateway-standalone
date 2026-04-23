@@ -11,8 +11,8 @@ import { expect, test } from "@playwright/test";
 const DEV_CONFIG = {
   appUrl: "http://127.0.0.1:5173", // Vite dev server
   wsUrl: "ws://127.0.0.1:3000/ws/terminal", // Backend WebSocket
-  logDir: "/root/pi-gateway-standalone/test-results",
-  screenshotsDir: "/root/pi-gateway-standalone/test-results/screenshots",
+  logDir: "/root/pi-gateway-standalone/logs/test",
+  screenshotsDir: "/root/pi-gateway-standalone/logs/test/screenshots",
 };
 
 // 创建目录

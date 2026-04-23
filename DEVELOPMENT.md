@@ -189,18 +189,23 @@ npm run check  # Biome + TypeScript check
 
 ### Test Results
 
-All test results are saved to `test-results/latest/`:
+All test results are saved to `logs/test/latest/`:
 
 ```
-test-results/latest/
-├── summary.md           # Human-readable report
-├── backend/
-│   ├── server.log      # Backend logs
-│   └── test.log        # Test execution logs
-├── browser/
-│   ├── console.log     # Browser console output
-│   └── ws-messages.json # WebSocket records
-└── screenshots/        # Test screenshots
+logs/test/
+├── latest/
+│   ├── summary.md           # Human-readable report
+│   ├── backend/
+│   │   ├── server.log      # Backend logs
+│   │   └── test.log        # Test execution logs
+│   ├── browser/
+│   │   ├── console.log     # Browser console output
+│   │   └── ws-messages.json # WebSocket records
+│   └── screenshots/        # Test screenshots
+├── dev/                    # Development logs
+│   ├── frontend_current.log
+│   └── backend_current.log
+└── prod/                   # Production logs
 ```
 
 ## Git Workflow
@@ -219,7 +224,7 @@ feat(chat): add message search
 ## Debugging
 
 - **Frontend**: Vite hot reload, check browser DevTools
-- **Backend**: tsx watch auto-restart, check `logs/backend_current.log`
+- **Backend**: tsx watch auto-restart, check `logs/dev/backend_current.log`
 - **WebSocket**: Browser Network → WS tab
 
 ## Prohibited Practices

@@ -35,8 +35,8 @@
     "check:changed": "biome check $(git diff --name-only HEAD) && tsc --noEmit --skipLibCheck",
     "fix": "biome check --write .",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.react.json --noEmit",
-    "test": "TEST_PORT=3200 vitest --run test/unit test/integration src/",
-    "test:terminal": "TEST_PORT=3200 bash scripts/run-terminal-tests.sh",
+    "test": "vitest --run test/unit test/integration src/",
+    "test:terminal": "bash scripts/run-terminal-tests.sh",
     "preview": "vite preview",
     "prepare": "husky"
   },

@@ -9,13 +9,13 @@ import { setTimeout as delay } from "node:timers/promises";
 import { expect, test } from "@playwright/test";
 
 // Test Configuration
-const TEST_PORT = 3200; // Fixed port for E2E tests
+// Unified dev environment // Fixed port for E2E tests
 const TEST_CONFIG = {
-  serverPort: TEST_PORT,
-  appUrl: `http://127.0.0.1:${TEST_PORT}`,
-  wsUrl: `ws://127.0.0.1:${TEST_PORT}/ws/terminal`,
-  logDir: "/root/pi-gateway-standalone/test-results",
-  screenshotsDir: "/root/pi-gateway-standalone/test-results/screenshots",
+  // Using dev server
+  appUrl: `http://127.0.0.1:5173`,
+  wsUrl: `ws://127.0.0.1:3000/ws/terminal`,
+  logDir: "/root/pi-gateway-standalone/logs/test",
+  screenshotsDir: "/root/pi-gateway-standalone/logs/test/screenshots",
 };
 
 // Setup directories

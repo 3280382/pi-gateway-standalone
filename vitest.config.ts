@@ -6,7 +6,6 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["./test/setup.ts"],
-    globalSetup: ["./test/setup-server.ts"],
     maxWorkers: 1, // 限制并发为1
     minWorkers: 1, // 最小工作线程为1
     sequence: {

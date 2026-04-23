@@ -327,10 +327,10 @@ bash scripts/run-terminal-tests.sh
 
 ### Interpreting Results
 
-Results are saved to `test-results/latest/`:
+Results are saved to `logs/test/latest/`:
 
 ```
-test-results/latest/
+logs/test/latest/
 ├── summary.md
 ├── vitest/
 │   └── report.json

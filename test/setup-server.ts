@@ -1,16 +1,18 @@
 /**
- * Vitest Global Setup for Server Tests
- * Starts a shared server instance before all tests
+ * Vitest Global Setup - Unified Development Environment
+ *
+ * All testing uses the shared tmux 3-pane development environment.
+ * Backend: port 3000, Frontend: port 5173
+ * Do NOT start separate test servers.
  */
 
-import { spawn } from "node:child_process";
 import { createConnection } from "node:net";
 import { setTimeout } from "node:timers/promises";
 
-let serverProcess: ReturnType<typeof spawn> | null = null;
-const PORT = 3200;
+const BACKEND_PORT = 3000;
+const FRONTEND_PORT = 5173;
 
-/** Check if test port is already in use (non-blocking) */
+/** Check if a port is already in use */
 function isPortInUse(port: number): Promise<boolean> {
   return new Promise((resolve) => {
     const conn = createConnection(port, "127.0.0.1");
@@ -26,136 +28,31 @@ function isPortInUse(port: number): Promise<boolean> {
   });
 }
 
-/** Kill process occupying the test port using Termux-compatible methods.
- *  Only targets the test port (3200), never the dev ports (3000/5173). */
-async function killPortOccupier(port: number): Promise<void> {
-  const inUse = await isPortInUse(port);
-  if (!inUse) return;
-
-  console.log(`[GlobalSetup] Port ${port} is occupied, attempting to free it...`);
-
-  // Try Termux-compatible methods in order of preference
-  const killers = [
-    // fuser is lightweight and often available in Termux
-    `fuser -k ${port}/tcp 2>/dev/null || true`,
-    // ss is part of iproute2, usually available
-    `pid=$(ss -tlnp 2>/dev/null | grep ":${port} " | sed 's/.*pid=\\([0-9]*\\).*/\\1/' | head -1); [ -n "$pid" ] && kill "$pid" 2>/dev/null || true`,
-    // netstat fallback
-    `pid=$(netstat -tlnp 2>/dev/null | grep ":${port} " | awk '{print $7}' | cut -d'/' -f1 | head -1); [ -n "$pid" ] && kill "$pid" 2>/dev/null || true`,
-  ];
-
-  for (const cmd of killers) {
-    try {
-      await new Promise<void>((resolve) => {
-        const p = spawn("sh", ["-c", cmd], { stdio: "ignore" });
-        p.on("close", () => resolve());
-        p.on("error", () => resolve());
-      });
-      await setTimeout(300);
-      if (!(await isPortInUse(port))) {
-        console.log(`[GlobalSetup] Port ${port} freed.`);
-        return;
-      }
-    } catch {
-      // Try next method
+/** Wait for dev server to be ready */
+async function waitForDevServer(port: number, label: string, maxWaitMs = 30000): Promise<void> {
+  const startTime = Date.now();
+  while (Date.now() - startTime < maxWaitMs) {
+    if (await isPortInUse(port)) {
+      console.log(`[GlobalSetup] ${label} is ready on port ${port}`);
+      return;
     }
+    await setTimeout(500);
   }
-
-  console.warn(`[GlobalSetup] Warning: could not free port ${port}. Test server may fail to start.`);
+  throw new Error(`${label} not available on port ${port} after ${maxWaitMs}ms`);
 }
 
 export async function setup(): Promise<void> {
-  console.log("[GlobalSetup] Starting test server on port", PORT);
+  console.log("[GlobalSetup] Using unified development environment");
+  console.log(`[GlobalSetup] Checking backend (port ${BACKEND_PORT})...`);
+  await waitForDevServer(BACKEND_PORT, "Backend");
 
-  // Only kill processes on the specific test port, never the dev server (3000/5173)
-  await killPortOccupier(PORT);
-  await setTimeout(500);
+  console.log(`[GlobalSetup] Checking frontend (port ${FRONTEND_PORT})...`);
+  await waitForDevServer(FRONTEND_PORT, "Frontend");
 
-  return new Promise((resolve, reject) => {
-    serverProcess = spawn("npx", ["tsx", "src/server/server.ts"], {
-      env: {
-        ...process.env,
-        PORT: String(PORT),
-        NODE_ENV: "test",
-      },
-      cwd: "/root/pi-gateway-standalone",
-      detached: false,
-    });
-
-    let output = "";
-    let resolved = false;
-
-    const checkReady = (data: Buffer) => {
-      const str = data.toString();
-      output += str;
-      process.stdout.write(str);
-
-      if (
-        !resolved &&
-        (output.includes("Web UI:") ||
-          output.includes("Server ready") ||
-          output.includes(`port ${PORT}`))
-      ) {
-        resolved = true;
-        console.log(`\n[GlobalSetup] Server ready on port ${PORT}`);
-        setTimeout(2000).then(resolve);
-      }
-    };
-
-    serverProcess.stdout?.on("data", checkReady);
-    serverProcess.stderr?.on("data", checkReady);
-
-    serverProcess.on("error", (err) => {
-      console.error("[GlobalSetup] Server error:", err);
-      if (!resolved) {
-        resolved = true;
-        reject(err);
-      }
-    });
-
-    serverProcess.on("exit", (code) => {
-      if (!resolved && code !== 0) {
-        resolved = true;
-        reject(new Error(`Server exited with code ${code}`));
-      }
-    });
-
-    // Timeout
-    setTimeout(90000).then(() => {
-      if (!resolved) {
-        resolved = true;
-        console.error("[GlobalSetup] Server output:\n", output.slice(-1000));
-        reject(new Error("Server startup timeout (90s)"));
-      }
-    });
-  });
+  console.log("[GlobalSetup] Development environment ready for testing");
 }
 
 export async function teardown(): Promise<void> {
-  console.log("[GlobalSetup] Stopping test server...");
-  if (!serverProcess) return;
-
-  // Graceful shutdown with fallback to force kill
-  const pid = serverProcess.pid;
-  serverProcess.kill("SIGTERM");
-  await setTimeout(2000);
-
-  // Check if process is still alive (Termux-compatible: no `ps -p`, use /proc)
-  const stillAlive = pid ? await new Promise<boolean>((resolve) => {
-    const check = spawn("sh", ["-c", `[ -d /proc/${pid} ] && echo alive || echo dead`], { stdio: "pipe" });
-    let out = "";
-    check.stdout?.on("data", (d) => { out += d.toString(); });
-    check.on("close", () => resolve(out.includes("alive")));
-    check.on("error", () => resolve(false));
-  }) : false;
-
-  if (stillAlive && pid) {
-    try {
-      process.kill(pid, "SIGKILL");
-    } catch {
-      // Already dead or permission denied
-    }
-  }
-
-  serverProcess = null;
+  // Do NOT stop the dev servers - they are managed by tmux
+  console.log("[GlobalSetup] Tests complete. Dev servers remain running.");
 }

@@ -1,7 +1,7 @@
 import { appendFileSync, mkdirSync } from "node:fs";
 import { test } from "@playwright/test";
 
-const RESULTS_DIR = process.env.TEST_RESULTS_DIR || "test-results/latest";
+const RESULTS_DIR = process.env.TEST_RESULTS_DIR || "logs/test";
 mkdirSync(`${RESULTS_DIR}/browser`, { recursive: true });
 
 const LOG_FILE = `${RESULTS_DIR}/browser/session-switch-debug.log`;

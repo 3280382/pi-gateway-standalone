@@ -19,12 +19,12 @@ import {
 // ========== 配置 ==========
 const TEST_TIMESTAMP = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 const PROJECT_ROOT = "/root/pi-gateway-standalone";
-const RESULTS_DIR = `${PROJECT_ROOT}/test-results/${TEST_TIMESTAMP}`;
-const BACKUP_DIR = `${PROJECT_ROOT}/test-results/backups`;
-const LATEST_LINK = `${PROJECT_ROOT}/test-results/latest`;
+const RESULTS_DIR = `${PROJECT_ROOT}/logs/test/${TEST_TIMESTAMP}`;
+const BACKUP_DIR = `${PROJECT_ROOT}/logs/test/backups`;
+const LATEST_LINK = `${PROJECT_ROOT}/logs/test/latest`;
 
-// 测试固定端口
-const TEST_PORT = 3200;
+// Unified development environment port
+const TEST_PORT = 3000;
 
 const TEST_CONFIG = {
   port: TEST_PORT,
@@ -506,7 +506,7 @@ async function main() {
   section("🧪 Pi Gateway 统一测试运行器");
   log("INFO", `测试类型: ${TEST_TYPE}`);
   log("INFO", `时间戳: ${TEST_TIMESTAMP}`);
-  log("INFO", `测试端口: ${TEST_CONFIG.port}`);
+  log("INFO", `开发环境端口: ${TEST_CONFIG.port}`);
 
   // 步骤 1: 备份和清理
   backupPrevious();
@@ -561,8 +561,8 @@ Types:
   terminal         - 运行终端服务端+客户端测试
   all              - 运行所有测试 (默认)
 
-Results: test-results/<timestamp>/
-Latest:  test-results/latest/
+Results: logs/test/<timestamp>/
+Latest:  logs/test/latest/
   `);
   process.exit(0);
 }

@@ -10,7 +10,7 @@ test("检查 sessionManager 是否可用", async ({ page }) => {
   await page.waitForTimeout(5000);
 
   // 截图 1: 初始状态
-  await page.screenshot({ path: "test-results/session-debug-1.png" });
+  await page.screenshot({ path: "logs/test/session-debug-1.png" });
 
   // 获取左下角所有按钮的信息
   const buttonInfo = await page.evaluate(() => {
@@ -47,7 +47,7 @@ test("检查 sessionManager 是否可用", async ({ page }) => {
   }
 
   // 截图 2: 点击菜单后
-  await page.screenshot({ path: "test-results/session-debug-2.png" });
+  await page.screenshot({ path: "logs/test/session-debug-2.png" });
 
   // 检查 aside 元素的内容
   const asideContent = await page.evaluate(() => {
@@ -91,7 +91,7 @@ test("检查 sessionManager 是否可用", async ({ page }) => {
   console.log("Has session table:", reactInfo?.hasSessionTable);
 
   // 截图 3: 分析后
-  await page.screenshot({ path: "test-results/session-debug-3.png" });
+  await page.screenshot({ path: "logs/test/session-debug-3.png" });
 
   // 检查 sessionManager 是否挂载到 window
   const hasSessionManager = await page.evaluate(() => {

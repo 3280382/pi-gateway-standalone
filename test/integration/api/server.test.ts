@@ -15,8 +15,8 @@ describe("Server API Integration", () => {
   beforeAll(async () => {
     logger.info("初始化服务器 API 测试");
     await server.start();
-    const port = process.env.TEST_PORT || 3200;
-    baseUrl = `http://127.0.0.1:${port}`;
+    // Using unified dev environment on port 3000
+    baseUrl = `http://127.0.0.1:3000`;
   });
 
   afterAll(() => {

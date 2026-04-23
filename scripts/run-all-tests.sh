@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Unified Test Runner - 统一测试RunScript
-# 规范：所有测试输出统一在 test-results/<timestamp>/ 目录
+# 规范：所有测试输出统一在 logs/test/<timestamp>/ 目录
 #
 # Usage: bash scripts/run-all-tests.sh [unit|integration|terminal|e2e|all]
 
@@ -62,14 +62,14 @@ if [ $EXIT_CODE -eq 0 ]; then
     log_success "All tests passed!"
     echo ""
     echo "View results:"
-    echo "  报告: cat test-results/latest/summary.md"
-    echo "  截图: ls test-results/latest/screenshots/"
+    echo "  报告: cat logs/test/latest/summary.md"
+    echo "  截图: ls logs/test/latest/screenshots/"
     exit 0
 else
     log_error "ExistsFailed的测试"
     echo ""
     echo "诊断Command:"
-    echo "  报告: cat test-results/latest/summary.md"
-    echo "  Log: tail -100 test-results/latest/backend/test.log"
+    echo "  报告: cat logs/test/latest/summary.md"
+    echo "  Log: tail -100 logs/test/latest/backend/test.log"
     exit 1
 fi

@@ -15,7 +15,7 @@ export default defineConfig({
   outputDir: "logs/test/playwright",
   reporter: [["list"], ["html", { outputFolder: "logs/test/playwright-mobile-report" }]],
   use: {
-    baseURL: "http://127.0.0.1:5273",
+    baseURL: "http://127.0.0.1:5173",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",

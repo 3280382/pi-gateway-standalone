@@ -11,7 +11,7 @@
 import { appendFileSync, mkdirSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
 
-const RESULTS_DIR = process.env.TEST_RESULTS_DIR || "test-results/latest";
+const RESULTS_DIR = process.env.TEST_RESULTS_DIR || "logs/test";
 const SCREENSHOTS_DIR = `${RESULTS_DIR}/screenshots`;
 const LOG_DIR = `${RESULTS_DIR}/browser`;
 
