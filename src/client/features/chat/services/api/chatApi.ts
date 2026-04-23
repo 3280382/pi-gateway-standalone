@@ -750,51 +750,6 @@ export function setupWebSocketListeners(): void {
   });
 
   // Initialized handler - 保存 resourceFiles、模型信息和会话 ID
-  websocketService.on("initialized", (data: any) => {
-    console.log("[setupWebSocketListeners] initialized");
-    const sessionStore = useSessionStore.getState();
-    const sidebarStore = useSidebarStore.getState();
-    const chatStore = useChatStore.getState();
-
-    if (data?.resourceFiles) {
-      sessionStore.setResourceFiles(data.resourceFiles);
-    }
-
-    // 使用后端返回的 currentModel（已考虑 session 优先级）
-    if (data?.currentModel) {
-      sessionStore.setCurrentModel(data.currentModel);
-      console.log("[initialized] Current model:", data.currentModel);
-    }
-
-    // 保存Default model信息（用于显示）
-    if (data?.defaultModel) {
-      sessionStore.setDefaultModel(data.defaultModel);
-    }
-
-    // 保存可用模型列表
-    if (data?.allModels) {
-      sessionStore.setAvailableModels(data.allModels);
-      console.log("[initialized] Available models:", data.allModels.length);
-    }
-
-    // 设置当前选中的会话 ID（短 ID）
-    const shortId = data?.currentSession?.shortId || data?.sessionId;
-    if (shortId) {
-      sidebarStore.setSelectedSessionId(shortId);
-      console.log("[initialized] Session ID:", shortId);
-    }
-
-    // 处理消息
-    const messages = data?.currentSession?.messages || [];
-    if (messages.length > 0) {
-      chatStore.setMessages(messages);
-    }
-
-    // 【统一处理】使用辅助函数更新 sessions 列表和状态
-    updateSessionsAndStatus(sidebarStore, data?.allSessions || []);
-    console.log("[initialized] Updated sessions and status");
-  });
-
   // Dir changed handler - 同样处理模型信息
   websocketService.on("dir_changed", (data: any) => {
     console.log("[setupWebSocketListeners] dir_changed:", data);
