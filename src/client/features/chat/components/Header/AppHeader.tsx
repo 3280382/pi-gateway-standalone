@@ -21,6 +21,7 @@ import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { ChatSearchFilters } from "@/features/chat/types/chat";
 import { formatSessionId } from "@/features/chat/utils/sessionUtils";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
+import { websocketService } from "@/services/websocket.service";
 import styles from "./AppHeader.module.css";
 
 // ============================================================================
@@ -73,7 +74,12 @@ export function AppHeader({
   const sidebarController = useSidebarController();
 
   // ========== 2. Derived Values ==========
-  const connectionStatus = isConnected ? heartbeat.connectionQuality : "disconnected";
+  // Show waiting state when ping sent but no pong received yet
+  const connectionStatus = !isConnected
+    ? "disconnected"
+    : heartbeat.isWaiting
+      ? "waiting"
+      : heartbeat.connectionQuality;
   const pid = serverPid;
 
   // Format timestamp for display
@@ -573,17 +579,38 @@ export function AppHeader({
               <div className={styles.heartbeatTooltip}>
                 <div className={styles.heartbeatTitle}>Connection Status</div>
                 <div className={styles.heartbeatRow}>
+                  <span>WebSocket:</span>
+                  <span
+                    className={styles.heartbeatValue}
+                    style={{
+                      fontSize: "10px",
+                      fontFamily: "monospace",
+                      maxWidth: "140px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                    title={websocketService.getWebSocketUrl()}
+                  >
+                    {websocketService.getWebSocketUrl()}
+                  </span>
+                </div>
+                <div className={styles.heartbeatRow}>
                   <span>Quality:</span>
                   <span
-                    className={`${styles.heartbeatValue} ${styles[heartbeat.connectionQuality]}`}
+                    className={`${styles.heartbeatValue} ${
+                      heartbeat.isWaiting ? styles.waiting : styles[heartbeat.connectionQuality]
+                    }`}
                   >
-                    {heartbeat.connectionQuality === "excellent"
-                      ? "Excellent"
-                      : heartbeat.connectionQuality === "good"
-                        ? "Good"
-                        : heartbeat.connectionQuality === "poor"
-                          ? "Poor"
-                          : "Disconnected"}
+                    {heartbeat.isWaiting
+                      ? "Waiting..."
+                      : heartbeat.connectionQuality === "excellent"
+                        ? "Excellent"
+                        : heartbeat.connectionQuality === "good"
+                          ? "Good"
+                          : heartbeat.connectionQuality === "poor"
+                            ? "Poor"
+                            : "Disconnected"}
                   </span>
                 </div>
                 <div className={styles.heartbeatRow}>

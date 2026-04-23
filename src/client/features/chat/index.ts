@@ -8,11 +8,8 @@ export { useChatController } from "@/features/chat/services/api/chatApi";
 export { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 // Stores
 export {
-  selectCurrentSearchIndex,
-  selectIsSearching,
   selectSearchFilters,
   selectSearchQuery,
-  selectSearchResults,
   useChatStore,
   useSidebarStore,
 } from "@/features/chat/stores";

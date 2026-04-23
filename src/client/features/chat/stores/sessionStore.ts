@@ -84,6 +84,7 @@ export interface HeartbeatStatus {
   lastPongTime: number | null;
   latency: number | null; // ms
   connectionQuality: "excellent" | "good" | "poor" | "disconnected";
+  isWaiting: boolean; // true when ping sent, waiting for pong
 }
 
 export interface ChatSessionState {
@@ -156,6 +157,7 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
         lastPongTime: null,
         latency: null,
         connectionQuality: "disconnected",
+        isWaiting: false,
       },
       heartbeatInterval: 30000, // 默认30秒
       resourceFiles: null,
@@ -211,6 +213,7 @@ export const useSessionStore = create<ChatSessionState & ChatSessionActions>()(
             lastPongTime: null,
             latency: null,
             connectionQuality: "disconnected",
+            isWaiting: false,
           },
         }),
 

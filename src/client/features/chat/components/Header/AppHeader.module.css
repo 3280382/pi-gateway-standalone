@@ -621,6 +621,24 @@
   background: #6e7681;
 }
 
+/* Waiting state - gray with pulse animation */
+.statusDot.waiting {
+  background: #8b949e;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
+}
+
 /* Heartbeat Tooltip */
 .heartbeatTooltip {
   position: absolute;
@@ -687,4 +705,19 @@
 
 .heartbeatValue.poor {
   color: #f85149;
+}
+
+.heartbeatValue.waiting {
+  color: #8b949e;
+  animation: blink 1s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }

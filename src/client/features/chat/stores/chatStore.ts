@@ -1208,13 +1208,6 @@ export const selectSearchQuery = (state: ReturnType<typeof useChatStore.getState
   state.searchQuery;
 export const selectSearchFilters = (state: ReturnType<typeof useChatStore.getState>) =>
   state.searchFilters;
-export const selectSearchResults = (state: ReturnType<typeof useChatStore.getState>) =>
-  state.searchResults;
-export const selectCurrentSearchIndex = (state: ReturnType<typeof useChatStore.getState>) =>
-  state.currentSearchIndex;
-export const selectIsSearching = (state: ReturnType<typeof useChatStore.getState>) =>
-  state.isSearching;
-
 // Streaming state selectors - passed to MessageList as props to control re-render frequency
 export const selectStreamingContent = (state: ReturnType<typeof useChatStore.getState>) =>
   state.streamingContent;
