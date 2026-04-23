@@ -69,8 +69,6 @@ function toLocalFileTimestamp(date = new Date()): string {
 }
 
 function getDefaultLogFile(): string {
-  const env = process.env.NODE_ENV;
-  if (env === "production") return `server_${toLocalFileTimestamp()}.log`;
   return "server.log";
 }
 
@@ -119,13 +117,28 @@ export class Logger {
     }
   }
 
+  /** Check if log file should be rotated (date changed or size exceeded) */
   private rotateLogFileIfNeeded(): void {
     if (!this.logFilePath || !existsSync(this.logFilePath)) return;
     try {
       const stats = statSync(this.logFilePath);
-      if (stats.size >= this.options.maxFileSize) {
-        const timestamp = toLocalFileTimestamp();
-        const rotatedPath = this.logFilePath.replace(/\.log$/, `_${timestamp}.log`);
+      const now = new Date();
+      const fileDate = new Date(stats.mtime);
+
+      // Rotate if date changed (crossed midnight)
+      const dateChanged =
+        now.getFullYear() !== fileDate.getFullYear() ||
+        now.getMonth() !== fileDate.getMonth() ||
+        now.getDate() !== fileDate.getDate();
+
+      // Rotate if size exceeded
+      const sizeExceeded = stats.size >= this.options.maxFileSize;
+
+      if (dateChanged || sizeExceeded) {
+        const suffix = sizeExceeded
+          ? toLocalFileTimestamp(fileDate)
+          : `${fileDate.getFullYear()}-${String(fileDate.getMonth() + 1).padStart(2, "0")}-${String(fileDate.getDate()).padStart(2, "0")}`;
+        const rotatedPath = this.logFilePath.replace(/\.log$/, `_${suffix}.log`);
         renameSync(this.logFilePath, rotatedPath);
       }
     } catch {
