@@ -14,13 +14,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useChatController } from "@/features/chat/services/api/chatApi";
 
 import { useChatStore } from "@/features/chat/stores/chatStore";
-import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import {
   createErrorMessage,
   createSystemMessage,
   createUserMessage,
 } from "@/features/chat/utils/messageUtils";
-import { websocketService } from "@/services/websocket.service";
 
 // ===== [ANCHOR:COMMAND_EXECUTION] =====
 
@@ -81,56 +79,69 @@ export function useChatPanel(): UseChatPanelReturn {
   // ===== [ANCHOR:STORE_SELECTORS] =====
   const inputText = useChatStore((state) => state.inputText);
   const messages = useChatStore((state) => state.messages);
+  const isStreaming = useChatStore((state) => state.isStreaming);
 
   const chatController = useChatController();
 
+  // ===== [ANCHOR:SCROLL_LOGIC] =====
+  const performScroll = useCallback(() => {
+    if (!messagesRef.current || !shouldScrollToBottom) return;
+
+    const now = Date.now();
+    const timeSinceLastScroll = now - lastScrollTimeRef.current;
+
+    if (timeSinceLastScroll > 100) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      lastScrollTimeRef.current = now;
+    } else {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      scrollTimeoutRef.current = setTimeout(() => {
+        if (messagesRef.current && shouldScrollToBottom) {
+          messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+          lastScrollTimeRef.current = Date.now();
+        }
+        scrollTimeoutRef.current = null;
+      }, 50);
+    }
+  }, [shouldScrollToBottom]);
+
   // ===== [ANCHOR:EFFECTS] =====
-  // First load时滚动到底部
+  // 首次加载时滚动到底部（延迟等待 DOM 渲染和消息加载）
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (messagesRef.current) {
-        messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-        lastScrollTimeRef.current = Date.now();
-      }
+      performScroll();
     }, 100);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [performScroll]);
 
-  // 消息变化时自动滚动（包括流式内容变化）
+  // 消息数量变化时自动滚动（刷新页面、session 切换、新发送消息）
+  // biome-ignore lint/correctness/useExhaustiveDependencies: messages.length is intentionally used as a trigger
   useEffect(() => {
-    if (messagesRef.current && shouldScrollToBottom) {
-      // 防抖滚动：避免在短时间内频繁滚动
-      const now = Date.now();
-      const timeSinceLastScroll = now - lastScrollTimeRef.current;
+    performScroll();
+  }, [messages.length, performScroll]);
 
-      // 如果距离上次滚动超过100ms，立即滚动；否则延迟滚动
-      if (timeSinceLastScroll > 100) {
-        // 立即滚动
-        messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-        lastScrollTimeRef.current = now;
-      } else {
-        // 延迟滚动，合并频繁的更新
-        if (scrollTimeoutRef.current) {
-          clearTimeout(scrollTimeoutRef.current);
-        }
-        scrollTimeoutRef.current = setTimeout(() => {
-          if (messagesRef.current && shouldScrollToBottom) {
-            messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-            lastScrollTimeRef.current = Date.now();
-          }
-          scrollTimeoutRef.current = null;
-        }, 50); // 50ms延迟，足够合并快速更新
-      }
+  // 激活滚动按钮时立即滚动到底部
+  useEffect(() => {
+    if (shouldScrollToBottom) {
+      performScroll();
     }
+  }, [shouldScrollToBottom, performScroll]);
 
-    return () => {
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-        scrollTimeoutRef.current = null;
+  // 流式过程中持续滚动（AI 回复时内容持续更新，messages 长度不变）
+  useEffect(() => {
+    if (!isStreaming || !shouldScrollToBottom || !messagesRef.current) return;
+
+    const interval = setInterval(() => {
+      if (messagesRef.current && shouldScrollToBottom) {
+        messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
       }
-    };
-  }, [shouldScrollToBottom]); // 添加流式内容依赖
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [isStreaming, shouldScrollToBottom]);
 
   // ===== [ANCHOR:HANDLERS] =====
   const handleScroll = useCallback(() => {
@@ -140,6 +151,8 @@ export function useChatPanel(): UseChatPanelReturn {
 
       if (!isAtBottom && shouldScrollToBottom) {
         setShouldScrollToBottom(false);
+      } else if (isAtBottom && !shouldScrollToBottom) {
+        setShouldScrollToBottom(true);
       }
     }
   }, [shouldScrollToBottom]);
