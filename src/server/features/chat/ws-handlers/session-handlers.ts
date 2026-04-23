@@ -513,11 +513,6 @@ export const handleListSessionsWrapped = createHandler(handleListSessions, {
   requireSession: false,
 });
 
-export const handleLoadSessionWrapped = createHandler(handleLoadSession, {
-  name: "load_session",
-  requireSession: true,
-});
-
 export const handleChangeDirWrapped = createHandler(handleChangeDir, {
   name: "change_dir",
   requireSession: false,

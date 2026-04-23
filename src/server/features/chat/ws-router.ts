@@ -301,7 +301,6 @@ import {
   handleGetSessionStatusWrapped,
   handleInitWrapped,
   handleListSessionsWrapped,
-  handleLoadSessionWrapped,
   handleNewSessionWrapped,
   handleSidebarVisibilityWrapped,
   handleUpdateSessionConfigWrapped,
@@ -343,7 +342,6 @@ export function registerAllWSHandlers(): void {
   wsRouter.register("init", handleInitWrapped);
   wsRouter.register("new_session", handleNewSessionWrapped);
   wsRouter.register("list_sessions", handleListSessionsWrapped);
-  wsRouter.register("load_session", handleLoadSessionWrapped);
   wsRouter.register("change_dir", handleChangeDirWrapped);
   wsRouter.register("sidebar_visibility", handleSidebarVisibilityWrapped);
   wsRouter.register("get_session_status", handleGetSessionStatusWrapped);

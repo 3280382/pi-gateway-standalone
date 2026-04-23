@@ -436,13 +436,6 @@ export class PiAgentSession {
         console.log(
           `[${timestamp}] [SEND] toolcall_end (implicit): ${this.currentContentBlock.toolName}`
         );
-        this.send({
-          type: "toolcall_end",
-          toolCallId: this.currentContentBlock.toolCallId,
-          toolName: this.currentContentBlock.toolName,
-          index: this.currentContentBlock.index,
-          implicit: true,
-        });
         break;
     }
     this.currentContentBlock = { type: null, index: -1 };
@@ -648,38 +641,16 @@ export class PiAgentSession {
                   toolName: toolCall.name,
                 };
                 this.updateRuntimeStatus("tooling");
-                this.send({
-                  type: "toolcall_start",
-                  toolCallId: toolCall.id,
-                  toolName: toolCall.name,
-                  index: contentIndex,
-                });
               }
               break;
             }
             case "toolcall_delta": {
-              const toolCall = partial.content?.[contentIndex];
-              if (toolCall?.type === "toolCall") {
-                this.send({
-                  type: "toolcall_delta",
-                  toolCallId: toolCall.id,
-                  toolName: toolCall.name,
-                  delta: msgEvent.delta,
-                  args: toolCall.arguments,
-                  index: contentIndex,
-                });
-              }
               break;
             }
             case "toolcall_end": {
               const toolCall = partial.content?.[contentIndex];
               if (toolCall?.type === "toolCall") {
-                this.send({
-                  type: "toolcall_end",
-                  toolCallId: toolCall.id,
-                  toolName: toolCall.name,
-                  index: contentIndex,
-                });
+                // no-op
               }
               this.currentContentBlock = { type: null, index: -1 };
               break;
