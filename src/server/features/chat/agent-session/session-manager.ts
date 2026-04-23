@@ -357,7 +357,7 @@ export class ServerSessionManager {
    */
   private async findMostRecentSessionFile(workingDir: string): Promise<string> {
     const { SessionManager } = await import("@mariozechner/pi-coding-agent");
-    const { getLocalSessionsDir } = await import("./utils.js");
+    const { getLocalSessionsDir } = await import("../session/utils.js");
 
     const localSessionsDir = getLocalSessionsDir(workingDir);
     const sessions = await SessionManager.list(workingDir, localSessionsDir);

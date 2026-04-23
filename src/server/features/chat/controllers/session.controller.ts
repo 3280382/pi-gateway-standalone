@@ -10,7 +10,7 @@ import { DefaultResourceLoader } from "@mariozechner/pi-coding-agent";
 import type { Request, Response } from "express";
 import { Logger, LogLevel } from "../../../lib/utils/logger.js";
 import { expandPath } from "../../files/utils.js";
-import { AGENT_DIR } from "../agent-session/utils.js";
+import { AGENT_DIR } from "../session/utils.js";
 
 const logger = new Logger({ level: LogLevel.INFO });
 

@@ -6,7 +6,7 @@
 import { existsSync } from "node:fs";
 import { SessionManager } from "@mariozechner/pi-coding-agent";
 import { extractShortSessionId, serverSessionManager } from "../agent-session/session-manager.js";
-import { getLocalSessionsDir } from "../agent-session/utils.js";
+import { getLocalSessionsDir } from "../session/utils.js";
 import { sessionConfigManager } from "../session/SessionConfig.js";
 import {
   buildSessionResponse,
@@ -161,7 +161,7 @@ export async function handleNewSession(
 
   // 2. Create new session file path (ensure completely new session)
   const { SessionManager } = await import("@mariozechner/pi-coding-agent");
-  const { getLocalSessionsDir } = await import("../agent-session/utils.js");
+  const { getLocalSessionsDir } = await import("../session/utils.js");
   const localSessionsDir = getLocalSessionsDir(workingDir);
   const newSessionManager = SessionManager.create(workingDir, localSessionsDir);
   const newSessionFile = newSessionManager.getSessionFile();
