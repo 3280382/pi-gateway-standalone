@@ -10,10 +10,7 @@ export {
   setupWebSocketListeners,
   useChatController,
 } from "@/features/chat/services/api/chatApi";
-export {
-  createSidebarController,
-  useSidebarController,
-} from "@/features/chat/services/api/sidebarApi";
+export { useSidebarController } from "@/features/chat/services/api/sidebarApi";
 export {
   getSystemPrompt,
   formatSystemPromptContent,
