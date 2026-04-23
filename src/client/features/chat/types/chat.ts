@@ -182,9 +182,6 @@ export interface ChatState {
   setSearchFilters: (filters: Partial<ChatSearchFilters>) => void;
   setSearchResults: (results: SearchResult[]) => void;
   setSearching: (searching: boolean) => void;
-  nextSearchResult: () => void;
-  prevSearchResult: () => void;
-  clearSearch: () => void;
 
   // Model/Session
   currentModel: string | null;

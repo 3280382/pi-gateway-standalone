@@ -999,44 +999,6 @@ export const useChatStore = create<
           set({ isSearching: searching }, false, "setSearching");
         },
 
-        nextSearchResult: () => {
-          const { searchResults, currentSearchIndex } = get();
-          if (searchResults.length === 0) return;
-          set(
-            {
-              currentSearchIndex: (currentSearchIndex + 1) % searchResults.length,
-            },
-            false,
-            "nextSearchResult"
-          );
-        },
-
-        prevSearchResult: () => {
-          const { searchResults, currentSearchIndex } = get();
-          if (searchResults.length === 0) return;
-          set(
-            {
-              currentSearchIndex:
-                (currentSearchIndex - 1 + searchResults.length) % searchResults.length,
-            },
-            false,
-            "prevSearchResult"
-          );
-        },
-
-        clearSearch: () => {
-          set(
-            {
-              searchQuery: "",
-              searchResults: [],
-              currentSearchIndex: -1,
-              isSearching: false,
-            },
-            false,
-            "clearSearch"
-          );
-        },
-
         // Session
         setSessionId: (id: string | null) => {
           set({ sessionId: id }, false, "setSessionId");
