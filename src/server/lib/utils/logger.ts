@@ -40,10 +40,37 @@ function getDefaultLogDir(): string | null {
   return "logs/dev";
 }
 
+function toLocalISOString(date = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const pad3 = (n: number) => String(n).padStart(3, "0");
+  const y = date.getFullYear();
+  const M = pad(date.getMonth() + 1);
+  const d = pad(date.getDate());
+  const h = pad(date.getHours());
+  const m = pad(date.getMinutes());
+  const s = pad(date.getSeconds());
+  const ms = pad3(date.getMilliseconds());
+  const tzOffset = -date.getTimezoneOffset();
+  const tzH = pad(Math.floor(Math.abs(tzOffset) / 60));
+  const tzM = pad(Math.abs(tzOffset) % 60);
+  const tzSign = tzOffset >= 0 ? "+" : "-";
+  return `${y}-${M}-${d}T${h}:${m}:${s}.${ms}${tzSign}${tzH}:${tzM}`;
+}
+
+function toLocalFileTimestamp(date = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const y = date.getFullYear();
+  const M = pad(date.getMonth() + 1);
+  const d = pad(date.getDate());
+  const h = pad(date.getHours());
+  const m = pad(date.getMinutes());
+  const s = pad(date.getSeconds());
+  return `${y}-${M}-${d}T${h}-${m}-${s}`;
+}
+
 function getDefaultLogFile(): string {
   const env = process.env.NODE_ENV;
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  if (env === "production") return `server_${timestamp}.log`;
+  if (env === "production") return `server_${toLocalFileTimestamp()}.log`;
   return "server.log";
 }
 
@@ -97,7 +124,7 @@ export class Logger {
     try {
       const stats = statSync(this.logFilePath);
       if (stats.size >= this.options.maxFileSize) {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+        const timestamp = toLocalFileTimestamp();
         const rotatedPath = this.logFilePath.replace(/\.log$/, `_${timestamp}.log`);
         renameSync(this.logFilePath, rotatedPath);
       }
@@ -136,7 +163,7 @@ export class Logger {
     error?: Error
   ): LogEntry {
     return {
-      timestamp: new Date().toISOString(),
+      timestamp: toLocalISOString(),
       level,
       message,
       context: this.options.includeContext ? context : undefined,
