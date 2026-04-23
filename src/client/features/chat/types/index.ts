@@ -5,10 +5,8 @@
 export type {
   ChatController,
   ChatSearchFilters,
-  ChatState,
   Message,
   MessageContent,
-  SearchResult,
   ToolExecution,
 } from "./chat";
 export type {
