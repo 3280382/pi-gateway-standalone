@@ -123,14 +123,6 @@ export function listChatSessions(cwd: string): boolean {
 }
 
 /**
- * Load more历史消息（对应后端的 load_more_messages 类型）
- * 当用户滚动到消息顶部时调用
- */
-export function loadMoreMessages(sessionFile: string, offset: number, limit: number = 50): boolean {
-  return websocketService.send("load_more_messages", { sessionFile, offset, limit });
-}
-
-/**
  * Set model（对应后端的 set_model 类型）
  */
 export function setChatModel(provider: string, modelId: string, thinkingLevel?: string): boolean {

@@ -90,7 +90,6 @@ export type WebSocketEvent =
   // Session Status Events
   | "runtime_status_broadcast"
   | "session_status"
-  | "more_messages_loaded"
   // Reconnection Events
   | "session_reconnected"
   // System Events
@@ -455,7 +454,6 @@ export class WebSocketService {
       // Session Status
       runtime_status_broadcast: "runtime_status_broadcast",
       session_status: "session_status",
-      more_messages_loaded: "more_messages_loaded",
       // Reconnection
       session_reconnected: "session_reconnected",
       // System
