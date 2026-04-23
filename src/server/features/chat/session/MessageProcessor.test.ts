@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { processSessionEntries } from "./MessageProcessor.js";
 
-describe("session-processor", () => {
+describe("session/MessageProcessor", () => {
   describe("processSessionEntries", () => {
     it("returns empty result for empty entries", () => {
       const result = processSessionEntries([]);

@@ -8,7 +8,7 @@ import {
   safeFileName,
 } from "./utils.js";
 
-describe("agent-session/utils", () => {
+describe("session/utils", () => {
   describe("encodeCwd", () => {
     it.each([
       ["/root/project", "--root-project--"],
