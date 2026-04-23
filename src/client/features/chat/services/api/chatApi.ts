@@ -532,18 +532,6 @@ export function setupWebSocketListeners(): void {
     }
   );
 
-  websocketService.on("tool_execution_update", (data: { toolCallId: string; chunk?: string }) => {
-    try {
-      const ts = new Date().toISOString().split("T")[1].split(".")[0];
-      console.log(`[${ts}] [RECV] tool_execution_update: ${data?.toolCallId}`);
-      if (data?.chunk) {
-        store.updateToolOutput(data.toolCallId, data.chunk, undefined);
-      }
-    } catch (err) {
-      console.error("[tool_execution_update] Error:", err);
-    }
-  });
-
   websocketService.on(
     "tool_execution_end",
     (data: { toolCallId: string; result?: string; isError?: boolean }) => {
@@ -674,20 +662,6 @@ export function setupWebSocketListeners(): void {
   });
 
   // Retry start/end handlers
-  websocketService.on("retry_start", () => {
-    const ts = new Date().toISOString().split("T")[1].split(".")[0];
-    console.log(`[${ts}] [RECV] retry_start`);
-    // 添加System message到消息Cols表
-    store.addMessage(createSystemInfoMessage("🔄 Retrying...", "retry", "retry"));
-  });
-
-  websocketService.on("retry_end", () => {
-    const ts = new Date().toISOString().split("T")[1].split(".")[0];
-    console.log(`[${ts}] [RECV] retry_end`);
-    // 添加System message到消息Cols表
-    store.addMessage(createSystemInfoMessage("✅ Retry complete", "retry", "retry"));
-  });
-
   // Queue update handler
   websocketService.on("queue_update", (data: any) => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
