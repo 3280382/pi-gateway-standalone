@@ -63,23 +63,6 @@ export interface SidebarController {
 }
 
 // ============================================================================
-// API Response Types
-// ============================================================================
-
-export interface SessionsResponse {
-  sessions: Array<{
-    path: string;
-    firstMessage?: string;
-    messageCount: number;
-    modified: string;
-  }>;
-}
-
-export interface WorkingDirResponse {
-  cwd: string;
-}
-
-// ============================================================================
 // Component Props Types
 // ============================================================================
 
@@ -93,10 +76,4 @@ export interface IconButtonProps {
   title?: string;
   children: React.ReactNode;
   className?: string;
-}
-
-export interface SessionItemProps {
-  session: Session;
-  isSelected: boolean;
-  onClick: () => void;
 }

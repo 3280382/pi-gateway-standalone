@@ -127,21 +127,6 @@ export interface ChatSearchFilters {
   };
 }
 
-// Legacy filter support (for backward compatibility)
-export type LegacyChatSearchFilters = {
-  user: boolean;
-  assistant: boolean;
-  system: boolean;
-  thinking: boolean;
-  tools: boolean;
-  compaction: boolean;
-  modelChange: boolean;
-  thinkingLevelChange: boolean;
-  usage: boolean;
-  retry: boolean;
-  autoRetry: boolean;
-};
-
 export interface SearchResult {
   messageId: string;
   indices: number[];
