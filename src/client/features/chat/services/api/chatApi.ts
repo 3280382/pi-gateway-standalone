@@ -53,6 +53,26 @@ function createSystemInfoMessage(
   };
 }
 
+/**
+ * Update session store from server data (shared between init and dir_change)
+ */
+function updateSessionStoreFromServerData(data: any): void {
+  const sessionStore = useSessionStore.getState();
+
+  if (data?.resourceFiles) {
+    sessionStore.setResourceFiles(data.resourceFiles);
+  }
+  if (data?.currentModel) {
+    sessionStore.setCurrentModel(data.currentModel);
+  }
+  if (data?.defaultModel) {
+    sessionStore.setDefaultModel(data.defaultModel);
+  }
+  if (data?.allModels) {
+    sessionStore.setAvailableModels(data.allModels);
+  }
+}
+
 // ============================================================================
 // Enhanced Chat Controller Interface (扩展原有接口)
 // ============================================================================
@@ -741,32 +761,11 @@ export function setupWebSocketListeners(): void {
     store.setIsRunning(false);
   });
 
-  // Initialized handler - 保存 resourceFiles、模型信息和会话 ID
-  // Dir changed handler - 同样处理模型信息
+  // Dir changed handler
   websocketService.on("dir_changed", (data: any) => {
     console.log("[setupWebSocketListeners] dir_changed:", data);
-    const sessionStore = useSessionStore.getState();
-    const sidebarStore = useSidebarStore.getState();
-
-    if (data?.resourceFiles) {
-      sessionStore.setResourceFiles(data.resourceFiles);
-    }
-
-    if (data?.currentModel) {
-      sessionStore.setCurrentModel(data.currentModel);
-    }
-
-    if (data?.defaultModel) {
-      sessionStore.setDefaultModel(data.defaultModel);
-    }
-
-    // 保存可用模型列表
-    if (data?.allModels) {
-      sessionStore.setAvailableModels(data.allModels);
-    }
-
-    // 【统一处理】使用辅助函数更新 sessions 列表和状态
-    updateSessionsAndStatus(sidebarStore, data?.allSessions || []);
+    updateSessionStoreFromServerData(data);
+    updateSessionsAndStatus(useSidebarStore.getState(), data?.allSessions || []);
     console.log("[dir_changed] Updated sessions and status");
   });
 
