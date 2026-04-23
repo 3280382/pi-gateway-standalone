@@ -12,7 +12,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useChatController } from "@/features/chat/services/api/chatApi";
-import { loadMoreMessages } from "@/features/chat/services/chatWebSocket";
+
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import {
@@ -20,7 +20,6 @@ import {
   createSystemMessage,
   createUserMessage,
 } from "@/features/chat/utils/messageUtils";
-import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { websocketService } from "@/services/websocket.service";
 
 // ===== [ANCHOR:COMMAND_EXECUTION] =====
@@ -55,12 +54,6 @@ export interface UseChatPanelReturn {
   setShouldScrollToBottom: (value: boolean) => void;
   handleScroll: () => void;
 
-  // Load more消息
-  isLoadingMore: boolean;
-  hasMoreMessages: boolean;
-  loadMore: () => void;
-  reloadAllMessages: () => void;
-
   // 消息操作
   handleSend: () => Promise<void>;
   handleSendWithImages: (
@@ -82,13 +75,8 @@ export function useChatPanel(): UseChatPanelReturn {
   const messagesRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastScrollTimeRef = useRef(0);
-  const loadingMoreRef = useRef(false);
-  const hasMoreRef = useRef(true);
-
   // ===== [ANCHOR:STATE] =====
   const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMoreMessages, setHasMoreMessages] = useState(true);
 
   // ===== [ANCHOR:STORE_SELECTORS] =====
   const inputText = useChatStore((state) => state.inputText);
@@ -97,7 +85,7 @@ export function useChatPanel(): UseChatPanelReturn {
   const chatController = useChatController();
 
   // ===== [ANCHOR:EFFECTS] =====
-  // First load时滚动到底部，并根据消息数量判断是否有更多历史消息
+  // First load时滚动到底部
   useEffect(() => {
     const timer = setTimeout(() => {
       if (messagesRef.current) {
@@ -106,15 +94,8 @@ export function useChatPanel(): UseChatPanelReturn {
       }
     }, 100);
 
-    // 检查是否有更多历史消息（如果当前消息少于100Items，认为已全部加载）
-    const messageLimit = useWorkspaceStore.getState().defaultMessageLimit;
-    if (messages.length < messageLimit && messageLimit > 0) {
-      hasMoreRef.current = false;
-      setHasMoreMessages(false);
-    }
-
     return () => clearTimeout(timer);
-  }, [messages.length]);
+  }, []);
 
   // 消息变化时自动滚动（包括流式内容变化）
   useEffect(() => {
@@ -151,226 +132,17 @@ export function useChatPanel(): UseChatPanelReturn {
     };
   }, [shouldScrollToBottom]); // 添加流式内容依赖
 
-  // 当切换 session 或消息Cols表变化时，更新 hasMore 状态
-  useEffect(() => {
-    if (messages.length === 0) {
-      setShouldScrollToBottom(true);
-      return;
-    }
-
-    // 根据消息数量和设置判断是否有更多历史消息
-    const messageLimit = useWorkspaceStore.getState().defaultMessageLimit;
-    // 如果当前消息数少于限制，说明已全部加载
-    if (messages.length < messageLimit) {
-      hasMoreRef.current = false;
-      setHasMoreMessages(false);
-    } else {
-      // 达到限制，可能还有更多
-      hasMoreRef.current = true;
-      setHasMoreMessages(true);
-    }
-  }, [messages.length]);
-
-  // Load more消息 - 滚动到顶部时加载所有历史消息
-  const loadMore = useCallback(async () => {
-    const sessionStore = useSessionStore.getState();
-    const chatStore = useChatStore.getState();
-    const currentSessionFile = sessionStore.currentSessionFile;
-
-    if (!currentSessionFile || loadingMoreRef.current) return;
-
-    loadingMoreRef.current = true;
-    setIsLoadingMore(true);
-
-    console.log(`[useChatPanel] Loading all history messages for: ${currentSessionFile}`);
-
-    try {
-      // 等待 more_messages_loaded 响应，加载所有历史消息（offset=0, limit=-1）
-      const response = await new Promise<{
-        messages: any[];
-        hasMore: boolean;
-        totalCount: number;
-      }>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          cleanup();
-          reject(new Error("Load messages timeout"));
-        }, 15000);
-
-        const unsubscribe = websocketService.on("more_messages_loaded", (data: any) => {
-          if (data?.sessionFile === currentSessionFile) {
-            clearTimeout(timeout);
-            cleanup();
-            resolve(data);
-          }
-        });
-
-        const unsubscribeError = websocketService.on("error", (data: any) => {
-          clearTimeout(timeout);
-          cleanup();
-          reject(new Error(`Server error: ${JSON.stringify(data)}`));
-        });
-
-        function cleanup() {
-          unsubscribe();
-          unsubscribeError();
-        }
-
-        // 发送请求加载所有历史消息（offset=0, limit=-1）
-        const sent = loadMoreMessages(currentSessionFile, 0, -1);
-        if (!sent) {
-          clearTimeout(timeout);
-          cleanup();
-          reject(new Error("Failed to send load_more_messages"));
-        }
-      });
-
-      console.log("[useChatPanel] All history loaded:", {
-        messageCount: response.messages?.length,
-        totalCount: response.totalCount,
-      });
-
-      // 合并消息：新加载的历史消息 + 当前已有的消息（避免重复）
-      // 服务器已预处理所有消息
-      const { handleServerMessages } = await import("@/features/chat/utils/messageUtils");
-
-      // 使用工具函数合并消息，避免重复
-      const merged = handleServerMessages(response.messages || []);
-
-      // 替换消息列表（保留流式消息在末尾）
-      const streamingMessage = chatStore.currentStreamingMessage;
-      if (streamingMessage) {
-        // 如果正在流式，保留流式消息
-        const nonStreaming = merged.filter((m) => m.id !== streamingMessage.id);
-        chatStore.setMessages([...nonStreaming, streamingMessage]);
-      } else {
-        chatStore.setMessages(merged);
-      }
-
-      // 更新 hasMore 状态
-      hasMoreRef.current = response.hasMore ?? false;
-      setHasMoreMessages(response.hasMore ?? false);
-
-      // 加载完成后，稍微向下滚动一点，让用户知道加载了更多内容
-      if (messagesRef.current) {
-        messagesRef.current.scrollTop = 100;
-      }
-    } catch (error) {
-      console.error("[useChatPanel] Failed to load messages:", error);
-    } finally {
-      loadingMoreRef.current = false;
-      setIsLoadingMore(false);
-    }
-  }, []);
-
   // ===== [ANCHOR:HANDLERS] =====
   const handleScroll = useCallback(() => {
     if (messagesRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = messagesRef.current;
       const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
-      const isAtTop = scrollTop < 50; // 距离顶部50px内认为是顶部
 
       if (!isAtBottom && shouldScrollToBottom) {
         setShouldScrollToBottom(false);
       }
-
-      // 滚动到顶部时自动Load more消息
-      if (isAtTop && hasMoreRef.current && !loadingMoreRef.current) {
-        loadMore();
-      }
     }
-  }, [shouldScrollToBottom, loadMore]);
-
-  // 重新加载所有消息
-  const reloadAllMessages = useCallback(async () => {
-    const sessionStore = useSessionStore.getState();
-    const chatStore = useChatStore.getState();
-    const currentSessionFile = sessionStore.currentSessionFile;
-
-    if (!currentSessionFile) {
-      console.warn("[useChatPanel] No current session file");
-      return;
-    }
-
-    console.log("[useChatPanel] Reloading all messages for:", currentSessionFile);
-
-    // 设置加载状态
-    setIsLoadingMore(true);
-
-    try {
-      // 等待 more_messages_loaded 响应
-      const response = await new Promise<{
-        messages: any[];
-        hasMore: boolean;
-        totalCount: number;
-      }>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          cleanup();
-          reject(new Error("Reload messages timeout"));
-        }, 10000);
-
-        const unsubscribe = websocketService.on("more_messages_loaded", (data: any) => {
-          if (data?.sessionFile === currentSessionFile) {
-            clearTimeout(timeout);
-            cleanup();
-            resolve(data);
-          }
-        });
-
-        const unsubscribeError = websocketService.on("error", (data: any) => {
-          clearTimeout(timeout);
-          cleanup();
-          reject(new Error(`Server error: ${JSON.stringify(data)}`));
-        });
-
-        function cleanup() {
-          unsubscribe();
-          unsubscribeError();
-        }
-
-        // 发送请求
-        const sent = loadMoreMessages(currentSessionFile, 0, -1);
-        if (!sent) {
-          clearTimeout(timeout);
-          cleanup();
-          reject(new Error("Failed to send load_more_messages"));
-        }
-      });
-
-      console.log("[useChatPanel] Reload response:", {
-        messageCount: response.messages?.length,
-        totalCount: response.totalCount,
-        hasMore: response.hasMore,
-      });
-
-      // Clear旧消息并设置新消息（服务器已预处理）
-      const { handleServerMessages } = await import("@/features/chat/utils/messageUtils");
-      const formattedMessages = handleServerMessages(response.messages);
-      chatStore.setMessages(formattedMessages);
-
-      hasMoreRef.current = response.hasMore;
-      setHasMoreMessages(response.hasMore);
-
-      console.log("[useChatPanel] Reloaded", formattedMessages.length, "messages");
-    } catch (error) {
-      console.error("[useChatPanel] Failed to reload messages:", error);
-      // 如果Failed，尝试恢复原来的消息（通过重新初始化）
-      const messageLimit = useWorkspaceStore.getState().defaultMessageLimit;
-      const { initChatWorkingDirectory } = await import("@/features/chat/services/chatWebSocket");
-      const response = await initChatWorkingDirectory(
-        sessionStore.workingDir,
-        currentSessionFile,
-        10000,
-        messageLimit
-      );
-      if (response?.currentSession?.messages) {
-        const { handleServerMessages } = await import("@/features/chat/utils/messageUtils");
-        const messages = handleServerMessages(response.currentSession.messages);
-        chatStore.setMessages(messages);
-      }
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, []);
+  }, [shouldScrollToBottom]);
 
   const handleSend = useCallback(async () => {
     if (inputText.trim()) {
@@ -441,10 +213,6 @@ export function useChatPanel(): UseChatPanelReturn {
     shouldScrollToBottom,
     setShouldScrollToBottom,
     handleScroll,
-    isLoadingMore,
-    hasMoreMessages,
-    loadMore,
-    reloadAllMessages,
     handleSend,
     handleSendWithImages,
     handleBashCommand,
