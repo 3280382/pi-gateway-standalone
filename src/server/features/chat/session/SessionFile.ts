@@ -14,13 +14,13 @@ import { SessionManager } from "@mariozechner/pi-coding-agent";
 import type {
   Message,
   SessionMessagesResponse,
-} from "../../../shared/types/session-messages.types.js";
-import { Logger, LogLevel } from "../../lib/utils/logger.js";
-import type { PiAgentSession } from "./agent-session/piAgentSession.js";
-import { extractShortSessionId, serverSessionManager } from "./agent-session/session-manager.js";
-import { getLocalSessionsDir } from "./session/utils.js";
-import { sessionConfigManager } from "./session/SessionConfig.js";
-import { processSessionEntries } from "./session-processor.js";
+} from "../../../../shared/types/session-messages.types.js";
+import { Logger, LogLevel } from "../../../lib/utils/logger.js";
+import type { PiAgentSession } from "../agent-session/piAgentSession.js";
+import { extractShortSessionId, serverSessionManager } from "../agent-session/session-manager.js";
+import { getLocalSessionsDir } from "./utils.js";
+import { sessionConfigManager } from "./SessionConfig.js";
+import { processSessionEntries } from "../session-processor.js";
 
 const logger = new Logger({ level: LogLevel.INFO });
 

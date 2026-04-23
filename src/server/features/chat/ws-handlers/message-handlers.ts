@@ -70,7 +70,7 @@ export async function handleExportSession(
 export async function handleListModels(ctx: WSContext, _payload: unknown): Promise<void> {
   try {
     // Import dynamically to avoid circular dependencies
-    const { getAllModels } = await import("../session-helpers.js");
+    const { getAllModels } = await import("../session/SessionFile.js");
     const models = await getAllModels();
 
     sendSuccess(ctx, "models_list", { models });

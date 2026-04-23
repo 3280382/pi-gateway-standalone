@@ -13,7 +13,7 @@ import {
   getAllSessions,
   getSessionMessageCount,
   getSessionMessages,
-} from "../session-helpers.js";
+} from "../session/SessionFile.js";
 import type { WSContext } from "../ws-router.js";
 import { createHandler, logger, sendError, sendSuccess } from "./handler-utils.js";
 
