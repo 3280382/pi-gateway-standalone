@@ -239,10 +239,6 @@ export interface ChatController {
 
   // Tools Display
   setShowTools: (show: boolean) => void;
-
-  // Tool Actions
-  expandToolOutput: (toolId: string) => void;
-  collapseToolOutput: (toolId: string) => void;
 }
 
 // ============================================================================

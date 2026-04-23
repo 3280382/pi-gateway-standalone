@@ -204,15 +204,6 @@ export function useChatController(): EnhancedChatController {
       chatStore.setShowThinking(show);
     },
 
-    // 工具操作（Placeholder实现）
-    expandToolOutput: (_toolId: string) => {
-      // 工具输出Expand在Group件状态中处理
-    },
-
-    collapseToolOutput: (_toolId: string) => {
-      // 工具输出Collapse在Group件状态中处理
-    },
-
     // 会话管理 - 使用 sessionManager 统一处理（包含 loading 和界面重建）
     createNewSession: async () => {
       // 调用 sessionManager 的方法，它会处理 loading、等待服务器返回和重建界面
