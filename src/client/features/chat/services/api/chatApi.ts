@@ -32,6 +32,26 @@ function generateToolId(): string {
   return `tool-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
+/**
+ * Helper to create a system info message with consistent structure
+ */
+function createSystemInfoMessage(
+  text: string,
+  kind: Message["kind"] = undefined,
+  kind3: Message["kind3"] = undefined
+): Message {
+  return {
+    id: generateMessageId(),
+    role: "system",
+    kind,
+    kind1: "sysinfo",
+    kind2: "event",
+    kind3,
+    content: [{ type: "text", text }],
+    timestamp: new Date(),
+  };
+}
+
 // ============================================================================
 // Enhanced Chat Controller Interface (扩展原有接口)
 // ============================================================================
@@ -627,32 +647,18 @@ export function setupWebSocketListeners(): void {
   websocketService.on("compaction_start", () => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] compaction_start`);
-    store.addMessage({
-      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      role: "system",
-      kind: "compaction",
-      kind1: "sysinfo",
-      kind2: "event",
-      kind3: "compaction",
-      content: [{ type: "text", text: "🗜️ Compacting context..." }],
-      timestamp: new Date(),
-    });
+    store.addMessage(
+      createSystemInfoMessage("🗜️ Compacting context...", "compaction", "compaction")
+    );
   });
 
   websocketService.on("compaction_end", () => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] compaction_end`);
     // 添加System message到消息Cols表
-    store.addMessage({
-      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      role: "system",
-      kind: "compaction",
-      kind1: "sysinfo",
-      kind2: "event",
-      kind3: "compaction",
-      content: [{ type: "text", text: "✅ Context compaction complete" }],
-      timestamp: new Date(),
-    });
+    store.addMessage(
+      createSystemInfoMessage("✅ Context compaction complete", "compaction", "compaction")
+    );
   });
 
   // Retry start/end handlers
@@ -660,32 +666,14 @@ export function setupWebSocketListeners(): void {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] retry_start`);
     // 添加System message到消息Cols表
-    store.addMessage({
-      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      role: "system",
-      kind: "retry",
-      kind1: "sysinfo",
-      kind2: "event",
-      kind3: "retry",
-      content: [{ type: "text", text: "🔄 Retrying..." }],
-      timestamp: new Date(),
-    });
+    store.addMessage(createSystemInfoMessage("🔄 Retrying...", "retry", "retry"));
   });
 
   websocketService.on("retry_end", () => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] retry_end`);
     // 添加System message到消息Cols表
-    store.addMessage({
-      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      role: "system",
-      kind: "retry",
-      kind1: "sysinfo",
-      kind2: "event",
-      kind3: "retry",
-      content: [{ type: "text", text: "✅ Retry complete" }],
-      timestamp: new Date(),
-    });
+    store.addMessage(createSystemInfoMessage("✅ Retry complete", "retry", "retry"));
   });
 
   // Queue update handler
@@ -700,16 +688,10 @@ export function setupWebSocketListeners(): void {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] auto_retry_start:`, data);
     store.addMessage({
-      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      role: "system",
-      kind: "auto_retry",
-      kind1: "sysinfo",
-      kind2: "event",
-      kind3: "auto_retry",
+      ...createSystemInfoMessage("", "auto_retry", "auto_retry"),
       content: [
         { type: "text", text: `🔄 Auto-retrying (${data.attempt}/${data.maxAttempts})...` },
       ],
-      timestamp: new Date(),
     });
   });
 
@@ -717,28 +699,15 @@ export function setupWebSocketListeners(): void {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] auto_retry_end:`, data);
     if (data.success) {
-      store.addMessage({
-        id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        role: "system",
-        kind: "auto_retry",
-        kind1: "sysinfo",
-        kind2: "event",
-        kind3: "auto_retry",
-        content: [{ type: "text", text: "✅ Auto-retry successful" }],
-        timestamp: new Date(),
-      });
+      store.addMessage(
+        createSystemInfoMessage("✅ Auto-retry successful", "auto_retry", "auto_retry")
+      );
     } else {
       store.addMessage({
-        id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        role: "system",
-        kind: "auto_retry",
-        kind1: "sysinfo",
-        kind2: "event",
-        kind3: "auto_retry",
+        ...createSystemInfoMessage("", "auto_retry", "auto_retry"),
         content: [
           { type: "text", text: `❌ Auto-retry failed: ${data.finalError || "Unknown error"}` },
         ],
-        timestamp: new Date(),
       });
     }
   });
