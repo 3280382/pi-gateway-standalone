@@ -88,15 +88,6 @@ export function initChatWorkingDirectory(
 }
 
 /**
- * 切换工作directories - 已弃用，使用 initChatWorkingDirectory
- * @deprecated
- */
-export function switchChatWorkingDirectory(path: string): Promise<unknown> {
-  console.warn("switchChatWorkingDirectory 已弃用，请使用 initChatWorkingDirectory");
-  return initChatWorkingDirectory(path);
-}
-
-/**
  * 流式传输时引导（对应后端的 steer 类型）
  */
 export function steerChat(text: string): boolean {
@@ -122,20 +113,6 @@ export function compactSession(customInstructions?: string): boolean {
  */
 export function exportSession(outputPath?: string): boolean {
   return websocketService.send("export_session", { outputPath });
-}
-
-/**
- * Cols出Available models（对应后端的 list_models 类型）
- */
-export function listChatModels(): boolean {
-  return websocketService.send("list_models");
-}
-
-/**
- * 设置 LLM 日志（对应后端的 set_llm_log 类型）
- */
-export function setChatLlmLogEnabled(enabled: boolean): boolean {
-  return websocketService.send("set_llm_log", { enabled });
 }
 
 /**
@@ -181,14 +158,4 @@ export function setChatThinkingLevel(level: string): boolean {
  */
 export function createNewChatSession(workingDir?: string): boolean {
   return websocketService.send("new_session", { workingDir });
-}
-
-/**
- * 发送切换directories请求
- */
-export function changeChatDirectory(path: string): boolean {
-  console.log(`[changeChatDirectory] Sending change_dir request: path="${path}"`);
-  const sent = websocketService.send("change_dir", { path });
-  console.log(`[changeChatDirectory] WebSocket send result: ${sent}`);
-  return sent;
 }
