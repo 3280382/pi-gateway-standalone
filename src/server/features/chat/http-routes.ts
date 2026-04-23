@@ -42,13 +42,8 @@ export async function registerChatHTTPRoutes(
 
   // Model API (WebSocket only: list_models, set_model)
 
-  // Session API
-  const { getSessions, getSystemPrompt, loadSession, getActiveSessions } = await import(
-    "./controllers/session.controller.js"
-  );
-  app.get("/api/sessions", getSessions);
-  app.get("/api/sessions/active", getActiveSessions);
-  app.post("/api/session/load", loadSession);
+  // Session API (WebSocket only: list_sessions, load_session, change_dir, new_session)
+  const { getSystemPrompt } = await import("./controllers/session.controller.js");
   app.get("/api/system-prompt", getSystemPrompt);
 
   // Extensions API

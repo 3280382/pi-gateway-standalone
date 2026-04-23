@@ -556,7 +556,6 @@ export const useChatStore = create<
     appendToolCallDelta: (id: string, name: string, delta: string) => void;
     toggleMessageCollapse: (messageId: string) => void;
     toggleThinkingCollapse: (messageId: string) => void;
-    loadSession: (sessionPath: string) => Promise<number>;
   }
 >()(
   persist(
@@ -1072,43 +1071,6 @@ export const useChatStore = create<
             false,
             "toggleThinkingCollapse"
           );
-        },
-
-        // Load session messages from server via HTTP (fallback method)
-        // Note: Main loading is now done via WebSocket init for consistency
-        loadSession: async (sessionPath: string) => {
-          console.log("[ChatStore] loadSession (HTTP fallback) called with path:", sessionPath);
-          try {
-            const response = await fetch("/api/session/load", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ sessionPath }),
-            });
-
-            if (!response.ok) {
-              const errorData = await response.json().catch(() => ({}));
-              console.error(
-                "[ChatStore] Failed to load session:",
-                response.status,
-                response.statusText,
-                errorData
-              );
-              set({ messages: [] }, false, "loadSession/error");
-              return 0;
-            }
-
-            const data = await response.json();
-
-            // 使用服务器预处理好的 messages（服务器已处理所有消息格式转换）
-            const messages = data.messages || [];
-            console.log("[loadSession] Using server-processed messages:", messages.length);
-            set({ messages, currentStreamingMessage: null }, false, "loadSession");
-            return messages.length;
-          } catch (error) {
-            console.error("[ChatStore] Error loading session:", error);
-            set({ messages: [] }, false, "loadSession/error");
-            return 0;
-          }
         },
       }),
       { name: "ChatStore" }

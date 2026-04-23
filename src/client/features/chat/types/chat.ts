@@ -166,7 +166,6 @@ export interface ChatState {
   clearMessages: () => void;
   toggleMessageCollapse: (messageId: string) => void;
   toggleThinkingCollapse: (messageId: string) => void;
-  loadSession: (sessionPath: string) => Promise<number>;
   reset: () => void;
 }
 

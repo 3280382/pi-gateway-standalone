@@ -36,15 +36,6 @@ export function abortChatGeneration(): boolean {
 }
 
 /**
- * 切换会话（对应后端的 load_session 类型）
- */
-export function switchChatSession(sessionId: string): boolean {
-  return websocketService.send("load_session", {
-    sessionPath: sessionId,
-  });
-}
-
-/**
  * 初始化工作directories（对应后端的 init 类型）
  * 返回 Promise 等待 initialized 响应
  *
