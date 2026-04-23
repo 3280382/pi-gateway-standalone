@@ -42,9 +42,6 @@ interface InputAreaProps {
   // Auto scroll related
   shouldScrollToBottom?: boolean;
   onToggleScroll?: () => void;
-  // Reload messages
-  onReloadMessages?: () => void;
-  isLoadingMore?: boolean;
 }
 
 // ===== [ANCHOR:COMPONENT] =====
@@ -68,9 +65,6 @@ export function InputArea({
   // Auto scroll related
   shouldScrollToBottom = true,
   onToggleScroll,
-  // Reload messages
-  onReloadMessages,
-  isLoadingMore = false,
 }: InputAreaProps) {
   // ===== [ANCHOR:REFS] =====
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -315,19 +309,6 @@ export function InputArea({
           <TemplateIcon />
         </button>
 
-        {/* 重新加载所有消息按钮 */}
-        {onReloadMessages && (
-          <button
-            type="button"
-            className={`${styles.toolbarBtn} ${isLoadingMore ? styles.loading : ""}`}
-            onClick={onReloadMessages}
-            title="Reload all history messages"
-            disabled={isLoadingMore}
-          >
-            <ReloadIcon isLoading={isLoadingMore} />
-          </button>
-        )}
-
         {/* 自动滚屏按钮 */}
         {onToggleScroll && (
           <button
@@ -446,20 +427,6 @@ function ScrollIcon({ active = true }: { active?: boolean }) {
       ) : (
         <circle cx="12" cy="12" r="2" stroke="currentColor" fill="none" />
       )}
-    </svg>
-  );
-}
-
-function ReloadIcon({ isLoading = false }: { isLoading?: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      className={isLoading ? styles.spinning : ""}
-    >
-      <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
     </svg>
   );
 }

@@ -104,9 +104,6 @@ export function ChatPanel() {
           // Auto scroll related
           shouldScrollToBottom={chatPanel.shouldScrollToBottom}
           onToggleScroll={() => chatPanel.setShouldScrollToBottom(!chatPanel.shouldScrollToBottom)}
-          // Reload messages
-          onReloadMessages={chatPanel.reloadAllMessages}
-          isLoadingMore={chatPanel.isLoadingMore}
           // Template insertion
           onInsertTemplate={openTemplateModal}
         />
