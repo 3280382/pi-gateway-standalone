@@ -16,8 +16,8 @@ import type {
   SessionMessagesResponse,
 } from "../../../../shared/types/session-messages.types.js";
 import { Logger, LogLevel } from "../../../lib/utils/logger.js";
-import type { PiAgentSession } from "../agent-session/piAgentSession.js";
-import { extractShortSessionId, serverSessionManager } from "../agent-session/session-manager.js";
+import type { PiAgentSession } from "./PiAgentSession.js";
+import { extractShortSessionId, serverSessionManager } from "./SessionRegistry.js";
 import { getLocalSessionsDir } from "./utils.js";
 import { sessionConfigManager } from "./SessionConfig.js";
 import { processSessionEntries } from "./MessageProcessor.js";

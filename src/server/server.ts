@@ -37,7 +37,7 @@ import { z } from "zod";
 import { registerRoutes } from "./app/routes.js";
 
 // WebSocket handlers are auto-registered when ws-router.ts is imported
-import { serverSessionManager } from "./features/chat/agent-session/session-manager.js";
+import { serverSessionManager } from "./features/chat/session/SessionRegistry.js";
 import { type WSContext, wsRouter } from "./features/chat/ws-router.js";
 import {
   cleanupTerminalSessions,

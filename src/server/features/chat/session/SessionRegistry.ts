@@ -5,7 +5,7 @@
 
 import { WebSocket } from "ws";
 import type { LlmLogManager } from "../llm/log-manager.js";
-import { PiAgentSession } from "./piAgentSession.js";
+import { PiAgentSession } from "./PiAgentSession.js";
 
 /**
  * Extract short session ID from session file path (fixed 8 characters)

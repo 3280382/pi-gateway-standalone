@@ -11,7 +11,7 @@
 
 import type { WebSocket } from "ws";
 import { Logger, LogLevel } from "../../lib/utils/logger.js";
-import type { PiAgentSession } from "./agent-session/piAgentSession.js";
+import type { PiAgentSession } from "./session/PiAgentSession.js";
 
 const logger = new Logger({ level: LogLevel.INFO });
 

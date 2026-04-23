@@ -5,7 +5,7 @@
 
 import { existsSync } from "node:fs";
 import { SessionManager } from "@mariozechner/pi-coding-agent";
-import { extractShortSessionId, serverSessionManager } from "../agent-session/session-manager.js";
+import { extractShortSessionId, serverSessionManager } from "../session/SessionRegistry.js";
 import { getLocalSessionsDir } from "../session/utils.js";
 import { sessionConfigManager } from "../session/SessionConfig.js";
 import {

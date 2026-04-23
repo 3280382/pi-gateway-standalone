@@ -30,8 +30,8 @@ import {
 } from "@mariozechner/pi-coding-agent";
 import { WebSocket } from "ws";
 import type { LlmLogManager } from "../llm/log-manager.js";
-import { extractShortSessionId, serverSessionManager } from "./session-manager.js";
-import { AGENT_DIR, getLocalSessionsDir } from "../session/utils.js";
+import { extractShortSessionId, serverSessionManager } from "./SessionRegistry.js";
+import { AGENT_DIR, getLocalSessionsDir } from "./utils.js";
 
 /**
  * Server message interface
