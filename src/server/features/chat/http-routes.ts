@@ -34,11 +34,10 @@ export async function registerChatHTTPRoutes(
     });
   });
 
-  // LLM log API
+  // LLM log API (read-only via HTTP; write via WebSocket: set_llm_log)
   const { createLlmLogController } = await import("./controllers/llm-log.controller.js");
   const llmLogController = createLlmLogController(llmLogManager);
   app.get("/api/llm-log", llmLogController.getLlmLog);
-  app.post("/api/llm-log/enabled", llmLogController.setLlmLogEnabled);
 
   // Model API (WebSocket only: list_models, set_model)
 
