@@ -266,7 +266,6 @@ export class ServerSessionManager {
     }
 
     // 不同 WebSocket 接管 session（真正的重连场景）
-    this.notifyClientReplaced(oldClient, shortId, workingDir);
     this.clientToShortId.delete(oldClient);
 
     session.reconnect(newClient);
@@ -295,22 +294,6 @@ export class ServerSessionManager {
     this.setupCallbacks(session);
 
     return session;
-  }
-
-  private notifyClientReplaced(oldClient: WebSocket, shortId: string, workingDir: string): void {
-    if (oldClient.readyState !== WebSocket.OPEN) return;
-    try {
-      oldClient.send(
-        JSON.stringify({
-          type: "session_replaced",
-          message: "Another client has taken over this session",
-          shortId,
-          workingDir,
-        })
-      );
-    } catch {
-      // Ignore send errors
-    }
   }
 
   private updateEntryClient(entry: SessionEntry, client: WebSocket): void {

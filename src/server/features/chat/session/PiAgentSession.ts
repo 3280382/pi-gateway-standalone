@@ -888,11 +888,6 @@ export class PiAgentSession {
       }
 
       await (this.session as any).newSession();
-      this.send({
-        type: "session_info",
-        sessionId: this.session.sessionId,
-        sessionFile: this.session.sessionFile,
-      });
     } catch (error) {
       this.send({
         type: "error",

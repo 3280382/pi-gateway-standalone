@@ -137,7 +137,6 @@ export async function handleSetLlmLog(
       ctx.session.llmLogManager.setEnabled(enabled);
     }
 
-    sendSuccess(ctx, "llm_log_set", { enabled });
     logger.info(`[handleSetLlmLog] LLM log ${enabled ? "enabled" : "disabled"}`);
   } catch (error) {
     logger.error(
@@ -214,7 +213,6 @@ export async function handleSteer(ctx: WSContext, payload: { text: string }): Pr
   const { text } = payload;
 
   await ctx.session.steer(text);
-  sendSuccess(ctx, "steered", { text });
   logger.info(`[handleSteer] Steered: ${text.substring(0, 50)}...`);
 }
 
@@ -259,39 +257,20 @@ export async function handleToolRequest(
   const tool = tools.find((t) => t.name === toolName);
 
   if (!tool) {
-    sendSuccess(ctx, "tool_end", {
-      toolCallId,
-      result: `Tool "${toolName}" not found`,
-      isError: true,
-    });
+    logger.error(`[handleToolRequest] Tool "${toolName}" not found`);
     return;
   }
-
-  // Send start event
-  sendSuccess(ctx, "tool_start", {
-    toolName,
-    toolCallId,
-    args,
-  });
 
   try {
     // Execute tool
     const result = await tool.execute(toolCallId, args as Record<string, string>);
-
-    // Send end event
-    sendSuccess(ctx, "tool_end", {
-      toolCallId,
-      result: JSON.stringify(result),
-      isError: false,
-    });
-
     logger.info(`[handleToolRequest] Tool executed: ${toolName}`);
   } catch (error) {
-    sendSuccess(ctx, "tool_end", {
-      toolCallId,
-      result: error instanceof Error ? error.message : "Unknown error",
-      isError: true,
-    });
+    logger.error(
+      `[handleToolRequest] Tool execution failed: ${toolName}`,
+      {},
+      error instanceof Error ? error : undefined
+    );
   }
 }
 
