@@ -12,13 +12,12 @@ import { AppHeader } from "@/features/chat/components/Header";
 import { SystemPromptModal } from "@/features/chat/components/modals/SystemPromptModal";
 import { LlmLogPanel } from "@/features/chat/components/panels/LlmLogPanel";
 import { SidebarPanel } from "@/features/chat/components/sidebar/SidebarPanel";
-import { useChatInit, useChatMessages } from "@/features/chat/hooks";
+import { useChatInit } from "@/features/chat/hooks";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 
 export function ChatPage() {
   // 总是在顶层调用 Hooks（React Hooks 规则）
   const { isConnecting } = useChatInit();
-  useChatMessages();
 
   // 从 sidebarStore 获取布局状态
   const isSidebarVisible = useSidebarStore((state) => state.isVisible);

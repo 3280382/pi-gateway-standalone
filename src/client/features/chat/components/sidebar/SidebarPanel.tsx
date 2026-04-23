@@ -11,7 +11,7 @@
  */
 
 import { IconButton } from "@/components/Icon/Icon";
-import { useSidebarSessions, useSidebarVisibility } from "@/features/chat/hooks";
+import { useSidebarVisibility } from "@/features/chat/hooks";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import { ChatSettingsSection } from "./ChatSettingsSection";
 import { CompactWorkspacesSection } from "./CompactWorkspacesSection";
@@ -40,8 +40,7 @@ export function SidebarPanel({ currentView = "chat" }: SidebarPanelProps) {
   const error = useSidebarStore((state) => state.error);
   const clearError = useSidebarStore((state) => state.clearError);
 
-  // 以当前工作directories为Arguments，从服务器获取所有历史 session files
-  useSidebarSessions();
+  // Sessions 从 WebSocket init 响应自动填充到 store
 
   // 通知服务器Sidebar可见性状态（用于优化状态广播）
   useSidebarVisibility();
