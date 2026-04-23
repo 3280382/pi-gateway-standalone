@@ -275,10 +275,6 @@ export function useChatController(): EnhancedChatController {
         timeoutMs: 30000, // 30 seconds for export
       });
     },
-
-    setShowTools: (show: boolean) => {
-      (chatStore as any).setShowTools(show);
-    },
   };
 }
 

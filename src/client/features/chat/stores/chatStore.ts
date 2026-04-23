@@ -56,7 +56,6 @@ const createInitialState = () => ({
   messages: [] as Message[],
   currentStreamingMessage: null as Message | null,
   inputText: "",
-  isInputFocused: false,
   isStreaming: false,
   isRunning: false, // Pi coding agent turn running status
   streamingContent: "",
@@ -65,7 +64,6 @@ const createInitialState = () => ({
   streamingToolCalls: new Map<string, { id: string; name: string; args: string }>(),
   activeTools: new Map<string, ToolExecution>(),
   showThinking: true,
-  showTools: true,
   searchQuery: "",
   searchFilters: {
     // Level 1: Message source (user | assistant | sysinfo)
@@ -101,8 +99,6 @@ const createInitialState = () => ({
   searchResults: [] as SearchResult[],
   isSearching: false,
   currentSearchIndex: -1,
-  currentModel: null as string | null,
-  sessionId: null as string | null,
 });
 
 type State = ReturnType<typeof createInitialState>;
@@ -551,10 +547,6 @@ export const useChatStore = create<
     setSearchResults: (results: SearchResult[]) => void;
     setSearching: (searching: boolean) => void;
 
-    // Session
-    setSessionId: (id: string | null) => void;
-    setCurrentModel: (model: string | null) => void;
-
     // Reset
     reset: () => void;
 
@@ -860,11 +852,6 @@ export const useChatStore = create<
         abortStreaming: () => finalizeStreaming(set, "abortStreaming"),
         finishStreaming: () => finalizeStreaming(set, "finishStreaming"),
 
-        // Tools visibility
-        showTools: true,
-        setShowTools: (show: boolean) => {
-          set({ showTools: show }, false, "setShowTools");
-        },
         toggleToolsCollapse: (messageId: string) => {
           console.log("[ChatStore] toggleToolsCollapse called:", messageId);
           set(
@@ -1000,13 +987,6 @@ export const useChatStore = create<
         },
 
         // Session
-        setSessionId: (id: string | null) => {
-          set({ sessionId: id }, false, "setSessionId");
-        },
-
-        setCurrentModel: (model: string | null) => {
-          set({ currentModel: model }, false, "setCurrentModel");
-        },
 
         // Reset
         reset: () => {
@@ -1224,7 +1204,6 @@ export const selectIsStreaming = (state: ReturnType<typeof useChatStore.getState
 export const selectIsRunning = (state: ReturnType<typeof useChatStore.getState>) => state.isRunning;
 export const selectShowThinking = (state: ReturnType<typeof useChatStore.getState>) =>
   state.showThinking;
-export const selectShowTools = (state: ReturnType<typeof useChatStore.getState>) => state.showTools;
 export const selectSearchQuery = (state: ReturnType<typeof useChatStore.getState>) =>
   state.searchQuery;
 export const selectSearchFilters = (state: ReturnType<typeof useChatStore.getState>) =>

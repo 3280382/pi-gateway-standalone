@@ -218,9 +218,6 @@ export interface ChatController {
 
   // Thinking Display
   setShowThinking: (show: boolean) => void;
-
-  // Tools Display
-  setShowTools: (show: boolean) => void;
 }
 
 // ============================================================================
