@@ -70,7 +70,7 @@ export async function getAllProcesses(): Promise<ProcessInfo[]> {
         uid,
         gid,
         command: comm,
-        args: args.length > 100 ? `${args.substring(0, 100)}...` : args,
+        args,
         cpu,
         mem,
         vsz,
@@ -285,6 +285,16 @@ export async function getProcessTreeData(serverPid?: number): Promise<{
     serverChildren = serverTree.allChildren;
     serverSessions = serverTree.sessions;
     stats.serverChildren = serverChildren.length;
+
+    // Sync markers to processes array for flat view
+    if (serverProcess) {
+      const p = processes.find((x) => x.pid === serverProcess!.pid);
+      if (p) p.isServerProcess = true;
+    }
+    for (const child of serverChildren) {
+      const p = processes.find((x) => x.pid === child.pid);
+      if (p && child.isSessionProcess) p.isSessionProcess = true;
+    }
   }
 
   return {

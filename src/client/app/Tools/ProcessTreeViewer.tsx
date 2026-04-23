@@ -70,6 +70,10 @@ export function ProcessTreeViewer() {
   const [processDetails, setProcessDetails] = useState<ProcessDetails | null>(null);
   const [expandedPids, setExpandedPids] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
+  const [sortField, setSortField] = useState<"pid" | "ppid" | "cmd" | "cpu" | "mem" | "stat">(
+    "pid"
+  );
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const serverPid = useSessionStore((state) => state.serverPid);
 
   // Get process tree data
@@ -188,6 +192,53 @@ export function ProcessTreeViewer() {
     if (kb > 1048576) return `${(kb / 1048576).toFixed(1)}G`;
     if (kb > 1024) return `${(kb / 1024).toFixed(1)}M`;
     return `${kb}K`;
+  };
+
+  // Toggle sort
+  const handleSort = (field: typeof sortField) => {
+    if (sortField === field) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDir("asc");
+    }
+  };
+
+  // Sort indicator
+  const sortIndicator = (field: typeof sortField) => {
+    if (sortField !== field) return "↕";
+    return sortDir === "asc" ? "↑" : "↓";
+  };
+
+  // Sorted flat processes
+  const getSortedFlatProcesses = () => {
+    if (!data?.processes) return [];
+    const result = [...data.processes];
+    result.sort((a, b) => {
+      let cmp = 0;
+      switch (sortField) {
+        case "pid":
+          cmp = a.pid - b.pid;
+          break;
+        case "ppid":
+          cmp = a.ppid - b.ppid;
+          break;
+        case "cmd":
+          cmp = (a.args || a.command).localeCompare(b.args || b.command);
+          break;
+        case "cpu":
+          cmp = a.cpu - b.cpu;
+          break;
+        case "mem":
+          cmp = a.mem - b.mem;
+          break;
+        case "stat":
+          cmp = a.stat.localeCompare(b.stat);
+          break;
+      }
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+    return result;
   };
 
   // Render process row
@@ -396,30 +447,75 @@ export function ProcessTreeViewer() {
                   </>
                 )}
                 {activeTab === "tree" && data?.tree.map((proc) => renderProcessRow(proc))}
-                {activeTab === "flat" &&
-                  data?.processes.map((proc) => (
-                    <div
-                      key={proc.pid}
-                      className={`${styles.processRow} ${selectedPid === proc.pid ? styles.selected : ""} ${
-                        proc.isServerProcess ? styles.serverProcess : ""
-                      }`}
-                      onClick={() => setSelectedPid(proc.pid)}
-                    >
-                      <span className={styles.expandBtn}> </span>
-                      <span className={styles.pid}>{proc.pid}</span>
-                      <span className={styles.ppid}>{proc.ppid}</span>
-                      <span className={styles.cpu}>{proc.cpu.toFixed(1)}</span>
-                      <span className={styles.mem}>{proc.mem.toFixed(1)}</span>
-                      <span className={styles.vsz}>{formatBytes(proc.vsz)}</span>
-                      <span className={styles.rss}>{formatBytes(proc.rss)}</span>
-                      <span className={styles.stat}>{proc.stat}</span>
-                      <span className={styles.time}>{proc.time}</span>
-                      <span className={styles.command} title={proc.args}>
-                        {proc.isServerProcess && "🟢 "}
-                        {proc.command}
-                      </span>
+                {activeTab === "flat" && (
+                  <>
+                    {/* Flat Mode Header - PID | PPID | CMD | CPU | MEM | STAT */}
+                    <div className={`${styles.headerRow} ${styles.flatHeaderRow}`}>
+                      <button
+                        type="button"
+                        className={styles.pid}
+                        onClick={() => handleSort("pid")}
+                      >
+                        PID {sortIndicator("pid")}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.ppid}
+                        onClick={() => handleSort("ppid")}
+                      >
+                        PPID {sortIndicator("ppid")}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.flatCmd}
+                        onClick={() => handleSort("cmd")}
+                      >
+                        CMD {sortIndicator("cmd")}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.cpu}
+                        onClick={() => handleSort("cpu")}
+                      >
+                        CPU% {sortIndicator("cpu")}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.mem}
+                        onClick={() => handleSort("mem")}
+                      >
+                        MEM% {sortIndicator("mem")}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.stat}
+                        onClick={() => handleSort("stat")}
+                      >
+                        STAT {sortIndicator("stat")}
+                      </button>
                     </div>
-                  ))}
+                    {getSortedFlatProcesses().map((proc) => (
+                      <div
+                        key={proc.pid}
+                        className={`${styles.processRow} ${styles.flatProcessRow} ${selectedPid === proc.pid ? styles.selected : ""} ${
+                          proc.isServerProcess ? styles.serverProcess : ""
+                        }`}
+                        onClick={() => setSelectedPid(proc.pid)}
+                      >
+                        <span className={styles.pid}>{proc.pid}</span>
+                        <span className={styles.ppid}>{proc.ppid}</span>
+                        <span className={styles.flatCmd} title={proc.args}>
+                          {proc.isServerProcess && "🟢 "}
+                          {proc.isSessionProcess && "🔸 "}
+                          {proc.args || proc.command}
+                        </span>
+                        <span className={styles.cpu}>{proc.cpu.toFixed(1)}</span>
+                        <span className={styles.mem}>{proc.mem.toFixed(1)}</span>
+                        <span className={styles.stat}>{proc.stat}</span>
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
 
               {/* Selected Process Details */}
@@ -431,6 +527,16 @@ export function ProcessTreeViewer() {
                       ✕
                     </button>
                   </div>
+                  {/* Full Command */}
+                  {(() => {
+                    const proc = data?.processes.find((p) => p.pid === selectedPid);
+                    return proc ? (
+                      <div className={styles.commandSection}>
+                        <div className={styles.sectionTitle}>Command</div>
+                        <div className={styles.commandFull}>{proc.args || proc.command}</div>
+                      </div>
+                    ) : null;
+                  })()}
                   {renderThreads()}
                   {renderOpenFiles()}
                 </div>

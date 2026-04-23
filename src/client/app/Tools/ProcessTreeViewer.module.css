@@ -272,6 +272,42 @@
   padding-left: 8px;
 }
 
+/* Flat Mode - PID | PPID | CMD | CPU | MEM | STAT */
+.flatHeaderRow {
+  padding-left: 8px;
+}
+
+.flatProcessRow {
+  padding-left: 8px;
+}
+
+.flatCmd {
+  flex: 1;
+  min-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #e4e4e7;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+/* Header Row buttons for sorting */
+.headerRow button {
+  background: none;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-align: inherit;
+}
+
+.headerRow button:hover {
+  color: #a1a1aa;
+}
+
 /* Server Children Section */
 .serverChildrenSection {
   border-top: 2px solid #22c55e;
@@ -292,7 +328,29 @@
 .detailsPanel {
   border-top: 1px solid #2d2d44;
   background: #16162a;
-  max-height: 200px;
+  max-height: 280px;
+  overflow: auto;
+}
+
+/* Command Section */
+.commandSection {
+  padding: 8px;
+  border-bottom: 1px solid #2d2d44;
+}
+
+.commandSection .sectionTitle {
+  background: #3b82f620;
+  color: #3b82f6;
+}
+
+.commandFull {
+  padding: 6px 8px;
+  font-size: 10px;
+  color: #d4d4d8;
+  word-break: break-all;
+  white-space: pre-wrap;
+  line-height: 1.4;
+  max-height: 80px;
   overflow: auto;
 }
 
