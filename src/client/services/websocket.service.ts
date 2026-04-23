@@ -36,8 +36,6 @@ export type WebSocketEvent =
   | "ping"
   | "pong"
   // Session Level Events
-  | "agent_start"
-  | "agent_end"
   | "turn_start"
   | "turn_end"
   // Message Level Events
@@ -47,21 +45,12 @@ export type WebSocketEvent =
   | "text_start"
   | "text_delta"
   | "text_end"
-  | "content_delta"
   // Content Block Level Events - Thinking
   | "thinking_start"
   | "thinking_delta"
   | "thinking_end"
-  // Content Block Level Events - Tool Call (LLM generating)
-  | "toolcall_start"
-  | "toolcall_delta"
-  | "toolcall_end"
   // Tool Execution Level Events (Actual tool running)
-  | "tool_start"
-  | "tool_update"
-  | "tool_end"
   | "tool_execution_start"
-  | "tool_execution_update"
   | "tool_execution_end"
   // System Events
   | "queue_update"
@@ -69,19 +58,13 @@ export type WebSocketEvent =
   | "compaction_end"
   | "auto_retry_start"
   | "auto_retry_end"
-  | "retry_start"
-  | "retry_end"
-  | "session_updated"
-  | "system_notification"
   | "initialized"
   | "dir_changed"
   | "session_created"
-  | "session_loaded"
   | "sessions_list"
   | "model_set"
   | "thinking_set"
   | "models_list"
-  | "llm_log_set"
   | "command_result"
   | "compact_result"
   | "export_result"
@@ -405,8 +388,6 @@ export class WebSocketService {
   private emitSpecificEvent(type: string, data: any): void {
     const eventMap: Record<string, WebSocketEvent> = {
       // Session Level
-      agent_start: "agent_start",
-      agent_end: "agent_end",
       turn_start: "turn_start",
       turn_end: "turn_end",
       // Message Level
@@ -420,13 +401,8 @@ export class WebSocketService {
       thinking_start: "thinking_start",
       thinking_delta: "thinking_delta",
       thinking_end: "thinking_end",
-      // Content Block - Tool Call
-      toolcall_start: "toolcall_start",
-      toolcall_delta: "toolcall_delta",
-      toolcall_end: "toolcall_end",
       // Tool Execution
       tool_execution_start: "tool_execution_start",
-      tool_execution_update: "tool_execution_update",
       tool_execution_end: "tool_execution_end",
       // System Events
       queue_update: "queue_update",
@@ -434,20 +410,14 @@ export class WebSocketService {
       compaction_end: "compaction_end",
       auto_retry_start: "auto_retry_start",
       auto_retry_end: "auto_retry_end",
-      retry_start: "retry_start",
-      retry_end: "retry_end",
       error: "error",
-      session_updated: "session_updated",
-      system_notification: "system_notification",
       initialized: "initialized",
       dir_changed: "dir_changed",
       session_created: "session_created",
-      session_loaded: "session_loaded",
       sessions_list: "sessions_list",
       model_set: "model_set",
       thinking_set: "thinking_set",
       models_list: "models_list",
-      llm_log_set: "llm_log_set",
       command_result: "command_result",
       compact_result: "compact_result",
       export_result: "export_result",
@@ -503,14 +473,7 @@ export class WebSocketService {
       "disconnected",
       "error",
       "message",
-      "content_delta",
       "thinking_delta",
-      "toolcall_delta",
-      "tool_start",
-      "tool_update",
-      "tool_end",
-      "agent_start",
-      "agent_end",
       "message_start",
       "message_end",
       "turn_start",
@@ -520,19 +483,13 @@ export class WebSocketService {
       "compaction_end",
       "auto_retry_start",
       "auto_retry_end",
-      "retry_start",
-      "retry_end",
-      "session_updated",
-      "system_notification",
       "initialized",
       "dir_changed",
       "session_created",
-      "session_loaded",
       "sessions_list",
       "model_set",
       "thinking_set",
       "models_list",
-      "llm_log_set",
       "command_result",
       "session_reconnected",
       "process_tree_data",
