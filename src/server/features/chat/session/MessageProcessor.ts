@@ -11,7 +11,7 @@ import type {
   MessageKind1,
   MessageKind2,
   MessageKind3,
-} from "../../../shared/types/session-messages.types.js";
+} from "../../../../shared/types/session-messages.types.js";
 
 interface SessionEntry {
   type: string;

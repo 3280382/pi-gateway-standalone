@@ -20,7 +20,7 @@ import type { PiAgentSession } from "../agent-session/piAgentSession.js";
 import { extractShortSessionId, serverSessionManager } from "../agent-session/session-manager.js";
 import { getLocalSessionsDir } from "./utils.js";
 import { sessionConfigManager } from "./SessionConfig.js";
-import { processSessionEntries } from "../session-processor.js";
+import { processSessionEntries } from "./MessageProcessor.js";
 
 const logger = new Logger({ level: LogLevel.INFO });
 

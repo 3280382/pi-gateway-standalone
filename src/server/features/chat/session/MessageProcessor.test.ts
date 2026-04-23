@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { processSessionEntries } from "./session-processor.js";
+import { processSessionEntries } from "./MessageProcessor.js";
 
 describe("session-processor", () => {
   describe("processSessionEntries", () => {
