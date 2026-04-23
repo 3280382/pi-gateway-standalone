@@ -239,69 +239,6 @@ export async function handleNewSession(
  * Handle list_sessions message
  */
 // ============================================================================
-// Load Session Handler
-// ============================================================================
-
-/**
- * Handle load_session message
- */
-export async function handleLoadSession(
-  ctx: WSContext,
-  payload: { sessionPath: string }
-): Promise<void> {
-  const { sessionPath } = payload;
-
-  try {
-    const shortId = extractShortSessionId(sessionPath);
-    const currentWorkingDir = ctx.session?.workingDir || process.cwd();
-
-    // 【重构】后台并行运行模型：旧 session 不 dispose，只切换 viewing
-    // 获取或创建目标 session（后台 session 继续运行）
-    const newSession = await serverSessionManager.getSessionForFile(
-      currentWorkingDir,
-      ctx.ws,
-      sessionPath
-    );
-
-    // 更新 ctx.session 为新的 session
-    ctx.session = newSession;
-
-    // 设置客户端正在查看的 session（消息路由关键）
-    if (shortId) {
-      serverSessionManager.setViewingSession(ctx.ws, shortId);
-      ctx.selectedSessionId = shortId;
-      logger.info(
-        `[handleLoadSession] Client viewing session: ${shortId} (background sessions continue running)`
-      );
-    }
-
-    // Build full response with messages using shared helper
-    const workingDir = ctx.session.workingDir;
-    const responseData = await buildSessionResponse(ctx.session, workingDir, 100, 15, sessionPath);
-
-    // Send session_loaded with full message list (unified naming convention)
-    sendSuccess(ctx, "session_loaded", {
-      success: true,
-      shortId, // 8-character short ID
-      sessionFile: responseData.currentSession.sessionFile, // Full path
-      messages: responseData.currentSession.messages,
-      totalMessageCount: responseData.currentSession.totalMessageCount,
-      pid: process.pid,
-    });
-
-    logger.info(
-      `[handleLoadSession] Session loaded: ${sessionPath}, messages: ${responseData.currentSession.messages.length}`
-    );
-  } catch (error) {
-    logger.error("[handleLoadSession] Error:", {}, error instanceof Error ? error : undefined);
-    sendSuccess(ctx, "session_loaded", {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to load session",
-    });
-  }
-}
-
-// ============================================================================
 // List Sessions Handler (WebSocket)
 // Replaces HTTP GET /api/sessions
 // ============================================================================

@@ -690,15 +690,6 @@ export class PiAgentSession {
               toolName.toLowerCase().includes(t.toLowerCase().replace("_", ""))
             );
 
-          if (isWriteOperation && !event.isError) {
-            const args = (event as any).args;
-            const filePath = args?.path || args?.file_path || args?.filepath || args?.filePath;
-            if (typeof filePath === "string") {
-              this.sendToolEndWithFileContent(toolCallId, toolResult, event.isError, filePath);
-              break;
-            }
-          }
-
           this.send({
             type: "tool_execution_end",
             toolCallId,
@@ -970,7 +961,7 @@ export class PiAgentSession {
 
       if (!tool) {
         this.send({
-          type: "tool_end",
+          type: "tool_execution_end",
           toolCallId,
           result: `Tool "${toolName}" not found`,
           isError: true,
@@ -978,27 +969,19 @@ export class PiAgentSession {
         return;
       }
 
-      // Send start event
-      this.send({
-        type: "tool_start",
-        toolName,
-        toolCallId,
-        args,
-      });
-
       // Execute tool (toolCallId, args, signal)
       const result = await tool.execute(toolCallId, args as Record<string, string>);
 
       // Send end event
       this.send({
-        type: "tool_end",
+        type: "tool_execution_end",
         toolCallId,
         result: JSON.stringify(result),
         isError: false,
       });
     } catch (error) {
       this.send({
-        type: "tool_end",
+        type: "tool_execution_end",
         toolCallId,
         result: error instanceof Error ? error.message : "Unknown error",
         isError: true,
@@ -1369,59 +1352,6 @@ export class PiAgentSession {
    */
   getWebSocket(): WebSocket | null {
     return this.ws;
-  }
-
-  /**
-   * Read file content and send with tool result (reuse tool_end message)
-   * @param toolCallId Tool call ID
-   * @param toolResult Tool execution result
-   * @param isError Whether error
-   * @param filePath File path
-   */
-  async sendToolEndWithFileContent(
-    toolCallId: string,
-    toolResult: string,
-    isError: boolean,
-    filePath: string
-  ) {
-    try {
-      // Resolve file path (support relative and absolute paths)
-      const fullPath = filePath.startsWith("/") ? filePath : join(this.workingDir, filePath);
-
-      // Check if file exists
-      const { existsSync } = await import("node:fs");
-      if (!existsSync(fullPath)) {
-        this.send({
-          type: "tool_end",
-          toolCallId,
-          result: toolResult,
-          isError,
-        });
-        return;
-      }
-
-      // Read file content
-      const content = await readFile(fullPath, "utf-8");
-
-      // Send tool end message with file content
-      this.send({
-        type: "tool_end",
-        toolCallId,
-        result: toolResult,
-        isError,
-        fileContent: content,
-        filePath,
-      });
-    } catch (error) {
-      // If read fails, only send tool result
-      console.error(`[Gateway] Failed to read file content: ${filePath}`, error);
-      this.send({
-        type: "tool_end",
-        toolCallId,
-        result: toolResult,
-        isError,
-      });
-    }
   }
 
   /**

@@ -456,51 +456,6 @@ export function setupWebSocketListeners(): void {
   });
 
   // =========================================================================
-  // Content Block Level Events - Tool Call (LLM generating tool call)
-  // =========================================================================
-  websocketService.on(
-    "toolcall_start",
-    (data: { toolCallId?: string; toolName?: string; index?: number }) => {
-      const ts = new Date().toISOString().split("T")[1].split(".")[0];
-      console.log(
-        `[${ts}] [RECV] toolcall_start[${data?.index ?? "?"}]: ${data?.toolName || "unknown"}`
-      );
-      store.startContentBlock("tool_use", data?.index, {
-        toolCallId: data?.toolCallId,
-        toolName: data?.toolName,
-      });
-    }
-  );
-
-  websocketService.on(
-    "toolcall_delta",
-    (data: { toolCallId?: string; toolName?: string; delta?: string; index?: number }) => {
-      const ts = new Date().toISOString().split("T")[1].split(".")[0];
-      console.log(
-        `[${ts}] [RECV] toolcall_delta[${data?.index ?? "?"}]: ${data?.toolName || "unknown"}`
-      );
-
-      if (data?.toolCallId && data?.toolName) {
-        store.appendToolCallDelta(data.toolCallId, data.toolName, data.delta || "");
-      }
-    }
-  );
-
-  websocketService.on(
-    "toolcall_end",
-    (data: { toolCallId?: string; toolName?: string; index?: number; implicit?: boolean }) => {
-      const ts = new Date().toISOString().split("T")[1].split(".")[0];
-      console.log(
-        `[${ts}] [RECV] toolcall_end[${data?.index ?? "?"}]: ${data?.toolName || "unknown"}${data?.implicit ? " (implicit)" : ""}`
-      );
-      store.endContentBlock("tool_use", data?.index, {
-        toolCallId: data?.toolCallId,
-        toolName: data?.toolName,
-      });
-    }
-  );
-
-  // =========================================================================
   // Tool Execution Level Events (Actual tool running)
   // =========================================================================
   websocketService.on(
