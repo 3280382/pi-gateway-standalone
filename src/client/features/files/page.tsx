@@ -13,11 +13,13 @@
 import { FileBottomMenu } from "@/features/files/components/BottomMenu/FileBottomMenu";
 import { FileBrowser } from "@/features/files/components/FileBrowser/FileBrowser";
 import { FileToolbar } from "@/features/files/components/Header/FileToolbar";
+import { LogMonitorPanel } from "@/features/files/components/panels/LogMonitorPanel";
 import { XTermTerminalPanel } from "@/features/files/components/panels/XTermTerminalPanel";
 import { FileSidebar } from "@/features/files/components/Sidebar/FileSidebar";
 import styles from "@/features/files/FilesLayout.module.css";
 import { useFileBrowser, useFileNavigation } from "@/features/files/hooks";
 import { useFileStore } from "@/features/files/stores";
+import { useLogMonitorStore } from "@/features/files/stores/logMonitorStore";
 import { useTerminalStore } from "@/features/files/stores/terminalStore";
 import { useAppStore } from "@/stores/appStore";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
@@ -33,6 +35,17 @@ export function FilesPage() {
 
   // Terminal state from new WebSocket terminal store
   const { isPanelOpen, panelHeight, setPanelOpen, setPanelHeight } = useTerminalStore();
+
+  // Log Monitor state
+  const {
+    activeMonitorId,
+    isPanelOpen: isMonitorOpen,
+    panelHeight: monitorHeight,
+    setPanelHeight: setMonitorHeight,
+    setPanelOpen: setMonitorOpen,
+    getConfigById,
+  } = useLogMonitorStore();
+  const activeMonitorConfig = activeMonitorId ? getConfigById(activeMonitorId) : undefined;
 
   // 全局工作directories（用于 FileToolbar 显示）
   const { currentPath } = useWorkspaceStore();
@@ -60,6 +73,14 @@ export function FilesPage() {
             onExecuteOutput={(output) => console.log("[Files] Execute output:", output)}
             onOpenBottomPanel={() => setPanelOpen(true)}
           />
+          {isMonitorOpen && activeMonitorConfig && (
+            <LogMonitorPanel
+              config={activeMonitorConfig}
+              height={monitorHeight}
+              onClose={() => setMonitorOpen(false)}
+              onHeightChange={setMonitorHeight}
+            />
+          )}
           {isPanelOpen && (
             <XTermTerminalPanel
               height={panelHeight}

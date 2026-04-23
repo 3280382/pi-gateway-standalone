@@ -9,10 +9,12 @@
 import { useRef, useState } from "react";
 import styles from "@/features/files/components/BottomMenu/FileBottomMenu.module.css";
 import { GitHistoryModal } from "@/features/files/components/modals/GitHistoryModal";
+import { LogMonitorConfigModal } from "@/features/files/components/modals/LogMonitorConfigModal";
 import { TodoInputModal } from "@/features/files/components/modals/TodoInputModal";
 import { useFileBottomMenu } from "@/features/files/hooks";
 import { useFileNavigation } from "@/features/files/hooks/useFileNavigation";
 import { useFileStore } from "@/features/files/stores/fileStore";
+import { useLogMonitorStore } from "@/features/files/stores/logMonitorStore";
 import { useTerminalStore } from "@/features/files/stores/terminalStore";
 import type { ViewMode } from "@/features/files/types";
 
@@ -47,6 +49,20 @@ export function FileBottomMenu() {
   const { isTodoModeActive, toggleTodoMode, todoInputFile, setTodoInputFile } = useFileStore();
   // Terminal
   const { isPanelOpen, togglePanel } = useTerminalStore();
+
+  // Log Monitor
+  const {
+    configs: monitorConfigs,
+    activeMonitorId,
+    isPanelOpen: isMonitorPanelOpen,
+    setActiveMonitor,
+    removeConfig: removeMonitorConfig,
+    togglePanel: toggleMonitorPanel,
+  } = useLogMonitorStore();
+
+  const [isMonitorMenuOpen, setIsMonitorMenuOpen] = useState(false);
+  const [isMonitorConfigOpen, setIsMonitorConfigOpen] = useState(false);
+  const monitorBtnRef = useRef<HTMLButtonElement>(null);
 
   // 打开视图选择器
   const openViewSelector = () => {
@@ -142,6 +158,17 @@ export function FileBottomMenu() {
         </button>
         {/* 分隔 */}
         <div className={styles.divider} />
+        {/* Monitor 按钮 */}
+        <button
+          type="button"
+          ref={monitorBtnRef}
+          className={`${styles.btn} ${styles.monitorBtn} ${isMonitorPanelOpen ? styles.active : ""}`}
+          onClick={() => setIsMonitorMenuOpen(true)}
+          title="Log Monitors"
+        >
+          <MonitorIcon />
+        </button>
+
         {/* Terminal 按钮 */}
         <button
           type="button"
@@ -191,6 +218,78 @@ export function FileBottomMenu() {
             >
               <TreeIcon />
             </button>
+          </div>
+        </>
+      )}
+
+      {/* Monitor 菜单弹出 */}
+      {isMonitorMenuOpen && (
+        <>
+          <div className={styles.overlay} onClick={() => setIsMonitorMenuOpen(false)} />
+          <div
+            className={styles.monitorMenu}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "fixed",
+              bottom: "52px",
+              right: "12px",
+            }}
+          >
+            {/* New Monitor 选项 */}
+            <button
+              type="button"
+              className={styles.monitorMenuItem}
+              onClick={() => {
+                setIsMonitorConfigOpen(true);
+                setIsMonitorMenuOpen(false);
+              }}
+            >
+              <span className={styles.monitorMenuIcon}>
+                <PlusIcon />
+              </span>
+              <span className={styles.monitorMenuLabel}>New Monitor...</span>
+            </button>
+
+            {/* 已有配置列表 */}
+            {monitorConfigs.length > 0 && (
+              <>
+                <div className={styles.monitorMenuDivider} />
+                {monitorConfigs.map((cfg) => (
+                  <div key={cfg.id} className={styles.monitorMenuRow}>
+                    <button
+                      type="button"
+                      className={`${styles.monitorMenuItem} ${activeMonitorId === cfg.id ? styles.monitorMenuActive : ""}`}
+                      onClick={() => {
+                        if (activeMonitorId === cfg.id) {
+                          toggleMonitorPanel();
+                        } else {
+                          setActiveMonitor(cfg.id);
+                        }
+                        setIsMonitorMenuOpen(false);
+                      }}
+                      title={cfg.filePaths.join("\n")}
+                    >
+                      <span className={styles.monitorMenuIcon}>
+                        <MonitorIconSmall />
+                      </span>
+                      <span className={styles.monitorMenuLabel}>{cfg.name}</span>
+                      <span className={styles.monitorMenuCount}>{cfg.filePaths.length}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.monitorMenuDelete}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeMonitorConfig(cfg.id);
+                      }}
+                      title="Delete monitor"
+                    >
+                      <TrashIconSmall />
+                    </button>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </>
       )}
@@ -302,6 +401,14 @@ export function FileBottomMenu() {
           filePath={todoInputFile.path}
           fileName={todoInputFile.name}
           onClose={() => setTodoInputFile(null)}
+        />
+      )}
+
+      {/* Log Monitor 配置弹窗 */}
+      {isMonitorConfigOpen && (
+        <LogMonitorConfigModal
+          isOpen={isMonitorConfigOpen}
+          onClose={() => setIsMonitorConfigOpen(false)}
         />
       )}
     </>
@@ -459,6 +566,83 @@ function TerminalIcon() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
       <polyline points="4 17 10 11 4 5" />
       <line x1="12" y1="19" x2="20" y2="19" />
+    </svg>
+  );
+}
+
+function MonitorIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      role="img"
+      aria-label="Monitor"
+    >
+      <title>Monitor</title>
+      <rect x="2" y="3" width="20" height="14" rx="2" />
+      <line x1="8" y1="21" x2="16" y2="21" />
+      <line x1="12" y1="17" x2="12" y2="21" />
+      <path d="M6 8h.01M6 12h.01M10 8h8M10 12h8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function MonitorIconSmall() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      width="14"
+      height="14"
+      role="img"
+      aria-label="Monitor"
+    >
+      <title>Monitor</title>
+      <rect x="2" y="3" width="20" height="14" rx="2" />
+      <line x1="8" y1="21" x2="16" y2="21" />
+      <line x1="12" y1="17" x2="12" y2="21" />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      width="14"
+      height="14"
+      role="img"
+      aria-label="Plus"
+    >
+      <title>Plus</title>
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+
+function TrashIconSmall() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      width="12"
+      height="12"
+      role="img"
+      aria-label="Delete"
+    >
+      <title>Delete</title>
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
     </svg>
   );
 }

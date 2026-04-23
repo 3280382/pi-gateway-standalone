@@ -1,0 +1,241 @@
+/**
+ * LogMonitorPanel Styles
+ *
+ * Features:
+ * - Multi-window layout with equal height distribution
+ * - Maximize/restore per window
+ * - Clean header per window showing file path
+ */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  background: #0a0c10;
+  border-top: 1px solid #30363d;
+  position: relative;
+  z-index: 100;
+}
+
+/* Resize Handle */
+.resizeHandle {
+  position: absolute;
+  top: -4px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  cursor: ns-resize;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resizeGrip {
+  width: 40px;
+  height: 4px;
+  background: #30363d;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+.resizeHandle:hover .resizeGrip {
+  background: #7aa2f7;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  flex-shrink: 0;
+  min-height: 32px;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e6edf3;
+}
+
+.title svg {
+  color: #7aa2f7;
+}
+
+.connectingBadge {
+  font-size: 10px;
+  font-weight: 500;
+  color: #d29922;
+  background: rgba(210, 153, 34, 0.15);
+  padding: 1px 8px;
+  border-radius: 10px;
+  margin-left: 4px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.2s;
+}
+
+.actionBtn:hover {
+  background: #21262d;
+  color: #e6edf3;
+}
+
+/* Error Banner */
+.errorBanner {
+  padding: 6px 12px;
+  background: rgba(248, 81, 73, 0.15);
+  border-bottom: 1px solid rgba(248, 81, 73, 0.3);
+  color: #f85149;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* Windows Container */
+.windowsContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Window */
+.window {
+  display: flex;
+  flex-direction: column;
+  min-height: 60px;
+  border-bottom: 1px solid #21262d;
+  overflow: hidden;
+  transition: flex 0.2s ease;
+}
+
+.window:last-child {
+  border-bottom: none;
+}
+
+.maximizedWindow {
+  flex: 1 1 100% !important;
+}
+
+.hiddenWindow {
+  display: none;
+}
+
+/* Window Header */
+.windowHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 8px;
+  background: #0d1117;
+  border-bottom: 1px solid #21262d;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.windowHeader:hover {
+  background: #161b22;
+}
+
+.windowTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.windowTitle svg {
+  color: #58a6ff;
+  flex-shrink: 0;
+}
+
+.windowName {
+  font-size: 11px;
+  font-weight: 500;
+  color: #c9d1d9;
+  flex-shrink: 0;
+}
+
+.windowPath {
+  font-size: 10px;
+  color: #6e7681;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.windowActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.windowLoading {
+  font-size: 10px;
+  color: #d29922;
+}
+
+/* Terminal Container */
+.terminalContainer {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.terminalContainer :global(.xterm) {
+  height: 100%;
+}
+
+.terminalContainer :global(.xterm-viewport) {
+  background-color: #0a0c10;
+}
+
+.terminalContainer :global(.xterm-screen) {
+  padding: 2px 4px;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #8b949e;
+  gap: 12px;
+}
+
+.emptyIcon {
+  width: 40px;
+  height: 40px;
+  opacity: 0.4;
+}

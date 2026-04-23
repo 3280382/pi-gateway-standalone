@@ -5,6 +5,14 @@
 export type { FileActions, FileState } from "@/features/files/stores/fileStore";
 export { useFileStore } from "@/features/files/stores/fileStore";
 
+// Log Monitor Store
+export {
+  type LogMonitorActions,
+  type LogMonitorConfig,
+  type LogMonitorState,
+  useLogMonitorStore,
+} from "@/features/files/stores/logMonitorStore";
+
 // WebSocket Terminal Store (new multi-session terminal)
 export {
   selectActiveSession,

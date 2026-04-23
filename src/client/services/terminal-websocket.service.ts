@@ -237,7 +237,12 @@ export class TerminalWebSocketService {
     cols?: number;
     rows?: number;
   }): boolean {
-    return this.send("terminal_create", options);
+    return this.send("terminal_create", {
+      sessionName: options?.name,
+      workingDir: options?.workingDir,
+      cols: options?.cols,
+      rows: options?.rows,
+    });
   }
 
   /**
