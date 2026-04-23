@@ -11,7 +11,7 @@ export { Config } from "./config/index.js";
 export {
   PiAgentSession,
   type ServerMessage,
-} from "./features/chat/agent-session/index.js";
+} from "./features/chat/session/index.js";
 // LLM related
 export { setupLlmInterceptors } from "./features/chat/llm/index.js";
 export { LlmLogManager } from "./features/chat/llm/log-manager.js";
