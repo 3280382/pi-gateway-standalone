@@ -15,38 +15,13 @@ import { useChatController } from "@/features/chat/services/api/chatApi";
 import { loadMoreMessages } from "@/features/chat/services/chatWebSocket";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
-import type { Message } from "@/features/chat/types/chat";
+import {
+  createErrorMessage,
+  createSystemMessage,
+  createUserMessage,
+} from "@/features/chat/utils/messageUtils";
 import { useWorkspaceStore } from "@/stores/workspaceStore";
 import { websocketService } from "@/services/websocket.service";
-
-// ===== [ANCHOR:HELPERS] =====
-
-function createUserMessage(text: string): Message {
-  return {
-    id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    role: "user",
-    kind1: "user",
-    kind2: "prompt",
-    content: [{ type: "text", text }],
-    timestamp: new Date(),
-  };
-}
-
-function createSystemMessage(text: string): Message {
-  return {
-    id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    role: "system",
-    kind1: "sysinfo",
-    kind2: "event",
-    content: [{ type: "text", text }],
-    timestamp: new Date(),
-  };
-}
-
-function createErrorMessage(error: unknown): Message {
-  const errorText = error instanceof Error ? error.message : String(error);
-  return createSystemMessage(`Command execution failed: ${errorText}`);
-}
 
 // ===== [ANCHOR:COMMAND_EXECUTION] =====
 
