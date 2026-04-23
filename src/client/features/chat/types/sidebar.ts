@@ -59,18 +59,7 @@ export interface SidebarState {
 // ============================================================================
 
 export interface SidebarController {
-  // Data Loading - 数据来自 WebSocket init，不再需要 HTTP 加载
-  loadWorkingDir: () => Promise<void>;
-  loadSessions: (cwd: string) => Promise<void>;
-
-  // Actions - WebSocket
   changeWorkingDir: (path: string) => Promise<void>;
-  selectSession: (id: string) => void;
-  createNewSession: () => Promise<void>;
-  listSessions: () => void; // 通过 WebSocket 请求会话Cols表
-
-  // Error Handling
-  clearError: () => void;
 }
 
 // ============================================================================
