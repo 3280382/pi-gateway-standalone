@@ -22,19 +22,15 @@ import {
 } from "@/features/chat/services/chatWebSocket";
 
 import { sessionManager, updateSessionsAndStatus } from "@/features/chat/services/sessionManager";
-import { useChatStore } from "@/features/chat/stores/chatStore";
+import { generateMessageId, useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { ChatController, Message, ToolExecution } from "@/features/chat/types/chat";
 import { websocketService } from "@/services/websocket.service";
 
 // ============================================================================
-// Message ID Generator
+// Tool ID Generator (Message ID is in chatStore)
 // ============================================================================
-
-function generateMessageId(): string {
-  return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
 
 function generateToolId(): string {
   return `tool-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
