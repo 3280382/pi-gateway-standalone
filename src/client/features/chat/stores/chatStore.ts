@@ -952,14 +952,36 @@ export const useChatStore = create<
 
         setSearchFilters: (filters: Partial<ChatSearchFilters>) => {
           set(
-            (state: any) => ({
-              searchFilters: {
-                kind1: { ...state.searchFilters.kind1, ...filters.kind1 },
-                kind2: { ...state.searchFilters.kind2, ...filters.kind2 },
-                kind3: { ...state.searchFilters.kind3, ...filters.kind3 },
-                dates: (filters as any).dates ?? state.searchFilters.dates,
-              },
-            }),
+            (state: any) => {
+              // Ensure default values if fields are undefined (migration safety)
+              const defaultKind1 = { user: true, assistant: true, sysinfo: true };
+              const defaultKind2 = {
+                prompt: true,
+                response: true,
+                thinking: true,
+                tool: true,
+                event: true,
+              };
+              const defaultKind3 = {
+                modelChange: true,
+                thinkingLevelChange: true,
+                compaction: true,
+                retry: true,
+                autoRetry: true,
+                usage: true,
+                toolSuccess: true,
+                toolError: true,
+                toolPending: true,
+              };
+              return {
+                searchFilters: {
+                  kind1: { ...defaultKind1, ...state.searchFilters?.kind1, ...filters.kind1 },
+                  kind2: { ...defaultKind2, ...state.searchFilters?.kind2, ...filters.kind2 },
+                  kind3: { ...defaultKind3, ...state.searchFilters?.kind3, ...filters.kind3 },
+                  dates: (filters as any).dates ?? state.searchFilters?.dates,
+                },
+              };
+            },
             false,
             "setSearchFilters"
           );
@@ -1278,95 +1300,6 @@ export interface FilterOptions {
 }
 
 /**
- * Hierarchical Message Type Detection
- *
- * Structure:
- * - Role: user | assistant | system
- *   - User: prompt (text content)
- *   - Assistant: text | thinking | tool
- *   - System: compaction | retry | autoRetry | modelChange | thinkingLevelChange | usage
- */
-function detectHierarchicalMessageType(message: Message): {
-  role: "user" | "assistant" | "system";
-  contentType: string;
-} {
-  const role = message.role;
-
-  // Determine content type based on role and kind/content
-  switch (role) {
-    case "user":
-      return { role: "user", contentType: "prompt" };
-
-    case "assistant": {
-      // Check content array for types
-      const hasThinking = message.content.some((c) => c.type === "thinking");
-      const hasText = message.content.some((c) => c.type === "text");
-
-      // Check for tools and their statuses
-      const toolBlocks = message.content.filter((c) => c.type === "tool" || c.type === "tool_use");
-      const hasTool = toolBlocks.length > 0;
-
-      if (hasTool) {
-        // Determine tool status for more granular filtering
-        // Priority: error > pending > success
-        const hasError = toolBlocks.some((c) => c.status === "error" || c.error);
-        const hasPending = toolBlocks.some(
-          (c) => c.status === "pending" || c.status === "executing"
-        );
-
-        if (hasError) return { role: "assistant", contentType: "toolError" };
-        if (hasPending) return { role: "assistant", contentType: "toolPending" };
-        return { role: "assistant", contentType: "toolSuccess" };
-      }
-
-      if (hasThinking) return { role: "assistant", contentType: "thinking" };
-      if (hasText) return { role: "assistant", contentType: "text" };
-      return { role: "assistant", contentType: "text" }; // default
-    }
-
-    case "system": {
-      // Use kind field or detect from content
-      const kind = message.kind;
-      if (kind) {
-        // Convert snake_case kind to camelCase for contentTypes lookup
-        const camelKind = kind.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-        return { role: "system", contentType: camelKind };
-      }
-
-      // Fallback: detect from text content
-      const text = message.content
-        .filter((c) => c.type === "text")
-        .map((c) => c.text || "")
-        .join(" ");
-
-      if (text.includes("🗜️ Compacting") || text.includes("上下文压缩")) {
-        return { role: "system", contentType: "compaction" };
-      }
-      if (text.includes("🔄 Auto-retrying")) {
-        return { role: "system", contentType: "autoRetry" };
-      }
-      if (text.includes("🔄 Retrying")) {
-        return { role: "system", contentType: "retry" };
-      }
-      if (text.includes("模型已切换为") || text.includes("Model switched")) {
-        return { role: "system", contentType: "modelChange" };
-      }
-      if (text.includes("Thinking level") || text.includes("Thinking level已设置")) {
-        return { role: "system", contentType: "thinkingLevelChange" };
-      }
-      if (text.includes("📊") || text.includes("tokens") || text.includes("cost")) {
-        return { role: "system", contentType: "usage" };
-      }
-
-      return { role: "system", contentType: "unknown" };
-    }
-
-    default:
-      return { role: "system", contentType: "unknown" };
-  }
-}
-
-/**
  * Hierarchical Message Filtering - 3-Level Kind System
  *
  * Three-level filtering:
@@ -1518,105 +1451,3 @@ export function filterMessages(messages: Message[], options: FilterOptions): Mes
     return true;
   });
 }
-
-// Legacy filter function - kept for backward compatibility
-/**
- * @deprecated Use filterMessages with kind1/kind2/kind3 structure instead
- */
-export function filterMessagesLegacy(messages: Message[], options: FilterOptions): Message[] {
-  const { query, filters } = options;
-  const lowerQuery = query.toLowerCase().trim();
-
-  // Defensive: ensure filters has the expected structure
-  const safeFilters = {
-    roles: (filters as any)?.roles ?? { user: true, assistant: true, system: true },
-    contentTypes: (filters as any)?.contentTypes ?? {
-      prompt: true,
-      text: true,
-      thinking: true,
-      tool: true,
-      toolSuccess: true,
-      toolError: true,
-      toolPending: true,
-      compaction: true,
-      retry: true,
-      autoRetry: true,
-      modelChange: true,
-      thinkingLevelChange: true,
-      usage: true,
-    },
-  };
-
-  return messages.filter((message) => {
-    const { role, contentType } = detectHierarchicalMessageType(message);
-
-    // Level 1: Role filtering
-    if (!safeFilters.roles[role]) return false;
-
-    // Level 2: Content type filtering (role-specific)
-    switch (role) {
-      case "user":
-        // User messages are always "prompt" type
-        if (!safeFilters.contentTypes.prompt) return false;
-        break;
-
-      case "assistant": {
-        // Assistant messages can be: text, thinking, tool (with status variants)
-        // First check if the base type is enabled
-        if (contentType === "text" && !safeFilters.contentTypes.text) return false;
-        if (contentType === "thinking" && !safeFilters.contentTypes.thinking) return false;
-
-        // For tools, check both base "tool" and specific status filters
-        if (contentType.startsWith("tool")) {
-          // If base tool filter is off, hide all tools
-          if (!safeFilters.contentTypes.tool) return false;
-
-          // Check specific tool status filters
-          if (contentType === "toolSuccess" && !safeFilters.contentTypes.toolSuccess) return false;
-          if (contentType === "toolError" && !safeFilters.contentTypes.toolError) return false;
-          if (contentType === "toolPending" && !safeFilters.contentTypes.toolPending) return false;
-        }
-        break;
-      }
-
-      case "system": {
-        // System messages are special events
-        if (contentType === "unknown") {
-          // Unknown system messages are shown if system role is enabled
-          return true;
-        }
-        const typeKey = contentType as keyof typeof safeFilters.contentTypes;
-        if (!safeFilters.contentTypes[typeKey]) return false;
-        break;
-      }
-    }
-
-    // Level 3: Text search filtering (if query exists)
-    if (lowerQuery) {
-      const messageText = message.content
-        .map((c) => {
-          if (c.type === "text") return c.text || "";
-          if (c.type === "thinking") return c.thinking || "";
-          if (c.type === "tool" || c.type === "tool_use") {
-            return `${c.toolName || ""} ${JSON.stringify(c.args || {})} ${c.output || ""}`;
-          }
-          return "";
-        })
-        .join(" ")
-        .toLowerCase();
-
-      return messageText.includes(lowerQuery);
-    }
-
-    return true;
-  });
-}
-
-/**
- * Selector: 获取过滤后的消息
- */
-export const selectFilteredMessages = (options: FilterOptions) => {
-  return (state: ReturnType<typeof useChatStore.getState>): Message[] => {
-    return filterMessages(state.messages, options);
-  };
-};
