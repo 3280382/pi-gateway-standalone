@@ -11,14 +11,10 @@ import {
   compactSession,
   executeChatCommand,
   exportSession,
-  initChatWorkingDirectory,
-  listChatModels,
   sendChatMessage,
-  setChatLlmLogEnabled,
   setChatModel,
   setChatThinkingLevel,
   steerChat,
-  switchChatSession,
 } from "@/features/chat/services/chatWebSocket";
 
 import { sessionManager, updateSessionsAndStatus } from "@/features/chat/services/sessionManager";
@@ -44,16 +40,12 @@ export interface EnhancedChatController extends ChatController {
   // 扩展功能
   steer: (text: string) => void;
   createNewSession: () => Promise<void>;
-  loadSession: (sessionPath: string) => Promise<void>;
 
   setModel: (modelId: string, thinkingLevel?: string) => Promise<void>;
   setThinkingLevel: (level: string) => Promise<void>;
-  listModels: () => Promise<any>;
   executeCommand: (command: string) => Promise<any>;
   compactSession: (customInstructions?: string) => Promise<any>;
   exportSession: (outputPath?: string) => Promise<any>;
-  setLlmLogEnabled: (enabled: boolean) => Promise<void>;
-  changeWorkingDir: (path: string) => Promise<void>;
 }
 
 // ============================================================================
@@ -227,27 +219,6 @@ export function useChatController(): EnhancedChatController {
       await sessionManager.createNewSession();
     },
 
-    loadSession: async (sessionPath: string) => {
-      const data = await createPromiseWithTimeout<any>({
-        timeoutMessage: "加载会话超时",
-        eventName: "session_loaded",
-        onSuccess: async (data) => {
-          if (data.success) {
-            // 统一使用 shortId（8-character short ID）
-            chatStore.setSessionId(data.shortId);
-            // Use messages from WebSocket response (already merged with buffer)
-            const messages = data.messages || [];
-            console.log("[ChatAPI] session_loaded with messages:", messages.length);
-            chatStore.setMessages(messages);
-          } else {
-            throw new Error(data.error || "Failed to load session");
-          }
-        },
-        sendAction: () => switchChatSession(sessionPath),
-      });
-      return data;
-    },
-
     // 模型管理
     setModel: async (fullModelId: string, thinkingLevel?: string) => {
       // Split fullModelId (format: "provider/modelId") into provider and modelId
@@ -279,15 +250,6 @@ export function useChatController(): EnhancedChatController {
           sessionStore.setThinkingLevel(level as any);
         },
         sendAction: () => setChatThinkingLevel(level),
-      });
-    },
-
-    listModels: async () => {
-      return createPromiseWithTimeout({
-        timeoutMessage: "Cols出模型超时",
-        eventName: "models_list",
-        onSuccess: () => {},
-        sendAction: listChatModels,
       });
     },
 
@@ -323,31 +285,8 @@ export function useChatController(): EnhancedChatController {
       });
     },
 
-    // LLM logs
-    setLlmLogEnabled: async (enabled: boolean) => {
-      await createPromiseWithTimeout<void>({
-        timeoutMessage: "设置LLM logs超时",
-        eventName: "llm_log_set",
-        onSuccess: () => {},
-        sendAction: () => setChatLlmLogEnabled(enabled),
-      });
-    },
-
     setShowTools: (show: boolean) => {
       (chatStore as any).setShowTools(show);
-    },
-
-    // 工作directories
-    changeWorkingDir: async (path: string) => {
-      await createPromiseWithTimeout<any>({
-        timeoutMessage: "更改工作directories超时",
-        eventName: "dir_changed",
-        onSuccess: (data) => {
-          sessionStore.setWorkingDir(data.cwd);
-          chatStore.setSessionId(data.sessionId);
-        },
-        sendAction: () => initChatWorkingDirectory(path),
-      });
     },
   };
 }
