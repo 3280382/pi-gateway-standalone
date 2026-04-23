@@ -7,17 +7,9 @@ export { useChatInit } from "@/features/chat/hooks/useChatInit";
 // ChatPanel 相关 Hooks
 export { useChatPanel } from "@/features/chat/hooks/useChatPanel";
 // AppHeader 相关 Hooks
-export { useDirectoryPicker } from "@/features/chat/hooks/useDirectoryPicker";
 export { useFilePicker } from "@/features/chat/hooks/useFilePicker";
 export { useImageUpload } from "@/features/chat/hooks/useImageUpload";
 // InputArea 相关 Hooks
 export { useInputArea } from "@/features/chat/hooks/useInputArea";
-export { useModelSelector } from "@/features/chat/hooks/useModelSelector";
-export type { SearchFilters } from "@/features/chat/hooks/useSearchFilters";
-export { useSearchFilters } from "@/features/chat/hooks/useSearchFilters";
 export { useSidebarVisibility } from "@/features/chat/hooks/useSidebarVisibility";
 export { useSlashCommands } from "@/features/chat/hooks/useSlashCommands";
-export {
-  THINKING_LEVELS,
-  useThinkingSelector,
-} from "@/features/chat/hooks/useThinkingSelector";
