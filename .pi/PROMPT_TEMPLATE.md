@@ -27,7 +27,7 @@ Must execute in the following order, explicitly report results after each step, 
   Result: [Passed X/Failed Y]
   
 □ STEP 5 - Service verification normal
-  Run: node scripts/tmux-controller.js status
+  Run: bash scripts/dev.sh status
   Result: [Frontend normal/abnormal] [Backend normal/abnormal]
   
 □ STEP 6 - [Gold Standard] Simulated browser testing (mandatory requirement)

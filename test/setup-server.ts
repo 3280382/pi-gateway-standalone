@@ -1,11 +1,11 @@
 /**
- * Vitest Global Setup - Unified Development Environment
+ * Vitest Global Setup - Development Environment
  *
- * All testing uses the shared tmux 3-pane development environment.
+ * Automatically starts development services before tests if not already running.
  * Backend: port 3000, Frontend: port 5173
- * Do NOT start separate test servers.
  */
 
+import { spawn } from "node:child_process";
 import { createConnection } from "node:net";
 import { setTimeout } from "node:timers/promises";
 
@@ -29,7 +29,7 @@ function isPortInUse(port: number): Promise<boolean> {
 }
 
 /** Wait for dev server to be ready */
-async function waitForDevServer(port: number, label: string, maxWaitMs = 30000): Promise<void> {
+async function waitForDevServer(port: number, label: string, maxWaitMs = 60000): Promise<void> {
   const startTime = Date.now();
   while (Date.now() - startTime < maxWaitMs) {
     if (await isPortInUse(port)) {
@@ -41,18 +41,40 @@ async function waitForDevServer(port: number, label: string, maxWaitMs = 30000):
   throw new Error(`${label} not available on port ${port} after ${maxWaitMs}ms`);
 }
 
-export async function setup(): Promise<void> {
-  console.log("[GlobalSetup] Using unified development environment");
-  console.log(`[GlobalSetup] Checking backend (port ${BACKEND_PORT})...`);
-  await waitForDevServer(BACKEND_PORT, "Backend");
+/** Start dev services */
+async function startDevServices(): Promise<void> {
+  console.log("[GlobalSetup] Starting development services...");
 
-  console.log(`[GlobalSetup] Checking frontend (port ${FRONTEND_PORT})...`);
+  const child = spawn("bash", ["scripts/dev.sh", "start"], {
+    cwd: "/root/pi-gateway-standalone",
+    detached: true,
+    stdio: "ignore",
+  });
+
+  child.unref();
+
+  // Wait for services
+  await waitForDevServer(BACKEND_PORT, "Backend");
   await waitForDevServer(FRONTEND_PORT, "Frontend");
+}
+
+export async function setup(): Promise<void> {
+  console.log("[GlobalSetup] Checking development environment...");
+
+  const backendUp = await isPortInUse(BACKEND_PORT);
+  const frontendUp = await isPortInUse(FRONTEND_PORT);
+
+  if (!backendUp || !frontendUp) {
+    console.log("[GlobalSetup] Services not running, starting them...");
+    await startDevServices();
+  } else {
+    console.log("[GlobalSetup] Development services already running");
+  }
 
   console.log("[GlobalSetup] Development environment ready for testing");
 }
 
 export async function teardown(): Promise<void> {
-  // Do NOT stop the dev servers - they are managed by tmux
+  // Do NOT stop the dev servers - they are shared
   console.log("[GlobalSetup] Tests complete. Dev servers remain running.");
 }

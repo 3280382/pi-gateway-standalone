@@ -8,8 +8,8 @@
 # Install dependencies
 npm install
 
-# Start development environment (tmux 3-pane mode)
-bash ./dev-start.sh
+# Start development environment
+bash scripts/dev.sh start
 ```
 
 ## Project Architecture
@@ -112,46 +112,16 @@ const store = useChatStore(); // Causes re-renders
 
 ## Development Environment
 
-### Quick Start (Tmux Mode)
+### Service Management
 
 ```bash
-# Create tmux session with 3 panes
-bash ./dev-start.sh create
-
-# Start all services
-bash ./dev-start.sh start
-
-# Attach to session (Ctrl+b d to detach)
-bash ./dev-start.sh attach
-```
-
-### Tmux Pane Layout
-
-```
-+-----------------+-----------------+
-|   Frontend      |    Backend      |
-|   (Vite HMR)    |  (tsx watch)    |
-+-----------------+-----------------+
-|                                   |
-|         AI / Logs                 |
-|                                   |
-+-----------------------------------+
-```
-
-### Commands
-
-```bash
-bash ./dev-start.sh [command]
-
-Commands:
-  create    Create tmux session
-  start     Start frontend + backend
-  stop      Stop all services
-  restart   Restart all services
-  status    Check service status
-  logs      View logs (frontend|backend)
-  attach    Attach to session
-  kill      Kill session
+bash scripts/dev.sh start          # Start backend + frontend
+bash scripts/dev.sh status         # Check service status
+bash scripts/dev.sh restart-backend   # Restart backend
+bash scripts/dev.sh restart-frontend  # Restart frontend
+bash scripts/dev.sh logs backend      # View backend logs
+bash scripts/dev.sh logs frontend     # View frontend logs
+bash scripts/dev.sh stop           # Stop all services
 ```
 
 ### Auto Reload

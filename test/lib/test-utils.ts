@@ -187,8 +187,7 @@ export class BrowserTestHelper {
 }
 
 /**
- * 【三窗口原则】TestServerManager 不再启动新服务器
- * 只检查tmux中已运行的服务状态
+ * TestServerManager - checks dev environment services
  */
 export class TestServerManager {
   private logger: TestLogger;
@@ -197,8 +196,6 @@ export class TestServerManager {
   private port: number;
   // @ts-ignore properties used via dynamic assignment
   private serverLogFile: string;
-  // @ts-ignore properties used via dynamic assignment
-  private useTmux = false;
 
   constructor(port?: number) {
     this.logger = new TestLogger("server-manager", "backend");
@@ -209,29 +206,23 @@ export class TestServerManager {
   async start(): Promise<void> {
     if (this.isStarted) return;
 
-    // 【三窗口原则】检查tmux中的服务，不启动新服务
-    this.logger.info("检查tmux中的服务...", { port: 3000 });
+    this.logger.info("检查开发环境服务...", { port: 3000 });
 
-    const tmuxAvailable = await this.checkTmuxServices();
-    if (tmuxAvailable.backend) {
-      this.logger.info("✅ 使用tmux中的后端服务");
+    const available = await this.checkDevServices();
+    if (available.backend) {
+      this.logger.info("✅ 使用开发环境后端服务");
       this.isStarted = true;
-      this.useTmux = true;
       return;
     }
 
-    this.logger.error("❌ tmux中的后端服务未运行！");
-    this.logger.error("请先启动tmux开发环境: bash scripts/start-tmux-dev.sh");
-    throw new Error("tmux后端服务未运行");
+    this.logger.error("❌ 开发环境后端服务未运行！");
+    this.logger.error("请先启动开发环境: bash scripts/dev.sh start");
+    throw new Error("开发环境后端服务未运行");
   }
 
-  /**
-   * 【三窗口原则】检查tmux中的服务状态
-   */
-  private async checkTmuxServices(): Promise<{ frontend: boolean; backend: boolean }> {
+  private async checkDevServices(): Promise<{ frontend: boolean; backend: boolean }> {
     const results = { frontend: false, backend: false };
 
-    // 检查前端 (Vite on 5173)
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 2000);
@@ -245,7 +236,6 @@ export class TestServerManager {
       results.frontend = false;
     }
 
-    // 检查后端 (Node.js on 3000)
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 2000);
@@ -262,7 +252,6 @@ export class TestServerManager {
   }
 
   async healthCheck(): Promise<boolean> {
-    // 【三窗口原则】检查tmux中的后端服务
     try {
       const response = await fetch("http://127.0.0.1:3000/api/health");
       return response.ok;
@@ -272,8 +261,7 @@ export class TestServerManager {
   }
 
   async stop(): Promise<void> {
-    // 【三窗口原则】不停止tmux中的服务
-    this.logger.info("保持tmux服务运行（不执行停止操作）");
+    this.logger.info("保持开发环境服务运行（不执行停止操作）");
     this.isStarted = false;
   }
 }

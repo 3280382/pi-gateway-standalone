@@ -19,18 +19,18 @@ Generated: 2026-04-17T03:48:49.105Z
 **统一的开发测试环境（唯一推荐方式）**
 
 ```bash
-# Tmux 3-pane mode - 同时启动前端、后端和监控
-bash ./dev-start.sh
+# Start development services
+bash scripts/dev.sh start
 ```
 
 ### 自动监控和热启动
 
-Tmux 模式下已配置自动监控和热启动：
+开发环境下已配置自动监控和热启动：
 
 | 组件 | 热启动方式 | 单独重启命令 |
 |------|-----------|-------------|
-| 后端 | `tsx watch` 自动重启 | `tmux send-keys -t gateway:backend C-c && tmux send-keys -t gateway:backend 'npm run dev' Enter` |
-| 前端 | Vite HMR 热更新 | `tmux send-keys -t gateway
+| 后端 | `tsx watch` 自动重启 | `bash scripts/dev.sh restart-backend` |
+| 前端 | Vite HMR 热更新 | `bash scripts/dev.sh restart-frontend` |
 
 ---
 

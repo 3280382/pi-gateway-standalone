@@ -3,7 +3,7 @@
  * Covers: clicking search filter dropdown, toggling options, verifying no JS errors
  * Regression for: "props is not defined" when toggling filters
  *
- * Uses the running dev server (port 5173) per the 3-pane tmux rule.
+ * Uses the running dev server (port 5173).
  */
 
 import { mkdirSync } from "node:fs";

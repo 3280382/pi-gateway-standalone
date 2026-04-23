@@ -62,20 +62,22 @@ Complete ALL before marking a task as complete:
 
 ## Development Environment
 
-**Tmux 3-pane mode is started by humans. AI MUST NOT run `bash ./dev-start.sh`.**
-
-Use `scripts/dev-ctl.sh` to manage services:
+Use `scripts/dev.sh` to manage services:
 
 ```bash
-bash scripts/dev-ctl.sh restart-frontend
-bash scripts/dev-ctl.sh restart-backend
-bash scripts/dev-ctl.sh status
-bash scripts/dev-ctl.sh logs frontend
+bash scripts/dev.sh start          # Start backend + frontend
+bash scripts/dev.sh status         # Check service status
+bash scripts/dev.sh restart-backend   # Restart backend
+bash scripts/dev.sh restart-frontend  # Restart frontend
+bash scripts/dev.sh logs backend      # View backend logs
+bash scripts/dev.sh logs frontend     # View frontend logs
+bash scripts/dev.sh stop           # Stop all services
 ```
 
 **Principles:**
 - Frontend (Vite HMR) and Backend (tsx watch) auto-reload
 - Do NOT start standalone servers
+- Do NOT kill processes on ports 3000/5173
 
 ## Testing Standards
 
@@ -97,7 +99,7 @@ timeout 10s curl -s http://localhost:3000/api/health
 - Clean up after completion
 - Merge useful tests into existing suites
 
-**Environment**: All testing uses the shared development environment (tmux 3-pane).
+**Environment**: All testing uses the shared development environment.
 - Backend runs on port 3000, frontend on port 5173
 - Do NOT start separate test servers
 - Do NOT kill processes on ports 3000/5173

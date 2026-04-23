@@ -13,7 +13,7 @@ cd pi-gateway-standalone
 npm install
 
 # Start development
-bash ./dev-start.sh
+bash scripts/dev.sh start
 ```
 
 ## Project Structure
