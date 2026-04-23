@@ -21,7 +21,12 @@
  */
 
 import { memo, useMemo, useRef } from "react";
-import type { ChatSearchFilters, Message, MessageContent, ToolExecution } from "@/features/chat/types/chat";
+import type {
+  ChatSearchFilters,
+  Message,
+  MessageContent,
+  ToolExecution,
+} from "@/features/chat/types/chat";
 import { MessageItem } from "./MessageItem";
 import styles from "./MessageList.module.css";
 
@@ -34,8 +39,6 @@ interface MessageListProps {
   onToggleMessageCollapse: (id: string) => void;
   onToggleThinkingCollapse: (id: string) => void;
   onToggleToolsCollapse?: (id: string) => void;
-  onDeleteMessage?: (id: string) => void;
-  onRegenerateMessage?: (id: string) => void;
   // Streaming state - passed from parent to control re-render frequency
   streamingContent?: string;
   streamingThinking?: string;
@@ -53,8 +56,6 @@ const StaticMessageItem = memo(function StaticMessageItem({
   onToggleCollapse,
   onToggleThinking,
   onToggleTools,
-  onDelete,
-  onRegenerate,
 }: {
   message: Message;
   showThinking: boolean;
@@ -64,8 +65,6 @@ const StaticMessageItem = memo(function StaticMessageItem({
   onToggleCollapse: () => void;
   onToggleThinking: () => void;
   onToggleTools?: () => void;
-  onDelete?: () => void;
-  onRegenerate?: () => void;
 }) {
   return (
     <MessageItem
@@ -77,8 +76,6 @@ const StaticMessageItem = memo(function StaticMessageItem({
       onToggleCollapse={onToggleCollapse}
       onToggleThinking={onToggleThinking}
       onToggleTools={onToggleTools}
-      onDelete={onDelete}
-      onRegenerate={onRegenerate}
     />
   );
 });
@@ -152,8 +149,7 @@ function useStreamingMessage(
     // Tool calls in streaming - skip if already in solidified content
     streamingToolCalls.forEach((tool) => {
       const existingIndex = content.findIndex(
-        (c) =>
-          (c.type === "tool_use" || c.type === "tool") && c.toolCallId === tool.id
+        (c) => (c.type === "tool_use" || c.type === "tool") && c.toolCallId === tool.id
       );
       const activeTool = activeTools.get(tool.id);
 
@@ -188,8 +184,7 @@ function useStreamingMessage(
     );
     activeTools.forEach((tool) => {
       const existsInContent = content.some(
-        (c) =>
-          (c.type === "tool_use" || c.type === "tool") && c.toolCallId === tool.id
+        (c) => (c.type === "tool_use" || c.type === "tool") && c.toolCallId === tool.id
       );
       console.log(
         "[useStreamingMessage] Processing tool:",
@@ -238,8 +233,6 @@ export const MessageList = memo(function MessageList({
   onToggleMessageCollapse,
   onToggleThinkingCollapse,
   onToggleToolsCollapse,
-  onDeleteMessage,
-  onRegenerateMessage,
   streamingContent = "",
   streamingThinking = "",
   streamingToolCalls = new Map(),
@@ -273,17 +266,8 @@ export const MessageList = memo(function MessageList({
       onToggleCollapse: () => onToggleMessageCollapse(message.id),
       onToggleThinking: () => onToggleThinkingCollapse(message.id),
       onToggleTools: onToggleToolsCollapse ? () => onToggleToolsCollapse(message.id) : undefined,
-      onDelete: onDeleteMessage ? () => onDeleteMessage(message.id) : undefined,
-      onRegenerate: onRegenerateMessage ? () => onRegenerateMessage(message.id) : undefined,
     }));
-  }, [
-    messages,
-    onToggleMessageCollapse,
-    onToggleThinkingCollapse,
-    onToggleToolsCollapse,
-    onDeleteMessage,
-    onRegenerateMessage,
-  ]);
+  }, [messages, onToggleMessageCollapse, onToggleThinkingCollapse, onToggleToolsCollapse]);
 
   if (messages.length === 0 && !streamingMessageWithContent) {
     return (
@@ -308,8 +292,6 @@ export const MessageList = memo(function MessageList({
           onToggleCollapse={handlers[index].onToggleCollapse}
           onToggleThinking={handlers[index].onToggleThinking}
           onToggleTools={handlers[index].onToggleTools}
-          onDelete={handlers[index].onDelete}
-          onRegenerate={handlers[index].onRegenerate}
         />
       ))}
       {streamingMessageWithContent && (

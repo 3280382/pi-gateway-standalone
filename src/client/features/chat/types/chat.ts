@@ -208,12 +208,9 @@ export interface ChatState {
 
   // Message Actions
   addMessage: (message: Message) => void;
-  updateMessage: (messageId: string, updates: Partial<Message>) => void;
-  deleteMessage: (messageId: string) => void;
   clearMessages: () => void;
   toggleMessageCollapse: (messageId: string) => void;
   toggleThinkingCollapse: (messageId: string) => void;
-  regenerateMessage: (messageId: string) => void;
   loadSession: (sessionPath: string) => Promise<number>;
   reset: () => void;
 }
@@ -235,9 +232,7 @@ export interface ChatController {
   toggleMessageCollapse: (messageId: string) => void;
   toggleThinkingCollapse: (messageId: string) => void;
   toggleToolsCollapse: (messageId: string) => void;
-  deleteMessage: (messageId: string) => void;
   clearMessages: () => void;
-  regenerateMessage: (messageId: string) => void;
 
   // Thinking Display
   setShowThinking: (show: boolean) => void;

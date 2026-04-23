@@ -562,11 +562,8 @@ export const useChatStore = create<
     appendStreamingContent: (text: string) => void;
     appendStreamingThinking: (thinking: string) => void;
     appendToolCallDelta: (id: string, name: string, delta: string) => void;
-    updateMessage: (messageId: string, updates: Partial<Message>) => void;
-    deleteMessage: (messageId: string) => void;
     toggleMessageCollapse: (messageId: string) => void;
     toggleThinkingCollapse: (messageId: string) => void;
-    regenerateMessage: (messageId: string) => void;
     loadSession: (sessionPath: string) => Promise<number>;
   }
 >()(
@@ -1171,11 +1168,6 @@ export const useChatStore = create<
             return 0;
           }
         },
-
-        // Stub methods for compatibility
-        updateMessage: () => {},
-        deleteMessage: () => {},
-        regenerateMessage: () => {},
       }),
       { name: "ChatStore" }
     ),

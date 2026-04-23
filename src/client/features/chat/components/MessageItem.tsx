@@ -27,8 +27,6 @@ interface MessageItemProps {
   onToggleCollapse: () => void;
   onToggleThinking: () => void;
   onToggleTools?: () => void;
-  onDelete?: () => void;
-  onRegenerate?: () => void;
 }
 
 // Content block type (with original index)

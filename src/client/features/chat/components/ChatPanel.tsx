@@ -79,8 +79,6 @@ export function ChatPanel() {
           onToggleMessageCollapse={chatController.toggleMessageCollapse}
           onToggleThinkingCollapse={chatController.toggleThinkingCollapse}
           onToggleToolsCollapse={chatController.toggleToolsCollapse}
-          onDeleteMessage={chatController.deleteMessage}
-          onRegenerateMessage={chatController.regenerateMessage}
           streamingContent={streamingContent}
           streamingThinking={streamingThinking}
           streamingToolCalls={streamingToolCalls}

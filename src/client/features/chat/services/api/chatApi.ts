@@ -203,16 +203,8 @@ export function useChatController(): EnhancedChatController {
       (chatStore as any).toggleToolsCollapse(messageId);
     },
 
-    deleteMessage: (messageId: string) => {
-      chatStore.deleteMessage(messageId);
-    },
-
     clearMessages: () => {
       chatStore.clearMessages();
-    },
-
-    regenerateMessage: (messageId: string) => {
-      chatStore.regenerateMessage(messageId);
     },
 
     // 思考显示
