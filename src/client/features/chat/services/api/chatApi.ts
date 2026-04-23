@@ -929,14 +929,6 @@ export function setupWebSocketListeners(): void {
     }
   });
 
-  // Dir changed handler - 也保存 resourceFiles（切换directories时）
-  websocketService.on("dir_changed", (data: any) => {
-    console.log("[setupWebSocketListeners] dir_changed:", data);
-    if (data?.resourceFiles) {
-      useSessionStore.getState().setResourceFiles(data.resourceFiles);
-    }
-  });
-
   // =========================================================================
   // Heartbeat Events - WebSocket Ping/Pong
   // Client sends ping, server replies with pong
