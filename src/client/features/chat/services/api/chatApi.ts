@@ -20,7 +20,7 @@ import {
   steerChat,
   switchChatSession,
 } from "@/features/chat/services/chatWebSocket";
-import { messageReconstructor } from "@/features/chat/services/messageReconstruction";
+
 import { sessionManager, updateSessionsAndStatus } from "@/features/chat/services/sessionManager";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
@@ -409,15 +409,8 @@ export function setupWebSocketListeners(): void {
     const message = data?.message;
     console.log(`[${ts}] [RECV] message_start: ${message?.role}, id=${message?.id || "new"}`);
 
-    // 记录事件到重建器
-    messageReconstructor.recordEvent("message_start");
-
-    // 重置重建器状态
-    messageReconstructor.reset();
-
     if (message?.role === "assistant") {
       store.createStreamingMessage(message.id);
-      messageReconstructor.startMessage(message.id);
     }
   });
 
@@ -426,24 +419,9 @@ export function setupWebSocketListeners(): void {
     const message = data?.message;
     console.log(`[${ts}] [RECV] message_end: ${message?.role}, id=${message?.id}`);
 
-    // 记录事件到重建器
-    messageReconstructor.recordEvent("message_end");
-
-    // 检查并修复未结束的内容块
-    const fix = messageReconstructor.autoFix();
-    if (fix?.action === "end_pending_blocks") {
-      console.log(`[${ts}] [RECONSTRUCT] Auto-ending ${fix.data.length} pending blocks`);
-      for (const block of fix.data) {
-        store.endContentBlock(block.type, block.index);
-      }
-    }
-
     if (message?.role === "assistant") {
       store.finishStreaming();
     }
-
-    // 结束重建器状态
-    messageReconstructor.endMessage();
   });
 
   // Usage event handler
@@ -492,21 +470,6 @@ export function setupWebSocketListeners(): void {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] text_delta[${data?.index ?? "?"}]`);
 
-    // 容错：检查是否需要自动创建 message_start
-    if (messageReconstructor.shouldCreateMessageStart()) {
-      console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing message_start`);
-      store.createStreamingMessage();
-      messageReconstructor.startMessage();
-    }
-
-    // 容错：检查是否需要自动创建 text_start
-    const index = data?.index ?? 0;
-    if (messageReconstructor.shouldCreateContentBlockStart(index, "text")) {
-      console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing text_start[${index}]`);
-      store.startContentBlock("text", index);
-      messageReconstructor.startContentBlock(index, "text");
-    }
-
     if (data?.text) {
       store.appendStreamingContent(data.text);
     }
@@ -532,21 +495,6 @@ export function setupWebSocketListeners(): void {
   websocketService.on("thinking_delta", (data: { thinking?: string; index?: number }) => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] thinking_delta[${data?.index ?? "?"}]`);
-
-    // 容错：检查是否需要自动创建 message_start
-    if (messageReconstructor.shouldCreateMessageStart()) {
-      console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing message_start`);
-      store.createStreamingMessage();
-      messageReconstructor.startMessage();
-    }
-
-    // 容错：检查是否需要自动创建 thinking_start
-    const thinkingIndex = data?.index ?? 0;
-    if (messageReconstructor.shouldCreateContentBlockStart(thinkingIndex, "thinking")) {
-      console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing thinking_start[${thinkingIndex}]`);
-      store.startContentBlock("thinking", thinkingIndex);
-      messageReconstructor.startContentBlock(thinkingIndex, "thinking");
-    }
 
     if (data?.thinking) {
       store.appendStreamingThinking(data.thinking);
@@ -585,27 +533,6 @@ export function setupWebSocketListeners(): void {
       console.log(
         `[${ts}] [RECV] toolcall_delta[${data?.index ?? "?"}]: ${data?.toolName || "unknown"}`
       );
-
-      // 容错：检查是否需要自动创建 message_start
-      if (messageReconstructor.shouldCreateMessageStart()) {
-        console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing message_start`);
-        store.createStreamingMessage();
-        messageReconstructor.startMessage();
-      }
-
-      // 容错：检查是否需要自动创建 toolcall_start
-      const toolIndex = data?.index ?? 0;
-      if (messageReconstructor.shouldCreateContentBlockStart(toolIndex, "tool_use")) {
-        console.log(`[${ts}] [RECONSTRUCT] Auto-creating missing toolcall_start[${toolIndex}]`);
-        store.startContentBlock("tool_use", toolIndex, {
-          toolCallId: data?.toolCallId,
-          toolName: data?.toolName,
-        });
-        messageReconstructor.startContentBlock(toolIndex, "tool_use", {
-          toolCallId: data?.toolCallId,
-          toolName: data?.toolName,
-        });
-      }
 
       if (data?.toolCallId && data?.toolName) {
         store.appendToolCallDelta(data.toolCallId, data.toolName, data.delta || "");
@@ -911,9 +838,6 @@ export function setupWebSocketListeners(): void {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] session_reconnected:`, data);
 
-    // 重置消息重建器状态，准备接收缓冲消息
-    messageReconstructor.reset();
-
     // 如果 flushedMessages > 0，说明有缓冲消息即将到达
     if (data?.flushedMessages > 0) {
       console.log(`[${ts}] [RECONNECT] Expecting ${data.flushedMessages} buffered messages`);
@@ -1097,19 +1021,23 @@ export function setupWebSocketListeners(): void {
 
   // =========================================================================
   // Heartbeat Events - WebSocket Ping/Pong
+  // Client sends ping, server replies with pong
   // =========================================================================
-  websocketService.on("ping", () => {
-    const ts = new Date().toISOString().split("T")[1].split(".")[0];
-    console.log(`[${ts}] [RECV] ping`);
-    // Update ping time in session store
-    useSessionStore.getState().updateHeartbeatPing();
-  });
-
   websocketService.on("pong", (data: any) => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
-    console.log(`[${ts}] [RECV] pong`, data);
-    // Update pong time and latency in session store
-    useSessionStore.getState().updateHeartbeatPong();
+    const latency = data?.latency || 0;
+    console.log(`[${ts}] [RECV] pong, latency: ${latency}ms`);
+
+    // Update heartbeat status with latency, clear waiting state
+    useSessionStore.setState({
+      heartbeat: {
+        lastPingTime: data?.timestamp || Date.now() - latency,
+        lastPongTime: data?.receivedAt || Date.now(),
+        latency,
+        connectionQuality: latency < 100 ? "excellent" : latency < 500 ? "good" : "poor",
+        isWaiting: false,
+      },
+    });
   });
 
   // Agent end handler - 已在 setupWebSocketListeners 中处理
