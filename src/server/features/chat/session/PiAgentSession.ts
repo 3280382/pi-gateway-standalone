@@ -955,6 +955,24 @@ export class PiAgentSession {
   }
 
   /**
+   * Follow-up (during streaming, delivered after agent finishes)
+   */
+  async followUp(text: string) {
+    if (!this.session) {
+      this.send({ type: "error", error: "Session not initialized" });
+      return;
+    }
+    try {
+      await this.session.followUp(text);
+    } catch (error) {
+      this.send({
+        type: "error",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  /**
    * Abort current operation
    */
   async abort() {
@@ -1605,7 +1623,12 @@ async function loadTemplateFile(templateName: string, workingDir: string): Promi
   const { homedir } = await import("node:os");
 
   const home = process.env.HOME || homedir();
-  const dirs = [join(home, ".pi", "agent", "prompts"), join(workingDir, ".pi", "prompts")];
+  const projectPrompts = join(process.cwd(), "prompts");
+  const dirs = [
+    join(home, ".pi", "agent", "prompts"),
+    join(workingDir, ".pi", "prompts"),
+    projectPrompts,
+  ];
 
   for (const dir of dirs) {
     const path = join(dir, `${templateName}.md`);

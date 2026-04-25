@@ -790,7 +790,6 @@ const DEFAULT_EXCLUDED_DIRS = [
   "bin",
   "obj",
   "vendor", // PHP/Go dependencies
-  "tmp",
   "temp",
 ];
 

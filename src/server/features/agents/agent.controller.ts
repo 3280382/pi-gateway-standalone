@@ -87,6 +87,21 @@ export async function listTemplates(req: Request, res: Response): Promise<void> 
       }
     }
 
+    // Project: src/server/features/agents/prompts/
+    const projectDir = join(process.cwd(), "prompts");
+    if (existsSync(projectDir)) {
+      const files = await readdir(projectDir);
+      for (const file of files) {
+        if (file.endsWith(".md")) {
+          templates.push({
+            name: file.replace(".md", ""),
+            path: join(projectDir, file),
+            source: "project",
+          });
+        }
+      }
+    }
+
     // Optionally read content for a specific template
     const name = req.query.name as string | undefined;
     if (name) {

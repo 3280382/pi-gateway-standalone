@@ -18,9 +18,10 @@ export function extractShortSessionId(sessionFile: string): string {
   const fileName = sessionFile.split("/").pop() || "";
   const withoutExt = fileName.replace(".jsonl", "");
   const parts = withoutExt.split("_");
-  // Get UUID part (last segment after underscore) and take first 8 chars
+  // Get UUID part (last segment after underscore) and take first 12 chars
+  // (was 8 — caused collisions with UUIDv7 timestamp-prefixed IDs)
   const uuidPart = parts[parts.length - 1] || fileName;
-  return uuidPart.slice(0, 8);
+  return uuidPart.slice(0, 12);
 }
 
 /**
