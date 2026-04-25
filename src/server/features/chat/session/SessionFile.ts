@@ -72,7 +72,7 @@ export async function getAllSessions(
       path: s.path,
     }));
     await sessionConfigManager.ensureConfigs(sessionIds, workingDir);
-    const configs = sessionConfigManager.getAllConfigs();
+    const configs = sessionConfigManager.getAllConfigs(workingDir);
 
     return limitedSessions.map((s) => {
       const shortId = extractShortSessionId(s.path);

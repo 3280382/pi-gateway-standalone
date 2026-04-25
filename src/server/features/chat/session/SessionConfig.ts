@@ -1,20 +1,22 @@
 /**
  * Session Config Manager
  *
- * Manages static session configuration in /root/.pi/agent/sessions.json
- * - Stores: workingDir, shortId, fullPath, name, summary
- * - Extracts name/summary from first user prompt in JSONL
- * - Auto-initializes config for new sessions
- * - Provides API for updating session metadata
+ * Stores session configuration per working directory:
+ *   /root/.pi/agent/sessions/{encoded-cwd}/session-config.json
+ *
+ * Each working directory has its own config file, keeping session
+ * metadata co-located with session JSONL files.
  */
 
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { homedir } from "node:os";
 import { Logger, LogLevel } from "../../../lib/utils/logger.js";
 
 const logger = new Logger({ level: LogLevel.INFO });
 
-const CONFIG_PATH = "/root/.pi/agent/sessions.json";
+const SESSIONS_ROOT = join(homedir(), ".pi", "agent", "sessions");
 
 export interface SessionConfig {
   shortId: string;
@@ -24,9 +26,7 @@ export interface SessionConfig {
   summary: string;
   agentId?: string;
   agentName?: string;
-  /** Parent session shortId (null for top-level/main sessions) */
   parentId?: string | null;
-  /** Child session shortIds */
   childIds?: string[];
   createdAt: string;
   updatedAt: string;
@@ -37,67 +37,93 @@ export interface SessionConfigMap {
 }
 
 class SessionConfigManager {
-  private config: SessionConfigMap = {};
-  private initialized = false;
-  private saveTimeout: NodeJS.Timeout | null = null;
+  private configsByDir = new Map<string, SessionConfigMap>();
+  private saveTimers = new Map<string, NodeJS.Timeout>();
 
-  /**
-   * Initialize and load config from disk
-   */
-  async init(): Promise<void> {
-    if (this.initialized) return;
+  /** Encode working dir to safe directory name */
+  private encodeCwd(cwd: string): string {
+    return `--${cwd.replace(/^[/\\]/, "").replace(/[/\\:]/g, "-")}--`;
+  }
 
+  private getConfigPath(workingDir: string): string {
+    return join(SESSIONS_ROOT, this.encodeCwd(workingDir), "session-config.json");
+  }
+
+  /** Load config for a specific working directory */
+  async loadDir(workingDir: string): Promise<SessionConfigMap> {
+    if (this.configsByDir.has(workingDir)) return this.configsByDir.get(workingDir)!;
+
+    const path = this.getConfigPath(workingDir);
     try {
-      if (existsSync(CONFIG_PATH)) {
-        const content = await readFile(CONFIG_PATH, "utf-8");
-        this.config = JSON.parse(content);
-        logger.info(
-          `[SessionConfigManager] Loaded ${Object.keys(this.config).length} session configs`
-        );
-      } else {
-        this.config = {};
-        await this.save();
-        logger.info("[SessionConfigManager] Created new sessions.json");
+      if (existsSync(path)) {
+        const content = await readFile(path, "utf-8");
+        const data = JSON.parse(content) as SessionConfigMap;
+        this.configsByDir.set(workingDir, data);
+        return data;
       }
-      this.initialized = true;
-    } catch (error) {
-      logger.error(`[SessionConfigManager] Failed to init: ${error}`);
-      this.config = {};
-      this.initialized = true;
+    } catch {
+      /* ignore corrupted files */
     }
+
+    const empty: SessionConfigMap = {};
+    this.configsByDir.set(workingDir, empty);
+    return empty;
   }
 
-  /**
-   * Get config for a session
-   */
+  /** Get config for a specific session (searches all loaded dirs) */
   getConfig(shortId: string): SessionConfig | undefined {
-    return this.config[shortId];
-  }
-
-  /**
-   * Get all configs
-   */
-  getAllConfigs(): SessionConfigMap {
-    return { ...this.config };
-  }
-
-  /**
-   * Update session name
-   */
-  async updateName(shortId: string, name: string): Promise<void> {
-    await this.init();
-
-    if (this.config[shortId]) {
-      this.config[shortId].name = name;
-      this.config[shortId].updatedAt = new Date().toISOString();
-      await this.debouncedSave();
-      logger.info(`[SessionConfigManager] Updated name for ${shortId}: ${name}`);
+    for (const configs of this.configsByDir.values()) {
+      if (configs[shortId]) return configs[shortId];
     }
+    return undefined;
   }
 
-  /**
-   * Set agent info for a session config (auto-creates entry if missing)
-   */
+  /** Get all configs for a specific working directory */
+  getAllConfigs(workingDir?: string): SessionConfigMap {
+    if (workingDir) {
+      return { ...(this.configsByDir.get(workingDir) || {}) };
+    }
+    // Merge all dirs (backward compat — only used in handleInit which should switch to per-dir)
+    const merged: SessionConfigMap = {};
+    for (const configs of this.configsByDir.values()) {
+      Object.assign(merged, configs);
+    }
+    return merged;
+  }
+
+  private ensureEntry(
+    dir: string,
+    shortId: string,
+    workingDir: string,
+    fullPath = ""
+  ): SessionConfig {
+    const configs = this.configsByDir.get(dir)!;
+    if (!configs[shortId]) {
+      configs[shortId] = {
+        shortId,
+        fullPath,
+        workingDir,
+        name: "New Session",
+        summary: "",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
+    return configs[shortId];
+  }
+
+  async updateName(shortId: string, name: string, workingDir?: string): Promise<void> {
+    const cfg = this.getConfig(shortId);
+    if (!cfg) return;
+    const wd = workingDir || cfg.workingDir;
+    const dir = this.encodeCwd(wd);
+    await this.loadDir(wd);
+    const entry = this.ensureEntry(dir, shortId, wd, cfg.fullPath);
+    entry.name = name;
+    entry.updatedAt = new Date().toISOString();
+    await this.debouncedSave(wd);
+  }
+
   async setAgent(
     shortId: string,
     agentId: string,
@@ -105,236 +131,162 @@ class SessionConfigManager {
     fullPath?: string,
     workingDir?: string
   ): Promise<void> {
-    await this.init();
-
-    if (!this.config[shortId]) {
-      // Auto-create minimal config entry for new session
-      this.config[shortId] = {
-        shortId,
-        fullPath: fullPath || "",
-        workingDir: workingDir || "",
-        name: "New Session",
-        summary: "",
-        agentId,
-        agentName,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-    } else {
-      this.config[shortId].agentId = agentId;
-      this.config[shortId].agentName = agentName;
-      this.config[shortId].updatedAt = new Date().toISOString();
-    }
-    await this.debouncedSave();
-    logger.info(`[SessionConfigManager] Set agent for ${shortId}: ${agentName}`);
+    const wd = workingDir || this.getConfig(shortId)?.workingDir || process.cwd();
+    const dir = this.encodeCwd(wd);
+    await this.loadDir(wd);
+    const entry = this.ensureEntry(dir, shortId, wd, fullPath || "");
+    entry.agentId = agentId;
+    entry.agentName = agentName;
+    entry.updatedAt = new Date().toISOString();
+    await this.debouncedSave(wd);
   }
 
-  /** Add parent-child relationship */
   async addChild(parentId: string, childId: string): Promise<void> {
-    await this.init();
-    if (this.config[parentId]) {
-      const children = this.config[parentId].childIds || [];
-      if (!children.includes(childId)) {
-        children.push(childId);
-        this.config[parentId].childIds = children;
-        this.config[parentId].updatedAt = new Date().toISOString();
-      }
+    const parentCfg = this.getConfig(parentId);
+    if (!parentCfg) return;
+    const wd = parentCfg.workingDir;
+    const dir = this.encodeCwd(wd);
+    await this.loadDir(wd);
+
+    // Update parent
+    const parent = this.ensureEntry(dir, parentId, wd, parentCfg.fullPath);
+    const children = parent.childIds || [];
+    if (!children.includes(childId)) {
+      children.push(childId);
+      parent.childIds = children;
     }
-    // Auto-create child entry if missing
-    if (!this.config[childId]) {
-      this.config[childId] = {
-        shortId: childId,
-        fullPath: "",
-        workingDir: "",
-        name: "Sub-Agent",
-        summary: "",
-        parentId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-    } else {
-      this.config[childId].parentId = parentId;
-      this.config[childId].updatedAt = new Date().toISOString();
-    }
-    await this.debouncedSave();
+    parent.updatedAt = new Date().toISOString();
+
+    // Create/update child
+    const child = this.ensureEntry(dir, childId, wd);
+    child.parentId = parentId;
+    child.updatedAt = new Date().toISOString();
+
+    await this.debouncedSave(wd);
   }
 
-  /** Get children of a session */
   getChildren(parentId: string): SessionConfig[] {
-    return Object.values(this.config).filter((c) => c.parentId === parentId);
+    for (const [, configs] of this.configsByDir) {
+      const children = Object.values(configs).filter((c) => c.parentId === parentId);
+      if (children.length > 0) return children;
+    }
+    return [];
   }
 
-  /** Get parent of a session */
   getParent(childId: string): SessionConfig | undefined {
-    const child = this.config[childId];
+    const child = this.getConfig(childId);
     if (!child?.parentId) return undefined;
-    return this.config[child.parentId];
+    return this.getConfig(child.parentId);
   }
 
-  /**
-   * Auto-initialize config from session file
-   */
   async autoInitialize(
     shortId: string,
     fullPath: string,
     workingDir: string
   ): Promise<SessionConfig | null> {
-    await this.init();
+    const dir = this.encodeCwd(workingDir);
+    await this.loadDir(workingDir);
+    const configs = this.configsByDir.get(workingDir)!;
+    if (configs[shortId]) return configs[shortId];
 
-    // Already exists - return existing without logging
-    if (this.config[shortId]) {
-      return this.config[shortId];
-    }
-
-    // Extract info from JSONL（只获取summary，不保存firstUserPrompt）
-    const { summary } = await this.extractFromJSONL(fullPath);
-
-    // Generate default name from first prompt
-    const defaultName = this.generateDefaultName(summary);
-
-    const config: SessionConfig = {
+    const summary = await this.extractSummary(fullPath);
+    const name = this.defaultName(summary);
+    configs[shortId] = {
       shortId,
       fullPath,
       workingDir,
-      name: defaultName,
+      name,
       summary,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-
-    this.config[shortId] = config;
-    await this.debouncedSave();
-
-    logger.info(`[SessionConfigManager] Auto-initialized ${shortId}: ${defaultName}`);
-    return config;
+    await this.debouncedSave(workingDir);
+    return configs[shortId];
   }
 
-  /**
-   * Ensure all sessions have config entries
-   * Call this when broadcasting sessions to auto-init any missing sessions
-   */
   async ensureConfigs(
     sessions: Array<{ id: string; path: string }>,
     workingDir: string
   ): Promise<void> {
-    await this.init();
+    const dir = this.encodeCwd(workingDir);
+    await this.loadDir(workingDir);
+    const configs = this.configsByDir.get(workingDir)!;
+    const missing = sessions.filter((s) => !configs[s.id]);
+    if (missing.length === 0) return;
 
-    // Quick check: count missing configs first
-    const missingSessions = sessions.filter((s) => !this.config[s.id]);
-    if (missingSessions.length === 0) {
-      // All sessions already have configs, skip processing
-      return;
-    }
-
-    logger.info(
-      `[SessionConfigManager] Found ${missingSessions.length} new sessions to initialize`
-    );
-
-    let hasNew = false;
-    for (const session of missingSessions) {
-      await this.autoInitialize(session.id, session.path, workingDir);
-      hasNew = true;
-    }
-
-    if (hasNew) {
-      await this.debouncedSave();
+    for (const s of missing) {
+      await this.autoInitialize(s.id, s.path, workingDir);
     }
   }
 
-  /**
-   * Extract summary from JSONL（只读取前几条，避免大文件）
-   * 【性能优化】不返回完整 firstUserPrompt，只返回 summary
-   */
-  private async extractFromJSONL(fullPath: string): Promise<{ summary: string }> {
-    try {
-      if (!existsSync(fullPath)) {
-        return { summary: "" };
-      }
+  // ========== Persistence ==========
 
-      // 【性能优化】只读取文件前 10KB，避免大文件
-      const { readFile } = await import("node:fs/promises");
-      const fd = await import("node:fs");
-      const handle = await fd.promises.open(fullPath, "r");
-      const buffer = Buffer.alloc(10240); // 10KB
-      const { bytesRead } = await handle.read(buffer, 0, 10240, 0);
-      await handle.close();
-
-      const content = buffer.toString("utf-8", 0, bytesRead);
-      const lines = content.split("\n").filter((line) => line.trim());
-
-      for (const line of lines) {
-        try {
-          const entry = JSON.parse(line);
-          // Look for first user message
-          if (entry.type === "message" && entry.message?.role === "user") {
-            const msgContent = entry.message.content;
-            let prompt = "";
-
-            if (Array.isArray(msgContent)) {
-              // Extract text from content array
-              prompt = msgContent
-                .filter((c: any) => c.type === "text")
-                .map((c: any) => c.text)
-                .join(" ");
-            } else if (typeof msgContent === "string") {
-              prompt = msgContent;
-            }
-
-            // Generate summary (first 100 chars)
-            const summary = prompt.slice(0, 100) + (prompt.length > 100 ? "..." : "");
-
-            return { summary };
-          }
-        } catch {}
-      }
-
-      return { summary: "" };
-    } catch (error) {
-      logger.error(`[SessionConfigManager] Failed to extract from ${fullPath}: ${error}`);
-      return { summary: "" };
-    }
-  }
-
-  /**
-   * Generate default name from first prompt
-   */
-  private generateDefaultName(prompt: string): string {
-    if (!prompt) return "New Session";
-
-    // Extract first line or first 30 chars
-    const firstLine = prompt.split("\n")[0].trim();
-    const shortName = firstLine.slice(0, 30) + (firstLine.length > 30 ? "..." : "");
-
-    return shortName || "New Session";
-  }
-
-  /**
-   * Save config to disk (debounced)
-   */
-  private debouncedSave(): Promise<void> {
-    return new Promise((resolve) => {
-      if (this.saveTimeout) {
-        clearTimeout(this.saveTimeout);
-      }
-
-      this.saveTimeout = setTimeout(async () => {
-        await this.save();
-        resolve();
-      }, 500);
+  private async debouncedSave(workingDir: string): Promise<void> {
+    const timerKey = workingDir;
+    if (this.saveTimers.has(timerKey)) clearTimeout(this.saveTimers.get(timerKey)!);
+    return new Promise<void>((resolve) => {
+      this.saveTimers.set(
+        timerKey,
+        setTimeout(async () => {
+          this.saveTimers.delete(timerKey);
+          await this.save(workingDir);
+          resolve();
+        }, 500)
+      );
     });
   }
 
-  /**
-   * Save config to disk immediately
-   */
-  private async save(): Promise<void> {
+  private async save(workingDir: string): Promise<void> {
+    const configs = this.configsByDir.get(workingDir);
+    if (!configs || Object.keys(configs).length === 0) return;
+    const path = this.getConfigPath(workingDir);
     try {
-      await writeFile(CONFIG_PATH, JSON.stringify(this.config, null, 2), "utf-8");
+      mkdirSync(join(path, ".."), { recursive: true });
+      await writeFile(path, JSON.stringify(configs, null, 2), "utf-8");
     } catch (error) {
-      logger.error(`[SessionConfigManager] Failed to save: ${error}`);
+      logger.error(`[SessionConfigManager] Save failed for ${workingDir}: ${error}`);
     }
+  }
+
+  // ========== Helpers ==========
+
+  private async extractSummary(fullPath: string): Promise<string> {
+    try {
+      if (!existsSync(fullPath)) return "";
+      const { open } = await import("node:fs/promises");
+      const handle = await open(fullPath, "r");
+      const buffer = Buffer.alloc(10240);
+      const { bytesRead } = await handle.read(buffer, 0, 10240, 0);
+      await handle.close();
+      const lines = buffer
+        .toString("utf-8", 0, bytesRead)
+        .split("\n")
+        .filter((l) => l.trim());
+      for (const line of lines) {
+        try {
+          const entry = JSON.parse(line);
+          if (entry.type === "message" && entry.message?.role === "user") {
+            const content = entry.message.content;
+            let prompt = "";
+            if (Array.isArray(content)) {
+              prompt = content
+                .filter((c: any) => c.type === "text")
+                .map((c: any) => c.text)
+                .join(" ");
+            } else if (typeof content === "string") prompt = content;
+            return prompt.slice(0, 100) + (prompt.length > 100 ? "..." : "");
+          }
+        } catch {}
+      }
+    } catch {}
+    return "";
+  }
+
+  private defaultName(prompt: string): string {
+    if (!prompt) return "New Session";
+    const firstLine = prompt.split("\n")[0].trim();
+    return firstLine.slice(0, 30) + (firstLine.length > 30 ? "..." : "") || "New Session";
   }
 }
 
-// Singleton instance
 export const sessionConfigManager = new SessionConfigManager();

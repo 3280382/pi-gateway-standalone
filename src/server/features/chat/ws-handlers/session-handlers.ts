@@ -233,7 +233,7 @@ export async function handleListSessions(
       path: s.path,
     }));
     await sessionConfigManager.ensureConfigs(sessionIds, workingDir);
-    const configs = sessionConfigManager.getAllConfigs();
+    const configs = sessionConfigManager.getAllConfigs(workingDir);
 
     const sessionsList = sortedSessions.map((s) => {
       const shortId = extractShortSessionId(s.path);
@@ -275,7 +275,7 @@ export async function handleUpdateSessionConfig(
     return;
   }
   try {
-    if (name !== undefined) await sessionConfigManager.updateName(sessionId, name);
+    if (name !== undefined) await sessionConfigManager.updateName(sessionId, name, ctx.workingDir);
     const workingDir = ctx.workingDir || process.cwd();
     const sessions = await getAllSessions(workingDir, 15);
     serverSessionManager.broadcastToWorkingDir(workingDir, { type: "sessions_list", sessions });
