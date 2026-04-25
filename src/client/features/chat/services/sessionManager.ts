@@ -36,7 +36,7 @@ export interface SwitchDirOptions {
 export interface SessionManagerAPI {
   switchDirectory: (dir: string, options?: SwitchDirOptions) => Promise<void>;
   selectSession: (sessionId: string) => Promise<void>;
-  createNewSession: () => Promise<void>;
+  createNewSession: (workingDir?: string, agentId?: string, sessionName?: string) => Promise<void>;
 }
 
 // ============================================================================
@@ -320,12 +320,21 @@ async function selectSession(sessionId: string): Promise<void> {
  * 轻量级实现：只添加新 session 到Cols表并选中，不重建整个界面
  * 使用覆盖式 loading，不Clear界面直到服务器返回
  */
-async function createNewSession(): Promise<void> {
+async function createNewSession(
+  workingDir?: string,
+  agentId?: string,
+  sessionName?: string
+): Promise<void> {
   const stores = getStores();
+
+  const targetWorkingDir = workingDir || stores.session.workingDir;
 
   // 设置加载状态（覆盖式，不Clear界面）
   stores.sidebar.setLoading(true);
-  console.log("[SessionManager.createNewSession] 开始创建，显示 loading");
+  console.log("[SessionManager.createNewSession] 开始创建，显示 loading", {
+    workingDir: targetWorkingDir,
+    agentId,
+  });
 
   try {
     // 1. 发送创建请求，等待服务器返回新 session 信息
@@ -336,7 +345,7 @@ async function createNewSession(): Promise<void> {
     }>((resolve, reject) => {
       const timeout = setTimeout(() => reject(new Error("创建 session 超时")), 10000);
 
-      createNewChatSession(stores.session.workingDir);
+      createNewChatSession(targetWorkingDir, agentId);
 
       const unsub = websocketService.on("session_created", (data: any) => {
         clearTimeout(timeout);
@@ -368,11 +377,18 @@ async function createNewSession(): Promise<void> {
     stores.sidebar.setSessions(updatedSessions);
     console.log("[SessionManager.createNewSession] 已添加到Cols表:", newSession.path);
 
-    // 4. 选中新 session
+    // 4. 选中新 session 并设置名称
     stores.sidebar.setSelectedSessionId(newSession.id);
     stores.session.setCurrentSession(newSession.id);
     stores.session.setCurrentSessionFile(newSession.path);
     console.log("[SessionManager.createNewSession] 已选中:", newSession.id);
+
+    // 4.5 如果有自定义名称，通过 WebSocket 更新
+    if (sessionName) {
+      const { updateSessionName } = await import("@/features/chat/services/api/sessionConfigApi");
+      updateSessionName(newSession.id, sessionName);
+      console.log("[SessionManager.createNewSession] Set name:", sessionName);
+    }
 
     // 5. Clear聊天消息区域并重置所有状态（新 session 从干净状态开始）
     stores.chat.setMessages([]);

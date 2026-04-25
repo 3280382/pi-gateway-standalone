@@ -75,6 +75,13 @@ export function Footer() {
       {/* Middle: View switch */}
       <div className={styles.centerGroup}>
         <IconButton
+          name="agents"
+          label="Agents"
+          variant={currentView === "agents" ? "primary" : "default"}
+          onClick={() => setCurrentView("agents")}
+          title="Agents"
+        />
+        <IconButton
           name="chat"
           label="Chat"
           variant={currentView === "chat" ? "primary" : "default"}

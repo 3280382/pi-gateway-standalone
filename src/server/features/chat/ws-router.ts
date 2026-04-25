@@ -290,11 +290,13 @@ import {
   handleListModelsWrapped,
   handleModelChangeWrapped,
   handlePromptWrapped,
+  handleReloadWrapped,
   handleSetModelWrapped,
   handleSteerWrapped,
   handleThinkingLevelChangeWrapped,
 } from "./ws-handlers/message-handlers.js";
 import {
+  handleGetSessionInfoWrapped,
   handleInitWrapped,
   handleListSessionsWrapped,
   handleNewSessionWrapped,
@@ -327,9 +329,11 @@ export function registerAllWSHandlers(): void {
   // Session operations (via SDK)
   wsRouter.register("compact_session", handleCompactSessionWrapped);
   wsRouter.register("export_session", handleExportSessionWrapped);
+  wsRouter.register("reload", handleReloadWrapped);
 
   // Session management
   wsRouter.register("init", handleInitWrapped);
+  wsRouter.register("get_session_info", handleGetSessionInfoWrapped);
   wsRouter.register("new_session", handleNewSessionWrapped);
   wsRouter.register("list_sessions", handleListSessionsWrapped);
   wsRouter.register("sidebar_visibility", handleSidebarVisibilityWrapped);

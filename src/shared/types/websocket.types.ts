@@ -37,6 +37,8 @@ export type WebSocketEvent =
   | "session_updated"
   | "session_deleted"
   | "session_loaded"
+  | "session_info"
+  | "session_reconnected"
 
   // System events
   | "initialized"

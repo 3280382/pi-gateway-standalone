@@ -60,6 +60,17 @@ export async function handleExportSession(
 }
 
 // ============================================================================
+// Reload Session Handler
+// ============================================================================
+
+/**
+ * Handle reload message - Reload session resources via SDK
+ */
+export async function handleReload(ctx: WSContext, _payload: unknown): Promise<void> {
+  await ctx.session.reload();
+}
+
+// ============================================================================
 // List Models Handler
 // ============================================================================
 
@@ -228,6 +239,11 @@ export const handleCompactSessionWrapped = createHandler(handleCompactSession, {
 
 export const handleExportSessionWrapped = createHandler(handleExportSession, {
   name: "export_session",
+  requireSession: true,
+});
+
+export const handleReloadWrapped = createHandler(handleReload, {
+  name: "reload",
   requireSession: true,
 });
 

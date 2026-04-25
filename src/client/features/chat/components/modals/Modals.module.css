@@ -477,3 +477,121 @@
     padding: 12px;
   }
 }
+
+.infoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.3);
+}
+.infoRow code {
+  font-size: 11px;
+  color: var(--accent-primary);
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.toolTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.toolTag {
+  font-size: 11px;
+  padding: 2px 8px;
+  background: rgba(88, 166, 255, 0.1);
+  color: var(--accent-primary);
+  border-radius: 4px;
+}
+
+/* ========== Tool Detail Styles ========== */
+.toolDetail {
+  margin-bottom: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.toolDetail summary {
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  background: rgba(48, 54, 61, 0.3);
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolDetail summary::-webkit-details-marker {
+  display: none;
+}
+
+.toolDetail summary::before {
+  content: "▶";
+  font-size: 10px;
+  color: var(--text-muted);
+  transition: transform 0.15s;
+}
+
+.toolDetail[open] summary::before {
+  content: "▼";
+}
+
+.toolSnippet {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.toolBody {
+  padding: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.toolSection {
+  margin-bottom: 14px;
+}
+
+.toolSection:last-child {
+  margin-bottom: 0;
+}
+
+.toolSection h5 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 6px 0;
+}
+
+.toolDescription {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.toolGuidelines {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+.toolGuidelines li {
+  margin-bottom: 2px;
+}

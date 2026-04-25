@@ -22,8 +22,12 @@ export interface SessionConfig {
   workingDir: string;
   name: string;
   summary: string;
-  // 【性能优化】不再保存 firstUserPrompt，避免 sessions.json 文件过大
-  // firstUserPrompt 只在需要时从 JSONL 文件实时读取
+  agentId?: string;
+  agentName?: string;
+  /** Parent session shortId (null for top-level/main sessions) */
+  parentId?: string | null;
+  /** Child session shortIds */
+  childIds?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -89,6 +93,82 @@ class SessionConfigManager {
       await this.debouncedSave();
       logger.info(`[SessionConfigManager] Updated name for ${shortId}: ${name}`);
     }
+  }
+
+  /**
+   * Set agent info for a session config (auto-creates entry if missing)
+   */
+  async setAgent(
+    shortId: string,
+    agentId: string,
+    agentName: string,
+    fullPath?: string,
+    workingDir?: string
+  ): Promise<void> {
+    await this.init();
+
+    if (!this.config[shortId]) {
+      // Auto-create minimal config entry for new session
+      this.config[shortId] = {
+        shortId,
+        fullPath: fullPath || "",
+        workingDir: workingDir || "",
+        name: "New Session",
+        summary: "",
+        agentId,
+        agentName,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    } else {
+      this.config[shortId].agentId = agentId;
+      this.config[shortId].agentName = agentName;
+      this.config[shortId].updatedAt = new Date().toISOString();
+    }
+    await this.debouncedSave();
+    logger.info(`[SessionConfigManager] Set agent for ${shortId}: ${agentName}`);
+  }
+
+  /** Add parent-child relationship */
+  async addChild(parentId: string, childId: string): Promise<void> {
+    await this.init();
+    if (this.config[parentId]) {
+      const children = this.config[parentId].childIds || [];
+      if (!children.includes(childId)) {
+        children.push(childId);
+        this.config[parentId].childIds = children;
+        this.config[parentId].updatedAt = new Date().toISOString();
+      }
+    }
+    // Auto-create child entry if missing
+    if (!this.config[childId]) {
+      this.config[childId] = {
+        shortId: childId,
+        fullPath: "",
+        workingDir: "",
+        name: "Sub-Agent",
+        summary: "",
+        parentId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    } else {
+      this.config[childId].parentId = parentId;
+      this.config[childId].updatedAt = new Date().toISOString();
+    }
+    await this.debouncedSave();
+  }
+
+  /** Get children of a session */
+  getChildren(parentId: string): SessionConfig[] {
+    return Object.values(this.config).filter((c) => c.parentId === parentId);
+  }
+
+  /** Get parent of a session */
+  getParent(childId: string): SessionConfig | undefined {
+    const child = this.config[childId];
+    if (!child?.parentId) return undefined;
+    return this.config[child.parentId];
   }
 
   /**

@@ -11,6 +11,7 @@ import {
   compactSession,
   executeChatCommand,
   exportSession,
+  reloadSession,
   sendChatMessage,
   setChatModel,
   setChatThinkingLevel,
@@ -87,6 +88,7 @@ export interface EnhancedChatController extends ChatController {
   executeCommand: (command: string) => Promise<any>;
   compactSession: (customInstructions?: string) => Promise<any>;
   exportSession: (outputPath?: string) => Promise<any>;
+  reloadSession: () => Promise<any>;
 }
 
 // ============================================================================
@@ -305,6 +307,17 @@ export function useChatController(): EnhancedChatController {
         onSuccess: () => {},
         sendAction: () => exportSession(outputPath),
         timeoutMs: 30000, // 30 seconds for export
+      });
+    },
+
+    // Reload session resources (skills, extensions, prompts, etc.)
+    reloadSession: async () => {
+      return createPromiseWithTimeout({
+        timeoutMessage: "Reload session 超时",
+        eventName: "reload_result",
+        onSuccess: () => {},
+        sendAction: () => reloadSession(),
+        timeoutMs: 15000,
       });
     },
   };

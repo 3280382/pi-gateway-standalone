@@ -12,6 +12,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useInputArea } from "@/features/chat/hooks/useInputArea";
 import { useModalStore } from "@/features/chat/stores/modalStore";
+import { NewSessionModal } from "@/features/chat/components/modals/NewSessionModal";
+import { sessionManager } from "@/features/chat/services/sessionManager";
 import styles from "./InputArea.module.css";
 
 // ===== [ANCHOR:TYPES] =====
@@ -37,6 +39,7 @@ interface InputAreaProps {
   // Session operations
   onCompactSession?: () => void;
   onExportSession?: () => void;
+  onReload?: () => void;
   // Template insertion
   onInsertTemplate?: () => void;
   // Auto scroll related
@@ -60,6 +63,7 @@ export function InputArea({
   onNewSession,
   onCompactSession,
   onExportSession,
+  onReload,
   // Template insertion
   onInsertTemplate,
   // Auto scroll related
@@ -85,7 +89,8 @@ export function InputArea({
   });
 
   // ===== [ANCHOR:MENU_STATE] =====
-  const [showToolsMenu, setShowToolsMenu] = useState(false);
+  const [showSlashMenu, setShowSlashMenu] = useState(false);
+  const [showNewSessionModal, setShowNewSessionModal] = useState(false);
 
   // ===== [ANCHOR:EFFECTS] =====
   useEffect(() => {
@@ -120,7 +125,7 @@ export function InputArea({
       />
 
       {/* Tools Menu - Replace Slash Commands */}
-      {showToolsMenu && (
+      {showSlashMenu && (
         <div className={styles.commandMenu}>
           {onCompactSession && (
             <button
@@ -128,7 +133,7 @@ export function InputArea({
               className={styles.commandItem}
               onClick={() => {
                 Promise.resolve(onCompactSession()).catch(console.error);
-                setShowToolsMenu(false);
+                setShowSlashMenu(false);
               }}
             >
               <span className={styles.commandIcon}>⚡</span>
@@ -141,11 +146,24 @@ export function InputArea({
               className={styles.commandItem}
               onClick={() => {
                 Promise.resolve(onExportSession()).catch(console.error);
-                setShowToolsMenu(false);
+                setShowSlashMenu(false);
               }}
             >
               <span className={styles.commandIcon}>📦</span>
               <span className={styles.commandName}>export</span>
+            </button>
+          )}
+          {onReload && (
+            <button
+              type="button"
+              className={styles.commandItem}
+              onClick={() => {
+                Promise.resolve(onReload()).catch(console.error);
+                setShowSlashMenu(false);
+              }}
+            >
+              <span className={styles.commandIcon}>🔄</span>
+              <span className={styles.commandName}>reload</span>
             </button>
           )}
         </div>
@@ -262,7 +280,7 @@ export function InputArea({
 
       {/* Toolbar */}
       <div className={styles.toolbar}>
-        <SystemPromptButton isStreaming={isStreaming} />
+        <SessionInfoButton isStreaming={isStreaming} />
         <button
           type="button"
           className={styles.toolbarBtn}
@@ -275,7 +293,7 @@ export function InputArea({
         <button
           type="button"
           className={styles.toolbarBtn}
-          onClick={() => setShowToolsMenu(!showToolsMenu)}
+          onClick={() => setShowSlashMenu(!showSlashMenu)}
           title="Slash command (/)"
           disabled={isStreaming}
         >
@@ -326,17 +344,36 @@ export function InputArea({
           </button>
         )}
 
-        {/* New Session button - place at bottom right，与其他toolbar按钮同Width */}
+        {/* New Session button - shows popup modal */}
         {onNewSession && (
-          <button
-            type="button"
-            className={`${styles.toolbarBtn} ${styles.newSessionBtn}`}
-            onClick={onNewSession}
-            title="New Session"
-            disabled={isStreaming}
-          >
-            <PlusIcon />
-          </button>
+          <>
+            <button
+              type="button"
+              className={`${styles.toolbarBtn} ${styles.newSessionBtn}`}
+              onClick={() => setShowNewSessionModal(true)}
+              title="New Session"
+              disabled={isStreaming}
+            >
+              <PlusIcon />
+            </button>
+            {showNewSessionModal && (
+              <NewSessionModal
+                onClose={() => setShowNewSessionModal(false)}
+                onDefaultNew={() => onNewSession()}
+                onCustomNew={async (agentId, workingDir, sessionName) => {
+                  try {
+                    await sessionManager.createNewSession(
+                      workingDir,
+                      agentId,
+                      sessionName || undefined
+                    );
+                  } catch (err) {
+                    console.error("[InputArea] Custom new session failed:", err);
+                  }
+                }}
+              />
+            )}
+          </>
         )}
       </div>
     </div>
@@ -433,15 +470,15 @@ function ScrollIcon({ active = true }: { active?: boolean }) {
 
 // ===== [ANCHOR:SUB_COMPONENTS] =====
 
-function SystemPromptButton({ isStreaming }: { isStreaming: boolean }) {
-  const openSystemPrompt = useModalStore((state) => state.openSystemPrompt);
+function SessionInfoButton({ isStreaming }: { isStreaming: boolean }) {
+  const openSessionInfo = useModalStore((state) => state.openSessionInfo);
 
   return (
     <button
       type="button"
       className={styles.toolbarBtn}
-      onClick={() => openSystemPrompt()}
-      title="System Prompt"
+      onClick={() => openSessionInfo()}
+      title="Session Info"
       disabled={isStreaming}
     >
       <DocumentIcon />

@@ -68,6 +68,7 @@ export type WebSocketEvent =
   | "command_result"
   | "compact_result"
   | "export_result"
+  | "reload_result"
   | "templates_list"
   | "template_content"
   // Session Status Events
@@ -421,10 +422,13 @@ export class WebSocketService {
       command_result: "command_result",
       compact_result: "compact_result",
       export_result: "export_result",
+      reload_result: "reload_result",
       // Session Status
       runtime_status_broadcast: "runtime_status_broadcast",
       session_status: "session_status",
       // Reconnection
+      session_loaded: "session_loaded",
+      session_info: "session_info",
       session_reconnected: "session_reconnected",
       // System
       process_tree_data: "process_tree_data",

@@ -46,8 +46,9 @@ export function abortChatGeneration(): boolean {
 export function initChatWorkingDirectory(
   path?: string,
   sessionFile?: string,
-  timeoutMs = 10000, // 增加到 10 秒，因为初始化可能需要加载模型和files系统
-  messageLimit?: number
+  timeoutMs = 10000, // 增加到 10 秒，因为初始化可能需要加载模型和file系统
+  messageLimit?: number,
+  agentId?: string
 ): Promise<any> {
   return new Promise((resolve, reject) => {
     // 设置一次性监听器等待 initialized 响应
@@ -72,10 +73,16 @@ export function initChatWorkingDirectory(
     }, timeoutMs);
 
     // Send init message
-    const payload: { workingDir?: string; sessionFile?: string; messageLimit?: number } = {};
+    const payload: {
+      workingDir?: string;
+      sessionFile?: string;
+      messageLimit?: number;
+      agentId?: string;
+    } = {};
     if (path) payload.workingDir = path;
     if (sessionFile) payload.sessionFile = sessionFile;
     if (messageLimit !== undefined) payload.messageLimit = messageLimit;
+    if (agentId) payload.agentId = agentId;
 
     const sent = websocketService.send("init", payload);
 
@@ -116,6 +123,13 @@ export function exportSession(outputPath?: string): boolean {
 }
 
 /**
+ * Reload session resources（对应后端的 reload 类型）
+ */
+export function reloadSession(): boolean {
+  return websocketService.send("reload");
+}
+
+/**
  * Cols出会话（对应后端的 list_sessions 类型）
  */
 export function listChatSessions(cwd: string): boolean {
@@ -148,6 +162,6 @@ export function setChatThinkingLevel(level: string): boolean {
 /**
  * 创建新 session
  */
-export function createNewChatSession(workingDir?: string): boolean {
-  return websocketService.send("new_session", { workingDir });
+export function createNewChatSession(workingDir?: string, agentId?: string): boolean {
+  return websocketService.send("new_session", { workingDir, agentId });
 }

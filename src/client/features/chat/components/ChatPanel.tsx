@@ -101,6 +101,7 @@ export function ChatPanel() {
           onNewSession={chatPanel.handleNewSession}
           onCompactSession={chatController.compactSession}
           onExportSession={chatController.exportSession}
+          onReload={chatController.reloadSession}
           // Auto scroll related
           shouldScrollToBottom={chatPanel.shouldScrollToBottom}
           onToggleScroll={() => chatPanel.setShouldScrollToBottom(!chatPanel.shouldScrollToBottom)}

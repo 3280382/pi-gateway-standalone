@@ -6,6 +6,8 @@
 import { WebSocket } from "ws";
 import type { LlmLogManager } from "../llm/log-manager.js";
 import { PiAgentSession } from "./PiAgentSession.js";
+import type { AgentConfig } from "@shared/types/agent.types.js";
+import { sessionConfigManager } from "./SessionConfig.js";
 
 /**
  * Extract short session ID from session file path (fixed 8 characters)
@@ -39,24 +41,19 @@ export type SessionStatus =
  * Session entry in the server-level registry
  */
 interface SessionEntry {
-  /** Session instance */
   session: PiAgentSession;
-  /** Short session ID (extracted from sessionFile) */
   shortId: string;
-  /** Current working directory */
   workingDir: string;
-  /** Current session file path */
   sessionFile: string;
-  /** Connected WebSocket client */
   client: WebSocket;
-  /** Last activity timestamp */
   lastActivity: Date;
-  /** Current runtime status */
   runtimeStatus: SessionStatus;
-  /** Whether client's sidebar is visible (for optimizing broadcasts) */
   sidebarVisible?: boolean;
-  /** Last broadcasted status (for detecting changes) */
   lastBroadcastedStatus?: SessionStatus;
+  /** Parent session shortId (for sub-agent tracking) */
+  parentId?: string;
+  /** Child session shortIds */
+  childIds?: string[];
 }
 
 /**
@@ -230,7 +227,8 @@ export class ServerSessionManager {
   async getOrCreateSession(
     workingDir: string,
     client: WebSocket,
-    sessionFile?: string
+    sessionFile?: string,
+    agentConfig?: AgentConfig
   ): Promise<PiAgentSession> {
     const actualSessionFile = sessionFile || (await this.findMostRecentSessionFile(workingDir));
     const shortId = this.getShortId(actualSessionFile);
@@ -244,7 +242,7 @@ export class ServerSessionManager {
       return this.reuseSession(existing, client, shortId, workingDir);
     }
 
-    return this.createSession(workingDir, client, actualSessionFile, shortId);
+    return this.createSession(workingDir, client, actualSessionFile, shortId, agentConfig);
   }
 
   private reuseSession(
@@ -279,7 +277,8 @@ export class ServerSessionManager {
     workingDir: string,
     client: WebSocket,
     sessionFile: string,
-    shortId: string
+    shortId: string,
+    agentConfig?: AgentConfig
   ): Promise<PiAgentSession> {
     console.log(`[ServerSessionManager] Creating session: ${shortId}`);
 
@@ -288,7 +287,7 @@ export class ServerSessionManager {
     }
 
     const session = new PiAgentSession(client, this.llmLogManager);
-    await session.initialize(workingDir, sessionFile);
+    await session.initialize(workingDir, sessionFile, agentConfig);
 
     this.registerSession(session, shortId, workingDir, sessionFile, client);
     this.setupCallbacks(session);
@@ -591,6 +590,35 @@ export class ServerSessionManager {
   }
 
   /**
+   * Register parent-child relationship (in-memory + persist)
+   */
+  registerChild(parentId: string, childId: string): void {
+    const parent = this.sessions.get(parentId);
+    const child = this.sessions.get(childId);
+    if (parent) {
+      parent.childIds = parent.childIds || [];
+      if (!parent.childIds.includes(childId)) parent.childIds.push(childId);
+    }
+    if (child) child.parentId = parentId;
+    // Also persist via sessionConfigManager
+    sessionConfigManager.addChild(parentId, childId).catch(() => {});
+  }
+
+  /** Get children of a session (in-memory, fast) */
+  getChildren(parentId: string): SessionEntry[] {
+    const parent = this.sessions.get(parentId);
+    if (!parent?.childIds?.length) return [];
+    return parent.childIds.map((id) => this.sessions.get(id)!).filter(Boolean);
+  }
+
+  /** Get parent of a session */
+  getParentEntry(childId: string): SessionEntry | undefined {
+    const child = this.sessions.get(childId);
+    if (!child?.parentId) return undefined;
+    return this.sessions.get(child.parentId);
+  }
+
+  /**
    * Broadcast a message to all clients in a working directory
    */
   broadcastToWorkingDir(workingDir: string, message: any): void {
@@ -619,7 +647,8 @@ export class ServerSessionManager {
     workingDir: string,
     client: WebSocket,
     session: PiAgentSession,
-    sessionFile: string
+    sessionFile: string,
+    parentId?: string
   ): void {
     const shortId = this.getShortId(sessionFile);
     console.log(`[ServerSessionManager] Registering new session: shortId=${shortId}`);
@@ -633,7 +662,17 @@ export class ServerSessionManager {
       client,
       lastActivity: new Date(),
       runtimeStatus: "idle",
+      parentId,
     });
+
+    // If this is a child, register with parent
+    if (parentId) {
+      const parent = this.sessions.get(parentId);
+      if (parent) {
+        parent.childIds = parent.childIds || [];
+        if (!parent.childIds.includes(shortId)) parent.childIds.push(shortId);
+      }
+    }
 
     // Update lookup maps
     this.sessionFileToShortId.set(sessionFile, shortId);

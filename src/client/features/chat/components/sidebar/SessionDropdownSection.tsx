@@ -161,7 +161,7 @@ function SessionRow({ session, isSelected, status, onSelect }: SessionRowProps) 
         </div>
       </div>
 
-      {/* Row 2: Name (editable) and Summary */}
+      {/* Row 2: Name (editable) and Agent Name */}
       <div className={styles.sessionRowSecondary}>
         {isEditing ? (
           <input
@@ -175,7 +175,14 @@ function SessionRow({ session, isSelected, status, onSelect }: SessionRowProps) 
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <span className={styles.sessionName}>{session.name || "Untitled"}</span>
+          <>
+            <span className={styles.sessionName}>{session.name || "Untitled"}</span>
+            {session.agentName && (
+              <span className={styles.agentTag} title={`Agent: ${session.agentName}`}>
+                🤖 {session.agentName}
+              </span>
+            )}
+          </>
         )}
         <span
           className={styles.editIcon}

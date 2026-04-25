@@ -1,4 +1,4 @@
 export { LlmLogModal } from "./LlmLogModal";
 export { ModelSelectorModal } from "./ModelSelectorModal";
-export { SystemPromptModal } from "./SystemPromptModal";
+export { SessionInfoModal } from "./SessionInfoModal";
 export { ThinkingLevelModal } from "./ThinkingLevelModal";

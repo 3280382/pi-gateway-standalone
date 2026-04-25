@@ -4,9 +4,11 @@
  */
 
 import type { Application } from "express";
+import { registerAgentsHTTPRoutes } from "../features/agents/http-routes.js";
 import { registerChatHTTPRoutes } from "../features/chat/http-routes.js";
 import type { LlmLogManager } from "../features/chat/llm/log-manager.js";
 import { registerFilesHTTPRoutes } from "../features/files/http-routes.js";
+import { registerOrchestrationHTTPRoutes } from "../features/orchestration/http-routes.js";
 import { registerWorkspaceHTTPRoutes } from "../features/workspace/http-routes.js";
 
 /**
@@ -22,8 +24,10 @@ export async function registerRoutes(
 ): Promise<void> {
   // Register routes for each Feature in parallel
   await Promise.all([
+    registerAgentsHTTPRoutes(app),
     registerChatHTTPRoutes(app, llmLogManager, serverStartTime),
     registerFilesHTTPRoutes(app),
+    registerOrchestrationHTTPRoutes(app),
     registerWorkspaceHTTPRoutes(app),
   ]);
 

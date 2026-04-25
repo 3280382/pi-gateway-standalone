@@ -6,7 +6,7 @@ import { create } from "zustand";
 
 export interface ModalState {
   // 系统提示
-  isSystemPromptOpen: boolean;
+  isSessionInfoOpen: boolean;
   // LLM logs
   isLlmLogOpen: boolean;
   // 模型选择器
@@ -25,8 +25,8 @@ export interface ModalState {
 
 interface ModalActions {
   // 系统提示
-  openSystemPrompt: () => void;
-  closeSystemPrompt: () => void;
+  openSessionInfo: () => void;
+  closeSessionInfo: () => void;
   // LLM logs
   openLlmLog: () => void;
   closeLlmLog: () => void;
@@ -51,7 +51,7 @@ interface ModalActions {
 
 export const useModalStore = create<ModalState & ModalActions>()((set) => ({
   // Initial state
-  isSystemPromptOpen: false,
+  isSessionInfoOpen: false,
   isLlmLogOpen: false,
   isModelSelectorOpen: false,
   isThinkingLevelOpen: false,
@@ -60,9 +60,9 @@ export const useModalStore = create<ModalState & ModalActions>()((set) => ({
   isFilterPanelOpen: false,
   isTemplateModalOpen: false,
 
-  // 系统提示
-  openSystemPrompt: () => set({ isSystemPromptOpen: true }),
-  closeSystemPrompt: () => set({ isSystemPromptOpen: false }),
+  // Session info
+  openSessionInfo: () => set({ isSessionInfoOpen: true }),
+  closeSessionInfo: () => set({ isSessionInfoOpen: false }),
 
   // LLM logs
   openLlmLog: () => set({ isLlmLogOpen: true }),
@@ -91,7 +91,7 @@ export const useModalStore = create<ModalState & ModalActions>()((set) => ({
   // Close所有
   closeAll: () =>
     set({
-      isSystemPromptOpen: false,
+      isSessionInfoOpen: false,
       isLlmLogOpen: false,
       isModelSelectorOpen: false,
       isThinkingLevelOpen: false,

@@ -9,7 +9,7 @@ import { useCallback } from "react";
 import styles from "@/features/chat/ChatLayout.module.css";
 import { ChatPanel } from "@/features/chat/components/ChatPanel";
 import { AppHeader } from "@/features/chat/components/Header";
-import { SystemPromptModal } from "@/features/chat/components/modals/SystemPromptModal";
+import { SessionInfoModal } from "@/features/chat/components/modals/SessionInfoModal";
 import { LlmLogPanel } from "@/features/chat/components/panels/LlmLogPanel";
 import { SidebarPanel } from "@/features/chat/components/sidebar/SidebarPanel";
 import { useChatInit } from "@/features/chat/hooks";
@@ -98,7 +98,7 @@ export function ChatPage() {
       </div>
 
       {/* Modals */}
-      <SystemPromptModal />
+      <SessionInfoModal />
     </>
   );
 }

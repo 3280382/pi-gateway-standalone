@@ -21,6 +21,8 @@ export interface Session {
   firstMessage?: string;
   status?: string; // Runtime status: idle/thinking/tooling/streaming/waiting/error/retrying/compacting
   hasClient?: boolean;
+  agentId?: string | null;
+  agentName?: string | null;
 }
 
 export type Theme = "dark" | "light";

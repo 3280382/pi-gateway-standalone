@@ -1263,6 +1263,19 @@
   color: #58a6ff;
 }
 
+.agentTag {
+  font-size: 10px;
+  color: #58a6ff;
+  background: rgba(88, 166, 255, 0.08);
+  padding: 1px 6px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .editIcon {
   font-size: 11px;
   color: #6e7681;

@@ -11,7 +11,7 @@ import { APP_GLOBAL_PERSIST, APP_STORAGE_KEYS, APP_STORAGE_VERSION } from "./per
 
 // ===== [ANCHOR:TYPES] =====
 
-export type ViewType = "chat" | "files";
+export type ViewType = "chat" | "files" | "agents";
 export type BottomPanelType = "terminal" | "preview" | null;
 export type Theme = "dark" | "light";
 export type FontSize = "tiny" | "small" | "medium" | "large";

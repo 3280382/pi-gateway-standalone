@@ -23,13 +23,24 @@ import {
   AuthStorage,
   createAgentSession,
   createCodingTools,
+  createReadOnlyTools,
   DefaultResourceLoader,
   ModelRegistry,
   SessionManager,
   SettingsManager,
+  createReadTool,
+  createBashTool,
+  createEditTool,
+  createWriteTool,
+  createGrepTool,
+  createFindTool,
+  createLsTool,
 } from "@mariozechner/pi-coding-agent";
 import { WebSocket } from "ws";
 import type { LlmLogManager } from "../llm/log-manager.js";
+import type { AgentConfig } from "@shared/types/agent.types.js";
+import { createAgentTool } from "../../agents/agent-tool.js";
+
 import { extractShortSessionId, serverSessionManager } from "./SessionRegistry.js";
 import { AGENT_DIR, getLocalSessionsDir } from "./utils.js";
 
@@ -168,9 +179,10 @@ export class PiAgentSession {
    *
    * @param workingDir Working directory
    * @param sessionFile Optional specific session file to open/create
+   * @param agentConfig Optional agent configuration for custom system prompt and model
    * @returns Session information
    */
-  async initialize(workingDir: string, sessionFile?: string) {
+  async initialize(workingDir: string, sessionFile?: string, agentConfig?: AgentConfig) {
     console.log(`[PiAgentSession.initialize] ========== START ==========`);
     console.log(
       `[PiAgentSession.initialize] Input: workingDir="${workingDir}", sessionFile="${sessionFile || "auto"}"`
@@ -253,11 +265,90 @@ export class PiAgentSession {
       sessionManager = SessionManager.create(workingDir, localSessionsDir);
     }
 
-    const loader = new DefaultResourceLoader({
+    // Build DefaultResourceLoader options from agent config
+    const loaderOpts: Record<string, unknown> = {
       cwd: workingDir,
       agentDir: AGENT_DIR,
       settingsManager: this.settingsManager,
-    });
+    };
+
+    if (agentConfig) {
+      // --- System Prompt ---
+      if (!agentConfig.systemPromptUseDefault && agentConfig.systemPromptTemplate) {
+        const content = await loadTemplateFile(agentConfig.systemPromptTemplate, workingDir);
+        if (content) {
+          // systemPromptOverride: (baseSystemPrompt: string) => string
+          loaderOpts.systemPromptOverride = (_base: string) => content;
+          console.log(
+            `[Gateway] System prompt override: template=${agentConfig.systemPromptTemplate}`
+          );
+        }
+      } else if (agentConfig.systemPromptUseDefault) {
+        console.log(`[Gateway] System prompt: using default discovery`);
+      }
+
+      // --- Append Prompt ---
+      if (!agentConfig.appendPromptUseDefault && agentConfig.appendPromptTemplate) {
+        const content = await loadTemplateFile(agentConfig.appendPromptTemplate, workingDir);
+        if (content) {
+          // appendSystemPromptOverride: (base: string[]) => string[]
+          loaderOpts.appendSystemPromptOverride = (base: string[]) => [...base, content];
+          console.log(
+            `[Gateway] Append prompt override: template=${agentConfig.appendPromptTemplate}`
+          );
+        }
+      } else if (agentConfig.appendPromptUseDefault) {
+        console.log(`[Gateway] Append prompt: using default discovery`);
+      }
+
+      // --- Extra Context (AGENTS.md) ---
+      if (!agentConfig.contextUseDefault && agentConfig.contextTemplate) {
+        const content = await loadTemplateFile(agentConfig.contextTemplate, workingDir);
+        if (content) {
+          // agentsFilesOverride: (current: { agentsFiles: Array<{path:string, content:string}> }) => { agentsFiles: [...] }
+          loaderOpts.agentsFilesOverride = (current: {
+            agentsFiles: Array<{ path: string; content: string }>;
+          }) => ({
+            agentsFiles: [
+              ...current.agentsFiles,
+              { path: `/virtual/agent-${agentConfig.contextTemplate}.md`, content },
+            ],
+          });
+          console.log(`[Gateway] Context override: template=${agentConfig.contextTemplate}`);
+        }
+      } else if (agentConfig.contextUseDefault) {
+        console.log(`[Gateway] Context: using default AGENTS.md discovery`);
+      }
+
+      // --- Skills ---
+      if (agentConfig.skillNames?.length) {
+        loaderOpts.skillsOverride = (current: {
+          skills: Array<{ name: string; description: string; filePath: string; baseDir: string }>;
+          diagnostics: unknown[];
+        }) => {
+          const filtered = current.skills.filter((s) => agentConfig.skillNames!.includes(s.name));
+          console.log(
+            `[Gateway] Skills filter: ${agentConfig.skillNames} -> ${filtered.length}/${current.skills.length}`
+          );
+          return { skills: filtered, diagnostics: current.diagnostics };
+        };
+      }
+
+      // --- Prompt Templates (slash commands) ---
+      if (agentConfig.promptTemplateNames?.length) {
+        loaderOpts.promptsOverride = (current: {
+          prompts: Array<{ name: string; description: string; content: string; source: string }>;
+          diagnostics: unknown[];
+        }) => {
+          const filtered = current.prompts.filter((p) =>
+            agentConfig.promptTemplateNames!.includes(p.name)
+          );
+          return { prompts: filtered, diagnostics: current.diagnostics };
+        };
+      }
+    }
+
+    const loader = new DefaultResourceLoader(loaderOpts as any);
     await loader.reload();
 
     // Log loaded resources for debugging
@@ -273,44 +364,78 @@ export class PiAgentSession {
       console.log(`[Gateway] Append system prompt: ${appendSystemPrompt.length} files`);
     }
 
-    const { session } = await createAgentSession({
+    // Resolve tools from agent config or use default coding tools
+    const selectedTools = agentConfig?.tools?.length
+      ? resolveTools(agentConfig.tools, workingDir)
+      : createCodingTools(workingDir);
+    console.log(`[Gateway] Tools: ${selectedTools.map((t: any) => t.name).join(", ")}`);
+
+    // Extract shortId before creating tool (tool needs it in closure via sessionManager)
+    const sessionShortId = extractShortSessionId((sessionManager as any).getSessionFile?.() || "");
+
+    const { session: agentSession } = await createAgentSession({
       cwd: workingDir,
       agentDir: AGENT_DIR,
       authStorage: this.authStorage,
       modelRegistry: this.modelRegistry,
       settingsManager: this.settingsManager,
       sessionManager,
-      tools: createCodingTools(workingDir),
+      tools: selectedTools,
       resourceLoader: loader,
+      customTools: [createAgentTool(this.llmLogManager, sessionShortId)],
     });
 
-    this.session = session;
+    this.session = agentSession;
     this.setupEventHandlers();
-
-    // Set short ID from session file
-    this.shortId = extractShortSessionId(session.sessionFile ?? "");
+    this.shortId = sessionShortId;
     this.updateRuntimeStatus("idle");
 
     console.log(
-      `[Gateway] Session created: shortId=${this.shortId}, sessionId=${session.sessionId}, sessionFile=${session.sessionFile}`
+      `[Gateway] Session created: shortId=${this.shortId}, sessionId=${agentSession.sessionId}, sessionFile=${agentSession.sessionFile}`
     );
 
     // Check if session has model setting, if not set default model
-    if (!session.model) {
-      const defaultModel = this.modelRegistry.find("deepseek", "deepseek-chat");
-      if (defaultModel) {
-        await session.setModel(defaultModel);
-        console.log(`[Gateway] Default model set to: ${defaultModel.id}`);
+    if (!agentSession.model) {
+      if (agentConfig?.defaultProvider && agentConfig?.defaultModel) {
+        const agentModel = this.modelRegistry.find(
+          agentConfig.defaultProvider,
+          agentConfig.defaultModel
+        );
+        if (agentModel) {
+          await agentSession.setModel(agentModel);
+          console.log(`[Gateway] Agent model set to: ${agentModel.id}`);
+        } else {
+          console.log(
+            `[Gateway] Agent model not found: ${agentConfig.defaultProvider}/${agentConfig.defaultModel}`
+          );
+          const defaultModel = this.modelRegistry.find("deepseek", "deepseek-chat");
+          if (defaultModel) {
+            await agentSession.setModel(defaultModel);
+            console.log(`[Gateway] Default model set to: ${defaultModel.id}`);
+          }
+        }
+      } else {
+        const defaultModel = this.modelRegistry.find("deepseek", "deepseek-chat");
+        if (defaultModel) {
+          await agentSession.setModel(defaultModel);
+          console.log(`[Gateway] Default model set to: ${defaultModel.id}`);
+        }
       }
     } else {
-      console.log(`[Gateway] Using session saved model: ${session.model.id}`);
+      console.log(`[Gateway] Using session saved model: ${agentSession.model.id}`);
+    }
+
+    // Set agent thinking level if provided
+    if (agentConfig?.thinkingLevel && agentConfig.thinkingLevel !== agentSession.thinkingLevel) {
+      agentSession.setThinkingLevel(agentConfig.thinkingLevel);
+      console.log(`[Gateway] Agent thinking level set to: ${agentConfig.thinkingLevel}`);
     }
 
     // Set LLM log file for this session
     console.log(
-      `[Gateway] Calling setLogFile with sessionFile=${session.sessionFile}, sessionId=${session.sessionId}`
+      `[Gateway] Calling setLogFile with sessionFile=${agentSession.sessionFile}, sessionId=${agentSession.sessionId}`
     );
-    this.llmLogManager.setLogFile(session.sessionFile, session.sessionId);
+    this.llmLogManager.setLogFile(agentSession.sessionFile, agentSession.sessionId);
     console.log(
       `[Gateway] LLM log: ${this.llmLogManager.getLogFilePath() || "disabled (memory session)"}`
     );
@@ -336,6 +461,7 @@ export class PiAgentSession {
       agentsFiles: agentsFiles.map((f: any) => ({
         path: f.path,
         exists: existsSync(f.path),
+        content: f.content || "",
       })),
       // Settings file
       settings: {
@@ -349,8 +475,8 @@ export class PiAgentSession {
       },
       // Session file
       session: {
-        path: session.sessionFile,
-        exists: session.sessionFile ? existsSync(session.sessionFile) : false,
+        path: agentSession.sessionFile,
+        exists: agentSession.sessionFile ? existsSync(agentSession.sessionFile) : false,
       },
       // Model registry
       models: {
@@ -363,7 +489,8 @@ export class PiAgentSession {
         project: join(workingDir, ".pi", "skills"),
         loaded: skills.map((s: any) => ({
           name: s.name,
-          path: s.path || "builtin",
+          description: s.description || "",
+          path: s.filePath || s.path || "builtin",
         })),
       },
       // Prompt templates directory
@@ -378,25 +505,32 @@ export class PiAgentSession {
     // Debug: check if paths are consistent
     const expectedDir = getLocalSessionsDir(workingDir);
     console.log(`[Gateway] Expected sessions directory: ${expectedDir}`);
-    console.log(`[Gateway] Actual sessionFile: ${session.sessionFile}`);
-    if (session.sessionFile && !session.sessionFile.startsWith(expectedDir)) {
+    console.log(`[Gateway] Actual sessionFile: ${agentSession.sessionFile}`);
+    if (agentSession.sessionFile && !agentSession.sessionFile.startsWith(expectedDir)) {
       console.warn(
-        `[Gateway] Path mismatch! Expected prefix: ${expectedDir}, actual: ${session.sessionFile}`
+        `[Gateway] Path mismatch! Expected prefix: ${expectedDir}, actual: ${agentSession.sessionFile}`
       );
     }
     console.log(
       `[Gateway] sessionFile exists:`,
-      session.sessionFile ? existsSync(session.sessionFile) : false
+      agentSession.sessionFile ? existsSync(agentSession.sessionFile) : false
     );
 
+    // Store resourceFiles and agent info for live session info retrieval
+    (this as any)._resourceFiles = resourceFiles;
+    (this as any)._agentName = agentConfig?.name || null;
+    (this as any)._agentId = agentConfig?.id || null;
+
     return {
-      sessionId: session.sessionId,
-      sessionFile: session.sessionFile,
+      sessionId: agentSession.sessionId,
+      sessionFile: agentSession.sessionFile,
       workingDir: this.workingDir,
-      model: session.model?.id || null,
-      modelProvider: session.model?.provider || null,
-      thinkingLevel: session.thinkingLevel,
+      model: agentSession.model?.id || null,
+      modelProvider: agentSession.model?.provider || null,
+      thinkingLevel: agentSession.thinkingLevel,
       systemPrompt: systemPrompt || "",
+      agentId: agentConfig?.id || null,
+      agentName: agentConfig?.name || null,
       agentsFiles: agentsFiles.map((f: any) => ({
         path: f.path,
         content: f.content,
@@ -693,6 +827,7 @@ export class PiAgentSession {
           this.send({
             type: "tool_execution_end",
             toolCallId,
+            toolName,
             result: toolResult,
             isError: event.isError,
           });
@@ -828,6 +963,29 @@ export class PiAgentSession {
       await this.session.abort();
     } catch (error) {
       console.error("[Gateway] Abort error:", error);
+    }
+  }
+
+  /**
+   * Reload session resources (skills, extensions, prompts, themes)
+   */
+  async reload() {
+    if (!this.session) {
+      console.error("[Gateway] reload failed: session is null");
+      this.send({ type: "error", error: "Session not initialized" });
+      return;
+    }
+    try {
+      console.log("[Gateway] Calling session.reload()");
+      await this.session.reload();
+      console.log("[Gateway] session.reload() completed");
+      this.send({ type: "reload_result", success: true });
+    } catch (error) {
+      console.error("[Gateway] Reload error:", error);
+      this.send({
+        type: "error",
+        error: error instanceof Error ? error.message : "Failed to reload session",
+      });
     }
   }
 
@@ -1177,18 +1335,32 @@ export class PiAgentSession {
    * Get current model
    * @returns Current model or null
    */
-  getCurrentModel(): any {
-    if (!this.session) return null;
-    return this.session.model;
-  }
-
   /**
-   * Get messages
-   * @returns Message array
+   * Get current session info (system prompt, model, tools, skills, agent)
    */
-  getMessages(): AgentMessage[] {
-    if (!this.session) return [];
-    return this.session.messages as AgentMessage[];
+  getSessionInfo(): Record<string, unknown> {
+    if (!this.session) return {};
+    const model = this.session.model;
+    const tools = (this.session.agent?.state?.tools || []).map((t: any) => ({
+      name: t.name,
+      label: t.label || t.name,
+      description: t.description || "",
+      promptSnippet: t.promptSnippet || "",
+      promptGuidelines: t.promptGuidelines || [],
+      parameters: t.parameters,
+    }));
+    return {
+      systemPrompt: this.session.agent?.state?.systemPrompt || "",
+      model: model ? `${model.provider}/${model.id}` : null,
+      thinkingLevel: this.session.thinkingLevel,
+      tools,
+      workingDir: this.workingDir,
+      sessionFile: this.session.sessionFile,
+      isStreaming: this.isStreaming,
+      agentName: (this as any)._agentName || null,
+      agentId: (this as any)._agentId || null,
+      resourceFiles: (this as any)._resourceFiles || null,
+    };
   }
 
   /** WebSocket connection state */
@@ -1421,4 +1593,80 @@ export class PiAgentSession {
       this.session = null;
     }
   }
+}
+
+/**
+ * Load a single prompt template file and return its content (stripped of YAML frontmatter)
+ */
+async function loadTemplateFile(templateName: string, workingDir: string): Promise<string | null> {
+  const { existsSync } = await import("node:fs");
+  const { readFile } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+  const { homedir } = await import("node:os");
+
+  const home = process.env.HOME || homedir();
+  const dirs = [join(home, ".pi", "agent", "prompts"), join(workingDir, ".pi", "prompts")];
+
+  for (const dir of dirs) {
+    const path = join(dir, `${templateName}.md`);
+    if (existsSync(path)) {
+      try {
+        const content = await readFile(path, "utf-8");
+        return content.replace(/^---[\s\S]*?---\n?/, "").trim();
+      } catch {
+        /* skip */
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Load prompt template files and concatenate their contents
+ */
+async function loadPromptTemplates(
+  templateNames: string[],
+  workingDir: string
+): Promise<string | null> {
+  const { existsSync } = await import("node:fs");
+  const { readFile } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+  const { homedir } = await import("node:os");
+
+  const home = process.env.HOME || homedir();
+  const dirs = [join(home, ".pi", "agent", "prompts"), join(workingDir, ".pi", "prompts")];
+  const contents: string[] = [];
+
+  for (const name of templateNames) {
+    for (const dir of dirs) {
+      const path = join(dir, `${name}.md`);
+      if (existsSync(path)) {
+        try {
+          const content = await readFile(path, "utf-8");
+          const body = content.replace(/^---[\s\S]*?---\n?/, "").trim();
+          if (body) contents.push(body);
+        } catch {
+          /* skip */
+        }
+      }
+    }
+  }
+
+  return contents.length > 0 ? contents.join("\n\n---\n\n") : null;
+}
+
+/**
+ * Resolve tool names to tool instances for a specific working directory
+ */
+function resolveTools(toolNames: string[], cwd: string) {
+  const toolMap: Record<string, () => any> = {
+    read: () => createReadTool(cwd),
+    bash: () => createBashTool(cwd),
+    edit: () => createEditTool(cwd),
+    write: () => createWriteTool(cwd),
+    grep: () => createGrepTool(cwd),
+    find: () => createFindTool(cwd),
+    ls: () => createLsTool(cwd),
+  };
+  return toolNames.filter((name) => name in toolMap).map((name) => toolMap[name]());
 }

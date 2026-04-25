@@ -15,6 +15,7 @@ import styles from "@/app/App.module.css";
 // Lazy load pages
 const ChatPage = React.lazy(() => import("@/features/chat/page"));
 const FilesPage = React.lazy(() => import("@/features/files/page"));
+const OrchestrationPage = React.lazy(() => import("@/features/orchestration/page"));
 
 // ===== [ANCHOR:KEEP_ALIVE_COMPONENT] =====
 
@@ -69,6 +70,13 @@ function AppContent() {
         <KeepAlive active={currentView === "files"}>
           <Suspense fallback={<LoadingScreen />}>
             <FilesPage />
+          </Suspense>
+        </KeepAlive>
+
+        {/* Orchestration (agents/prompts/skills/models/workflows) */}
+        <KeepAlive active={currentView === "agents"}>
+          <Suspense fallback={<LoadingScreen />}>
+            <OrchestrationPage />
           </Suspense>
         </KeepAlive>
       </main>
