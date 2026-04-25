@@ -28,44 +28,83 @@ export function createAgentTool(llmLogManager: LlmLogManager, mySessionId: strin
   return defineTool({
     name: "agent_tool",
     label: "Agent Tool",
-    description: `Manage sub-agents (child pi sessions running in the same process).
+    description: `Manage sub-agents (child pi sessions in the same Node.js process).
 
-This session's ID is: ${mySessionId}
-Use this ID to reference yourself when creating sub-agents (optional — the tool auto-detects the calling session).
+=== YOUR SESSION ID: ${mySessionId} ===
+(This ID is auto-detected — you do NOT need to pass parentSessionId)
 
-ACTIONS:
+=== ACTIONS ===
 
-1) "create_sub_agent" — Spawn a new pi session with read/bash/edit/write tools.
-   Required: workingDir, name
-   Optional: agentId (agent config), initialPrompt (first task)
-   The tool automatically registers this session as the parent.
+1) action="create_sub_agent" — Spawn a new pi session.
+   Params: workingDir, name, initialPrompt
+   Optional: agentId (agent config name)
+   Returns: { sessionId, sessionFile, parentId, name }
+   Rules:
+   - Create sub-agents IN PARALLEL for independent tasks (call multiple times without waiting)
+   - Create sub-agents SERIALLY when each depends on previous output
+   - Include clear deliverable instructions in initialPrompt
+   - Tell sub-agents to summarize results with output file paths
 
-2) "send_to_sub_agent" — Send a prompt to a running child session.
-   Required: sessionId (child's shortId), prompt (message text)
-   Use this to check status, give instructions, or review output.
+2) action="send_to_sub_agent" — Send a prompt to a running child.
+   Params: sessionId (child's shortId), prompt
+   Rules:
+   - Use to check progress, give new instructions, or receive results
+   - Sub-agents reply asynchronously via their own tool responses
+   - Can poll via list_children to see active/completed status
 
-3) "list_children" — List all child sessions of this session.
-   No parameters needed — auto-detects parent from calling session.
+3) action="list_children" — List all child sessions.
+   Returns: children with { sessionId, workingDir, status }
+   Rules:
+   - status: "idle" = created waiting for prompt, "tooling" = working, "waiting" = waiting after completion
+   - Use to check which children are active vs done
 
-Sub-agents are full pi sessions. They run independently in the same process.
-They do NOT have agent_tool themselves.
-Use send_to_sub_agent to communicate with them after creation.`,
+=== PATTERNS ===
+
+PARALLEL (concurrent sub-agents):
+  agent_tool(action="create_sub_agent", name="A", initialPrompt="...")
+  agent_tool(action="create_sub_agent", name="B", initialPrompt="...")
+  [Both A and B run simultaneously in the same process]
+
+SERIAL (chain sub-agents):
+  agent_tool(action="create_sub_agent", name="A", initialPrompt="...")
+  [Wait for A to finish — check via list_children or send_to_sub_agent]
+  agent_tool(action="create_sub_agent", name="B", initialPrompt="read A's output from {wd}/...")
+
+ASYNC CHECK-IN:
+  agent_tool(action="send_to_sub_agent", sessionId="child-id", prompt="Are you done? What files?")
+
+=== CRITICAL RULES ===
+- Sub-agents DO NOT have agent_tool — they cannot create their own sub-agents
+- Sub-agents are full pi sessions with read/bash/edit/write tools
+- All sessions share the same process — no network latency
+- Tell sub-agents to END with a clear summary: "COMPLETED. Files: file1, file2"
+- Check sub-agent output files before proceeding to dependent phases`,
 
     parameters: Type.Object({
       action: Type.String({ description: "create_sub_agent | send_to_sub_agent | list_children" }),
       workingDir: Type.Optional(
-        Type.String({ description: "Working directory for sub-agent (default: current)" })
+        Type.String({ description: "Working directory for the sub-agent" })
       ),
-      name: Type.Optional(Type.String({ description: "Sub-agent display name" })),
-      agentId: Type.Optional(Type.String({ description: "Agent config ID from the Agents page" })),
+      name: Type.Optional(
+        Type.String({
+          description: "Descriptive name for the sub-agent (e.g., 'designer', 'api-coder')",
+        })
+      ),
+      agentId: Type.Optional(
+        Type.String({
+          description: "Pre-configured agent ID (e.g., 'designer-yid6', 'coder-yin9')",
+        })
+      ),
       initialPrompt: Type.Optional(
-        Type.String({ description: "First prompt/task for the sub-agent" })
+        Type.String({ description: "Detailed task: what to do, where to output, how to summarize" })
       ),
       sessionId: Type.Optional(
-        Type.String({ description: "Target child session shortId (for send_to_sub_agent)" })
+        Type.String({ description: "The sub-agent's sessionId (returned by create_sub_agent)" })
       ),
       prompt: Type.Optional(
-        Type.String({ description: "Prompt text to send (for send_to_sub_agent)" })
+        Type.String({
+          description: "Follow-up message: check status, new instructions, ask for results",
+        })
       ),
     }),
 
