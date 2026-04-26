@@ -35,9 +35,9 @@ Use when tasks are independent. Call create_sub_agent multiple times without wai
 ## Sub-Agent Communication
 
 - **Creating**: `agent_tool(action="create_sub_agent", name="...", workingDir="/tmp/project", agentId="...-xxx", initialPrompt="...")`
-- **Checking**: `agent_tool(action="send_to_sub_agent", sessionId="...", prompt="Ready for next phase? List your deliverable files.")`
-- **Listing**: `agent_tool(action="list_children")` — shows all children with status (idle/tooling/waiting)
-- **Sub-agents send results back**: They respond to send_to_sub_agent with their output summary.
+- **Sub-agents report back proactively**: Every sub-agent MUST call `agent_tool(action="send_to_parent", message="...")` when its task is complete. The parent receives this in real time via prompt/steer/followUp.
+- **Default parent behavior**: WAIT for sub-agents to report via `send_to_parent`. Do not poll.
+- **Checking status (only when user asks)**: `agent_tool(action="list_children")` or `agent_tool(action="send_to_sub_agent", sessionId="...", prompt="...")` may be used if the user explicitly requests a status update or if you need to send new instructions to a running child.
 
 ## Prompt Guidelines for Sub-Agents
 

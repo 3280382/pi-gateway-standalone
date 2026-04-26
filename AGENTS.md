@@ -120,9 +120,22 @@ timeout 10s curl -s http://localhost:3000/api/health
 
 ### Headless Browser Testing
 
+**Config note:** `playwright.mobile.config.ts` uses `testMatch: "*-dev.test.ts"`. Test files must match this pattern.
+
 ```bash
 npx playwright test --config=playwright.mobile.config.ts
 npx playwright test --config=playwright.mobile.config.ts --headed
+```
+
+**Quick ad-hoc check** (no test file needed, catches browser-side JS errors immediately):
+
+```ts
+// test/tmp/check.ts — run with: npx tsx test/tmp/check.ts
+import { chromium } from "playwright";
+const page = await (await chromium.launch()).newPage();
+page.on("pageerror", (e) => console.error("[PAGE]", e.message));
+await page.goto("http://127.0.0.1:5173/", { waitUntil: "networkidle" });
+await page.screenshot({ path: "test/tmp/shot.png" });
 ```
 
 **Checklist:**

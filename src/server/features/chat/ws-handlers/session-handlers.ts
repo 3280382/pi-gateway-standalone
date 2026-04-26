@@ -283,7 +283,7 @@ export async function handleUpdateSessionConfig(
   }
   try {
     if (name !== undefined) await sessionConfigManager.updateName(sessionId, name, ctx.workingDir);
-    const workingDir = ctx.workingDir || process.cwd();
+    const workingDir = ctx.workingDir || ctx.session?.workingDir;
     const sessions = await getAllSessions(workingDir, 15);
     serverSessionManager.broadcastToWorkingDir(workingDir, { type: "sessions_list", sessions });
   } catch (error) {

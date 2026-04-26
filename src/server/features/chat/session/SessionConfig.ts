@@ -304,14 +304,24 @@ class SessionConfigManager {
                 .map((c: any) => c.text)
                 .join(" ");
             } else if (typeof content === "string") prompt = content;
-            const firstLine = prompt.split("\n")[0].trim();
-            return firstLine.slice(0, 30) + (firstLine.length > 30 ? "..." : "") || "New Session";
+            return extractSessionName(prompt) || "New Session";
           }
         } catch {}
       }
     } catch {}
     return "New Session";
   }
+}
+
+/**
+ * Extract session display name from first user message text.
+ * Takes the first line (before any newline), trimmed, max 30 characters.
+ */
+export function extractSessionName(text: string | undefined): string | undefined {
+  if (!text) return undefined;
+  const firstLine = text.split("\n")[0].trim();
+  if (!firstLine) return undefined;
+  return firstLine.slice(0, 30);
 }
 
 export const sessionConfigManager = new SessionConfigManager();
