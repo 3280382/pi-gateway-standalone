@@ -36,6 +36,13 @@ type(scope): subject
 Types: feat, fix, docs, style, refactor, test, chore
 ```
 
+> **⚠️ `git commit` hangs**: The pre-commit hook runs `npm run check` (~2s on 364 files).
+> If output is empty for >5s, the hook is running. Use:
+> ```bash
+> timeout 10s git commit --no-verify -m "type(scope): subject"
+> ```
+> Only skip verify if `npm run check` was already run separately and passed.
+
 ## Code Quality Requirements
 
 Complete ALL before marking a task as complete:
