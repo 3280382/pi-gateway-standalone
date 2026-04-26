@@ -7,7 +7,7 @@ import { SessionManager } from "@mariozechner/pi-coding-agent";
 import type { AgentConfig } from "@shared/types/agent.types.js";
 import { extractShortSessionId, serverSessionManager } from "../session/SessionRegistry.js";
 import { getLocalSessionsDir } from "../session/utils.js";
-import { sessionConfigManager } from "../session/SessionConfig.js";
+import { sessionConfigManager, extractSessionName } from "../session/SessionConfig.js";
 import { agentConfigManager } from "../../agents/AgentConfigManager.js";
 import {
   buildSessionResponse,
@@ -250,7 +250,7 @@ export async function handleListSessions(
         id: shortId,
         path: s.path,
         name:
-          s.firstMessage?.slice(0, 35) || config?.name || s.path?.split("/").pop() || "Untitled",
+        extractSessionName(s.firstMessage) || config?.name || s.path?.split("/").pop() || "Untitled",
         messageCount: s.messageCount || 0,
         lastModified: s.modified.toISOString(),
         status: activeInfo?.runtimeStatus || "history",

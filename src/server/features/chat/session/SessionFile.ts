@@ -19,7 +19,7 @@ import { Logger, LogLevel } from "../../../lib/utils/logger.js";
 import type { PiAgentSession } from "./PiAgentSession.js";
 import { extractShortSessionId, serverSessionManager } from "./SessionRegistry.js";
 import { getLocalSessionsDir } from "./utils.js";
-import { sessionConfigManager } from "./SessionConfig.js";
+import { sessionConfigManager, extractSessionName } from "./SessionConfig.js";
 import { processSessionEntries } from "./MessageProcessor.js";
 
 const logger = new Logger({ level: LogLevel.INFO });
@@ -84,7 +84,7 @@ export async function getAllSessions(
         path: s.path,
         // 【一致性保障】与 handleListSessions 使用相同的 name 生成逻辑
         name:
-          s.firstMessage?.slice(0, 35) || config?.name || s.path?.split("/").pop() || "Untitled",
+          extractSessionName(s.firstMessage) || config?.name || s.path?.split("/").pop() || "Untitled",
         messageCount: s.messageCount || 0,
         lastModified: s.modified.toISOString(),
         // 【状态一致性】从 serverSessionManager 获取 runtime status

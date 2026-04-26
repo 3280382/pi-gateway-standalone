@@ -401,7 +401,7 @@ async function createNewSession(
       const serverSessions = createResponse.allSessions.map((s: any) => ({
         id: s.path || s.id,
         path: s.path || s.id,
-        name: s.firstMessage?.slice(0, 35) || s.name || "Untitled",
+        name: s.firstMessage?.split("\n")[0].trim().slice(0, 30) || s.name || "Untitled",
         messageCount: s.messageCount || 0,
         lastModified: s.modified || s.lastModified || new Date().toISOString(),
       }));
