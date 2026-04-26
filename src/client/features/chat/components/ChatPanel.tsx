@@ -17,6 +17,7 @@ import {
   selectCurrentStreamingMessage,
   selectInputText,
   selectIsRunning,
+  selectIsReconnecting,
   selectIsStreaming,
   selectMessages,
   selectSearchFilters,
@@ -42,6 +43,7 @@ export function ChatPanel() {
   const inputText = useChatStore(selectInputText);
   const isStreaming = useChatStore(selectIsStreaming);
   const isRunning = useChatStore(selectIsRunning);
+  const isReconnecting = useChatStore(selectIsReconnecting);
   const showThinking = useChatStore(selectShowThinking);
   const searchQuery = useChatStore(selectSearchQuery);
   const searchFilters = useChatStore(selectSearchFilters);
@@ -91,6 +93,7 @@ export function ChatPanel() {
           value={inputText}
           isStreaming={isStreaming}
           isRunning={isRunning}
+          isReconnecting={isReconnecting}
           onChange={chatController.setInputText}
           onSend={chatPanel.handleSend}
           onSendWithImages={chatPanel.handleSendWithImages}

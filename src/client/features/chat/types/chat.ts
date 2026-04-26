@@ -18,6 +18,12 @@ export interface MessageContent {
   output?: string;
   error?: string;
   imageUrl?: string;
+  source?: {
+    type: "base64";
+    mediaType?: string;
+    mimeType?: string;
+    data: string;
+  };
   turnNumber?: number;
   status?: "pending" | "executing" | "success" | "error" | "timeout"; // for tool/tool_use to show execution status
 }

@@ -10,7 +10,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { updateSessionName } from "@/features/chat/services/api/sessionConfigApi";
+import { deleteSession, updateSessionName } from "@/features/chat/services/api/sessionConfigApi";
 import { listChatSessions } from "@/features/chat/services/chatWebSocket";
 import { sessionManager } from "@/features/chat/services/sessionManager";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
@@ -82,6 +82,7 @@ interface SessionRowProps {
 function SessionRow({ session, isSelected, status, onSelect }: SessionRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(session.name);
+  const [showConfirm, setShowConfirm] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -109,6 +110,20 @@ function SessionRow({ session, isSelected, status, onSelect }: SessionRowProps) 
     },
     [isEditing, editName, session.name, session.id]
   );
+
+  const handleDeleteClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowConfirm(true);
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    deleteSession(session.id);
+    setShowConfirm(false);
+  }, [session.id]);
+
+  const handleCancelDelete = useCallback(() => {
+    setShowConfirm(false);
+  }, []);
 
   const handleSave = useCallback(() => {
     if (editName.trim() && editName !== session.name) {
@@ -191,7 +206,33 @@ function SessionRow({ session, isSelected, status, onSelect }: SessionRowProps) 
         >
           {isEditing ? "✓" : "✎"}
         </span>
+        {!isEditing && (
+          <span className={styles.deleteIcon} onClick={handleDeleteClick} title="Delete session">
+            🗑
+          </span>
+        )}
       </div>
+
+      {showConfirm && (
+        <div className={styles.confirmOverlay} onClick={handleCancelDelete}>
+          <div className={styles.confirmBox} onClick={(e) => e.stopPropagation()}>
+            <p className={styles.confirmText}>
+              Delete session <strong>{session.name || "Untitled"}</strong>?
+            </p>
+            <p className={styles.confirmSubtext}>
+              This will permanently remove the session file and its log.
+            </p>
+            <div className={styles.confirmActions}>
+              <button className={styles.confirmCancel} onClick={handleCancelDelete}>
+                Cancel
+              </button>
+              <button className={styles.confirmDelete} onClick={handleConfirmDelete}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

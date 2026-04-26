@@ -84,7 +84,7 @@ export async function getAllSessions(
         path: s.path,
         // 【一致性保障】与 handleListSessions 使用相同的 name 生成逻辑
         name:
-          config?.name || s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
+          s.firstMessage?.slice(0, 35) || config?.name || s.path?.split("/").pop() || "Untitled",
         messageCount: s.messageCount || 0,
         lastModified: s.modified.toISOString(),
         // 【状态一致性】从 serverSessionManager 获取 runtime status

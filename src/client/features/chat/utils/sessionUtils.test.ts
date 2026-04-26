@@ -5,8 +5,8 @@ describe("sessionUtils", () => {
   describe("extractShortSessionId", () => {
     it.each([
       ["", ""],
-      ["/path/to/2026-04-17T08-26-10-585Z_019d9a8c-2b19-7345-94f5-5efedb498871.jsonl", "019d9a8c"],
-      ["2026-04-17T08-26-10-585Z_019d9a8c-2b19-7345-94f5-5efedb498871.jsonl", "019d9a8c"],
+      ["/path/to/2026-04-17T08-26-10-585Z_019d9a8c-2b19-7345-94f5-5efedb498871.jsonl", "db498871"],
+      ["2026-04-17T08-26-10-585Z_019d9a8c-2b19-7345-94f5-5efedb498871.jsonl", "db498871"],
       ["abc123.jsonl", "abc123"],
       ["short", "short"],
     ])("extracts short id from %s → %s", (input, expected) => {

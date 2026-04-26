@@ -60,6 +60,7 @@ interface SidebarActions {
 
   // Session Config Actions
   updateSessionName: (sessionId: string, name: string) => void;
+  removeSession: (sessionId: string) => void;
 
   // Reset
   reset: () => void;
@@ -98,7 +99,18 @@ const sidebarStoreCreator = (set: any) => ({
   setWorkingDir: (path: string) => {
     const safePath = path || "";
     const displayName = safePath.split("/").pop() || safePath;
-    set({ workingDir: { path: safePath, displayName } }, false, "setWorkingDir");
+    // Clear old sessions when switching directories — the new list arrives
+    // asynchronously via sessions_list WebSocket event.
+    set(
+      {
+        workingDir: { path: safePath, displayName },
+        sessions: [],
+        runtimeStatus: {},
+        selectedSessionId: null,
+      },
+      false,
+      "setWorkingDir"
+    );
   },
 
   setSessions: (sessions: Session[]) => {
@@ -169,6 +181,17 @@ const sidebarStoreCreator = (set: any) => ({
       }),
       false,
       "updateSessionName"
+    );
+  },
+
+  removeSession: (sessionId: string) => {
+    set(
+      (state: any) => ({
+        sessions: state.sessions.filter((s: Session) => s.id !== sessionId),
+        selectedSessionId: state.selectedSessionId === sessionId ? null : state.selectedSessionId,
+      }),
+      false,
+      "removeSession"
     );
   },
 

@@ -187,9 +187,15 @@ export const MessageItem = memo(
         .filter((c) => c.type === "text")
         .map((c) => c.text)
         .join("");
+      const imageBlocks = blocks.filter((c) => c.type === "image");
       return (
         <div className={styles.userMessage}>
-          <div className={styles.userBubble}>{text}</div>
+          <div className={styles.userBubble}>
+            {text && <div>{text}</div>}
+            {imageBlocks.map((img, i) => (
+              <UserImage key={`img-${i}`} block={img} />
+            ))}
+          </div>
         </div>
       );
     }
@@ -642,7 +648,82 @@ function GlassCard({
     );
   }
 
+  // Render image block
+  if (block.type === "image") {
+    const imageUrl = getImageUrl(block);
+    if (!imageUrl) return null;
+
+    const isExpandable = kind1 === "assistant" || (kind1 === "user" && block.source?.data);
+    return (
+      <div
+        className={styles.imageBlock}
+        onMouseEnter={() => setIsCopyVisible(true)}
+        onMouseLeave={() => setIsCopyVisible(false)}
+      >
+        <div className={styles.cardHeader}>
+          <span className={styles.dot} />
+          <span className={styles.label}>Image</span>
+          <div className={styles.actions}>
+            {isExpandable && (
+              <button
+                type="button"
+                className={styles.btnCopy}
+                style={{ visibility: isCopyVisible ? "visible" : "hidden" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyToClipboard(imageUrl);
+                }}
+              >
+                📋
+              </button>
+            )}
+          </div>
+        </div>
+        <div className={styles.imageContent}>
+          <img
+            src={imageUrl}
+            alt="User uploaded image"
+            className={styles.imagePreview}
+            loading="lazy"
+          />
+        </div>
+      </div>
+    );
+  }
+
   return null;
+}
+
+/**
+ * Extract image URL from content block.
+ * Handles:
+ * - Direct imageUrl field
+ * - Base64 source with data URL construction
+ *   - mediaType field (shared types)
+ *   - mimeType field (JSONL session files)
+ */
+function getImageUrl(block: IndexedContentBlock): string | null {
+  if (block.imageUrl) return block.imageUrl;
+  if (block.source?.data) {
+    const mediaType = block.source.mediaType || block.source.mimeType || "image/png";
+    return `data:${mediaType};base64,${block.source.data}`;
+  }
+  // Defensive: handle pi-ai ImageContent format { data, mimeType }
+  if (block.data && block.mimeType) {
+    return `data:${block.mimeType};base64,${block.data}`;
+  }
+  return null;
+}
+
+/**
+ * Inline image component for user messages.
+ */
+function UserImage({ block }: { block: IndexedContentBlock }) {
+  const imageUrl = getImageUrl(block);
+  if (!imageUrl) return null;
+  return (
+    <img src={imageUrl} alt="User uploaded image" className={styles.userImage} loading="lazy" />
+  );
 }
 
 function TextContent({ text }: { text: string }) {

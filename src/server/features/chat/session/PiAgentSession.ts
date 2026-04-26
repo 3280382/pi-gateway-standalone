@@ -108,6 +108,10 @@ export class PiAgentSession {
     toolName?: string;
   } = { type: null, index: -1 };
 
+  /** Track all tool calls in the current assistant message (Map<toolCallId, toolName>).
+   *  Needed because parallel tool calls overwrite currentContentBlock. */
+  private _toolCallsInMessage = new Map<string, string>();
+
   /** Track if message_start has been sent for current message */
   private messageStarted: boolean = false;
 
@@ -225,6 +229,22 @@ export class PiAgentSession {
       try {
         sessionManager = SessionManager.open(sessionFile, localSessionsDir);
         console.log(`[PiAgentSession.initialize] Successfully opened session file`);
+        // Force-write header if the session file was just created.
+        // SDK's open() may call newSession() internally for new files
+        // without writing to disk, causing header loss.
+        if (!existsSync(sessionFile)) {
+          (sessionManager as any)._rewriteFile?.();
+        }
+        // Warn if the session header's cwd doesn't match the requested
+        // workingDir. This happens when a session created in dir A is
+        // opened from dir B. Tools use this.workingDir (correct), but
+        // the SDK may show stale cwd in system prompts.
+        const headerCwd = (sessionManager as any).getCwd?.();
+        if (headerCwd && headerCwd !== workingDir) {
+          console.log(
+            `[PiAgentSession.initialize] NOTE: session cwd=${headerCwd} but workingDir=${workingDir}. Tools will use ${workingDir}.`
+          );
+        }
       } catch (error) {
         console.warn(
           `[PiAgentSession.initialize] Failed to open session file: ${sessionFile}, error:`,
@@ -263,6 +283,15 @@ export class PiAgentSession {
         `[PiAgentSession.initialize] Creating NEW session for workingDir="${workingDir}"`
       );
       sessionManager = SessionManager.create(workingDir, localSessionsDir);
+      console.log(
+        `[PiAgentSession.initialize] Created session: workingDir="${workingDir}" sessionsDir="${localSessionsDir}" cwd=${(sessionManager as any).getCwd?.()}`
+      );
+      // Force-write the session header immediately. The SDK's _persist()
+      // defers writes until an assistant message exists, which can cause
+      // the header (with cwd) to be lost if writes fail or are interrupted.
+      if ((sessionManager as any).sessionFile) {
+        (sessionManager as any)._rewriteFile?.();
+      }
     }
 
     // Build DefaultResourceLoader options from agent config
@@ -593,6 +622,24 @@ export class PiAgentSession {
       const timestamp = new Date().toISOString().split("T")[1].split(".")[0];
 
       switch (event.type) {
+        // Agent loop boundary — the ONLY reliable indicator of whether the
+        // SDK is actively processing. turn_start/end happen inside the loop.
+        case "agent_start": {
+          console.log(`[${timestamp}] [AGENT] agent_start`);
+          this.isStreaming = true;
+          this.updateRuntimeStatus("thinking");
+          this.send({ type: "agent_start" });
+          break;
+        }
+
+        case "agent_end": {
+          console.log(`[${timestamp}] [AGENT] agent_end`);
+          this.isStreaming = false;
+          this.updateRuntimeStatus("waiting");
+          this.send({ type: "agent_end" });
+          break;
+        }
+
         // Turn boundary - indicates Pi coding agent turn start/end
         case "turn_start": {
           console.log(`[${timestamp}] [SEND] turn_start`);
@@ -603,8 +650,9 @@ export class PiAgentSession {
 
         case "turn_end": {
           console.log(`[${timestamp}] [SEND] turn_end`);
-          // AI enters waiting state after completing output（waiting for user input），not idle
-          this.updateRuntimeStatus("waiting");
+          // Do NOT set runtimeStatus to "waiting" here. The agent loop may
+          // continue with follow-up messages. agent_end is the only event
+          // that truly means the SDK has stopped processing.
           this.send({ type: "turn_end" });
           break;
         }
@@ -675,12 +723,17 @@ export class PiAgentSession {
           break;
         }
 
-        // Message boundary - only process assistant messages
+        // Message boundary - forward to client so it can confirm receipt
         case "message_start": {
           const startMsg = event.message;
           if (startMsg.role === "assistant") {
             console.log(`[${timestamp}] [SEND] message_start: ${(startMsg as any).id || "new"}`);
             this.messageStarted = true;
+            this.send({ type: "message_start", message: startMsg });
+          } else if (startMsg.role === "user") {
+            // SDK echoes user prompts as message_start → relay to frontend
+            // so it can confirm receipt (pessimistic send) or show sub-agent messages
+            console.log(`[${timestamp}] [SEND] message_start: user`);
             this.send({ type: "message_start", message: startMsg });
           }
           break;
@@ -774,7 +827,12 @@ export class PiAgentSession {
                   toolCallId: toolCall.id,
                   toolName: toolCall.name,
                 };
+                this._toolCallsInMessage.set(toolCall.id, toolCall.name);
                 this.updateRuntimeStatus("tooling");
+                // NOTE: Do NOT synthesize tool_execution_start here.
+                // defineTool-based custom tools DO trigger the real
+                // tool_execution_start / tool_execution_end events from the SDK.
+                // Synthesizing would create duplicate start events.
               }
               break;
             }
@@ -784,7 +842,10 @@ export class PiAgentSession {
             case "toolcall_end": {
               const toolCall = partial.content?.[contentIndex];
               if (toolCall?.type === "toolCall") {
-                // no-op
+                // Do NOT synthesize tool_execution_end here.
+                // For built-in tools the SDK emits the real event with the actual result.
+                // For custom tools we accept the missing end event rather than sending
+                // a bogus result: null that overwrites the real data.
               }
               this.currentContentBlock = { type: null, index: -1 };
               break;
@@ -795,8 +856,7 @@ export class PiAgentSession {
 
         // Tool actual execution event
         case "tool_execution_start": {
-          // Use currentContentBlock's toolCallId to ensure consistency with toolcall_start
-          const toolCallId = this.currentContentBlock?.toolCallId || event.toolCallId;
+          const toolCallId = event.toolCallId;
           this.activeToolExecution = {
             toolCallId,
             toolName: event.toolName,
@@ -814,15 +874,9 @@ export class PiAgentSession {
 
         case "tool_execution_end": {
           this.activeToolExecution = null;
-          // Use currentContentBlock's toolCallId to ensure consistency with toolcall_start
-          const toolCallId = this.currentContentBlock?.toolCallId || event.toolCallId;
+          const toolCallId = event.toolCallId;
           const toolResult = event.result;
           const toolName = event.toolName;
-          const isWriteOperation =
-            toolName &&
-            writeFileTools.some((t) =>
-              toolName.toLowerCase().includes(t.toLowerCase().replace("_", ""))
-            );
 
           this.send({
             type: "tool_execution_end",
@@ -850,7 +904,7 @@ export class PiAgentSession {
     }>
   ) {
     console.log(
-      `[PiAgentSession.prompt] Starting processing, session exists: ${!!this.session}, isStreaming: ${this.isStreaming}`
+      `[PiAgentSession.prompt] Starting processing, session exists: ${!!this.session}, runtimeStatus: ${this.runtimeStatus}`
     );
     if (!this.session) {
       this.send({ type: "error", error: "Session not initialized" });
@@ -865,7 +919,10 @@ export class PiAgentSession {
         mimeType: img.source.mediaType,
       }));
 
-      console.log(`[PiAgentSession.prompt] Calling session.prompt, text length: ${text.length}`);
+      console.log(
+        `[PiAgentSession.prompt] Calling session.prompt, text length: ${text.length}, isStreaming: ${this.isStreaming}`
+      );
+
       if (this.isStreaming) {
         await this.session.prompt(text, {
           images: convertedImages,
@@ -969,6 +1026,27 @@ export class PiAgentSession {
         type: "error",
         error: error instanceof Error ? error.message : "Unknown error",
       });
+    }
+  }
+
+  /**
+   * Continue processing queued follow-up/steering messages.
+   * Call this after adding followUps to wake up an idle session.
+   */
+  async continueSession() {
+    if (!this.session) {
+      this.send({ type: "error", error: "Session not initialized" });
+      return;
+    }
+    try {
+      // continue() lives on the internal agent object, not on AgentSession itself
+      await (this.session as any).agent?.continue();
+    } catch (error) {
+      // Expected if session is still running — queued messages will be
+      // consumed automatically when the current turn ends.
+      console.log(
+        `[PiAgentSession] continue() skipped: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -1428,7 +1506,10 @@ export class PiAgentSession {
   }
 
   private trackMessageBoundary(message: ServerMessage): void {
-    if (message.type === "message_start") {
+    if (message.type === "turn_start") {
+      this.clearBuffer();
+      this._toolCallsInMessage.clear();
+    } else if (message.type === "message_start") {
       this.clearBuffer();
       this.insideMessage = true;
     } else if (message.type === "message_end") {
@@ -1454,8 +1535,33 @@ export class PiAgentSession {
     return viewingShortId === this.shortId;
   }
 
+  private static readonly MAX_BUFFER_SIZE = 100;
+
   private bufferMessage(message: ServerMessage, reason: string): void {
-    console.log(`[PiAgentSession] Buffering ${message.type}: ${reason}`);
+    // Skip noisy high-frequency events to avoid log spam
+    const noisyTypes = new Set(["thinking_delta", "text_delta", "toolcall_delta"]);
+    if (!noisyTypes.has(message.type)) {
+      console.log(`[PiAgentSession] Buffering ${message.type}: ${reason}`);
+    }
+    // Cap buffer to prevent infinite memory growth for background sessions
+    if (this.messageEventBuffer.length >= PiAgentSession.MAX_BUFFER_SIZE) {
+      // Keep only the most recent turn by stripping everything up to
+      // the last turn_start or message_start
+      let truncateIdx = 0;
+      for (let i = this.messageEventBuffer.length - 1; i >= 0; i--) {
+        const t = this.messageEventBuffer[i].type;
+        if (t === "turn_start" || t === "message_start") {
+          truncateIdx = i;
+          break;
+        }
+      }
+      if (truncateIdx > 0) {
+        this.messageEventBuffer = this.messageEventBuffer.slice(truncateIdx);
+        console.log(
+          `[PiAgentSession] Buffer truncated to ${this.messageEventBuffer.length} events`
+        );
+      }
+    }
     this.messageEventBuffer.push(message);
     this.isBuffering = true;
   }

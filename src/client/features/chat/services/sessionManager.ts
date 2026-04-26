@@ -20,7 +20,7 @@ import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
 import type { Message } from "@/features/chat/types/chat";
 import type { Session } from "@/features/chat/types/sidebar";
-import { extractShortSessionId } from "@/features/chat/utils/sessionUtils";
+import { extractShortSessionId } from "@shared/utils/extractShortSessionId";
 import { websocketService } from "@/services/websocket.service";
 import { useWorkspaceStore as useGlobalWorkspaceStore } from "@/stores/workspaceStore";
 import { createNewChatSession } from "./chatWebSocket";
@@ -46,10 +46,9 @@ export interface SessionManagerAPI {
 function extractSessionId(pathOrId: string | undefined): string {
   if (!pathOrId) return "";
   if (pathOrId.includes("/")) {
-    const fileName = pathOrId.split("/").pop() || "";
-    return fileName.replace(".jsonl", "").split("_").pop() || pathOrId;
+    return extractShortSessionId(pathOrId);
   }
-  return pathOrId;
+  return pathOrId.slice(-8);
 }
 
 function findSessionInList(sessions: Session[], sessionId: string): Session | undefined {
@@ -402,7 +401,7 @@ async function createNewSession(
       const serverSessions = createResponse.allSessions.map((s: any) => ({
         id: s.path || s.id,
         path: s.path || s.id,
-        name: s.name || s.firstMessage?.slice(0, 35) || "Untitled",
+        name: s.firstMessage?.slice(0, 35) || s.name || "Untitled",
         messageCount: s.messageCount || 0,
         lastModified: s.modified || s.lastModified || new Date().toISOString(),
       }));

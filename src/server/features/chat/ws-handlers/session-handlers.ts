@@ -102,7 +102,11 @@ export async function handleInit(
     messageLimit = 100,
     agentId,
   } = payload;
-  const workingDir = clientWorkingDir || process.cwd();
+  const workingDir = clientWorkingDir;
+  if (!workingDir) {
+    sendError(ctx, "workingDir is required in init payload");
+    return;
+  }
 
   if (!existsSync(workingDir)) {
     sendError(ctx, `Path does not exist: ${workingDir}`);
@@ -164,6 +168,9 @@ export async function handleNewSession(
 ): Promise<void> {
   const workingDir = payload.workingDir || ctx.session?.workingDir;
   if (!workingDir) {
+    logger.warn(
+      `[handleNewSession] No workingDir — payload.workingDir=${payload.workingDir} ctx.session?.workingDir=${ctx.session?.workingDir}`
+    );
     sendError(ctx, "Working directory not available");
     return;
   }
@@ -243,7 +250,7 @@ export async function handleListSessions(
         id: shortId,
         path: s.path,
         name:
-          config?.name || s.firstMessage?.slice(0, 35) || s.path?.split("/").pop() || "Untitled",
+          s.firstMessage?.slice(0, 35) || config?.name || s.path?.split("/").pop() || "Untitled",
         messageCount: s.messageCount || 0,
         lastModified: s.modified.toISOString(),
         status: activeInfo?.runtimeStatus || "history",
@@ -281,6 +288,67 @@ export async function handleUpdateSessionConfig(
     serverSessionManager.broadcastToWorkingDir(workingDir, { type: "sessions_list", sessions });
   } catch (error) {
     sendError(ctx, error instanceof Error ? error.message : "Failed to update session config");
+  }
+}
+
+// ============================================================================
+// Delete Session Handler
+// ============================================================================
+
+export async function handleDeleteSession(
+  ctx: WSContext,
+  payload: { sessionId: string }
+): Promise<void> {
+  const { sessionId } = payload;
+  if (!sessionId) {
+    sendError(ctx, "sessionId is required");
+    return;
+  }
+  try {
+    const workingDir = ctx.workingDir || process.cwd();
+    const config = sessionConfigManager.getConfig(sessionId);
+    if (!config) {
+      sendError(ctx, `Session ${sessionId} not found`);
+      return;
+    }
+
+    const { fullPath } = config;
+
+    // 1. Stop running agent and dispose from memory before deleting files
+    const entry = serverSessionManager.getSessionByShortId(sessionId);
+    if (entry) {
+      // Abort any active LLM call first, then dispose
+      await entry.session.abort().catch(() => {});
+      serverSessionManager.endSession(sessionId);
+    }
+
+    // 2. Delete session JSONL file
+    if (fullPath && existsSync(fullPath)) {
+      const { unlink } = await import("node:fs/promises");
+      await unlink(fullPath);
+    }
+
+    // 3. Delete associated log file
+    if (fullPath) {
+      const logPath = fullPath.replace(/\.jsonl$/, ".log");
+      if (existsSync(logPath)) {
+        const { unlink } = await import("node:fs/promises");
+        await unlink(logPath);
+      }
+    }
+
+    // 4. Remove from session-config.json
+    await sessionConfigManager.removeConfig(sessionId, workingDir);
+
+    // 5. Broadcast updated session list
+    const sessions = await getAllSessions(workingDir, 15);
+    serverSessionManager.broadcastToWorkingDir(workingDir, { type: "sessions_list", sessions });
+
+    sendSuccess(ctx, "session_deleted", { sessionId });
+    logger.info(`[handleDeleteSession] Deleted session ${sessionId}, file=${fullPath}`);
+  } catch (error) {
+    logger.error("[handleDeleteSession] Error:", {}, error instanceof Error ? error : undefined);
+    sendError(ctx, error instanceof Error ? error.message : "Failed to delete session");
   }
 }
 
@@ -357,6 +425,10 @@ export const handleListSessionsWrapped = createHandler(handleListSessions, {
 });
 export const handleUpdateSessionConfigWrapped = createHandler(handleUpdateSessionConfig, {
   name: "update_session_config",
+  requireSession: false,
+});
+export const handleDeleteSessionWrapped = createHandler(handleDeleteSession, {
+  name: "delete_session",
   requireSession: false,
 });
 export const handleSidebarVisibilityWrapped = createHandler(handleSidebarVisibility, {

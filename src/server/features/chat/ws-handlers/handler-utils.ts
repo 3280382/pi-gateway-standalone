@@ -43,7 +43,7 @@ export function sendError(ctx: WSContext, message: string, messageType?: string)
  * Returns true if session is valid, false otherwise
  */
 export function checkSessionInitialized(ctx: WSContext): boolean {
-  if (!ctx.session.session) {
+  if (!ctx.session?.session) {
     sendError(ctx, "Session not initialized, please send init message first");
     return false;
   }

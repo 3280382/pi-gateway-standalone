@@ -54,7 +54,7 @@ test.describe("PM Workflow E2E", () => {
       'Phase 2: After Phase 1 finishes, create_sub_agent name=coder workingDir=/tmp/hello-demo agentId=coder-yin9 initialPrompt="Implement the design from DESIGN.md into index.html and README.md"\n' +
       'Phase 3: After Phase 2 finishes, create_sub_agent name=tester workingDir=/tmp/hello-demo agentId=tester-yixh initialPrompt="Test the implementation and write TEST-REPORT.md"\n' +
       'Phase 4: After Phase 3 finishes, create_sub_agent name=refactor workingDir=/tmp/hello-demo agentId=refactor-yj7g initialPrompt="Refactor the code and write REFACTOR-REPORT.md"\n' +
-      "After ALL 4 phases complete (use list_children and send_to_sub_agent to check each), summarize the results.";
+      "Each sub-agent will proactively report completion via send_to_parent. Wait for their reports, then summarize all results.";
 
     await textarea.fill(pmPrompt);
     await page.waitForTimeout(300);

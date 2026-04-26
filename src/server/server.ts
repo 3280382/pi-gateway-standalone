@@ -170,7 +170,7 @@ wss.on("connection", (ws) => {
           connectionId,
         })
       );
-      logger.info(`[WebSocket] Ping sent to ${connectionId}`);
+      logger.debug(`[WebSocket] Ping sent to ${connectionId}`);
     }
   }, 30000); // 30 seconds
 

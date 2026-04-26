@@ -12,6 +12,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useInputArea } from "@/features/chat/hooks/useInputArea";
 import { useModalStore } from "@/features/chat/stores/modalStore";
+import { useChatStore } from "@/features/chat/stores/chatStore";
 import { NewSessionModal } from "@/features/chat/components/modals/NewSessionModal";
 import { sessionManager } from "@/features/chat/services/sessionManager";
 import styles from "./InputArea.module.css";
@@ -22,6 +23,7 @@ interface InputAreaProps {
   value: string;
   isStreaming: boolean;
   isRunning?: boolean; // Pi coding agent turn running status
+  isReconnecting?: boolean; // WebSocket reconnection in progress
   onChange: (text: string) => void;
   onSend: () => void;
   onAbort: () => void;
@@ -53,6 +55,7 @@ export function InputArea({
   value,
   isStreaming,
   isRunning = false,
+  isReconnecting = false,
   onChange,
   onSend,
   onAbort,
@@ -79,6 +82,7 @@ export function InputArea({
     value,
     isStreaming,
     isRunning,
+    isReconnecting,
     onChange,
     onSend,
     onAbort,
@@ -91,6 +95,9 @@ export function InputArea({
   // ===== [ANCHOR:MENU_STATE] =====
   const [showSlashMenu, setShowSlashMenu] = useState(false);
   const [showNewSessionModal, setShowNewSessionModal] = useState(false);
+  const [showQueuePopup, setShowQueuePopup] = useState(false);
+  const queueState = useChatStore((s) => s.queueState);
+  const queueTotal = queueState.steering.length + queueState.followUp.length;
 
   // ===== [ANCHOR:EFFECTS] =====
   useEffect(() => {
@@ -259,12 +266,52 @@ export function InputArea({
           {/* Send button - green when isRunning(steer)，otherwise blue (prompt) */}
           <button
             type="button"
-            className={`${styles.sendButton} ${isRunning ? styles.steerButton : styles.promptButton}`}
+            className={`${styles.sendButton} ${isRunning ? styles.steerButton : styles.promptButton} ${isReconnecting ? styles.sendDisabled : ""}`}
             onClick={inputArea.handleSend}
-            title={isRunning ? "Steer (Ctrl+Enter)" : "Send (Ctrl+Enter)"}
+            title={
+              isReconnecting
+                ? "Reconnecting…"
+                : isRunning
+                  ? "Steer (Ctrl+Enter)"
+                  : "Send (Ctrl+Enter)"
+            }
+            disabled={isReconnecting}
           >
-            <SendIcon />
+            {isReconnecting ? <span className={styles.reconnectIcon}>⟳</span> : <SendIcon />}
           </button>
+          {/* Queue badge - shows pending steer/followUp count, tap to expand */}
+          {queueTotal > 0 && (
+            <div className={styles.queueBadgeWrap}>
+              <button
+                type="button"
+                className={styles.queueBadge}
+                onClick={() => setShowQueuePopup(!showQueuePopup)}
+                title={`${queueState.steering.length} steer, ${queueState.followUp.length} followUp queued`}
+              >
+                {queueTotal}
+              </button>
+              {showQueuePopup && (
+                <div className={styles.queuePopup}>
+                  <div className={styles.queuePopupTitle}>Queued messages</div>
+                  {queueState.steering.map((m, i) => (
+                    <div key={`s-${i}`} className={styles.queueItem}>
+                      <span className={styles.queueTag}>Steer</span>
+                      {m.slice(0, 80)}
+                      {m.length > 80 ? "…" : ""}
+                    </div>
+                  ))}
+                  {queueState.followUp.map((m, i) => (
+                    <div key={`f-${i}`} className={styles.queueItem}>
+                      <span className={styles.queueTagFollow}>FollowUp</span>
+                      {m.slice(0, 80)}
+                      {m.length > 80 ? "…" : ""}
+                    </div>
+                  ))}
+                  {queueTotal === 0 && <div className={styles.queueEmpty}>Queue cleared</div>}
+                </div>
+              )}
+            </div>
+          )}
           {/* Abort button - active when isRunning(红色)，otherwise disabled(灰色) */}
           <button
             type="button"

@@ -360,6 +360,13 @@ export function processSessionEntries(entries: SessionEntry[]): {
           args: block.arguments, // Map arguments to args for client
         };
       }
+      // Convert pi-ai ImageContent format { data, mimeType } to client-compatible { imageUrl }
+      if (block.type === "image" && block.data) {
+        return {
+          ...block,
+          imageUrl: `data:${block.mimeType || "image/png"};base64,${block.data}`,
+        };
+      }
       return block;
     });
 

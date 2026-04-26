@@ -112,7 +112,7 @@ export function SessionInfoModal() {
         return (
           <div className={styles.promptSection}>
             <h4>System Prompt {data.isLive ? "(live)" : "(static)"}</h4>
-            <pre className={styles.code}>{safeSlice(data.systemPrompt || "(empty)", 3000)}</pre>
+            <pre className={styles.code}>{data.systemPrompt || "(empty)"}</pre>
           </div>
         );
 

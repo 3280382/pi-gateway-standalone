@@ -9,20 +9,10 @@ import { PiAgentSession } from "./PiAgentSession.js";
 import type { AgentConfig } from "@shared/types/agent.types.js";
 import { sessionConfigManager } from "./SessionConfig.js";
 
-/**
- * Extract short session ID from session file path (fixed 8 characters)
- * Example: "/.../2026-04-17T08-26-10-585Z_019d9a8c-2b19-7345-94f5-5efedb498871.jsonl" -> "5efedb49"
- */
-export function extractShortSessionId(sessionFile: string): string {
-  if (!sessionFile) return "";
-  const fileName = sessionFile.split("/").pop() || "";
-  const withoutExt = fileName.replace(".jsonl", "");
-  const parts = withoutExt.split("_");
-  // Get UUID part (last segment after underscore) and take first 12 chars
-  // (was 8 — caused collisions with UUIDv7 timestamp-prefixed IDs)
-  const uuidPart = parts[parts.length - 1] || fileName;
-  return uuidPart.slice(0, 12);
-}
+import { extractShortSessionId } from "@shared/utils/extractShortSessionId";
+
+// Re-export for backward compat
+export { extractShortSessionId };
 
 /**
  * Session runtime status
@@ -601,8 +591,10 @@ export class ServerSessionManager {
       if (!parent.childIds.includes(childId)) parent.childIds.push(childId);
     }
     if (child) child.parentId = parentId;
-    // Also persist via sessionConfigManager
-    sessionConfigManager.addChild(parentId, childId).catch(() => {});
+    // Also persist via sessionConfigManager. Pass the parent's workingDir
+    // so addChild can load configs even on the first call (when
+    // configsByDir hasn't been populated yet).
+    sessionConfigManager.addChild(parentId, childId, parent?.workingDir).catch(() => {});
   }
 
   /** Get children of a session (in-memory, fast) */
@@ -683,8 +675,12 @@ export class ServerSessionManager {
     }
     this.workingDirToShortIds.get(workingDir)?.add(shortId);
 
-    // Update reverse mapping
-    this.clientToShortId.set(client, shortId);
+    // Only map client→session for top-level sessions (not children).
+    // Child sessions share the parent's WebSocket and must not overwrite
+    // the parent's mapping, or the parent stops receiving messages.
+    if (!parentId && client) {
+      this.clientToShortId.set(client, shortId);
+    }
 
     console.log(`[ServerSessionManager] New session registered: shortId=${shortId}`);
   }

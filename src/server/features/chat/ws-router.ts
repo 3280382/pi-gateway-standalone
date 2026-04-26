@@ -296,6 +296,7 @@ import {
   handleThinkingLevelChangeWrapped,
 } from "./ws-handlers/message-handlers.js";
 import {
+  handleDeleteSessionWrapped,
   handleGetSessionInfoWrapped,
   handleInitWrapped,
   handleListSessionsWrapped,
@@ -338,6 +339,7 @@ export function registerAllWSHandlers(): void {
   wsRouter.register("list_sessions", handleListSessionsWrapped);
   wsRouter.register("sidebar_visibility", handleSidebarVisibilityWrapped);
   wsRouter.register("update_session_config", handleUpdateSessionConfigWrapped);
+  wsRouter.register("delete_session", handleDeleteSessionWrapped);
 
   // System information
   wsRouter.register("get_process_tree", handleGetProcessTreeWrapped);

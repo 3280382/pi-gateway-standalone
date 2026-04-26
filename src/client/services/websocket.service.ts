@@ -35,6 +35,9 @@ export type WebSocketEvent =
   // Heartbeat Events
   | "ping"
   | "pong"
+  // Agent Loop Events
+  | "agent_start"
+  | "agent_end"
   // Session Level Events
   | "turn_start"
   | "turn_end"
@@ -388,6 +391,9 @@ export class WebSocketService {
    */
   private emitSpecificEvent(type: string, data: any): void {
     const eventMap: Record<string, WebSocketEvent> = {
+      // Agent Loop
+      agent_start: "agent_start",
+      agent_end: "agent_end",
       // Session Level
       turn_start: "turn_start",
       turn_end: "turn_end",
@@ -480,6 +486,8 @@ export class WebSocketService {
       "thinking_delta",
       "message_start",
       "message_end",
+      "agent_start",
+      "agent_end",
       "turn_start",
       "turn_end",
       "queue_update",

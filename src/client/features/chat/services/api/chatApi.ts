@@ -148,15 +148,28 @@ export function useChatController(): EnhancedChatController {
     ) => {
       if (!text.trim() && (!images || images.length === 0)) return Promise.resolve();
 
-      // 检查WebSocket连接状态
+      // 检查WebSocket连接状态，必要时自动重连+重新初始化
       if (!websocketService.isConnected) {
-        console.error("[ChatAPI] WebSocket not connected, attempting to connect...");
+        console.error("[ChatAPI] WebSocket not connected, attempting to reconnect...");
+        store.setReconnecting(true);
+        // Show reconnecting status in chat
+        store.addMessage(createSystemInfoMessage("⟳ Reconnecting…"));
         try {
           await websocketService.connect();
+          // Re-init after reconnect so the backend has a session context
+          const sessionStore = useSessionStore.getState();
+          await initChatWorkingDirectory(
+            sessionStore.workingDir,
+            sessionStore.currentSessionFile,
+            10000
+          );
+          console.log("[ChatAPI] Reconnect + re-init OK");
         } catch (error) {
-          console.error("[ChatAPI] Failed to connect WebSocket:", error);
+          console.error("[ChatAPI] Reconnect/re-init failed:", error);
+          store.setReconnecting(false);
           throw new Error("无法连接到服务器，请检查网络连接");
         }
+        store.setReconnecting(false);
       }
 
       // 构建消息内容（文本 + 图片）
@@ -180,9 +193,7 @@ export function useChatController(): EnhancedChatController {
         timestamp: new Date(),
       };
 
-      chatStore.addMessage(userMessage);
-      chatStore.clearInput();
-      chatStore.startStreaming();
+      chatStore.setPendingUserMessage(userMessage);
 
       // 通过WebSocketSend message
       const success = sendChatMessage(text, undefined, undefined, images);
@@ -370,6 +381,20 @@ export function setupWebSocketListeners(): void {
 
     if (message?.role === "assistant") {
       store.createStreamingMessage(message.id);
+    } else if (message?.role === "user") {
+      // SDK echoes ALL user messages (typed by human, sent by sub-agent,
+      // sent by parent to child). Add to chat list regardless of source.
+      const msg: Message = {
+        id: message.id || generateMessageId(),
+        role: "user",
+        kind1: "user",
+        kind2: "prompt",
+        content: message.content || [{ type: "text", text: "" }],
+        timestamp: new Date(),
+      };
+      store.addMessage(msg);
+      // If this was a message the user typed (pending), confirm it
+      store.confirmSend();
     }
   });
 
@@ -669,6 +694,22 @@ export function setupWebSocketListeners(): void {
   // Connection status handlers
   websocketService.on("connected", () => {
     console.log("[setupWebSocketListeners] WebSocket connected");
+    // Re-init after auto-reconnect so the backend has a session context.
+    // Without this, prompt messages fail with "Session not initialized".
+    const sessionStore = useSessionStore.getState();
+    if (sessionStore.workingDir) {
+      initChatWorkingDirectory(sessionStore.workingDir, sessionStore.currentSessionFile, 10000)
+        .then(() => console.log("[setupWebSocketListeners] Re-init after reconnect OK"))
+        .catch((e) => console.error("[setupWebSocketListeners] Re-init failed:", e));
+    }
+  });
+
+  // Show backend errors to the user so they know something went wrong
+  websocketService.on("error", (data: any) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] error:`, data);
+    const errorMsg = data?.error || "Unknown server error";
+    store.appendMessage(createSystemInfoMessage(`⚠ ${errorMsg}`, "error", "connection_error"));
   });
 
   websocketService.on("session_reconnected", (data: any) => {
@@ -689,20 +730,18 @@ export function setupWebSocketListeners(): void {
     }
   });
 
-  // Turn start/end handlers - 控制isRunning状态
-  websocketService.on("turn_start", () => {
-    const ts = new Date().toISOString().split("T")[1].split(".")[0];
-    console.log(`[${ts}] [RECV] turn_start`);
+  // Agent start/end handlers - 控制isRunning状态
+  // agent_start/end covers the entire agent loop (multiple turns + follow-ups),
+  // so isRunning stays stable without flickering during followUp processing.
+  websocketService.on("agent_start", () => {
     store.setIsRunning(true);
   });
 
-  websocketService.on("turn_end", () => {
-    const ts = new Date().toISOString().split("T")[1].split(".")[0];
-    console.log(`[${ts}] [RECV] turn_end`);
-    // Turn 结束，AI 完成输出，进入 waiting 状态（waiting for user input）
+  websocketService.on("agent_end", () => {
     store.setIsRunning(false);
   });
 
+  // User message echoed by SDK → commit the pending message
   // Dir changed handler
   websocketService.on("dir_changed", (data: any) => {
     console.log("[setupWebSocketListeners] dir_changed:", data);

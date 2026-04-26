@@ -116,14 +116,9 @@ export async function handlePrompt(
 ): Promise<void> {
   const { text, images } = payload;
 
-  // Call session's prompt method
-  // PiAgentSession.prompt accepts (text, images?) parameters
-  if (ctx.session.isStreaming) {
-    // Streaming mode requires special handling
-    await ctx.session.prompt(text, images);
-  } else {
-    await ctx.session.prompt(text, images);
-  }
+  // PiAgentSession.prompt internally checks runtimeStatus to decide
+  // whether to use steer or normal prompt, so we call it directly.
+  await ctx.session.prompt(text, images);
 
   logger.info(`[handlePrompt] Processed prompt: ${text.substring(0, 50)}...`);
 }

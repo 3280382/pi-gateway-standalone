@@ -58,6 +58,9 @@ const createInitialState = () => ({
   inputText: "",
   isStreaming: false,
   isRunning: false, // Pi coding agent turn running status
+  isReconnecting: false, // WebSocket reconnection in progress
+  pendingUserMessage: null as Message | null, // pessimistic send buffer
+  queueState: { steering: [] as string[], followUp: [] as string[] }, // queue_update
   streamingContent: "",
   streamingThinking: "",
   streamingThinkings: [] as Array<{ id: string; content: string }>, // 多轮思考支持
@@ -517,6 +520,14 @@ export const useChatStore = create<
 
     // Running State (Pi coding agent turn)
     setIsRunning: (isRunning: boolean) => void;
+    setReconnecting: (v: boolean) => void;
+
+    // Pessimistic sending
+    setPendingUserMessage: (msg: Message) => void;
+    commitPendingMessage: () => void; // deprecated, use confirmSend
+    confirmSend: () => void;
+    // Queue state for UI badges
+    setQueueState: (qs: { steering: string[]; followUp: string[] }) => void;
 
     // Streaming Actions - Batch Updates
     startStreaming: () => void;
@@ -593,6 +604,26 @@ export const useChatStore = create<
         setIsRunning: (isRunning: boolean) => {
           set({ isRunning }, false, "setIsRunning");
         },
+        setReconnecting: (v: boolean) => set({ isReconnecting: v }),
+
+        // Pessimistic sending - cache user message until turn_start confirms
+        setPendingUserMessage: (msg: Message) => set({ pendingUserMessage: msg }),
+        commitPendingMessage: () => {
+          const { pendingUserMessage: msg } = useChatStore.getState();
+          if (!msg) return; // not a user-typed message, skip
+          useChatStore.setState({ pendingUserMessage: null, inputText: "" });
+          useChatStore.getState().startStreaming();
+        },
+        confirmSend: function () {
+          const state = useChatStore.getState();
+          if (state.pendingUserMessage) {
+            useChatStore.setState({ pendingUserMessage: null, inputText: "" });
+          }
+          if (!state.isStreaming) {
+            useChatStore.getState().startStreaming();
+          }
+        },
+        setQueueState: (qs: { steering: string[]; followUp: string[] }) => set({ queueState: qs }),
 
         // Streaming Actions - Optimized with batch updates
         startStreaming: () => {
@@ -1156,6 +1187,8 @@ export const selectInputText = (state: ReturnType<typeof useChatStore.getState>)
 export const selectIsStreaming = (state: ReturnType<typeof useChatStore.getState>) =>
   state.isStreaming;
 export const selectIsRunning = (state: ReturnType<typeof useChatStore.getState>) => state.isRunning;
+export const selectIsReconnecting = (state: ReturnType<typeof useChatStore.getState>) =>
+  state.isReconnecting;
 export const selectShowThinking = (state: ReturnType<typeof useChatStore.getState>) =>
   state.showThinking;
 export const selectSearchQuery = (state: ReturnType<typeof useChatStore.getState>) =>
