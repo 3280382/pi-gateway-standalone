@@ -34,6 +34,9 @@ export interface ViewerState {
   // 显示非可视化符号
   showInvisibleChars: boolean;
 
+  // 自动换行
+  wordWrap: boolean;
+
   // 终端状态（原 terminalStore）
   terminalOutput: string;
   terminalCommand: string;
@@ -57,6 +60,9 @@ interface ViewerActions {
   // 显示非可视化符号
   toggleShowInvisibleChars: () => void;
   setShowInvisibleChars: (show: boolean) => void;
+
+  // 自动换行
+  toggleWordWrap: () => void;
 
   // 终端操作（原 terminalStore + fileViewerStore）
   setTerminalOutput: (output: string) => void;
@@ -87,6 +93,9 @@ export const useViewerStore = create<ViewerState & ViewerActions>()((set) => ({
 
   // 显示非可视化符号
   showInvisibleChars: false,
+
+  // 自动换行（默认开启）
+  wordWrap: true,
 
   // 终端初始状态
   terminalOutput: "",
@@ -161,6 +170,9 @@ export const useViewerStore = create<ViewerState & ViewerActions>()((set) => ({
   toggleShowInvisibleChars: () =>
     set((state) => ({ showInvisibleChars: !state.showInvisibleChars })),
   setShowInvisibleChars: (show) => set({ showInvisibleChars: show }),
+
+  // 自动换行
+  toggleWordWrap: () => set((state) => ({ wordWrap: !state.wordWrap })),
 
   // 终端（合并自 terminalStore）
   setTerminalOutput: (output) => set({ terminalOutput: output }),

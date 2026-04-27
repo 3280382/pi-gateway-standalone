@@ -26,12 +26,14 @@ export function FileViewer() {
     editedContent,
     isSaving,
     showInvisibleChars,
+    wordWrap,
     terminalOutput,
     isExecuting,
     closeViewer,
     setMode,
     setEditedContent,
     toggleShowInvisibleChars,
+    toggleWordWrap,
     clearTerminal,
   } = useFileViewerStore();
 
@@ -149,31 +151,47 @@ export function FileViewer() {
           </div>
           <div className={styles.actions}>
             {mode === "view" && (
-              <button
-                type="button"
-                className={`${styles.btnToggle} ${showInvisibleChars ? styles.active : ""}`}
-                onClick={toggleShowInvisibleChars}
-                title="Show invisible characters (spaces, tabs, line breaks)"
-              >
-                {showInvisibleChars ? "Hide" : "Show"} Invisible
-              </button>
+              <>
+                <button
+                  type="button"
+                  className={`${styles.btnIcon} ${wordWrap ? styles.active : ""}`}
+                  onClick={toggleWordWrap}
+                  title={wordWrap ? "Disable word wrap" : "Enable word wrap"}
+                >
+                  <WrapIcon />
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.btnIcon} ${showInvisibleChars ? styles.active : ""}`}
+                  onClick={toggleShowInvisibleChars}
+                  title="Show invisible characters (spaces, tabs, line breaks)"
+                >
+                  <InvisibleIcon />
+                </button>
+              </>
             )}
             {mode === "view" && fileTypes.isExecutable && (
               <button
                 type="button"
                 className={styles.btnExecute}
                 onClick={() => setMode("execute")}
+                title="Execute"
               >
-                ▶ Execute
+                ▶
               </button>
             )}
             {mode === "view" && fileTypes.isEditable && (
-              <button type="button" className={styles.btnEdit} onClick={() => setMode("edit")}>
-                ✎ Edit
+              <button
+                type="button"
+                className={styles.btnIcon}
+                onClick={() => setMode("edit")}
+                title="Edit"
+              >
+                <EditIcon />
               </button>
             )}
-            <button type="button" className={styles.btnClose} onClick={closeViewer}>
-              ✕
+            <button type="button" className={styles.btnIcon} onClick={closeViewer} title="Close">
+              <CloseIcon />
             </button>
           </div>
         </div>
@@ -208,8 +226,21 @@ export function FileViewer() {
               sandbox="allow-scripts allow-same-origin allow-forms"
             />
           ) : (
-            <pre className={`${styles.code} language-${prismLanguage}`}>
-              <code data-prism-code className={`language-${prismLanguage}`}>
+            <pre
+              className={styles.code}
+              style={{
+                whiteSpace: wordWrap ? "pre-wrap" : "pre",
+                wordBreak: wordWrap ? "break-word" : "normal",
+              }}
+            >
+              <code
+                data-prism-code
+                className={`language-${prismLanguage}`}
+                style={{
+                  whiteSpace: wordWrap ? "pre-wrap" : "pre",
+                  wordBreak: wordWrap ? "break-word" : "normal",
+                }}
+              >
                 {showInvisibleChars
                   ? renderContentWithInvisibleChars(
                       typeof content === "string" ? content : JSON.stringify(content, null, 2)
@@ -259,19 +290,57 @@ export function FileViewer() {
   );
 }
 
-// Icon Group件
+// Icon components
+const iconSize = { width: 14, height: 14 };
+
 function CopyIcon() {
   return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
+    <svg {...iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <title>Copy path</title>
       <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
+function EditIcon() {
+  return (
+    <svg {...iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <title>Edit</title>
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg {...iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <title>Close</title>
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+function InvisibleIcon() {
+  return (
+    <svg {...iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <title>Toggle invisible characters</title>
+      <path d="M6 4l12 16" />
+      <path d="M4 4l16 16" />
+    </svg>
+  );
+}
+
+function WrapIcon() {
+  return (
+    <svg {...iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <title>Toggle word wrap</title>
+      <polyline points="4 5 4 19 20 19" />
+      <polyline points="20 15 20 19 16 19" />
+      <line x1="8" y1="9" x2="20" y2="9" />
+      <line x1="8" y1="13" x2="16" y2="13" />
     </svg>
   );
 }
