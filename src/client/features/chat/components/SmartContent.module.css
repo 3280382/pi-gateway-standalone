@@ -123,6 +123,25 @@
   padding: 4px 0 2px;
 }
 
+/* ---- Prism code block ---- */
+.codeBlock {
+  margin: 6px 0;
+  padding: 10px 12px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.codeBlock code {
+  background: none;
+  padding: 0;
+  font-size: 12px;
+}
+
 /* ---- Code context (for tool args/output) ---- */
 .codeContent {
   font-family: var(--font-mono, "JetBrains Mono", monospace);

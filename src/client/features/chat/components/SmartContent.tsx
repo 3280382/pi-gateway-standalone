@@ -9,7 +9,7 @@
  * - 当 smartContentRecognition 关闭时，回退到纯文本渲染
  */
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useChatStore } from "@/features/chat/stores/chatStore";
 import { useFileViewerStore } from "@/features/files/stores/viewerStore";
 import styles from "./SmartContent.module.css";
@@ -308,51 +308,95 @@ export function SmartContent({ text, isCode = false }: SmartContentProps) {
 // ============================================================================
 
 /**
- * Plain text with markdown-like line formatting
+ * Plain text with markdown-like line formatting.
+ * Detects fenced code blocks (```) and applies Prism.js syntax highlighting.
  */
 function PlainContent({ text, isCode = false }: { text: string; isCode?: boolean }) {
   if (!text) return null;
 
   const lines = text.split("\n");
-  const LineTag = isCode ? "code" : "div";
+
+  // Collect segments: text lines and code blocks
+  const segments = useMemo(() => {
+    const result: Array<{ type: "text" | "code"; lines: string[]; lang?: string }> = [];
+    let i = 0;
+
+    while (i < lines.length) {
+      const line = lines[i];
+
+      if (line.startsWith("```")) {
+        const lang = line.slice(3).trim() || undefined;
+        i++;
+        const codeLines: string[] = [];
+        while (i < lines.length && !lines[i].startsWith("```")) {
+          codeLines.push(lines[i]);
+          i++;
+        }
+        if (codeLines.length > 0) {
+          result.push({ type: "code", lines: codeLines, lang });
+        }
+        i++; // skip closing ```
+      } else {
+        result.push({ type: "text", lines: [line] });
+        i++;
+      }
+    }
+    return result;
+  }, [text]);
 
   return (
     <>
-      {lines.map((line, index) => {
-        if (line.startsWith("```")) {
-          return (
-            <div key={`code-${index}-${line.substring(3, 10)}`} className={styles.codeBlockStart}>
-              {line.slice(3)}
-            </div>
-          );
+      {segments.map((seg, idx) => {
+        if (seg.type === "code") {
+          // biome-ignore lint/suspicious/noArrayIndexKey: stable
+          return <CodeBlock key={`cb-${idx}`} lines={seg.lines} lang={seg.lang} />;
         }
-
-        // Inline code
-        if (line.startsWith("`") && line.endsWith("`")) {
-          return (
-            <code key={`ic-${index}-${line.substring(1, 6)}`} className={styles.inlineCode}>
-              {line.slice(1, -1)}
-            </code>
-          );
-        }
-
-        // Bold
-        if (line.startsWith("**") && line.endsWith("**")) {
-          return <strong key={`b-${index}`}>{line.slice(2, -2)}</strong>;
-        }
-
-        // Italic
-        if (line.startsWith("*") && line.endsWith("*")) {
-          return <em key={`i-${index}`}>{line.slice(1, -1)}</em>;
-        }
-
-        return (
-          <LineTag key={`ln-${index}`} className={isCode ? styles.codeLine : styles.line}>
-            {line}
-          </LineTag>
-        );
+        // biome-ignore lint/suspicious/noArrayIndexKey: stable
+        return <TextLine key={`tl-${idx}`} line={seg.lines[0]} isCode={isCode} />;
       })}
     </>
+  );
+}
+
+function TextLine({ line, isCode }: { line: string; isCode: boolean }) {
+  const LineTag = isCode ? "code" : "div";
+
+  if (line.startsWith("`") && line.endsWith("`")) {
+    return <code className={styles.inlineCode}>{line.slice(1, -1)}</code>;
+  }
+  if (line.startsWith("**") && line.endsWith("**")) {
+    return <strong>{line.slice(2, -2)}</strong>;
+  }
+  if (line.startsWith("*") && line.endsWith("*")) {
+    return <em>{line.slice(1, -1)}</em>;
+  }
+  return (
+    <LineTag className={isCode ? styles.codeLine : styles.line}>
+      {line}
+    </LineTag>
+  );
+}
+
+function CodeBlock({ lines, lang }: { lines: string[]; lang?: string }) {
+  const codeRef = useRef<HTMLElement>(null);
+  const code = lines.join("\n");
+  const languageClass = lang ? `language-${lang}` : "";
+
+  useEffect(() => {
+    if (codeRef.current) {
+      const Prism = (window as any).Prism;
+      if (Prism) {
+        Prism.highlightElement(codeRef.current);
+      }
+    }
+  }, [code, lang]);
+
+  return (
+    <pre className={styles.codeBlock}>
+      <code ref={codeRef} className={languageClass}>
+        {code}
+      </code>
+    </pre>
   );
 }
 
