@@ -77,9 +77,13 @@ const FILE_PATH_RE = new RegExp(
   "gi"
 );
 
-// URL 正则
-const URL_RE =
-  /(?:^|[\s(>])(https?:\/\/[^\s<>"'`)\]}\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]+)(?=[\s<)"'`.,;:]|$)/gi;
+// URL 正则 — 宽泛匹配，后处理去尾
+const URL_RE = /(https?:\/\/[^\s<>"'\]})\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]+)/gi;
+
+/** Clean up trailing characters that are not part of the URL */
+function normalizeUrl(raw: string): string {
+  return raw.replace(/[.,;:!?)\]}"'*]+$/, "");
+}
 
 // Markdown 表格检测正则（至少 2 列）
 const TABLE_LINE_RE = /^\|(.+)\|$/;
@@ -228,10 +232,11 @@ function parseInlineText(text: string): ParsedSegment[] {
         path: earliestMatch.value,
       });
     } else {
+      const cleanUrl = normalizeUrl(earliestMatch.value);
       segments.push({
         type: "url",
         value: earliestMatch.value,
-        url: earliestMatch.value,
+        url: cleanUrl,
       });
     }
 
