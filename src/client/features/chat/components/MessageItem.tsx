@@ -12,6 +12,8 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Message, MessageContent } from "@/features/chat/types/chat";
+import { useChatStore } from "@/features/chat/stores/chatStore";
+import { SmartContent } from "./SmartContent";
 import styles from "./MessageItem.module.css";
 
 // ============================================================================
@@ -122,6 +124,45 @@ function formatToolArgs(
  */
 function indexContentBlocks(content: MessageContent[]): IndexedContentBlock[] {
   return content.map((item, index) => ({ ...item, originalIndex: index }));
+}
+
+// ============================================================================
+// URL Preview Modal
+// ============================================================================
+
+function UrlPreviewModal() {
+  const urlPreview = useChatStore((s) => s.urlPreview);
+  const closeUrlPreview = useChatStore((s) => s.closeUrlPreview);
+
+  if (!urlPreview.isOpen || !urlPreview.url) return null;
+
+  return (
+    <div className={styles.urlOverlay}>
+      <div className={styles.urlHeader}>
+        <span className={styles.urlTitle}>{urlPreview.url}</span>
+        <button type="button" className={styles.urlClose} onClick={closeUrlPreview} title="Close">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <title>Close</title>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <iframe
+        src={urlPreview.url}
+        className={styles.urlFrame}
+        title="URL Preview"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+      />
+    </div>
+  );
 }
 
 // ============================================================================
@@ -642,7 +683,7 @@ function GlassCard({
           </div>
         </div>
         <div className={styles.content}>
-          <TextContent text={block.text} />
+          <SmartContent text={block.text} />
         </div>
       </div>
     );
@@ -726,48 +767,6 @@ function UserImage({ block }: { block: IndexedContentBlock }) {
   );
 }
 
-function TextContent({ text }: { text: string }) {
-  const safeText = text || "";
-  const lines = safeText.split("\n");
-
-  return (
-    <>
-      {lines.map((line, index) => {
-        // Code block start/end markers
-        if (line.startsWith("```")) {
-          return (
-            <div key={index} className={styles.codeBlockStart}>
-              {line.slice(3)}
-            </div>
-          );
-        }
-
-        // Inline code
-        if (line.startsWith("`") && line.endsWith("`")) {
-          return (
-            <code key={index} className={styles.inlineCode}>
-              {line.slice(1, -1)}
-            </code>
-          );
-        }
-
-        // Bold text
-        if (line.startsWith("**") && line.endsWith("**")) {
-          return <strong key={index}>{line.slice(2, -2)}</strong>;
-        }
-
-        // Italic text
-        if (line.startsWith("*") && line.endsWith("*")) {
-          return <em key={index}>{line.slice(1, -1)}</em>;
-        }
-
-        // Normal text
-        return (
-          <div key={index} className={styles.line}>
-            {line}
-          </div>
-        );
-      })}
-    </>
-  );
-}
+// SmartContent is now in SmartContent.tsx, exported as SmartContent
+// UrlPreviewModal renders the URL iframe overlay
+export { UrlPreviewModal };

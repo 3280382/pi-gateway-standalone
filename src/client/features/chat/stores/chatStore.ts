@@ -68,6 +68,7 @@ const createInitialState = () => ({
   streamingToolCalls: new Map<string, { id: string; name: string; args: string }>(),
   activeTools: new Map<string, ToolExecution>(),
   showThinking: true,
+  smartContentRecognition: true,
   searchQuery: "",
   searchFilters: {
     // Level 1: Message source (user | assistant | sysinfo)
@@ -103,6 +104,8 @@ const createInitialState = () => ({
   searchResults: [] as SearchResult[],
   isSearching: false,
   currentSearchIndex: -1,
+  // URL preview
+  urlPreview: { url: null as string | null, isOpen: false },
 });
 
 type State = ReturnType<typeof createInitialState>;
@@ -552,6 +555,7 @@ export const useChatStore = create<
 
     // UI State
     setShowThinking: (show: boolean) => void;
+    toggleSmartContentRecognition: () => void;
     setScrollToBottom: (scroll: boolean) => void;
 
     // Search
@@ -562,6 +566,10 @@ export const useChatStore = create<
 
     // Reset
     reset: () => void;
+
+    // URL preview
+    setUrlPreview: (url: string | null) => void;
+    closeUrlPreview: () => void;
 
     // Legacy compatibility
     appendStreamingContent: (text: string) => void;
@@ -954,6 +962,18 @@ export const useChatStore = create<
           set({ showThinking: show }, false, "setShowThinking");
         },
 
+        toggleSmartContentRecognition: () => {
+          set(
+            (state) => ({ smartContentRecognition: !state.smartContentRecognition }),
+            false,
+            "toggleSmartContentRecognition"
+          );
+        },
+
+        setScrollToBottom: (scroll: boolean) => {
+          set({ scrollToBottom: scroll }, false, "setScrollToBottom");
+        },
+
         // Search
         setSearchQuery: (query: string) => {
           set({ searchQuery: query }, false, "setSearchQuery");
@@ -1016,6 +1036,15 @@ export const useChatStore = create<
         // Reset
         reset: () => {
           set(createInitialState(), false, "reset");
+        },
+
+        // URL preview
+        setUrlPreview: (url: string | null) => {
+          set({ urlPreview: { url, isOpen: !!url } }, false, "setUrlPreview");
+        },
+
+        closeUrlPreview: () => {
+          set({ urlPreview: { url: null, isOpen: false } }, false, "closeUrlPreview");
         },
 
         // 直接同步更新流式状态，不用 RAF 批处理避免竞争
@@ -1106,6 +1135,7 @@ export const useChatStore = create<
       partialize: (state) => ({
         searchQuery: state.searchQuery,
         searchFilters: state.searchFilters,
+        smartContentRecognition: state.smartContentRecognition,
       }),
       migrate: (persistedState: unknown) => {
         // Migrate from old flat filter structure to new hierarchical structure
