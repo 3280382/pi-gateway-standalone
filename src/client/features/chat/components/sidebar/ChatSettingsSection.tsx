@@ -65,6 +65,9 @@ export function ChatSettingsSection() {
             <SmartIcon />
             <span>{smartContentRecognition ? "On" : "Off"}</span>
           </button>
+        </div>
+      </div>
+
       {/* LLM Log configuration */}
       <div className={styles.setting}>
         <span className={styles.label}>LLM Log</span>
