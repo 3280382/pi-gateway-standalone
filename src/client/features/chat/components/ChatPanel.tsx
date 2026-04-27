@@ -9,6 +9,7 @@
 
 // ===== [ANCHOR:IMPORTS] =====
 
+import { useEffect } from "react";
 import { useChatPanel } from "@/features/chat/hooks/useChatPanel";
 import { useChatController } from "@/features/chat/services/api/chatApi";
 import {
@@ -58,6 +59,31 @@ export function ChatPanel() {
   const chatPanel = useChatPanel();
   const chatController = useChatController();
   const { openTemplateModal } = useModalStore();
+
+  // Dev helper: expose test inject on window
+  useEffect(() => {
+    (window as any).__injectTestMessage = () => {
+      const { addMessage } = useChatStore.getState();
+      addMessage({
+        id: `test-${Date.now()}`,
+        role: "assistant",
+        kind1: "assistant",
+        kind2: "response",
+        kind3: "text_response",
+        content: [
+          {
+            type: "text",
+            text: "文件路径: /root/pi-gateway-standalone/CHANGELOG.md\n\nURL: https://example.com\n\n| 名称 | 类型 |\n|------|------|\n| Alice | Admin |\n| Bob | User |",
+          },
+        ],
+        timestamp: new Date(),
+      });
+      return "Test message injected!";
+    };
+    return () => {
+      delete (window as any).__injectTestMessage;
+    };
+  }, []);
 
   // ===== [ANCHOR:COMPUTED] =====
   const filteredMessages = filterMessages(messages, {
