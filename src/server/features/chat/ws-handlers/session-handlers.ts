@@ -257,6 +257,9 @@ export async function handleListSessions(
         hasClient: activeInfo ? activeInfo.hasClient : false,
         agentId: config?.agentId || null,
         agentName: config?.agentName || null,
+        parentId: config?.parentId || null,
+        childIds: config?.childIds || [],
+        hasChildren: (config?.childIds?.length || 0) > 0,
       };
     });
 

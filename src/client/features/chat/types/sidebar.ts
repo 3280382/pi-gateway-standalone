@@ -23,6 +23,9 @@ export interface Session {
   hasClient?: boolean;
   agentId?: string | null;
   agentName?: string | null;
+  parentId?: string | null;
+  childIds?: string[];
+  hasChildren?: boolean;
 }
 
 export type Theme = "dark" | "light";

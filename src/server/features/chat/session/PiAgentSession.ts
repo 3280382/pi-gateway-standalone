@@ -128,9 +128,6 @@ export class PiAgentSession {
   /** Parent session ID (if this is a sub-agent) */
   parentId: string | null = null;
 
-  /** Collect assistant text for auto-forwarding to parent */
-  private _assistantText: string = "";
-
   /** Current runtime status */
   runtimeStatus:
     | "idle"
@@ -643,8 +640,20 @@ export class PiAgentSession {
           this.isStreaming = false;
           this.updateRuntimeStatus("waiting");
           this.send({ type: "agent_end" });
-          // Auto-forward assistant text to parent if this is a sub-agent
-          this._forwardToParent();
+          // Extract last assistant text from SDK's message array and forward to parent
+          const msgs = (event as any).messages || [];
+          let text = "";
+          for (let i = msgs.length - 1; i >= 0; i--) {
+            if (msgs[i].role === "assistant") {
+              text =
+                msgs[i].content
+                  ?.filter((c: any) => c.type === "text")
+                  ?.map((c: any) => c.text)
+                  ?.join("\n") || "";
+              break;
+            }
+          }
+          if (text.trim()) this._forwardToParent(text.trim());
           break;
         }
 
@@ -737,7 +746,6 @@ export class PiAgentSession {
           if (startMsg.role === "assistant") {
             console.log(`[${timestamp}] [SEND] message_start: ${(startMsg as any).id || "new"}`);
             this.messageStarted = true;
-            this._assistantText = "";
             this.send({ type: "message_start", message: startMsg });
           } else if (startMsg.role === "user") {
             // SDK echoes user prompts as message_start → relay to frontend
@@ -814,7 +822,6 @@ export class PiAgentSession {
               break;
             }
             case "text_delta": {
-              this._assistantText += (msgEvent.delta as string) || "";
               this.send({
                 type: "text_delta",
                 text: msgEvent.delta,
@@ -1719,13 +1726,12 @@ export class PiAgentSession {
    * Sub-agents report their results back to the parent automatically;
    * they don't need to call send_to_parent explicitly.
    */
-  private _forwardToParent() {
-    if (!this.parentId || !this._assistantText.trim()) return;
+  private _forwardToParent(text: string) {
+    if (!this.parentId || !text) return;
 
     const parentEntry = serverSessionManager.getSessionByShortId(this.parentId);
     if (!parentEntry?.session) return;
 
-    const text = this._assistantText.trim();
     const report = `[SUB-AGENT \`${this.shortId}\`]\n${text}`;
     const parent = parentEntry.session;
 
