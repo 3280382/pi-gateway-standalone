@@ -59,6 +59,7 @@ const createInitialState = () => ({
   isStreaming: false,
   isRunning: false, // Pi coding agent turn running status
   isReconnecting: false, // WebSocket reconnection in progress
+  userAborted: false, // user clicked abort button (vs system disconnect)
   pendingUserMessage: null as Message | null, // pessimistic send buffer
   queueState: { steering: [] as string[], followUp: [] as string[] }, // queue_update
   streamingContent: "",
@@ -521,6 +522,7 @@ export const useChatStore = create<
     // Running State (Pi coding agent turn)
     setIsRunning: (isRunning: boolean) => void;
     setReconnecting: (v: boolean) => void;
+    setUserAborted: (v: boolean) => void;
 
     // Pessimistic sending
     setPendingUserMessage: (msg: Message) => void;
@@ -605,6 +607,7 @@ export const useChatStore = create<
           set({ isRunning }, false, "setIsRunning");
         },
         setReconnecting: (v: boolean) => set({ isReconnecting: v }),
+        setUserAborted: (v: boolean) => set({ userAborted: v }),
 
         // Pessimistic sending - cache user message until turn_start confirms
         setPendingUserMessage: (msg: Message) => set({ pendingUserMessage: msg }),

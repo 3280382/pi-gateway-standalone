@@ -206,6 +206,8 @@ export function useChatController(): EnhancedChatController {
 
     abortGeneration: () => {
       abortChatGeneration();
+      // User-initiated: wait for backend "aborted" confirmation
+      chatStore.setUserAborted(true);
       chatStore.abortStreaming();
     },
 
@@ -718,11 +720,14 @@ export function setupWebSocketListeners(): void {
     store.appendMessage(createSystemInfoMessage(`⚠ ${errorMsg}`, "error", "connection_error"));
   });
 
-  // Abort confirmation from backend
+  // Abort confirmation from backend — only show message when user-initiated
   websocketService.on("aborted", (data: any) => {
     const ts = new Date().toISOString().split("T")[1].split(".")[0];
     console.log(`[${ts}] [RECV] aborted:`, data);
-    store.appendMessage(createSystemInfoMessage(`⏹ ${data?.message || "Generation aborted"}`, "abort", "aborted"));
+    if (useChatStore.getState().userAborted) {
+      useChatStore.setState({ userAborted: false });
+      store.appendMessage(createSystemInfoMessage(`⏹ Generation aborted`, "abort", "aborted"));
+    }
   });
 
   websocketService.on("session_reconnected", (data: any) => {
