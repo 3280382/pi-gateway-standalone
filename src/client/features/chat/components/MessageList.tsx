@@ -27,6 +27,7 @@ import type {
   ToolExecution,
 } from "@/features/chat/types/chat";
 import { MessageItem } from "./MessageItem";
+import { SmartContent } from "./SmartContent";
 import styles from "./MessageList.module.css";
 
 interface MessageListProps {
@@ -274,6 +275,20 @@ export const MessageList = memo(function MessageList({
         <div className={styles.logo}>π</div>
         <h1>Welcome to Pi Gateway</h1>
         <p>Start a conversation below</p>
+        <div className={styles.demoContent}>
+          <p className={styles.demoLabel}>Smart Content Demo:</p>
+          <SmartContent text="File: /root/pi-gateway-standalone/CHANGELOG.md" />
+          <div style={{ height: 4 }} />
+          <SmartContent text="URL: https://example.com" />
+          <div style={{ height: 4 }} />
+          <SmartContent
+            text={`Table demo:
+| Name | Type |
+|------|------|
+| Alice | Admin |
+| Bob | User |`}
+          />
+        </div>
       </div>
     );
   }
