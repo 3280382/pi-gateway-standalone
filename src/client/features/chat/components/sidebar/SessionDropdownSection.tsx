@@ -154,6 +154,7 @@ function SessionRow({ session, isSelected, status, onSelect }: SessionRowProps) 
       {/* Row 1: ID, Status, Count, Time */}
       <div className={styles.sessionRowPrimary}>
         <div className={styles.sessionIdContainer}>
+          {session.parentId && <span className={styles.childMarker} title="Sub-agent">↳</span>}
           <span className={`${styles.sessionId} ${isSelected ? styles.sessionIdSelected : ""}`}>
             {formatSessionId(session.id)}
           </span>
@@ -195,6 +196,11 @@ function SessionRow({ session, isSelected, status, onSelect }: SessionRowProps) 
             {session.agentName && (
               <span className={styles.agentTag} title={`Agent: ${session.agentName}`}>
                 🤖 {session.agentName}
+              </span>
+            )}
+            {session.hasChildren && (
+              <span className={styles.childrenTag} title={`${(session.childIds || []).length} child agents`}>
+                👪 {(session.childIds || []).length}
               </span>
             )}
           </>

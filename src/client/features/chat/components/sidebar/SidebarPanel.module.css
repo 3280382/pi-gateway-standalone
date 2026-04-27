@@ -1276,6 +1276,23 @@
   text-overflow: ellipsis;
 }
 
+.childrenTag {
+  font-size: 10px;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 1px 6px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.childMarker {
+  font-size: 11px;
+  color: #6e7681;
+  margin-right: 2px;
+  flex-shrink: 0;
+}
+
 .editIcon {
   font-size: 11px;
   color: #6e7681;
