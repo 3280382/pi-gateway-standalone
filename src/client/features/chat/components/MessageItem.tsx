@@ -232,7 +232,7 @@ export const MessageItem = memo(
       return (
         <div className={styles.userMessage}>
           <div className={styles.userBubble}>
-            {text && <div>{text}</div>}
+            {text && <SmartContent text={text} />}
             {imageBlocks.map((img, i) => (
               <UserImage key={`img-${i}`} block={img} />
             ))}
