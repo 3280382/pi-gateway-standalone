@@ -37,8 +37,8 @@ list_children — List all child sessions with status.
 
 === PATTERNS ===
 
-PARALLEL: Create N sub-agents without waiting. Each reports via send_to_parent when done. Parent simply waits for results.
-SERIAL: Create sub-agent, wait for send_to_parent report, create next dependent sub-agent.
+PARALLEL: Create N sub-agents without waiting. Each auto-reports results when done. Parent simply waits for results.
+SERIAL: Create sub-agent, wait for results, create next dependent sub-agent.
 
 === RULES ===
 - Sub-agents: NO need to call send_to_parent. Results are auto-forwarded to parent on completion.
@@ -48,7 +48,7 @@ SERIAL: Create sub-agent, wait for send_to_parent report, create next dependent 
 
     parameters: Type.Object({
       action: Type.String({
-        description: "create_sub_agent | send_to_sub_agent | list_children | send_to_parent",
+        description: "create_sub_agent | send_to_sub_agent | list_children",
       }),
       workingDir: Type.Optional(Type.String({ description: "Working directory" })),
       name: Type.Optional(Type.String({ description: "Display name for sub-agent" })),
@@ -56,9 +56,7 @@ SERIAL: Create sub-agent, wait for send_to_parent report, create next dependent 
       initialPrompt: Type.Optional(Type.String({ description: "First task for sub-agent" })),
       sessionId: Type.Optional(Type.String({ description: "Target child session ID" })),
       prompt: Type.Optional(Type.String({ description: "Message to send" })),
-      message: Type.Optional(
-        Type.String({ description: "Summary for parent (include output file paths)" })
-      ),
+      message: Type.Optional(Type.String({ description: "Additional info (deprecated)" })),
     }),
 
     execute: async (_toolCallId, params) => {
@@ -165,7 +163,7 @@ SERIAL: Create sub-agent, wait for send_to_parent report, create next dependent 
 
           default:
             return fail(
-              `Unknown action: ${action}. Use create_sub_agent, send_to_sub_agent, list_children, or send_to_parent.`
+              `Unknown action: ${action}. Use create_sub_agent, send_to_sub_agent, or list_children.`
             );
         }
       } catch (error) {
