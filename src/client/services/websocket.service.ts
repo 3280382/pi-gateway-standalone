@@ -191,11 +191,16 @@ export class WebSocketService {
 
         this.ws.onerror = (error) => {
           clearTimeout(timeoutId);
-          wsLog.error("Error:", error);
-          this.emit("error", error);
-          reject(
-            new ServiceError("WEBSOCKET_CONNECT_FAILED", "Failed to connect to WebSocket", error)
-          );
+          // During auto-reconnect, don't reject — the close handler will retry
+          if (this.reconnectAttempts === 0) {
+            wsLog.error("Error:", error);
+            this.emit("error", error);
+            reject(
+              new ServiceError("WEBSOCKET_CONNECT_FAILED", "Failed to connect to WebSocket", error)
+            );
+          } else {
+            wsLog.warn("Reconnect error (will retry):", error);
+          }
         };
 
         this.ws.onmessage = (event) => {

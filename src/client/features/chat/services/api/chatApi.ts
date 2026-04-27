@@ -22,6 +22,7 @@ import { sessionManager, updateSessionsAndStatus } from "@/features/chat/service
 import { generateMessageId, useChatStore } from "@/features/chat/stores/chatStore";
 import { useSessionStore } from "@/features/chat/stores/sessionStore";
 import { useSidebarStore } from "@/features/chat/stores/sidebarStore";
+import { useWorkspaceStore } from "@/stores/workspaceStore";
 import type { ChatController, Message, ToolExecution } from "@/features/chat/types/chat";
 import { createUserMessage } from "@/features/chat/utils/messageUtils";
 import { websocketService } from "@/services/websocket.service";
@@ -699,8 +700,10 @@ export function setupWebSocketListeners(): void {
     // Re-init after auto-reconnect so the backend has a session context.
     // Without this, prompt messages fail with "Session not initialized".
     const sessionStore = useSessionStore.getState();
-    if (sessionStore.workingDir) {
-      initChatWorkingDirectory(sessionStore.workingDir, sessionStore.currentSessionFile, 10000)
+    const wsStore = useWorkspaceStore.getState();
+    const wd = sessionStore.workingDir || wsStore.currentPath;
+    if (wd) {
+      initChatWorkingDirectory(wd, sessionStore.currentSessionFile, 10000)
         .then(() => console.log("[setupWebSocketListeners] Re-init after reconnect OK"))
         .catch((e) => {
           console.error("[setupWebSocketListeners] Re-init failed, reconnecting:", e);
