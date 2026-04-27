@@ -15,6 +15,7 @@ import { createHandler, logger, sendError, sendSuccess } from "./handler-utils.j
  */
 export async function handleAbort(ctx: WSContext, _payload: unknown): Promise<void> {
   await ctx.session.abort();
+  sendSuccess(ctx, "aborted", { message: "Generation aborted" });
 }
 
 // ============================================================================

@@ -61,6 +61,7 @@ export type WebSocketEvent =
   | "compaction_end"
   | "auto_retry_start"
   | "auto_retry_end"
+  | "aborted"
   | "initialized"
   | "dir_changed"
   | "session_created"
@@ -417,6 +418,7 @@ export class WebSocketService {
       compaction_end: "compaction_end",
       auto_retry_start: "auto_retry_start",
       auto_retry_end: "auto_retry_end",
+      aborted: "aborted",
       error: "error",
       initialized: "initialized",
       dir_changed: "dir_changed",
@@ -495,6 +497,7 @@ export class WebSocketService {
       "compaction_end",
       "auto_retry_start",
       "auto_retry_end",
+      "aborted",
       "initialized",
       "dir_changed",
       "session_created",

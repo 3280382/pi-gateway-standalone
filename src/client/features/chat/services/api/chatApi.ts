@@ -700,7 +700,13 @@ export function setupWebSocketListeners(): void {
     if (sessionStore.workingDir) {
       initChatWorkingDirectory(sessionStore.workingDir, sessionStore.currentSessionFile, 10000)
         .then(() => console.log("[setupWebSocketListeners] Re-init after reconnect OK"))
-        .catch((e) => console.error("[setupWebSocketListeners] Re-init failed:", e));
+        .catch((e) => {
+          console.error("[setupWebSocketListeners] Re-init failed, reconnecting:", e);
+          // Force disconnect to trigger a fresh reconnect cycle.
+          // If re-init fails, the WebSocket is open but session is not initialized,
+          // causing subsequent prompts to hang with no response.
+          websocketService.disconnect(4001, "re-init failed");
+        });
     }
   });
 
@@ -710,6 +716,13 @@ export function setupWebSocketListeners(): void {
     console.log(`[${ts}] [RECV] error:`, data);
     const errorMsg = data?.error || "Unknown server error";
     store.appendMessage(createSystemInfoMessage(`⚠ ${errorMsg}`, "error", "connection_error"));
+  });
+
+  // Abort confirmation from backend
+  websocketService.on("aborted", (data: any) => {
+    const ts = new Date().toISOString().split("T")[1].split(".")[0];
+    console.log(`[${ts}] [RECV] aborted:`, data);
+    store.appendMessage(createSystemInfoMessage(`⏹ ${data?.message || "Generation aborted"}`, "abort", "aborted"));
   });
 
   websocketService.on("session_reconnected", (data: any) => {
