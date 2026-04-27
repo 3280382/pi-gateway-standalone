@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
   resolve: {
     alias: {
@@ -12,7 +12,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "dist",
+    outDir: mode === "production" ? "dist" : "dist-dev",
     reportCompressedSize: false,
     chunkSizeWarningLimit: 1000,
     watch: null,
@@ -34,4 +34,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));
