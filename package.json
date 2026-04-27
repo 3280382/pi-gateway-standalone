@@ -28,6 +28,7 @@
     "build:server": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json --resolve-full-paths",
     "build:prod": "npm run clean && vite build --mode production --logLevel error && npm run build:server",
     "start": "PORT=3300 NODE_ENV=production node dist/server/server.js",
+    "start-prod": "PORT=3300 NODE_ENV=production node dist-prod/server/server.js",
     "start:prod": "PORT=3300 NODE_ENV=production node dist/server/server.js",
     "cleanup-logs": "bash scripts/cleanup-logs.sh",
     "check": "biome check . && tsc --noEmit --skipLibCheck",
