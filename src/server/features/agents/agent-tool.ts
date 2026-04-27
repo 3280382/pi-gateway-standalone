@@ -63,71 +63,77 @@ SERIAL: Create sub-agent, wait for send_to_parent report, create next dependent 
 
     execute: async (_toolCallId, params) => {
       const { action } = params as any;
+
+      async function createOneSubAgent(
+        parentId: string,
+        workingDir: string,
+        parentEntry: any,
+        name: string,
+        initialPrompt: string,
+        agentId?: string
+      ) {
+        let agentConfig = undefined;
+        if (agentId) {
+          await agentConfigManager.init();
+          agentConfig = agentConfigManager.getAgent(agentId);
+        }
+
+        const localDir = getLocalSessionsDir(workingDir);
+        const sm = SessionManager.create(workingDir, localDir);
+        const sessionFile = sm.getSessionFile();
+        if (!sessionFile) throw new Error("Failed to create session file");
+        const childId = extractShortSessionId(sessionFile);
+        console.log(`[AgentTool] create_sub_agent name="${name}" childId=${childId}`);
+
+        await serverSessionManager.registerChild(parentId, childId);
+        if (name) await sessionConfigManager.updateName(childId, name, workingDir);
+        if (agentConfig)
+          await sessionConfigManager.setAgent(childId, agentConfig.id, agentConfig.name, sessionFile, workingDir);
+
+        const ws = parentEntry?.client;
+        const childSession = new PiAgentSession(ws || (null as any), llmLogManager);
+        await childSession.initialize(workingDir, sessionFile, agentConfig);
+        childSession.parentId = parentId;
+        await serverSessionManager.registerNewSession(workingDir, ws || (null as any), childSession, sessionFile, parentId);
+
+        if (initialPrompt) {
+          const prefixedPrompt =
+            `[SUB-AGENT] \`${childId}\` from \`${parentId}\`\n` +
+            `You were created by parent agent \`${parentId}\` via agent_tool(action="create_sub_agent").\n` +
+            `Your session ID: \`${childId}\`\n\n` +
+            `Your task:\n${initialPrompt}`;
+          childSession.prompt(prefixedPrompt).catch((e) => console.error("[AgentTool] prompt error:", e));
+        }
+
+        return { sessionId: childId, name, created: true };
+      }
+
       try {
         switch (action) {
           case "create_sub_agent": {
             const p = params as any;
             const parentId = mySessionId;
             const parentEntry = serverSessionManager.getSessionByShortId(parentId);
-            // Sub-agents always run in the parent's workingDir.
-            // Cross-directory agents risk process.chdir() races
-            // since cwd is process-level, not per-session.
             const workingDir = parentEntry?.workingDir || process.cwd();
 
-            console.log(`[AgentTool] create_sub_agent name="${p.name}" workdir=${workingDir}`);
+            // Support both single {name, initialPrompt} and batch {agents: [...]}
+            const agents: Array<{ name: string; initialPrompt: string }> =
+              p.agents || (p.name ? [{ name: p.name, initialPrompt: p.initialPrompt }] : []);
 
-            let agentConfig = undefined;
-            if (p.agentId) {
-              await agentConfigManager.init();
-              agentConfig = agentConfigManager.getAgent(p.agentId);
-            }
+            if (agents.length === 0) return fail("No agents specified");
 
-            const localDir = getLocalSessionsDir(workingDir);
-            const sm = SessionManager.create(workingDir, localDir);
-            const sessionFile = sm.getSessionFile();
-            if (!sessionFile) return fail("Failed to create session file");
-            const childId = extractShortSessionId(sessionFile);
-            console.log(`[AgentTool] childId=${childId}`);
-
-            await serverSessionManager.registerChild(parentId, childId);
-            if (p.name) await sessionConfigManager.updateName(childId, p.name, workingDir);
-            if (agentConfig)
-              await sessionConfigManager.setAgent(
-                childId,
-                agentConfig.id,
-                agentConfig.name,
-                sessionFile,
-                workingDir
+            const results: any[] = [];
+            for (const agent of agents) {
+              const result = await createOneSubAgent(
+                parentId, workingDir, parentEntry, agent.name, agent.initialPrompt, p.agentId
               );
-
-            const ws = parentEntry?.client;
-            const childSession = new PiAgentSession(ws || (null as any), llmLogManager);
-            await childSession.initialize(workingDir, sessionFile, agentConfig);
-            childSession.parentId = parentId;
-            await serverSessionManager.registerNewSession(
-              workingDir,
-              ws || (null as any),
-              childSession,
-              sessionFile,
-              parentId
-            );
-
-            if (p.initialPrompt) {
-              const prefixedPrompt =
-                `[SUB-AGENT] \`${childId}\` from \`${parentId}\`\n` +
-                `You were created by parent agent \`${parentId}\` via agent_tool(action="create_sub_agent").\n` +
-                `Your session ID: \`${childId}\`\n\n` +
-                `Your task:\n${p.initialPrompt}\n\n` +
-                `⚠️ IMPORTANT: When you finish your task, you MUST report back to the parent using agent_tool(action="send_to_parent", message="..."). Include a summary + file manifest. Do NOT just reply in chat — use agent_tool.`;
-              childSession
-                .prompt(prefixedPrompt)
-                .catch((e) => console.error("[AgentTool] prompt error:", e));
+              results.push(result);
             }
+
             return ok({
-              sessionId: childId,
-              created: true,
+              created: results,
               status: "running",
-              note: "Sub-agent is now running independently in the background. It will report back via send_to_parent when done. End your current turn NOW — do NOT wait or poll.",
+              note: `${results.length} sub-agent(s) created. They run independently and auto-report results. End your turn now.`,
             });
           }
 
