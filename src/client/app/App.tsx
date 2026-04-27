@@ -8,6 +8,8 @@ import React, { Suspense, useRef } from "react";
 import { ErrorBoundary } from "@/app/ErrorBoundary";
 import { Footer } from "@/app/Footer";
 import { LoadingScreen } from "@/app/LoadingScreen";
+import { FileViewer } from "@/features/files/components/modals/FileViewer";
+import { UrlPreviewModal } from "@/features/chat/components/MessageItem";
 import { useAppStore } from "@/stores/appStore";
 import "@/styles/global.css";
 import styles from "@/app/App.module.css";
@@ -82,6 +84,10 @@ function AppContent() {
       </main>
 
       <Footer />
+
+      {/* FileViewer rendered at app level so it works in all views */}
+      <FileViewer />
+      <UrlPreviewModal />
     </div>
   );
 }

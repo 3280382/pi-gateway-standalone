@@ -16,7 +16,6 @@ import { FileList } from "@/features/files/components/FileBrowser/FileList";
 import { TreeView } from "@/features/files/components/FileBrowser/TreeView";
 
 import { FileActionBar } from "@/features/files/components/Header/FileActionBar";
-import { FileViewer } from "@/features/files/components/modals/FileViewer";
 import {
   useFileBrowser,
   useFileFiltering,

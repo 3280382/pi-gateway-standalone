@@ -31,7 +31,6 @@ import {
 import { useModalStore } from "@/features/chat/stores/modalStore";
 import styles from "./ChatPanel.module.css";
 import { InputArea } from "./InputArea";
-import { UrlPreviewModal } from "./MessageItem";
 import { MessageList } from "./MessageList";
 import { TemplateModal } from "./modals/TemplateModal";
 
@@ -119,7 +118,6 @@ export function ChatPanel() {
           chatController.setInputText(useChatStore.getState().inputText + content);
         }}
       />
-      <UrlPreviewModal />
     </div>
   );
 }
