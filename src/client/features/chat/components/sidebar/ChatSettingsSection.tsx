@@ -65,33 +65,6 @@ export function ChatSettingsSection() {
             <SmartIcon />
             <span>{smartContentRecognition ? "On" : "Off"}</span>
           </button>
-          <button
-            type="button"
-            className={styles.viewBtn}
-            onClick={() => {
-              const { addMessage } = useChatStore.getState();
-              addMessage({
-                id: `demo-${Date.now()}`,
-                role: "assistant",
-                kind1: "assistant",
-                kind2: "response",
-                kind3: "text_response",
-                content: [
-                  {
-                    type: "text",
-                    text: "测试文件路径和URL识别：\n\n文件: /root/pi-gateway-standalone/CHANGELOG.md\n\nURL: https://example.com\n\n表格测试:\n| 名称 | 类型 |\n|------|------|\n| Alice | Admin |\n| Bob | User |",
-                  },
-                ],
-                timestamp: new Date(),
-              } as any);
-            }}
-            title="Inject test message with file paths and URLs"
-          >
-            <TestIcon />
-          </button>
-        </div>
-      </div>
-
       {/* LLM Log configuration */}
       <div className={styles.setting}>
         <span className={styles.label}>LLM Log</span>
@@ -203,22 +176,6 @@ function SmartIcon() {
     >
       <title>Smart recognition</title>
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
-  );
-}
-
-function TestIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <title>Test</title>
-      <polygon points="5 3 19 12 5 21 5 3" />
     </svg>
   );
 }
