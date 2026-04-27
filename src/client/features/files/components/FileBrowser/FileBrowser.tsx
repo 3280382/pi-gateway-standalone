@@ -104,9 +104,6 @@ export function FileBrowser({
           </div>
         </div>
       </div>
-
-      {/* files查看器Modal */}
-      <FileViewer />
     </section>
   );
 }
