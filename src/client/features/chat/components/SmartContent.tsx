@@ -247,9 +247,11 @@ function parseInlineText(text: string): ParsedSegment[] {
 
 interface SmartContentProps {
   text: string;
+  /** Render in code-style wrapper (for tool args/output) */
+  isCode?: boolean;
 }
 
-export function SmartContent({ text }: SmartContentProps) {
+export function SmartContent({ text, isCode = false }: SmartContentProps) {
   const smartContentRecognition = useChatStore((s) => s.smartContentRecognition);
 
   const segments = useMemo(() => {
@@ -261,16 +263,17 @@ export function SmartContent({ text }: SmartContentProps) {
 
   // If smart recognition is off or no text, render plain
   if (!smartContentRecognition || !segments) {
-    return <PlainContent text={text} />;
+    return <PlainContent text={text} isCode={isCode} />;
   }
 
+  const containerClass = isCode ? styles.codeContent : undefined;
   return (
-    <>
+    <div className={containerClass}>
       {segments.map((seg, index) => {
         switch (seg.type) {
           case "text":
             // biome-ignore lint/suspicious/noArrayIndexKey: stable ordered list
-            return <PlainContent key={index} text={seg.value} />;
+            return <PlainContent key={index} text={seg.value} isCode={isCode} />;
           case "file": {
             const path = seg.path ?? "";
             // biome-ignore lint/suspicious/noArrayIndexKey: stable ordered list
@@ -288,10 +291,10 @@ export function SmartContent({ text }: SmartContentProps) {
           }
           default:
             // biome-ignore lint/suspicious/noArrayIndexKey: stable ordered list
-            return <PlainContent key={index} text={seg.value} />;
+            return <PlainContent key={index} text={seg.value} isCode={isCode} />;
         }
       })}
-    </>
+    </div>
   );
 }
 
@@ -302,10 +305,11 @@ export function SmartContent({ text }: SmartContentProps) {
 /**
  * Plain text with markdown-like line formatting
  */
-function PlainContent({ text }: { text: string }) {
+function PlainContent({ text, isCode = false }: { text: string; isCode?: boolean }) {
   if (!text) return null;
 
   const lines = text.split("\n");
+  const LineTag = isCode ? "code" : "div";
 
   return (
     <>
@@ -338,9 +342,9 @@ function PlainContent({ text }: { text: string }) {
         }
 
         return (
-          <div key={`ln-${index}`} className={styles.line}>
+          <LineTag key={`ln-${index}`} className={isCode ? styles.codeLine : styles.line}>
             {line}
-          </div>
+          </LineTag>
         );
       })}
     </>

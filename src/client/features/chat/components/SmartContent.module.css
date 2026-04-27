@@ -123,6 +123,23 @@
   padding: 4px 0 2px;
 }
 
+/* ---- Code context (for tool args/output) ---- */
+.codeContent {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.codeLine {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 12px;
+  line-height: 1.5;
+  min-height: 1.2em;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 /* ---- URL preview modal ---- */
 .urlOverlay {
   position: fixed;

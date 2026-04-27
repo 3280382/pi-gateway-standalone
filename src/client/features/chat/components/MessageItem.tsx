@@ -454,24 +454,24 @@ function GlassCard({
           <div className={styles.content} onClick={(e) => e.stopPropagation()}>
             <div className={styles.toolSection}>
               <div className={styles.toolSectionLabel}>Arguments:</div>
-              <pre className={styles.toolCode}>
-                <code>{formattedArgs}</code>
-              </pre>
+              <div className={styles.toolCode}>
+                <SmartContent text={formattedArgs} isCode />
+              </div>
             </div>
             {block.output && (
               <div className={styles.toolSection}>
                 <div className={styles.toolSectionLabel}>Output:</div>
-                <pre className={`${styles.toolCode} ${styles.toolOutput}`}>
-                  <code>{safeString(block.output)}</code>
-                </pre>
+                <div className={`${styles.toolCode} ${styles.toolOutput}`}>
+                  <SmartContent text={safeString(block.output)} isCode />
+                </div>
               </div>
             )}
             {block.error && (
               <div className={styles.toolSection}>
                 <div className={styles.toolSectionLabel}>Error:</div>
-                <pre className={`${styles.toolCode} ${styles.toolErrorText}`}>
-                  <code>{safeString(block.error)}</code>
-                </pre>
+                <div className={`${styles.toolCode} ${styles.toolErrorText}`}>
+                  <SmartContent text={safeString(block.error)} isCode />
+                </div>
               </div>
             )}
           </div>
@@ -533,16 +533,16 @@ function GlassCard({
           <div className={styles.content} onClick={(e) => e.stopPropagation()}>
             <div className={styles.toolSection}>
               <div className={styles.toolSectionLabel}>Arguments:</div>
-              <pre className={styles.toolCode}>
-                <code>{formattedArgs}</code>
-              </pre>
+              <div className={styles.toolCode}>
+                <SmartContent text={formattedArgs} isCode />
+              </div>
             </div>
             {hasResult && (
               <div
                 className={`${styles.toolSection} ${block.error ? styles.toolSectionError : styles.toolSectionSuccess}`}
               >
                 <div className={styles.toolSectionLabel}>Result:</div>
-                <code>{resultOutput}</code>
+                <SmartContent text={resultOutput} isCode />
               </div>
             )}
           </div>
