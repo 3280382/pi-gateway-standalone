@@ -20,24 +20,20 @@ YOUR SESSION ID: ${mySessionId}
 
 === ACTIONS ===
 
-create_sub_agent — Spawn a new pi session with read/bash/edit/write tools.
-  Params: name, initialPrompt (optional: agentId)
-  Returns: { sessionId, sessionFile, parentId, name }
-  Sub-agent runs in the parent's workingDir. Create multiple in parallel for independent tasks.
-  NOTE: initialPrompt is automatically prefixed with sub-agent identity metadata (parent ID, session ID, workingDir) so the sub-agent knows its context.
+create_sub_agent — Spawn new pi sessions.
+  Params: agents: [{name, initialPrompt}] — array of sub-agents to create
+  Returns: [{sessionId, name, created}]
+  Sub-agents run in the parent's workingDir. They auto-report results back to parent on completion.
+  NOTE: initialPrompt is automatically prefixed with sub-agent identity metadata.
 
 send_to_sub_agent — Send a prompt to a running child session.
-  Params: sessionId (child's shortId), prompt
+  Params: sessionId (child's shortId), prompt, mode? ("followUp"|"steer", default "followUp")
   Use to give new instructions or request mid-task updates.
 
 list_children — List all child sessions with status.
   Returns: children with { sessionId, workingDir, status }
   status: "idle"|"tooling"|"waiting"
-
-send_to_parent — [SUB-AGENT ONLY] Report completion back to parent in REAL TIME.
-  Params: message (summary + output file manifest)
-  Delivery: Uses prompt/steer/followUp based on parent state so results arrive immediately.
-  Example: agent_tool(action="send_to_parent", message="✓ DONE. Files: DESIGN.md (2KB), index.html (4KB)")
+  NOTE: sub-agents auto-report results. Only use list_children when user explicitly asks for status.
 
 === PATTERNS ===
 
@@ -45,9 +41,9 @@ PARALLEL: Create N sub-agents without waiting. Each reports via send_to_parent w
 SERIAL: Create sub-agent, wait for send_to_parent report, create next dependent sub-agent.
 
 === RULES ===
-- Sub-agents: ALWAYS call send_to_parent with file manifest when task is complete
-- Parent: default behavior is to wait for sub-agents to proactively report via send_to_parent. Only use list_children or send_to_sub_agent when the user explicitly asks for status or when you need to send new instructions to a child.
-- CRITICAL: After calling create_sub_agent, end your current turn immediately. Do NOT wait, poll, or call list_children. The sub-agent runs independently and will report back on its own.
+- Sub-agents: NO need to call send_to_parent. Results are auto-forwarded to parent on completion.
+- Parent: default behavior is to wait for sub-agents to complete. Only use list_children when user asks.
+- CRITICAL: After calling create_sub_agent, end your current turn immediately. The sub-agents run independently.
 - All sessions share the same Node.js process — no HTTP, no IPC`,
 
     parameters: Type.Object({
@@ -107,6 +103,7 @@ SERIAL: Create sub-agent, wait for send_to_parent report, create next dependent 
             const ws = parentEntry?.client;
             const childSession = new PiAgentSession(ws || (null as any), llmLogManager);
             await childSession.initialize(workingDir, sessionFile, agentConfig);
+            childSession.parentId = parentId;
             await serverSessionManager.registerNewSession(
               workingDir,
               ws || (null as any),
@@ -120,7 +117,8 @@ SERIAL: Create sub-agent, wait for send_to_parent report, create next dependent 
                 `[SUB-AGENT] \`${childId}\` from \`${parentId}\`\n` +
                 `You were created by parent agent \`${parentId}\` via agent_tool(action="create_sub_agent").\n` +
                 `Your session ID: \`${childId}\`\n\n` +
-                `Your task:\n${p.initialPrompt}`;
+                `Your task:\n${p.initialPrompt}\n\n` +
+                `⚠️ IMPORTANT: When you finish your task, you MUST report back to the parent using agent_tool(action="send_to_parent", message="..."). Include a summary + file manifest. Do NOT just reply in chat — use agent_tool.`;
               childSession
                 .prompt(prefixedPrompt)
                 .catch((e) => console.error("[AgentTool] prompt error:", e));
@@ -138,8 +136,13 @@ SERIAL: Create sub-agent, wait for send_to_parent report, create next dependent 
             if (!p.sessionId || !p.prompt) return fail("sessionId and prompt required");
             const entry = serverSessionManager.getSessionByShortId(p.sessionId);
             if (!entry?.session?.session) return fail(`Session ${p.sessionId} not found`);
-            await entry.session.prompt(p.prompt);
-            return ok({ sent: true, sessionId: p.sessionId });
+            const mode = p.mode === "steer" ? "steer" : "followUp";
+            if (mode === "steer") {
+              await entry.session.steer(p.prompt);
+            } else {
+              await entry.session.followUp(p.prompt);
+            }
+            return ok({ sent: true, sessionId: p.sessionId, mode });
           }
 
           case "list_children": {
@@ -152,61 +155,6 @@ SERIAL: Create sub-agent, wait for send_to_parent report, create next dependent 
                 status: c.runtimeStatus,
               })),
             });
-          }
-
-          case "send_to_parent": {
-            const p = params as any;
-            if (!p.message) return fail("message required — include summary and output file paths");
-            const parentEntry = serverSessionManager.getParentEntry(mySessionId);
-            if (!parentEntry?.session?.session) {
-              console.error(
-                `[AgentTool] send_to_parent FAILED: myId=${mySessionId} parent not found in registry`
-              );
-              return fail(`Parent not active. Your session: ${mySessionId}`);
-            }
-
-            // Safety: verify the parent actually knows this child
-            const children = serverSessionManager.getChildren(parentEntry.shortId);
-            const isKnown = children.some((c) => c.shortId === mySessionId);
-            if (!isKnown) {
-              console.error(
-                `[AgentTool] send_to_parent CROSS-TALK: myId=${mySessionId} claimed parent=${parentEntry.shortId} but parent doesn't list me as child. Known children: ${children.map((c) => c.shortId).join(",") || "none"}`
-              );
-              // Try to find the actual parent by searching all sessions
-              const allSessions = serverSessionManager.getAllSessions();
-              for (const s of allSessions) {
-                if (s.shortId === parentEntry.shortId) continue;
-                const sChildren = serverSessionManager.getChildren(s.shortId);
-                if (sChildren.some((c) => c.shortId === mySessionId)) {
-                  console.error(`[AgentTool] Found real parent: ${s.shortId}`);
-                }
-              }
-            }
-
-            const parentSession = parentEntry.session;
-            const reportText =
-              `[SUB-AGENT REPORT from ${mySessionId}]\n` +
-              `This message was sent by a sub-agent via agent_tool(action="send_to_parent").\n` +
-              `Task completed. Details:\n\n${p.message}`;
-
-            // 1) Queue the report via followUp() — always safe.
-            await parentSession.followUp(reportText);
-
-            // 2) Wake up the parent if it has finished (agent_end has fired).
-            //    Bypass PiAgentSession.prompt() and call the SDK directly so
-            //    the SDK can throw "already processing" if parent is still
-            //    running. Going through PiAgentSession would silently steer
-            //    instead, which breaks parallel tool execution.
-            try {
-              await (parentSession.session as any).prompt(reportText);
-              return ok({ sent: true, toParent: parentEntry.shortId, method: "followUp+prompt" });
-            } catch (e: any) {
-              if (e.message?.includes("already processing")) {
-                // Parent is still running — followUp will be consumed when its loop finishes.
-                return ok({ sent: true, toParent: parentEntry.shortId, method: "followUp" });
-              }
-              throw e;
-            }
           }
 
           default:

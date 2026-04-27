@@ -125,6 +125,12 @@ export class PiAgentSession {
   /** Short session ID */
   shortId: string = "";
 
+  /** Parent session ID (if this is a sub-agent) */
+  parentId: string | null = null;
+
+  /** Collect assistant text for auto-forwarding to parent */
+  private _assistantText: string = "";
+
   /** Current runtime status */
   runtimeStatus:
     | "idle"
@@ -637,6 +643,8 @@ export class PiAgentSession {
           this.isStreaming = false;
           this.updateRuntimeStatus("waiting");
           this.send({ type: "agent_end" });
+          // Auto-forward assistant text to parent if this is a sub-agent
+          this._forwardToParent();
           break;
         }
 
@@ -729,6 +737,7 @@ export class PiAgentSession {
           if (startMsg.role === "assistant") {
             console.log(`[${timestamp}] [SEND] message_start: ${(startMsg as any).id || "new"}`);
             this.messageStarted = true;
+            this._assistantText = "";
             this.send({ type: "message_start", message: startMsg });
           } else if (startMsg.role === "user") {
             // SDK echoes user prompts as message_start → relay to frontend
@@ -805,6 +814,7 @@ export class PiAgentSession {
               break;
             }
             case "text_delta": {
+              this._assistantText += (msgEvent.delta as string) || "";
               this.send({
                 type: "text_delta",
                 text: msgEvent.delta,
@@ -1702,6 +1712,29 @@ export class PiAgentSession {
   updateWebSocket(ws: WebSocket) {
     console.log(`[PiAgentSession] Updating WebSocket connection (legacy)`);
     this.ws = ws;
+  }
+
+  /**
+   * Auto-forward assistant text to parent on agent_end.
+   * Sub-agents report their results back to the parent automatically;
+   * they don't need to call send_to_parent explicitly.
+   */
+  private _forwardToParent() {
+    if (!this.parentId || !this._assistantText.trim()) return;
+
+    const parentEntry = serverSessionManager.getSessionByShortId(this.parentId);
+    if (!parentEntry?.session) return;
+
+    const text = this._assistantText.trim();
+    const report = `[SUB-AGENT \`${this.shortId}\`]\n${text}`;
+    const parent = parentEntry.session;
+
+    console.log(`[PiAgentSession] Forwarding to parent ${this.parentId}: ${text.substring(0, 80)}`);
+
+    // Try prompt first (parent idle), fallback to followUp (parent busy)
+    parent
+      .prompt(report)
+      .catch(() => parent.followUp(report).catch(() => {}));
   }
 
   /**
